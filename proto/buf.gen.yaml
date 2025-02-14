@@ -3,7 +3,7 @@ managed:
   enabled: true
   # override:
   #   - file_option: go_package_prefix
-  #     value: github.com/beiduoke/go-scaffold/api
+  #     value: backend-service/api
   disable:
     - file_option: go_package_prefix
       module: buf.build/bufbuild/protovalidate

@@ -9,14 +9,14 @@ import "google/protobuf/empty.proto";
 
 import "common/pagination/pagination.proto";
 
-import "core/service/v1/menu.proto";
+import "admin/service/v1/menu.proto";
 
-option go_package = "github.com/beiduoke/go-scaffold/api/admin/interface/v1;v1";
+option go_package = "backend-service/api/admin/interface/v1;v1";
 
 // 菜单管理服务
 service MenuService {
   // 获取菜单列表
-  rpc ListMenu (pagination.PagingRequest) returns (core.service.v1.ListMenuResponse) {
+  rpc ListMenu (pagination.PagingRequest) returns (admin.service.v1.ListMenuResponse) {
     option (google.api.http) = {
       get: "/admin/v1/menus"
     };
@@ -27,7 +27,7 @@ service MenuService {
   }
 
   // 获取菜单数据
-  rpc GetMenu (core.service.v1.GetMenuRequest) returns (core.service.v1.Menu) {
+  rpc GetMenu (admin.service.v1.GetMenuRequest) returns (admin.service.v1.Menu) {
     option (google.api.http) = {
       get: "/admin/v1/menus/{id}"
     };
@@ -38,7 +38,7 @@ service MenuService {
   }
 
   // 创建菜单
-  rpc CreateMenu (core.service.v1.CreateMenuRequest) returns (core.service.v1.CreateMenuResponse) {
+  rpc CreateMenu (admin.service.v1.CreateMenuRequest) returns (admin.service.v1.CreateMenuResponse) {
     option (google.api.http) = {
       post: "/admin/v1/menus"
       body: "menu"
@@ -50,7 +50,7 @@ service MenuService {
   }
 
   // 更新菜单
-  rpc UpdateMenu (core.service.v1.UpdateMenuRequest) returns (core.service.v1.UpdateMenuResponse) {
+  rpc UpdateMenu (admin.service.v1.UpdateMenuRequest) returns (admin.service.v1.UpdateMenuResponse) {
     option (google.api.http) = {
       put: "/admin/v1/menus/{id}"
       body: "menu"
@@ -62,7 +62,7 @@ service MenuService {
   }
 
   // 删除菜单
-  rpc DeleteMenu (core.service.v1.DeleteMenuRequest) returns (core.service.v1.DeleteMenuResponse) {
+  rpc DeleteMenu (admin.service.v1.DeleteMenuRequest) returns (admin.service.v1.DeleteMenuResponse) {
     option (google.api.http) = {
       delete: "/admin/v1/menus/{id}"
     };

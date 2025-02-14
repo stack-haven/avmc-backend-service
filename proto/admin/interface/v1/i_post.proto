@@ -9,14 +9,14 @@ import "google/protobuf/empty.proto";
 
 import "common/pagination/pagination.proto";
 
-import "core/service/v1/post.proto";
+import "admin/service/v1/post.proto";
 
-option go_package = "github.com/beiduoke/go-scaffold/api/admin/interface/v1;v1";
+option go_package = "backend-service/api/admin/interface/v1;v1";
 
 // 岗位管理服务
 service PostService {
   // 获取岗位列表
-  rpc ListPost (pagination.PagingRequest) returns (core.service.v1.ListPostResponse) {
+  rpc ListPost (pagination.PagingRequest) returns (admin.service.v1.ListPostResponse) {
     option (google.api.http) = {
       get: "/admin/v1/posts"
     };
@@ -27,7 +27,7 @@ service PostService {
   }
 
   // 获取岗位数据
-  rpc GetPost (core.service.v1.GetPostRequest) returns (core.service.v1.Post) {
+  rpc GetPost (admin.service.v1.GetPostRequest) returns (admin.service.v1.Post) {
     option (google.api.http) = {
       get: "/admin/v1/posts/{id}"
     };
@@ -38,7 +38,7 @@ service PostService {
   }
 
   // 创建岗位
-  rpc CreatePost (core.service.v1.CreatePostRequest) returns (core.service.v1.CreatePostResponse) {
+  rpc CreatePost (admin.service.v1.CreatePostRequest) returns (admin.service.v1.CreatePostResponse) {
     option (google.api.http) = {
       post: "/admin/v1/posts"
       body: "post"
@@ -50,7 +50,7 @@ service PostService {
   }
 
   // 更新岗位
-  rpc UpdatePost (core.service.v1.UpdatePostRequest) returns (core.service.v1.UpdatePostResponse) {
+  rpc UpdatePost (admin.service.v1.UpdatePostRequest) returns (admin.service.v1.UpdatePostResponse) {
     option (google.api.http) = {
       put: "/admin/v1/posts/{id}"
       body: "post"
@@ -62,7 +62,7 @@ service PostService {
   }
 
   // 删除岗位
-  rpc DeletePost (core.service.v1.DeletePostRequest) returns (core.service.v1.DeletePostResponse) {
+  rpc DeletePost (admin.service.v1.DeletePostRequest) returns (admin.service.v1.DeletePostResponse) {
     option (google.api.http) = {
       delete: "/admin/v1/posts/{id}"
     };

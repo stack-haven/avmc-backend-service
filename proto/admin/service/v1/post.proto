@@ -11,7 +11,7 @@ import "validate/validate.proto";
 
 import "common/pagination/pagination.proto";
 
-option go_package = "github.com/beiduoke/go-scaffold/api/admin/service/v1;v1";
+option go_package = "backend-service/api/admin/service/v1;v1";
 
 service PostService {
 	rpc CreatePost (CreatePostRequest) returns (CreatePostResponse);

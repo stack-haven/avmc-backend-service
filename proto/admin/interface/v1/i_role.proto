@@ -9,15 +9,15 @@ import "google/protobuf/empty.proto";
 
 import "common/pagination/pagination.proto";
 
-import "core/service/v1/user.proto";
-import "core/service/v1/role.proto";
+import "admin/service/v1/user.proto";
+import "admin/service/v1/role.proto";
 
-option go_package = "github.com/beiduoke/go-scaffold/api/admin/interface/v1;v1";
+option go_package = "backend-service/api/admin/interface/v1;v1";
 
 // 角色管理服务
 service RoleService {
   // 获取角色列表
-  rpc ListRole (pagination.PagingRequest) returns (core.service.v1.ListRoleResponse) {
+  rpc ListRole (pagination.PagingRequest) returns (admin.service.v1.ListRoleResponse) {
     option (google.api.http) = {
       get: "/admin/v1/roles"
     };
@@ -28,7 +28,7 @@ service RoleService {
   }
 
   // 获取角色数据
-  rpc GetRole (core.service.v1.GetRoleRequest) returns (core.service.v1.Role) {
+  rpc GetRole (admin.service.v1.GetRoleRequest) returns (admin.service.v1.Role) {
     option (google.api.http) = {
       get: "/admin/v1/roles/{id}"
     };
@@ -39,7 +39,7 @@ service RoleService {
   }
 
   // 创建角色
-  rpc CreateRole (core.service.v1.CreateRoleRequest) returns (core.service.v1.CreateRoleResponse) {
+  rpc CreateRole (admin.service.v1.CreateRoleRequest) returns (admin.service.v1.CreateRoleResponse) {
     option (google.api.http) = {
       post: "/admin/v1/roles"
       body: "role"
@@ -51,7 +51,7 @@ service RoleService {
   }
 
   // 更新角色
-  rpc UpdateRole (core.service.v1.UpdateRoleRequest) returns (core.service.v1.UpdateRoleResponse) {
+  rpc UpdateRole (admin.service.v1.UpdateRoleRequest) returns (admin.service.v1.UpdateRoleResponse) {
     option (google.api.http) = {
       put: "/admin/v1/roles/{id}"
       body: "role"
@@ -63,7 +63,7 @@ service RoleService {
   }
 
   // 删除角色
-  rpc DeleteRole (core.service.v1.DeleteRoleRequest) returns (core.service.v1.DeleteRoleResponse) {
+  rpc DeleteRole (admin.service.v1.DeleteRoleRequest) returns (admin.service.v1.DeleteRoleResponse) {
     option (google.api.http) = {
       delete: "/admin/v1/roles/{id}"
     };

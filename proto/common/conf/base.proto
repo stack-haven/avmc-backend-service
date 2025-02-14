@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package conf;
+
+option go_package = "backend-service/api/common/conf;conf";
+
+message Base {
+  // Admin 管理配置
+  message Admin {
+    uint64 domain_id = 1;
+    uint64 user_id = 2;
+  }
+  // Domain
+  message Domain {
+  }
+
+  Admin admin = 1;
+  Domain domain = 2;
+}

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package conf;
+
+option go_package = "backend-service/api/common/conf;conf";
+
+import "common/conf/tracer.proto";
+import "common/conf/data.proto";
+import "common/conf/server.proto";
+import "common/conf/client.proto";
+import "common/conf/logger.proto";
+import "common/conf/registry.proto";
+import "common/conf/oss.proto";
+import "common/conf/config.proto";
+import "common/conf/notify.proto";
+import "common/conf/base.proto";
+
+// 引导信息
+message Bootstrap {
+  Server server = 1;
+  Client client = 2;
+  Data data = 3;
+  Tracer trace = 4;
+  Logger logger = 5;
+  Registry registry = 6;
+  RemoteConfig config = 7;
+  OSS oss = 8;
+  Notification notify = 9;
+  Base base = 10;
+}

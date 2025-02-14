@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package common;
+
+import "google/protobuf/any.proto";
+
+option go_package = "backend-service/api/common;common";
+
+
+
+// 通用返回
+message Result {
+  int32 code = 1;
+  string message = 2;
+  optional google.protobuf.Any result = 3;
+  string type = 4;
+}
+
+// 通用返回数据
+message ResultData {
+  uint64 id = 1;
+  map<string, string> data = 2;
+}

@@ -3,7 +3,7 @@ syntax = "proto3";
 package admin.interface.v1;
 import "errors/errors.proto";
 
-option go_package = "github.com/beiduoke/go-scaffold/api/admin/interface/v1;v1";
+option go_package = "backend-service/api/admin/interface/v1;v1";
 option java_multiple_files = true;
 option java_package = "dev.kratos.admin.interface.v1";
 option objc_class_prefix = "RESOURCEapiV1";

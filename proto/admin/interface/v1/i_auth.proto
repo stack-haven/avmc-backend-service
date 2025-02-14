@@ -10,10 +10,10 @@ import "google/protobuf/any.proto";
 import "validate/validate.proto";
 import "buf/validate/validate.proto";
 
-import "core/service/v1/auth.proto";
-import "core/service/v1/user.proto";
+import "admin/service/v1/auth.proto";
+import "admin/service/v1/user.proto";
 
-option go_package = "github.com/beiduoke/go-scaffold/api/admin/interface/v1;v1";
+option go_package = "backend-service/api/admin/interface/v1;v1";
 
 option (gnostic.openapi.v3.document) = {
   info: {

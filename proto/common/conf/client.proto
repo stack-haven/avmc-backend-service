@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package conf;
+
+option go_package = "backend-service/api/common/conf;conf";
+
+import "google/protobuf/duration.proto";
+import "common/conf/middleware.proto";
+
+// 客户端
+message Client {
+  // HTTP
+  message HTTP {
+    google.protobuf.Duration timeout = 1; // 超时时间
+    Middleware middleware = 2;
+  }
+
+  // gPRC
+  message GRPC {
+    google.protobuf.Duration timeout = 1; // 超时时间
+    Middleware middleware = 2;
+  }
+
+  HTTP http = 1;  // HTTP服务
+  GRPC grpc = 2;  // gRPC服务
+}
