@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    // Golang 的语言支持
+    "golang.go",
+    // 将 bufbuild Proto 集成到 VS Code 中。
+    "bufbuild.vscode-buf",
+    // 将 proto3 集成到 VS Code 中。
+    "zxh404.vscode-proto3",
+  ],
+  "unwantedRecommendations": [
+    // 和 volar 冲突
+    "octref.vetur"
+  ]
+}

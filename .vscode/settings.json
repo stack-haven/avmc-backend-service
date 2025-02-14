@@ -1,0 +1,41 @@
+{
+  "cSpell.words": [
+    "anypb",
+    "authz",
+    "depts",
+    "durationpb",
+    "entsql",
+    "envoyproxy",
+    "fileadapter",
+    "flagconf",
+    "gormadapter",
+    "Infof",
+    "mergo",
+    "Nillable",
+    "nopaging",
+    "openapiv",
+    "proto",
+    "redisadapter",
+    "saasdesk",
+    "signout",
+    "stdcasbin",
+    "strcase"
+  ],
+  "clang-format.style": "google",
+  "protoc": {
+    "compile_on_save": false,
+    "options": [
+        "--proto_path=${workspaceRoot}/proto",
+        "--proto_path=${workspaceRoot}/proto/third_party",
+        "--go_out=paths=source_relative:${workspaceRoot}/api",
+        "--go-errors_out=paths=source_relative:${workspaceRoot}/api",
+        "--go-http_out=paths=source_relative:${workspaceRoot}/api",
+        "--go-grpc_out=paths=source_relative:${workspaceRoot}/api",
+        "--validate_out=paths=source_relative,lang=go:${workspaceRoot}/api",
+        "--openapi_out=fq_schema_naming=true,default_response=false:${workspaceRoot}/api",
+        "--openapiv2_out=${workspaceRoot}/api",
+        "--openapiv2_opt=logtostderr=true",
+        "--openapiv2_opt=json_names_for_fields=true",
+    ]
+  }
+}
