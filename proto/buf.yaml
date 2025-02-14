@@ -1,0 +1,33 @@
+version: v2
+modules:
+  - path: .
+    excludes:
+      - third_party
+    lint:
+      use:
+        - STANDARD
+    breaking:
+      use:
+        - FILE
+  # - path: apis/third_party
+deps:
+  - buf.build/googleapis/googleapis:83c0f6c19b2f4ea0b0fd84a80e753659
+  - buf.build/gnostic/gnostic:087bc8072ce44e339f213209e4d57bf0
+  - buf.build/protocolbuffers/wellknowntypes:v29.3
+  - buf.build/kratos/apis:c2de25f14fa445a79a054214f31d17a8
+  - buf.build/envoyproxy/protoc-gen-validate:daf171c6cdb54629b5f51e345a79e4dd
+  - buf.build/bufbuild/protovalidate:v0.10.0
+  
+lint:
+  use:
+    - STANDARD
+  # except:
+    # - FIELD_NOT_REQUIRED
+    # - PACKAGE_NO_IMPORT_CYCLE
+  disallow_comment_ignores: true
+breaking:
+  use:
+    - FILE
+  except:
+    - EXTENSION_NO_DELETE
+    - FIELD_SAME_DEFAULT

@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+import "common/pagination/pagination.proto";
+
+option go_package = "github.com/beiduoke/go-scaffold/api/admin/service/v1;v1";
+
+service MenuService {
+	rpc CreateMenu (CreateMenuRequest) returns (CreateMenuResponse);
+	rpc UpdateMenu (UpdateMenuRequest) returns (UpdateMenuResponse);
+	rpc DeleteMenu (DeleteMenuRequest) returns (DeleteMenuResponse);
+	rpc GetMenu (GetMenuRequest) returns (Menu);
+	rpc ListMenu (pagination.PagingRequest) returns (ListMenuResponse);
+}
+
+// 菜单模块
+message Menu {
+  optional string created_at = 1;
+  optional string updated_at = 2;
+  uint32 id = 3;
+  optional string name = 4;
+  optional int32 sort = 5;
+  optional int32 state = 6 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
+  optional string remark = 7;
+  optional uint32 parent_id = 8;
+  optional string title = 9;
+  optional int32 type = 10;
+  optional string path = 11;
+  optional string component = 12;
+  optional string icon = 13;
+  optional bool is_ext = 14;
+  optional string ext_url = 15;
+  optional string permissions = 16;
+  optional string redirect = 17;
+  optional string current_active_menu = 18;
+  optional bool keep_alive = 19;
+  optional bool visible = 20;
+  optional bool hide_tab = 21;
+  optional bool hide_menu = 22;
+  optional bool hide_breadcrumb = 23;
+}
+
+message CreateMenuRequest {
+  Menu menu = 1;
+  uint32 operator_id = 2;
+}
+message CreateMenuResponse {}
+
+message UpdateMenuRequest {
+  uint32 id = 1;
+  Menu menu = 2;
+  uint32 operator_id = 3;
+}
+message UpdateMenuResponse {
+}
+
+message DeleteMenuRequest {
+  uint32 id = 1;
+  uint32 operator_id = 2;
+}
+message DeleteMenuResponse {}
+
+message GetMenuRequest {
+  uint32 id = 1;
+}
+message GetMenuResponse {}
+
+message ListMenuRequest {}
+message ListMenuResponse {
+  repeated Menu items = 1;
+  int32 total = 2;
+}

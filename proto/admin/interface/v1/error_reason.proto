@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package admin.interface.v1;
+import "errors/errors.proto";
+
+option go_package = "github.com/beiduoke/go-scaffold/api/admin/interface/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.admin.interface.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+enum ErrorReason {
+  // 设置缺省错误码
+  option (errors.default_code) = 500;
+  BAD_REQUEST = 0 [(errors.code) = 400];// 400
+  NOT_LOGGED_IN = 1 [(errors.code) = 401];// 401
+  ACCESS_FORBIDDEN = 2 [(errors.code) = 403]; // 403
+  RESOURCE_NOT_FOUND = 3 [(errors.code) = 404]; // 404
+  METHOD_NOT_ALLOWED = 4 [(errors.code) = 405]; // 405
+  REQUEST_TIMEOUT = 5 [(errors.code) = 408]; // 408
+
+  INTERNAL_SERVER_ERROR = 10 [(errors.code) = 500]; // 500
+  NOT_IMPLEMENTED = 11 [(errors.code) = 501]; // 501
+  NETWORK_ERROR = 12 [(errors.code) = 502]; // 502
+  SERVICE_UNAVAILABLE = 13 [(errors.code) = 503]; // 503
+  NETWORK_TIMEOUT = 14 [(errors.code) = 504]; // 504
+  REQUEST_NOT_SUPPORT = 15 [(errors.code) = 505]; // 505
+  
+  // 认证相关
+  AUTH_TOKEN_EXPIRED = 30 [(errors.code) = 103];// token过期
+  AUTH_INVALID_TOKEN = 31 [(errors.code) = 104];// token无效
+  AUTH_TOKEN_NOT_EXIST = 32 [(errors.code) = 105];// token不存在
+
+  // 用户相关错误
+  USER_NOT_FOUND = 50 [(errors.code) = 110];
+  USER_NOT_EXIST = 51 [(errors.code) = 112];// 用户不存在
+  USER_INCORRECT_PASSWORD = 52 [(errors.code) = 113]; // 密码错误
+  USER_FREEZE = 53 [(errors.code) = 114]; // 用户冻结
+  USER_INVALID_ID = 54 [(errors.code) = 115];// 用户ID无效
+  USER_INVALID_PASSWORD = 55 [(errors.code) = 116];// 密码无效
+
+}

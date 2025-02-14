@@ -1,0 +1,7 @@
+# 配置protoc生成规则
+version: v2
+managed:
+  enabled: false
+plugins:
+  - remote: buf.build/community/google-gnostic-openapi:v0.7.0
+    out: api/admin/docs/v1

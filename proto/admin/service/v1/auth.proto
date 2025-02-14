@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+
+import "admin/service/v1/user.proto";
+import "admin/service/v1/role.proto";
+
+option go_package = "github.com/beiduoke/go-scaffold/api/admin/service/v1;v1";
+
+option (gnostic.openapi.v3.document) = {
+  info: {
+    title: "Scaffold SAAS Auth API";
+    description: "SAAS平台管理脚手架系统-认证服务";
+    version: "1.0";
+		contact: {
+			name: "SAAS架构";
+			url: "https://github.com/grpc-ecosystem/grpc-gateway";
+			email: "none@example.com";
+		};
+		license: {
+			name: "BSD 3-Clause License";
+			url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
+		};
+  }
+};
+
+// The greeting service definition.
+service AuthService {
+  // 注册 - 暂保留
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  // 鉴权
+  rpc IsAuthorized (IsAuthorizedRequest) returns (IsAuthorizedResponse);
+}
+
+// 注册 - 请求
+message RegisterRequest {
+  message Auth {
+    // 用户名
+    string name = 1 [(validate.rules).string = {min_len: 1, max_len: 10}];
+    // 密码
+    string password = 2 [(validate.rules).string = {min_len: 6, max_len: 25}];
+    // 电话
+    string phone = 3 [(validate.rules).string.pattern = "^1[0-9]{10}$"];
+  }
+  // 请求体
+  Auth auth = 1 [(validate.rules).message = {required: true}];
+  string domain = 2 [(validate.rules).string = {min_len: 1, max_len: 20}];
+}
+
+// 注册 - 回应
+message RegisterResponse {
+  int32 code = 1;
+  string message = 2;
+  optional google.protobuf.Any result = 3;
+  string type = 4;
+}
+
+
+// 鉴权 - 请求
+message IsAuthorizedRequest {
+  string subject = 1;
+  string action = 2;
+  string resource = 3;
+  string project = 4;
+}
+
+// 鉴权 - 回应
+message IsAuthorizedResponse {}
