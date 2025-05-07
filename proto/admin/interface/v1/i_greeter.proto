@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package admin.interface.v1;
+
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "backend-service/api/admin/interface/v1;v1";
+
+// Greeter管理服务
+service GreeterService {
+  rpc SayHello (HelloRequest) returns (HelloReply) {
+    option (google.api.http) = {
+      get: "/admin/v1/greeter/hello"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+}
+
+message HelloRequest {
+  string name = 1; // 名称
+}
+
+message HelloReply {
+  string message = 1; // 消息
+}

@@ -3,14 +3,13 @@ package service
 import (
 	"context"
 
-	v1 "backend-service/app/admin/api/helloworld/v1"
+	v1 "backend-service/api/admin/interface/v1"
 	"backend-service/app/admin/internal/biz"
 )
 
 // GreeterService is a greeter service.
 type GreeterService struct {
-	v1.UnimplementedGreeterServer
-
+	v1.UnimplementedGreeterServiceServer
 	uc *biz.GreeterUsecase
 }
 
