@@ -1,0 +1,293 @@
+syntax = "proto3";
+
+package admin.interface.v1;
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+import "common/pagination/pagination.proto";
+
+option go_package = "avmc-backend-service/api/admin/interface;interface";
+
+// 用户管理接口
+service SystemService {
+  // 创建用户
+  rpc CreateUser (CreateUserRequest) returns (CreateUserReply) {
+    option (google.api.http) = {
+      post: "/v1/system/user"
+      body: "*"
+    };
+  }
+  // 更新用户
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply) {
+    option (google.api.http) = {
+      put: "/v1/system/user/{id}"
+      body: "*"
+    };
+  }
+  // 删除用户
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply) {
+    option (google.api.http) = {
+      delete: "/v1/system/user/{id}"
+    };
+  }
+  // 获取用户列表
+  rpc ListUser (ListUserRequest) returns (ListUserReply) {
+    option (google.api.http) = {
+      get: "/v1/system/users"
+    };
+  }
+  // 获取用户详情
+  rpc GetUser (GetUserRequest) returns (GetUserReply) {
+    option (google.api.http) = {
+      get: "/v1/system/user/{id}"
+    };
+  }
+
+  // 创建角色
+  rpc CreateRole (CreateRoleRequest) returns (CreateRoleReply) {
+    option (google.api.http) = {
+      post: "/v1/system/role"
+      body: "*"
+    };
+  }
+  // 更新角色
+  rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleReply) {
+    option (google.api.http) = {
+      put: "/v1/system/role/{id}"
+      body: "*"
+    };
+  }
+  // 删除角色
+  rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleReply) {
+    option (google.api.http) = {
+      delete: "/v1/system/role/{id}"
+    };
+  }
+  // 获取角色列表
+  rpc ListRole (ListRoleRequest) returns (ListRoleReply) {
+    option (google.api.http) = {
+      get: "/v1/system/roles"
+    };
+  }
+  // 获取角色详情
+  rpc GetRole (GetRoleRequest) returns (GetRoleReply) {
+    option (google.api.http) = {
+      get: "/v1/system/role/{id}"
+    };
+  }
+
+  // 创建权限
+  rpc CreatePermission (CreatePermissionRequest) returns (CreatePermissionReply) {
+    option (google.api.http) = {
+      post: "/v1/system/permission"
+      body: "*"
+    };
+  }
+  // 更新权限
+  rpc UpdatePermission (UpdatePermissionRequest) returns (UpdatePermissionReply) {
+    option (google.api.http) = {
+      put: "/v1/system/permission/{id}"
+      body: "*"
+    };
+  }
+  // 删除权限
+  rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionReply) {
+    option (google.api.http) = {
+      delete: "/v1/system/permission/{id}"
+    };
+  }
+  // 获取权限列表
+  rpc ListPermission (ListPermissionRequest) returns (ListPermissionReply) {
+    option (google.api.http) = {
+      get: "/v1/system/permissions"
+    };
+  }
+  // 获取权限详情
+  rpc GetPermission (GetPermissionRequest) returns (GetPermissionReply) {
+    option (google.api.http) = {
+      get: "/v1/system/permission/{id}"
+    };
+  }
+}
+
+// 用户相关消息定义
+message User {
+  uint64 id = 1;
+  string username = 2 [(validate.rules).string = {min_len: 1, max_len: 100}];
+  string password = 3 [(validate.rules).string = {min_len: 6, max_len: 100}];
+  string nickname = 4;
+  string email = 5 [(validate.rules).string = {email: true}];
+  string phone = 6;
+  string avatar = 7;
+  int32 status = 8;
+  repeated uint64 role_ids = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+
+message CreateUserRequest {
+  string username = 1 [(validate.rules).string = {min_len: 1, max_len: 100}];
+  string password = 2 [(validate.rules).string = {min_len: 6, max_len: 100}];
+  string nickname = 3;
+  string email = 4 [(validate.rules).string = {email: true}];
+  string phone = 5;
+  string avatar = 6;
+  repeated uint64 role_ids = 7;
+}
+
+message CreateUserReply {
+  uint64 id = 1;
+}
+
+message UpdateUserRequest {
+  uint64 id = 1;
+  string nickname = 2;
+  string email = 3 [(validate.rules).string = {email: true}];
+  string phone = 4;
+  string avatar = 5;
+  int32 status = 6;
+  repeated uint64 role_ids = 7;
+}
+
+message UpdateUserReply {}
+
+message DeleteUserRequest {
+  uint64 id = 1;
+}
+
+message DeleteUserReply {}
+
+message GetUserRequest {
+  uint64 id = 1;
+}
+
+message GetUserReply {
+  User user = 1;
+}
+
+message ListUserRequest {
+  string keyword = 1;
+  int32 status = 2;
+  common.pagination.PaginationRequest pagination = 3;
+}
+
+message ListUserReply {
+  repeated User users = 1;
+  common.pagination.PaginationReply pagination = 2;
+}
+
+// 角色相关消息定义
+message Role {
+  uint64 id = 1;
+  string name = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string code = 3 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string description = 4;
+  int32 status = 5;
+  repeated uint64 permission_ids = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+message CreateRoleRequest {
+  string name = 1 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string code = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string description = 3;
+  repeated uint64 permission_ids = 4;
+}
+
+message CreateRoleReply {
+  uint64 id = 1;
+}
+
+message UpdateRoleRequest {
+  uint64 id = 1;
+  string name = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string description = 3;
+  int32 status = 4;
+  repeated uint64 permission_ids = 5;
+}
+
+message UpdateRoleReply {}
+
+message DeleteRoleRequest {
+  uint64 id = 1;
+}
+
+message DeleteRoleReply {}
+
+message GetRoleRequest {
+  uint64 id = 1;
+}
+
+message GetRoleReply {
+  Role role = 1;
+}
+
+message ListRoleRequest {
+  string keyword = 1;
+  int32 status = 2;
+  common.pagination.PaginationRequest pagination = 3;
+}
+
+message ListRoleReply {
+  repeated Role roles = 1;
+  common.pagination.PaginationReply pagination = 2;
+}
+
+// 权限相关消息定义
+message Permission {
+  uint64 id = 1;
+  string name = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string code = 3 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string type = 4;
+  string description = 5;
+  int32 status = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+message CreatePermissionRequest {
+  string name = 1 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string code = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string type = 3;
+  string description = 4;
+}
+
+message CreatePermissionReply {
+  uint64 id = 1;
+}
+
+message UpdatePermissionRequest {
+  uint64 id = 1;
+  string name = 2 [(validate.rules).string = {min_len: 1, max_len: 50}];
+  string description = 3;
+  int32 status = 4;
+}
+
+message UpdatePermissionReply {}
+
+message DeletePermissionRequest {
+  uint64 id = 1;
+}
+
+message DeletePermissionReply {}
+
+message GetPermissionRequest {
+  uint64 id = 1;
+}
+
+message GetPermissionReply {
+  Permission permission = 1;
+}
+
+message ListPermissionRequest {
+  string keyword = 1;
+  string type = 2;
+  int32 status = 3;
+  common.pagination.PaginationRequest pagination = 4;
+}
+
+message ListPermissionReply {
+  repeated Permission permissions = 1;
+  common.pagination.PaginationReply pagination = 2;
+}
