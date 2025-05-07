@@ -8,30 +8,152 @@ option java_package = "dev.beiduoke.api.protobuf";
 option java_outer_classname = "EnumProto";
 
 // 启用状态
-enum Enable {
-  ENABLE_UNSPECIFIED = 0;
-  ENABLE_YES = 1;
-  ENABLE_NO = 2;
+enum Status {
+  STATUS_UNSPECIFIED = 0;  // 未指定
+  STATUS_ENABLED = 1;      // 启用
+  STATUS_DISABLED = 2;     // 禁用
 }
 
 // 通用排序
-enum Sort {
-  SORT_UNSPECIFIED = 0;
-  SORT_DESC = 1;
-  SORT_ASC = 2;
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;  // 未指定
+  SORT_ORDER_DESC = 1;         // 降序
+  SORT_ORDER_ASC = 2;          // 升序
 }
 
 // 通用状态
 enum State {
-  STATE_UNSPECIFIED = 0;
-  STATE_ACTIVE = 1;
-  STATE_INACTIVE = 2;
-  STATE_BANNED = 3;
+  STATE_UNSPECIFIED = 0;   // 未指定
+  STATE_ACTIVE = 1;        // 活跃
+  STATE_INACTIVE = 2;      // 不活跃
+  STATE_BANNED = 3;        // 封禁
 }
 
-// 开关
-enum Switch {
-  SWITCH_UNSPECIFIED = 0;
-  SWITCH_OPEN = 1;
-  SWITCH_CLOSE = 2;
+// 开关状态
+enum FeatureFlag {
+  FEATURE_FLAG_UNSPECIFIED = 0;    // 未指定
+  FEATURE_FLAG_ON = 1;             // 开启
+  FEATURE_FLAG_OFF = 2;            // 关闭
+}
+
+// 性别
+enum Gender {
+  GENDER_UNSPECIFIED = 0;  // 未指定
+  GENDER_MALE = 1;         // 男
+  GENDER_FEMALE = 2;       // 女
+  GENDER_OTHER = 3;        // 其他
+}
+
+// 审核状态
+enum AuditStatus {
+  AUDIT_STATUS_UNSPECIFIED = 0;   // 未指定
+  AUDIT_STATUS_PENDING = 1;       // 待审核
+  AUDIT_STATUS_APPROVED = 2;      // 已通过
+  AUDIT_STATUS_REJECTED = 3;      // 已拒绝
+  AUDIT_STATUS_REVIEWING = 4;     // 审核中
+}
+
+// 支付状态
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;  // 未指定
+  PAYMENT_STATUS_PENDING = 1;      // 待支付
+  PAYMENT_STATUS_PAID = 2;         // 已支付
+  PAYMENT_STATUS_REFUNDING = 3;    // 退款中
+  PAYMENT_STATUS_REFUNDED = 4;     // 已退款
+  PAYMENT_STATUS_CANCELLED = 5;    // 已取消
+  PAYMENT_STATUS_FAILED = 6;       // 支付失败
+}
+
+// 订单状态
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;    // 未指定
+  ORDER_STATUS_PENDING = 1;        // 待处理
+  ORDER_STATUS_PROCESSING = 2;     // 处理中
+  ORDER_STATUS_COMPLETED = 3;      // 已完成
+  ORDER_STATUS_CANCELLED = 4;      // 已取消
+  ORDER_STATUS_FAILED = 5;         // 已失败
+  ORDER_STATUS_REFUNDING = 6;      // 退款中
+  ORDER_STATUS_REFUNDED = 7;       // 已退款
+}
+
+// 用户类型
+enum UserType {
+  USER_TYPE_UNSPECIFIED = 0;  // 未指定
+  USER_TYPE_ADMIN = 1;        // 管理员
+  USER_TYPE_STAFF = 2;        // 员工
+  USER_TYPE_CUSTOMER = 3;     // 客户
+  USER_TYPE_GUEST = 4;        // 访客
+}
+
+// 文件类型
+enum FileType {
+  FILE_TYPE_UNSPECIFIED = 0;  // 未指定
+  FILE_TYPE_IMAGE = 1;        // 图片
+  FILE_TYPE_VIDEO = 2;        // 视频
+  FILE_TYPE_AUDIO = 3;        // 音频
+  FILE_TYPE_DOCUMENT = 4;     // 文档
+  FILE_TYPE_OTHER = 5;        // 其他
+}
+
+// 消息类型
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;  // 未指定
+  MESSAGE_TYPE_TEXT = 1;         // 文本
+  MESSAGE_TYPE_IMAGE = 2;        // 图片
+  MESSAGE_TYPE_VIDEO = 3;        // 视频
+  MESSAGE_TYPE_AUDIO = 4;        // 音频
+  MESSAGE_TYPE_FILE = 5;         // 文件
+  MESSAGE_TYPE_LOCATION = 6;     // 位置
+  MESSAGE_TYPE_SYSTEM = 7;       // 系统消息
+}
+
+// 设备类型
+enum DeviceType {
+  DEVICE_TYPE_UNSPECIFIED = 0;  // 未指定
+  DEVICE_TYPE_WEB = 1;          // Web端
+  DEVICE_TYPE_ANDROID = 2;      // 安卓端
+  DEVICE_TYPE_IOS = 3;          // iOS端
+  DEVICE_TYPE_DESKTOP = 4;      // 桌面端
+  DEVICE_TYPE_OTHER = 5;        // 其他
+}
+
+// 通知类型
+enum NotificationType {
+  NOTIFICATION_TYPE_UNSPECIFIED = 0;  // 未指定
+  NOTIFICATION_TYPE_SYSTEM = 1;       // 系统通知
+  NOTIFICATION_TYPE_ORDER = 2;        // 订单通知
+  NOTIFICATION_TYPE_PAYMENT = 3;      // 支付通知
+  NOTIFICATION_TYPE_PROMOTION = 4;    // 促销通知
+  NOTIFICATION_TYPE_REMINDER = 5;     // 提醒通知
+}
+
+// 操作类型
+enum OperationType {
+  OPERATION_TYPE_UNSPECIFIED = 0;  // 未指定
+  OPERATION_TYPE_CREATE = 1;       // 创建
+  OPERATION_TYPE_UPDATE = 2;       // 更新
+  OPERATION_TYPE_DELETE = 3;       // 删除
+  OPERATION_TYPE_QUERY = 4;        // 查询
+  OPERATION_TYPE_IMPORT = 5;       // 导入
+  OPERATION_TYPE_EXPORT = 6;       // 导出
+}
+
+// 资源类型
+enum ResourceType {
+  RESOURCE_TYPE_UNSPECIFIED = 0;  // 未指定
+  RESOURCE_TYPE_USER = 1;         // 用户资源
+  RESOURCE_TYPE_ORDER = 2;        // 订单资源
+  RESOURCE_TYPE_PRODUCT = 3;      // 产品资源
+  RESOURCE_TYPE_ARTICLE = 4;      // 文章资源
+  RESOURCE_TYPE_COMMENT = 5;      // 评论资源
+}
+
+// 权限级别
+enum PermissionLevel {
+  PERMISSION_LEVEL_UNSPECIFIED = 0;  // 未指定
+  PERMISSION_LEVEL_NONE = 1;         // 无权限
+  PERMISSION_LEVEL_READ = 2;         // 只读权限
+  PERMISSION_LEVEL_WRITE = 3;        // 读写权限
+  PERMISSION_LEVEL_ADMIN = 4;        // 管理权限
+  PERMISSION_LEVEL_SUPER = 5;        // 超级权限
 }
