@@ -11,7 +11,7 @@ type Authenticator interface {
 	// Init 初始化认证器
 	// ctx: 上下文信息
 	// 返回: 初始化过程中的错误
-	Init(ctx context.Context) error
+	Init(ctx context.Context, opts ...Option) error
 
 	// Authenticate 验证用户身份并返回认证声明
 	// ctx: 上下文信息，可能包含令牌信息
@@ -114,6 +114,9 @@ type TokenManager interface {
 // AuthProvider 定义了认证提供者的接口
 // 实现此接口的提供者需要支持创建认证器实例
 type AuthProvider interface {
+	// Name 获取提供者名称
+	// 返回: 提供者名称
+	Name() string
 	// NewAuthenticator 创建新的认证器实例
 	// ctx: 上下文信息
 	// opts: 配置选项

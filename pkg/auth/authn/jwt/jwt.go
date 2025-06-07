@@ -67,29 +67,24 @@ func (p *JWTProvider) Name() string {
 
 // NewAuthenticator 创建新的认证器实例
 func (p *JWTProvider) NewAuthenticator(ctx context.Context, opts ...authn.Option) (authn.Authenticator, error) {
-	// 使用默认选项
-	options := authn.DefaultOptions()
-
-	// 应用选项
-	for _, opt := range opts {
-		opt(options)
-	}
-
 	// 创建JWT认证器
-	auth := &JWTAuthenticator{
-		options: options,
-	}
-
+	auth := new(JWTAuthenticator)
+	// 使用默认选项
+	auth.options = authn.DefaultOptions()
 	// 初始化认证器
-	if err := auth.Init(ctx); err != nil {
+	if err := auth.Init(ctx, opts); err != nil {
 		return nil, err
 	}
-
 	return auth, nil
 }
 
 // Init 初始化认证器
-func (a *JWTAuthenticator) Init(ctx context.Context) error {
+func (a *JWTAuthenticator) Init(ctx context.Context, opts ...authn.Option) error {
+	// 应用选项
+	for _, opt := range opts {
+		opt(a.options)
+	}
+
 	// 设置签名方法
 	switch a.options.SigningMethod {
 	case "HS256":
