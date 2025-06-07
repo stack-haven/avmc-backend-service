@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+import "buf/validate/validate.proto";
+
+import "common/pagination/pagination.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+
+service PostService {
+	rpc CreatePost (CreatePostRequest) returns (CreatePostResponse);
+	rpc UpdatePost (UpdatePostRequest) returns (UpdatePostResponse);
+	rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
+	rpc GetPost (GetPostRequest) returns (Post);
+	rpc ListPost (pagination.PagingRequest) returns (ListPostResponse);
+}
+
+// 岗位模块
+message Post {
+  optional string created_at = 1;
+  optional string updated_at = 2;
+  uint32 id = 3;
+  optional int32 state = 4 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
+  optional string remark = 5;
+  optional int32 sort = 6;
+  optional string name = 7;
+}
+
+message CreatePostRequest {
+  Post post = 1;
+  uint32 operator_id = 2;
+}
+message CreatePostResponse {}
+
+message UpdatePostRequest {
+  uint32 id = 1;
+  Post post = 2;
+  uint32 operator_id = 3;
+}
+message UpdatePostResponse {
+}
+
+message DeletePostRequest {
+  uint32 id = 1;
+  uint32 operator_id = 2;
+}
+message DeletePostResponse {}
+
+message GetPostRequest {
+  uint32 id = 1;
+}
+message GetPostResponse {}
+
+message ListPostRequest {}
+message ListPostResponse {
+  repeated Post items = 1;
+  int32 total = 2;
+}

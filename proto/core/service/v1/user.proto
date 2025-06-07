@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/field_mask.proto";
+import "validate/validate.proto";
+import "buf/validate/validate.proto";
+
+import "common/pagination/pagination.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+// option go_package = "corev1";
+// option java_multiple_files = true;
+// option java_package = "com.foo.v1";
+
+service UserService {
+	rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+	rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
+	rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
+	rpc GetUser (GetUserRequest) returns (User);
+	rpc ListUser (pagination.PagingRequest) returns (ListUserResponse);
+  // 查询用户详情
+  rpc GetUserByName (GetUserByNameRequest) returns (User) {}
+  // 验证密码
+  rpc VerifyPassword (VerifyPasswordRequest) returns (VerifyPasswordResponse) {}
+  // 用户是否存在
+  rpc UserExists (UserExistsRequest) returns (UserExistsResponse) {}
+}
+
+// 验证密码结果码
+enum VerifyPassword {
+  VERIFY_PASSWORD_UNSPECIFIED = 0; 
+  VERIFY_PASSWORD_SUCCESS = 1;  // 验证成功
+  VERIFY_PASSWORD_ACCOUNT_NOT_EXISTS = 2; // 账号不存在
+  VERIFY_PASSWORD_WRONG_PASSWORD = 3;// 密码错误
+  VERIFY_PASSWORD_FREEZE = 4;// 已冻结
+  VERIFY_PASSWORD_DELETED = 5;// 已删除
+}
+// 用户权限
+enum Authority {
+  AUTHORITY_UNSPECIFIED = 0; 
+  AUTHORITY_SYS_ADMIN = 1;  // 系统超级用户
+  AUTHORITY_CUSTOMER_USER = 2;  // 普通用户
+  AUTHORITY_GUEST_USER = 3;  // 游客
+}
+
+message User {
+  uint32 id = 1;
+  optional string name = 2 [(validate.rules).string = {min_len: 1, max_len: 10}];
+  optional string nick_name = 4 [(validate.rules).string = {min_len: 1, max_len: 10}];
+  optional string real_name = 5 [(validate.rules).string = {min_len: 2, max_len: 10}];
+  optional string birthday = 6 [(validate.rules).string.pattern = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$"];
+  optional int32 gender = 7 [(validate.rules).int32.gte = 0]; 
+  optional string phone = 8 [(validate.rules).string.pattern = "^1[0-9]{10}$"];
+  optional string email = 9 [(validate.rules).string.email = true];
+  optional string avatar = 10;
+  optional int32 state = 11 [(validate.rules).int32.gte = 0,(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
+  optional string created_at = 12;
+  optional string updated_at = 13;
+  optional uint32 creator_id = 14 [(gnostic.openapi.v3.property) = {description: "创建者ID"}]; // 创建者ID
+  optional int32 authority = 15 [(gnostic.openapi.v3.property) = {description: "权限"}]; // 权限
+  optional string password = 16 [(validate.rules).string = {min_len: 6, max_len: 28}];
+  optional string description = 17; // 个人说明
+}
+
+message CreateUserRequest {
+  User user = 1;
+  uint32 operator_id = 2;
+}
+message CreateUserResponse {
+}
+
+message UpdateUserRequest {
+  uint32 id = 1;
+  User user = 2;
+  uint32 operator_id = 3;
+}
+message UpdateUserResponse {
+}
+
+message DeleteUserRequest {
+  uint32 id = 1;
+  uint32 operator_id = 2;
+}
+message DeleteUserResponse {}
+
+message GetUserRequest {
+  uint32 id = 1;
+}
+message GetUserResponse {}
+
+message GetUserByNameRequest {
+  string name = 1;
+}
+
+message ListUserRequest {
+    // 当前页码
+    optional int32 page = 1;
+    // 每页的行数
+    optional int32 page_size = 2;
+    // 与过滤参数
+    optional User query = 3;
+    // 或过滤参数
+    optional User or_query = 4;
+    // 排序条件
+    repeated string order_by = 5;
+    // 是否不分页
+    optional bool no_paging = 6;
+    // 字段掩码
+    google.protobuf.FieldMask field_mask = 7;
+}
+message ListUserResponse {
+  repeated User items = 1;
+  int32 total = 2;
+}
+// 验证密码 - 请求
+message VerifyPasswordRequest {
+  string name = 1;
+  string password = 2;
+}
+// 验证密码 - 回应
+message VerifyPasswordResponse {
+  VerifyPassword result = 1;
+}
+
+// 用户是否存在 - 请求
+message UserExistsRequest {
+  string name = 1;
+}
+// 用户是否存在 - 回应
+message UserExistsResponse {
+  bool exist = 1;
+}

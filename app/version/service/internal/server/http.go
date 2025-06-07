@@ -1,7 +1,6 @@
 package server
 
 import (
-	v1 "backend-service/api/helloworld/v1"
 	"backend-service/app/version/service/internal/conf"
 	"backend-service/app/version/service/internal/service"
 
@@ -11,7 +10,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, release *service.ReleaseService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -27,6 +26,6 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterGreeterHTTPServer(srv, greeter)
+	// v1.RegisterReleaseServiceHTTPServer(srv, release)
 	return srv
 }

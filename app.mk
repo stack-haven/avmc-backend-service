@@ -1,4 +1,6 @@
 GOPATH ?= $(shell go env GOPATH)
+# GOVERSION is the current go version, e.g. go1.9.2
+GOVERSION ?= $(shell go version | awk '{print $$3;}')
 
 # Ensure GOPATH is set before running build process.
 ifeq "$(GOPATH)" ""
@@ -6,20 +8,54 @@ ifeq "$(GOPATH)" ""
 endif
 FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
 
-GO              := GO111MODULE=on go
+GO_CMD			:= GO111MODULE=on go
+GIT_CMD			:= git
+DOCKER_CMD		:= docker
 
 ARCH      := "`uname -s`"
 LINUX     := "Linux"
 MAC       := "Darwin"
 
+DEFAULT_VERSION=0.0.1
+
 ifeq ($(OS),Windows_NT)
-    IS_WINDOWS:=1
+    IS_WINDOWS:=TRUE
 endif
 
-APP_VERSION=$(shell git describe --tags --always)
+ifneq (git,)
+	GIT_EXIST:=TRUE
+endif
+
+ifneq ("$(wildcard .git)", "")
+	HAS_DOTGIT:=TRUE
+endif
+
+ifeq ($(GIT_EXIST),TRUE)
+ifeq ($(HAS_DOTGIT),TRUE)
+	# CUR_TAG is the last git tag plus the delta from the current commit to the tag
+	# e.g. v1.5.5-<nr of commits since>-g<current git sha>
+	CUR_TAG ?= $(shell git describe --tags --first-parent)
+
+	# LAST_TAG is the last git tag
+    # e.g. v1.5.5
+    LAST_TAG ?= $(shell git describe --match "v*" --abbrev=0 --tags --first-parent)
+
+    # VERSION is the last git tag without the 'v'
+    # e.g. 1.5.5
+    VERSION ?= $(shell git describe --match "v*" --abbrev=0 --tags --first-parent | cut -c 2-)
+endif
+endif
+
+CUR_TAG ?= $(DEFAULT_VERSION)
+LAST_TAG ?= v$(DEFAULT_VERSION)
+VERSION ?= $(DEFAULT_VERSION)
+
+# GOFLAGS is the flags for the go compiler.
+GOFLAGS ?= -ldflags "-X main.version=$(VERSION)"
+
 APP_RELATIVE_PATH=$(shell a=`basename $$PWD` && cd .. && b=`basename $$PWD` && echo $$b/$$a)
 APP_NAME=$(shell echo $(APP_RELATIVE_PATH) | sed -En "s/\//-/p")
-APP_DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "scaffold-admin/" $$0 ":0.1.0"}')
+APP_DOCKER_IMAGE=$(shell echo $(APP_NAME) |awk -F '@' '{print "samv/" $$0 ":0.1.0"}')
 
 
 .PHONY:init dep vendor build clean docker gen ent wire api openapi run test cover vet lint app
@@ -75,6 +111,7 @@ ifneq ("$(wildcard ./internal/data/ent)","")
 				--feature sql/modifier \
 				--feature entql \
 				--feature sql/upsert \
+				--feature sql/lock \
 				./internal/data/ent/schema
 endif
 
@@ -84,13 +121,13 @@ wire:
 
 # generate protobuf api go code
 api:
-	@cd ../../../ && \
+	@cd ../../../proto && \
 	buf generate --template buf.gen.yaml
 
 # generate OpenAPI v3 doc
 openapi:
-	@cd ../../../ && \
-	buf generate --template proto/admin/interface/v1/buf.openapi.gen.yaml
+	@cd ../../../proto && \
+	buf generate --template buf.openapi.gen.yaml
 
 # run application
 run: api openapi

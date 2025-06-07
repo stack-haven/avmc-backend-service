@@ -1,7 +1,7 @@
 package server
 
 import (
-	v1 "backend-service/api/helloworld/v1"
+	v1 "backend-service/api/avmc/admin/v1"
 	"backend-service/app/avmc/admin/internal/conf"
 	"backend-service/app/avmc/admin/internal/service"
 
@@ -11,7 +11,14 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server,
+	auth *service.AuthServiceService,
+	user *service.UserServiceService,
+	dept *service.DeptServiceService,
+	menu *service.MenuServiceService,
+	role *service.RoleServiceService,
+	logger log.Logger,
+) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -27,6 +34,10 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterGreeterServer(srv, greeter)
+	v1.RegisterAuthServiceServer(srv, auth)
+	v1.RegisterUserServiceServer(srv, user)
+	v1.RegisterDeptServiceServer(srv, dept)
+	v1.RegisterMenuServiceServer(srv, menu)
+	v1.RegisterRoleServiceServer(srv, role)
 	return srv
 }

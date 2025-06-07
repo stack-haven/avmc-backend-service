@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package avmc.admin.v1;
+
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+import "common/pagination/pagination.proto";
+
+import "core/service/v1/post.proto";
+
+option go_package = "backend-service/api/avmc/admin/v1;v1";
+
+// 岗位管理服务
+service PostService {
+  // 获取岗位列表
+  rpc ListPost (pagination.PagingRequest) returns (core.service.v1.ListPostResponse) {
+    option (google.api.http) = {
+      get: "/avmc/v1/posts"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+
+  // 获取岗位数据
+  rpc GetPost (core.service.v1.GetPostRequest) returns (core.service.v1.Post) {
+    option (google.api.http) = {
+      get: "/avmc/v1/posts/{id}"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+
+  // 创建岗位
+  rpc CreatePost (core.service.v1.CreatePostRequest) returns (core.service.v1.CreatePostResponse) {
+    option (google.api.http) = {
+      post: "/avmc/v1/posts"
+      body: "post"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+
+  // 更新岗位
+  rpc UpdatePost (core.service.v1.UpdatePostRequest) returns (core.service.v1.UpdatePostResponse) {
+    option (google.api.http) = {
+      put: "/avmc/v1/posts/{id}"
+      body: "post"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+
+  // 删除岗位
+  rpc DeletePost (core.service.v1.DeletePostRequest) returns (core.service.v1.DeletePostResponse) {
+    option (google.api.http) = {
+      delete: "/avmc/v1/posts/{id}"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+}

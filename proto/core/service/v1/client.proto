@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+import "common/pagination/pagination.proto";
+import "common/enum/enum.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "core.service.v1";
+
+service ClientService {
+	rpc CreateClient (CreateClientRequest) returns (CreateClientResponse);
+	rpc UpdateClient (UpdateClientRequest) returns (UpdateClientResponse);
+	rpc DeleteClient (DeleteClientRequest) returns (DeleteClientResponse);
+	rpc GetClient (GetClientRequest) returns (GetClientResponse);
+	rpc ListClient (pagination.PagingRequest) returns (ListClientResponse);
+}
+
+// 客户端模块
+// 客户端模块
+message Client {
+  // 创建时间
+  optional google.protobuf.Timestamp created_at = 1;
+  // 更新时间
+  optional google.protobuf.Timestamp updated_at = 2;
+  // 客户端ID
+  uint32 id = 3;
+  // 客户端名称
+  optional string name = 4 [(validate.rules).string.min_len = 1];
+  // 排序值
+  optional int32 sort = 5;
+  // 客户端状态 1 激活 2 未激活 3 禁用
+  optional enum.State state = 6 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
+  // 备注信息
+  optional string remark = 7;
+}
+
+message CreateClientRequest {
+  // 客户端名称
+  string name = 1 [(validate.rules).string.min_len = 1];
+  // 排序值
+  optional int32 sort = 2;
+  // 客户端状态
+  optional enum.State state = 3;
+  // 备注信息
+  optional string remark = 4;
+}
+message CreateClientResponse {
+  // 客户端标识
+  string client_id = 1;
+}
+
+message UpdateClientRequest {
+  // 客户端标识
+  string client_id = 1 [(validate.rules).string.min_len = 1];
+}
+message UpdateClientResponse {
+  // 客户端标识
+  string client_id = 1;
+}
+
+message DeleteClientRequest {
+  // 客户端标识
+  string client_id = 1 [(validate.rules).string.min_len = 1];
+}
+message DeleteClientResponse {
+  // 客户端标识
+  string client_id = 1;
+}
+
+message GetClientRequest {
+  // 客户端标识
+  string client_id = 1 [(validate.rules).string.min_len = 1];
+}
+message GetClientResponse {
+  // 客户端标识
+  string client_id = 1;
+}
+
+// 列出客户端响应
+message ListClientResponse {
+  // 客户端列表
+  repeated Client clients = 1;
+  // 分页响应
+  pagination.PagingResponse paging = 2;
+}

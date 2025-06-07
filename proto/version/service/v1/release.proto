@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package version.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+import "buf/validate/validate.proto";
+
+import "common/pagination/pagination.proto";
+
+option go_package = "backend-service/version/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "version.service.v1";
+
+service ReleaseService {
+	rpc CreateRelease (CreateReleaseRequest) returns (CreateReleaseResponse);
+	rpc UpdateRelease (UpdateReleaseRequest) returns (UpdateReleaseResponse);
+	rpc DeleteRelease (DeleteReleaseRequest) returns (DeleteReleaseResponse);
+	rpc GetRelease (GetReleaseRequest) returns (GetReleaseResponse);
+	rpc ListRelease (ListReleaseRequest) returns (ListReleaseResponse);
+}
+
+// 版本发布模块
+message Release {
+  optional string created_at = 1;
+  optional string updated_at = 2;
+  uint32 id = 3;
+  optional int32 state = 4 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
+  optional string remark = 5;
+  optional int32 sort = 6;
+  optional string name = 7;
+}
+
+message CreateReleaseRequest {
+  Release release = 1;
+  uint32 operator_id = 2;
+}
+message CreateReleaseResponse {}
+
+message UpdateReleaseRequest {
+  uint32 id = 1;
+  Release release = 2;
+  uint32 operator_id = 3;
+}
+message UpdateReleaseResponse {}
+
+message DeleteReleaseRequest {
+  uint32 id = 1;
+  uint32 operator_id = 2;
+}
+message DeleteReleaseResponse {}
+
+message GetReleaseRequest {
+  uint32 id = 1;
+}
+message GetReleaseResponse {}
+
+message ListReleaseRequest {
+  pagination.PagingRequest paging = 1;
+}
+message ListReleaseResponse {
+  repeated Release items = 1;
+  int32 total = 2;
+}

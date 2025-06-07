@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package avmc.admin.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+import "buf/validate/validate.proto";
+
+import "core/service/v1/auth.proto";
+import "core/service/v1/user.proto";
+
+option go_package = "backend-service/api/avmc/admin/v1;v1";
+
+option (gnostic.openapi.v3.document) = {
+  info: {
+    title: "Admin AVMC Auth API";
+    description: "后台管理脚手架系统-认证服务";
+    version: "1.0";
+		contact: {
+			name: "SAAS架构";
+			url: "https://github.com/grpc-ecosystem/grpc-gateway";
+			email: "none@example.com";
+		};
+		license: {
+			name: "BSD 3-Clause License";
+			url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
+		};
+  }
+};
+
+// The greeting service definition.
+service AuthService {
+  // 后台登陆
+  rpc Login (LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/avmc/v1/login"
+      body: "*"
+    };
+  }
+  
+  // 刷新令牌
+  // @param RefreshTokenRequest 请求参数，包含刷新令牌
+  // @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
+  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/avmc/v1/refresh-token"
+      body: "*"
+    };
+    
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+
+  // 后台登出
+  rpc Logout (LogoutRequest) returns (LogoutResponse) {
+    option (google.api.http) = {
+      post: "/avmc/v1/logout"
+      body: "*"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    };
+  }
+}
+
+// 授权类型
+enum GrandType {
+  GRAND_TYPE_UNSPECIFIED = 0; // 未指定
+  GRAND_TYPE_PASSWORD = 1; // 密码
+  GRAND_TYPE_CODE = 2; // 验证码
+}
+
+message Auth {
+  uint32 id = 1; // 用户ID
+  string name = 2; // 认证名称
+}
+
+// 用户后台登陆 - 请求
+message LoginRequest {
+  string name = 1 [(validate.rules).string = {min_len: 1, max_len: 10}, (buf.validate.field).string.min_len = 1]; // 账号
+  string password = 2 [(validate.rules).string = {min_len: 6, max_len: 25}]; // 密码
+  optional GrandType grand_type = 3; // 授权类型，一直为：password
+}
+
+// 用户后台登陆 - 回应
+message LoginResponse {
+  uint32 id = 1; // 用户ID
+  string name = 2; // 用户名
+  string token_type = 3; // 令牌类型
+  string access_token = 4; // 访问令牌
+  string refresh_token = 5; // 刷新令牌
+}
+
+// 请求 - 刷新令牌
+message RefreshTokenRequest {
+  string refresh_token = 1 [(validate.rules).string.min_len = 1]; // 刷新令牌
+}
+
+// 回应 - 刷新令牌
+message RefreshTokenResponse {
+  string access_token = 1; // 新的访问令牌
+  string refresh_token = 2; // 新的刷新令牌
+  int64 expires_in = 3; // 访问令牌过期时间（秒）
+}
+
+// 用户后台登出 - 请求
+message LogoutRequest {}
+
+// 用户后台登出 - 回应
+message LogoutResponse {}
+

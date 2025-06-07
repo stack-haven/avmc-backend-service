@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "validate/validate.proto";
+import "common/pagination/pagination.proto";
+import "common/enum/enum.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+
+service DeptService {
+	rpc CreateDept (CreateDeptRequest) returns (CreateDeptResponse);
+	rpc UpdateDept (UpdateDeptRequest) returns (UpdateDeptResponse);
+	rpc DeleteDept (DeleteDeptRequest) returns (DeleteDeptResponse);
+	rpc GetDept (GetDeptRequest) returns (Dept);
+	rpc ListDept (pagination.PagingRequest) returns (ListDeptResponse);
+}
+
+// 部门模块
+message Dept {
+  optional string created_at = 1;
+  optional string updated_at = 2;
+  uint32 id = 3;
+  optional string name = 4;
+  optional int32 sort = 5;
+  optional int32 state = 6 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
+  optional string remark = 7;
+  optional uint32 parent_id = 8;
+  optional uint32 leader_id = 9;
+}
+
+message CreateDeptRequest {
+  Dept dept = 1;
+  uint32 operator_id = 2;
+}
+message CreateDeptResponse {}
+
+message UpdateDeptRequest {
+  uint32 id = 1;
+  Dept dept = 2;
+  uint32 operator_id = 3;
+}
+message UpdateDeptResponse {
+}
+
+message DeleteDeptRequest {
+  uint32 id = 1;
+  uint32 operator_id = 2;
+}
+message DeleteDeptResponse {}
+
+message GetDeptRequest {
+  uint32 id = 1;
+}
+message GetDeptResponse {}
+
+message ListDeptRequest {}
+message ListDeptResponse {
+  repeated Dept items = 1;
+  int32 total = 2;
+}

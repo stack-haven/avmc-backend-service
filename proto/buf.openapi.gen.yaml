@@ -7,12 +7,11 @@ managed:
   enabled: true
 
   disable:
-    - module: buf.build/googleapis/googleapis
+    - module: 'buf.build/googleapis/googleapis'
     - module: 'buf.build/envoyproxy/protoc-gen-validate'
     - module: 'buf.build/kratos/apis'
     - module: 'buf.build/gnostic/gnostic'
     - module: 'buf.build/gogo/protobuf'
-    - module: 'buf.build/tx7do/pagination'
 
   override:
     - file_option: go_package_prefix
@@ -21,7 +20,7 @@ managed:
 inputs:
   - directory: .
     paths:
-      - ./admin/interface/v1
+      - ./avmc/admin/v1
 
 plugins:
   # generate openapi v2 json doc
@@ -33,7 +32,7 @@ plugins:
 
   # generate openapi v3 yaml doc
   - local: protoc-gen-openapi
-    out: ../app/admin/interface/cmd/server/assets
+    out: ../app/avmc/admin/cmd/server/assets
     opt:
       - naming=json # 命名约定。使用"proto"则直接从proto文件传递名称。默认为：json
       - depth=2 # 循环消息的递归深度，默认为：2

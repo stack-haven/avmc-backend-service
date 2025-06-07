@@ -80,3 +80,92 @@ pkg/
    - 清晰的提交信息
    - 适当的改动范围
    - 通过 CI 测试
+
+
+## Go-Auth 身份认证模块-开发提示词（Prompt）内容
+
+---
+### 开发助手提示词（口语版）
+我正在开发一个身份认证模块，所在当前项目的pkg目录下，模块名称为go-auth，路径 pkg/go-auth。
+
+角色：请作为一个golang编程语言的架构师或者是资深开发工程师完成我的需求，项目使用go-kratos微服务框架搭建。在身份认证模块中需要包含身份验证（简写：anthn）和身份鉴权（简写：anthz）子模块，因为这个是作为身份认证模块所以还需要增加中间件。
+
+--- 
+
+### 开发助手提示词（AI版）
+
+你是一个资深 Golang 架构师，请使用 Go 语言，基于 go-kratos 微服务框架，开发一个通用的身份认证模块 `go-auth`，其路径为 `pkg/go-auth`。该模块需同时支持身份验证（Authn）与身份鉴权（Authz），具备如下要求：
+
+模块要求：模块设计需具备通用可扩展特性，同时让逻辑解耦、可插拔等能够接入兼容多种主流协议与后端提供者。
+
+设计原则：
+* 接口驱动设计（Interface-based Design）
+* 依赖反转原则（Dependency Inversion）
+* 开闭原则（Open/Closed Principle）
+设计目标：
+* 模块通用、可插拔、协议无关
+* 易扩展，支持多种认证与鉴权提供者
+* 松耦合，使用 interface-based 设计
+* 遵循 SOLID 原则（特别是开闭原则与依赖反转）
+
+设计要求：
+* 提供模块初始化方式，支持使用 Google Wire 进行依赖注入
+* 参考 go-micro 与 go-kratos 插件化设计风格
+* 使用清晰的包结构、接口与实现分离
+* 实现至少一个 JWT 提供者作为示例
+
+服务接口基础方法：
+身份验证（Authenticator）：身份初始化（Init）、身份验证、令牌验证、令牌发放、令牌续期（刷新）、令牌注销（Destroy）、提供者名称（String/Name）、等；
+身份鉴权（Authorizer）：权限初始化（Init）、权限验证、添加权限策略、权限策略注销（Destroy）、提供者名称（String/Name）、等；
+
+备注：接口方法需要你来优化和补充，我只是给你一些基础提示。
+
+服务提供者：
+* 身份验证提供者（AuthnProvider）：Jwt 、OIDC、PSK、等；
+* 身份鉴权提供者（AuthzProvider）：Casbin、OPA、Zanzibar、等；
+
+服务中间件：
+* 身份验证中间件（AuthnMiddleware）：身份验证中间件，用于身份验证和令牌验证；
+* 身份鉴权中间件（AuthzMiddleware）：身份鉴权中间件，用于权限验证；
+
+以上需求中需要你提供设计思路和编码过程，需实现至少一个提供者的。
+
+### ✅ 接口建议
+
+#### Authenticator 接口（身份验证）
+
+* `Init(config any) error`
+* `Authenticate(ctx context.Context, credentials any) (Principal, error)`
+* `VerifyToken(ctx context.Context, token string) (Principal, error)`
+* `IssueToken(ctx context.Context, p Principal) (string, error)`
+* `RefreshToken(ctx context.Context, token string) (string, error)`
+* `DestroyToken(ctx context.Context, token string) error`
+* `Name() string`
+
+#### Authorizer 接口（身份鉴权）
+
+* `Init(config any) error`
+* `Authorize(ctx context.Context, p Principal, resource string, action string) error`
+* `AddPolicy(policy any) error`
+* `RemovePolicy(policy any) error`
+* `Name() string`
+
+#### Middleware 接口建议
+
+* `AuthnMiddleware(next http.Handler) http.Handler`
+* `AuthzMiddleware(next http.Handler) http.Handler`
+
+```mermaid
+graph TD
+  A[Auth Module] --> B[Authn 身份验证]
+  A --> C[Authz 身份鉴权]
+  A --> D[Middleware]
+  B --> E[JWT Provider]
+  B --> F[OIDC Provider]
+  C --> G[Casbin Provider]
+  C --> H[OPA Provider]
+  D --> I[Authn Middleware]
+  D --> J[Authz Middleware]
+```
+
+以上需求中需要你提供设计思路和编码过程，需实现至少一个提供者的。

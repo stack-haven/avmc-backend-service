@@ -9,21 +9,26 @@
 │   ├── Dockerfile             # 主Dockerfile
 │   └── compose                # Docker Compose配置
 ├── api                        # API定义目录
-│   ├── admin                  # 管理后台API
-│   │   ├── interface         # 接口定义
-│   │   └── service          # 服务定义
+│   ├── avmc                  # HTTP API接口
+│   │   ├── admin             # 管理后台API 接口定义
+│   │   └── api               # 开放服务API 接口定义
 │   └── common                # 公共API定义
 ├── app                        # 应用目录（多个微服务）
-│   ├── admin                 # 管理后台服务
-│   │   ├── cmd              # 启动入口
-│   │   ├── configs         # 配置文件
-│   │   └── internal        # 内部代码
+│   ├── avmc                    # 开放服务
+│   │   ├── admin             # 管理后台服务
+│   ├──      ├──internal                # 内部服务
+│   │        ├── service           # 服务层
+│   │        ├── biz               # 业务逻辑层
+│   │        └── data              # 数据访问层  
+│   │   └── api               # 开放服务
 │   └── other_service        # 其他微服务
 ├── pkg                        # 共享库目录
 │   ├── errors               # 错误处理库
 │   └── middleware           # 中间件库
 ├── proto                      # Proto文件目录
-│   ├── admin                 # 管理后台Proto
+│   ├── avmc                 # http 接口Proto
+│   │   ├── admin            # 管理后台Proto
+│   │   └── api             # 开放接口服务Proto
 │   ├── common                # 公共Proto
 │   └── third_party          # 第三方Proto
 └── tests                     # 测试目录
@@ -135,6 +140,9 @@
 - 使用多阶段构建
 - 基础镜像统一使用 Alpine
 - 暴露健康检查接口
+
+### 4.4 Docker 支持
+项目已提供 Docker 和 `docker-compose.yaml` 快速部署方案，具体配置位于 `.docker/` 目录下，其中包含 `Dockerfile` 和 `compose/docker-compose.yml` 文件。
 
 ### 4.2 配置中心
 - 区分环境配置

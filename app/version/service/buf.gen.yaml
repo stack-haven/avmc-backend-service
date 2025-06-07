@@ -1,0 +1,19 @@
+version: v2
+managed:
+  enabled: true
+  # override:
+  #   - file_option: go_package
+  #     value: foo/bar
+  disable:
+    - file_option: go_package_prefix
+      module: buf.build/bufbuild/protovalidate
+
+inputs:
+  - directory: .
+    paths:
+      - ./common/conf
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.36.5
+    out: ../app/version/service/proto
+    opt:
+      - paths=source_relative

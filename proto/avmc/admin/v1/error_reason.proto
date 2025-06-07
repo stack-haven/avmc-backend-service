@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package avmc.admin.v1;
+import "errors/errors.proto";
+
+option go_package = "backend-service/api/avmc/admin/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.avmc.admin.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// 错误原因枚举，定义系统中可能出现的各种错误情况
+enum ErrorReason {
+  // 设置缺省错误码为500
+  option (errors.default_code) = 500;
+  // 客户端请求格式错误，服务器无法理解
+  BAD_REQUEST = 0 [(errors.code) = 400];
+  // 用户未登录，尝试访问需要认证的资源
+  NOT_LOGGED_IN = 1 [(errors.code) = 401];
+  // 用户没有权限访问请求的资源
+  ACCESS_FORBIDDEN = 2 [(errors.code) = 403];
+  // 请求的资源在服务器上不存在
+  RESOURCE_NOT_FOUND = 3 [(errors.code) = 404];
+  // 请求的方法不被资源支持
+  METHOD_NOT_ALLOWED = 4 [(errors.code) = 405];
+  // 客户端请求超时，服务器未在规定时间内收到完整请求
+  REQUEST_TIMEOUT = 5 [(errors.code) = 408];
+
+  // 服务器内部发生错误，无法完成请求
+  INTERNAL_SERVER_ERROR = 10 [(errors.code) = 500];
+  // 请求的功能尚未在服务器上实现
+  NOT_IMPLEMENTED = 11 [(errors.code) = 501];
+  // 网络连接出现问题，无法与其他服务通信
+  NETWORK_ERROR = 12 [(errors.code) = 502];
+  // 服务器当前无法处理请求，可能处于过载或维护状态
+  SERVICE_UNAVAILABLE = 13 [(errors.code) = 503];
+  // 网络请求超时，与其他服务通信时未在规定时间内得到响应
+  NETWORK_TIMEOUT = 14 [(errors.code) = 504];
+  // 服务器不支持请求的协议版本或功能
+  REQUEST_NOT_SUPPORT = 15 [(errors.code) = 505];
+  
+  // 认证相关错误
+  // 认证令牌已过期，需要重新获取
+  AUTH_TOKEN_EXPIRED = 30 [(errors.code) = 103];
+  // 提供的认证令牌无效，可能格式错误或已被撤销
+  AUTH_INVALID_TOKEN = 31 [(errors.code) = 104];
+  // 请求中未包含认证令牌
+  AUTH_TOKEN_NOT_EXIST = 32 [(errors.code) = 105];
+
+  // 用户相关错误
+  // 未找到指定的用户记录
+  USER_NOT_FOUND = 50 [(errors.code) = 110];
+  // 用户不存在于系统中
+  USER_NOT_EXIST = 51 [(errors.code) = 112];
+  // 用户输入的密码错误
+  USER_INCORRECT_PASSWORD = 52 [(errors.code) = 113];
+  // 用户账户已被冻结，无法进行操作
+  USER_FREEZE = 53 [(errors.code) = 114];
+  // 提供的用户ID无效，可能格式错误或不存在
+  USER_INVALID_ID = 54 [(errors.code) = 115];
+  // 尝试创建的用户已经存在于系统中
+  USER_ALREADY_EXISTS = 56 [(errors.code) = 117];
+  // 用户邮箱未经过验证
+  USER_EMAIL_UNVERIFIED = 57 [(errors.code) = 118];
+  // 用户手机号未经过验证
+  USER_PHONE_UNVERIFIED = 58 [(errors.code) = 119];
+  // 用户账户已被锁定，可能由于多次尝试失败
+  USER_ACCOUNT_LOCKED = 59 [(errors.code) = 120];
+  // 用户登录尝试次数过多，账户暂时被锁定
+  USER_TOO_MANY_LOGIN_ATTEMPTS = 60 [(errors.code) = 121];
+  // 用户密码已过期，需要重置
+  USER_PASSWORD_EXPIRED = 61 [(errors.code) = 122];
+  // 用户必须重置密码才能继续使用账户
+  USER_MUST_RESET_PASSWORD = 62 [(errors.code) = 123];
+  // 用户没有足够的权限执行请求的操作
+  USER_PERMISSION_DENIED = 63 [(errors.code) = 124];
+  // 用户账户已被禁用
+  USER_DISABLED = 64 [(errors.code) = 125];
+  // 用户注册功能已被禁用
+  USER_REGISTRATION_DISABLED = 65 [(errors.code) = 126];
+  // 用户提供的邮箱格式无效
+  USER_INVALID_EMAIL_FORMAT = 66 [(errors.code) = 127];
+  // 用户提供的手机号格式无效
+  USER_INVALID_PHONE_FORMAT = 67 [(errors.code) = 128];
+  // 用户社交登录失败
+  USER_SOCIAL_LOGIN_FAILED = 68 [(errors.code) = 129];
+
+  // 数据库相关错误
+  // 无法建立与数据库的连接
+  DB_CONNECTION_ERROR = 100 [(errors.code) = 200];
+  // 数据库查询操作失败
+  DB_QUERY_ERROR = 101 [(errors.code) = 201];
+  // 数据库插入操作失败
+  DB_INSERT_ERROR = 102 [(errors.code) = 202];
+  // 数据库更新操作失败
+  DB_UPDATE_ERROR = 103 [(errors.code) = 203];
+  // 数据库删除操作失败
+  DB_DELETE_ERROR = 104 [(errors.code) = 204];
+
+  // 缓存相关错误
+  // 无法建立与缓存服务的连接
+  CACHE_CONNECTION_ERROR = 110 [(errors.code) = 210];
+  // 从缓存中获取数据失败
+  CACHE_GET_ERROR = 111 [(errors.code) = 211];
+  // 向缓存中设置数据失败
+  CACHE_SET_ERROR = 112 [(errors.code) = 212];
+  // 从缓存中删除数据失败
+  CACHE_DELETE_ERROR = 113 [(errors.code) = 213];
+
+  // 文件操作相关错误
+  // 读取文件时发生错误
+  FILE_READ_ERROR = 120 [(errors.code) = 220];
+  // 写入文件时发生错误
+  FILE_WRITE_ERROR = 121 [(errors.code) = 221];
+  // 删除文件时发生错误
+  FILE_DELETE_ERROR = 122 [(errors.code) = 222];
+  // 请求的文件在系统中不存在
+  FILE_NOT_FOUND = 123 [(errors.code) = 223];
+
+  // 消息队列相关错误
+  // 无法建立与消息队列的连接
+  MQ_CONNECTION_ERROR = 130 [(errors.code) = 230];
+  // 向消息队列发送消息失败
+  MQ_SEND_ERROR = 131 [(errors.code) = 231];
+  // 从消息队列接收消息失败
+  MQ_RECEIVE_ERROR = 132 [(errors.code) = 232];
+
+  // 第三方服务相关错误
+  // 调用第三方服务时发生错误
+  THIRD_PARTY_SERVICE_ERROR = 140 [(errors.code) = 240];
+  // 调用第三方服务时超时，未在规定时间内得到响应
+  THIRD_PARTY_TIMEOUT = 141 [(errors.code) = 241];
+  // 调用第三方服务时未获得授权
+  THIRD_PARTY_UNAUTHORIZED = 142 [(errors.code) = 242];
+}

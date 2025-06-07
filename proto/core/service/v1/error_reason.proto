@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package core.service.v1;
+import "errors/errors.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+option java_multiple_files = true;
+option objc_class_prefix = "RESOURCEapiV1";
+
+enum ErrorReason {
+  // 设置缺省错误码
+  option (errors.default_code) = 500;
+  UNSPECIFIED = 0 [(errors.code) = 400];
+  USER_NOT_FOUND = 11 [(errors.code) = 600];
+}
