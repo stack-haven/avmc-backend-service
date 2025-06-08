@@ -12,7 +12,7 @@ import (
 	redisotel "github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 
-	entrapper "github.com/casbin/ent-adapter"
+	// entrapper "github.com/casbin/ent-adapter"
 
 	// casbinmodel "github.com/casbin/casbin/v2/model"
 
@@ -162,9 +162,12 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 // NewAuthenticator 创建认证器
 func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticator {
 	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
-	authenticator, err := authnJwt.NewAuthenticator(
-		authnJwt.WithKey([]byte(c.Http.Middleware.Auth.Key)),
-		authnJwt.WithSigningMethod(c.Http.Middleware.Auth.Method),
+	// 使用jwt提供者
+	provider := authnJwt.NewProvider()
+	authenticator, err := provider.NewAuthenticator(
+		context.Background(),
+		authnEngine.WithSigningKey(c.Http.Middleware.Auth.Key),
+		authnEngine.WithSigningMethod(c.Http.Middleware.Auth.Method),
 	)
 	if err != nil {
 		l.Fatalf("failed creating authentincator: %s", err.Error())
@@ -174,26 +177,28 @@ func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticat
 }
 
 // NewAuthorizer 创建权鉴器
-func NewAuthorizer(cfg *conf.Data, logger log.Logger) authzEngine.Authorized {
+func NewAuthorizer(cfg *conf.Data, logger log.Logger) authzEngine.Authorizer {
 	l := log.NewHelper(log.With(logger, "module", "authorizer/auth/initialize"))
-	adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
-	if err != nil {
-		l.Fatalf("failed creating adapter: %s", err.Error())
-		panic(err)
-	}
+	// adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
+	// if err != nil {
+	// 	l.Fatalf("failed creating adapter: %s", err.Error())
+	// 	panic(err)
+	// }
 	// model, err := casbinmodel.NewModelFromString(authzCasbin.DefaultAbacModel)
 	// if err != nil {
 	// 	log.Fatalf("failed casbin model connection %v", err)
 	// }
 
-	engine, err := authzCasbin.NewAuthorized(
+	provider := authzCasbin.NewProvider()
+	authorizer, err := provider.NewAuthorizer(
 		context.Background(),
-		authzCasbin.WithPolicyAdapter(adapter),
-		// authzCasbin.WithModel(model),
+		authzEngine.WithAdapterType(authzEngine.AdapterMySQL),
+		authzEngine.WithAdapterDSN(cfg.Database.Source),
 	)
+
 	if err != nil {
-		l.Fatalf("failed creating engine: %s", err.Error())
+		l.Fatalf("failed creating authorizer: %s", err.Error())
 		panic(err)
 	}
-	return engine
+	return authorizer
 }

@@ -69,7 +69,7 @@ func (r *authTokenRepo) createAccessJwtToken(_ string, userId uint32) string {
 		// authnEngine.ClaimFieldScope:   make(authnEngine.ScopeSet),
 	}
 
-	signedToken, err := r.authenticator.CreateIdentity(principal)
+	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)
 	if err != nil {
 		return ""
 	}

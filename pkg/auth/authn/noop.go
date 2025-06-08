@@ -29,7 +29,7 @@ func (a *NoopAuthenticator) Authenticate(ctx context.Context) (*AuthClaims, erro
 }
 
 // Init 初始化认证器
-func (a *NoopAuthenticator) Init(ctx context.Context) error {
+func (a *NoopAuthenticator) Init(ctx context.Context, opts ...Option) error {
 	return nil
 }
 

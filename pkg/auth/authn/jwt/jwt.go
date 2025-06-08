@@ -72,7 +72,7 @@ func (p *JWTProvider) NewAuthenticator(ctx context.Context, opts ...authn.Option
 	// 使用默认选项
 	auth.options = authn.DefaultOptions()
 	// 初始化认证器
-	if err := auth.Init(ctx, opts); err != nil {
+	if err := auth.Init(ctx, opts...); err != nil {
 		return nil, err
 	}
 	return auth, nil

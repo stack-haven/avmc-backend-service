@@ -17,12 +17,10 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/handlers"
 
-	authnEngine "github.com/tx7do/kratos-authn/engine"
-
-	authn "github.com/tx7do/kratos-authn/middleware"
+	authnEngine "backend-service/pkg/auth/authn"
 
 	authzEngine "backend-service/pkg/auth/authz"
-	authz "backend-service/pkg/middleware/authz"
+	authMiddleware "backend-service/pkg/auth/middleware"
 )
 
 // NewWhiteListMatcher 创建jwt白名单
@@ -47,9 +45,9 @@ func newHTTPMiddleware(
 	var ms []middleware.Middleware
 	ms = append(ms, logging.Server(logger))
 	ms = append(ms, selector.Server(
-		authn.Server(authenticator),
+		authMiddleware.AuthnMiddleware(authenticator),
 		// auth.Server(userToken),
-		authz.Server(authorizer),
+		authMiddleware.AuthzMiddleware(authorizer),
 	).Match(newHTTPWhiteListMatcher()).Build())
 
 	return ms
@@ -57,7 +55,7 @@ func newHTTPMiddleware(
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
-	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorized, userToken *data.UserToken,
+	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorizer, userToken *data.UserToken,
 	auth *service.AuthServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,

@@ -59,7 +59,7 @@ func (su *securityUser) ParseFromContext(ctx context.Context) error {
 		return errors.New("parse from request header")
 	}
 
-	user := convert.StringToUnit32(su.options.authClaims.Subject)
+	user := convert.StringToUnit32(su.options.authClaims)
 	authTokenRepo := su.options.authTokenRepo.GetAccessToken(ctx, user)
 	if authTokenRepo == "" {
 		err := errors.New("result auth user fail: auth token null")
