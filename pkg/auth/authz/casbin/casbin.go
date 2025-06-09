@@ -131,7 +131,15 @@ func (a *CasbinAuthorizer) Init(ctx context.Context, opts ...authz.Option) error
 		adapter = fileadapter.NewAdapter(a.options.AdapterDSN)
 	case authz.AdapterMemory:
 	case authz.AdapterMySQL:
-		adapter, _ = gormadapter.NewAdapter("mysql", a.options.AdapterDSN) // Your driver and data source.
+		println("MySQL adapter", a.options.AdapterDSN)
+		if a.options.AdapterDSN == "" {
+			return authz.NewAuthzError(
+				authz.ErrCodeInvalidConfiguration,
+				"adapter DSN (MySQL connection string) is required for MySQL adapter",
+				nil,
+			)
+		}
+		adapter, _ = gormadapter.NewAdapter("mysql", a.options.AdapterDSN, true) // Your driver and data source.
 	default:
 		// 其他适配器类型需要在实际应用中实现
 		return authz.NewAuthzError(

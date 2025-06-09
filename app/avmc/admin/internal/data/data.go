@@ -5,6 +5,7 @@ import (
 	"backend-service/app/avmc/admin/internal/conf"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/go-kratos/kratos/v2/log"
@@ -168,6 +169,8 @@ func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticat
 		context.Background(),
 		authnEngine.WithSigningKey(c.Http.Middleware.Auth.Key),
 		authnEngine.WithSigningMethod(c.Http.Middleware.Auth.Method),
+		authnEngine.WithTokenExpiration(c.Http.Middleware.Auth.ExpiresTime.AsDuration()),
+		authnEngine.WithRefreshTokenExpiration(c.Http.Middleware.Auth.ExpiresTime.AsDuration()+(time.Hour*24*7)),
 	)
 	if err != nil {
 		l.Fatalf("failed creating authentincator: %s", err.Error())

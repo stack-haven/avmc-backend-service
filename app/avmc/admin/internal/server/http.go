@@ -4,7 +4,6 @@ import (
 	v1 "backend-service/api/avmc/admin/v1"
 	"backend-service/app/avmc/admin/cmd/server/assets"
 	"backend-service/app/avmc/admin/internal/conf"
-	"backend-service/app/avmc/admin/internal/data"
 	"backend-service/app/avmc/admin/internal/service"
 	"context"
 
@@ -40,7 +39,7 @@ func newHTTPMiddleware(
 	logger log.Logger,
 	authenticator authnEngine.Authenticator,
 	authorizer authzEngine.Authorizer,
-	userToken *data.UserToken,
+	// userToken *data.UserToken,
 ) []middleware.Middleware {
 	var ms []middleware.Middleware
 	ms = append(ms, logging.Server(logger))
@@ -55,7 +54,8 @@ func newHTTPMiddleware(
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
-	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorizer, userToken *data.UserToken,
+	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorizer,
+	// userToken *data.UserToken,
 	auth *service.AuthServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,
@@ -69,7 +69,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 			handlers.AllowedMethods(c.Http.Cors.Methods),
 			handlers.AllowedOrigins(c.Http.Cors.Origins),
 		)),
-		http.Middleware(newHTTPMiddleware(logger, authenticator, authorizer, userToken)...),
+		http.Middleware(newHTTPMiddleware(logger, authenticator, authorizer)...),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))

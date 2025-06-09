@@ -50,13 +50,64 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "username", Type: field.TypeString, Unique: true, Size: 32},
+		{Name: "password", Type: field.TypeString, Size: 100},
+		{Name: "name", Type: field.TypeString, Size: 50},
+		{Name: "nickname", Type: field.TypeString, Nullable: true, Size: 50},
+		{Name: "email", Type: field.TypeString, Unique: true, Nullable: true, Size: 100},
+		{Name: "mobile", Type: field.TypeString, Unique: true, Nullable: true, Size: 20},
+		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 255},
+		{Name: "gender", Type: field.TypeEnum, Enums: []string{"male", "female", "unknown"}, Default: "unknown"},
+		{Name: "age", Type: field.TypeInt, Nullable: true},
+		{Name: "role", Type: field.TypeString, Default: "user"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive", "locked", "deleted"}, Default: "active"},
+		{Name: "last_login_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_login_ip", Type: field.TypeString, Nullable: true, Size: 50},
+		{Name: "login_count", Type: field.TypeInt, Default: 0},
+		{Name: "settings", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[0]},
+			},
+			{
+				Name:    "user_username",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[3]},
+			},
+			{
+				Name:    "user_email",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[7]},
+			},
+			{
+				Name:    "user_mobile",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[8]},
+			},
+			{
+				Name:    "user_status",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[13]},
+			},
+			{
+				Name:    "user_role",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[12]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

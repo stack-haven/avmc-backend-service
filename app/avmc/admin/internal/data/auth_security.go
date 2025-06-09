@@ -32,16 +32,19 @@ type securityOptions struct {
 
 type securityUser struct {
 	options securityOptions
-	// 用户
-	user uint32
-	// 域/租户
-	domain uint32
 	// 角色/主题
 	subject uint32
 	// 资源/路由
 	object string
 	// 方法
 	action string
+	// 域/租户
+	domain uint32
+}
+
+// GetID returns the security Name.
+func (su *securityUser) Name() string {
+	return "admin security"
 }
 
 // ParseFromContext parses the user from the context.
@@ -49,25 +52,25 @@ func (su *securityUser) ParseFromContext(ctx context.Context) error {
 	if header, ok := transport.FromServerContext(ctx); ok {
 		su.object = header.Operation()
 		su.action = "*"
-		if header.Kind() == transport.KindHTTP {
-			// if ht, ok := header.(http.Transporter); ok {
-			// 	su.object = ht.Request().URL.Object
-			// 	su.action = ht.Request().Action
-			// }
-		}
+		// if header.Kind() == transport.KindHTTP {
+		// 	if ht, ok := header.(http.Transporter); ok {
+		// 		su.object = ht.Request().URL.Object
+		// 		su.action = ht.Request().Action
+		// 	}
+		// }
 	} else {
 		return errors.New("parse from request header")
 	}
-
-	user := convert.StringToUnit32(su.options.authClaims)
-	authTokenRepo := su.options.authTokenRepo.GetAccessToken(ctx, user)
+	su.GetAction()
+	// subject := convert.StringToUnit32(su.options.authClaims["sub"].(string))
+	subject := convert.StringToUnit32("1")
+	authTokenRepo := su.options.authTokenRepo.GetAccessToken(ctx, subject)
 	if authTokenRepo == "" {
 		err := errors.New("result auth user fail: auth token null")
 		su.options.log.Error(err)
 		return err
 	}
-	su.user = user
-	// su.domain = authTokenRepo.DomainID
+	// su.domain = su.options.authClaims
 	// su.subject = authTokenRepo.LastUseRoleID
 	return nil
 }
@@ -90,9 +93,4 @@ func (su *securityUser) GetSubject() string {
 // GetDomain returns the domain of the token.
 func (su *securityUser) GetDomain() string {
 	return convert.Unit32ToString(su.domain)
-}
-
-// // GetID returns the user of the token.
-func (su *securityUser) GetUser() string {
-	return convert.Unit32ToString(su.user)
 }

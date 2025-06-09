@@ -2,6 +2,7 @@ package data
 
 import (
 	"backend-service/app/avmc/admin/internal/biz"
+	"backend-service/app/avmc/admin/internal/data/ent/user"
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -34,6 +35,15 @@ func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo
 func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginResponse, error) {
 	// 这里实现具体的登录数据操作
 	r.log.Infof("尝试登录数据操作，用户名：%s", name)
+	u, err := r.data.DB(ctx).User.Query().Where(user.NameEQ(name)).First(ctx)
+	if err != nil {
+		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
+		return nil, err
+	}
+	r.atr.GenerateToken(ctx, &pb.Auth{
+		Id:   u.ID,
+		Name: name,
+	})
 	return &pb.LoginResponse{
 		AccessToken:  "",
 		RefreshToken: "",

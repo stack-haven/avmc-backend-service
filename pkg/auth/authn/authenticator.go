@@ -53,6 +53,9 @@ type Authenticator interface {
 
 // SecurityUser 定义了安全用户信息的接口
 type SecurityUser interface {
+	// Name 获取Security Name
+	// 返回: Security Name标识字符串
+	Name() string
 	// ParseFromContext 从上下文中解析用户信息
 	// ctx: 上下文信息
 	// 返回: 可能的错误
@@ -73,10 +76,6 @@ type SecurityUser interface {
 	// GetDomain 获取域标识（通常是租户或项目ID）
 	// 返回: 域标识字符串
 	GetDomain() string
-
-	// GetUser 获取用户标识
-	// 返回: 用户标识字符串
-	GetUser() string
 }
 
 // SecurityUserCreator 定义了从认证声明创建安全用户的函数类型

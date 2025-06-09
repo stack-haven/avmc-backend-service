@@ -27,7 +27,7 @@ server:
 data:
   database:
     driver: mysql
-    source: root:123456@tcp(127.0.0.1:3306)/avmc_system?charset=utf8mb4&parseTime=true&loc=Local
+    source: root:123456@tcp(127.0.0.1:3306)/avmc_system?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
     migrate: true
     debug: true
   redis:

@@ -71,12 +71,32 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUint32,
 				Column: user.FieldID,
 			},
 		},
-		Type:   "User",
-		Fields: map[string]*sqlgraph.FieldSpec{},
+		Type: "User",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			user.FieldCreatedAt:   {Type: field.TypeTime, Column: user.FieldCreatedAt},
+			user.FieldUpdatedAt:   {Type: field.TypeTime, Column: user.FieldUpdatedAt},
+			user.FieldUsername:    {Type: field.TypeString, Column: user.FieldUsername},
+			user.FieldPassword:    {Type: field.TypeString, Column: user.FieldPassword},
+			user.FieldName:        {Type: field.TypeString, Column: user.FieldName},
+			user.FieldNickname:    {Type: field.TypeString, Column: user.FieldNickname},
+			user.FieldEmail:       {Type: field.TypeString, Column: user.FieldEmail},
+			user.FieldMobile:      {Type: field.TypeString, Column: user.FieldMobile},
+			user.FieldAvatar:      {Type: field.TypeString, Column: user.FieldAvatar},
+			user.FieldGender:      {Type: field.TypeEnum, Column: user.FieldGender},
+			user.FieldAge:         {Type: field.TypeInt, Column: user.FieldAge},
+			user.FieldRole:        {Type: field.TypeString, Column: user.FieldRole},
+			user.FieldStatus:      {Type: field.TypeEnum, Column: user.FieldStatus},
+			user.FieldLastLoginAt: {Type: field.TypeTime, Column: user.FieldLastLoginAt},
+			user.FieldLastLoginIP: {Type: field.TypeString, Column: user.FieldLastLoginIP},
+			user.FieldLoginCount:  {Type: field.TypeInt, Column: user.FieldLoginCount},
+			user.FieldSettings:    {Type: field.TypeJSON, Column: user.FieldSettings},
+			user.FieldMetadata:    {Type: field.TypeJSON, Column: user.FieldMetadata},
+			user.FieldDeletedAt:   {Type: field.TypeTime, Column: user.FieldDeletedAt},
+		},
 	}
 	return graph
 }()
@@ -282,7 +302,102 @@ func (f *UserFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql int predicate on the id field.
-func (f *UserFilter) WhereID(p entql.IntP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *UserFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(user.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *UserFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(user.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *UserFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(user.FieldUpdatedAt))
+}
+
+// WhereUsername applies the entql string predicate on the username field.
+func (f *UserFilter) WhereUsername(p entql.StringP) {
+	f.Where(p.Field(user.FieldUsername))
+}
+
+// WherePassword applies the entql string predicate on the password field.
+func (f *UserFilter) WherePassword(p entql.StringP) {
+	f.Where(p.Field(user.FieldPassword))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *UserFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(user.FieldName))
+}
+
+// WhereNickname applies the entql string predicate on the nickname field.
+func (f *UserFilter) WhereNickname(p entql.StringP) {
+	f.Where(p.Field(user.FieldNickname))
+}
+
+// WhereEmail applies the entql string predicate on the email field.
+func (f *UserFilter) WhereEmail(p entql.StringP) {
+	f.Where(p.Field(user.FieldEmail))
+}
+
+// WhereMobile applies the entql string predicate on the mobile field.
+func (f *UserFilter) WhereMobile(p entql.StringP) {
+	f.Where(p.Field(user.FieldMobile))
+}
+
+// WhereAvatar applies the entql string predicate on the avatar field.
+func (f *UserFilter) WhereAvatar(p entql.StringP) {
+	f.Where(p.Field(user.FieldAvatar))
+}
+
+// WhereGender applies the entql string predicate on the gender field.
+func (f *UserFilter) WhereGender(p entql.StringP) {
+	f.Where(p.Field(user.FieldGender))
+}
+
+// WhereAge applies the entql int predicate on the age field.
+func (f *UserFilter) WhereAge(p entql.IntP) {
+	f.Where(p.Field(user.FieldAge))
+}
+
+// WhereRole applies the entql string predicate on the role field.
+func (f *UserFilter) WhereRole(p entql.StringP) {
+	f.Where(p.Field(user.FieldRole))
+}
+
+// WhereStatus applies the entql string predicate on the status field.
+func (f *UserFilter) WhereStatus(p entql.StringP) {
+	f.Where(p.Field(user.FieldStatus))
+}
+
+// WhereLastLoginAt applies the entql time.Time predicate on the last_login_at field.
+func (f *UserFilter) WhereLastLoginAt(p entql.TimeP) {
+	f.Where(p.Field(user.FieldLastLoginAt))
+}
+
+// WhereLastLoginIP applies the entql string predicate on the last_login_ip field.
+func (f *UserFilter) WhereLastLoginIP(p entql.StringP) {
+	f.Where(p.Field(user.FieldLastLoginIP))
+}
+
+// WhereLoginCount applies the entql int predicate on the login_count field.
+func (f *UserFilter) WhereLoginCount(p entql.IntP) {
+	f.Where(p.Field(user.FieldLoginCount))
+}
+
+// WhereSettings applies the entql json.RawMessage predicate on the settings field.
+func (f *UserFilter) WhereSettings(p entql.BytesP) {
+	f.Where(p.Field(user.FieldSettings))
+}
+
+// WhereMetadata applies the entql json.RawMessage predicate on the metadata field.
+func (f *UserFilter) WhereMetadata(p entql.BytesP) {
+	f.Where(p.Field(user.FieldMetadata))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *UserFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(user.FieldDeletedAt))
 }

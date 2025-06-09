@@ -63,7 +63,7 @@ func NewAuthToken(
 }
 
 // createAccessJwtToken 生成JWT访问令牌
-func (r *authTokenRepo) createAccessJwtToken(_ string, userId uint32) string {
+func (r *authTokenRepo) createAccessToken(_ string, userId uint32) string {
 	principal := authnEngine.AuthClaims{
 		ClaimFieldSubject: strconv.FormatUint(uint64(userId), 10),
 		// authnEngine.ClaimFieldScope:   make(authnEngine.ScopeSet),
@@ -84,7 +84,7 @@ func (r *authTokenRepo) createRefreshToken() string {
 
 // GenerateToken 创建令牌
 func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (accessToken string, refreshToken string, err error) {
-	if accessToken = r.createAccessJwtToken(auth.GetName(), auth.GetId()); accessToken == "" {
+	if accessToken = r.createAccessToken(auth.GetName(), auth.GetId()); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
@@ -107,7 +107,7 @@ func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (acces
 
 // GenerateAccessToken 创建访问令牌
 func (r *authTokenRepo) GenerateAccessToken(ctx context.Context, userId uint32, userName string) (accessToken string, err error) {
-	if accessToken = r.createAccessJwtToken(userName, userId); accessToken == "" {
+	if accessToken = r.createAccessToken(userName, userId); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
