@@ -24,7 +24,6 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	authUsecase := biz.NewAuthUsecase(logger)
 	client := data.NewEntClient(confData, logger)
 	redisClient := data.NewRedisClient(confData, logger)
 	node := data.NewSnowflake(logger)
@@ -32,6 +31,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
+	authenticator := data.NewAuthenticator(confServer, logger)
+	authTokenRepo := data.NewAuthTokenRepo(dataData, authenticator, logger)
+	authRepo := data.NewAuthRepo(dataData, authTokenRepo, logger)
+	authUsecase := biz.NewAuthUsecase(logger, authRepo)
 	userRepo := data.NewUserRepo(dataData, logger)
 	userUsecase := biz.NewUserUsecase(userRepo, logger)
 	authServiceService := service.NewAuthServiceService(authUsecase, userUsecase, logger)
@@ -46,7 +49,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	roleUsecase := biz.NewRoleUsecase(roleRepo, logger)
 	roleServiceService := service.NewRoleServiceService(roleUsecase, logger)
 	grpcServer := server.NewGRPCServer(confServer, authServiceService, userServiceService, deptServiceService, menuServiceService, roleServiceService, logger)
-	authenticator := data.NewAuthenticator(confServer, logger)
 	authorizer := data.NewAuthorizer(confData, logger)
 	postRepo := data.NewPostRepo(dataData, logger)
 	postUsecase := biz.NewPostUsecase(postRepo, logger)

@@ -131,7 +131,7 @@ func (a *CasbinAuthorizer) Init(ctx context.Context, opts ...authz.Option) error
 		adapter = fileadapter.NewAdapter(a.options.AdapterDSN)
 	case authz.AdapterMemory:
 	case authz.AdapterMySQL:
-		println("MySQL adapter", a.options.AdapterDSN)
+		// println("MySQL adapter", a.options.AdapterDSN)
 		if a.options.AdapterDSN == "" {
 			return authz.NewAuthzError(
 				authz.ErrCodeInvalidConfiguration,

@@ -53,23 +53,22 @@ var (
 		{Name: "id", Type: field.TypeUint32, Increment: true, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "username", Type: field.TypeString, Unique: true, Size: 32},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 32},
 		{Name: "password", Type: field.TypeString, Size: 100},
-		{Name: "name", Type: field.TypeString, Size: 50},
+		{Name: "realname", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "nickname", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "email", Type: field.TypeString, Unique: true, Nullable: true, Size: 100},
 		{Name: "mobile", Type: field.TypeString, Unique: true, Nullable: true, Size: 20},
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "gender", Type: field.TypeEnum, Enums: []string{"male", "female", "unknown"}, Default: "unknown"},
 		{Name: "age", Type: field.TypeInt, Nullable: true},
-		{Name: "role", Type: field.TypeString, Default: "user"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive", "locked", "deleted"}, Default: "active"},
 		{Name: "last_login_at", Type: field.TypeTime, Nullable: true},
 		{Name: "last_login_ip", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "login_count", Type: field.TypeInt, Default: 0},
 		{Name: "settings", Type: field.TypeJSON, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -83,19 +82,14 @@ var (
 				Columns: []*schema.Column{UsersColumns[0]},
 			},
 			{
-				Name:    "user_username",
+				Name:    "user_name",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[3]},
-			},
-			{
-				Name:    "user_email",
-				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[7]},
+				Columns: []*schema.Column{UsersColumns[4]},
 			},
 			{
 				Name:    "user_mobile",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[8]},
+				Columns: []*schema.Column{UsersColumns[9]},
 			},
 			{
 				Name:    "user_status",
@@ -103,9 +97,9 @@ var (
 				Columns: []*schema.Column{UsersColumns[13]},
 			},
 			{
-				Name:    "user_role",
+				Name:    "user_email",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[12]},
+				Columns: []*schema.Column{UsersColumns[8]},
 			},
 		},
 	}

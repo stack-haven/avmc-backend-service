@@ -16,18 +16,6 @@ import (
 	v1 "backend-service/api/avmc/admin/v1"
 )
 
-const (
-	ClaimFieldIssuer         = "iss" // 代表 JWT 的签发者。它是一个字符串或者 URL，用于标识是哪个实体（如服务器、服务提供商等）签发了这个 JWT。
-	ClaimFieldSubject        = "sub" // 代表 JWT 的主题。通常是一个唯一标识符，用于标识 JWT 所涉及的主体，这个主体通常是用户，但也可以是其他实体，如设备等。
-	ClaimFieldAudience       = "aud" // 代表 JWT 的受众。它指定了 JWT 的接收方，是一个或多个字符串或者 URL。
-	ClaimFieldExpirationTime = "exp" // 代表 JWT 的过期时间。它是一个数字，表示从 1970 年 1 月 1 日 00:00:00 UTC 开始到过期时间的秒数。
-	ClaimFieldNotBefore      = "nbf" // 代表 JWT 的生效时间。和exp类似，它是一个数字，表示从 1970 年 1 月 1 日 00:00:00 UTC 开始到生效时间的秒数。
-	ClaimFieldIssuedAt       = "iat" // 代表 JWT 的签发时间。也是一个数字，表示从 1970 年 1 月 1 日 00:00:00 UTC 开始到签发时间的秒数。
-	ClaimFieldJwtID          = "jti" // 代表 JWT 的唯一标识符。是一个字符串，用于唯一标识一个 JWT。
-
-	ClaimFieldScope = "scope" // 代表 JWT 的权限范围。它是一个字符串或者字符串数组，用于标识 JWT 的权限范围。在一个 API 访问场景中，scope的值可能是["read:users", "write:posts"]。这意味着拥有此 JWT 的用户被授权读取用户信息和写入文章相关内容。通过这种方式，scope清晰地界定了用户凭借该令牌可以进行的操作范围。
-)
-
 type authTokenRepo struct {
 	rdb           *redis.Client
 	log           *log.Helper
@@ -43,6 +31,7 @@ func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logge
 		userAccessTokenKeyPrefix  = "admin_uat_"
 		userRefreshTokenKeyPrefix = "admin_urt_"
 	)
+	// authenticator.Init(context.Background(), )
 	return NewAuthToken(data.rdb, authenticator, logger, userAccessTokenKeyPrefix, userRefreshTokenKeyPrefix)
 }
 
@@ -65,8 +54,9 @@ func NewAuthToken(
 // createAccessJwtToken 生成JWT访问令牌
 func (r *authTokenRepo) createAccessToken(_ string, userId uint32) string {
 	principal := authnEngine.AuthClaims{
-		ClaimFieldSubject: strconv.FormatUint(uint64(userId), 10),
-		// authnEngine.ClaimFieldScope:   make(authnEngine.ScopeSet),
+		"sub":   strconv.FormatUint(uint64(userId), 10),
+		"jti":   "",
+		"scope": "",
 	}
 
 	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)

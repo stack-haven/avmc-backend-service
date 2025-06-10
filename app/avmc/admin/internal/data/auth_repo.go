@@ -3,7 +3,9 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/user"
+	"backend-service/pkg/utils/crypto"
 	"context"
+	"fmt"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -35,18 +37,30 @@ func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo
 func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginResponse, error) {
 	// 这里实现具体的登录数据操作
 	r.log.Infof("尝试登录数据操作，用户名：%s", name)
-	u, err := r.data.DB(ctx).User.Query().Where(user.NameEQ(name)).First(ctx)
+	u, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword).Where(user.NameEQ(name)).First(ctx)
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
 		return nil, err
 	}
-	r.atr.GenerateToken(ctx, &pb.Auth{
+	fmt.Printf("user password: %s", u.Password)
+	pass, _ := crypto.HashPassword(password)
+	println("password：", pass)
+
+	if crypto.CheckPasswordHash(password, pass) {
+		r.log.Errorf("登录数据操作失败，用户名：%s，密码错误", name)
+		return nil, biz.ErrPasswordIncorrect
+	}
+	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, &pb.Auth{
 		Id:   u.ID,
 		Name: name,
 	})
+	if err != nil {
+		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
+		return nil, err
+	}
 	return &pb.LoginResponse{
-		AccessToken:  "",
-		RefreshToken: "",
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 }
 
@@ -56,6 +70,10 @@ func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginR
 func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.RefreshTokenResponse, error) {
 	// 这里实现具体的刷新令牌数据操作
 	r.log.Infof("尝试刷新令牌数据操作，刷新令牌：%s", refreshToken)
+	// r.atr.GenerateRefreshToken(ctx, &pb.Auth{
+	// 	Id:   "",
+	// 	Name: "",
+	// })
 	return &pb.RefreshTokenResponse{
 		AccessToken:  "",
 		RefreshToken: "",
@@ -68,6 +86,7 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 func (r *authRepo) Logout(ctx context.Context, accessToken string) error {
 	// 这里实现具体的登出数据操作
 	r.log.Infof("尝试登出数据操作，访问令牌：%s", accessToken)
+	// r.atr.RemoveToken(ctx, )
 	return nil
 }
 
@@ -77,5 +96,10 @@ func (r *authRepo) Logout(ctx context.Context, accessToken string) error {
 func (r *authRepo) Register(ctx context.Context, name, password string) error {
 	// 这里实现具体的注册数据操作
 	r.log.Infof("尝试注册数据操作，用户名：%s", name)
+	_, err := r.data.DB(ctx).User.Create().SetName(name).SetPassword(password).Save(ctx)
+	if err != nil {
+		r.log.Errorf("注册数据操作失败，用户名：%s，错误：%v", name, err)
+		return err
+	}
 	return nil
 }

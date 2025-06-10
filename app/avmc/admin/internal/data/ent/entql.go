@@ -79,23 +79,22 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Fields: map[string]*sqlgraph.FieldSpec{
 			user.FieldCreatedAt:   {Type: field.TypeTime, Column: user.FieldCreatedAt},
 			user.FieldUpdatedAt:   {Type: field.TypeTime, Column: user.FieldUpdatedAt},
-			user.FieldUsername:    {Type: field.TypeString, Column: user.FieldUsername},
-			user.FieldPassword:    {Type: field.TypeString, Column: user.FieldPassword},
+			user.FieldDeletedAt:   {Type: field.TypeTime, Column: user.FieldDeletedAt},
 			user.FieldName:        {Type: field.TypeString, Column: user.FieldName},
+			user.FieldPassword:    {Type: field.TypeString, Column: user.FieldPassword},
+			user.FieldRealname:    {Type: field.TypeString, Column: user.FieldRealname},
 			user.FieldNickname:    {Type: field.TypeString, Column: user.FieldNickname},
 			user.FieldEmail:       {Type: field.TypeString, Column: user.FieldEmail},
 			user.FieldMobile:      {Type: field.TypeString, Column: user.FieldMobile},
 			user.FieldAvatar:      {Type: field.TypeString, Column: user.FieldAvatar},
 			user.FieldGender:      {Type: field.TypeEnum, Column: user.FieldGender},
 			user.FieldAge:         {Type: field.TypeInt, Column: user.FieldAge},
-			user.FieldRole:        {Type: field.TypeString, Column: user.FieldRole},
 			user.FieldStatus:      {Type: field.TypeEnum, Column: user.FieldStatus},
 			user.FieldLastLoginAt: {Type: field.TypeTime, Column: user.FieldLastLoginAt},
 			user.FieldLastLoginIP: {Type: field.TypeString, Column: user.FieldLastLoginIP},
 			user.FieldLoginCount:  {Type: field.TypeInt, Column: user.FieldLoginCount},
 			user.FieldSettings:    {Type: field.TypeJSON, Column: user.FieldSettings},
 			user.FieldMetadata:    {Type: field.TypeJSON, Column: user.FieldMetadata},
-			user.FieldDeletedAt:   {Type: field.TypeTime, Column: user.FieldDeletedAt},
 		},
 	}
 	return graph
@@ -317,9 +316,14 @@ func (f *UserFilter) WhereUpdatedAt(p entql.TimeP) {
 	f.Where(p.Field(user.FieldUpdatedAt))
 }
 
-// WhereUsername applies the entql string predicate on the username field.
-func (f *UserFilter) WhereUsername(p entql.StringP) {
-	f.Where(p.Field(user.FieldUsername))
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *UserFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(user.FieldDeletedAt))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *UserFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(user.FieldName))
 }
 
 // WherePassword applies the entql string predicate on the password field.
@@ -327,9 +331,9 @@ func (f *UserFilter) WherePassword(p entql.StringP) {
 	f.Where(p.Field(user.FieldPassword))
 }
 
-// WhereName applies the entql string predicate on the name field.
-func (f *UserFilter) WhereName(p entql.StringP) {
-	f.Where(p.Field(user.FieldName))
+// WhereRealname applies the entql string predicate on the realname field.
+func (f *UserFilter) WhereRealname(p entql.StringP) {
+	f.Where(p.Field(user.FieldRealname))
 }
 
 // WhereNickname applies the entql string predicate on the nickname field.
@@ -362,11 +366,6 @@ func (f *UserFilter) WhereAge(p entql.IntP) {
 	f.Where(p.Field(user.FieldAge))
 }
 
-// WhereRole applies the entql string predicate on the role field.
-func (f *UserFilter) WhereRole(p entql.StringP) {
-	f.Where(p.Field(user.FieldRole))
-}
-
 // WhereStatus applies the entql string predicate on the status field.
 func (f *UserFilter) WhereStatus(p entql.StringP) {
 	f.Where(p.Field(user.FieldStatus))
@@ -395,9 +394,4 @@ func (f *UserFilter) WhereSettings(p entql.BytesP) {
 // WhereMetadata applies the entql json.RawMessage predicate on the metadata field.
 func (f *UserFilter) WhereMetadata(p entql.BytesP) {
 	f.Where(p.Field(user.FieldMetadata))
-}
-
-// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
-func (f *UserFilter) WhereDeletedAt(p entql.TimeP) {
-	f.Where(p.Field(user.FieldDeletedAt))
 }

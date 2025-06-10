@@ -3,8 +3,16 @@ package biz
 import (
 	v1 "backend-service/api/avmc/admin/v1"
 	"context"
+	"errors"
 
 	"github.com/go-kratos/kratos/v2/log"
+)
+
+// 预定义错误
+var (
+	// ErrUnknown 未知错误
+	ErrUnknown           = errors.New("unknown authentication error")
+	ErrPasswordIncorrect = errors.New("auth failed: incorrect password")
 )
 
 // UserRepo is a Greater repo.
@@ -24,9 +32,10 @@ type AuthUsecase struct {
 // NewAuthUsecase 创建新的用户业务用例实例
 // 参数：logger 日志记录器
 // 返回值：用户业务用例实例指针
-func NewAuthUsecase(logger log.Logger) *AuthUsecase {
+func NewAuthUsecase(logger log.Logger, repo AuthRepo) *AuthUsecase {
 	return &AuthUsecase{
-		log: log.NewHelper(logger),
+		log:  log.NewHelper(logger),
+		repo: repo,
 	}
 }
 
@@ -36,10 +45,7 @@ func NewAuthUsecase(logger log.Logger) *AuthUsecase {
 func (uc *AuthUsecase) Login(ctx context.Context, name, password string) (*v1.LoginResponse, error) {
 	// 这里实现具体的登录业务逻辑
 	uc.log.Infof("尝试登录，用户名：%s", name)
-	return &v1.LoginResponse{
-		AccessToken:  "",
-		RefreshToken: "",
-	}, nil
+	return uc.repo.Login(ctx, name, password)
 }
 
 // RefreshToken 处理刷新令牌业务逻辑
@@ -60,7 +66,7 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*
 func (uc *AuthUsecase) Logout(ctx context.Context, acccessToken string) error {
 	// 这里实现具体的登出业务逻辑
 	uc.log.Infof("尝试登出，访问令牌：%s")
-	return nil
+	return uc.repo.Logout(ctx, acccessToken)
 }
 
 // Register 处理注册业务逻辑

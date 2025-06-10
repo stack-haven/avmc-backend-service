@@ -18,12 +18,14 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldUsername holds the string denoting the username field in the database.
-	FieldUsername = "username"
-	// FieldPassword holds the string denoting the password field in the database.
-	FieldPassword = "password"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
+	// FieldRealname holds the string denoting the realname field in the database.
+	FieldRealname = "realname"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldEmail holds the string denoting the email field in the database.
@@ -36,8 +38,6 @@ const (
 	FieldGender = "gender"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
-	// FieldRole holds the string denoting the role field in the database.
-	FieldRole = "role"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldLastLoginAt holds the string denoting the last_login_at field in the database.
@@ -50,8 +50,6 @@ const (
 	FieldSettings = "settings"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
-	FieldDeletedAt = "deleted_at"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -61,23 +59,22 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldUsername,
-	FieldPassword,
+	FieldDeletedAt,
 	FieldName,
+	FieldPassword,
+	FieldRealname,
 	FieldNickname,
 	FieldEmail,
 	FieldMobile,
 	FieldAvatar,
 	FieldGender,
 	FieldAge,
-	FieldRole,
 	FieldStatus,
 	FieldLastLoginAt,
 	FieldLastLoginIP,
 	FieldLoginCount,
 	FieldSettings,
 	FieldMetadata,
-	FieldDeletedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -97,12 +94,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
-	UsernameValidator func(string) error
-	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
-	PasswordValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	PasswordValidator func(string) error
+	// RealnameValidator is a validator for the "realname" field. It is called by the builders before save.
+	RealnameValidator func(string) error
 	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	NicknameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
@@ -113,8 +110,6 @@ var (
 	AvatarValidator func(string) error
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
 	AgeValidator func(int) error
-	// DefaultRole holds the default value on creation for the "role" field.
-	DefaultRole string
 	// LastLoginIPValidator is a validator for the "last_login_ip" field. It is called by the builders before save.
 	LastLoginIPValidator func(string) error
 	// DefaultLoginCount holds the default value on creation for the "login_count" field.
@@ -196,9 +191,14 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByUsername orders the results by the username field.
-func ByUsername(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUsername, opts...).ToFunc()
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByPassword orders the results by the password field.
@@ -206,9 +206,9 @@ func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByRealname orders the results by the realname field.
+func ByRealname(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRealname, opts...).ToFunc()
 }
 
 // ByNickname orders the results by the nickname field.
@@ -241,11 +241,6 @@ func ByAge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAge, opts...).ToFunc()
 }
 
-// ByRole orders the results by the role field.
-func ByRole(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRole, opts...).ToFunc()
-}
-
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
@@ -264,9 +259,4 @@ func ByLastLoginIP(opts ...sql.OrderTermOption) OrderOption {
 // ByLoginCount orders the results by the login_count field.
 func ByLoginCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLoginCount, opts...).ToFunc()
-}
-
-// ByDeletedAt orders the results by the deleted_at field.
-func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }

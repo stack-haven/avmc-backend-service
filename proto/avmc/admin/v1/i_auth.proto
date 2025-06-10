@@ -21,7 +21,7 @@ option (gnostic.openapi.v3.document) = {
     description: "后台管理脚手架系统-认证服务";
     version: "1.0";
 		contact: {
-			name: "SAAS架构";
+			name: "AVMC架构";
 			url: "https://github.com/grpc-ecosystem/grpc-gateway";
 			email: "none@example.com";
 		};

@@ -13,21 +13,19 @@ import (
 
 var _ authn.SecurityUser = (*securityUser)(nil)
 
-func NewSecurityUser(data *Data, logger log.Logger, authTokenRepo *authTokenRepo) authn.SecurityUserCreator {
+func NewSecurityUser(logger log.Logger) authn.SecurityUserCreator {
 	log := log.NewHelper(log.With(logger, "module", "auth/securityUserCreator"))
 	return func(authClaims *authn.AuthClaims) authn.SecurityUser {
 		if authClaims == nil {
 			log.Error("auth claims creator fail ac == nil")
 		}
-		return &securityUser{options: securityOptions{data: data, log: log, authClaims: authClaims, authTokenRepo: authTokenRepo}}
+		return &securityUser{options: securityOptions{log: log, authClaims: authClaims}}
 	}
 }
 
 type securityOptions struct {
-	data          *Data
-	log           *log.Helper
-	authClaims    *authn.AuthClaims
-	authTokenRepo *authTokenRepo
+	log        *log.Helper
+	authClaims *authn.AuthClaims
 }
 
 type securityUser struct {
@@ -61,17 +59,18 @@ func (su *securityUser) ParseFromContext(ctx context.Context) error {
 	} else {
 		return errors.New("parse from request header")
 	}
-	su.GetAction()
-	// subject := convert.StringToUnit32(su.options.authClaims["sub"].(string))
-	subject := convert.StringToUnit32("1")
-	authTokenRepo := su.options.authTokenRepo.GetAccessToken(ctx, subject)
-	if authTokenRepo == "" {
-		err := errors.New("result auth user fail: auth token null")
-		su.options.log.Error(err)
-		return err
-	}
+	// su.GetAction()
+	// // subject := convert.StringToUnit32(su.options.authClaims["sub"].(string))
+	// subject := convert.StringToUnit32("1")
+	// authTokenRepo := su.options.authTokenRepo.GetAccessToken(ctx, subject)
+	// if authTokenRepo == "" {
+	// 	err := errors.New("result auth user fail: auth token null")
+	// 	su.options.log.Error(err)
+	// 	return err
+	// }
 	// su.domain = su.options.authClaims
 	// su.subject = authTokenRepo.LastUseRoleID
+	// authn.ContextWithAuthUser(ctx, su)
 	return nil
 }
 
