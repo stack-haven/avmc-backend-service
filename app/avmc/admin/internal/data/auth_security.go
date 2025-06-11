@@ -13,14 +13,19 @@ import (
 
 var _ authn.SecurityUser = (*securityUser)(nil)
 
-func NewSecurityUser(logger log.Logger) authn.SecurityUserCreator {
+func NewSecurityUserCreator(logger log.Logger) authn.SecurityUserCreator {
 	log := log.NewHelper(log.With(logger, "module", "auth/securityUserCreator"))
 	return func(authClaims *authn.AuthClaims) authn.SecurityUser {
 		if authClaims == nil {
 			log.Error("auth claims creator fail ac == nil")
 		}
-		return &securityUser{options: securityOptions{log: log, authClaims: authClaims}}
+		return NewSecurityUser(logger, authClaims)
 	}
+}
+
+func NewSecurityUser(logger log.Logger, authClaims *authn.AuthClaims) authn.SecurityUser {
+	log := log.NewHelper(log.With(logger, "module", "auth/securityUser"))
+	return &securityUser{options: securityOptions{log: log, authClaims: authClaims}}
 }
 
 type securityOptions struct {

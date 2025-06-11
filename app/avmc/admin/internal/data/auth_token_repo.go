@@ -25,14 +25,41 @@ type authTokenRepo struct {
 	refreshTokenKeyPrefix string
 }
 
+// var _ authnEngine.TokenManager = (*authTokenRepo)(nil)
+
+// // CreateToken implements authn.TokenManager.
+// func (r *authTokenRepo) CreateToken(ctx context.Context, claims authnEngine.AuthClaims, expiration time.Duration) (string, error) {
+// 	panic("unimplemented")
+// }
+
+// // RefreshToken implements authn.TokenManager.
+// func (r *authTokenRepo) RefreshToken(ctx context.Context, token string) (string, error) {
+// 	panic("unimplemented")
+// }
+
+// // RevokeToken implements authn.TokenManager.
+// func (r *authTokenRepo) RevokeToken(ctx context.Context, token string) error {
+// 	panic("unimplemented")
+// }
+
+// // ValidateToken implements authn.TokenManager.
+// func (r *authTokenRepo) ValidateToken(ctx context.Context, token string) (*authnEngine.AuthClaims, error) {
+// 	panic("unimplemented")
+// }
+
 func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logger log.Logger) *authTokenRepo {
-	log.NewHelper(log.With(logger, "module", "auth-token/cache"))
+	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
-		userAccessTokenKeyPrefix  = "admin_uat_"
-		userRefreshTokenKeyPrefix = "admin_urt_"
+		accessTokenKeyPrefix  = "admin_uat_"
+		refreshTokenKeyPrefix = "admin_urt_"
 	)
-	// authenticator.Init(context.Background(), )
-	return NewAuthToken(data.rdb, authenticator, logger, userAccessTokenKeyPrefix, userRefreshTokenKeyPrefix)
+	return &authTokenRepo{
+		log:                   log,
+		rdb:                   data.rdb,
+		authenticator:         authenticator,
+		accessTokenKeyPrefix:  accessTokenKeyPrefix,
+		refreshTokenKeyPrefix: refreshTokenKeyPrefix,
+	}
 }
 
 func NewAuthToken(
@@ -43,7 +70,7 @@ func NewAuthToken(
 	refreshTokenKeyPrefix string,
 ) *authTokenRepo {
 	return &authTokenRepo{
-		log:                   log.NewHelper(log.With(logger, "module", "user-token/cache")),
+		log:                   log.NewHelper(log.With(logger, "module", "auth-token/cache")),
 		rdb:                   rdb,
 		authenticator:         authenticator,
 		accessTokenKeyPrefix:  accessTokenKeyPrefix,
