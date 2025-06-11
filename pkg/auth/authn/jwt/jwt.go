@@ -11,6 +11,8 @@ import (
 	"backend-service/pkg/auth/authn"
 )
 
+var _ authn.Authenticator = (*JWTAuthenticator)(nil)
+
 // "iss" // 代表 JWT 的签发者。它是一个字符串或者 URL，用于标识是哪个实体（如服务器、服务提供商等）签发了这个 JWT。
 // "sub" // 代表 JWT 的主题。通常是一个唯一标识符，用于标识 JWT 所涉及的主体，这个主体通常是用户，但也可以是其他实体，如设备等。
 // "aud" // 代表 JWT 的受众。它指定了 JWT 的接收方，是一个或多个字符串或者 URL。
@@ -24,7 +26,7 @@ import (
 // JWTAuthenticator JWT认证器实现
 type JWTAuthenticator struct {
 	// options 配置选项
-	options *authn.Options
+	options authn.Options
 	// signingMethod 签名方法
 	signingMethod jwt.SigningMethod
 	// signingKey 签名密钥
@@ -92,7 +94,7 @@ func (p *JWTProvider) NewAuthenticator(ctx context.Context, opts ...authn.Option
 func (a *JWTAuthenticator) Init(ctx context.Context, opts ...authn.Option) error {
 	// 应用选项
 	for _, opt := range opts {
-		opt(a.options)
+		opt(&a.options)
 	}
 
 	// 设置签名方法
@@ -349,6 +351,11 @@ func (a *JWTAuthenticator) Close() error {
 // Name 返回认证提供者的名称
 func (a *JWTAuthenticator) Name() string {
 	return "jwt"
+}
+
+// Name 返回认证提供者的名称
+func (a *JWTAuthenticator) Options() authn.Options {
+	return a.options
 }
 
 // NewProvider 创建新的JWT认证提供者

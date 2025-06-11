@@ -10,7 +10,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/app/admin/interface/cmd/server",
+      "program": "${workspaceFolder}/app/avmc/admin/cmd/server",
       "env": {},
       "args": []
     },

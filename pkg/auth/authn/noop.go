@@ -10,6 +10,11 @@ var _ Authenticator = (*NoopAuthenticator)(nil)
 type NoopAuthenticator struct {
 }
 
+// Options implements Authenticator.
+func (a *NoopAuthenticator) Options() Options {
+	return DefaultOptions()
+}
+
 // NoopAuthn Noop认证提供者
 type NoopAuthn struct{}
 

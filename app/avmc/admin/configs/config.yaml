@@ -21,6 +21,7 @@ server:
       auth:
         method: "HS256"
         key: "some_api_key"
+        expires_time: 604800s
   grpc:
     addr: 0.0.0.0:9000
     timeout: 1s
@@ -32,5 +33,7 @@ data:
     debug: true
   redis:
     addr: 127.0.0.1:6379
+    password: "123456"
+    db: 0
     read_timeout: 0.2s
     write_timeout: 0.2s

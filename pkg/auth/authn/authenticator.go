@@ -46,6 +46,9 @@ type Authenticator interface {
 	// 返回: 可能的错误
 	Close() error
 
+	// 返回: 选项允许您查看当前选项。
+	Options() Options
+
 	// Name 返回认证提供者的名称
 	// 返回: 提供者名称
 	Name() string

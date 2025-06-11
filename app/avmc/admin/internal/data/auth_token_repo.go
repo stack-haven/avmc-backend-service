@@ -54,9 +54,10 @@ func NewAuthToken(
 // createAccessJwtToken 生成JWT访问令牌
 func (r *authTokenRepo) createAccessToken(_ string, userId uint32) string {
 	principal := authnEngine.AuthClaims{
-		"sub":   strconv.FormatUint(uint64(userId), 10),
-		"jti":   "",
-		"scope": "",
+		"sub":    strconv.FormatUint(uint64(userId), 10),
+		"jti":    "",
+		"domain": "",
+		"scope":  "",
 	}
 
 	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)
@@ -78,8 +79,7 @@ func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (acces
 		err = errors.New("create access token failed")
 		return
 	}
-
-	if err = r.setAccessTokenToRedis(ctx, auth.GetId(), accessToken, 0); err != nil {
+	if err = r.setAccessTokenToRedis(ctx, auth.GetId(), accessToken, r.authenticator.Options().TokenExpiration); err != nil {
 		return
 	}
 
@@ -88,7 +88,7 @@ func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (acces
 		return
 	}
 
-	if err = r.setRefreshTokenToRedis(ctx, auth.GetId(), refreshToken, 0); err != nil {
+	if err = r.setRefreshTokenToRedis(ctx, auth.GetId(), refreshToken, r.authenticator.Options().RefreshTokenExpiration); err != nil {
 		return
 	}
 
@@ -167,9 +167,9 @@ func (r *authTokenRepo) IsExistRefreshToken(ctx context.Context, userId uint32) 
 	return n > 0
 }
 
-func (r *authTokenRepo) setAccessTokenToRedis(ctx context.Context, userId uint32, token string, expires int32) error {
+func (r *authTokenRepo) setAccessTokenToRedis(ctx context.Context, userId uint32, token string, expires time.Duration) error {
 	key := fmt.Sprintf("%s%d", r.accessTokenKeyPrefix, userId)
-	return r.rdb.Set(ctx, key, token, time.Duration(expires)).Err()
+	return r.rdb.Set(ctx, key, token, expires).Err()
 }
 
 func (r *authTokenRepo) getAccessTokenFromRedis(ctx context.Context, userId uint32) string {
@@ -189,9 +189,9 @@ func (r *authTokenRepo) deleteAccessTokenFromRedis(ctx context.Context, userId u
 	return r.rdb.Del(ctx, key).Err()
 }
 
-func (r *authTokenRepo) setRefreshTokenToRedis(ctx context.Context, userId uint32, token string, expires int32) error {
+func (r *authTokenRepo) setRefreshTokenToRedis(ctx context.Context, userId uint32, token string, expires time.Duration) error {
 	key := fmt.Sprintf("%s%d", r.refreshTokenKeyPrefix, userId)
-	return r.rdb.Set(ctx, key, token, time.Duration(expires)).Err()
+	return r.rdb.Set(ctx, key, token, expires).Err()
 }
 
 func (r *authTokenRepo) getRefreshTokenFromRedis(ctx context.Context, userId uint32) string {

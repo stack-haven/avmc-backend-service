@@ -15,6 +15,8 @@ import (
 	"backend-service/pkg/auth/authn"
 )
 
+var _ authn.Authenticator = (*PSKAuthenticator)(nil)
+
 // PSKAuthenticator 实现基于预共享密钥的认证器
 type PSKAuthenticator struct {
 	options *authn.Options

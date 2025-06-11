@@ -15,6 +15,8 @@ import (
 	"backend-service/pkg/auth/authn"
 )
 
+var _ authn.Authenticator = (*OIDCAuthenticator)(nil)
+
 // OIDCAuthenticator 实现基于OpenID Connect的认证器
 type OIDCAuthenticator struct {
 	options      *authn.Options
