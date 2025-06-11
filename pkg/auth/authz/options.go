@@ -104,8 +104,8 @@ type Options struct {
 type Option func(*Options)
 
 // DefaultOptions 默认选项
-func DefaultOptions() *Options {
-	return &Options{
+func DefaultOptions() Options {
+	return Options{
 		EngineType:        EngineCasbin,
 		ModelFormat:       ModelFormatText,
 		AdapterType:       AdapterMemory,

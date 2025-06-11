@@ -155,6 +155,9 @@ type Authorizer interface {
 	// 返回: 授权器名称
 	Name() string
 
+	// 返回: 选项允许您查看当前选项。
+	Options() Options
+
 	// Close 关闭授权器，释放资源
 	// 返回: 可能的错误
 	Close() error

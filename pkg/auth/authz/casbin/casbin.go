@@ -32,10 +32,12 @@ e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 m = g(r.sub, p.sub, r.dom) && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 `
 
+var _ authz.Authorizer = (*CasbinAuthorizer)(nil)
+
 // CasbinAuthorizer Casbin授权器实现
 type CasbinAuthorizer struct {
 	// options 配置选项
-	options *authz.Options
+	options authz.Options
 	// enforcer Casbin执行器
 	enforcer stdcasbin.IEnforcer
 }
@@ -50,15 +52,9 @@ func (p *CasbinProvider) Name() string {
 
 // NewAuthorizer 创建新的授权器实例
 func (p *CasbinProvider) NewAuthorizer(ctx context.Context, opts ...authz.Option) (authz.Authorizer, error) {
-	// 使用默认选项
-	options := authz.DefaultOptions()
 	auth := new(CasbinAuthorizer)
-	auth.options = options
-
-	// 应用选项
-	for _, opt := range opts {
-		opt(auth.options)
-	}
+	// 使用默认选项
+	auth.options = authz.DefaultOptions()
 
 	// 初始化授权器
 	if err := auth.Init(ctx, opts...); err != nil {
@@ -75,7 +71,7 @@ func (a *CasbinAuthorizer) Init(ctx context.Context, opts ...authz.Option) error
 
 	// 应用选项
 	for _, opt := range opts {
-		opt(a.options)
+		opt(&a.options)
 	}
 
 	// 加载模型
@@ -483,6 +479,11 @@ func (a *CasbinAuthorizer) DeleteRoleForUser(ctx context.Context, user authz.Sub
 // Name 获取授权器名称
 func (a *CasbinAuthorizer) Name() string {
 	return "casbin"
+}
+
+// Options implements authz.Authorizer.
+func (a *CasbinAuthorizer) Options() authz.Options {
+	return a.options
 }
 
 // Close 关闭授权器，释放资源
