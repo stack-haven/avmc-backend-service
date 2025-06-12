@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
 	authnEngine "backend-service/pkg/auth/authn"
@@ -97,7 +96,15 @@ func (r *authTokenRepo) createAccessToken(_ string, userId uint32) string {
 
 // createRefreshToken 生成刷新令牌
 func (r *authTokenRepo) createRefreshToken() string {
-	return uuid.New().String()
+	// 刷新令牌信息中包含刷新过期时间
+	authClaims := authnEngine.AuthClaims{
+		"refresh_exp": time.Now().Add(r.authenticator.Options().RefreshTokenExpiration),
+	}
+	token, err := r.authenticator.CreateToken(context.Background(), authClaims)
+	if err != nil {
+		return ""
+	}
+	return token
 }
 
 // GenerateToken 创建令牌
