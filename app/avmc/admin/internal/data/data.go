@@ -32,7 +32,7 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
-	NewAuthenticator, NewAuthorizer, NewSecurityUser,
+	NewAuthenticator, NewAuthorizer,
 	NewAuthTokenRepo,
 	NewAuthRepo,
 	NewUserRepo,
@@ -170,6 +170,7 @@ func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticat
 	}
 	// 刷新令牌过期时间 = 令牌过期时间 * 10
 	refreshExpires := expires * 10
+	securityUserCreator := NewSecurityUserCreator(logger)
 	// 使用jwt提供者
 	provider := authnJwt.NewProvider()
 	authenticator, err := provider.NewAuthenticator(
@@ -178,6 +179,7 @@ func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticat
 		authnEngine.WithSigningMethod(c.Http.Middleware.Auth.Method),
 		authnEngine.WithTokenExpiration(expires),
 		authnEngine.WithRefreshTokenExpiration(refreshExpires),
+		authnEngine.WithUserFactory(securityUserCreator),
 	)
 	if err != nil {
 		l.Fatalf("failed creating authentincator: %s", err.Error())

@@ -58,7 +58,17 @@ func AuthnMiddleware(authenticator authn.Authenticator) middleware.Middleware {
 
 			// 将认证声明注入上下文
 			ctx = authn.ContextWithAuthClaims(ctx, claims)
-
+			// 将用户信息注入上下文
+			securityUser := authenticator.Options().UserFactory(claims)
+			if securityUser != nil {
+				err := securityUser.ParseFromContext(ctx)
+				if err != nil {
+					return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", err.Error())
+				}
+			} else {
+				return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", "security user parse fail")
+			}
+			ctx = authn.ContextWithAuthUser(ctx, securityUser)
 			// 继续处理请求
 			return handler(ctx, req)
 		}

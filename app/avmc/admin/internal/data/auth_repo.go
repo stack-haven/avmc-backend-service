@@ -3,8 +3,11 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/user"
+	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 	"context"
+	"errors"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -46,8 +49,9 @@ func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginR
 		return nil, biz.ErrPasswordIncorrect
 	}
 	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, &pb.Auth{
-		Id:   res.ID,
-		Name: name,
+		UserId:   res.ID,
+		Username: name,
+		// DomainId: ,
 	})
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
@@ -76,13 +80,17 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 }
 
 // Logout 处理后台登出数据操作
-// 参数：ctx 上下文，accessToken 访问令牌
+// 参数：ctx 上下文
 // 返回值：错误信息
-func (r *authRepo) Logout(ctx context.Context, accessToken string) error {
+func (r *authRepo) Logout(ctx context.Context) error {
 	// 这里实现具体的登出数据操作
-	r.log.Infof("尝试登出数据操作，访问令牌：%s", accessToken)
-	// r.atr.RemoveToken(ctx, )
-	return nil
+	securityUser, success := authn.AuthUserFromContext(ctx)
+	if !success {
+		return errors.New("failed to parse user")
+	}
+	r.log.Infof("尝试登出数据操作，访问令牌：%s", securityUser.GetSubject())
+	userId := convert.StringToUnit32(securityUser.GetSubject())
+	return r.atr.RemoveToken(ctx, userId)
 }
 
 // Register 处理注册数据操作

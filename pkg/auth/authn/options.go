@@ -29,7 +29,7 @@ type Options struct {
 	// ClaimsFactory 声明工厂函数
 	ClaimsFactory func() interface{}
 	// UserFactory 用户工厂函数
-	UserFactory func() SecurityUser
+	UserFactory func(*AuthClaims) SecurityUser
 	// EnableRefresh 是否启用刷新
 	EnableRefresh bool
 	// EnableRevocation 是否启用撤销
@@ -136,7 +136,7 @@ func WithClaimsFactory(factory func() interface{}) Option {
 }
 
 // WithUserFactory 设置用户工厂
-func WithUserFactory(factory func() SecurityUser) Option {
+func WithUserFactory(factory func(*AuthClaims) SecurityUser) Option {
 	return func(o *Options) {
 		o.UserFactory = factory
 	}

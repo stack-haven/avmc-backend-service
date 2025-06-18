@@ -56,9 +56,11 @@ func (m *Auth) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Id
+	// no validation rules for Username
 
-	// no validation rules for Name
+	// no validation rules for UserId
+
+	// no validation rules for DomainId
 
 	if len(errors) > 0 {
 		return AuthMultiError(errors)

@@ -19,7 +19,7 @@ func NewSecurityUserCreator(logger log.Logger) authn.SecurityUserCreator {
 		if authClaims == nil {
 			log.Error("auth claims creator fail ac == nil")
 		}
-		return NewSecurityUser(logger, authClaims)
+		return &securityUser{options: securityOptions{log: log, authClaims: authClaims}}
 	}
 }
 
@@ -36,13 +36,13 @@ type securityOptions struct {
 type securityUser struct {
 	options securityOptions
 	// 角色/主题
-	subject uint32
+	subject string
 	// 资源/路由
 	object string
 	// 方法
 	action string
 	// 域/租户
-	domain uint32
+	domain string
 }
 
 // GetID returns the security Name.
@@ -64,18 +64,11 @@ func (su *securityUser) ParseFromContext(ctx context.Context) error {
 	} else {
 		return errors.New("parse from request header")
 	}
-	// su.GetAction()
-	// // subject := convert.StringToUnit32(su.options.authClaims["sub"].(string))
-	// subject := convert.StringToUnit32("1")
-	// authTokenRepo := su.options.authTokenRepo.GetAccessToken(ctx, subject)
-	// if authTokenRepo == "" {
-	// 	err := errors.New("result auth user fail: auth token null")
-	// 	su.options.log.Error(err)
-	// 	return err
-	// }
-	// su.domain = su.options.authClaims
-	// su.subject = authTokenRepo.LastUseRoleID
-	// authn.ContextWithAuthUser(ctx, su)
+	su.subject = su.options.authClaims.GetSubject()
+	if su.subject == "" {
+		return errors.New("subject is empty")
+	}
+	su.domain = su.options.authClaims.GetDomain()
 	return nil
 }
 
@@ -91,10 +84,20 @@ func (su *securityUser) GetAction() string {
 
 // GetSubject returns the subject of the token.
 func (su *securityUser) GetSubject() string {
-	return convert.Unit32ToString(su.subject)
+	return su.subject
 }
 
 // GetDomain returns the domain of the token.
 func (su *securityUser) GetDomain() string {
-	return convert.Unit32ToString(su.domain)
+	return su.domain
+}
+
+// GetUserID returns the user id of the token.
+func (su *securityUser) GetUserID() uint32 {
+	return convert.StringToUnit32(su.subject)
+}
+
+// GetDomainID returns the domain id of the token.
+func (su *securityUser) GetDomainID() uint32 {
+	return convert.StringToUnit32(su.domain)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	authnEngine "backend-service/pkg/auth/authn"
+	"backend-service/pkg/utils/convert"
 
 	v1 "backend-service/api/avmc/admin/v1"
 )
@@ -78,12 +79,12 @@ func NewAuthToken(
 }
 
 // createAccessJwtToken 生成JWT访问令牌
-func (r *authTokenRepo) createAccessToken(_ string, userId uint32) string {
+func (r *authTokenRepo) createAccessToken(_ string, userId uint32, domanId uint32) string {
 	principal := authnEngine.AuthClaims{
-		"sub":    strconv.FormatUint(uint64(userId), 10),
-		"jti":    "",
-		"domain": "",
-		"scope":  "",
+		"sub":   convert.Unit32ToString(userId),
+		"jti":   "",
+		"dom":   convert.Unit32ToString(domanId),
+		"scope": "",
 	}
 
 	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)
@@ -95,9 +96,11 @@ func (r *authTokenRepo) createAccessToken(_ string, userId uint32) string {
 }
 
 // createRefreshToken 生成刷新令牌
-func (r *authTokenRepo) createRefreshToken() string {
+func (r *authTokenRepo) createRefreshToken(_ string, userId uint32, domanId uint32) string {
 	// 刷新令牌信息中包含刷新过期时间
 	authClaims := authnEngine.AuthClaims{
+		"sub":         strconv.FormatUint(uint64(userId), 10),
+		"dom":         convert.Unit32ToString(domanId),
 		"refresh_exp": time.Now().Add(r.authenticator.Options().RefreshTokenExpiration),
 	}
 	token, err := r.authenticator.CreateToken(context.Background(), authClaims)
@@ -109,20 +112,20 @@ func (r *authTokenRepo) createRefreshToken() string {
 
 // GenerateToken 创建令牌
 func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (accessToken string, refreshToken string, err error) {
-	if accessToken = r.createAccessToken(auth.GetName(), auth.GetId()); accessToken == "" {
+	if accessToken = r.createAccessToken(auth.GetUsername(), auth.GetUserId(), auth.DomainId); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
-	if err = r.setAccessTokenToRedis(ctx, auth.GetId(), accessToken, r.authenticator.Options().TokenExpiration); err != nil {
+	if err = r.setAccessTokenToRedis(ctx, auth.GetUserId(), accessToken, r.authenticator.Options().TokenExpiration); err != nil {
 		return
 	}
 
-	if refreshToken = r.createRefreshToken(); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth.GetUsername(), auth.GetUserId(), 0); refreshToken == "" {
 		err = errors.New("create refresh token failed")
 		return
 	}
 
-	if err = r.setRefreshTokenToRedis(ctx, auth.GetId(), refreshToken, r.authenticator.Options().RefreshTokenExpiration); err != nil {
+	if err = r.setRefreshTokenToRedis(ctx, auth.GetUserId(), refreshToken, r.authenticator.Options().RefreshTokenExpiration); err != nil {
 		return
 	}
 
@@ -131,7 +134,7 @@ func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (acces
 
 // GenerateAccessToken 创建访问令牌
 func (r *authTokenRepo) GenerateAccessToken(ctx context.Context, userId uint32, userName string) (accessToken string, err error) {
-	if accessToken = r.createAccessToken(userName, userId); accessToken == "" {
+	if accessToken = r.createAccessToken(userName, userId, 0); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
@@ -145,12 +148,12 @@ func (r *authTokenRepo) GenerateAccessToken(ctx context.Context, userId uint32, 
 
 // GenerateRefreshToken 创建刷新令牌
 func (r *authTokenRepo) GenerateRefreshToken(ctx context.Context, auth *v1.Auth) (refreshToken string, err error) {
-	if refreshToken = r.createRefreshToken(); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth.GetUsername(), auth.GetUserId(), auth.GetDomainId()); refreshToken == "" {
 		err = errors.New("create refresh token failed")
 		return
 	}
 
-	if err = r.setRefreshTokenToRedis(ctx, auth.GetId(), refreshToken, 0); err != nil {
+	if err = r.setRefreshTokenToRedis(ctx, auth.GetUserId(), refreshToken, 0); err != nil {
 		return
 	}
 

@@ -18,7 +18,7 @@ var (
 // UserRepo is a Greater repo.
 type AuthRepo interface {
 	Login(ctx context.Context, name, password string) (*v1.LoginResponse, error)
-	Logout(context.Context, string) error
+	Logout(context.Context) error
 	RefreshToken(context.Context, string) (*v1.RefreshTokenResponse, error)
 }
 
@@ -63,10 +63,10 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*
 // Logout 处理后台登出业务逻辑
 // 参数：ctx 上下文，accessToken 访问令牌
 // 返回值：错误信息
-func (uc *AuthUsecase) Logout(ctx context.Context, acccessToken string) error {
+func (uc *AuthUsecase) Logout(ctx context.Context) error {
 	// 这里实现具体的登出业务逻辑
-	uc.log.Infof("尝试登出，访问令牌：%s")
-	return uc.repo.Logout(ctx, acccessToken)
+	uc.log.Infof("尝试登出")
+	return uc.repo.Logout(ctx)
 }
 
 // Register 处理注册业务逻辑

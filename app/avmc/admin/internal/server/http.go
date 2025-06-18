@@ -26,6 +26,7 @@ import (
 func newHTTPWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]bool)
 	whiteList[v1.OperationAuthServiceLogin] = true
+	whiteList[v1.OperationAuthServiceRefreshToken] = true
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false
@@ -39,7 +40,6 @@ func newHTTPMiddleware(
 	logger log.Logger,
 	authenticator authnEngine.Authenticator,
 	authorizer authzEngine.Authorizer,
-	// userToken *data.UserToken,
 ) []middleware.Middleware {
 	var ms []middleware.Middleware
 	ms = append(ms, logging.Server(logger))
@@ -55,7 +55,6 @@ func newHTTPMiddleware(
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
 	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorizer,
-	// userToken *data.UserToken,
 	auth *service.AuthServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,

@@ -61,6 +61,8 @@ type StandardClaims struct {
 	IssuedAt *time.Time `json:"iat,omitempty"`
 	// ID 唯一标识符
 	ID string `json:"jti,omitempty"`
+	// Scope 权限范围
+	// Scope []string `json:"scope,omitempty"`
 }
 
 // ParseContextTokenFunc 定义从上下文解析令牌的函数类型
@@ -161,6 +163,18 @@ func (a *AuthClaims) GetID() string {
 	}
 	if jti, ok := (*a)["jti"].(string); ok {
 		return jti
+	}
+	return ""
+}
+
+// GetDomain 获取域
+// 返回: 域字符串
+func (a *AuthClaims) GetDomain() string {
+	if a == nil {
+		return ""
+	}
+	if domain, ok := (*a)["dom"].(string); ok {
+		return domain
 	}
 	return ""
 }

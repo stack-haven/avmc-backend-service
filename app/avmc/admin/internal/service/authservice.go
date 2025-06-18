@@ -77,13 +77,8 @@ func (s *AuthServiceService) RefreshToken(ctx context.Context, req *pb.RefreshTo
 // 参数：ctx 上下文，req 登出请求
 // 返回值：登出响应，错误信息
 func (s *AuthServiceService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
-	acccessToken := ""
-	if acccessToken == "" {
-		s.log.Errorf("访问令牌为空")
-		return nil, pb.ErrorAuthTokenNotExist("刷新令牌为空")
-	}
 	// 调用业务逻辑层
-	if err := s.auc.Logout(ctx, acccessToken); err != nil {
+	if err := s.auc.Logout(ctx); err != nil {
 		s.log.Errorf("登出失败: %v", err)
 		return nil, err
 	}

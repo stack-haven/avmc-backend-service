@@ -77,8 +77,11 @@ enum GrandType {
 }
 
 message Auth {
-  uint32 id = 1; // 用户ID
-  string name = 2; // 认证名称
+  string username = 2; // 认证名称
+  uint32 user_id = 1; // 用户ID
+  uint32 domain_id = 3; // 域ID
+  repeated string roles = 4; // 角色
+  repeated string permissions = 5; // 权限
 }
 
 // 用户后台登陆 - 请求
