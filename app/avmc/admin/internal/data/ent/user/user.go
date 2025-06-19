@@ -3,7 +3,6 @@
 package user
 
 import (
-	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -20,6 +19,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldDomainID holds the string denoting the domain_id field in the database.
+	FieldDomainID = "domain_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldPassword holds the string denoting the password field in the database.
@@ -30,8 +31,8 @@ const (
 	FieldNickname = "nickname"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
-	// FieldMobile holds the string denoting the mobile field in the database.
-	FieldMobile = "mobile"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
 	// FieldGender holds the string denoting the gender field in the database.
@@ -60,12 +61,13 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldDomainID,
 	FieldName,
 	FieldPassword,
 	FieldRealname,
 	FieldNickname,
 	FieldEmail,
-	FieldMobile,
+	FieldPhone,
 	FieldAvatar,
 	FieldGender,
 	FieldAge,
@@ -94,6 +96,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultDomainID holds the default value on creation for the "domain_id" field.
+	DefaultDomainID func() uint32
+	// DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
+	DomainIDValidator func(uint32) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
@@ -104,12 +110,20 @@ var (
 	NicknameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
-	// MobileValidator is a validator for the "mobile" field. It is called by the builders before save.
-	MobileValidator func(string) error
+	// PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
+	PhoneValidator func(string) error
 	// AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
 	AvatarValidator func(string) error
+	// DefaultGender holds the default value on creation for the "gender" field.
+	DefaultGender int
+	// GenderValidator is a validator for the "gender" field. It is called by the builders before save.
+	GenderValidator func(int) error
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
 	AgeValidator func(int) error
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(int) error
 	// LastLoginIPValidator is a validator for the "last_login_ip" field. It is called by the builders before save.
 	LastLoginIPValidator func(string) error
 	// DefaultLoginCount holds the default value on creation for the "login_count" field.
@@ -117,61 +131,6 @@ var (
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
-
-// Gender defines the type for the "gender" enum field.
-type Gender string
-
-// GenderUnknown is the default value of the Gender enum.
-const DefaultGender = GenderUnknown
-
-// Gender values.
-const (
-	GenderMale    Gender = "male"
-	GenderFemale  Gender = "female"
-	GenderUnknown Gender = "unknown"
-)
-
-func (ge Gender) String() string {
-	return string(ge)
-}
-
-// GenderValidator is a validator for the "gender" field enum values. It is called by the builders before save.
-func GenderValidator(ge Gender) error {
-	switch ge {
-	case GenderMale, GenderFemale, GenderUnknown:
-		return nil
-	default:
-		return fmt.Errorf("user: invalid enum value for gender field: %q", ge)
-	}
-}
-
-// Status defines the type for the "status" enum field.
-type Status string
-
-// StatusActive is the default value of the Status enum.
-const DefaultStatus = StatusActive
-
-// Status values.
-const (
-	StatusActive   Status = "active"
-	StatusInactive Status = "inactive"
-	StatusLocked   Status = "locked"
-	StatusDeleted  Status = "deleted"
-)
-
-func (s Status) String() string {
-	return string(s)
-}
-
-// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
-func StatusValidator(s Status) error {
-	switch s {
-	case StatusActive, StatusInactive, StatusLocked, StatusDeleted:
-		return nil
-	default:
-		return fmt.Errorf("user: invalid enum value for status field: %q", s)
-	}
-}
 
 // OrderOption defines the ordering options for the User queries.
 type OrderOption func(*sql.Selector)
@@ -194,6 +153,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByDomainID orders the results by the domain_id field.
+func ByDomainID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDomainID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
@@ -221,9 +185,9 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
 }
 
-// ByMobile orders the results by the mobile field.
-func ByMobile(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMobile, opts...).ToFunc()
+// ByPhone orders the results by the phone field.
+func ByPhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhone, opts...).ToFunc()
 }
 
 // ByAvatar orders the results by the avatar field.

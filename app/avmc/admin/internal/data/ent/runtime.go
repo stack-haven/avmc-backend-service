@@ -17,6 +17,8 @@ func init() {
 	_ = userMixinFields0
 	userMixinFields1 := userMixin[1].Fields()
 	_ = userMixinFields1
+	userMixinFields2 := userMixin[2].Fields()
+	_ = userMixinFields2
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -29,6 +31,12 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescDomainID is the schema descriptor for domain_id field.
+	userDescDomainID := userMixinFields2[0].Descriptor()
+	// user.DefaultDomainID holds the default value on creation for the domain_id field.
+	user.DefaultDomainID = userDescDomainID.Default.(func() uint32)
+	// user.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
+	user.DomainIDValidator = userDescDomainID.Validators[0].(func(uint32) error)
 	// userDescName is the schema descriptor for name field.
 	userDescName := userFields[0].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -92,14 +100,34 @@ func init() {
 			return nil
 		}
 	}()
-	// userDescMobile is the schema descriptor for mobile field.
-	userDescMobile := userFields[5].Descriptor()
-	// user.MobileValidator is a validator for the "mobile" field. It is called by the builders before save.
-	user.MobileValidator = userDescMobile.Validators[0].(func(string) error)
+	// userDescPhone is the schema descriptor for phone field.
+	userDescPhone := userFields[5].Descriptor()
+	// user.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
+	user.PhoneValidator = userDescPhone.Validators[0].(func(string) error)
 	// userDescAvatar is the schema descriptor for avatar field.
 	userDescAvatar := userFields[6].Descriptor()
 	// user.AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
 	user.AvatarValidator = userDescAvatar.Validators[0].(func(string) error)
+	// userDescGender is the schema descriptor for gender field.
+	userDescGender := userFields[7].Descriptor()
+	// user.DefaultGender holds the default value on creation for the gender field.
+	user.DefaultGender = userDescGender.Default.(int)
+	// user.GenderValidator is a validator for the "gender" field. It is called by the builders before save.
+	user.GenderValidator = func() func(int) error {
+		validators := userDescGender.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(gender int) error {
+			for _, fn := range fns {
+				if err := fn(gender); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// userDescAge is the schema descriptor for age field.
 	userDescAge := userFields[8].Descriptor()
 	// user.AgeValidator is a validator for the "age" field. It is called by the builders before save.
@@ -112,6 +140,26 @@ func init() {
 		return func(age int) error {
 			for _, fn := range fns {
 				if err := fn(age); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// userDescStatus is the schema descriptor for status field.
+	userDescStatus := userFields[9].Descriptor()
+	// user.DefaultStatus holds the default value on creation for the status field.
+	user.DefaultStatus = userDescStatus.Default.(int)
+	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	user.StatusValidator = func() func(int) error {
+		validators := userDescStatus.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(status int) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
 					return err
 				}
 			}

@@ -6,21 +6,19 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
-
-	"github.com/beiduoke/go-scaffold/pkg/util/id/snowflake"
 )
 
-var _ ent.Mixin = (*PlatformId)(nil)
+var _ ent.Mixin = (*PlatformID)(nil)
 
-type PlatformId struct {
+type PlatformID struct {
 	mixin.Schema
 }
 
-func (PlatformId) Fields() []ent.Field {
+func (PlatformID) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("platform_id").
+		field.Uint32("platform_id").
 			Comment("平台ID").
-			DefaultFunc(uint64(snowflake.NewFlake(1).Generate())).
+			DefaultFunc(NewSnowflakeID().Uint32).
 			Positive().
 			StructTag(`json:"platform_id,omitempty"`).
 			SchemaType(map[string]string{
@@ -30,8 +28,8 @@ func (PlatformId) Fields() []ent.Field {
 	}
 }
 
-// Indexes of the PlatformId.
-func (PlatformId) Indexes() []ent.Index {
+// Indexes of the PlatformID.
+func (PlatformID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("platform_id"),
 	}

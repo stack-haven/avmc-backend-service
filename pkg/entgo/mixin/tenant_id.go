@@ -8,17 +8,17 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-var _ ent.Mixin = (*TenantId)(nil)
+var _ ent.Mixin = (*TenantID)(nil)
 
-type TenantId struct {
+type TenantID struct {
 	mixin.Schema
 }
 
-func (TenantId) Fields() []ent.Field {
+func (TenantID) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("tenant_id").
+		field.Uint32("tenant_id").
 			Comment("租户ID").
-			DefaultFunc(NewSnowflakeId().Int64).
+			DefaultFunc(NewSnowflakeID().Uint32).
 			Positive().
 			StructTag(`json:"tenant_id,omitempty"`).
 			SchemaType(map[string]string{
@@ -28,8 +28,8 @@ func (TenantId) Fields() []ent.Field {
 	}
 }
 
-// Indexes of the TenantId.
-func (TenantId) Indexes() []ent.Index {
+// Indexes of the TenantID.
+func (TenantID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("tenant_id"),
 	}

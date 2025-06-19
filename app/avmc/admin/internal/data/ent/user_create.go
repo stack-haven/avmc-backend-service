@@ -64,6 +64,20 @@ func (uc *UserCreate) SetNillableDeletedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
+// SetDomainID sets the "domain_id" field.
+func (uc *UserCreate) SetDomainID(u uint32) *UserCreate {
+	uc.mutation.SetDomainID(u)
+	return uc
+}
+
+// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDomainID(u *uint32) *UserCreate {
+	if u != nil {
+		uc.SetDomainID(*u)
+	}
+	return uc
+}
+
 // SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
@@ -118,16 +132,16 @@ func (uc *UserCreate) SetNillableEmail(s *string) *UserCreate {
 	return uc
 }
 
-// SetMobile sets the "mobile" field.
-func (uc *UserCreate) SetMobile(s string) *UserCreate {
-	uc.mutation.SetMobile(s)
+// SetPhone sets the "phone" field.
+func (uc *UserCreate) SetPhone(s string) *UserCreate {
+	uc.mutation.SetPhone(s)
 	return uc
 }
 
-// SetNillableMobile sets the "mobile" field if the given value is not nil.
-func (uc *UserCreate) SetNillableMobile(s *string) *UserCreate {
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	if s != nil {
-		uc.SetMobile(*s)
+		uc.SetPhone(*s)
 	}
 	return uc
 }
@@ -147,15 +161,15 @@ func (uc *UserCreate) SetNillableAvatar(s *string) *UserCreate {
 }
 
 // SetGender sets the "gender" field.
-func (uc *UserCreate) SetGender(u user.Gender) *UserCreate {
-	uc.mutation.SetGender(u)
+func (uc *UserCreate) SetGender(i int) *UserCreate {
+	uc.mutation.SetGender(i)
 	return uc
 }
 
 // SetNillableGender sets the "gender" field if the given value is not nil.
-func (uc *UserCreate) SetNillableGender(u *user.Gender) *UserCreate {
-	if u != nil {
-		uc.SetGender(*u)
+func (uc *UserCreate) SetNillableGender(i *int) *UserCreate {
+	if i != nil {
+		uc.SetGender(*i)
 	}
 	return uc
 }
@@ -175,15 +189,15 @@ func (uc *UserCreate) SetNillableAge(i *int) *UserCreate {
 }
 
 // SetStatus sets the "status" field.
-func (uc *UserCreate) SetStatus(u user.Status) *UserCreate {
-	uc.mutation.SetStatus(u)
+func (uc *UserCreate) SetStatus(i int) *UserCreate {
+	uc.mutation.SetStatus(i)
 	return uc
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (uc *UserCreate) SetNillableStatus(u *user.Status) *UserCreate {
-	if u != nil {
-		uc.SetStatus(*u)
+func (uc *UserCreate) SetNillableStatus(i *int) *UserCreate {
+	if i != nil {
+		uc.SetStatus(*i)
 	}
 	return uc
 }
@@ -291,6 +305,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := uc.mutation.DomainID(); !ok {
+		v := user.DefaultDomainID()
+		uc.mutation.SetDomainID(v)
+	}
 	if _, ok := uc.mutation.Gender(); !ok {
 		v := user.DefaultGender
 		uc.mutation.SetGender(v)
@@ -312,6 +330,14 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "User.updated_at"`)}
+	}
+	if _, ok := uc.mutation.DomainID(); !ok {
+		return &ValidationError{Name: "domain_id", err: errors.New(`ent: missing required field "User.domain_id"`)}
+	}
+	if v, ok := uc.mutation.DomainID(); ok {
+		if err := user.DomainIDValidator(v); err != nil {
+			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "User.domain_id": %w`, err)}
+		}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
@@ -344,9 +370,9 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
-	if v, ok := uc.mutation.Mobile(); ok {
-		if err := user.MobileValidator(v); err != nil {
-			return &ValidationError{Name: "mobile", err: fmt.Errorf(`ent: validator failed for field "User.mobile": %w`, err)}
+	if v, ok := uc.mutation.Phone(); ok {
+		if err := user.PhoneValidator(v); err != nil {
+			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
 		}
 	}
 	if v, ok := uc.mutation.Avatar(); ok {
@@ -433,6 +459,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := uc.mutation.DomainID(); ok {
+		_spec.SetField(user.FieldDomainID, field.TypeUint32, value)
+		_node.DomainID = value
+	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -453,16 +483,16 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
-	if value, ok := uc.mutation.Mobile(); ok {
-		_spec.SetField(user.FieldMobile, field.TypeString, value)
-		_node.Mobile = value
+	if value, ok := uc.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+		_node.Phone = value
 	}
 	if value, ok := uc.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
 		_node.Avatar = value
 	}
 	if value, ok := uc.mutation.Gender(); ok {
-		_spec.SetField(user.FieldGender, field.TypeEnum, value)
+		_spec.SetField(user.FieldGender, field.TypeInt, value)
 		_node.Gender = value
 	}
 	if value, ok := uc.mutation.Age(); ok {
@@ -470,7 +500,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.Age = value
 	}
 	if value, ok := uc.mutation.Status(); ok {
-		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
+		_spec.SetField(user.FieldStatus, field.TypeInt, value)
 		_node.Status = value
 	}
 	if value, ok := uc.mutation.LastLoginAt(); ok {
@@ -575,6 +605,24 @@ func (u *UserUpsert) ClearDeletedAt() *UserUpsert {
 	return u
 }
 
+// SetDomainID sets the "domain_id" field.
+func (u *UserUpsert) SetDomainID(v uint32) *UserUpsert {
+	u.Set(user.FieldDomainID, v)
+	return u
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateDomainID() *UserUpsert {
+	u.SetExcluded(user.FieldDomainID)
+	return u
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *UserUpsert) AddDomainID(v uint32) *UserUpsert {
+	u.Add(user.FieldDomainID, v)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *UserUpsert) SetName(v string) *UserUpsert {
 	u.Set(user.FieldName, v)
@@ -653,21 +701,21 @@ func (u *UserUpsert) ClearEmail() *UserUpsert {
 	return u
 }
 
-// SetMobile sets the "mobile" field.
-func (u *UserUpsert) SetMobile(v string) *UserUpsert {
-	u.Set(user.FieldMobile, v)
+// SetPhone sets the "phone" field.
+func (u *UserUpsert) SetPhone(v string) *UserUpsert {
+	u.Set(user.FieldPhone, v)
 	return u
 }
 
-// UpdateMobile sets the "mobile" field to the value that was provided on create.
-func (u *UserUpsert) UpdateMobile() *UserUpsert {
-	u.SetExcluded(user.FieldMobile)
+// UpdatePhone sets the "phone" field to the value that was provided on create.
+func (u *UserUpsert) UpdatePhone() *UserUpsert {
+	u.SetExcluded(user.FieldPhone)
 	return u
 }
 
-// ClearMobile clears the value of the "mobile" field.
-func (u *UserUpsert) ClearMobile() *UserUpsert {
-	u.SetNull(user.FieldMobile)
+// ClearPhone clears the value of the "phone" field.
+func (u *UserUpsert) ClearPhone() *UserUpsert {
+	u.SetNull(user.FieldPhone)
 	return u
 }
 
@@ -690,7 +738,7 @@ func (u *UserUpsert) ClearAvatar() *UserUpsert {
 }
 
 // SetGender sets the "gender" field.
-func (u *UserUpsert) SetGender(v user.Gender) *UserUpsert {
+func (u *UserUpsert) SetGender(v int) *UserUpsert {
 	u.Set(user.FieldGender, v)
 	return u
 }
@@ -698,6 +746,12 @@ func (u *UserUpsert) SetGender(v user.Gender) *UserUpsert {
 // UpdateGender sets the "gender" field to the value that was provided on create.
 func (u *UserUpsert) UpdateGender() *UserUpsert {
 	u.SetExcluded(user.FieldGender)
+	return u
+}
+
+// AddGender adds v to the "gender" field.
+func (u *UserUpsert) AddGender(v int) *UserUpsert {
+	u.Add(user.FieldGender, v)
 	return u
 }
 
@@ -726,7 +780,7 @@ func (u *UserUpsert) ClearAge() *UserUpsert {
 }
 
 // SetStatus sets the "status" field.
-func (u *UserUpsert) SetStatus(v user.Status) *UserUpsert {
+func (u *UserUpsert) SetStatus(v int) *UserUpsert {
 	u.Set(user.FieldStatus, v)
 	return u
 }
@@ -734,6 +788,12 @@ func (u *UserUpsert) SetStatus(v user.Status) *UserUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *UserUpsert) UpdateStatus() *UserUpsert {
 	u.SetExcluded(user.FieldStatus)
+	return u
+}
+
+// AddStatus adds v to the "status" field.
+func (u *UserUpsert) AddStatus(v int) *UserUpsert {
+	u.Add(user.FieldStatus, v)
 	return u
 }
 
@@ -913,6 +973,27 @@ func (u *UserUpsertOne) ClearDeletedAt() *UserUpsertOne {
 	})
 }
 
+// SetDomainID sets the "domain_id" field.
+func (u *UserUpsertOne) SetDomainID(v uint32) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *UserUpsertOne) AddDomainID(v uint32) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateDomainID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *UserUpsertOne) SetName(v string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
@@ -1004,24 +1085,24 @@ func (u *UserUpsertOne) ClearEmail() *UserUpsertOne {
 	})
 }
 
-// SetMobile sets the "mobile" field.
-func (u *UserUpsertOne) SetMobile(v string) *UserUpsertOne {
+// SetPhone sets the "phone" field.
+func (u *UserUpsertOne) SetPhone(v string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.SetMobile(v)
+		s.SetPhone(v)
 	})
 }
 
-// UpdateMobile sets the "mobile" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateMobile() *UserUpsertOne {
+// UpdatePhone sets the "phone" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdatePhone() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateMobile()
+		s.UpdatePhone()
 	})
 }
 
-// ClearMobile clears the value of the "mobile" field.
-func (u *UserUpsertOne) ClearMobile() *UserUpsertOne {
+// ClearPhone clears the value of the "phone" field.
+func (u *UserUpsertOne) ClearPhone() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.ClearMobile()
+		s.ClearPhone()
 	})
 }
 
@@ -1047,9 +1128,16 @@ func (u *UserUpsertOne) ClearAvatar() *UserUpsertOne {
 }
 
 // SetGender sets the "gender" field.
-func (u *UserUpsertOne) SetGender(v user.Gender) *UserUpsertOne {
+func (u *UserUpsertOne) SetGender(v int) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetGender(v)
+	})
+}
+
+// AddGender adds v to the "gender" field.
+func (u *UserUpsertOne) AddGender(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddGender(v)
 	})
 }
 
@@ -1089,9 +1177,16 @@ func (u *UserUpsertOne) ClearAge() *UserUpsertOne {
 }
 
 // SetStatus sets the "status" field.
-func (u *UserUpsertOne) SetStatus(v user.Status) *UserUpsertOne {
+func (u *UserUpsertOne) SetStatus(v int) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *UserUpsertOne) AddStatus(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddStatus(v)
 	})
 }
 
@@ -1459,6 +1554,27 @@ func (u *UserUpsertBulk) ClearDeletedAt() *UserUpsertBulk {
 	})
 }
 
+// SetDomainID sets the "domain_id" field.
+func (u *UserUpsertBulk) SetDomainID(v uint32) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *UserUpsertBulk) AddDomainID(v uint32) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateDomainID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *UserUpsertBulk) SetName(v string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
@@ -1550,24 +1666,24 @@ func (u *UserUpsertBulk) ClearEmail() *UserUpsertBulk {
 	})
 }
 
-// SetMobile sets the "mobile" field.
-func (u *UserUpsertBulk) SetMobile(v string) *UserUpsertBulk {
+// SetPhone sets the "phone" field.
+func (u *UserUpsertBulk) SetPhone(v string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.SetMobile(v)
+		s.SetPhone(v)
 	})
 }
 
-// UpdateMobile sets the "mobile" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateMobile() *UserUpsertBulk {
+// UpdatePhone sets the "phone" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdatePhone() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateMobile()
+		s.UpdatePhone()
 	})
 }
 
-// ClearMobile clears the value of the "mobile" field.
-func (u *UserUpsertBulk) ClearMobile() *UserUpsertBulk {
+// ClearPhone clears the value of the "phone" field.
+func (u *UserUpsertBulk) ClearPhone() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.ClearMobile()
+		s.ClearPhone()
 	})
 }
 
@@ -1593,9 +1709,16 @@ func (u *UserUpsertBulk) ClearAvatar() *UserUpsertBulk {
 }
 
 // SetGender sets the "gender" field.
-func (u *UserUpsertBulk) SetGender(v user.Gender) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetGender(v int) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetGender(v)
+	})
+}
+
+// AddGender adds v to the "gender" field.
+func (u *UserUpsertBulk) AddGender(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddGender(v)
 	})
 }
 
@@ -1635,9 +1758,16 @@ func (u *UserUpsertBulk) ClearAge() *UserUpsertBulk {
 }
 
 // SetStatus sets the "status" field.
-func (u *UserUpsertBulk) SetStatus(v user.Status) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetStatus(v int) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *UserUpsertBulk) AddStatus(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddStatus(v)
 	})
 }
 

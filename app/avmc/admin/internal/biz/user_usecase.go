@@ -19,7 +19,7 @@ var (
 type UserRepo interface {
 	Save(context.Context, *pbCore.User) (*pbCore.User, error)
 	Update(context.Context, *pbCore.User) (*pbCore.User, error)
-	FindByID(context.Context, int64) (*pbCore.User, error)
+	FindByID(context.Context, uint32) (*pbCore.User, error)
 	ListByHello(context.Context, string) ([]*pbCore.User, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
 }
@@ -39,4 +39,10 @@ func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
 func (uc *UserUsecase) CreateUser(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("CreateUser: %v", g.Name)
 	return uc.repo.Save(ctx, g)
+}
+
+// GetUser gets a User by ID.
+func (uc *UserUsecase) GetUser(ctx context.Context, id uint32) (*pbCore.User, error) {
+	uc.log.WithContext(ctx).Infof("GetUser: %v", id)
+	return uc.repo.FindByID(ctx, id)
 }

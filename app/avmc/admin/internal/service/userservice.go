@@ -28,7 +28,7 @@ func (s *UserServiceService) ListUser(ctx context.Context, req *pbPagination.Pag
 	return &pbCore.ListUserResponse{}, nil
 }
 func (s *UserServiceService) GetUser(ctx context.Context, req *pbCore.GetUserRequest) (*pbCore.User, error) {
-	return &pbCore.User{}, nil
+	return s.uuc.GetUser(ctx, req.Id)
 }
 func (s *UserServiceService) CreateUser(ctx context.Context, req *pbCore.CreateUserRequest) (*pbCore.CreateUserResponse, error) {
 	return &pbCore.CreateUserResponse{}, nil

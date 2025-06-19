@@ -25,28 +25,6 @@ type authTokenRepo struct {
 	refreshTokenKeyPrefix string
 }
 
-// var _ authnEngine.TokenManager = (*authTokenRepo)(nil)
-
-// // CreateToken implements authn.TokenManager.
-// func (r *authTokenRepo) CreateToken(ctx context.Context, claims authnEngine.AuthClaims, expiration time.Duration) (string, error) {
-// 	panic("unimplemented")
-// }
-
-// // RefreshToken implements authn.TokenManager.
-// func (r *authTokenRepo) RefreshToken(ctx context.Context, token string) (string, error) {
-// 	panic("unimplemented")
-// }
-
-// // RevokeToken implements authn.TokenManager.
-// func (r *authTokenRepo) RevokeToken(ctx context.Context, token string) error {
-// 	panic("unimplemented")
-// }
-
-// // ValidateToken implements authn.TokenManager.
-// func (r *authTokenRepo) ValidateToken(ctx context.Context, token string) (*authnEngine.AuthClaims, error) {
-// 	panic("unimplemented")
-// }
-
 func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logger log.Logger) *authTokenRepo {
 	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
@@ -78,41 +56,9 @@ func NewAuthToken(
 	}
 }
 
-// createAccessJwtToken 生成JWT访问令牌
-func (r *authTokenRepo) createAccessToken(_ string, userId uint32, domanId uint32) string {
-	principal := authnEngine.AuthClaims{
-		"sub":   convert.Unit32ToString(userId),
-		"jti":   "",
-		"dom":   convert.Unit32ToString(domanId),
-		"scope": "",
-	}
-
-	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)
-	if err != nil {
-		return ""
-	}
-
-	return signedToken
-}
-
-// createRefreshToken 生成刷新令牌
-func (r *authTokenRepo) createRefreshToken(_ string, userId uint32, domanId uint32) string {
-	// 刷新令牌信息中包含刷新过期时间
-	authClaims := authnEngine.AuthClaims{
-		"sub":         strconv.FormatUint(uint64(userId), 10),
-		"dom":         convert.Unit32ToString(domanId),
-		"refresh_exp": time.Now().Add(r.authenticator.Options().RefreshTokenExpiration),
-	}
-	token, err := r.authenticator.CreateToken(context.Background(), authClaims)
-	if err != nil {
-		return ""
-	}
-	return token
-}
-
 // GenerateToken 创建令牌
 func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (accessToken string, refreshToken string, err error) {
-	if accessToken = r.createAccessToken(auth.GetUsername(), auth.GetUserId(), auth.DomainId); accessToken == "" {
+	if accessToken = r.createAccessToken(auth.GetUsername(), auth.GetUserId(), auth.GetDomainId()); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
@@ -120,7 +66,7 @@ func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (acces
 		return
 	}
 
-	if refreshToken = r.createRefreshToken(auth.GetUsername(), auth.GetUserId(), 0); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth.GetUsername(), auth.GetUserId(), auth.GetDomainId()); refreshToken == "" {
 		err = errors.New("create refresh token failed")
 		return
 	}
@@ -133,13 +79,13 @@ func (r *authTokenRepo) GenerateToken(ctx context.Context, auth *v1.Auth) (acces
 }
 
 // GenerateAccessToken 创建访问令牌
-func (r *authTokenRepo) GenerateAccessToken(ctx context.Context, userId uint32, userName string) (accessToken string, err error) {
-	if accessToken = r.createAccessToken(userName, userId, 0); accessToken == "" {
+func (r *authTokenRepo) GenerateAccessToken(ctx context.Context, auth *v1.Auth) (accessToken string, err error) {
+	if accessToken = r.createAccessToken(auth.GetUsername(), auth.GetUserId(), auth.GetDomainId()); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
 
-	if err = r.setAccessTokenToRedis(ctx, userId, accessToken, 0); err != nil {
+	if err = r.setAccessTokenToRedis(ctx, auth.GetUserId(), accessToken, 0); err != nil {
 		return
 	}
 
@@ -202,6 +148,38 @@ func (r *authTokenRepo) IsExistRefreshToken(ctx context.Context, userId uint32) 
 		return false
 	}
 	return n > 0
+}
+
+// createAccessJwtToken 生成JWT访问令牌
+func (r *authTokenRepo) createAccessToken(_ string, userId uint32, domanId uint32) string {
+	principal := authnEngine.AuthClaims{
+		"jti":   "",
+		"sub":   convert.Unit32ToString(userId),
+		"dom":   convert.Unit32ToString(domanId),
+		"scope": "",
+	}
+
+	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)
+	if err != nil {
+		return ""
+	}
+
+	return signedToken
+}
+
+// createRefreshToken 生成刷新令牌
+func (r *authTokenRepo) createRefreshToken(_ string, userId uint32, domanId uint32) string {
+	// 刷新令牌信息中包含刷新过期时间
+	authClaims := authnEngine.AuthClaims{
+		"sub":         strconv.FormatUint(uint64(userId), 10),
+		"dom":         convert.Unit32ToString(domanId),
+		"refresh_exp": time.Now().Add(r.authenticator.Options().RefreshTokenExpiration),
+	}
+	token, err := r.authenticator.CreateToken(context.Background(), authClaims)
+	if err != nil {
+		return ""
+	}
+	return token
 }
 
 func (r *authTokenRepo) setAccessTokenToRedis(ctx context.Context, userId uint32, token string, expires time.Duration) error {

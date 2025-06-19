@@ -183,6 +183,10 @@ func (m *LoginRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if m.DomainId != nil {
+		// no validation rules for DomainId
+	}
+
 	if m.GrandType != nil {
 		// no validation rules for GrandType
 	}
@@ -295,6 +299,10 @@ func (m *LoginResponse) validate(all bool) error {
 	// no validation rules for AccessToken
 
 	// no validation rules for RefreshToken
+
+	if m.ExpiresIn != nil {
+		// no validation rules for ExpiresIn
+	}
 
 	if len(errors) > 0 {
 		return LoginResponseMultiError(errors)
@@ -513,7 +521,9 @@ func (m *RefreshTokenResponse) validate(all bool) error {
 
 	// no validation rules for RefreshToken
 
-	// no validation rules for ExpiresIn
+	if m.ExpiresIn != nil {
+		// no validation rules for ExpiresIn
+	}
 
 	if len(errors) > 0 {
 		return RefreshTokenResponseMultiError(errors)

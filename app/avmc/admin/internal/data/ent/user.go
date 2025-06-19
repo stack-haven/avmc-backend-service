@@ -25,6 +25,8 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 域ID
+	DomainID uint32 `json:"domain_id,omitempty"`
 	// 用户名，唯一
 	Name string `json:"name,omitempty"`
 	// 密码哈希
@@ -36,15 +38,15 @@ type User struct {
 	// 电子邮箱，唯一
 	Email string `json:"email,omitempty"`
 	// 手机号码，唯一
-	Mobile string `json:"mobile,omitempty"`
+	Phone string `json:"phone,omitempty"`
 	// 头像URL
 	Avatar string `json:"avatar,omitempty"`
-	// 性别
-	Gender user.Gender `json:"gender,omitempty"`
+	// 性别：0=未知 1=男 2=女
+	Gender int `json:"gender,omitempty"`
 	// 年龄
 	Age int `json:"age,omitempty"`
-	// 用户状态
-	Status user.Status `json:"status,omitempty"`
+	// 状态：0=未知 1=正常 2=禁用 3=锁定
+	Status int `json:"status,omitempty"`
 	// 最后登录时间
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
 	// 最后登录IP
@@ -65,9 +67,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldSettings, user.FieldMetadata:
 			values[i] = new([]byte)
-		case user.FieldID, user.FieldAge, user.FieldLoginCount:
+		case user.FieldID, user.FieldDomainID, user.FieldGender, user.FieldAge, user.FieldStatus, user.FieldLoginCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldPassword, user.FieldRealname, user.FieldNickname, user.FieldEmail, user.FieldMobile, user.FieldAvatar, user.FieldGender, user.FieldStatus, user.FieldLastLoginIP:
+		case user.FieldName, user.FieldPassword, user.FieldRealname, user.FieldNickname, user.FieldEmail, user.FieldPhone, user.FieldAvatar, user.FieldLastLoginIP:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldLastLoginAt:
 			values[i] = new(sql.NullTime)
@@ -111,6 +113,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.DeletedAt = new(time.Time)
 				*u.DeletedAt = value.Time
 			}
+		case user.FieldDomainID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field domain_id", values[i])
+			} else if value.Valid {
+				u.DomainID = uint32(value.Int64)
+			}
 		case user.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -141,11 +149,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Email = value.String
 			}
-		case user.FieldMobile:
+		case user.FieldPhone:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field mobile", values[i])
+				return fmt.Errorf("unexpected type %T for field phone", values[i])
 			} else if value.Valid {
-				u.Mobile = value.String
+				u.Phone = value.String
 			}
 		case user.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -154,10 +162,10 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.Avatar = value.String
 			}
 		case user.FieldGender:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field gender", values[i])
 			} else if value.Valid {
-				u.Gender = user.Gender(value.String)
+				u.Gender = int(value.Int64)
 			}
 		case user.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -166,10 +174,10 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.Age = int(value.Int64)
 			}
 		case user.FieldStatus:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				u.Status = user.Status(value.String)
+				u.Status = int(value.Int64)
 			}
 		case user.FieldLastLoginAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -253,6 +261,9 @@ func (u *User) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("domain_id=")
+	builder.WriteString(fmt.Sprintf("%v", u.DomainID))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(u.Name)
 	builder.WriteString(", ")
@@ -267,8 +278,8 @@ func (u *User) String() string {
 	builder.WriteString("email=")
 	builder.WriteString(u.Email)
 	builder.WriteString(", ")
-	builder.WriteString("mobile=")
-	builder.WriteString(u.Mobile)
+	builder.WriteString("phone=")
+	builder.WriteString(u.Phone)
 	builder.WriteString(", ")
 	builder.WriteString("avatar=")
 	builder.WriteString(u.Avatar)

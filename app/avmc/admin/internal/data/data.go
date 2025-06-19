@@ -32,7 +32,7 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
-	NewAuthenticator, NewAuthorizer,
+	NewAuthenticator, NewAuthorizer, NewAuthSecurity,
 	NewAuthTokenRepo,
 	NewAuthRepo,
 	NewUserRepo,
@@ -161,7 +161,7 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 }
 
 // NewAuthenticator 创建认证器
-func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticator {
+func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *AuthSecurity) authnEngine.Authenticator {
 	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
 	expires := c.Http.Middleware.Auth.ExpiresTime.AsDuration()
 	// 令牌过期时间默认 7天
@@ -170,7 +170,6 @@ func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticat
 	}
 	// 刷新令牌过期时间 = 令牌过期时间 * 10
 	refreshExpires := expires * 10
-	securityUserCreator := NewSecurityUserCreator(logger)
 	// 使用jwt提供者
 	provider := authnJwt.NewProvider()
 	authenticator, err := provider.NewAuthenticator(
@@ -179,7 +178,7 @@ func NewAuthenticator(c *conf.Server, logger log.Logger) authnEngine.Authenticat
 		authnEngine.WithSigningMethod(c.Http.Middleware.Auth.Method),
 		authnEngine.WithTokenExpiration(expires),
 		authnEngine.WithRefreshTokenExpiration(refreshExpires),
-		authnEngine.WithUserFactory(securityUserCreator),
+		authnEngine.WithUserFactory(authSecurity.NewSecurityUser),
 	)
 	if err != nil {
 		l.Fatalf("failed creating authentincator: %s", err.Error())

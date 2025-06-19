@@ -88,7 +88,8 @@ message Auth {
 message LoginRequest {
   string name = 1 [(validate.rules).string = {min_len: 1, max_len: 10}, (buf.validate.field).string.min_len = 1]; // 账号
   string password = 2 [(validate.rules).string = {min_len: 6, max_len: 25}]; // 密码
-  optional GrandType grand_type = 3; // 授权类型，一直为：password
+  optional uint32 domain_id = 3; // 域ID
+  optional GrandType grand_type = 4; // 授权类型，一直为：password
 }
 
 // 用户后台登陆 - 回应
@@ -98,6 +99,7 @@ message LoginResponse {
   string token_type = 3; // 令牌类型
   string access_token = 4; // 访问令牌
   string refresh_token = 5; // 刷新令牌
+  optional string expires_in = 6; // 访问令牌过期时间
 }
 
 // 请求 - 刷新令牌
@@ -109,7 +111,7 @@ message RefreshTokenRequest {
 message RefreshTokenResponse {
   string access_token = 1; // 新的访问令牌
   string refresh_token = 2; // 新的刷新令牌
-  int64 expires_in = 3; // 访问令牌过期时间（秒）
+  optional string expires_in = 3; // 访问令牌过期时间
 }
 
 // 用户后台登出 - 请求

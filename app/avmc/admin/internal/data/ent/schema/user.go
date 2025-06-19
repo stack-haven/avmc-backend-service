@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -22,11 +23,11 @@ func (User) Fields() []ent.Field {
 		field.String("realname").Optional().MaxLen(50).Comment("用户真实姓名"),
 		field.String("nickname").Optional().MaxLen(50).Comment("用户昵称"),
 		field.String("email").Optional().Unique().MaxLen(100).Match(regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)).Comment("电子邮箱，唯一"),
-		field.String("mobile").Optional().Unique().MaxLen(20).Comment("手机号码，唯一"),
+		field.String("phone").Optional().Unique().MaxLen(20).Comment("手机号码，唯一"),
 		field.String("avatar").Optional().MaxLen(255).Comment("头像URL"),
-		field.Enum("gender").Values("male", "female", "unknown").Default("unknown").Comment("性别"),
+		field.Int("gender").Max(5).Min(0).Default(0).SchemaType(map[string]string{dialect.MySQL: "tinyint"}).Comment("性别：0=未知 1=男 2=女"),
 		field.Int("age").Optional().Min(0).Max(150).Comment("年龄"),
-		field.Enum("status").Values("active", "inactive", "locked", "deleted").Default("active").Comment("用户状态"),
+		field.Int("status").Max(5).Min(0).Default(1).SchemaType(map[string]string{dialect.MySQL: "tinyint"}).Comment("状态：0=未知 1=正常 2=禁用 3=锁定"),
 		field.Time("last_login_at").Optional().Nillable().Comment("最后登录时间"),
 		field.String("last_login_ip").Optional().MaxLen(50).Comment("最后登录IP"),
 		field.Int("login_count").Default(0).Comment("登录次数"),
@@ -43,8 +44,9 @@ func (User) Edges() []ent.Edge {
 // Mixin of the User.
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Id{},
+		mixin.ID{},
 		mixin.TimeAt{},
+		mixin.DomainID{},
 	}
 }
 
@@ -52,48 +54,8 @@ func (User) Mixin() []ent.Mixin {
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("name"),
-		index.Fields("mobile"),
+		index.Fields("phone"),
 		index.Fields("status"),
 		index.Fields("email"),
 	}
 }
-
-// // TimeMixin implements the time mixin for schemas.
-// type TimeMixin struct {
-// 	mixin.Schema
-// }
-
-// // Fields of the TimeMixin.
-// func (TimeMixin) Fields() []ent.Field {
-// 	return []ent.Field{
-// 		field.Time("created_at").Default(time.Now).Immutable().Comment("创建时间"),
-// 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now).Comment("更新时间"),
-// 	}
-// }
-
-// type AutoIncrementId struct{ mixin.Schema }
-
-// func (AutoIncrementId) Fields() []ent.Field {
-// 	return []ent.Field{
-// 		field.Uint32("id").
-// 			Comment("id").
-// 			StructTag(`json:"id,omitempty"`).
-// 			SchemaType(map[string]string{
-// 				dialect.MySQL:    "bigint",
-// 				dialect.Postgres: "serial",
-// 			}).
-// 			Annotations(
-// 				entproto.Field(1),
-// 			).
-// 			Positive().
-// 			Immutable().
-// 			Unique(),
-// 	}
-// }
-
-// // Indexes of the AutoIncrementId.
-// func (AutoIncrementId) Indexes() []ent.Index {
-// 	return []ent.Index{
-// 		index.Fields("id"),
-// 	}
-// }

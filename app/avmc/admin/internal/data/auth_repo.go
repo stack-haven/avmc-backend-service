@@ -36,10 +36,10 @@ func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo
 // Login 处理后台登录数据操作
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
-func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginResponse, error) {
+func (r *authRepo) Login(ctx context.Context, name, password string, domainId uint32) (*pb.LoginResponse, error) {
 	// 这里实现具体的登录数据操作
-	r.log.Infof("尝试登录数据操作，用户名：%s", name)
-	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword).Where(user.NameEQ(name)).Only(ctx)
+	r.log.Infof("尝试登录数据操作，��户名：%s", name)
+	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword, user.FieldName).Where(user.NameEQ(name), user.DomainIDEQ(domainId)).Only(ctx)
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
 		return nil, err
@@ -51,13 +51,15 @@ func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginR
 	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, &pb.Auth{
 		UserId:   res.ID,
 		Username: name,
-		// DomainId: ,
+		DomainId: domainId,
 	})
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
 		return nil, err
 	}
 	return &pb.LoginResponse{
+		Id:           res.ID,
+		Name:         res.Name,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
@@ -69,6 +71,7 @@ func (r *authRepo) Login(ctx context.Context, name, password string) (*pb.LoginR
 func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.RefreshTokenResponse, error) {
 	// 这里实现具体的刷新令牌数据操作
 	r.log.Infof("尝试刷新令牌数据操作，刷新令牌：%s", refreshToken)
+	// r.atr.IsExistRefreshToken(ctx, )
 	// r.atr.GenerateRefreshToken(ctx, &pb.Auth{
 	// 	Id:   "",
 	// 	Name: "",

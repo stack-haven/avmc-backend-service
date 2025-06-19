@@ -84,6 +84,19 @@ type SecurityUser interface {
 // SecurityUserCreator 定义了从认证声明创建安全用户的函数类型
 type SecurityUserCreator func(*AuthClaims) SecurityUser
 
+// AuthProvider 定义了认证提供者的接口
+// 实现此接口的提供者需要支持创建认证器实例
+type AuthProvider interface {
+	// Name 获取提供者名称
+	// 返回: 提供者名称
+	Name() string
+	// NewAuthenticator 创建新的认证器实例
+	// ctx: 上下文信息
+	// opts: 配置选项
+	// 返回: 认证器实例和可能的错误
+	NewAuthenticator(ctx context.Context, opts ...Option) (Authenticator, error)
+}
+
 // TokenManager 定义了令牌管理的接口
 // 实现此接口的提供者需要支持令牌的创建、验证、刷新和撤销功能
 type TokenManager interface {
@@ -111,17 +124,4 @@ type TokenManager interface {
 	// token: 待撤销的令牌字符串
 	// 返回: 可能的错误
 	RevokeToken(ctx context.Context, token string) error
-}
-
-// AuthProvider 定义了认证提供者的接口
-// 实现此接口的提供者需要支持创建认证器实例
-type AuthProvider interface {
-	// Name 获取提供者名称
-	// 返回: 提供者名称
-	Name() string
-	// NewAuthenticator 创建新的认证器实例
-	// ctx: 上下文信息
-	// opts: 配置选项
-	// 返回: 认证器实例和可能的错误
-	NewAuthenticator(ctx context.Context, opts ...Option) (Authenticator, error)
 }

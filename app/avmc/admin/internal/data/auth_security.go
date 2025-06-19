@@ -11,30 +11,63 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ authn.SecurityUser = (*securityUser)(nil)
+// AuthSecurity 认证安全
+type AuthSecurity struct {
+	log *log.Helper
+}
 
-func NewSecurityUserCreator(logger log.Logger) authn.SecurityUserCreator {
-	log := log.NewHelper(log.With(logger, "module", "auth/securityUserCreator"))
+// NewAuthSecurity 创建新的认证安全实例
+func NewAuthSecurity(logger log.Logger) *AuthSecurity {
+	log := log.NewHelper(log.With(logger, "module", "auth/security/init"))
+	return &AuthSecurity{log: log}
+}
+
+// Name 获取提供者名称
+func (p *AuthSecurity) Name() string {
+	return "admin auth security"
+}
+
+// NewSecurityUserCreator 创建新的认证用户创建器
+func (p *AuthSecurity) NewSecurityUserCreator() authn.SecurityUserCreator {
 	return func(authClaims *authn.AuthClaims) authn.SecurityUser {
 		if authClaims == nil {
-			log.Error("auth claims creator fail ac == nil")
+			p.log.Error("auth claims creator fail ac == nil")
 		}
-		return &securityUser{options: securityOptions{log: log, authClaims: authClaims}}
+		return &securityUser{options: SecurityUserOptions{log: p.log, authClaims: authClaims}}
 	}
 }
 
-func NewSecurityUser(logger log.Logger, authClaims *authn.AuthClaims) authn.SecurityUser {
-	log := log.NewHelper(log.With(logger, "module", "auth/securityUser"))
-	return &securityUser{options: securityOptions{log: log, authClaims: authClaims}}
+// NewAuthenticator 创建新的认证器实例
+func (p *AuthSecurity) NewSecurityUser(authClaims *authn.AuthClaims) authn.SecurityUser {
+	// 创建认证声明
+	user := new(securityUser)
+	user.options = SecurityUserOptions{log: p.log, authClaims: authClaims}
+	return user
 }
 
-type securityOptions struct {
+var _ authn.SecurityUser = (*securityUser)(nil)
+
+type SecurityUserOptions struct {
 	log        *log.Helper
 	authClaims *authn.AuthClaims
 }
 
+type Option func(*SecurityUserOptions)
+
+func WithLog(log *log.Helper) Option {
+	return func(opts *SecurityUserOptions) {
+		opts.log = log
+	}
+}
+
+func WithAuthClaims(authClaims *authn.AuthClaims) Option {
+	return func(opts *SecurityUserOptions) {
+		opts.authClaims = authClaims
+	}
+}
+
 type securityUser struct {
-	options securityOptions
+	options SecurityUserOptions
 	// 角色/主题
 	subject string
 	// 资源/路由
@@ -47,7 +80,7 @@ type securityUser struct {
 
 // GetID returns the security Name.
 func (su *securityUser) Name() string {
-	return "admin security"
+	return "Admin Security User"
 }
 
 // ParseFromContext parses the user from the context.
@@ -63,6 +96,10 @@ func (su *securityUser) ParseFromContext(ctx context.Context) error {
 		// }
 	} else {
 		return errors.New("parse from request header")
+	}
+
+	if su.options.authClaims == nil {
+		su.options.log.Error("auth claims creator fail ac == nil")
 	}
 	su.subject = su.options.authClaims.GetSubject()
 	if su.subject == "" {

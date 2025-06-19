@@ -31,7 +31,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
-	authenticator := data.NewAuthenticator(confServer, logger)
+	authSecurity := data.NewAuthSecurity(logger)
+	authenticator := data.NewAuthenticator(confServer, logger, authSecurity)
 	authTokenRepo := data.NewAuthTokenRepo(dataData, authenticator, logger)
 	authRepo := data.NewAuthRepo(dataData, authTokenRepo, logger)
 	authUsecase := biz.NewAuthUsecase(logger, authRepo)

@@ -17,7 +17,7 @@ var (
 
 // UserRepo is a Greater repo.
 type AuthRepo interface {
-	Login(ctx context.Context, name, password string) (*v1.LoginResponse, error)
+	Login(ctx context.Context, name, password string, domainID uint32) (*v1.LoginResponse, error)
 	Logout(context.Context) error
 	RefreshToken(context.Context, string) (*v1.RefreshTokenResponse, error)
 }
@@ -42,10 +42,10 @@ func NewAuthUsecase(logger log.Logger, repo AuthRepo) *AuthUsecase {
 // Login 处理后台登录业务逻辑
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
-func (uc *AuthUsecase) Login(ctx context.Context, name, password string) (*v1.LoginResponse, error) {
+func (uc *AuthUsecase) Login(ctx context.Context, name, password string, domainID uint32) (*v1.LoginResponse, error) {
 	// 这里实现具体的登录业务逻辑
 	uc.log.Infof("尝试登录，用户名：%s", name)
-	return uc.repo.Login(ctx, name, password)
+	return uc.repo.Login(ctx, name, password, domainID)
 }
 
 // RefreshToken 处理刷新令牌业务逻辑
@@ -54,10 +54,7 @@ func (uc *AuthUsecase) Login(ctx context.Context, name, password string) (*v1.Lo
 func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*v1.RefreshTokenResponse, error) {
 	// 这里实现具体的刷新令牌业务逻辑
 	uc.log.Infof("尝试刷新令牌，刷新令牌：%s", refreshToken)
-	return &v1.RefreshTokenResponse{
-		AccessToken:  "",
-		RefreshToken: "",
-	}, nil
+	return uc.repo.RefreshToken(ctx, refreshToken)
 }
 
 // Logout 处理后台登出业务逻辑

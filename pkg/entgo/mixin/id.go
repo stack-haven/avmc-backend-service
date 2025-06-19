@@ -13,11 +13,11 @@ import (
 	"github.com/bwmarrin/snowflake"
 )
 
-var _ ent.Mixin = (*Id)(nil)
+var _ ent.Mixin = (*ID)(nil)
 
-type Id struct{ mixin.Schema }
+type ID struct{ mixin.Schema }
 
-func (Id) Fields() []ent.Field {
+func (ID) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("id").
 			Comment("id").
@@ -35,36 +35,47 @@ func (Id) Fields() []ent.Field {
 	}
 }
 
-// Indexes of the Id.
-func (Id) Indexes() []ent.Index {
+// Indexes of the ID.
+func (ID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
 	}
 }
 
-var _ ent.Mixin = (*SnowflackId)(nil)
+var _ ent.Mixin = (*SnowflakeID)(nil)
 
-var nodeId = rand.Int63n(9000)
-
-func NewSnowflakeId() snowflake.ID {
-	sf, err := snowflake.NewNode(nodeId)
-	if err != nil {
-		log.Fatalf("snowflake.NewNode(%d): %s", nodeId, err)
-		return 0
-	}
-
-	return sf.Generate()
-}
-
-type SnowflackId struct {
+type SnowflakeID struct {
 	mixin.Schema
+	*snowflake.Node
 }
 
-func (SnowflackId) Fields() []ent.Field {
+func NewSnowflakeID() *SnowflakeID {
+	newSnowflakeID := new(SnowflakeID)
+	if err := newSnowflakeID.Init(); err != nil {
+		log.Fatalf("snowflake.NewNode: %s", err)
+		return nil
+	}
+	return newSnowflakeID
+}
+
+func (s *SnowflakeID) Init() error {
+	if s.Node == nil {
+		nodeID := rand.Int63n(1023)
+		sf, err := snowflake.NewNode(nodeID)
+		if err != nil {
+			log.Fatalf("snowflake.NewNode(%d): %s", nodeID, err)
+			return err
+		}
+		s.Node = sf
+	}
+	return nil
+}
+
+func (s SnowflakeID) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("id").
+		field.Int64("id").
 			Comment("id").
-			DefaultFunc(NewSnowflakeId().Int64).
+			DefaultFunc(s.Uint32()).
 			Positive().
 			Immutable().
 			StructTag(`json:"id,omitempty"`).
@@ -75,9 +86,17 @@ func (SnowflackId) Fields() []ent.Field {
 	}
 }
 
-// Indexes of the snowflackId.
-func (SnowflackId) Indexes() []ent.Index {
+// Indexes of the snowflakeID.
+func (SnowflakeID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
 	}
+}
+
+func (s SnowflakeID) Uint32() uint32 {
+	if err := s.Init(); err != nil {
+		log.Fatalf("snowflakeID.Uint32: %s", err)
+		return 0
+	}
+	return uint32(s.Node.Generate())
 }

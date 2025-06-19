@@ -1096,17 +1096,21 @@ type UserMutation struct {
 	created_at     *time.Time
 	updated_at     *time.Time
 	deleted_at     *time.Time
+	domain_id      *uint32
+	adddomain_id   *int32
 	name           *string
 	password       *string
 	realname       *string
 	nickname       *string
 	email          *string
-	mobile         *string
+	phone          *string
 	avatar         *string
-	gender         *user.Gender
+	gender         *int
+	addgender      *int
 	age            *int
 	addage         *int
-	status         *user.Status
+	status         *int
+	addstatus      *int
 	last_login_at  *time.Time
 	last_login_ip  *string
 	login_count    *int
@@ -1344,6 +1348,62 @@ func (m *UserMutation) ResetDeletedAt() {
 	delete(m.clearedFields, user.FieldDeletedAt)
 }
 
+// SetDomainID sets the "domain_id" field.
+func (m *UserMutation) SetDomainID(u uint32) {
+	m.domain_id = &u
+	m.adddomain_id = nil
+}
+
+// DomainID returns the value of the "domain_id" field in the mutation.
+func (m *UserMutation) DomainID() (r uint32, exists bool) {
+	v := m.domain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDomainID returns the old "domain_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDomainID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+	}
+	return oldValue.DomainID, nil
+}
+
+// AddDomainID adds u to the "domain_id" field.
+func (m *UserMutation) AddDomainID(u int32) {
+	if m.adddomain_id != nil {
+		*m.adddomain_id += u
+	} else {
+		m.adddomain_id = &u
+	}
+}
+
+// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
+func (m *UserMutation) AddedDomainID() (r int32, exists bool) {
+	v := m.adddomain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDomainID resets all changes to the "domain_id" field.
+func (m *UserMutation) ResetDomainID() {
+	m.domain_id = nil
+	m.adddomain_id = nil
+}
+
 // SetName sets the "name" field.
 func (m *UserMutation) SetName(s string) {
 	m.name = &s
@@ -1563,53 +1623,53 @@ func (m *UserMutation) ResetEmail() {
 	delete(m.clearedFields, user.FieldEmail)
 }
 
-// SetMobile sets the "mobile" field.
-func (m *UserMutation) SetMobile(s string) {
-	m.mobile = &s
+// SetPhone sets the "phone" field.
+func (m *UserMutation) SetPhone(s string) {
+	m.phone = &s
 }
 
-// Mobile returns the value of the "mobile" field in the mutation.
-func (m *UserMutation) Mobile() (r string, exists bool) {
-	v := m.mobile
+// Phone returns the value of the "phone" field in the mutation.
+func (m *UserMutation) Phone() (r string, exists bool) {
+	v := m.phone
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldMobile returns the old "mobile" field's value of the User entity.
+// OldPhone returns the old "phone" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldMobile(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldPhone(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMobile is only allowed on UpdateOne operations")
+		return v, errors.New("OldPhone is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMobile requires an ID field in the mutation")
+		return v, errors.New("OldPhone requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMobile: %w", err)
+		return v, fmt.Errorf("querying old value for OldPhone: %w", err)
 	}
-	return oldValue.Mobile, nil
+	return oldValue.Phone, nil
 }
 
-// ClearMobile clears the value of the "mobile" field.
-func (m *UserMutation) ClearMobile() {
-	m.mobile = nil
-	m.clearedFields[user.FieldMobile] = struct{}{}
+// ClearPhone clears the value of the "phone" field.
+func (m *UserMutation) ClearPhone() {
+	m.phone = nil
+	m.clearedFields[user.FieldPhone] = struct{}{}
 }
 
-// MobileCleared returns if the "mobile" field was cleared in this mutation.
-func (m *UserMutation) MobileCleared() bool {
-	_, ok := m.clearedFields[user.FieldMobile]
+// PhoneCleared returns if the "phone" field was cleared in this mutation.
+func (m *UserMutation) PhoneCleared() bool {
+	_, ok := m.clearedFields[user.FieldPhone]
 	return ok
 }
 
-// ResetMobile resets all changes to the "mobile" field.
-func (m *UserMutation) ResetMobile() {
-	m.mobile = nil
-	delete(m.clearedFields, user.FieldMobile)
+// ResetPhone resets all changes to the "phone" field.
+func (m *UserMutation) ResetPhone() {
+	m.phone = nil
+	delete(m.clearedFields, user.FieldPhone)
 }
 
 // SetAvatar sets the "avatar" field.
@@ -1662,12 +1722,13 @@ func (m *UserMutation) ResetAvatar() {
 }
 
 // SetGender sets the "gender" field.
-func (m *UserMutation) SetGender(u user.Gender) {
-	m.gender = &u
+func (m *UserMutation) SetGender(i int) {
+	m.gender = &i
+	m.addgender = nil
 }
 
 // Gender returns the value of the "gender" field in the mutation.
-func (m *UserMutation) Gender() (r user.Gender, exists bool) {
+func (m *UserMutation) Gender() (r int, exists bool) {
 	v := m.gender
 	if v == nil {
 		return
@@ -1678,7 +1739,7 @@ func (m *UserMutation) Gender() (r user.Gender, exists bool) {
 // OldGender returns the old "gender" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldGender(ctx context.Context) (v user.Gender, err error) {
+func (m *UserMutation) OldGender(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldGender is only allowed on UpdateOne operations")
 	}
@@ -1692,9 +1753,28 @@ func (m *UserMutation) OldGender(ctx context.Context) (v user.Gender, err error)
 	return oldValue.Gender, nil
 }
 
+// AddGender adds i to the "gender" field.
+func (m *UserMutation) AddGender(i int) {
+	if m.addgender != nil {
+		*m.addgender += i
+	} else {
+		m.addgender = &i
+	}
+}
+
+// AddedGender returns the value that was added to the "gender" field in this mutation.
+func (m *UserMutation) AddedGender() (r int, exists bool) {
+	v := m.addgender
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetGender resets all changes to the "gender" field.
 func (m *UserMutation) ResetGender() {
 	m.gender = nil
+	m.addgender = nil
 }
 
 // SetAge sets the "age" field.
@@ -1768,12 +1848,13 @@ func (m *UserMutation) ResetAge() {
 }
 
 // SetStatus sets the "status" field.
-func (m *UserMutation) SetStatus(u user.Status) {
-	m.status = &u
+func (m *UserMutation) SetStatus(i int) {
+	m.status = &i
+	m.addstatus = nil
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *UserMutation) Status() (r user.Status, exists bool) {
+func (m *UserMutation) Status() (r int, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -1784,7 +1865,7 @@ func (m *UserMutation) Status() (r user.Status, exists bool) {
 // OldStatus returns the old "status" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldStatus(ctx context.Context) (v user.Status, err error) {
+func (m *UserMutation) OldStatus(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -1798,9 +1879,28 @@ func (m *UserMutation) OldStatus(ctx context.Context) (v user.Status, err error)
 	return oldValue.Status, nil
 }
 
+// AddStatus adds i to the "status" field.
+func (m *UserMutation) AddStatus(i int) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *UserMutation) AddedStatus() (r int, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetStatus resets all changes to the "status" field.
 func (m *UserMutation) ResetStatus() {
 	m.status = nil
+	m.addstatus = nil
 }
 
 // SetLastLoginAt sets the "last_login_at" field.
@@ -2089,7 +2189,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2098,6 +2198,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, user.FieldDeletedAt)
+	}
+	if m.domain_id != nil {
+		fields = append(fields, user.FieldDomainID)
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
@@ -2114,8 +2217,8 @@ func (m *UserMutation) Fields() []string {
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
 	}
-	if m.mobile != nil {
-		fields = append(fields, user.FieldMobile)
+	if m.phone != nil {
+		fields = append(fields, user.FieldPhone)
 	}
 	if m.avatar != nil {
 		fields = append(fields, user.FieldAvatar)
@@ -2158,6 +2261,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case user.FieldDeletedAt:
 		return m.DeletedAt()
+	case user.FieldDomainID:
+		return m.DomainID()
 	case user.FieldName:
 		return m.Name()
 	case user.FieldPassword:
@@ -2168,8 +2273,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Nickname()
 	case user.FieldEmail:
 		return m.Email()
-	case user.FieldMobile:
-		return m.Mobile()
+	case user.FieldPhone:
+		return m.Phone()
 	case user.FieldAvatar:
 		return m.Avatar()
 	case user.FieldGender:
@@ -2203,6 +2308,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case user.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case user.FieldDomainID:
+		return m.OldDomainID(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
 	case user.FieldPassword:
@@ -2213,8 +2320,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldNickname(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
-	case user.FieldMobile:
-		return m.OldMobile(ctx)
+	case user.FieldPhone:
+		return m.OldPhone(ctx)
 	case user.FieldAvatar:
 		return m.OldAvatar(ctx)
 	case user.FieldGender:
@@ -2263,6 +2370,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
+	case user.FieldDomainID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDomainID(v)
+		return nil
 	case user.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -2298,12 +2412,12 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEmail(v)
 		return nil
-	case user.FieldMobile:
+	case user.FieldPhone:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetMobile(v)
+		m.SetPhone(v)
 		return nil
 	case user.FieldAvatar:
 		v, ok := value.(string)
@@ -2313,7 +2427,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetAvatar(v)
 		return nil
 	case user.FieldGender:
-		v, ok := value.(user.Gender)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2327,7 +2441,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetAge(v)
 		return nil
 	case user.FieldStatus:
-		v, ok := value.(user.Status)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2376,8 +2490,17 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
 	var fields []string
+	if m.adddomain_id != nil {
+		fields = append(fields, user.FieldDomainID)
+	}
+	if m.addgender != nil {
+		fields = append(fields, user.FieldGender)
+	}
 	if m.addage != nil {
 		fields = append(fields, user.FieldAge)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, user.FieldStatus)
 	}
 	if m.addlogin_count != nil {
 		fields = append(fields, user.FieldLoginCount)
@@ -2390,8 +2513,14 @@ func (m *UserMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldDomainID:
+		return m.AddedDomainID()
+	case user.FieldGender:
+		return m.AddedGender()
 	case user.FieldAge:
 		return m.AddedAge()
+	case user.FieldStatus:
+		return m.AddedStatus()
 	case user.FieldLoginCount:
 		return m.AddedLoginCount()
 	}
@@ -2403,12 +2532,33 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldDomainID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDomainID(v)
+		return nil
+	case user.FieldGender:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGender(v)
+		return nil
 	case user.FieldAge:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAge(v)
+		return nil
+	case user.FieldStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
 		return nil
 	case user.FieldLoginCount:
 		v, ok := value.(int)
@@ -2437,8 +2587,8 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldEmail) {
 		fields = append(fields, user.FieldEmail)
 	}
-	if m.FieldCleared(user.FieldMobile) {
-		fields = append(fields, user.FieldMobile)
+	if m.FieldCleared(user.FieldPhone) {
+		fields = append(fields, user.FieldPhone)
 	}
 	if m.FieldCleared(user.FieldAvatar) {
 		fields = append(fields, user.FieldAvatar)
@@ -2484,8 +2634,8 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldEmail:
 		m.ClearEmail()
 		return nil
-	case user.FieldMobile:
-		m.ClearMobile()
+	case user.FieldPhone:
+		m.ClearPhone()
 		return nil
 	case user.FieldAvatar:
 		m.ClearAvatar()
@@ -2522,6 +2672,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
+	case user.FieldDomainID:
+		m.ResetDomainID()
+		return nil
 	case user.FieldName:
 		m.ResetName()
 		return nil
@@ -2537,8 +2690,8 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldEmail:
 		m.ResetEmail()
 		return nil
-	case user.FieldMobile:
-		m.ResetMobile()
+	case user.FieldPhone:
+		m.ResetPhone()
 		return nil
 	case user.FieldAvatar:
 		m.ResetAvatar()

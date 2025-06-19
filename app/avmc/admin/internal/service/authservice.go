@@ -39,16 +39,13 @@ func (s *AuthServiceService) Login(ctx context.Context, req *pb.LoginRequest) (*
 	}
 
 	// 调用业务逻辑层
-	resp, err := s.auc.Login(ctx, req.Name, req.Password)
+	resp, err := s.auc.Login(ctx, req.GetName(), req.GetPassword(), req.GetDomainId())
 	if err != nil {
 		s.log.Errorf("登录失败: %v", err)
 		return nil, err
 	}
 
-	return &pb.LoginResponse{
-		AccessToken:  resp.AccessToken,
-		RefreshToken: resp.RefreshToken,
-	}, nil
+	return resp, nil
 }
 
 // RefreshToken 处理刷新令牌请求
@@ -67,10 +64,7 @@ func (s *AuthServiceService) RefreshToken(ctx context.Context, req *pb.RefreshTo
 		return nil, err
 	}
 
-	return &pb.RefreshTokenResponse{
-		AccessToken:  resp.AccessToken,
-		RefreshToken: resp.RefreshToken,
-	}, nil
+	return resp, nil
 }
 
 // Logout 处理后台登出请求

@@ -11,6 +11,34 @@ import (
 	"backend-service/pkg/auth/authn"
 )
 
+var _ authn.AuthProvider = (*JWTProvider)(nil)
+
+// JWTProvider JWT认证提供者
+type JWTProvider struct{}
+
+// NewProvider 创建新的JWT认证提供者
+func NewProvider() authn.AuthProvider {
+	return &JWTProvider{}
+}
+
+// Name 获取提供者名称
+func (p *JWTProvider) Name() string {
+	return "jwt"
+}
+
+// NewAuthenticator 创建新的认证器实例
+func (p *JWTProvider) NewAuthenticator(ctx context.Context, opts ...authn.Option) (authn.Authenticator, error) {
+	// 创建JWT认证器
+	auth := new(JWTAuthenticator)
+	// 使用默认选项
+	auth.options = authn.DefaultOptions()
+	// 初始化认证器
+	if err := auth.Init(ctx, opts...); err != nil {
+		return nil, err
+	}
+	return auth, nil
+}
+
 var _ authn.Authenticator = (*JWTAuthenticator)(nil)
 
 // "iss" // 代表 JWT 的签发者。它是一个字符串或者 URL，用于标识是哪个实体（如服务器、服务提供商等）签发了这个 JWT。
@@ -35,59 +63,6 @@ type JWTAuthenticator struct {
 	verificationKey interface{}
 	// parseTokenFunc 解析令牌函数
 	parseTokenFunc authn.ParseContextTokenFunc
-}
-
-// JWTTokenInfo JWT令牌信息
-type JWTTokenInfo struct {
-	// AccessToken 访问令牌
-	AccessToken string
-	// RefreshToken 刷新令牌
-	RefreshToken string
-	// ExpiresAt 过期时间
-	ExpiresAt time.Time
-	// Claims 声明
-	Claims map[string]interface{}
-}
-
-// GetAccessToken 获取访问令牌
-func (t *JWTTokenInfo) GetAccessToken() string {
-	return t.AccessToken
-}
-
-// GetRefreshToken 获取刷新令牌
-func (t *JWTTokenInfo) GetRefreshToken() string {
-	return t.RefreshToken
-}
-
-// GetExpiresAt 获取过期时间
-func (t *JWTTokenInfo) GetExpiresAt() time.Time {
-	return t.ExpiresAt
-}
-
-// GetClaims 获取令牌声明
-func (t *JWTTokenInfo) GetClaims() map[string]interface{} {
-	return t.Claims
-}
-
-// JWTProvider JWT认证提供者
-type JWTProvider struct{}
-
-// Name 获取提供者名称
-func (p *JWTProvider) Name() string {
-	return "jwt"
-}
-
-// NewAuthenticator 创建新的认证器实例
-func (p *JWTProvider) NewAuthenticator(ctx context.Context, opts ...authn.Option) (authn.Authenticator, error) {
-	// 创建JWT认证器
-	auth := new(JWTAuthenticator)
-	// 使用默认选项
-	auth.options = authn.DefaultOptions()
-	// 初始化认证器
-	if err := auth.Init(ctx, opts...); err != nil {
-		return nil, err
-	}
-	return auth, nil
 }
 
 // Init 初始化认证器
@@ -358,7 +333,34 @@ func (a *JWTAuthenticator) Options() authn.Options {
 	return a.options
 }
 
-// NewProvider 创建新的JWT认证提供者
-func NewProvider() authn.AuthProvider {
-	return &JWTProvider{}
+// JWTTokenInfo JWT令牌信息
+type JWTTokenInfo struct {
+	// AccessToken 访问令牌
+	AccessToken string
+	// RefreshToken 刷新令牌
+	RefreshToken string
+	// ExpiresAt 过期时间
+	ExpiresAt time.Time
+	// Claims 声明
+	Claims map[string]interface{}
+}
+
+// GetAccessToken 获取访问令牌
+func (t *JWTTokenInfo) GetAccessToken() string {
+	return t.AccessToken
+}
+
+// GetRefreshToken 获取刷新令牌
+func (t *JWTTokenInfo) GetRefreshToken() string {
+	return t.RefreshToken
+}
+
+// GetExpiresAt 获取过期时间
+func (t *JWTTokenInfo) GetExpiresAt() time.Time {
+	return t.ExpiresAt
+}
+
+// GetClaims 获取令牌声明
+func (t *JWTTokenInfo) GetClaims() map[string]interface{} {
+	return t.Claims
 }
