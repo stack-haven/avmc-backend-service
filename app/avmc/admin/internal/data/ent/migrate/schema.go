@@ -62,14 +62,16 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true, Nullable: true, Size: 100},
 		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true, Size: 20},
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 255},
-		{Name: "gender", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"mysql": "tinyint"}},
+		{Name: "birthday", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "date"}},
+		{Name: "gender", Type: field.TypeInt32, Default: 0, SchemaType: map[string]string{"mysql": "tinyint"}},
 		{Name: "age", Type: field.TypeInt, Nullable: true},
-		{Name: "status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"mysql": "tinyint"}},
+		{Name: "status", Type: field.TypeInt32, Default: 1, SchemaType: map[string]string{"mysql": "tinyint"}},
 		{Name: "last_login_at", Type: field.TypeTime, Nullable: true},
 		{Name: "last_login_ip", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "login_count", Type: field.TypeInt, Default: 0},
 		{Name: "settings", Type: field.TypeJSON, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 255},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -100,7 +102,7 @@ var (
 			{
 				Name:    "user_status",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[14]},
+				Columns: []*schema.Column{UsersColumns[15]},
 			},
 			{
 				Name:    "user_email",

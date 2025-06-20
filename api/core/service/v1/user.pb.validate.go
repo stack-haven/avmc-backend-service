@@ -17,6 +17,8 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/protobuf/types/known/anypb"
+
+	enum "backend-service/api/common/enum"
 )
 
 // ensure the imports are used
@@ -33,6 +35,8 @@ var (
 	_ = (*mail.Address)(nil)
 	_ = anypb.Any{}
 	_ = sort.Sort
+
+	_ = enum.Gender(0)
 )
 
 // Validate checks the field values on User with the rules defined in the proto
@@ -73,11 +77,26 @@ func (m *User) validate(all bool) error {
 
 	}
 
-	if m.NickName != nil {
+	if m.Password != nil {
 
-		if l := utf8.RuneCountInString(m.GetNickName()); l < 1 || l > 10 {
+		if l := utf8.RuneCountInString(m.GetPassword()); l < 6 || l > 28 {
 			err := UserValidationError{
-				field:  "NickName",
+				field:  "Password",
+				reason: "value length must be between 6 and 28 runes, inclusive",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
+	if m.Nickname != nil {
+
+		if l := utf8.RuneCountInString(m.GetNickname()); l < 1 || l > 10 {
+			err := UserValidationError{
+				field:  "Nickname",
 				reason: "value length must be between 1 and 10 runes, inclusive",
 			}
 			if !all {
@@ -88,11 +107,11 @@ func (m *User) validate(all bool) error {
 
 	}
 
-	if m.RealName != nil {
+	if m.Realname != nil {
 
-		if l := utf8.RuneCountInString(m.GetRealName()); l < 2 || l > 10 {
+		if l := utf8.RuneCountInString(m.GetRealname()); l < 2 || l > 10 {
 			err := UserValidationError{
-				field:  "RealName",
+				field:  "Realname",
 				reason: "value length must be between 2 and 10 runes, inclusive",
 			}
 			if !all {
@@ -120,10 +139,10 @@ func (m *User) validate(all bool) error {
 
 	if m.Gender != nil {
 
-		if m.GetGender() < 0 {
+		if _, ok := enum.Gender_name[int32(m.GetGender())]; !ok {
 			err := UserValidationError{
 				field:  "Gender",
-				reason: "value must be greater than or equal to 0",
+				reason: "value must be one of the defined enum values",
 			}
 			if !all {
 				return err
@@ -168,11 +187,11 @@ func (m *User) validate(all bool) error {
 		// no validation rules for Avatar
 	}
 
-	if m.State != nil {
+	if m.Status != nil {
 
-		if m.GetState() < 0 {
+		if m.GetStatus() < 0 {
 			err := UserValidationError{
-				field:  "State",
+				field:  "Status",
 				reason: "value must be greater than or equal to 0",
 			}
 			if !all {
@@ -189,29 +208,6 @@ func (m *User) validate(all bool) error {
 
 	if m.UpdatedAt != nil {
 		// no validation rules for UpdatedAt
-	}
-
-	if m.CreatorId != nil {
-		// no validation rules for CreatorId
-	}
-
-	if m.Authority != nil {
-		// no validation rules for Authority
-	}
-
-	if m.Password != nil {
-
-		if l := utf8.RuneCountInString(m.GetPassword()); l < 6 || l > 28 {
-			err := UserValidationError{
-				field:  "Password",
-				reason: "value length must be between 6 and 28 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
 	}
 
 	if m.Description != nil {
@@ -1131,106 +1127,6 @@ var _ interface {
 	ErrorName() string
 } = GetUserRequestValidationError{}
 
-// Validate checks the field values on GetUserResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *GetUserResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GetUserResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GetUserResponseMultiError, or nil if none found.
-func (m *GetUserResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GetUserResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return GetUserResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// GetUserResponseMultiError is an error wrapping multiple validation errors
-// returned by GetUserResponse.ValidateAll() if the designated constraints
-// aren't met.
-type GetUserResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GetUserResponseMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GetUserResponseMultiError) AllErrors() []error { return m }
-
-// GetUserResponseValidationError is the validation error returned by
-// GetUserResponse.Validate if the designated constraints aren't met.
-type GetUserResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GetUserResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GetUserResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GetUserResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GetUserResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GetUserResponseValidationError) ErrorName() string { return "GetUserResponseValidationError" }
-
-// Error satisfies the builtin error interface
-func (e GetUserResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGetUserResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GetUserResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GetUserResponseValidationError{}
-
 // Validate checks the field values on GetUserByNameRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1335,149 +1231,44 @@ var _ interface {
 	ErrorName() string
 } = GetUserByNameRequestValidationError{}
 
-// Validate checks the field values on ListUserRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *ListUserRequest) Validate() error {
+// Validate checks the field values on GetUserByPhoneRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserByPhoneRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on ListUserRequest with the rules
+// ValidateAll checks the field values on GetUserByPhoneRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// ListUserRequestMultiError, or nil if none found.
-func (m *ListUserRequest) ValidateAll() error {
+// GetUserByPhoneRequestMultiError, or nil if none found.
+func (m *GetUserByPhoneRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *ListUserRequest) validate(all bool) error {
+func (m *GetUserByPhoneRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetFieldMask()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListUserRequestValidationError{
-					field:  "FieldMask",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListUserRequestValidationError{
-					field:  "FieldMask",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetFieldMask()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ListUserRequestValidationError{
-				field:  "FieldMask",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if m.Page != nil {
-		// no validation rules for Page
-	}
-
-	if m.PageSize != nil {
-		// no validation rules for PageSize
-	}
-
-	if m.Query != nil {
-
-		if all {
-			switch v := interface{}(m.GetQuery()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListUserRequestValidationError{
-						field:  "Query",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ListUserRequestValidationError{
-						field:  "Query",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetQuery()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ListUserRequestValidationError{
-					field:  "Query",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if m.OrQuery != nil {
-
-		if all {
-			switch v := interface{}(m.GetOrQuery()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListUserRequestValidationError{
-						field:  "OrQuery",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ListUserRequestValidationError{
-						field:  "OrQuery",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetOrQuery()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ListUserRequestValidationError{
-					field:  "OrQuery",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if m.NoPaging != nil {
-		// no validation rules for NoPaging
-	}
+	// no validation rules for Phone
 
 	if len(errors) > 0 {
-		return ListUserRequestMultiError(errors)
+		return GetUserByPhoneRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// ListUserRequestMultiError is an error wrapping multiple validation errors
-// returned by ListUserRequest.ValidateAll() if the designated constraints
-// aren't met.
-type ListUserRequestMultiError []error
+// GetUserByPhoneRequestMultiError is an error wrapping multiple validation
+// errors returned by GetUserByPhoneRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetUserByPhoneRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m ListUserRequestMultiError) Error() string {
+func (m GetUserByPhoneRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1486,11 +1277,11 @@ func (m ListUserRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m ListUserRequestMultiError) AllErrors() []error { return m }
+func (m GetUserByPhoneRequestMultiError) AllErrors() []error { return m }
 
-// ListUserRequestValidationError is the validation error returned by
-// ListUserRequest.Validate if the designated constraints aren't met.
-type ListUserRequestValidationError struct {
+// GetUserByPhoneRequestValidationError is the validation error returned by
+// GetUserByPhoneRequest.Validate if the designated constraints aren't met.
+type GetUserByPhoneRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1498,22 +1289,24 @@ type ListUserRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e ListUserRequestValidationError) Field() string { return e.field }
+func (e GetUserByPhoneRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ListUserRequestValidationError) Reason() string { return e.reason }
+func (e GetUserByPhoneRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ListUserRequestValidationError) Cause() error { return e.cause }
+func (e GetUserByPhoneRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ListUserRequestValidationError) Key() bool { return e.key }
+func (e GetUserByPhoneRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ListUserRequestValidationError) ErrorName() string { return "ListUserRequestValidationError" }
+func (e GetUserByPhoneRequestValidationError) ErrorName() string {
+	return "GetUserByPhoneRequestValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e ListUserRequestValidationError) Error() string {
+func (e GetUserByPhoneRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1525,14 +1318,14 @@ func (e ListUserRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sListUserRequest.%s: %s%s",
+		"invalid %sGetUserByPhoneRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ListUserRequestValidationError{}
+var _ error = GetUserByPhoneRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1540,7 +1333,136 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ListUserRequestValidationError{}
+} = GetUserByPhoneRequestValidationError{}
+
+// Validate checks the field values on GetUserResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *GetUserResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetUserResponseMultiError, or nil if none found.
+func (m *GetUserResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetUser()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetUserResponseValidationError{
+					field:  "User",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetUserResponseValidationError{
+					field:  "User",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetUserResponseValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return GetUserResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserResponseMultiError is an error wrapping multiple validation errors
+// returned by GetUserResponse.ValidateAll() if the designated constraints
+// aren't met.
+type GetUserResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserResponseMultiError) AllErrors() []error { return m }
+
+// GetUserResponseValidationError is the validation error returned by
+// GetUserResponse.Validate if the designated constraints aren't met.
+type GetUserResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserResponseValidationError) ErrorName() string { return "GetUserResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetUserResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserResponseValidationError{}
 
 // Validate checks the field values on ListUserResponse with the rules defined
 // in the proto definition for this message. If any rules are violated, the

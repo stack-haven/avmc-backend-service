@@ -88,14 +88,16 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldEmail:       {Type: field.TypeString, Column: user.FieldEmail},
 			user.FieldPhone:       {Type: field.TypeString, Column: user.FieldPhone},
 			user.FieldAvatar:      {Type: field.TypeString, Column: user.FieldAvatar},
-			user.FieldGender:      {Type: field.TypeInt, Column: user.FieldGender},
+			user.FieldBirthday:    {Type: field.TypeTime, Column: user.FieldBirthday},
+			user.FieldGender:      {Type: field.TypeInt32, Column: user.FieldGender},
 			user.FieldAge:         {Type: field.TypeInt, Column: user.FieldAge},
-			user.FieldStatus:      {Type: field.TypeInt, Column: user.FieldStatus},
+			user.FieldStatus:      {Type: field.TypeInt32, Column: user.FieldStatus},
 			user.FieldLastLoginAt: {Type: field.TypeTime, Column: user.FieldLastLoginAt},
 			user.FieldLastLoginIP: {Type: field.TypeString, Column: user.FieldLastLoginIP},
 			user.FieldLoginCount:  {Type: field.TypeInt, Column: user.FieldLoginCount},
 			user.FieldSettings:    {Type: field.TypeJSON, Column: user.FieldSettings},
 			user.FieldMetadata:    {Type: field.TypeJSON, Column: user.FieldMetadata},
+			user.FieldDescription: {Type: field.TypeString, Column: user.FieldDescription},
 		},
 	}
 	return graph
@@ -362,8 +364,13 @@ func (f *UserFilter) WhereAvatar(p entql.StringP) {
 	f.Where(p.Field(user.FieldAvatar))
 }
 
-// WhereGender applies the entql int predicate on the gender field.
-func (f *UserFilter) WhereGender(p entql.IntP) {
+// WhereBirthday applies the entql time.Time predicate on the birthday field.
+func (f *UserFilter) WhereBirthday(p entql.TimeP) {
+	f.Where(p.Field(user.FieldBirthday))
+}
+
+// WhereGender applies the entql int32 predicate on the gender field.
+func (f *UserFilter) WhereGender(p entql.Int32P) {
 	f.Where(p.Field(user.FieldGender))
 }
 
@@ -372,8 +379,8 @@ func (f *UserFilter) WhereAge(p entql.IntP) {
 	f.Where(p.Field(user.FieldAge))
 }
 
-// WhereStatus applies the entql int predicate on the status field.
-func (f *UserFilter) WhereStatus(p entql.IntP) {
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *UserFilter) WhereStatus(p entql.Int32P) {
 	f.Where(p.Field(user.FieldStatus))
 }
 
@@ -400,4 +407,9 @@ func (f *UserFilter) WhereSettings(p entql.BytesP) {
 // WhereMetadata applies the entql json.RawMessage predicate on the metadata field.
 func (f *UserFilter) WhereMetadata(p entql.BytesP) {
 	f.Where(p.Field(user.FieldMetadata))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *UserFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(user.FieldDescription))
 }

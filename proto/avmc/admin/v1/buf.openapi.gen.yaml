@@ -8,9 +8,9 @@ managed:
 
   disable:
     - module: buf.build/googleapis/googleapis
+    - module: 'buf.build/gnostic/gnostic'
     - module: 'buf.build/envoyproxy/protoc-gen-validate'
     - module: 'buf.build/kratos/apis'
-    - module: 'buf.build/gnostic/gnostic'
     - module: 'buf.build/gogo/protobuf'
 
   override:
@@ -23,6 +23,9 @@ inputs:
       - ./avmc/admin/v1
 
 plugins:
+  # - plugin: openapi
+  #   out: ../app/avmc/admin/cmd/server/assets
+  #   opt: logtostderr=true,output_format=yaml
   # generate openapi v2 json doc
   #  - local: protoc-gen-openapiv2
   #    out: ../app/admin/service/cmd/server/assets

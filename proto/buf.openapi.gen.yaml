@@ -23,6 +23,9 @@ inputs:
       - ./avmc/admin/v1
 
 plugins:
+  - plugin: openapi
+    out: gen/openapi
+    opt: logtostderr=true,output_format=yaml
   # generate openapi v2 json doc
   #  - local: protoc-gen-openapiv2
   #    out: ../app/admin/service/cmd/server/assets

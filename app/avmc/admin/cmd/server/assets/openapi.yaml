@@ -3,16 +3,16 @@
 
 openapi: 3.0.3
 info:
-    title: Admin AVMC Auth API
-    description: 后台管理脚手架系统-认证服务
+    title: AVMC Admin Auth API
+    description: AVMC 后台管理脚手架系统-认证服务
     contact:
-        name: SAAS架构
+        name: AVMC Admin架构
         url: https://github.com/grpc-ecosystem/grpc-gateway
-        email: none@example.com
+        email: 737043980@qq.com
     license:
         name: BSD 3-Clause License
         url: https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt
-    version: "1.0"
+    version: 1.0.0
 paths:
     /admin/v1/depts:
         get:
@@ -176,11 +176,13 @@ paths:
                                 $ref: '#/components/schemas/DeleteDeptResponse'
             security:
                 - OAuth2PasswordBearer: []
-    /avmc/v1/login:
+    /avmc/v1/auth/login:
         post:
             tags:
                 - AuthService
-            description: 后台登陆
+                - 认证服务
+            summary: 用户登录
+            description: 通过用户名和密码登录系统
             operationId: AuthService_Login
             requestBody:
                 content:
@@ -195,7 +197,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LoginResponse'
-    /avmc/v1/logout:
+    /avmc/v1/auth/logout:
         post:
             tags:
                 - AuthService
@@ -214,6 +216,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LogoutResponse'
+            security:
+                - OAuth2PasswordBearer: []
+    /avmc/v1/auth/refresh-token:
+        post:
+            tags:
+                - AuthService
+            description: |-
+                刷新令牌
+                 @param RefreshTokenRequest 请求参数，包含刷新令牌
+                 @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
+            operationId: AuthService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RefreshTokenResponse'
             security:
                 - OAuth2PasswordBearer: []
     /avmc/v1/menus:
@@ -538,30 +564,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/DeletePostResponse'
-            security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/refresh-token:
-        post:
-            tags:
-                - AuthService
-            description: |-
-                刷新令牌
-                 @param RefreshTokenRequest 请求参数，包含刷新令牌
-                 @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
-            operationId: AuthService_RefreshToken
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/RefreshTokenRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/RefreshTokenResponse'
             security:
                 - OAuth2PasswordBearer: []
     /avmc/v1/roles:
@@ -1003,8 +1005,13 @@ components:
             properties:
                 name:
                     type: string
+                    description: 登录用户
                 password:
                     type: string
+                    description: 密码
+                domainId:
+                    type: integer
+                    format: uint32
                 grandType:
                     enum:
                         - GRAND_TYPE_UNSPECIFIED
@@ -1026,6 +1033,8 @@ components:
                 accessToken:
                     type: string
                 refreshToken:
+                    type: string
+                expiresIn:
                     type: string
             description: 用户后台登陆 - 回应
         LogoutRequest:
@@ -1119,6 +1128,7 @@ components:
             properties:
                 refreshToken:
                     type: string
+                    description: 刷新令牌
             description: 请求 - 刷新令牌
         RefreshTokenResponse:
             type: object
@@ -1191,41 +1201,52 @@ components:
                     format: uint32
                 name:
                     type: string
-                nickName:
+                    description: 用户名
+                password:
                     type: string
-                realName:
+                    description: 密码
+                nickname:
                     type: string
+                    description: 昵称
+                realname:
+                    type: string
+                    description: 真实姓名
                 birthday:
                     type: string
+                    description: 生日
                 gender:
-                    type: integer
-                    format: int32
+                    enum:
+                        - GENDER_UNSPECIFIED
+                        - GENDER_MALE
+                        - GENDER_FEMALE
+                        - GENDER_OTHER
+                    type: string
+                    description: 性别 0 未知 1 男 2 女
+                    format: enum
                 phone:
                     type: string
+                    description: 手机号
                 email:
                     type: string
+                    description: 电子邮箱
                 avatar:
                     type: string
-                state:
+                    description: 头像
+                status:
                     type: integer
-                    description: 状态 1 激活 2 未激活 3 禁用
+                    description: 状态 0 未知 1 激活 2 未激活 3 禁用
                     format: int32
                 createdAt:
                     type: string
+                    description: 创建时间
                 updatedAt:
                     type: string
-                creatorId:
-                    type: integer
-                    description: 创建者ID
-                    format: uint32
-                authority:
-                    type: integer
-                    description: 权限
-                    format: int32
-                password:
-                    type: string
+                    description: 更新时间
                 description:
                     type: string
+                    description: 个人说明
+security:
+    - OAuth2PasswordBearer: []
 tags:
     - name: AuthService
       description: The greeting service definition.

@@ -35,6 +35,8 @@ const (
 	FieldPhone = "phone"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
+	// FieldBirthday holds the string denoting the birthday field in the database.
+	FieldBirthday = "birthday"
 	// FieldGender holds the string denoting the gender field in the database.
 	FieldGender = "gender"
 	// FieldAge holds the string denoting the age field in the database.
@@ -51,6 +53,8 @@ const (
 	FieldSettings = "settings"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -69,6 +73,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldPhone,
 	FieldAvatar,
+	FieldBirthday,
 	FieldGender,
 	FieldAge,
 	FieldStatus,
@@ -77,6 +82,7 @@ var Columns = []string{
 	FieldLoginCount,
 	FieldSettings,
 	FieldMetadata,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -115,19 +121,21 @@ var (
 	// AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
 	AvatarValidator func(string) error
 	// DefaultGender holds the default value on creation for the "gender" field.
-	DefaultGender int
+	DefaultGender int32
 	// GenderValidator is a validator for the "gender" field. It is called by the builders before save.
-	GenderValidator func(int) error
+	GenderValidator func(int32) error
 	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
 	AgeValidator func(int) error
 	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus int
+	DefaultStatus int32
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	StatusValidator func(int) error
+	StatusValidator func(int32) error
 	// LastLoginIPValidator is a validator for the "last_login_ip" field. It is called by the builders before save.
 	LastLoginIPValidator func(string) error
 	// DefaultLoginCount holds the default value on creation for the "login_count" field.
 	DefaultLoginCount int
+	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	DescriptionValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -195,6 +203,11 @@ func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
 }
 
+// ByBirthday orders the results by the birthday field.
+func ByBirthday(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBirthday, opts...).ToFunc()
+}
+
 // ByGender orders the results by the gender field.
 func ByGender(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGender, opts...).ToFunc()
@@ -223,4 +236,9 @@ func ByLastLoginIP(opts ...sql.OrderTermOption) OrderOption {
 // ByLoginCount orders the results by the login_count field.
 func ByLoginCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLoginCount, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }

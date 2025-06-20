@@ -1105,18 +1105,20 @@ type UserMutation struct {
 	email          *string
 	phone          *string
 	avatar         *string
-	gender         *int
-	addgender      *int
+	birthday       *time.Time
+	gender         *int32
+	addgender      *int32
 	age            *int
 	addage         *int
-	status         *int
-	addstatus      *int
+	status         *int32
+	addstatus      *int32
 	last_login_at  *time.Time
 	last_login_ip  *string
 	login_count    *int
 	addlogin_count *int
 	settings       *map[string]interface{}
 	metadata       *map[string]interface{}
+	description    *string
 	clearedFields  map[string]struct{}
 	done           bool
 	oldValue       func(context.Context) (*User, error)
@@ -1721,14 +1723,63 @@ func (m *UserMutation) ResetAvatar() {
 	delete(m.clearedFields, user.FieldAvatar)
 }
 
+// SetBirthday sets the "birthday" field.
+func (m *UserMutation) SetBirthday(t time.Time) {
+	m.birthday = &t
+}
+
+// Birthday returns the value of the "birthday" field in the mutation.
+func (m *UserMutation) Birthday() (r time.Time, exists bool) {
+	v := m.birthday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBirthday returns the old "birthday" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldBirthday(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBirthday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBirthday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBirthday: %w", err)
+	}
+	return oldValue.Birthday, nil
+}
+
+// ClearBirthday clears the value of the "birthday" field.
+func (m *UserMutation) ClearBirthday() {
+	m.birthday = nil
+	m.clearedFields[user.FieldBirthday] = struct{}{}
+}
+
+// BirthdayCleared returns if the "birthday" field was cleared in this mutation.
+func (m *UserMutation) BirthdayCleared() bool {
+	_, ok := m.clearedFields[user.FieldBirthday]
+	return ok
+}
+
+// ResetBirthday resets all changes to the "birthday" field.
+func (m *UserMutation) ResetBirthday() {
+	m.birthday = nil
+	delete(m.clearedFields, user.FieldBirthday)
+}
+
 // SetGender sets the "gender" field.
-func (m *UserMutation) SetGender(i int) {
+func (m *UserMutation) SetGender(i int32) {
 	m.gender = &i
 	m.addgender = nil
 }
 
 // Gender returns the value of the "gender" field in the mutation.
-func (m *UserMutation) Gender() (r int, exists bool) {
+func (m *UserMutation) Gender() (r int32, exists bool) {
 	v := m.gender
 	if v == nil {
 		return
@@ -1739,7 +1790,7 @@ func (m *UserMutation) Gender() (r int, exists bool) {
 // OldGender returns the old "gender" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldGender(ctx context.Context) (v int, err error) {
+func (m *UserMutation) OldGender(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldGender is only allowed on UpdateOne operations")
 	}
@@ -1754,7 +1805,7 @@ func (m *UserMutation) OldGender(ctx context.Context) (v int, err error) {
 }
 
 // AddGender adds i to the "gender" field.
-func (m *UserMutation) AddGender(i int) {
+func (m *UserMutation) AddGender(i int32) {
 	if m.addgender != nil {
 		*m.addgender += i
 	} else {
@@ -1763,7 +1814,7 @@ func (m *UserMutation) AddGender(i int) {
 }
 
 // AddedGender returns the value that was added to the "gender" field in this mutation.
-func (m *UserMutation) AddedGender() (r int, exists bool) {
+func (m *UserMutation) AddedGender() (r int32, exists bool) {
 	v := m.addgender
 	if v == nil {
 		return
@@ -1848,13 +1899,13 @@ func (m *UserMutation) ResetAge() {
 }
 
 // SetStatus sets the "status" field.
-func (m *UserMutation) SetStatus(i int) {
+func (m *UserMutation) SetStatus(i int32) {
 	m.status = &i
 	m.addstatus = nil
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *UserMutation) Status() (r int, exists bool) {
+func (m *UserMutation) Status() (r int32, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -1865,7 +1916,7 @@ func (m *UserMutation) Status() (r int, exists bool) {
 // OldStatus returns the old "status" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldStatus(ctx context.Context) (v int, err error) {
+func (m *UserMutation) OldStatus(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -1880,7 +1931,7 @@ func (m *UserMutation) OldStatus(ctx context.Context) (v int, err error) {
 }
 
 // AddStatus adds i to the "status" field.
-func (m *UserMutation) AddStatus(i int) {
+func (m *UserMutation) AddStatus(i int32) {
 	if m.addstatus != nil {
 		*m.addstatus += i
 	} else {
@@ -1889,7 +1940,7 @@ func (m *UserMutation) AddStatus(i int) {
 }
 
 // AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *UserMutation) AddedStatus() (r int, exists bool) {
+func (m *UserMutation) AddedStatus() (r int32, exists bool) {
 	v := m.addstatus
 	if v == nil {
 		return
@@ -2155,6 +2206,55 @@ func (m *UserMutation) ResetMetadata() {
 	delete(m.clearedFields, user.FieldMetadata)
 }
 
+// SetDescription sets the "description" field.
+func (m *UserMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *UserMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *UserMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[user.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *UserMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[user.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *UserMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, user.FieldDescription)
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -2189,7 +2289,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 21)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2223,6 +2323,9 @@ func (m *UserMutation) Fields() []string {
 	if m.avatar != nil {
 		fields = append(fields, user.FieldAvatar)
 	}
+	if m.birthday != nil {
+		fields = append(fields, user.FieldBirthday)
+	}
 	if m.gender != nil {
 		fields = append(fields, user.FieldGender)
 	}
@@ -2246,6 +2349,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.metadata != nil {
 		fields = append(fields, user.FieldMetadata)
+	}
+	if m.description != nil {
+		fields = append(fields, user.FieldDescription)
 	}
 	return fields
 }
@@ -2277,6 +2383,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Phone()
 	case user.FieldAvatar:
 		return m.Avatar()
+	case user.FieldBirthday:
+		return m.Birthday()
 	case user.FieldGender:
 		return m.Gender()
 	case user.FieldAge:
@@ -2293,6 +2401,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Settings()
 	case user.FieldMetadata:
 		return m.Metadata()
+	case user.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -2324,6 +2434,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPhone(ctx)
 	case user.FieldAvatar:
 		return m.OldAvatar(ctx)
+	case user.FieldBirthday:
+		return m.OldBirthday(ctx)
 	case user.FieldGender:
 		return m.OldGender(ctx)
 	case user.FieldAge:
@@ -2340,6 +2452,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldSettings(ctx)
 	case user.FieldMetadata:
 		return m.OldMetadata(ctx)
+	case user.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2426,8 +2540,15 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAvatar(v)
 		return nil
+	case user.FieldBirthday:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBirthday(v)
+		return nil
 	case user.FieldGender:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2441,7 +2562,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetAge(v)
 		return nil
 	case user.FieldStatus:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2481,6 +2602,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMetadata(v)
+		return nil
+	case user.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -2540,7 +2668,7 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		m.AddDomainID(v)
 		return nil
 	case user.FieldGender:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2554,7 +2682,7 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		m.AddAge(v)
 		return nil
 	case user.FieldStatus:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2593,6 +2721,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldAvatar) {
 		fields = append(fields, user.FieldAvatar)
 	}
+	if m.FieldCleared(user.FieldBirthday) {
+		fields = append(fields, user.FieldBirthday)
+	}
 	if m.FieldCleared(user.FieldAge) {
 		fields = append(fields, user.FieldAge)
 	}
@@ -2607,6 +2738,9 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldMetadata) {
 		fields = append(fields, user.FieldMetadata)
+	}
+	if m.FieldCleared(user.FieldDescription) {
+		fields = append(fields, user.FieldDescription)
 	}
 	return fields
 }
@@ -2640,6 +2774,9 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldAvatar:
 		m.ClearAvatar()
 		return nil
+	case user.FieldBirthday:
+		m.ClearBirthday()
+		return nil
 	case user.FieldAge:
 		m.ClearAge()
 		return nil
@@ -2654,6 +2791,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldMetadata:
 		m.ClearMetadata()
+		return nil
+	case user.FieldDescription:
+		m.ClearDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -2696,6 +2836,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldAvatar:
 		m.ResetAvatar()
 		return nil
+	case user.FieldBirthday:
+		m.ResetBirthday()
+		return nil
 	case user.FieldGender:
 		m.ResetGender()
 		return nil
@@ -2719,6 +2862,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldMetadata:
 		m.ResetMetadata()
+		return nil
+	case user.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

@@ -17,28 +17,52 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 
 option (gnostic.openapi.v3.document) = {
   info: {
-    title: "Admin AVMC Auth API";
-    description: "后台管理脚手架系统-认证服务";
-    version: "1.0";
+    title: "AVMC Admin Auth API";
+    description: "AVMC 后台管理脚手架系统-认证服务";
+    version: "1.0.0";
 		contact: {
-			name: "AVMC架构";
+			name: "AVMC Admin架构";
 			url: "https://github.com/grpc-ecosystem/grpc-gateway";
-			email: "none@example.com";
+			email: "737043980@qq.com";
 		};
 		license: {
 			name: "BSD 3-Clause License";
 			url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
 		};
   }
+  security: {
+    additional_properties: [{
+      name: "OAuth2PasswordBearer"
+      value: {
+        // type: "http"
+        // scheme: "bearer"
+        // bearer_format: "JWT"
+      }
+    }]
+  }
 };
 
 // The greeting service definition.
 service AuthService {
+  // option (gnostic.openapi.v3.server) = {
+  //   id: "auth"
+  //   title: "认证服务"
+  //   description: "用于处理用户登录、登出等认证相关操作"
+  //   external_docs: {
+  //     description: "更多认证服务信息"
+  //     url: "https://example.com/docs/auth"
+  //   }
+  // };
   // 后台登陆
   rpc Login (LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/login"
+      post: "/avmc/v1/auth/login"
       body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "用户登录"
+      description: "通过用户名和密码登录系统"
+      tags: ["认证服务"]
     };
   }
   
@@ -47,7 +71,7 @@ service AuthService {
   // @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/refresh-token"
+      post: "/avmc/v1/auth/refresh-token"
       body: "*"
     };
     
@@ -59,7 +83,7 @@ service AuthService {
   // 后台登出
   rpc Logout (LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/logout"
+      post: "/avmc/v1/auth/logout"
       body: "*"
     };
 
@@ -86,8 +110,15 @@ message Auth {
 
 // 用户后台登陆 - 请求
 message LoginRequest {
-  string name = 1 [(validate.rules).string = {min_len: 1, max_len: 10}, (buf.validate.field).string.min_len = 1]; // 账号
-  string password = 2 [(validate.rules).string = {min_len: 6, max_len: 25}]; // 密码
+  string name = 1 [
+    (validate.rules).string = {min_len: 1, max_len: 10},
+    (buf.validate.field).string.min_len = 1,
+    (gnostic.openapi.v3.property) = {description: "登录用户"}
+  ]; // 账号
+  string password = 2 [
+    (validate.rules).string = {min_len: 6, max_len: 25},
+    (gnostic.openapi.v3.property) = {description: "密码"}
+  ]; // 密码
   optional uint32 domain_id = 3; // 域ID
   optional GrandType grand_type = 4; // 授权类型，一直为：password
 }
@@ -104,7 +135,10 @@ message LoginResponse {
 
 // 请求 - 刷新令牌
 message RefreshTokenRequest {
-  string refresh_token = 1 [(validate.rules).string.min_len = 1]; // 刷新令牌
+  string refresh_token = 1 [
+    (validate.rules).string.min_len = 1,
+    (gnostic.openapi.v3.property) = {description: "刷新令牌"}
+  ]; // 刷新令牌
 }
 
 // 回应 - 刷新令牌

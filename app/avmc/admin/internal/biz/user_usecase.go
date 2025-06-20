@@ -20,7 +20,8 @@ type UserRepo interface {
 	Save(context.Context, *pbCore.User) (*pbCore.User, error)
 	Update(context.Context, *pbCore.User) (*pbCore.User, error)
 	FindByID(context.Context, uint32) (*pbCore.User, error)
-	ListByHello(context.Context, string) ([]*pbCore.User, error)
+	ListByName(context.Context, string) ([]*pbCore.User, error)
+	ListByPhone(context.Context, string) ([]*pbCore.User, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
 }
 

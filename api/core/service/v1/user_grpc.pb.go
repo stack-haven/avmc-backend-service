@@ -26,6 +26,7 @@ const (
 	UserService_GetUser_FullMethodName        = "/core.service.v1.UserService/GetUser"
 	UserService_ListUser_FullMethodName       = "/core.service.v1.UserService/ListUser"
 	UserService_GetUserByName_FullMethodName  = "/core.service.v1.UserService/GetUserByName"
+	UserService_GetUserByPhone_FullMethodName = "/core.service.v1.UserService/GetUserByPhone"
 	UserService_VerifyPassword_FullMethodName = "/core.service.v1.UserService/VerifyPassword"
 	UserService_UserExists_FullMethodName     = "/core.service.v1.UserService/UserExists"
 )
@@ -34,13 +35,20 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	// 创建用户
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	// 更新用户
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
+	// 删除用户
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
-	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
+	// 获取用户
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	// 分页查询用户
 	ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
 	// 查询用户详情
-	GetUserByName(ctx context.Context, in *GetUserByNameRequest, opts ...grpc.CallOption) (*User, error)
+	GetUserByName(ctx context.Context, in *GetUserByNameRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	// 根据手机号查询用户详情
+	GetUserByPhone(ctx context.Context, in *GetUserByPhoneRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	// 验证密码
 	VerifyPassword(ctx context.Context, in *VerifyPasswordRequest, opts ...grpc.CallOption) (*VerifyPasswordResponse, error)
 	// 用户是否存在
@@ -85,9 +93,9 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReques
 	return out, nil
 }
 
-func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(User)
+	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -105,10 +113,20 @@ func (c *userServiceClient) ListUser(ctx context.Context, in *pagination.PagingR
 	return out, nil
 }
 
-func (c *userServiceClient) GetUserByName(ctx context.Context, in *GetUserByNameRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userServiceClient) GetUserByName(ctx context.Context, in *GetUserByNameRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(User)
+	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, UserService_GetUserByName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUserByPhone(ctx context.Context, in *GetUserByPhoneRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserByPhone_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -139,13 +157,20 @@ func (c *userServiceClient) UserExists(ctx context.Context, in *UserExistsReques
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
+	// 创建用户
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	// 更新用户
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
+	// 删除用户
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
-	GetUser(context.Context, *GetUserRequest) (*User, error)
+	// 获取用户
+	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	// 分页查询用户
 	ListUser(context.Context, *pagination.PagingRequest) (*ListUserResponse, error)
 	// 查询用户详情
-	GetUserByName(context.Context, *GetUserByNameRequest) (*User, error)
+	GetUserByName(context.Context, *GetUserByNameRequest) (*GetUserResponse, error)
+	// 根据手机号查询用户详情
+	GetUserByPhone(context.Context, *GetUserByPhoneRequest) (*GetUserResponse, error)
 	// 验证密码
 	VerifyPassword(context.Context, *VerifyPasswordRequest) (*VerifyPasswordResponse, error)
 	// 用户是否存在
@@ -169,14 +194,17 @@ func (UnimplementedUserServiceServer) UpdateUser(context.Context, *UpdateUserReq
 func (UnimplementedUserServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
-func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
+func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) ListUser(context.Context, *pagination.PagingRequest) (*ListUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
 }
-func (UnimplementedUserServiceServer) GetUserByName(context.Context, *GetUserByNameRequest) (*User, error) {
+func (UnimplementedUserServiceServer) GetUserByName(context.Context, *GetUserByNameRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserByName not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserByPhone(context.Context, *GetUserByPhoneRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserByPhone not implemented")
 }
 func (UnimplementedUserServiceServer) VerifyPassword(context.Context, *VerifyPasswordRequest) (*VerifyPasswordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyPassword not implemented")
@@ -313,6 +341,24 @@ func _UserService_GetUserByName_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUserByPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByPhoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserByPhone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserByPhone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserByPhone(ctx, req.(*GetUserByPhoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_VerifyPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VerifyPasswordRequest)
 	if err := dec(in); err != nil {
@@ -379,6 +425,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserByName",
 			Handler:    _UserService_GetUserByName_Handler,
+		},
+		{
+			MethodName: "GetUserByPhone",
+			Handler:    _UserService_GetUserByPhone_Handler,
 		},
 		{
 			MethodName: "VerifyPassword",

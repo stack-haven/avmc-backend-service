@@ -89,7 +89,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	if c.GetHttp().GetEnableSwagger() {
 		allFS := nethttp.FS(assets.OpenApiData)
 		// swagger-ui: http://127.0.0.1:8000/docs/swagger-ui
-		// swagger-ui: http://127.0.0.1:8000/docs/openapu.yaml
+		// swagger-ui: http://127.0.0.1:8000/docs/openapi.yaml
 		srv.HandlePrefix("/docs", nethttp.StripPrefix("/docs/", nethttp.FileServer(allFS)))
 	}
 	return srv

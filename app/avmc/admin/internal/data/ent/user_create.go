@@ -160,14 +160,28 @@ func (uc *UserCreate) SetNillableAvatar(s *string) *UserCreate {
 	return uc
 }
 
+// SetBirthday sets the "birthday" field.
+func (uc *UserCreate) SetBirthday(t time.Time) *UserCreate {
+	uc.mutation.SetBirthday(t)
+	return uc
+}
+
+// SetNillableBirthday sets the "birthday" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBirthday(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetBirthday(*t)
+	}
+	return uc
+}
+
 // SetGender sets the "gender" field.
-func (uc *UserCreate) SetGender(i int) *UserCreate {
+func (uc *UserCreate) SetGender(i int32) *UserCreate {
 	uc.mutation.SetGender(i)
 	return uc
 }
 
 // SetNillableGender sets the "gender" field if the given value is not nil.
-func (uc *UserCreate) SetNillableGender(i *int) *UserCreate {
+func (uc *UserCreate) SetNillableGender(i *int32) *UserCreate {
 	if i != nil {
 		uc.SetGender(*i)
 	}
@@ -189,13 +203,13 @@ func (uc *UserCreate) SetNillableAge(i *int) *UserCreate {
 }
 
 // SetStatus sets the "status" field.
-func (uc *UserCreate) SetStatus(i int) *UserCreate {
+func (uc *UserCreate) SetStatus(i int32) *UserCreate {
 	uc.mutation.SetStatus(i)
 	return uc
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (uc *UserCreate) SetNillableStatus(i *int) *UserCreate {
+func (uc *UserCreate) SetNillableStatus(i *int32) *UserCreate {
 	if i != nil {
 		uc.SetStatus(*i)
 	}
@@ -253,6 +267,20 @@ func (uc *UserCreate) SetSettings(m map[string]interface{}) *UserCreate {
 // SetMetadata sets the "metadata" field.
 func (uc *UserCreate) SetMetadata(m map[string]interface{}) *UserCreate {
 	uc.mutation.SetMetadata(m)
+	return uc
+}
+
+// SetDescription sets the "description" field.
+func (uc *UserCreate) SetDescription(s string) *UserCreate {
+	uc.mutation.SetDescription(s)
+	return uc
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDescription(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDescription(*s)
+	}
 	return uc
 }
 
@@ -409,6 +437,11 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.LoginCount(); !ok {
 		return &ValidationError{Name: "login_count", err: errors.New(`ent: missing required field "User.login_count"`)}
 	}
+	if v, ok := uc.mutation.Description(); ok {
+		if err := user.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "User.description": %w`, err)}
+		}
+	}
 	if v, ok := uc.mutation.ID(); ok {
 		if err := user.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "User.id": %w`, err)}
@@ -491,8 +524,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
 		_node.Avatar = value
 	}
+	if value, ok := uc.mutation.Birthday(); ok {
+		_spec.SetField(user.FieldBirthday, field.TypeTime, value)
+		_node.Birthday = value
+	}
 	if value, ok := uc.mutation.Gender(); ok {
-		_spec.SetField(user.FieldGender, field.TypeInt, value)
+		_spec.SetField(user.FieldGender, field.TypeInt32, value)
 		_node.Gender = value
 	}
 	if value, ok := uc.mutation.Age(); ok {
@@ -500,7 +537,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.Age = value
 	}
 	if value, ok := uc.mutation.Status(); ok {
-		_spec.SetField(user.FieldStatus, field.TypeInt, value)
+		_spec.SetField(user.FieldStatus, field.TypeInt32, value)
 		_node.Status = value
 	}
 	if value, ok := uc.mutation.LastLoginAt(); ok {
@@ -522,6 +559,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Metadata(); ok {
 		_spec.SetField(user.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
+	}
+	if value, ok := uc.mutation.Description(); ok {
+		_spec.SetField(user.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	return _node, _spec
 }
@@ -737,8 +778,26 @@ func (u *UserUpsert) ClearAvatar() *UserUpsert {
 	return u
 }
 
+// SetBirthday sets the "birthday" field.
+func (u *UserUpsert) SetBirthday(v time.Time) *UserUpsert {
+	u.Set(user.FieldBirthday, v)
+	return u
+}
+
+// UpdateBirthday sets the "birthday" field to the value that was provided on create.
+func (u *UserUpsert) UpdateBirthday() *UserUpsert {
+	u.SetExcluded(user.FieldBirthday)
+	return u
+}
+
+// ClearBirthday clears the value of the "birthday" field.
+func (u *UserUpsert) ClearBirthday() *UserUpsert {
+	u.SetNull(user.FieldBirthday)
+	return u
+}
+
 // SetGender sets the "gender" field.
-func (u *UserUpsert) SetGender(v int) *UserUpsert {
+func (u *UserUpsert) SetGender(v int32) *UserUpsert {
 	u.Set(user.FieldGender, v)
 	return u
 }
@@ -750,7 +809,7 @@ func (u *UserUpsert) UpdateGender() *UserUpsert {
 }
 
 // AddGender adds v to the "gender" field.
-func (u *UserUpsert) AddGender(v int) *UserUpsert {
+func (u *UserUpsert) AddGender(v int32) *UserUpsert {
 	u.Add(user.FieldGender, v)
 	return u
 }
@@ -780,7 +839,7 @@ func (u *UserUpsert) ClearAge() *UserUpsert {
 }
 
 // SetStatus sets the "status" field.
-func (u *UserUpsert) SetStatus(v int) *UserUpsert {
+func (u *UserUpsert) SetStatus(v int32) *UserUpsert {
 	u.Set(user.FieldStatus, v)
 	return u
 }
@@ -792,7 +851,7 @@ func (u *UserUpsert) UpdateStatus() *UserUpsert {
 }
 
 // AddStatus adds v to the "status" field.
-func (u *UserUpsert) AddStatus(v int) *UserUpsert {
+func (u *UserUpsert) AddStatus(v int32) *UserUpsert {
 	u.Add(user.FieldStatus, v)
 	return u
 }
@@ -884,6 +943,24 @@ func (u *UserUpsert) UpdateMetadata() *UserUpsert {
 // ClearMetadata clears the value of the "metadata" field.
 func (u *UserUpsert) ClearMetadata() *UserUpsert {
 	u.SetNull(user.FieldMetadata)
+	return u
+}
+
+// SetDescription sets the "description" field.
+func (u *UserUpsert) SetDescription(v string) *UserUpsert {
+	u.Set(user.FieldDescription, v)
+	return u
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *UserUpsert) UpdateDescription() *UserUpsert {
+	u.SetExcluded(user.FieldDescription)
+	return u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (u *UserUpsert) ClearDescription() *UserUpsert {
+	u.SetNull(user.FieldDescription)
 	return u
 }
 
@@ -1127,15 +1204,36 @@ func (u *UserUpsertOne) ClearAvatar() *UserUpsertOne {
 	})
 }
 
+// SetBirthday sets the "birthday" field.
+func (u *UserUpsertOne) SetBirthday(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBirthday(v)
+	})
+}
+
+// UpdateBirthday sets the "birthday" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateBirthday() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBirthday()
+	})
+}
+
+// ClearBirthday clears the value of the "birthday" field.
+func (u *UserUpsertOne) ClearBirthday() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBirthday()
+	})
+}
+
 // SetGender sets the "gender" field.
-func (u *UserUpsertOne) SetGender(v int) *UserUpsertOne {
+func (u *UserUpsertOne) SetGender(v int32) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetGender(v)
 	})
 }
 
 // AddGender adds v to the "gender" field.
-func (u *UserUpsertOne) AddGender(v int) *UserUpsertOne {
+func (u *UserUpsertOne) AddGender(v int32) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.AddGender(v)
 	})
@@ -1177,14 +1275,14 @@ func (u *UserUpsertOne) ClearAge() *UserUpsertOne {
 }
 
 // SetStatus sets the "status" field.
-func (u *UserUpsertOne) SetStatus(v int) *UserUpsertOne {
+func (u *UserUpsertOne) SetStatus(v int32) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *UserUpsertOne) AddStatus(v int) *UserUpsertOne {
+func (u *UserUpsertOne) AddStatus(v int32) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.AddStatus(v)
 	})
@@ -1299,6 +1397,27 @@ func (u *UserUpsertOne) UpdateMetadata() *UserUpsertOne {
 func (u *UserUpsertOne) ClearMetadata() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearMetadata()
+	})
+}
+
+// SetDescription sets the "description" field.
+func (u *UserUpsertOne) SetDescription(v string) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDescription(v)
+	})
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateDescription() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDescription()
+	})
+}
+
+// ClearDescription clears the value of the "description" field.
+func (u *UserUpsertOne) ClearDescription() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDescription()
 	})
 }
 
@@ -1708,15 +1827,36 @@ func (u *UserUpsertBulk) ClearAvatar() *UserUpsertBulk {
 	})
 }
 
+// SetBirthday sets the "birthday" field.
+func (u *UserUpsertBulk) SetBirthday(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBirthday(v)
+	})
+}
+
+// UpdateBirthday sets the "birthday" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateBirthday() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBirthday()
+	})
+}
+
+// ClearBirthday clears the value of the "birthday" field.
+func (u *UserUpsertBulk) ClearBirthday() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBirthday()
+	})
+}
+
 // SetGender sets the "gender" field.
-func (u *UserUpsertBulk) SetGender(v int) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetGender(v int32) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetGender(v)
 	})
 }
 
 // AddGender adds v to the "gender" field.
-func (u *UserUpsertBulk) AddGender(v int) *UserUpsertBulk {
+func (u *UserUpsertBulk) AddGender(v int32) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.AddGender(v)
 	})
@@ -1758,14 +1898,14 @@ func (u *UserUpsertBulk) ClearAge() *UserUpsertBulk {
 }
 
 // SetStatus sets the "status" field.
-func (u *UserUpsertBulk) SetStatus(v int) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetStatus(v int32) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *UserUpsertBulk) AddStatus(v int) *UserUpsertBulk {
+func (u *UserUpsertBulk) AddStatus(v int32) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.AddStatus(v)
 	})
@@ -1880,6 +2020,27 @@ func (u *UserUpsertBulk) UpdateMetadata() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearMetadata() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearMetadata()
+	})
+}
+
+// SetDescription sets the "description" field.
+func (u *UserUpsertBulk) SetDescription(v string) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDescription(v)
+	})
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateDescription() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDescription()
+	})
+}
+
+// ClearDescription clears the value of the "description" field.
+func (u *UserUpsertBulk) ClearDescription() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDescription()
 	})
 }
 

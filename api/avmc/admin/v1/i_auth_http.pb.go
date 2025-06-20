@@ -24,7 +24,16 @@ const OperationAuthServiceLogout = "/avmc.admin.v1.AuthService/Logout"
 const OperationAuthServiceRefreshToken = "/avmc.admin.v1.AuthService/RefreshToken"
 
 type AuthServiceHTTPServer interface {
-	// Login 后台登陆
+	// Login option (gnostic.openapi.v3.service) = {
+	//   id: "auth"
+	//   title: "认证服务"
+	//   description: "用于处理用户登录、登出等认证相关操作"
+	//   external_docs: {
+	//     description: "更多认证服务信息"
+	//     url: "https://example.com/docs/auth"
+	//   }
+	// };
+	// 后台登陆
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Logout 后台登出
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
@@ -36,9 +45,9 @@ type AuthServiceHTTPServer interface {
 
 func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/avmc/v1/login", _AuthService_Login0_HTTP_Handler(srv))
-	r.POST("/avmc/v1/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
-	r.POST("/avmc/v1/logout", _AuthService_Logout0_HTTP_Handler(srv))
+	r.POST("/avmc/v1/auth/login", _AuthService_Login0_HTTP_Handler(srv))
+	r.POST("/avmc/v1/auth/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
+	r.POST("/avmc/v1/auth/logout", _AuthService_Logout0_HTTP_Handler(srv))
 }
 
 func _AuthService_Login0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
@@ -123,7 +132,7 @@ func NewAuthServiceHTTPClient(client *http.Client) AuthServiceHTTPClient {
 
 func (c *AuthServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
 	var out LoginResponse
-	pattern := "/avmc/v1/login"
+	pattern := "/avmc/v1/auth/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthServiceLogin))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -136,7 +145,7 @@ func (c *AuthServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest,
 
 func (c *AuthServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutRequest, opts ...http.CallOption) (*LogoutResponse, error) {
 	var out LogoutResponse
-	pattern := "/avmc/v1/logout"
+	pattern := "/avmc/v1/auth/logout"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthServiceLogout))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -149,7 +158,7 @@ func (c *AuthServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutReques
 
 func (c *AuthServiceHTTPClientImpl) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...http.CallOption) (*RefreshTokenResponse, error) {
 	var out RefreshTokenResponse
-	pattern := "/avmc/v1/refresh-token"
+	pattern := "/avmc/v1/auth/refresh-token"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthServiceRefreshToken))
 	opts = append(opts, http.PathTemplate(pattern))

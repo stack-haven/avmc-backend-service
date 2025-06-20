@@ -41,12 +41,14 @@ type User struct {
 	Phone string `json:"phone,omitempty"`
 	// 头像URL
 	Avatar string `json:"avatar,omitempty"`
+	// 生日
+	Birthday time.Time `json:"birthday,omitempty"`
 	// 性别：0=未知 1=男 2=女
-	Gender int `json:"gender,omitempty"`
+	Gender int32 `json:"gender,omitempty"`
 	// 年龄
 	Age int `json:"age,omitempty"`
 	// 状态：0=未知 1=正常 2=禁用 3=锁定
-	Status int `json:"status,omitempty"`
+	Status int32 `json:"status,omitempty"`
 	// 最后登录时间
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
 	// 最后登录IP
@@ -56,7 +58,9 @@ type User struct {
 	// 用户设置，JSON格式
 	Settings map[string]interface{} `json:"settings,omitempty"`
 	// 元数据，JSON格式
-	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	// 个人说明
+	Description  string `json:"description,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -69,9 +73,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case user.FieldID, user.FieldDomainID, user.FieldGender, user.FieldAge, user.FieldStatus, user.FieldLoginCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldPassword, user.FieldRealname, user.FieldNickname, user.FieldEmail, user.FieldPhone, user.FieldAvatar, user.FieldLastLoginIP:
+		case user.FieldName, user.FieldPassword, user.FieldRealname, user.FieldNickname, user.FieldEmail, user.FieldPhone, user.FieldAvatar, user.FieldLastLoginIP, user.FieldDescription:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldLastLoginAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldBirthday, user.FieldLastLoginAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -161,11 +165,17 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Avatar = value.String
 			}
+		case user.FieldBirthday:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field birthday", values[i])
+			} else if value.Valid {
+				u.Birthday = value.Time
+			}
 		case user.FieldGender:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field gender", values[i])
 			} else if value.Valid {
-				u.Gender = int(value.Int64)
+				u.Gender = int32(value.Int64)
 			}
 		case user.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -177,7 +187,7 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				u.Status = int(value.Int64)
+				u.Status = int32(value.Int64)
 			}
 		case user.FieldLastLoginAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -213,6 +223,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &u.Metadata); err != nil {
 					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
+			}
+		case user.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				u.Description = value.String
 			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
@@ -284,6 +300,9 @@ func (u *User) String() string {
 	builder.WriteString("avatar=")
 	builder.WriteString(u.Avatar)
 	builder.WriteString(", ")
+	builder.WriteString("birthday=")
+	builder.WriteString(u.Birthday.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("gender=")
 	builder.WriteString(fmt.Sprintf("%v", u.Gender))
 	builder.WriteString(", ")
@@ -309,6 +328,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", u.Metadata))
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(u.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }
