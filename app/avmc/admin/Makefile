@@ -16,13 +16,6 @@ config:
 	mv proto/common/conf internal && \
 	rm -rf proto
 
-.PHONY: config1
-config1:
-	@cd../../../proto && \
-	buf generate --template ../app/avmc/admin/buf.gen.yaml && \
-	sudo mv -f common/conf internal && \
-	rm -rf common
-
 .PHONY: demo
 demo:
 	@echo "demo"

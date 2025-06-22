@@ -29,39 +29,43 @@ option (gnostic.openapi.v3.document) = {
 			name: "BSD 3-Clause License";
 			url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
 		};
-  }
-  security: {
-    additional_properties: [{
-      name: "OAuth2PasswordBearer"
-      value: {
-        // type: "http"
-        // scheme: "bearer"
-        // bearer_format: "JWT"
-      }
-    }]
+  };
+  servers: [
+    {
+      url: "https://api.example.com/v1";
+      description: "Production server";
+    }
+  ];
+  components: {
+    security_schemes: {
+      additional_properties: [
+        {
+          name: "BearerAuth";
+          value: {
+            security_scheme: {
+              type: "http";
+              scheme: "bearer";
+              bearer_format: "JWT";
+              description: "JWT Bearer token for authenticating requests...";
+            }
+          }
+        }
+      ]
+    }
   }
 };
 
 // The greeting service definition.
 service AuthService {
-  // option (gnostic.openapi.v3.server) = {
-  //   id: "auth"
-  //   title: "认证服务"
-  //   description: "用于处理用户登录、登出等认证相关操作"
-  //   external_docs: {
-  //     description: "更多认证服务信息"
-  //     url: "https://example.com/docs/auth"
-  //   }
-  // };
-  // 后台登陆
   rpc Login (LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
       post: "/avmc/v1/auth/login"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
+      // operation_id: "LoginUser"
       summary: "用户登录"
-      description: "通过用户名和密码登录系统"
+      description: "通过用户名和密码登录认证服务"
       tags: ["认证服务"]
     };
   }
@@ -74,9 +78,20 @@ service AuthService {
       post: "/avmc/v1/auth/refresh-token"
       body: "*"
     };
-    
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "刷新令牌";
+      description: "使用刷新令牌获取新的访问令牌";
+      tags: ["认证服务"];
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth";
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 
@@ -86,9 +101,20 @@ service AuthService {
       post: "/avmc/v1/auth/logout"
       body: "*"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "用户登出";
+      description: "退出登录并失效当前令牌";
+      tags: ["认证服务"];
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth";
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 }
@@ -112,15 +138,23 @@ message Auth {
 message LoginRequest {
   string name = 1 [
     (validate.rules).string = {min_len: 1, max_len: 10},
-    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string = {min_len: 1, max_len: 10},
     (gnostic.openapi.v3.property) = {description: "登录用户"}
   ]; // 账号
   string password = 2 [
     (validate.rules).string = {min_len: 6, max_len: 25},
+    (buf.validate.field).string = {min_len: 6, max_len: 25},
     (gnostic.openapi.v3.property) = {description: "密码"}
   ]; // 密码
-  optional uint32 domain_id = 3; // 域ID
-  optional GrandType grand_type = 4; // 授权类型，一直为：password
+  optional uint32 domain_id = 3 [
+    (validate.rules).uint32.gte = 0,
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
+  ]; // 域ID
+  optional GrandType grand_type = 4 [
+    (validate.rules).enum = {not_in: 0},
+    (gnostic.openapi.v3.property) = {description: "授权类型"}
+  ]; // 授权类型，一直为：password
 }
 
 // 用户后台登陆 - 回应

@@ -30,17 +30,6 @@ const (
 //
 // The greeting service definition.
 type AuthServiceClient interface {
-	//	option (gnostic.openapi.v3.service) = {
-	//	  id: "auth"
-	//	  title: "认证服务"
-	//	  description: "用于处理用户登录、登出等认证相关操作"
-	//	  external_docs: {
-	//	    description: "更多认证服务信息"
-	//	    url: "https://example.com/docs/auth"
-	//	  }
-	//	};
-	//
-	// 后台登陆
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
@@ -94,17 +83,6 @@ func (c *authServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts 
 //
 // The greeting service definition.
 type AuthServiceServer interface {
-	//	option (gnostic.openapi.v3.service) = {
-	//	  id: "auth"
-	//	  title: "认证服务"
-	//	  description: "用于处理用户登录、登出等认证相关操作"
-	//	  external_docs: {
-	//	    description: "更多认证服务信息"
-	//	    url: "https://example.com/docs/auth"
-	//	  }
-	//	};
-	//
-	// 后台登陆
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌

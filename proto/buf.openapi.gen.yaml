@@ -10,12 +10,8 @@ managed:
     - module: 'buf.build/googleapis/googleapis'
     - module: 'buf.build/envoyproxy/protoc-gen-validate'
     - module: 'buf.build/kratos/apis'
-    - module: 'buf.build/gnostic/gnostic'
     - module: 'buf.build/gogo/protobuf'
-
-  override:
-    - file_option: go_package_prefix
-      value: kratos-admin/api/gen/go
+    # - module: 'buf.build/gnostic/gnostic'
 
 inputs:
   - directory: .

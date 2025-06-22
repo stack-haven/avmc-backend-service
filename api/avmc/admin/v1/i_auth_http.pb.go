@@ -24,16 +24,6 @@ const OperationAuthServiceLogout = "/avmc.admin.v1.AuthService/Logout"
 const OperationAuthServiceRefreshToken = "/avmc.admin.v1.AuthService/RefreshToken"
 
 type AuthServiceHTTPServer interface {
-	// Login option (gnostic.openapi.v3.service) = {
-	//   id: "auth"
-	//   title: "认证服务"
-	//   description: "用于处理用户登录、登出等认证相关操作"
-	//   external_docs: {
-	//     description: "更多认证服务信息"
-	//     url: "https://example.com/docs/auth"
-	//   }
-	// };
-	// 后台登陆
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Logout 后台登出
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)

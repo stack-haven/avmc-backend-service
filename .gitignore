@@ -35,3 +35,4 @@ bin/
 # Develop tools
 .idea/
 *.swp
+__debug_*

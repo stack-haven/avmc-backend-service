@@ -13,6 +13,9 @@ info:
         name: BSD 3-Clause License
         url: https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt
     version: 1.0.0
+servers:
+    - url: https://api.example.com/v1
+      description: Production server
 paths:
     /admin/v1/depts:
         get:
@@ -182,7 +185,7 @@ paths:
                 - AuthService
                 - 认证服务
             summary: 用户登录
-            description: 通过用户名和密码登录系统
+            description: 通过用户名和密码登录认证服务
             operationId: AuthService_Login
             requestBody:
                 content:
@@ -201,7 +204,9 @@ paths:
         post:
             tags:
                 - AuthService
-            description: 后台登出
+                - 认证服务
+            summary: 用户登出
+            description: 退出登录并失效当前令牌
             operationId: AuthService_Logout
             requestBody:
                 content:
@@ -217,15 +222,14 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/LogoutResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
     /avmc/v1/auth/refresh-token:
         post:
             tags:
                 - AuthService
-            description: |-
-                刷新令牌
-                 @param RefreshTokenRequest 请求参数，包含刷新令牌
-                 @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
+                - 认证服务
+            summary: 刷新令牌
+            description: 使用刷新令牌获取新的访问令牌
             operationId: AuthService_RefreshToken
             requestBody:
                 content:
@@ -241,7 +245,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/RefreshTokenResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
     /avmc/v1/menus:
         get:
             tags:
@@ -1011,6 +1015,7 @@ components:
                     description: 密码
                 domainId:
                     type: integer
+                    description: 租户/域ID
                     format: uint32
                 grandType:
                     enum:
@@ -1018,6 +1023,7 @@ components:
                         - GRAND_TYPE_PASSWORD
                         - GRAND_TYPE_CODE
                     type: string
+                    description: 授权类型
                     format: enum
             description: 用户后台登陆 - 请求
         LoginResponse:
@@ -1245,8 +1251,12 @@ components:
                 description:
                     type: string
                     description: 个人说明
-security:
-    - OAuth2PasswordBearer: []
+    securitySchemes:
+        BearerAuth:
+            type: http
+            description: JWT Bearer token for authenticating requests...
+            scheme: bearer
+            bearerFormat: JWT
 tags:
     - name: AuthService
       description: The greeting service definition.
