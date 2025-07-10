@@ -7,6 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
+	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent"
@@ -114,4 +115,11 @@ func (r *userRepo) ListByPhone(context.Context, string) ([]*pbCore.User, error) 
 
 func (r *userRepo) ListAll(context.Context) ([]*pbCore.User, error) {
 	return nil, nil
+}
+func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
+	return nil, nil
+}
+
+func (r *userRepo) Delete(ctx context.Context, id uint32) error {
+	return nil
 }

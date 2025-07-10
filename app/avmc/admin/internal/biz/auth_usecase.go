@@ -74,3 +74,13 @@ func (uc *AuthUsecase) Register(ctx context.Context, name, password string) erro
 	uc.log.Infof("尝试注册，用户名：%s", name)
 	return nil
 }
+
+// Profile 处理登录用户简介信息业务逻辑
+// 参数：ctx 上下文
+// 返回值：登录用户简介信息响应结构体，错误信息
+func (uc *AuthUsecase) Profile(ctx context.Context) (*v1.ProfileResponse, error) {
+	// 这里实现具体的登录用户简介信息业务逻辑
+	uc.log.Infof("尝试获取登录用户简介信息")
+
+	return nil, nil
+}

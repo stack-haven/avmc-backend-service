@@ -79,3 +79,17 @@ func (s *AuthServiceService) Logout(ctx context.Context, req *pb.LogoutRequest) 
 
 	return &pb.LogoutResponse{}, nil
 }
+
+// Profile 处理登录用户简介信息请求
+// 参数：ctx 上下文，req 登录用户简介信息请求
+// 返回值：登录用户简介信息响应，错误信息
+func (s *AuthServiceService) Profile(ctx context.Context, req *pb.ProfileRequest) (*pb.ProfileResponse, error) {
+	// 调用业务逻辑层
+	resp, err := s.auc.Profile(ctx)
+	if err != nil {
+		s.log.Errorf("获取登录用户简介信息失败: %v", err)
+		return nil, err
+	}
+
+	return resp, nil
+}

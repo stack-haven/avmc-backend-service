@@ -130,7 +130,7 @@ openapi:
 	buf generate --template buf.openapi.gen.yaml
 
 # run application
-run: api openapi
+run: api
 	@go run ./cmd/server -conf ./configs
 
 # run tests

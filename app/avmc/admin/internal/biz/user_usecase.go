@@ -2,6 +2,7 @@ package biz
 
 import (
 	v1 "backend-service/api/avmc/admin/v1"
+	pbPagination "backend-service/api/common/pagination"
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
@@ -23,6 +24,8 @@ type UserRepo interface {
 	ListByName(context.Context, string) ([]*pbCore.User, error)
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
+	ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
+	Delete(ctx context.Context, id uint32) error
 }
 
 // UserUsecase is a User usecase.
@@ -36,14 +39,28 @@ func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
 	return &UserUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-// CreateUser creates a User, and returns the new User.
-func (uc *UserUsecase) CreateUser(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
+func (uc *UserUsecase) Create(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("CreateUser: %v", g.Name)
 	return uc.repo.Save(ctx, g)
 }
 
-// GetUser gets a User by ID.
-func (uc *UserUsecase) GetUser(ctx context.Context, id uint32) (*pbCore.User, error) {
+func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("GetUser: %v", id)
 	return uc.repo.FindByID(ctx, id)
+}
+
+func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
+	return uc.repo.Update(ctx, g)
+}
+
+func (uc *UserUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) ([]*pbCore.User, error) {
+	return uc.repo.ListAll(ctx)
+}
+
+func (uc *UserUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
+	return uc.repo.ListPage(ctx, pagination)
+}
+
+func (uc *UserUsecase) Delete(ctx context.Context, id uint32) error {
+	return uc.repo.Delete(ctx, id)
 }

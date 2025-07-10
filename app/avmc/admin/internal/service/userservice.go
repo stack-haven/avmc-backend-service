@@ -25,17 +25,29 @@ func NewUserServiceService(uuc *biz.UserUsecase, logger log.Logger) *UserService
 }
 
 func (s *UserServiceService) ListUser(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
-	return &pbCore.ListUserResponse{}, nil
+	return s.uuc.ListPage(ctx, req)
 }
 func (s *UserServiceService) GetUser(ctx context.Context, req *pbCore.GetUserRequest) (*pbCore.User, error) {
-	return s.uuc.GetUser(ctx, req.Id)
+	return s.uuc.Get(ctx, req.Id)
 }
 func (s *UserServiceService) CreateUser(ctx context.Context, req *pbCore.CreateUserRequest) (*pbCore.CreateUserResponse, error) {
+	_, err := s.uuc.Create(ctx, req.User)
+	if err != nil {
+		return nil, err
+	}
 	return &pbCore.CreateUserResponse{}, nil
 }
 func (s *UserServiceService) UpdateUser(ctx context.Context, req *pbCore.UpdateUserRequest) (*pbCore.UpdateUserResponse, error) {
+	_, err := s.uuc.Update(ctx, req.User)
+	if err != nil {
+		return nil, err
+	}
 	return &pbCore.UpdateUserResponse{}, nil
 }
 func (s *UserServiceService) DeleteUser(ctx context.Context, req *pbCore.DeleteUserRequest) (*pbCore.DeleteUserResponse, error) {
+	err := s.uuc.Delete(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
 	return &pbCore.DeleteUserResponse{}, nil
 }

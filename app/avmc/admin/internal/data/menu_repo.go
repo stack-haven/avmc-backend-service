@@ -31,15 +31,15 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 	return g, nil
 }
 
-func (r *menuRepo) FindByID(context.Context, int64) (*pbCore.Menu, error) {
+func (r *menuRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Menu, error) {
 	return nil, nil
 }
 
-func (r *menuRepo) Delete(context.Context, int64) error {
+func (r *menuRepo) Delete(ctx context.Context, id uint32) error {
 	return nil
 }
 
-func (r *menuRepo) ListByHello(context.Context, string) ([]*pbCore.Menu, error) {
+func (r *menuRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Menu, error) {
 	return nil, nil
 }
 

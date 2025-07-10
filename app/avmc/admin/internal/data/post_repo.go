@@ -31,19 +31,19 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 	return g, nil
 }
 
-func (r *postRepo) FindByID(context.Context, int64) (*pbCore.Post, error) {
+func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error) {
 	return nil, nil
 }
 
-func (r *postRepo) Delete(context.Context, int64) error {
+func (r *postRepo) Delete(ctx context.Context, id uint32) error {
 	return nil
 }
 
-func (r *postRepo) ListByHello(context.Context, string) ([]*pbCore.Post, error) {
+func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post, error) {
 	return nil, nil
 }
 
-func (r *postRepo) ListAll(context.Context) ([]*pbCore.Post, error) {
+func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 	return nil, nil
 }
 

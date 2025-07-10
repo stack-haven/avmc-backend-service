@@ -31,19 +31,19 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	return g, nil
 }
 
-func (r *roleRepo) FindByID(context.Context, int64) (*pbCore.Role, error) {
+func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error) {
 	return nil, nil
 }
 
-func (r *roleRepo) Delete(context.Context, int64) error {
+func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 	return nil
 }
 
-func (r *roleRepo) ListByHello(context.Context, string) ([]*pbCore.Role, error) {
+func (r *roleRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Role, error) {
 	return nil, nil
 }
 
-func (r *roleRepo) ListAll(context.Context) ([]*pbCore.Role, error) {
+func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 	return nil, nil
 }
 

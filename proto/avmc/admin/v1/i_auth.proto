@@ -12,6 +12,7 @@ import "buf/validate/validate.proto";
 
 import "core/service/v1/auth.proto";
 import "core/service/v1/user.proto";
+import "core/service/v1/role.proto";
 
 option go_package = "backend-service/api/avmc/admin/v1;v1";
 
@@ -117,6 +118,28 @@ service AuthService {
       ]
     };
   }
+  
+  // 登录用户信息
+  rpc Profile (ProfileRequest) returns (ProfileResponse) {
+    option (google.api.http) = {
+      get: "/avmc/v1/auth/profile"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "登录用户简介信息";
+      description: "登录用户简介信息";
+      tags: ["认证服务"];
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth";
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
 }
 
 // 授权类型
@@ -188,3 +211,13 @@ message LogoutRequest {}
 // 用户后台登出 - 回应
 message LogoutResponse {}
 
+// 登录用户简介信息 - 请求
+message ProfileRequest {}
+
+// 登录用户简介信息 - 回应
+message ProfileResponse {
+  core.service.v1.User user = 1; // 登录用户简介信息
+  optional core.service.v1.Role role = 2; // 登录用户角色信息  
+  repeated string permissions = 3; // 登录用户权限信息
+  repeated string menus = 4; // 登录用户菜单信息
+}

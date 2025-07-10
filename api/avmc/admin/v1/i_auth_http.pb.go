@@ -21,12 +21,15 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationAuthServiceLogin = "/avmc.admin.v1.AuthService/Login"
 const OperationAuthServiceLogout = "/avmc.admin.v1.AuthService/Logout"
+const OperationAuthServiceProfile = "/avmc.admin.v1.AuthService/Profile"
 const OperationAuthServiceRefreshToken = "/avmc.admin.v1.AuthService/RefreshToken"
 
 type AuthServiceHTTPServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Logout 后台登出
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	// Profile 登录用户信息
+	Profile(context.Context, *ProfileRequest) (*ProfileResponse, error)
 	// RefreshToken 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
 	// @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
@@ -38,6 +41,7 @@ func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
 	r.POST("/avmc/v1/auth/login", _AuthService_Login0_HTTP_Handler(srv))
 	r.POST("/avmc/v1/auth/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
 	r.POST("/avmc/v1/auth/logout", _AuthService_Logout0_HTTP_Handler(srv))
+	r.GET("/avmc/v1/auth/profile", _AuthService_Profile0_HTTP_Handler(srv))
 }
 
 func _AuthService_Login0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
@@ -106,9 +110,29 @@ func _AuthService_Logout0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.
 	}
 }
 
+func _AuthService_Profile0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ProfileRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthServiceProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Profile(ctx, req.(*ProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ProfileResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AuthServiceHTTPClient interface {
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
+	Profile(ctx context.Context, req *ProfileRequest, opts ...http.CallOption) (rsp *ProfileResponse, err error)
 	RefreshToken(ctx context.Context, req *RefreshTokenRequest, opts ...http.CallOption) (rsp *RefreshTokenResponse, err error)
 }
 
@@ -140,6 +164,19 @@ func (c *AuthServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutReques
 	opts = append(opts, http.Operation(OperationAuthServiceLogout))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AuthServiceHTTPClientImpl) Profile(ctx context.Context, in *ProfileRequest, opts ...http.CallOption) (*ProfileResponse, error) {
+	var out ProfileResponse
+	pattern := "/avmc/v1/auth/profile"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAuthServiceProfile))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
