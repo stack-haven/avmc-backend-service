@@ -11,11 +11,11 @@ import (
 // format: 时间格式字符串。
 // 返回值: 转换后的字符串指针，若 t 为 nil 则返回 nil。
 func TimeValueToString(t *time.Time, format string) *string {
-	if t != nil {
-		s := t.Format(format)
-		return &s
+	if t == nil || t.IsZero() {
+		return nil
 	}
-	return nil
+	s := t.Format(format)
+	return &s
 }
 
 // StringValueToTime 将字符串指针转换为时间指针。

@@ -12,6 +12,7 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent"
 	"backend-service/app/avmc/admin/internal/data/ent/user"
+	"backend-service/pkg/utils/convert"
 )
 
 var _ biz.UserRepo = (*userRepo)(nil)
@@ -31,55 +32,30 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 
 func (r *userRepo) toProto(res *ent.User) *pbCore.User {
 	return &pbCore.User{
-		Id:       res.ID,
-		Name:     &res.Name,
-		Email:    &res.Email,
-		Nickname: &res.Nickname,
-		Realname: &res.Realname,
-		Gender:   (*enum.Gender)(&res.Gender),
-		Avatar:   &res.Avatar,
-		Phone:    &res.Phone,
-		Status:   &res.Status,
-		Birthday: func() *string {
-			if res.Birthday.IsZero() {
-				return nil
-			}
-			birthday := res.Birthday.Format(time.DateOnly)
-			return &birthday
-		}(),
-		// optional int32 gender = 7 [(validate.rules).int32.gte = 0,(gnostic.openapi.v3.property) = {description: "性别 0 未知 1 男 2 女"}];
-		CreatedAt: func() *string {
-			if res.CreatedAt.IsZero() {
-				return nil
-			}
-			createdAt := res.CreatedAt.Format(time.DateTime)
-			return &createdAt
-		}(),
-		UpdatedAt: func() *string {
-			if res.UpdatedAt.IsZero() {
-				return nil
-			}
-			updatedAt := res.UpdatedAt.Format(time.DateTime)
-			return &updatedAt
-		}(),
+		Id:          res.ID,
+		Name:        &res.Name,
+		Email:       &res.Email,
+		Nickname:    &res.Nickname,
+		Realname:    &res.Realname,
+		Gender:      (*enum.Gender)(&res.Gender),
+		Avatar:      &res.Avatar,
 		Description: &res.Description,
+		Phone:       &res.Phone,
+		Status:      &res.Status,
+		Birthday:    convert.TimeValueToString(&res.Birthday, time.DateOnly),
+		CreatedAt:   convert.TimeValueToString(&res.CreatedAt, time.DateTime),
+		UpdatedAt:   convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
 }
 
 func (r *userRepo) toEnt(g *pbCore.User) *ent.User {
 	return &ent.User{
-		ID:       g.GetId(),
-		Name:     g.GetName(),
-		Email:    g.GetEmail(),
-		Nickname: g.GetNickname(),
-		Realname: g.GetRealname(),
-		Birthday: func() time.Time {
-			if g.GetBirthday() == "" {
-				return time.Time{}
-			}
-			birthday, _ := time.Parse(time.DateOnly, g.GetBirthday())
-			return birthday
-		}(),
+		ID:          g.GetId(),
+		Name:        g.GetName(),
+		Email:       g.GetEmail(),
+		Nickname:    g.GetNickname(),
+		Realname:    g.GetRealname(),
+		Birthday:    *convert.StringValueToTime(g.Birthday, time.DateOnly),
 		Gender:      int32(g.GetGender()),
 		Phone:       g.GetPhone(),
 		Avatar:      g.GetAvatar(),
