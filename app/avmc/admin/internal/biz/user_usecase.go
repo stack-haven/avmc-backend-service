@@ -16,7 +16,7 @@ var (
 	ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
-// UserRepo is a Greater repo.
+// UserRepo is a User repo.
 type UserRepo interface {
 	Save(context.Context, *pbCore.User) (*pbCore.User, error)
 	Update(context.Context, *pbCore.User) (*pbCore.User, error)
@@ -29,6 +29,7 @@ type UserRepo interface {
 }
 
 // UserUsecase is a User usecase.
+// 包含用户仓库和日志记录器
 type UserUsecase struct {
 	repo UserRepo
 	log  *log.Helper
@@ -39,28 +40,46 @@ func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
 	return &UserUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
+// Create 处理创建用户请求
+// 参数：ctx 上下文，g 用户信息
+// 返回值：创建用户响应，错误信息
 func (uc *UserUsecase) Create(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("CreateUser: %v", g.Name)
 	return uc.repo.Save(ctx, g)
 }
 
+// Get 处理获取用户详情请求
+// 参数：ctx 上下文，id 用户ID
+// 返回值：用户详情响应，错误信息
 func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("GetUser: %v", id)
 	return uc.repo.FindByID(ctx, id)
 }
 
+// Update 处理更新用户请求
+// 参数：ctx 上下文，g 用户信息
+// 返回值：更新用户响应，错误信息
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	return uc.repo.Update(ctx, g)
 }
 
+// ListSimple 处理获取用户列表请求
+// 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
+// 返回值：用户列表响应，错误信息
 func (uc *UserUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) ([]*pbCore.User, error) {
 	return uc.repo.ListAll(ctx)
 }
 
+// ListPage 处理分页用户列表请求
+// 参数：ctx 上下文，pagination 分页请求
+// 返回值：用户列表响应，错误信息
 func (uc *UserUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
 	return uc.repo.ListPage(ctx, pagination)
 }
 
+// Delete 处理删除用户请求
+// 参数：ctx 上下文，id 用户ID
+// 返回值：错误信息
 func (uc *UserUsecase) Delete(ctx context.Context, id uint32) error {
 	return uc.repo.Delete(ctx, id)
 }

@@ -8,6 +8,7 @@ import (
 	"backend-service/pkg/utils/crypto"
 	"context"
 	"errors"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -57,11 +58,17 @@ func (r *authRepo) Login(ctx context.Context, name, password string, domainId ui
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
 		return nil, err
 	}
+	// 拼装具体过期时间
+	expires := convert.TimeValueToString(func(exp time.Duration) *time.Time {
+		t := time.Now().Add(exp)
+		return &t
+	}(r.atr.authenticator.Options().TokenExpiration), time.RFC3339)
 	return &pb.LoginResponse{
 		Id:           res.ID,
 		Name:         res.Name,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		ExpiresIn:    expires,
 	}, nil
 }
 

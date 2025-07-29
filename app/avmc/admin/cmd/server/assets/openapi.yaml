@@ -17,10 +17,96 @@ servers:
     - url: https://api.example.com/v1
       description: Production server
 paths:
+    /admin/v1/auth/login:
+        post:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 用户登录
+            description: 通过用户名和密码登录认证服务
+            operationId: AuthService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LoginResponse'
+    /admin/v1/auth/logout:
+        post:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 用户登出
+            description: 退出登录并失效当前令牌
+            operationId: AuthService_Logout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LogoutResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/auth/profile:
+        get:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 登录用户简介信息
+            description: 登录用户简介信息
+            operationId: AuthService_Profile
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ProfileResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/auth/refresh-token:
+        post:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 刷新令牌
+            description: 使用刷新令牌获取新的访问令牌
+            operationId: AuthService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RefreshTokenResponse'
+            security:
+                - BearerAuth: []
     /admin/v1/depts:
         get:
             tags:
                 - DeptService
+                - 部门管理服务
+            summary: 获取部门列表
             description: 获取部门列表
             operationId: DeptService_ListDept
             parameters:
@@ -72,10 +158,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ListDeptResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         post:
             tags:
                 - DeptService
+                - 部门管理服务
+            summary: 创建部门
             description: 创建部门
             operationId: DeptService_CreateDept
             parameters:
@@ -98,11 +186,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/CreateDeptResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
     /admin/v1/depts/{id}:
         get:
             tags:
                 - DeptService
+                - 部门管理服务
+            summary: 获取部门数据
             description: 获取部门数据
             operationId: DeptService_GetDept
             parameters:
@@ -120,10 +210,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Dept'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         put:
             tags:
                 - DeptService
+                - 部门管理服务
+            summary: 更新部门
             description: 更新部门
             operationId: DeptService_UpdateDept
             parameters:
@@ -152,10 +244,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UpdateDeptResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         delete:
             tags:
                 - DeptService
+                - 部门管理服务
+            summary: 删除部门
             description: 删除部门
             operationId: DeptService_DeleteDept
             parameters:
@@ -178,78 +272,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DeleteDeptResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/auth/login:
-        post:
-            tags:
-                - AuthService
-                - 认证服务
-            summary: 用户登录
-            description: 通过用户名和密码登录认证服务
-            operationId: AuthService_Login
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/LoginRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/LoginResponse'
-    /avmc/v1/auth/logout:
-        post:
-            tags:
-                - AuthService
-                - 认证服务
-            summary: 用户登出
-            description: 退出登录并失效当前令牌
-            operationId: AuthService_Logout
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/LogoutRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/LogoutResponse'
-            security:
                 - BearerAuth: []
-    /avmc/v1/auth/refresh-token:
-        post:
-            tags:
-                - AuthService
-                - 认证服务
-            summary: 刷新令牌
-            description: 使用刷新令牌获取新的访问令牌
-            operationId: AuthService_RefreshToken
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/RefreshTokenRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/RefreshTokenResponse'
-            security:
-                - BearerAuth: []
-    /avmc/v1/menus:
+    /admin/v1/menus:
         get:
             tags:
                 - MenuService
+                - 菜单管理服务
+            summary: 获取菜单列表
             description: 获取菜单列表
             operationId: MenuService_ListMenu
             parameters:
@@ -301,10 +330,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ListMenuResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         post:
             tags:
                 - MenuService
+                - 菜单管理服务
+            summary: 创建菜单
             description: 创建菜单
             operationId: MenuService_CreateMenu
             parameters:
@@ -327,11 +358,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/CreateMenuResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/menus/{id}:
+                - BearerAuth: []
+    /admin/v1/menus/{id}:
         get:
             tags:
                 - MenuService
+                - 菜单管理服务
+            summary: 获取菜单数据
             description: 获取菜单数据
             operationId: MenuService_GetMenu
             parameters:
@@ -349,10 +382,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Menu'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         put:
             tags:
                 - MenuService
+                - 菜单管理服务
+            summary: 更新菜单
             description: 更新菜单
             operationId: MenuService_UpdateMenu
             parameters:
@@ -381,10 +416,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UpdateMenuResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         delete:
             tags:
                 - MenuService
+                - 菜单管理服务
+            summary: 删除菜单
             description: 删除菜单
             operationId: MenuService_DeleteMenu
             parameters:
@@ -407,11 +444,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DeleteMenuResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/posts:
+                - BearerAuth: []
+    /admin/v1/posts:
         get:
             tags:
                 - PostService
+                - 岗位管理服务
+            summary: 获取岗位列表
             description: 获取岗位列表
             operationId: PostService_ListPost
             parameters:
@@ -463,10 +502,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ListPostResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         post:
             tags:
                 - PostService
+                - 岗位管理服务
+            summary: 创建岗位
             description: 创建岗位
             operationId: PostService_CreatePost
             parameters:
@@ -489,11 +530,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/CreatePostResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/posts/{id}:
+                - BearerAuth: []
+    /admin/v1/posts/{id}:
         get:
             tags:
                 - PostService
+                - 岗位管理服务
+            summary: 获取岗位数据
             description: 获取岗位数据
             operationId: PostService_GetPost
             parameters:
@@ -511,10 +554,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Post'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         put:
             tags:
                 - PostService
+                - 岗位管理服务
+            summary: 更新岗位
             description: 更新岗位
             operationId: PostService_UpdatePost
             parameters:
@@ -543,10 +588,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UpdatePostResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         delete:
             tags:
                 - PostService
+                - 岗位管理服务
+            summary: 删除岗位
             description: 删除岗位
             operationId: PostService_DeletePost
             parameters:
@@ -569,11 +616,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DeletePostResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/roles:
+                - BearerAuth: []
+    /admin/v1/roles:
         get:
             tags:
                 - RoleService
+                - 角色管理服务
+            summary: 获取角色列表
             description: 获取角色列表
             operationId: RoleService_ListRole
             parameters:
@@ -625,10 +674,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ListRoleResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         post:
             tags:
                 - RoleService
+                - 角色管理服务
+            summary: 创建角色
             description: 创建角色
             operationId: RoleService_CreateRole
             parameters:
@@ -651,11 +702,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/CreateRoleResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/roles/{id}:
+                - BearerAuth: []
+    /admin/v1/roles/{id}:
         get:
             tags:
                 - RoleService
+                - 角色管理服务
+            summary: 获取角色数据
             description: 获取角色数据
             operationId: RoleService_GetRole
             parameters:
@@ -673,10 +726,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Role'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         put:
             tags:
                 - RoleService
+                - 角色管理服务
+            summary: 更新角色
             description: 更新角色
             operationId: RoleService_UpdateRole
             parameters:
@@ -705,10 +760,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UpdateRoleResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         delete:
             tags:
                 - RoleService
+                - 角色管理服务
+            summary: 删除角色
             description: 删除角色
             operationId: RoleService_DeleteRole
             parameters:
@@ -731,11 +788,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DeleteRoleResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/users:
+                - BearerAuth: []
+    /admin/v1/users:
         get:
             tags:
                 - UserService
+                - 用户管理服务
+            summary: 获取用户列表
             description: 获取用户列表
             operationId: UserService_ListUser
             parameters:
@@ -787,10 +846,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ListUserResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         post:
             tags:
                 - UserService
+                - 用户管理服务
+            summary: 创建用户
             description: 创建用户
             operationId: UserService_CreateUser
             parameters:
@@ -813,11 +874,13 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/CreateUserResponse'
             security:
-                - OAuth2PasswordBearer: []
-    /avmc/v1/users/{id}:
+                - BearerAuth: []
+    /admin/v1/users/{id}:
         get:
             tags:
                 - UserService
+                - 用户管理服务
+            summary: 获取用户数据
             description: 获取用户数据
             operationId: UserService_GetUser
             parameters:
@@ -835,10 +898,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/User'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         put:
             tags:
                 - UserService
+                - 用户管理服务
+            summary: 更新用户
             description: 更新用户
             operationId: UserService_UpdateUser
             parameters:
@@ -867,10 +932,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UpdateUserResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
         delete:
             tags:
                 - UserService
+                - 用户管理服务
+            summary: 删除用户
             description: 删除用户
             operationId: UserService_DeleteUser
             parameters:
@@ -893,7 +960,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DeleteUserResponse'
             security:
-                - OAuth2PasswordBearer: []
+                - BearerAuth: []
 components:
     schemas:
         CreateDeptResponse:
@@ -1129,6 +1196,22 @@ components:
                 name:
                     type: string
             description: 岗位模块
+        ProfileResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/User'
+                role:
+                    $ref: '#/components/schemas/Role'
+                permissions:
+                    type: array
+                    items:
+                        type: string
+                menus:
+                    type: array
+                    items:
+                        type: string
+            description: 登录用户简介信息 - 回应
         RefreshTokenRequest:
             type: object
             properties:

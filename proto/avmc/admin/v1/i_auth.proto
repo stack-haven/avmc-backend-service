@@ -60,7 +60,7 @@ option (gnostic.openapi.v3.document) = {
 service AuthService {
   rpc Login (LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/auth/login"
+      post: "/admin/v1/auth/login"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
@@ -76,30 +76,21 @@ service AuthService {
   // @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/auth/refresh-token"
+      post: "/admin/v1/auth/refresh-token"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "刷新令牌";
       description: "使用刷新令牌获取新的访问令牌";
       tags: ["认证服务"];
-      security: [
-        {
-          additional_properties: [
-            {
-              name: "BearerAuth";
-              value: {}
-            }
-          ]
-        }
-      ]
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 后台登出
   rpc Logout (LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/auth/logout"
+      post: "/admin/v1/auth/logout"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
@@ -122,7 +113,7 @@ service AuthService {
   // 登录用户信息
   rpc Profile (ProfileRequest) returns (ProfileResponse) {
     option (google.api.http) = {
-      get: "/avmc/v1/auth/profile"
+      get: "/admin/v1/auth/profile"
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "登录用户简介信息";

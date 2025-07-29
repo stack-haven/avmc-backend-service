@@ -18,57 +18,67 @@ service MenuService {
   // 获取菜单列表
   rpc ListMenu (pagination.PagingRequest) returns (core.service.v1.ListMenuResponse) {
     option (google.api.http) = {
-      get: "/avmc/v1/menus"
+      get: "/admin/v1/menus"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单列表";
+      description: "获取菜单列表";
+      tags: ["菜单管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 获取菜单数据
   rpc GetMenu (core.service.v1.GetMenuRequest) returns (core.service.v1.Menu) {
     option (google.api.http) = {
-      get: "/avmc/v1/menus/{id}"
+      get: "/admin/v1/menus/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单数据";
+      description: "获取菜单数据";
+      tags: ["菜单管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 创建菜单
   rpc CreateMenu (core.service.v1.CreateMenuRequest) returns (core.service.v1.CreateMenuResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/menus"
+      post: "/admin/v1/menus"
       body: "menu"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建菜单";
+      description: "创建菜单";
+      tags: ["菜单管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 更新菜单
   rpc UpdateMenu (core.service.v1.UpdateMenuRequest) returns (core.service.v1.UpdateMenuResponse) {
     option (google.api.http) = {
-      put: "/avmc/v1/menus/{id}"
+      put: "/admin/v1/menus/{id}"
       body: "menu"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新菜单";
+      description: "更新菜单";
+      tags: ["菜单管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 删除菜单
   rpc DeleteMenu (core.service.v1.DeleteMenuRequest) returns (core.service.v1.DeleteMenuResponse) {
     option (google.api.http) = {
-      delete: "/avmc/v1/menus/{id}"
+      delete: "/admin/v1/menus/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除菜单";
+      description: "删除菜单";
+      tags: ["菜单管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 }

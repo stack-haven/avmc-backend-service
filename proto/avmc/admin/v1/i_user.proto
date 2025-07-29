@@ -19,57 +19,67 @@ service UserService {
   // 获取用户列表
   rpc ListUser (pagination.PagingRequest) returns (core.service.v1.ListUserResponse) {
     option (google.api.http) = {
-      get: "/avmc/v1/users"
+      get: "/admin/v1/users"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取用户列表";
+      description: "获取用户列表";
+      tags: ["用户管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 获取用户数据
   rpc GetUser (core.service.v1.GetUserRequest) returns (core.service.v1.User) {
     option (google.api.http) = {
-      get: "/avmc/v1/users/{id}"
+      get: "/admin/v1/users/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取用户数据";
+      description: "获取用户数据";
+      tags: ["用户管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 创建用户
   rpc CreateUser (core.service.v1.CreateUserRequest) returns (core.service.v1.CreateUserResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/users"
+      post: "/admin/v1/users"
       body: "user"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建用户";
+      description: "创建用户";
+      tags: ["用户管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 更新用户
   rpc UpdateUser (core.service.v1.UpdateUserRequest) returns (core.service.v1.UpdateUserResponse) {
     option (google.api.http) = {
-      put: "/avmc/v1/users/{id}"
+      put: "/admin/v1/users/{id}"
       body: "user"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新用户";
+      description: "更新用户";
+      tags: ["用户管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 删除用户
   rpc DeleteUser (core.service.v1.DeleteUserRequest) returns (core.service.v1.DeleteUserResponse) {
     option (google.api.http) = {
-      delete: "/avmc/v1/users/{id}"
+      delete: "/admin/v1/users/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除用户";
+      description: "删除用户";
+      tags: ["用户管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 }

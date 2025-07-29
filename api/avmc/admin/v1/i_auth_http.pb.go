@@ -38,10 +38,10 @@ type AuthServiceHTTPServer interface {
 
 func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/avmc/v1/auth/login", _AuthService_Login0_HTTP_Handler(srv))
-	r.POST("/avmc/v1/auth/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
-	r.POST("/avmc/v1/auth/logout", _AuthService_Logout0_HTTP_Handler(srv))
-	r.GET("/avmc/v1/auth/profile", _AuthService_Profile0_HTTP_Handler(srv))
+	r.POST("/admin/v1/auth/login", _AuthService_Login0_HTTP_Handler(srv))
+	r.POST("/admin/v1/auth/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
+	r.POST("/admin/v1/auth/logout", _AuthService_Logout0_HTTP_Handler(srv))
+	r.GET("/admin/v1/auth/profile", _AuthService_Profile0_HTTP_Handler(srv))
 }
 
 func _AuthService_Login0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
@@ -146,7 +146,7 @@ func NewAuthServiceHTTPClient(client *http.Client) AuthServiceHTTPClient {
 
 func (c *AuthServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
 	var out LoginResponse
-	pattern := "/avmc/v1/auth/login"
+	pattern := "/admin/v1/auth/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthServiceLogin))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -159,7 +159,7 @@ func (c *AuthServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest,
 
 func (c *AuthServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutRequest, opts ...http.CallOption) (*LogoutResponse, error) {
 	var out LogoutResponse
-	pattern := "/avmc/v1/auth/logout"
+	pattern := "/admin/v1/auth/logout"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthServiceLogout))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -172,7 +172,7 @@ func (c *AuthServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutReques
 
 func (c *AuthServiceHTTPClientImpl) Profile(ctx context.Context, in *ProfileRequest, opts ...http.CallOption) (*ProfileResponse, error) {
 	var out ProfileResponse
-	pattern := "/avmc/v1/auth/profile"
+	pattern := "/admin/v1/auth/profile"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAuthServiceProfile))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -185,7 +185,7 @@ func (c *AuthServiceHTTPClientImpl) Profile(ctx context.Context, in *ProfileRequ
 
 func (c *AuthServiceHTTPClientImpl) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...http.CallOption) (*RefreshTokenResponse, error) {
 	var out RefreshTokenResponse
-	pattern := "/avmc/v1/auth/refresh-token"
+	pattern := "/admin/v1/auth/refresh-token"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthServiceRefreshToken))
 	opts = append(opts, http.PathTemplate(pattern))

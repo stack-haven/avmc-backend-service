@@ -2,7 +2,9 @@ package convert
 
 // Uint 包提供 uint 类型与字符串相互转换的工具函数。
 
-import "strconv"
+import (
+	"strconv"
+)
 
 // UnitToString 将 uint 类型的值转换为字符串。
 // id: 待转换的 uint 类型值。

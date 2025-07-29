@@ -18,57 +18,67 @@ service PostService {
   // 获取岗位列表
   rpc ListPost (pagination.PagingRequest) returns (core.service.v1.ListPostResponse) {
     option (google.api.http) = {
-      get: "/avmc/v1/posts"
+      get: "/admin/v1/posts"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取岗位列表";
+      description: "获取岗位列表";
+      tags: ["岗位管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 获取岗位数据
   rpc GetPost (core.service.v1.GetPostRequest) returns (core.service.v1.Post) {
     option (google.api.http) = {
-      get: "/avmc/v1/posts/{id}"
+      get: "/admin/v1/posts/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取岗位数据";
+      description: "获取岗位数据";
+      tags: ["岗位管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 创建岗位
   rpc CreatePost (core.service.v1.CreatePostRequest) returns (core.service.v1.CreatePostResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/posts"
+      post: "/admin/v1/posts"
       body: "post"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建岗位";
+      description: "创建岗位";
+      tags: ["岗位管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 更新岗位
   rpc UpdatePost (core.service.v1.UpdatePostRequest) returns (core.service.v1.UpdatePostResponse) {
     option (google.api.http) = {
-      put: "/avmc/v1/posts/{id}"
+      put: "/admin/v1/posts/{id}"
       body: "post"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新岗位";
+      description: "更新岗位";
+      tags: ["岗位管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 删除岗位
   rpc DeletePost (core.service.v1.DeletePostRequest) returns (core.service.v1.DeletePostResponse) {
     option (google.api.http) = {
-      delete: "/avmc/v1/posts/{id}"
+      delete: "/admin/v1/posts/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除岗位";
+      description: "删除岗位";
+      tags: ["岗位管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 }

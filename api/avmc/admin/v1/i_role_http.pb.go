@@ -42,11 +42,11 @@ type RoleServiceHTTPServer interface {
 
 func RegisterRoleServiceHTTPServer(s *http.Server, srv RoleServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/avmc/v1/roles", _RoleService_ListRole0_HTTP_Handler(srv))
-	r.GET("/avmc/v1/roles/{id}", _RoleService_GetRole0_HTTP_Handler(srv))
-	r.POST("/avmc/v1/roles", _RoleService_CreateRole0_HTTP_Handler(srv))
-	r.PUT("/avmc/v1/roles/{id}", _RoleService_UpdateRole0_HTTP_Handler(srv))
-	r.DELETE("/avmc/v1/roles/{id}", _RoleService_DeleteRole0_HTTP_Handler(srv))
+	r.GET("/admin/v1/roles", _RoleService_ListRole0_HTTP_Handler(srv))
+	r.GET("/admin/v1/roles/{id}", _RoleService_GetRole0_HTTP_Handler(srv))
+	r.POST("/admin/v1/roles", _RoleService_CreateRole0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/roles/{id}", _RoleService_UpdateRole0_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/roles/{id}", _RoleService_DeleteRole0_HTTP_Handler(srv))
 }
 
 func _RoleService_ListRole0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
@@ -177,7 +177,7 @@ func NewRoleServiceHTTPClient(client *http.Client) RoleServiceHTTPClient {
 
 func (c *RoleServiceHTTPClientImpl) CreateRole(ctx context.Context, in *v1.CreateRoleRequest, opts ...http.CallOption) (*v1.CreateRoleResponse, error) {
 	var out v1.CreateRoleResponse
-	pattern := "/avmc/v1/roles"
+	pattern := "/admin/v1/roles"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRoleServiceCreateRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -190,7 +190,7 @@ func (c *RoleServiceHTTPClientImpl) CreateRole(ctx context.Context, in *v1.Creat
 
 func (c *RoleServiceHTTPClientImpl) DeleteRole(ctx context.Context, in *v1.DeleteRoleRequest, opts ...http.CallOption) (*v1.DeleteRoleResponse, error) {
 	var out v1.DeleteRoleResponse
-	pattern := "/avmc/v1/roles/{id}"
+	pattern := "/admin/v1/roles/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoleServiceDeleteRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -203,7 +203,7 @@ func (c *RoleServiceHTTPClientImpl) DeleteRole(ctx context.Context, in *v1.Delet
 
 func (c *RoleServiceHTTPClientImpl) GetRole(ctx context.Context, in *v1.GetRoleRequest, opts ...http.CallOption) (*v1.Role, error) {
 	var out v1.Role
-	pattern := "/avmc/v1/roles/{id}"
+	pattern := "/admin/v1/roles/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoleServiceGetRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -216,7 +216,7 @@ func (c *RoleServiceHTTPClientImpl) GetRole(ctx context.Context, in *v1.GetRoleR
 
 func (c *RoleServiceHTTPClientImpl) ListRole(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListRoleResponse, error) {
 	var out v1.ListRoleResponse
-	pattern := "/avmc/v1/roles"
+	pattern := "/admin/v1/roles"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoleServiceListRole))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -229,7 +229,7 @@ func (c *RoleServiceHTTPClientImpl) ListRole(ctx context.Context, in *pagination
 
 func (c *RoleServiceHTTPClientImpl) UpdateRole(ctx context.Context, in *v1.UpdateRoleRequest, opts ...http.CallOption) (*v1.UpdateRoleResponse, error) {
 	var out v1.UpdateRoleResponse
-	pattern := "/avmc/v1/roles/{id}"
+	pattern := "/admin/v1/roles/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRoleServiceUpdateRole))
 	opts = append(opts, http.PathTemplate(pattern))

@@ -20,9 +20,11 @@ service DeptService {
     option (google.api.http) = {
       get: "/admin/v1/depts"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取部门列表";
+      description: "获取部门列表";
+      tags: ["部门管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
@@ -31,9 +33,11 @@ service DeptService {
     option (google.api.http) = {
       get: "/admin/v1/depts/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取部门数据";
+      description: "获取部门数据";
+      tags: ["部门管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
@@ -43,9 +47,11 @@ service DeptService {
       post: "/admin/v1/depts"
       body: "dept"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建部门";
+      description: "创建部门";
+      tags: ["部门管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
@@ -55,9 +61,11 @@ service DeptService {
       put: "/admin/v1/depts/{id}"
       body: "dept"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新部门";
+      description: "更新部门";
+      tags: ["部门管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
@@ -66,9 +74,11 @@ service DeptService {
     option (google.api.http) = {
       delete: "/admin/v1/depts/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除部门";
+      description: "删除部门";
+      tags: ["部门管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 }

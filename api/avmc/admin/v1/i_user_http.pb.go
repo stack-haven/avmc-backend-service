@@ -42,11 +42,11 @@ type UserServiceHTTPServer interface {
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/avmc/v1/users", _UserService_ListUser0_HTTP_Handler(srv))
-	r.GET("/avmc/v1/users/{id}", _UserService_GetUser0_HTTP_Handler(srv))
-	r.POST("/avmc/v1/users", _UserService_CreateUser0_HTTP_Handler(srv))
-	r.PUT("/avmc/v1/users/{id}", _UserService_UpdateUser0_HTTP_Handler(srv))
-	r.DELETE("/avmc/v1/users/{id}", _UserService_DeleteUser0_HTTP_Handler(srv))
+	r.GET("/admin/v1/users", _UserService_ListUser0_HTTP_Handler(srv))
+	r.GET("/admin/v1/users/{id}", _UserService_GetUser0_HTTP_Handler(srv))
+	r.POST("/admin/v1/users", _UserService_CreateUser0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/users/{id}", _UserService_UpdateUser0_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/users/{id}", _UserService_DeleteUser0_HTTP_Handler(srv))
 }
 
 func _UserService_ListUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -177,7 +177,7 @@ func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 
 func (c *UserServiceHTTPClientImpl) CreateUser(ctx context.Context, in *v1.CreateUserRequest, opts ...http.CallOption) (*v1.CreateUserResponse, error) {
 	var out v1.CreateUserResponse
-	pattern := "/avmc/v1/users"
+	pattern := "/admin/v1/users"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceCreateUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -190,7 +190,7 @@ func (c *UserServiceHTTPClientImpl) CreateUser(ctx context.Context, in *v1.Creat
 
 func (c *UserServiceHTTPClientImpl) DeleteUser(ctx context.Context, in *v1.DeleteUserRequest, opts ...http.CallOption) (*v1.DeleteUserResponse, error) {
 	var out v1.DeleteUserResponse
-	pattern := "/avmc/v1/users/{id}"
+	pattern := "/admin/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceDeleteUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -203,7 +203,7 @@ func (c *UserServiceHTTPClientImpl) DeleteUser(ctx context.Context, in *v1.Delet
 
 func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *v1.GetUserRequest, opts ...http.CallOption) (*v1.User, error) {
 	var out v1.User
-	pattern := "/avmc/v1/users/{id}"
+	pattern := "/admin/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceGetUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -216,7 +216,7 @@ func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *v1.GetUserR
 
 func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
 	var out v1.ListUserResponse
-	pattern := "/avmc/v1/users"
+	pattern := "/admin/v1/users"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceListUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -229,7 +229,7 @@ func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *pagination
 
 func (c *UserServiceHTTPClientImpl) UpdateUser(ctx context.Context, in *v1.UpdateUserRequest, opts ...http.CallOption) (*v1.UpdateUserResponse, error) {
 	var out v1.UpdateUserResponse
-	pattern := "/avmc/v1/users/{id}"
+	pattern := "/admin/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceUpdateUser))
 	opts = append(opts, http.PathTemplate(pattern))

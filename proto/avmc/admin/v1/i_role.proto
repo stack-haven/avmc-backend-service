@@ -19,57 +19,67 @@ service RoleService {
   // 获取角色列表
   rpc ListRole (pagination.PagingRequest) returns (core.service.v1.ListRoleResponse) {
     option (google.api.http) = {
-      get: "/avmc/v1/roles"
+      get: "/admin/v1/roles"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取角色列表";
+      description: "获取角色列表";
+      tags: ["角色管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 获取角色数据
   rpc GetRole (core.service.v1.GetRoleRequest) returns (core.service.v1.Role) {
     option (google.api.http) = {
-      get: "/avmc/v1/roles/{id}"
+      get: "/admin/v1/roles/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取角色数据";
+      description: "获取角色数据";
+      tags: ["角色管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 创建角色
   rpc CreateRole (core.service.v1.CreateRoleRequest) returns (core.service.v1.CreateRoleResponse) {
     option (google.api.http) = {
-      post: "/avmc/v1/roles"
+      post: "/admin/v1/roles"
       body: "role"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建角色";
+      description: "创建角色";
+      tags: ["角色管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 更新角色
   rpc UpdateRole (core.service.v1.UpdateRoleRequest) returns (core.service.v1.UpdateRoleResponse) {
     option (google.api.http) = {
-      put: "/avmc/v1/roles/{id}"
+      put: "/admin/v1/roles/{id}"
       body: "role"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新角色";
+      description: "更新角色";
+      tags: ["角色管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 
   // 删除角色
   rpc DeleteRole (core.service.v1.DeleteRoleRequest) returns (core.service.v1.DeleteRoleResponse) {
     option (google.api.http) = {
-      delete: "/avmc/v1/roles/{id}"
+      delete: "/admin/v1/roles/{id}"
     };
-
-    option(gnostic.openapi.v3.operation) = {
-      security: [{additional_properties: [{name: "OAuth2PasswordBearer"; value: {}}]}]
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除角色";
+      description: "删除角色";
+      tags: ["角色管理服务"];
+      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
     };
   }
 }
