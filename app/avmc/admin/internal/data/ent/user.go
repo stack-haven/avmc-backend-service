@@ -56,9 +56,9 @@ type User struct {
 	// 登录次数
 	LoginCount int `json:"login_count,omitempty"`
 	// 用户设置，JSON格式
-	Settings map[string]interface{} `json:"settings,omitempty"`
+	Settings []string `json:"settings,omitempty"`
 	// 元数据，JSON格式
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Metadata []string `json:"metadata,omitempty"`
 	// 个人说明
 	Description  string `json:"description,omitempty"`
 	selectValues sql.SelectValues

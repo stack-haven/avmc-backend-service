@@ -25,6 +25,7 @@ type UserRepo interface {
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
 	ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
+	ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
 	Delete(ctx context.Context, id uint32) error
 }
 
@@ -63,11 +64,11 @@ func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User
 	return uc.repo.Update(ctx, g)
 }
 
-// ListSimple 处理获取用户列表请求
+// ListPageSimple 处理分页用户简单列表请求
 // 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
 // 返回值：用户列表响应，错误信息
-func (uc *UserUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) ([]*pbCore.User, error) {
-	return uc.repo.ListAll(ctx)
+func (uc *UserUsecase) ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
+	return uc.repo.ListPageSimple(ctx, pagination)
 }
 
 // ListPage 处理分页用户列表请求

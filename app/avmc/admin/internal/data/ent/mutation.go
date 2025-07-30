@@ -1116,8 +1116,10 @@ type UserMutation struct {
 	last_login_ip  *string
 	login_count    *int
 	addlogin_count *int
-	settings       *map[string]interface{}
-	metadata       *map[string]interface{}
+	settings       *[]string
+	appendsettings []string
+	metadata       *[]string
+	appendmetadata []string
 	description    *string
 	clearedFields  map[string]struct{}
 	done           bool
@@ -2109,12 +2111,13 @@ func (m *UserMutation) ResetLoginCount() {
 }
 
 // SetSettings sets the "settings" field.
-func (m *UserMutation) SetSettings(value map[string]interface{}) {
-	m.settings = &value
+func (m *UserMutation) SetSettings(s []string) {
+	m.settings = &s
+	m.appendsettings = nil
 }
 
 // Settings returns the value of the "settings" field in the mutation.
-func (m *UserMutation) Settings() (r map[string]interface{}, exists bool) {
+func (m *UserMutation) Settings() (r []string, exists bool) {
 	v := m.settings
 	if v == nil {
 		return
@@ -2125,7 +2128,7 @@ func (m *UserMutation) Settings() (r map[string]interface{}, exists bool) {
 // OldSettings returns the old "settings" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldSettings(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *UserMutation) OldSettings(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSettings is only allowed on UpdateOne operations")
 	}
@@ -2139,9 +2142,23 @@ func (m *UserMutation) OldSettings(ctx context.Context) (v map[string]interface{
 	return oldValue.Settings, nil
 }
 
+// AppendSettings adds s to the "settings" field.
+func (m *UserMutation) AppendSettings(s []string) {
+	m.appendsettings = append(m.appendsettings, s...)
+}
+
+// AppendedSettings returns the list of values that were appended to the "settings" field in this mutation.
+func (m *UserMutation) AppendedSettings() ([]string, bool) {
+	if len(m.appendsettings) == 0 {
+		return nil, false
+	}
+	return m.appendsettings, true
+}
+
 // ClearSettings clears the value of the "settings" field.
 func (m *UserMutation) ClearSettings() {
 	m.settings = nil
+	m.appendsettings = nil
 	m.clearedFields[user.FieldSettings] = struct{}{}
 }
 
@@ -2154,16 +2171,18 @@ func (m *UserMutation) SettingsCleared() bool {
 // ResetSettings resets all changes to the "settings" field.
 func (m *UserMutation) ResetSettings() {
 	m.settings = nil
+	m.appendsettings = nil
 	delete(m.clearedFields, user.FieldSettings)
 }
 
 // SetMetadata sets the "metadata" field.
-func (m *UserMutation) SetMetadata(value map[string]interface{}) {
-	m.metadata = &value
+func (m *UserMutation) SetMetadata(s []string) {
+	m.metadata = &s
+	m.appendmetadata = nil
 }
 
 // Metadata returns the value of the "metadata" field in the mutation.
-func (m *UserMutation) Metadata() (r map[string]interface{}, exists bool) {
+func (m *UserMutation) Metadata() (r []string, exists bool) {
 	v := m.metadata
 	if v == nil {
 		return
@@ -2174,7 +2193,7 @@ func (m *UserMutation) Metadata() (r map[string]interface{}, exists bool) {
 // OldMetadata returns the old "metadata" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *UserMutation) OldMetadata(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
 	}
@@ -2188,9 +2207,23 @@ func (m *UserMutation) OldMetadata(ctx context.Context) (v map[string]interface{
 	return oldValue.Metadata, nil
 }
 
+// AppendMetadata adds s to the "metadata" field.
+func (m *UserMutation) AppendMetadata(s []string) {
+	m.appendmetadata = append(m.appendmetadata, s...)
+}
+
+// AppendedMetadata returns the list of values that were appended to the "metadata" field in this mutation.
+func (m *UserMutation) AppendedMetadata() ([]string, bool) {
+	if len(m.appendmetadata) == 0 {
+		return nil, false
+	}
+	return m.appendmetadata, true
+}
+
 // ClearMetadata clears the value of the "metadata" field.
 func (m *UserMutation) ClearMetadata() {
 	m.metadata = nil
+	m.appendmetadata = nil
 	m.clearedFields[user.FieldMetadata] = struct{}{}
 }
 
@@ -2203,6 +2236,7 @@ func (m *UserMutation) MetadataCleared() bool {
 // ResetMetadata resets all changes to the "metadata" field.
 func (m *UserMutation) ResetMetadata() {
 	m.metadata = nil
+	m.appendmetadata = nil
 	delete(m.clearedFields, user.FieldMetadata)
 }
 
@@ -2590,14 +2624,14 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetLoginCount(v)
 		return nil
 	case user.FieldSettings:
-		v, ok := value.(map[string]interface{})
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSettings(v)
 		return nil
 	case user.FieldMetadata:
-		v, ok := value.(map[string]interface{})
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

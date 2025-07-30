@@ -32,8 +32,8 @@ func (User) Fields() []ent.Field {
 		field.Time("last_login_at").Optional().Nillable().Comment("最后登录时间"),
 		field.String("last_login_ip").Optional().MaxLen(50).Comment("最后登录IP"),
 		field.Int("login_count").Default(0).Comment("登录次数"),
-		field.JSON("settings", map[string]interface{}{}).Optional().Comment("用户设置，JSON格式"),
-		field.JSON("metadata", map[string]interface{}{}).Optional().Comment("元数据，JSON格式"),
+		field.JSON("settings", []string{}).Optional().Default([]string{"/tmp"}).Comment("用户设置，JSON格式"),
+		field.JSON("metadata", []string{}).Optional().Default([]string{"/tmp"}).Comment("元数据，JSON格式"),
 		field.String("description").Optional().MaxLen(255).Comment("个人说明"),
 	}
 }

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -74,14 +75,52 @@ func (r *userRepo) toEnt(g *pbCore.User) *ent.User {
 // 参数：ctx 上下文，g 用户信息
 // 返回值：用户信息，错误信息
 func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	return g, nil
+	r.log.Infof("保存用户，用户信息：%v", g)
+	entUser := r.toEnt(g)
+	res, err := r.data.DB(ctx).User.
+		Create().
+		SetName(entUser.Name).
+		SetEmail(entUser.Email).
+		SetNickname(entUser.Nickname).
+		SetRealname(entUser.Realname).
+		SetBirthday(entUser.Birthday).
+		SetGender(entUser.Gender).
+		SetPhone(entUser.Phone).
+		SetAvatar(entUser.Avatar).
+		SetStatus(entUser.Status).
+		SetDescription(entUser.Description).
+		Save(ctx)
+	if err != nil {
+		r.log.Errorf("保存用户失败，用户信息：%v，错误：%v", g, err)
+		return nil, err
+	}
+	return r.toProto(res), nil
 }
 
 // Update 更新用户信息
 // 参数：ctx 上下文，g 用户信息
 // 返回值：用户信息，错误信息
 func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	return g, nil
+	r.log.Infof("更新用户，用户信息：%v", g)
+	entUser := r.toEnt(g)
+	res, err := r.data.DB(ctx).User.
+		UpdateOneID(g.GetId()).
+		SetName(entUser.Name).
+		SetEmail(entUser.Email).
+		SetNickname(entUser.Nickname).
+		SetRealname(entUser.Realname).
+		SetBirthday(entUser.Birthday).
+		SetGender(entUser.Gender).
+		SetPhone(entUser.Phone).
+		SetAvatar(entUser.Avatar).
+		SetStatus(entUser.Status).
+		SetDescription(entUser.Description).
+		Save(ctx)
+	if err != nil {
+		r.log.Errorf("更新用户失败，用户信息：%v，错误：%v", g, err)
+		return nil, err
+	}
+	return r.toProto(res), nil
 }
 
 // FindByID 通过ID查询用户信息
@@ -89,7 +128,10 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 // 返回值：用户信息，错误信息
 func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error) {
 	r.log.Infof("通过ID查询用户，ID：%d", id)
-	res, err := r.data.DB(ctx).User.Query().Where(user.IDEQ(id)).Only(ctx)
+	res, err := r.data.DB(ctx).User.Query().
+		// Select(user.FieldID, user.FieldName, user.FieldEmail, user.FieldNickname, user.FieldRealname, user.FieldGender, user.FieldAvatar, user.FieldDescription, user.FieldPhone, user.FieldStatus, user.FieldBirthday, user.FieldCreatedAt, user.FieldUpdatedAt).
+		Where(user.IDEQ(id), user.DeletedAtIsNil()).Only(ctx)
+	fmt.Printf("%v", res)
 	if err != nil {
 		r.log.Errorf("通过ID查询用户失败，ID：%d，错误：%v", id, err)
 		return nil, err
@@ -128,7 +170,7 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 // 返回值：用户列表，错误信息
 func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 	r.log.Infof("查询所有用户列表")
-	res, err := r.data.DB(ctx).User.Query().All(ctx)
+	res, err := r.data.DB(ctx).User.Query().Select(user.FieldID, user.FieldName).Order(ent.Desc(user.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err
@@ -136,14 +178,47 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 	return convert.SliceToAny(res, r.toProto), nil
 }
 
+// ListPageSimple 查询用户简单列表分页
+// 参数：ctx 上下文，pagination 分页请求
+// 返回值：用户列表响应，错误信息
+func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
+	r.log.Infof("查询用户简单列表分页，分页请求：%v", pagination)
+	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Count(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
+		return nil, err
+	}
+	res, err := r.data.DB(ctx).User.Query().
+		Select(user.FieldID, user.FieldName).
+		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
+		Limit(int(pagination.GetPageSize())).
+		Order(ent.Desc(user.FieldID)).
+		All(ctx)
+	if err != nil {
+		r.log.Errorf("查询用户简单列表分页失败，分页请求：%v，错误：%v", pagination, err)
+		return nil, err
+	}
+	return &pbCore.ListUserResponse{
+		Items: convert.SliceToAny(res, r.toProto),
+		Total: int32(count),
+	}, nil
+}
+
 // ListPage 查询用户列表分页
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：用户列表响应，错误信息
 func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
 	r.log.Infof("查询用户列表分页，分页请求：%v", pagination)
+	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Count(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
+		return nil, err
+	}
 	res, err := r.data.DB(ctx).User.Query().
+		Select(user.FieldID, user.FieldName, user.FieldEmail, user.FieldNickname, user.FieldRealname, user.FieldBirthday, user.FieldGender, user.FieldPhone, user.FieldAvatar, user.FieldStatus).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
+		Order(ent.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
 		r.log.Errorf("查询用户列表分页失败，分页请求：%v，错误：%v", pagination, err)
@@ -151,7 +226,7 @@ func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 	}
 	return &pbCore.ListUserResponse{
 		Items: convert.SliceToAny(res, r.toProto),
-		Total: int32(len(res)),
+		Total: int32(count),
 	}, nil
 }
 
@@ -159,5 +234,11 @@ func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 // 参数：ctx 上下文，id 用户ID
 // 返回值：错误信息
 func (r *userRepo) Delete(ctx context.Context, id uint32) error {
+	r.log.Infof("删除用户，用户ID：%d", id)
+	err := r.data.DB(ctx).User.DeleteOneID(id).Exec(ctx)
+	if err != nil {
+		r.log.Errorf("删除用户失败，用户ID：%d，错误：%v", id, err)
+		return err
+	}
 	return nil
 }

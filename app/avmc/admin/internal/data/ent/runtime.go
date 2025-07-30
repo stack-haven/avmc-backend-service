@@ -174,6 +174,14 @@ func init() {
 	userDescLoginCount := userFields[13].Descriptor()
 	// user.DefaultLoginCount holds the default value on creation for the login_count field.
 	user.DefaultLoginCount = userDescLoginCount.Default.(int)
+	// userDescSettings is the schema descriptor for settings field.
+	userDescSettings := userFields[14].Descriptor()
+	// user.DefaultSettings holds the default value on creation for the settings field.
+	user.DefaultSettings = userDescSettings.Default.([]string)
+	// userDescMetadata is the schema descriptor for metadata field.
+	userDescMetadata := userFields[15].Descriptor()
+	// user.DefaultMetadata holds the default value on creation for the metadata field.
+	user.DefaultMetadata = userDescMetadata.Default.([]string)
 	// userDescDescription is the schema descriptor for description field.
 	userDescDescription := userFields[16].Descriptor()
 	// user.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.

@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -355,8 +356,14 @@ func (uu *UserUpdate) AddLoginCount(i int) *UserUpdate {
 }
 
 // SetSettings sets the "settings" field.
-func (uu *UserUpdate) SetSettings(m map[string]interface{}) *UserUpdate {
-	uu.mutation.SetSettings(m)
+func (uu *UserUpdate) SetSettings(s []string) *UserUpdate {
+	uu.mutation.SetSettings(s)
+	return uu
+}
+
+// AppendSettings appends s to the "settings" field.
+func (uu *UserUpdate) AppendSettings(s []string) *UserUpdate {
+	uu.mutation.AppendSettings(s)
 	return uu
 }
 
@@ -367,8 +374,14 @@ func (uu *UserUpdate) ClearSettings() *UserUpdate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (uu *UserUpdate) SetMetadata(m map[string]interface{}) *UserUpdate {
-	uu.mutation.SetMetadata(m)
+func (uu *UserUpdate) SetMetadata(s []string) *UserUpdate {
+	uu.mutation.SetMetadata(s)
+	return uu
+}
+
+// AppendMetadata appends s to the "metadata" field.
+func (uu *UserUpdate) AppendMetadata(s []string) *UserUpdate {
+	uu.mutation.AppendMetadata(s)
 	return uu
 }
 
@@ -626,11 +639,21 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Settings(); ok {
 		_spec.SetField(user.FieldSettings, field.TypeJSON, value)
 	}
+	if value, ok := uu.mutation.AppendedSettings(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldSettings, value)
+		})
+	}
 	if uu.mutation.SettingsCleared() {
 		_spec.ClearField(user.FieldSettings, field.TypeJSON)
 	}
 	if value, ok := uu.mutation.Metadata(); ok {
 		_spec.SetField(user.FieldMetadata, field.TypeJSON, value)
+	}
+	if value, ok := uu.mutation.AppendedMetadata(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldMetadata, value)
+		})
 	}
 	if uu.mutation.MetadataCleared() {
 		_spec.ClearField(user.FieldMetadata, field.TypeJSON)
@@ -989,8 +1012,14 @@ func (uuo *UserUpdateOne) AddLoginCount(i int) *UserUpdateOne {
 }
 
 // SetSettings sets the "settings" field.
-func (uuo *UserUpdateOne) SetSettings(m map[string]interface{}) *UserUpdateOne {
-	uuo.mutation.SetSettings(m)
+func (uuo *UserUpdateOne) SetSettings(s []string) *UserUpdateOne {
+	uuo.mutation.SetSettings(s)
+	return uuo
+}
+
+// AppendSettings appends s to the "settings" field.
+func (uuo *UserUpdateOne) AppendSettings(s []string) *UserUpdateOne {
+	uuo.mutation.AppendSettings(s)
 	return uuo
 }
 
@@ -1001,8 +1030,14 @@ func (uuo *UserUpdateOne) ClearSettings() *UserUpdateOne {
 }
 
 // SetMetadata sets the "metadata" field.
-func (uuo *UserUpdateOne) SetMetadata(m map[string]interface{}) *UserUpdateOne {
-	uuo.mutation.SetMetadata(m)
+func (uuo *UserUpdateOne) SetMetadata(s []string) *UserUpdateOne {
+	uuo.mutation.SetMetadata(s)
+	return uuo
+}
+
+// AppendMetadata appends s to the "metadata" field.
+func (uuo *UserUpdateOne) AppendMetadata(s []string) *UserUpdateOne {
+	uuo.mutation.AppendMetadata(s)
 	return uuo
 }
 
@@ -1290,11 +1325,21 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Settings(); ok {
 		_spec.SetField(user.FieldSettings, field.TypeJSON, value)
 	}
+	if value, ok := uuo.mutation.AppendedSettings(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldSettings, value)
+		})
+	}
 	if uuo.mutation.SettingsCleared() {
 		_spec.ClearField(user.FieldSettings, field.TypeJSON)
 	}
 	if value, ok := uuo.mutation.Metadata(); ok {
 		_spec.SetField(user.FieldMetadata, field.TypeJSON, value)
+	}
+	if value, ok := uuo.mutation.AppendedMetadata(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, user.FieldMetadata, value)
+		})
 	}
 	if uuo.mutation.MetadataCleared() {
 		_spec.ClearField(user.FieldMetadata, field.TypeJSON)

@@ -875,6 +875,64 @@ paths:
                                 $ref: '#/components/schemas/CreateUserResponse'
             security:
                 - BearerAuth: []
+    /admin/v1/users/simple:
+        get:
+            tags:
+                - UserService
+                - 用户管理服务
+            summary: 获取用户简单列表
+            description: 获取用户简单列表
+            operationId: UserService_ListUserSimple
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  description: 每页的行数
+                  schema:
+                    type: integer
+                    format: int32
+                - name: query
+                  in: query
+                  description: 与过滤参数
+                  schema:
+                    type: string
+                - name: or
+                  in: query
+                  description: 或过滤参数
+                  schema:
+                    type: string
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                - name: nopaging
+                  in: query
+                  description: 是否不分页
+                  schema:
+                    type: boolean
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListUserResponse'
+            security:
+                - BearerAuth: []
     /admin/v1/users/{id}:
         get:
             tags:

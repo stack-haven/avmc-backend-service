@@ -21,11 +21,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_ListUser_FullMethodName   = "/avmc.admin.v1.UserService/ListUser"
-	UserService_GetUser_FullMethodName    = "/avmc.admin.v1.UserService/GetUser"
-	UserService_CreateUser_FullMethodName = "/avmc.admin.v1.UserService/CreateUser"
-	UserService_UpdateUser_FullMethodName = "/avmc.admin.v1.UserService/UpdateUser"
-	UserService_DeleteUser_FullMethodName = "/avmc.admin.v1.UserService/DeleteUser"
+	UserService_ListUserSimple_FullMethodName = "/avmc.admin.v1.UserService/ListUserSimple"
+	UserService_ListUser_FullMethodName       = "/avmc.admin.v1.UserService/ListUser"
+	UserService_GetUser_FullMethodName        = "/avmc.admin.v1.UserService/GetUser"
+	UserService_CreateUser_FullMethodName     = "/avmc.admin.v1.UserService/CreateUser"
+	UserService_UpdateUser_FullMethodName     = "/avmc.admin.v1.UserService/UpdateUser"
+	UserService_DeleteUser_FullMethodName     = "/avmc.admin.v1.UserService/DeleteUser"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -34,6 +35,8 @@ const (
 //
 // 用户管理服务
 type UserServiceClient interface {
+	// 获取用户简单列表
+	ListUserSimple(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error)
 	// 获取用户列表
 	ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error)
 	// 获取用户数据
@@ -52,6 +55,16 @@ type userServiceClient struct {
 
 func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
+}
+
+func (c *userServiceClient) ListUserSimple(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListUserResponse)
+	err := c.cc.Invoke(ctx, UserService_ListUserSimple_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userServiceClient) ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error) {
@@ -110,6 +123,8 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *v1.DeleteUserReq
 //
 // 用户管理服务
 type UserServiceServer interface {
+	// 获取用户简单列表
+	ListUserSimple(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
 	// 获取用户列表
 	ListUser(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
 	// 获取用户数据
@@ -130,6 +145,9 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
+func (UnimplementedUserServiceServer) ListUserSimple(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUserSimple not implemented")
+}
 func (UnimplementedUserServiceServer) ListUser(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
 }
@@ -164,6 +182,24 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&UserService_ServiceDesc, srv)
+}
+
+func _UserService_ListUserSimple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(pagination.PagingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ListUserSimple(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ListUserSimple_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ListUserSimple(ctx, req.(*pagination.PagingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_ListUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -263,6 +299,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "avmc.admin.v1.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListUserSimple",
+			Handler:    _UserService_ListUserSimple_Handler,
+		},
 		{
 			MethodName: "ListUser",
 			Handler:    _UserService_ListUser_Handler,

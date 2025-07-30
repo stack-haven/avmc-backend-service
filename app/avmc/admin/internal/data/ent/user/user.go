@@ -134,6 +134,10 @@ var (
 	LastLoginIPValidator func(string) error
 	// DefaultLoginCount holds the default value on creation for the "login_count" field.
 	DefaultLoginCount int
+	// DefaultSettings holds the default value on creation for the "settings" field.
+	DefaultSettings []string
+	// DefaultMetadata holds the default value on creation for the "metadata" field.
+	DefaultMetadata []string
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.

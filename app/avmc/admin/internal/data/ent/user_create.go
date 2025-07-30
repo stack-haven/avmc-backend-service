@@ -259,14 +259,14 @@ func (uc *UserCreate) SetNillableLoginCount(i *int) *UserCreate {
 }
 
 // SetSettings sets the "settings" field.
-func (uc *UserCreate) SetSettings(m map[string]interface{}) *UserCreate {
-	uc.mutation.SetSettings(m)
+func (uc *UserCreate) SetSettings(s []string) *UserCreate {
+	uc.mutation.SetSettings(s)
 	return uc
 }
 
 // SetMetadata sets the "metadata" field.
-func (uc *UserCreate) SetMetadata(m map[string]interface{}) *UserCreate {
-	uc.mutation.SetMetadata(m)
+func (uc *UserCreate) SetMetadata(s []string) *UserCreate {
+	uc.mutation.SetMetadata(s)
 	return uc
 }
 
@@ -348,6 +348,14 @@ func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.LoginCount(); !ok {
 		v := user.DefaultLoginCount
 		uc.mutation.SetLoginCount(v)
+	}
+	if _, ok := uc.mutation.Settings(); !ok {
+		v := user.DefaultSettings
+		uc.mutation.SetSettings(v)
+	}
+	if _, ok := uc.mutation.Metadata(); !ok {
+		v := user.DefaultMetadata
+		uc.mutation.SetMetadata(v)
 	}
 }
 
@@ -911,7 +919,7 @@ func (u *UserUpsert) AddLoginCount(v int) *UserUpsert {
 }
 
 // SetSettings sets the "settings" field.
-func (u *UserUpsert) SetSettings(v map[string]interface{}) *UserUpsert {
+func (u *UserUpsert) SetSettings(v []string) *UserUpsert {
 	u.Set(user.FieldSettings, v)
 	return u
 }
@@ -929,7 +937,7 @@ func (u *UserUpsert) ClearSettings() *UserUpsert {
 }
 
 // SetMetadata sets the "metadata" field.
-func (u *UserUpsert) SetMetadata(v map[string]interface{}) *UserUpsert {
+func (u *UserUpsert) SetMetadata(v []string) *UserUpsert {
 	u.Set(user.FieldMetadata, v)
 	return u
 }
@@ -1359,7 +1367,7 @@ func (u *UserUpsertOne) UpdateLoginCount() *UserUpsertOne {
 }
 
 // SetSettings sets the "settings" field.
-func (u *UserUpsertOne) SetSettings(v map[string]interface{}) *UserUpsertOne {
+func (u *UserUpsertOne) SetSettings(v []string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetSettings(v)
 	})
@@ -1380,7 +1388,7 @@ func (u *UserUpsertOne) ClearSettings() *UserUpsertOne {
 }
 
 // SetMetadata sets the "metadata" field.
-func (u *UserUpsertOne) SetMetadata(v map[string]interface{}) *UserUpsertOne {
+func (u *UserUpsertOne) SetMetadata(v []string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetMetadata(v)
 	})
@@ -1982,7 +1990,7 @@ func (u *UserUpsertBulk) UpdateLoginCount() *UserUpsertBulk {
 }
 
 // SetSettings sets the "settings" field.
-func (u *UserUpsertBulk) SetSettings(v map[string]interface{}) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetSettings(v []string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetSettings(v)
 	})
@@ -2003,7 +2011,7 @@ func (u *UserUpsertBulk) ClearSettings() *UserUpsertBulk {
 }
 
 // SetMetadata sets the "metadata" field.
-func (u *UserUpsertBulk) SetMetadata(v map[string]interface{}) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetMetadata(v []string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetMetadata(v)
 	})
