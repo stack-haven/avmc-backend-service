@@ -45,7 +45,7 @@ func (r *authRepo) Login(ctx context.Context, name, password string, domainId ui
 		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
 		return nil, err
 	}
-	if !crypto.CheckPasswordHash(password, res.Password) {
+	if !crypto.CheckPasswordHash(password, *res.Password) {
 		r.log.Errorf("登录数据操作失败，用户名：%s，密码错误", name)
 		return nil, biz.ErrPasswordIncorrect
 	}
@@ -109,7 +109,8 @@ func (r *authRepo) Logout(ctx context.Context) error {
 func (r *authRepo) Register(ctx context.Context, name, password string) error {
 	// 这里实现具体的注册数据操作
 	r.log.Infof("尝试注册数据操作，用户名：%s", name)
-	_, err := r.data.DB(ctx).User.Create().SetName(name).SetPassword(password).Save(ctx)
+	hashPassword, _ := crypto.HashPassword(password)
+	_, err := r.data.DB(ctx).User.Create().SetName(name).SetPassword(hashPassword).Save(ctx)
 	if err != nil {
 		r.log.Errorf("注册数据操作失败，用户名：%s，错误：%v", name, err)
 		return err

@@ -189,10 +189,10 @@ func (m *User) validate(all bool) error {
 
 	if m.Status != nil {
 
-		if m.GetStatus() < 0 {
+		if _, ok := enum.Status_name[int32(m.GetStatus())]; !ok {
 			err := UserValidationError{
 				field:  "Status",
-				reason: "value must be greater than or equal to 0",
+				reason: "value must be one of the defined enum values",
 			}
 			if !all {
 				return err

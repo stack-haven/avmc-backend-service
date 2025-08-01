@@ -318,13 +318,17 @@ func (m *LoginResponse) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for Name
-
-	// no validation rules for TokenType
-
 	// no validation rules for AccessToken
 
 	// no validation rules for RefreshToken
+
+	if m.Name != nil {
+		// no validation rules for Name
+	}
+
+	if m.TokenType != nil {
+		// no validation rules for TokenType
+	}
 
 	if m.ExpiresIn != nil {
 		// no validation rules for ExpiresIn

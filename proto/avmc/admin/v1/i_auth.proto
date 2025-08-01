@@ -141,11 +141,21 @@ enum GrandType {
 }
 
 message Auth {
-  string username = 2; // 认证名称
-  uint32 user_id = 1; // 用户ID
-  uint32 domain_id = 3; // 域ID
-  repeated string roles = 4; // 角色
-  repeated string permissions = 5; // 权限
+  string username = 1 [
+    (gnostic.openapi.v3.property) = {description: "认证名称"}
+  ]; // 认证名称
+  uint32 user_id = 2 [
+    (gnostic.openapi.v3.property) = {description: "用户ID"}
+  ]; // 用户ID
+  uint32 domain_id = 3 [
+    (gnostic.openapi.v3.property) = {description: "域ID"}
+  ]; // 域ID
+  repeated string roles = 4 [
+    (gnostic.openapi.v3.property) = {description: "角色"}
+  ]; // 角色
+  repeated string permissions = 5 [
+    (gnostic.openapi.v3.property) = {description: "权限"}
+  ]; // 权限
 }
 
 // 用户后台登陆 - 请求
@@ -173,12 +183,24 @@ message LoginRequest {
 
 // 用户后台登陆 - 回应
 message LoginResponse {
-  uint32 id = 1; // 用户ID
-  string name = 2; // 用户名
-  string token_type = 3; // 令牌类型
-  string access_token = 4; // 访问令牌
-  string refresh_token = 5; // 刷新令牌
-  optional string expires_in = 6; // 访问令牌过期时间
+  uint32 id = 1 [
+    (gnostic.openapi.v3.property) = {description: "用户ID"}
+  ]; // 用户ID
+  optional string name = 2 [
+    (gnostic.openapi.v3.property) = {description: "用户名"}
+  ]; // 用户名
+  optional string token_type = 3 [
+    (gnostic.openapi.v3.property) = {description: "令牌类型"}
+  ]; // 令牌类型
+  string access_token = 4 [
+    (gnostic.openapi.v3.property) = {description: "访问令牌"}
+  ]; // 访问令牌
+  string refresh_token = 5 [
+    (gnostic.openapi.v3.property) = {description: "刷新令牌"}
+  ]; // 刷新令牌
+  optional string expires_in = 6 [
+    (gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}
+  ]; // 访问令牌过期时间
 }
 
 // 请求 - 刷新令牌
@@ -191,9 +213,15 @@ message RefreshTokenRequest {
 
 // 回应 - 刷新令牌
 message RefreshTokenResponse {
-  string access_token = 1; // 新的访问令牌
-  string refresh_token = 2; // 新的刷新令牌
-  optional string expires_in = 3; // 访问令牌过期时间
+  string access_token = 1 [
+    (gnostic.openapi.v3.property) = {description: "新的访问令牌"}
+  ]; // 新的访问令牌
+  string refresh_token = 2 [
+    (gnostic.openapi.v3.property) = {description: "新的刷新令牌"}
+  ]; // 新的刷新令牌
+  optional string expires_in = 3 [
+    (gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}
+  ]; // 访问令牌过期时间
 }
 
 // 用户后台登出 - 请求
@@ -207,8 +235,16 @@ message ProfileRequest {}
 
 // 登录用户简介信息 - 回应
 message ProfileResponse {
-  core.service.v1.User user = 1; // 登录用户简介信息
-  optional core.service.v1.Role role = 2; // 登录用户角色信息  
-  repeated string permissions = 3; // 登录用户权限信息
-  repeated string menus = 4; // 登录用户菜单信息
+  core.service.v1.User user = 1 [
+    (gnostic.openapi.v3.property) = {description: "登录用户简介信息"}
+  ]; // 登录用户简介信息
+  optional core.service.v1.Role role = 2 [
+    (gnostic.openapi.v3.property) = {description: "登录用户角色信息"}
+  ]; // 登录用户角色信息  
+  repeated string permissions = 3 [
+    (gnostic.openapi.v3.property) = {description: "登录用户权限信息"}
+  ]; // 登录用户权限信息
+  repeated string menus = 4 [
+    (gnostic.openapi.v3.property) = {description: "登录用户菜单信息"}
+  ]; // 登录用户菜单信息
 }

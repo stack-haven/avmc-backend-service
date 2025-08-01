@@ -506,47 +506,47 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
-		_node.Name = value
+		_node.Name = &value
 	}
 	if value, ok := uc.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
-		_node.Password = value
+		_node.Password = &value
 	}
 	if value, ok := uc.mutation.Realname(); ok {
 		_spec.SetField(user.FieldRealname, field.TypeString, value)
-		_node.Realname = value
+		_node.Realname = &value
 	}
 	if value, ok := uc.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
-		_node.Nickname = value
+		_node.Nickname = &value
 	}
 	if value, ok := uc.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
-		_node.Email = value
+		_node.Email = &value
 	}
 	if value, ok := uc.mutation.Phone(); ok {
 		_spec.SetField(user.FieldPhone, field.TypeString, value)
-		_node.Phone = value
+		_node.Phone = &value
 	}
 	if value, ok := uc.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
-		_node.Avatar = value
+		_node.Avatar = &value
 	}
 	if value, ok := uc.mutation.Birthday(); ok {
 		_spec.SetField(user.FieldBirthday, field.TypeTime, value)
-		_node.Birthday = value
+		_node.Birthday = &value
 	}
 	if value, ok := uc.mutation.Gender(); ok {
 		_spec.SetField(user.FieldGender, field.TypeInt32, value)
-		_node.Gender = value
+		_node.Gender = &value
 	}
 	if value, ok := uc.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt, value)
-		_node.Age = value
+		_node.Age = &value
 	}
 	if value, ok := uc.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeInt32, value)
-		_node.Status = value
+		_node.Status = &value
 	}
 	if value, ok := uc.mutation.LastLoginAt(); ok {
 		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)
@@ -554,11 +554,11 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.LastLoginIP(); ok {
 		_spec.SetField(user.FieldLastLoginIP, field.TypeString, value)
-		_node.LastLoginIP = value
+		_node.LastLoginIP = &value
 	}
 	if value, ok := uc.mutation.LoginCount(); ok {
 		_spec.SetField(user.FieldLoginCount, field.TypeInt, value)
-		_node.LoginCount = value
+		_node.LoginCount = &value
 	}
 	if value, ok := uc.mutation.Settings(); ok {
 		_spec.SetField(user.FieldSettings, field.TypeJSON, value)
@@ -570,7 +570,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.Description(); ok {
 		_spec.SetField(user.FieldDescription, field.TypeString, value)
-		_node.Description = value
+		_node.Description = &value
 	}
 	return _node, _spec
 }

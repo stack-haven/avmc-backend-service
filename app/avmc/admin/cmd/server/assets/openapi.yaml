@@ -1156,17 +1156,23 @@ components:
             properties:
                 id:
                     type: integer
+                    description: 用户ID
                     format: uint32
                 name:
                     type: string
+                    description: 用户名
                 tokenType:
                     type: string
+                    description: 令牌类型
                 accessToken:
                     type: string
+                    description: 访问令牌
                 refreshToken:
                     type: string
+                    description: 刷新令牌
                 expiresIn:
                     type: string
+                    description: 访问令牌过期时间
             description: 用户后台登陆 - 回应
         LogoutRequest:
             type: object
@@ -1265,10 +1271,12 @@ components:
                     type: array
                     items:
                         type: string
+                    description: 登录用户权限信息
                 menus:
                     type: array
                     items:
                         type: string
+                    description: 登录用户菜单信息
             description: 登录用户简介信息 - 回应
         RefreshTokenRequest:
             type: object
@@ -1282,10 +1290,13 @@ components:
             properties:
                 accessToken:
                     type: string
+                    description: 新的访问令牌
                 refreshToken:
                     type: string
+                    description: 新的刷新令牌
                 expiresIn:
                     type: string
+                    description: 访问令牌过期时间
             description: 回应 - 刷新令牌
         Role:
             type: object
@@ -1380,9 +1391,13 @@ components:
                     type: string
                     description: 头像
                 status:
-                    type: integer
-                    description: 状态 0 未知 1 激活 2 未激活 3 禁用
-                    format: int32
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    description: 状态 0 未知 1 启用 2 禁用
+                    format: enum
                 createdAt:
                     type: string
                     description: 创建时间

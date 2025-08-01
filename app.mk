@@ -112,6 +112,7 @@ ifneq ("$(wildcard ./internal/data/ent)","")
 				--feature entql \
 				--feature sql/upsert \
 				--feature sql/lock \
+				--feature intercept,schema/snapshot \
 				./internal/data/ent/schema
 endif
 
