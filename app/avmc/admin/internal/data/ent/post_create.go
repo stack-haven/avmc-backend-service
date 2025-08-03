@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,19 +22,110 @@ type PostCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (_c *PostCreate) SetCreatedAt(v time.Time) *PostCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_c *PostCreate) SetNillableCreatedAt(v *time.Time) *PostCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
+	}
+	return _c
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_c *PostCreate) SetUpdatedAt(v time.Time) *PostCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_c *PostCreate) SetNillableUpdatedAt(v *time.Time) *PostCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *PostCreate) SetDeletedAt(v time.Time) *PostCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *PostCreate) SetNillableDeletedAt(v *time.Time) *PostCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *PostCreate) SetStatus(v int32) *PostCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *PostCreate) SetNillableStatus(v *int32) *PostCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetDomainID sets the "domain_id" field.
+func (_c *PostCreate) SetDomainID(v uint32) *PostCreate {
+	_c.mutation.SetDomainID(v)
+	return _c
+}
+
+// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
+func (_c *PostCreate) SetNillableDomainID(v *uint32) *PostCreate {
+	if v != nil {
+		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetName sets the "name" field.
+func (_c *PostCreate) SetName(v string) *PostCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_c *PostCreate) SetNillableName(v *string) *PostCreate {
+	if v != nil {
+		_c.SetName(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *PostCreate) SetID(v uint32) *PostCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
 // Mutation returns the PostMutation object of the builder.
-func (pc *PostCreate) Mutation() *PostMutation {
-	return pc.mutation
+func (_c *PostCreate) Mutation() *PostMutation {
+	return _c.mutation
 }
 
 // Save creates the Post in the database.
-func (pc *PostCreate) Save(ctx context.Context) (*Post, error) {
-	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
+func (_c *PostCreate) Save(ctx context.Context) (*Post, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *PostCreate) SaveX(ctx context.Context) *Post {
-	v, err := pc.Save(ctx)
+func (_c *PostCreate) SaveX(ctx context.Context) *Post {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -41,47 +133,136 @@ func (pc *PostCreate) SaveX(ctx context.Context) *Post {
 }
 
 // Exec executes the query.
-func (pc *PostCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (_c *PostCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *PostCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (_c *PostCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *PostCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		v := post.DefaultCreatedAt()
+		_c.mutation.SetCreatedAt(v)
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		v := post.DefaultUpdatedAt()
+		_c.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := post.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.DomainID(); !ok {
+		v := post.DefaultDomainID()
+		_c.mutation.SetDomainID(v)
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		v := post.DefaultName
+		_c.mutation.SetName(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
-func (pc *PostCreate) check() error {
+func (_c *PostCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Post.created_at"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Post.updated_at"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Post.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := post.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Post.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DomainID(); !ok {
+		return &ValidationError{Name: "domain_id", err: errors.New(`ent: missing required field "Post.domain_id"`)}
+	}
+	if v, ok := _c.mutation.DomainID(); ok {
+		if err := post.DomainIDValidator(v); err != nil {
+			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "Post.domain_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Post.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := post.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Post.name": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := post.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Post.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
-func (pc *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
-	if err := pc.check(); err != nil {
+func (_c *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
-	pc.mutation.id = &_node.ID
-	pc.mutation.done = true
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
+	}
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
+func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Post{config: pc.config}
-		_spec = sqlgraph.NewCreateSpec(post.Table, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
+		_node = &Post{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(post.Table, sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32))
 	)
-	_spec.OnConflict = pc.conflict
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(post.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(post.FieldStatus, field.TypeInt32, value)
+		_node.Status = &value
+	}
+	if value, ok := _c.mutation.DomainID(); ok {
+		_spec.SetField(post.FieldDomainID, field.TypeUint32, value)
+		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(post.FieldName, field.TypeString, value)
+		_node.Name = &value
+	}
 	return _node, _spec
 }
 
@@ -89,16 +270,22 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Post.Create().
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.PostUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
-func (pc *PostCreate) OnConflict(opts ...sql.ConflictOption) *PostUpsertOne {
-	pc.conflict = opts
+func (_c *PostCreate) OnConflict(opts ...sql.ConflictOption) *PostUpsertOne {
+	_c.conflict = opts
 	return &PostUpsertOne{
-		create: pc,
+		create: _c,
 	}
 }
 
@@ -108,10 +295,10 @@ func (pc *PostCreate) OnConflict(opts ...sql.ConflictOption) *PostUpsertOne {
 //	client.Post.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pc *PostCreate) OnConflictColumns(columns ...string) *PostUpsertOne {
-	pc.conflict = append(pc.conflict, sql.ConflictColumns(columns...))
+func (_c *PostCreate) OnConflictColumns(columns ...string) *PostUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PostUpsertOne{
-		create: pc,
+		create: _c,
 	}
 }
 
@@ -128,16 +315,105 @@ type (
 	}
 )
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetUpdatedAt sets the "updated_at" field.
+func (u *PostUpsert) SetUpdatedAt(v time.Time) *PostUpsert {
+	u.Set(post.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *PostUpsert) UpdateUpdatedAt() *PostUpsert {
+	u.SetExcluded(post.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *PostUpsert) SetDeletedAt(v time.Time) *PostUpsert {
+	u.Set(post.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *PostUpsert) UpdateDeletedAt() *PostUpsert {
+	u.SetExcluded(post.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *PostUpsert) ClearDeletedAt() *PostUpsert {
+	u.SetNull(post.FieldDeletedAt)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *PostUpsert) SetStatus(v int32) *PostUpsert {
+	u.Set(post.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *PostUpsert) UpdateStatus() *PostUpsert {
+	u.SetExcluded(post.FieldStatus)
+	return u
+}
+
+// AddStatus adds v to the "status" field.
+func (u *PostUpsert) AddStatus(v int32) *PostUpsert {
+	u.Add(post.FieldStatus, v)
+	return u
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *PostUpsert) SetDomainID(v uint32) *PostUpsert {
+	u.Set(post.FieldDomainID, v)
+	return u
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *PostUpsert) UpdateDomainID() *PostUpsert {
+	u.SetExcluded(post.FieldDomainID)
+	return u
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *PostUpsert) AddDomainID(v uint32) *PostUpsert {
+	u.Add(post.FieldDomainID, v)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *PostUpsert) SetName(v string) *PostUpsert {
+	u.Set(post.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *PostUpsert) UpdateName() *PostUpsert {
+	u.SetExcluded(post.FieldName)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Post.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(post.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PostUpsertOne) UpdateNewValues() *PostUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(post.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(post.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -168,6 +444,97 @@ func (u *PostUpsertOne) Update(set func(*PostUpsert)) *PostUpsertOne {
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *PostUpsertOne) SetUpdatedAt(v time.Time) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateUpdatedAt() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *PostUpsertOne) SetDeletedAt(v time.Time) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateDeletedAt() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *PostUpsertOne) ClearDeletedAt() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *PostUpsertOne) SetStatus(v int32) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *PostUpsertOne) AddStatus(v int32) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateStatus() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *PostUpsertOne) SetDomainID(v uint32) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *PostUpsertOne) AddDomainID(v uint32) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateDomainID() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *PostUpsertOne) SetName(v string) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateName() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateName()
+	})
+}
+
 // Exec executes the query.
 func (u *PostUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -184,7 +551,7 @@ func (u *PostUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PostUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *PostUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -193,7 +560,7 @@ func (u *PostUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PostUpsertOne) IDX(ctx context.Context) int {
+func (u *PostUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -210,16 +577,17 @@ type PostCreateBulk struct {
 }
 
 // Save creates the Post entities in the database.
-func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (_c *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*Post, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Post, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PostMutation)
 				if !ok {
@@ -232,12 +600,12 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = pcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -247,9 +615,9 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
+					nodes[i].ID = uint32(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -261,7 +629,7 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -269,8 +637,8 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *PostCreateBulk) SaveX(ctx context.Context) []*Post {
-	v, err := pcb.Save(ctx)
+func (_c *PostCreateBulk) SaveX(ctx context.Context) []*Post {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -278,14 +646,14 @@ func (pcb *PostCreateBulk) SaveX(ctx context.Context) []*Post {
 }
 
 // Exec executes the query.
-func (pcb *PostCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (_c *PostCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *PostCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (_c *PostCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -299,11 +667,16 @@ func (pcb *PostCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.PostUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
-func (pcb *PostCreateBulk) OnConflict(opts ...sql.ConflictOption) *PostUpsertBulk {
-	pcb.conflict = opts
+func (_c *PostCreateBulk) OnConflict(opts ...sql.ConflictOption) *PostUpsertBulk {
+	_c.conflict = opts
 	return &PostUpsertBulk{
-		create: pcb,
+		create: _c,
 	}
 }
 
@@ -313,10 +686,10 @@ func (pcb *PostCreateBulk) OnConflict(opts ...sql.ConflictOption) *PostUpsertBul
 //	client.Post.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pcb *PostCreateBulk) OnConflictColumns(columns ...string) *PostUpsertBulk {
-	pcb.conflict = append(pcb.conflict, sql.ConflictColumns(columns...))
+func (_c *PostCreateBulk) OnConflictColumns(columns ...string) *PostUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &PostUpsertBulk{
-		create: pcb,
+		create: _c,
 	}
 }
 
@@ -332,10 +705,23 @@ type PostUpsertBulk struct {
 //	client.Post.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(post.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *PostUpsertBulk) UpdateNewValues() *PostUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(post.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(post.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -364,6 +750,97 @@ func (u *PostUpsertBulk) Update(set func(*PostUpsert)) *PostUpsertBulk {
 		set(&PostUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *PostUpsertBulk) SetUpdatedAt(v time.Time) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateUpdatedAt() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *PostUpsertBulk) SetDeletedAt(v time.Time) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateDeletedAt() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *PostUpsertBulk) ClearDeletedAt() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *PostUpsertBulk) SetStatus(v int32) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *PostUpsertBulk) AddStatus(v int32) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateStatus() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *PostUpsertBulk) SetDomainID(v uint32) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *PostUpsertBulk) AddDomainID(v uint32) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateDomainID() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *PostUpsertBulk) SetName(v string) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateName() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateName()
+	})
 }
 
 // Exec executes the query.

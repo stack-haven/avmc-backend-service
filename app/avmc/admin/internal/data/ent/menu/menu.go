@@ -3,7 +3,10 @@
 package menu
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -11,13 +14,91 @@ const (
 	Label = "menu"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldDomainID holds the string denoting the domain_id field in the database.
+	FieldDomainID = "domain_id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldPath holds the string denoting the path field in the database.
+	FieldPath = "path"
+	// FieldComponent holds the string denoting the component field in the database.
+	FieldComponent = "component"
+	// FieldIcon holds the string denoting the icon field in the database.
+	FieldIcon = "icon"
+	// FieldIsExt holds the string denoting the is_ext field in the database.
+	FieldIsExt = "is_ext"
+	// FieldExtURL holds the string denoting the ext_url field in the database.
+	FieldExtURL = "ext_url"
+	// FieldPermissions holds the string denoting the permissions field in the database.
+	FieldPermissions = "permissions"
+	// FieldRedirect holds the string denoting the redirect field in the database.
+	FieldRedirect = "redirect"
+	// FieldCurrentActiveMenu holds the string denoting the current_active_menu field in the database.
+	FieldCurrentActiveMenu = "current_active_menu"
+	// FieldKeepAlive holds the string denoting the keep_alive field in the database.
+	FieldKeepAlive = "keep_alive"
+	// FieldVisible holds the string denoting the visible field in the database.
+	FieldVisible = "visible"
+	// FieldHideTab holds the string denoting the hide_tab field in the database.
+	FieldHideTab = "hide_tab"
+	// FieldHideMenu holds the string denoting the hide_menu field in the database.
+	FieldHideMenu = "hide_menu"
+	// FieldHideBreadcrumb holds the string denoting the hide_breadcrumb field in the database.
+	FieldHideBreadcrumb = "hide_breadcrumb"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
 	// Table holds the table name of the menu in the database.
 	Table = "menus"
+	// ParentTable is the table that holds the parent relation/edge.
+	ParentTable = "menus"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "parent_id"
+	// ChildrenTable is the table that holds the children relation/edge.
+	ChildrenTable = "menus"
+	// ChildrenColumn is the table column denoting the children relation/edge.
+	ChildrenColumn = "parent_id"
 )
 
 // Columns holds all SQL columns for menu fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
+	FieldStatus,
+	FieldDomainID,
+	FieldName,
+	FieldTitle,
+	FieldParentID,
+	FieldType,
+	FieldPath,
+	FieldComponent,
+	FieldIcon,
+	FieldIsExt,
+	FieldExtURL,
+	FieldPermissions,
+	FieldRedirect,
+	FieldCurrentActiveMenu,
+	FieldKeepAlive,
+	FieldVisible,
+	FieldHideTab,
+	FieldHideMenu,
+	FieldHideBreadcrumb,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -30,10 +111,211 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int32
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(int32) error
+	// DefaultDomainID holds the default value on creation for the "domain_id" field.
+	DefaultDomainID func() uint32
+	// DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
+	DomainIDValidator func(uint32) error
+	// DefaultName holds the default value on creation for the "name" field.
+	DefaultName string
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
+	// DefaultTitle holds the default value on creation for the "title" field.
+	DefaultTitle string
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
+	// DefaultParentID holds the default value on creation for the "parent_id" field.
+	DefaultParentID uint32
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType int32
+	// DefaultPath holds the default value on creation for the "path" field.
+	DefaultPath string
+	// DefaultComponent holds the default value on creation for the "component" field.
+	DefaultComponent string
+	// DefaultIcon holds the default value on creation for the "icon" field.
+	DefaultIcon string
+	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
+	IconValidator func(string) error
+	// DefaultIsExt holds the default value on creation for the "is_ext" field.
+	DefaultIsExt bool
+	// DefaultExtURL holds the default value on creation for the "ext_url" field.
+	DefaultExtURL string
+	// ExtURLValidator is a validator for the "ext_url" field. It is called by the builders before save.
+	ExtURLValidator func(string) error
+	// DefaultPermissions holds the default value on creation for the "permissions" field.
+	DefaultPermissions []string
+	// DefaultRedirect holds the default value on creation for the "redirect" field.
+	DefaultRedirect string
+	// DefaultCurrentActiveMenu holds the default value on creation for the "current_active_menu" field.
+	DefaultCurrentActiveMenu string
+	// DefaultKeepAlive holds the default value on creation for the "keep_alive" field.
+	DefaultKeepAlive bool
+	// DefaultVisible holds the default value on creation for the "visible" field.
+	DefaultVisible bool
+	// DefaultHideTab holds the default value on creation for the "hide_tab" field.
+	DefaultHideTab bool
+	// DefaultHideMenu holds the default value on creation for the "hide_menu" field.
+	DefaultHideMenu bool
+	// DefaultHideBreadcrumb holds the default value on creation for the "hide_breadcrumb" field.
+	DefaultHideBreadcrumb bool
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(uint32) error
+)
+
 // OrderOption defines the ordering options for the Menu queries.
 type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByDomainID orders the results by the domain_id field.
+func ByDomainID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDomainID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
+}
+
+// ByParentID orders the results by the parent_id field.
+func ByParentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByPath orders the results by the path field.
+func ByPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPath, opts...).ToFunc()
+}
+
+// ByComponent orders the results by the component field.
+func ByComponent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldComponent, opts...).ToFunc()
+}
+
+// ByIcon orders the results by the icon field.
+func ByIcon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIcon, opts...).ToFunc()
+}
+
+// ByIsExt orders the results by the is_ext field.
+func ByIsExt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsExt, opts...).ToFunc()
+}
+
+// ByExtURL orders the results by the ext_url field.
+func ByExtURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExtURL, opts...).ToFunc()
+}
+
+// ByRedirect orders the results by the redirect field.
+func ByRedirect(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRedirect, opts...).ToFunc()
+}
+
+// ByCurrentActiveMenu orders the results by the current_active_menu field.
+func ByCurrentActiveMenu(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentActiveMenu, opts...).ToFunc()
+}
+
+// ByKeepAlive orders the results by the keep_alive field.
+func ByKeepAlive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKeepAlive, opts...).ToFunc()
+}
+
+// ByVisible orders the results by the visible field.
+func ByVisible(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisible, opts...).ToFunc()
+}
+
+// ByHideTab orders the results by the hide_tab field.
+func ByHideTab(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideTab, opts...).ToFunc()
+}
+
+// ByHideMenu orders the results by the hide_menu field.
+func ByHideMenu(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideMenu, opts...).ToFunc()
+}
+
+// ByHideBreadcrumb orders the results by the hide_breadcrumb field.
+func ByHideBreadcrumb(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideBreadcrumb, opts...).ToFunc()
+}
+
+// ByParentField orders the results by parent field.
+func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByChildrenCount orders the results by children count.
+func ByChildrenCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newChildrenStep(), opts...)
+	}
+}
+
+// ByChildren orders the results by children terms.
+func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newParentStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
+	)
+}
+func newChildrenStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
+	)
 }

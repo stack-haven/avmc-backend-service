@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -292,13 +293,13 @@ func (c *DeptClient) Update() *DeptUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DeptClient) UpdateOne(d *Dept) *DeptUpdateOne {
-	mutation := newDeptMutation(c.config, OpUpdateOne, withDept(d))
+func (c *DeptClient) UpdateOne(_m *Dept) *DeptUpdateOne {
+	mutation := newDeptMutation(c.config, OpUpdateOne, withDept(_m))
 	return &DeptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DeptClient) UpdateOneID(id int) *DeptUpdateOne {
+func (c *DeptClient) UpdateOneID(id uint32) *DeptUpdateOne {
 	mutation := newDeptMutation(c.config, OpUpdateOne, withDeptID(id))
 	return &DeptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -310,12 +311,12 @@ func (c *DeptClient) Delete() *DeptDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *DeptClient) DeleteOne(d *Dept) *DeptDeleteOne {
-	return c.DeleteOneID(d.ID)
+func (c *DeptClient) DeleteOne(_m *Dept) *DeptDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DeptClient) DeleteOneID(id int) *DeptDeleteOne {
+func (c *DeptClient) DeleteOneID(id uint32) *DeptDeleteOne {
 	builder := c.Delete().Where(dept.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -332,17 +333,49 @@ func (c *DeptClient) Query() *DeptQuery {
 }
 
 // Get returns a Dept entity by its id.
-func (c *DeptClient) Get(ctx context.Context, id int) (*Dept, error) {
+func (c *DeptClient) Get(ctx context.Context, id uint32) (*Dept, error) {
 	return c.Query().Where(dept.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DeptClient) GetX(ctx context.Context, id int) *Dept {
+func (c *DeptClient) GetX(ctx context.Context, id uint32) *Dept {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryParent queries the parent edge of a Dept.
+func (c *DeptClient) QueryParent(_m *Dept) *DeptQuery {
+	query := (&DeptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dept.Table, dept.FieldID, id),
+			sqlgraph.To(dept.Table, dept.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dept.ParentTable, dept.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Dept.
+func (c *DeptClient) QueryChildren(_m *Dept) *DeptQuery {
+	query := (&DeptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dept.Table, dept.FieldID, id),
+			sqlgraph.To(dept.Table, dept.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dept.ChildrenTable, dept.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -425,13 +458,13 @@ func (c *MenuClient) Update() *MenuUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *MenuClient) UpdateOne(m *Menu) *MenuUpdateOne {
-	mutation := newMenuMutation(c.config, OpUpdateOne, withMenu(m))
+func (c *MenuClient) UpdateOne(_m *Menu) *MenuUpdateOne {
+	mutation := newMenuMutation(c.config, OpUpdateOne, withMenu(_m))
 	return &MenuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *MenuClient) UpdateOneID(id int) *MenuUpdateOne {
+func (c *MenuClient) UpdateOneID(id uint32) *MenuUpdateOne {
 	mutation := newMenuMutation(c.config, OpUpdateOne, withMenuID(id))
 	return &MenuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -443,12 +476,12 @@ func (c *MenuClient) Delete() *MenuDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *MenuClient) DeleteOne(m *Menu) *MenuDeleteOne {
-	return c.DeleteOneID(m.ID)
+func (c *MenuClient) DeleteOne(_m *Menu) *MenuDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *MenuClient) DeleteOneID(id int) *MenuDeleteOne {
+func (c *MenuClient) DeleteOneID(id uint32) *MenuDeleteOne {
 	builder := c.Delete().Where(menu.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -465,17 +498,49 @@ func (c *MenuClient) Query() *MenuQuery {
 }
 
 // Get returns a Menu entity by its id.
-func (c *MenuClient) Get(ctx context.Context, id int) (*Menu, error) {
+func (c *MenuClient) Get(ctx context.Context, id uint32) (*Menu, error) {
 	return c.Query().Where(menu.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *MenuClient) GetX(ctx context.Context, id int) *Menu {
+func (c *MenuClient) GetX(ctx context.Context, id uint32) *Menu {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryParent queries the parent edge of a Menu.
+func (c *MenuClient) QueryParent(_m *Menu) *MenuQuery {
+	query := (&MenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(menu.Table, menu.FieldID, id),
+			sqlgraph.To(menu.Table, menu.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, menu.ParentTable, menu.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Menu.
+func (c *MenuClient) QueryChildren(_m *Menu) *MenuQuery {
+	query := (&MenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(menu.Table, menu.FieldID, id),
+			sqlgraph.To(menu.Table, menu.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, menu.ChildrenTable, menu.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -558,13 +623,13 @@ func (c *PostClient) Update() *PostUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PostClient) UpdateOne(po *Post) *PostUpdateOne {
-	mutation := newPostMutation(c.config, OpUpdateOne, withPost(po))
+func (c *PostClient) UpdateOne(_m *Post) *PostUpdateOne {
+	mutation := newPostMutation(c.config, OpUpdateOne, withPost(_m))
 	return &PostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PostClient) UpdateOneID(id int) *PostUpdateOne {
+func (c *PostClient) UpdateOneID(id uint32) *PostUpdateOne {
 	mutation := newPostMutation(c.config, OpUpdateOne, withPostID(id))
 	return &PostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -576,12 +641,12 @@ func (c *PostClient) Delete() *PostDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PostClient) DeleteOne(po *Post) *PostDeleteOne {
-	return c.DeleteOneID(po.ID)
+func (c *PostClient) DeleteOne(_m *Post) *PostDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
+func (c *PostClient) DeleteOneID(id uint32) *PostDeleteOne {
 	builder := c.Delete().Where(post.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -598,12 +663,12 @@ func (c *PostClient) Query() *PostQuery {
 }
 
 // Get returns a Post entity by its id.
-func (c *PostClient) Get(ctx context.Context, id int) (*Post, error) {
+func (c *PostClient) Get(ctx context.Context, id uint32) (*Post, error) {
 	return c.Query().Where(post.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PostClient) GetX(ctx context.Context, id int) *Post {
+func (c *PostClient) GetX(ctx context.Context, id uint32) *Post {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -691,13 +756,13 @@ func (c *RoleClient) Update() *RoleUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
-	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(r))
+func (c *RoleClient) UpdateOne(_m *Role) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(_m))
 	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RoleClient) UpdateOneID(id int) *RoleUpdateOne {
+func (c *RoleClient) UpdateOneID(id uint32) *RoleUpdateOne {
 	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
 	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -709,12 +774,12 @@ func (c *RoleClient) Delete() *RoleDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
-	return c.DeleteOneID(r.ID)
+func (c *RoleClient) DeleteOne(_m *Role) *RoleDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
+func (c *RoleClient) DeleteOneID(id uint32) *RoleDeleteOne {
 	builder := c.Delete().Where(role.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -731,17 +796,33 @@ func (c *RoleClient) Query() *RoleQuery {
 }
 
 // Get returns a Role entity by its id.
-func (c *RoleClient) Get(ctx context.Context, id int) (*Role, error) {
+func (c *RoleClient) Get(ctx context.Context, id uint32) (*Role, error) {
 	return c.Query().Where(role.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
+func (c *RoleClient) GetX(ctx context.Context, id uint32) *Role {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryUsers queries the users edge of a Role.
+func (c *RoleClient) QueryUsers(_m *Role) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, role.UsersTable, role.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -824,8 +905,8 @@ func (c *UserClient) Update() *UserUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+func (c *UserClient) UpdateOne(_m *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(_m))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -842,8 +923,8 @@ func (c *UserClient) Delete() *UserDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -875,6 +956,38 @@ func (c *UserClient) GetX(ctx context.Context, id uint32) *User {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryRoles queries the roles edge of a User.
+func (c *UserClient) QueryRoles(_m *User) *RoleQuery {
+	query := (&RoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.RolesTable, user.RolesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPosts queries the posts edge of a User.
+func (c *UserClient) QueryPosts(_m *User) *PostQuery {
+	query := (&PostClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PostsTable, user.PostsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

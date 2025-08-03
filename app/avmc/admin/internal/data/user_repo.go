@@ -272,7 +272,7 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 // 返回值：用户列表响应，错误信息
 func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
 	r.log.Infof("查询用户简单列表分页，分页请求：%v", pagination)
-	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Count(ctx)
+	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Where(user.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err
@@ -299,7 +299,7 @@ func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.
 // 返回值：用户列表响应，错误信息
 func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
 	r.log.Infof("查询用户列表分页，分页请求：%v", pagination)
-	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Count(ctx)
+	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Where(user.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err

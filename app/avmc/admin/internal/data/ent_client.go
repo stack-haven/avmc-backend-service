@@ -10,6 +10,7 @@ import (
 	// init mysql driver
 	"backend-service/app/avmc/admin/internal/data/ent/intercept"
 
+	entgo "entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
 
@@ -61,7 +62,10 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *ent.Client {
 	client.Intercept(
 		intercept.Func(func(ctx context.Context, q intercept.Query) error {
 			// Limit all queries to 1000 records.
-			q.Limit(1000)
+			// q.Limit(1000)
+			if entgo.QueryFromContext(ctx).Limit == nil {
+				q.Limit(1000)
+			}
 			return nil
 		}),
 	)

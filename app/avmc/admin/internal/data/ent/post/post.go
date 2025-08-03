@@ -3,6 +3,8 @@
 package post
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -11,6 +13,18 @@ const (
 	Label = "post"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldDomainID holds the string denoting the domain_id field in the database.
+	FieldDomainID = "domain_id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// Table holds the table name of the post in the database.
 	Table = "posts"
 )
@@ -18,6 +32,18 @@ const (
 // Columns holds all SQL columns for post fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
+	FieldStatus,
+	FieldDomainID,
+	FieldName,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "posts"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"user_posts",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -27,8 +53,36 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
+
+var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int32
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(int32) error
+	// DefaultDomainID holds the default value on creation for the "domain_id" field.
+	DefaultDomainID func() uint32
+	// DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
+	DomainIDValidator func(uint32) error
+	// DefaultName holds the default value on creation for the "name" field.
+	DefaultName string
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(uint32) error
+)
 
 // OrderOption defines the ordering options for the Post queries.
 type OrderOption func(*sql.Selector)
@@ -36,4 +90,34 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByDomainID orders the results by the domain_id field.
+func ByDomainID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDomainID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }

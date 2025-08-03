@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,19 +22,346 @@ type MenuCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (_c *MenuCreate) SetCreatedAt(v time.Time) *MenuCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableCreatedAt(v *time.Time) *MenuCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
+	}
+	return _c
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_c *MenuCreate) SetUpdatedAt(v time.Time) *MenuCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableUpdatedAt(v *time.Time) *MenuCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *MenuCreate) SetDeletedAt(v time.Time) *MenuCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableDeletedAt(v *time.Time) *MenuCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *MenuCreate) SetStatus(v int32) *MenuCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableStatus(v *int32) *MenuCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetDomainID sets the "domain_id" field.
+func (_c *MenuCreate) SetDomainID(v uint32) *MenuCreate {
+	_c.mutation.SetDomainID(v)
+	return _c
+}
+
+// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableDomainID(v *uint32) *MenuCreate {
+	if v != nil {
+		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetName sets the "name" field.
+func (_c *MenuCreate) SetName(v string) *MenuCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableName(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetName(*v)
+	}
+	return _c
+}
+
+// SetTitle sets the "title" field.
+func (_c *MenuCreate) SetTitle(v string) *MenuCreate {
+	_c.mutation.SetTitle(v)
+	return _c
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableTitle(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetTitle(*v)
+	}
+	return _c
+}
+
+// SetParentID sets the "parent_id" field.
+func (_c *MenuCreate) SetParentID(v uint32) *MenuCreate {
+	_c.mutation.SetParentID(v)
+	return _c
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableParentID(v *uint32) *MenuCreate {
+	if v != nil {
+		_c.SetParentID(*v)
+	}
+	return _c
+}
+
+// SetType sets the "type" field.
+func (_c *MenuCreate) SetType(v int32) *MenuCreate {
+	_c.mutation.SetType(v)
+	return _c
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableType(v *int32) *MenuCreate {
+	if v != nil {
+		_c.SetType(*v)
+	}
+	return _c
+}
+
+// SetPath sets the "path" field.
+func (_c *MenuCreate) SetPath(v string) *MenuCreate {
+	_c.mutation.SetPath(v)
+	return _c
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (_c *MenuCreate) SetNillablePath(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetPath(*v)
+	}
+	return _c
+}
+
+// SetComponent sets the "component" field.
+func (_c *MenuCreate) SetComponent(v string) *MenuCreate {
+	_c.mutation.SetComponent(v)
+	return _c
+}
+
+// SetNillableComponent sets the "component" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableComponent(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetComponent(*v)
+	}
+	return _c
+}
+
+// SetIcon sets the "icon" field.
+func (_c *MenuCreate) SetIcon(v string) *MenuCreate {
+	_c.mutation.SetIcon(v)
+	return _c
+}
+
+// SetNillableIcon sets the "icon" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableIcon(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetIcon(*v)
+	}
+	return _c
+}
+
+// SetIsExt sets the "is_ext" field.
+func (_c *MenuCreate) SetIsExt(v bool) *MenuCreate {
+	_c.mutation.SetIsExt(v)
+	return _c
+}
+
+// SetNillableIsExt sets the "is_ext" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableIsExt(v *bool) *MenuCreate {
+	if v != nil {
+		_c.SetIsExt(*v)
+	}
+	return _c
+}
+
+// SetExtURL sets the "ext_url" field.
+func (_c *MenuCreate) SetExtURL(v string) *MenuCreate {
+	_c.mutation.SetExtURL(v)
+	return _c
+}
+
+// SetNillableExtURL sets the "ext_url" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableExtURL(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetExtURL(*v)
+	}
+	return _c
+}
+
+// SetPermissions sets the "permissions" field.
+func (_c *MenuCreate) SetPermissions(v []string) *MenuCreate {
+	_c.mutation.SetPermissions(v)
+	return _c
+}
+
+// SetRedirect sets the "redirect" field.
+func (_c *MenuCreate) SetRedirect(v string) *MenuCreate {
+	_c.mutation.SetRedirect(v)
+	return _c
+}
+
+// SetNillableRedirect sets the "redirect" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableRedirect(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetRedirect(*v)
+	}
+	return _c
+}
+
+// SetCurrentActiveMenu sets the "current_active_menu" field.
+func (_c *MenuCreate) SetCurrentActiveMenu(v string) *MenuCreate {
+	_c.mutation.SetCurrentActiveMenu(v)
+	return _c
+}
+
+// SetNillableCurrentActiveMenu sets the "current_active_menu" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableCurrentActiveMenu(v *string) *MenuCreate {
+	if v != nil {
+		_c.SetCurrentActiveMenu(*v)
+	}
+	return _c
+}
+
+// SetKeepAlive sets the "keep_alive" field.
+func (_c *MenuCreate) SetKeepAlive(v bool) *MenuCreate {
+	_c.mutation.SetKeepAlive(v)
+	return _c
+}
+
+// SetNillableKeepAlive sets the "keep_alive" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableKeepAlive(v *bool) *MenuCreate {
+	if v != nil {
+		_c.SetKeepAlive(*v)
+	}
+	return _c
+}
+
+// SetVisible sets the "visible" field.
+func (_c *MenuCreate) SetVisible(v bool) *MenuCreate {
+	_c.mutation.SetVisible(v)
+	return _c
+}
+
+// SetNillableVisible sets the "visible" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableVisible(v *bool) *MenuCreate {
+	if v != nil {
+		_c.SetVisible(*v)
+	}
+	return _c
+}
+
+// SetHideTab sets the "hide_tab" field.
+func (_c *MenuCreate) SetHideTab(v bool) *MenuCreate {
+	_c.mutation.SetHideTab(v)
+	return _c
+}
+
+// SetNillableHideTab sets the "hide_tab" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableHideTab(v *bool) *MenuCreate {
+	if v != nil {
+		_c.SetHideTab(*v)
+	}
+	return _c
+}
+
+// SetHideMenu sets the "hide_menu" field.
+func (_c *MenuCreate) SetHideMenu(v bool) *MenuCreate {
+	_c.mutation.SetHideMenu(v)
+	return _c
+}
+
+// SetNillableHideMenu sets the "hide_menu" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableHideMenu(v *bool) *MenuCreate {
+	if v != nil {
+		_c.SetHideMenu(*v)
+	}
+	return _c
+}
+
+// SetHideBreadcrumb sets the "hide_breadcrumb" field.
+func (_c *MenuCreate) SetHideBreadcrumb(v bool) *MenuCreate {
+	_c.mutation.SetHideBreadcrumb(v)
+	return _c
+}
+
+// SetNillableHideBreadcrumb sets the "hide_breadcrumb" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableHideBreadcrumb(v *bool) *MenuCreate {
+	if v != nil {
+		_c.SetHideBreadcrumb(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *MenuCreate) SetID(v uint32) *MenuCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetParent sets the "parent" edge to the Menu entity.
+func (_c *MenuCreate) SetParent(v *Menu) *MenuCreate {
+	return _c.SetParentID(v.ID)
+}
+
+// AddChildIDs adds the "children" edge to the Menu entity by IDs.
+func (_c *MenuCreate) AddChildIDs(ids ...uint32) *MenuCreate {
+	_c.mutation.AddChildIDs(ids...)
+	return _c
+}
+
+// AddChildren adds the "children" edges to the Menu entity.
+func (_c *MenuCreate) AddChildren(v ...*Menu) *MenuCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddChildIDs(ids...)
+}
+
 // Mutation returns the MenuMutation object of the builder.
-func (mc *MenuCreate) Mutation() *MenuMutation {
-	return mc.mutation
+func (_c *MenuCreate) Mutation() *MenuMutation {
+	return _c.mutation
 }
 
 // Save creates the Menu in the database.
-func (mc *MenuCreate) Save(ctx context.Context) (*Menu, error) {
-	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
+func (_c *MenuCreate) Save(ctx context.Context) (*Menu, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (mc *MenuCreate) SaveX(ctx context.Context) *Menu {
-	v, err := mc.Save(ctx)
+func (_c *MenuCreate) SaveX(ctx context.Context) *Menu {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -41,47 +369,350 @@ func (mc *MenuCreate) SaveX(ctx context.Context) *Menu {
 }
 
 // Exec executes the query.
-func (mc *MenuCreate) Exec(ctx context.Context) error {
-	_, err := mc.Save(ctx)
+func (_c *MenuCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mc *MenuCreate) ExecX(ctx context.Context) {
-	if err := mc.Exec(ctx); err != nil {
+func (_c *MenuCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *MenuCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		v := menu.DefaultCreatedAt()
+		_c.mutation.SetCreatedAt(v)
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		v := menu.DefaultUpdatedAt()
+		_c.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := menu.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.DomainID(); !ok {
+		v := menu.DefaultDomainID()
+		_c.mutation.SetDomainID(v)
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		v := menu.DefaultName
+		_c.mutation.SetName(v)
+	}
+	if _, ok := _c.mutation.Title(); !ok {
+		v := menu.DefaultTitle
+		_c.mutation.SetTitle(v)
+	}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		v := menu.DefaultParentID
+		_c.mutation.SetParentID(v)
+	}
+	if _, ok := _c.mutation.GetType(); !ok {
+		v := menu.DefaultType
+		_c.mutation.SetType(v)
+	}
+	if _, ok := _c.mutation.Path(); !ok {
+		v := menu.DefaultPath
+		_c.mutation.SetPath(v)
+	}
+	if _, ok := _c.mutation.Component(); !ok {
+		v := menu.DefaultComponent
+		_c.mutation.SetComponent(v)
+	}
+	if _, ok := _c.mutation.Icon(); !ok {
+		v := menu.DefaultIcon
+		_c.mutation.SetIcon(v)
+	}
+	if _, ok := _c.mutation.IsExt(); !ok {
+		v := menu.DefaultIsExt
+		_c.mutation.SetIsExt(v)
+	}
+	if _, ok := _c.mutation.ExtURL(); !ok {
+		v := menu.DefaultExtURL
+		_c.mutation.SetExtURL(v)
+	}
+	if _, ok := _c.mutation.Permissions(); !ok {
+		v := menu.DefaultPermissions
+		_c.mutation.SetPermissions(v)
+	}
+	if _, ok := _c.mutation.Redirect(); !ok {
+		v := menu.DefaultRedirect
+		_c.mutation.SetRedirect(v)
+	}
+	if _, ok := _c.mutation.CurrentActiveMenu(); !ok {
+		v := menu.DefaultCurrentActiveMenu
+		_c.mutation.SetCurrentActiveMenu(v)
+	}
+	if _, ok := _c.mutation.KeepAlive(); !ok {
+		v := menu.DefaultKeepAlive
+		_c.mutation.SetKeepAlive(v)
+	}
+	if _, ok := _c.mutation.Visible(); !ok {
+		v := menu.DefaultVisible
+		_c.mutation.SetVisible(v)
+	}
+	if _, ok := _c.mutation.HideTab(); !ok {
+		v := menu.DefaultHideTab
+		_c.mutation.SetHideTab(v)
+	}
+	if _, ok := _c.mutation.HideMenu(); !ok {
+		v := menu.DefaultHideMenu
+		_c.mutation.SetHideMenu(v)
+	}
+	if _, ok := _c.mutation.HideBreadcrumb(); !ok {
+		v := menu.DefaultHideBreadcrumb
+		_c.mutation.SetHideBreadcrumb(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
-func (mc *MenuCreate) check() error {
+func (_c *MenuCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Menu.created_at"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Menu.updated_at"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Menu.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := menu.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Menu.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DomainID(); !ok {
+		return &ValidationError{Name: "domain_id", err: errors.New(`ent: missing required field "Menu.domain_id"`)}
+	}
+	if v, ok := _c.mutation.DomainID(); ok {
+		if err := menu.DomainIDValidator(v); err != nil {
+			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "Menu.domain_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Menu.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := menu.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Menu.name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Menu.title"`)}
+	}
+	if v, ok := _c.mutation.Title(); ok {
+		if err := menu.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Menu.title": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Menu.type"`)}
+	}
+	if _, ok := _c.mutation.Path(); !ok {
+		return &ValidationError{Name: "path", err: errors.New(`ent: missing required field "Menu.path"`)}
+	}
+	if _, ok := _c.mutation.Component(); !ok {
+		return &ValidationError{Name: "component", err: errors.New(`ent: missing required field "Menu.component"`)}
+	}
+	if _, ok := _c.mutation.Icon(); !ok {
+		return &ValidationError{Name: "icon", err: errors.New(`ent: missing required field "Menu.icon"`)}
+	}
+	if v, ok := _c.mutation.Icon(); ok {
+		if err := menu.IconValidator(v); err != nil {
+			return &ValidationError{Name: "icon", err: fmt.Errorf(`ent: validator failed for field "Menu.icon": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.IsExt(); !ok {
+		return &ValidationError{Name: "is_ext", err: errors.New(`ent: missing required field "Menu.is_ext"`)}
+	}
+	if _, ok := _c.mutation.ExtURL(); !ok {
+		return &ValidationError{Name: "ext_url", err: errors.New(`ent: missing required field "Menu.ext_url"`)}
+	}
+	if v, ok := _c.mutation.ExtURL(); ok {
+		if err := menu.ExtURLValidator(v); err != nil {
+			return &ValidationError{Name: "ext_url", err: fmt.Errorf(`ent: validator failed for field "Menu.ext_url": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Redirect(); !ok {
+		return &ValidationError{Name: "redirect", err: errors.New(`ent: missing required field "Menu.redirect"`)}
+	}
+	if _, ok := _c.mutation.CurrentActiveMenu(); !ok {
+		return &ValidationError{Name: "current_active_menu", err: errors.New(`ent: missing required field "Menu.current_active_menu"`)}
+	}
+	if _, ok := _c.mutation.KeepAlive(); !ok {
+		return &ValidationError{Name: "keep_alive", err: errors.New(`ent: missing required field "Menu.keep_alive"`)}
+	}
+	if _, ok := _c.mutation.Visible(); !ok {
+		return &ValidationError{Name: "visible", err: errors.New(`ent: missing required field "Menu.visible"`)}
+	}
+	if _, ok := _c.mutation.HideTab(); !ok {
+		return &ValidationError{Name: "hide_tab", err: errors.New(`ent: missing required field "Menu.hide_tab"`)}
+	}
+	if _, ok := _c.mutation.HideMenu(); !ok {
+		return &ValidationError{Name: "hide_menu", err: errors.New(`ent: missing required field "Menu.hide_menu"`)}
+	}
+	if _, ok := _c.mutation.HideBreadcrumb(); !ok {
+		return &ValidationError{Name: "hide_breadcrumb", err: errors.New(`ent: missing required field "Menu.hide_breadcrumb"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := menu.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Menu.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
-func (mc *MenuCreate) sqlSave(ctx context.Context) (*Menu, error) {
-	if err := mc.check(); err != nil {
+func (_c *MenuCreate) sqlSave(ctx context.Context) (*Menu, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := mc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
-	mc.mutation.id = &_node.ID
-	mc.mutation.done = true
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
+	}
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (mc *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
+func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Menu{config: mc.config}
-		_spec = sqlgraph.NewCreateSpec(menu.Table, sqlgraph.NewFieldSpec(menu.FieldID, field.TypeInt))
+		_node = &Menu{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(menu.Table, sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32))
 	)
-	_spec.OnConflict = mc.conflict
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(menu.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(menu.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(menu.FieldStatus, field.TypeInt32, value)
+		_node.Status = &value
+	}
+	if value, ok := _c.mutation.DomainID(); ok {
+		_spec.SetField(menu.FieldDomainID, field.TypeUint32, value)
+		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(menu.FieldName, field.TypeString, value)
+		_node.Name = &value
+	}
+	if value, ok := _c.mutation.Title(); ok {
+		_spec.SetField(menu.FieldTitle, field.TypeString, value)
+		_node.Title = &value
+	}
+	if value, ok := _c.mutation.GetType(); ok {
+		_spec.SetField(menu.FieldType, field.TypeInt32, value)
+		_node.Type = &value
+	}
+	if value, ok := _c.mutation.Path(); ok {
+		_spec.SetField(menu.FieldPath, field.TypeString, value)
+		_node.Path = &value
+	}
+	if value, ok := _c.mutation.Component(); ok {
+		_spec.SetField(menu.FieldComponent, field.TypeString, value)
+		_node.Component = &value
+	}
+	if value, ok := _c.mutation.Icon(); ok {
+		_spec.SetField(menu.FieldIcon, field.TypeString, value)
+		_node.Icon = &value
+	}
+	if value, ok := _c.mutation.IsExt(); ok {
+		_spec.SetField(menu.FieldIsExt, field.TypeBool, value)
+		_node.IsExt = &value
+	}
+	if value, ok := _c.mutation.ExtURL(); ok {
+		_spec.SetField(menu.FieldExtURL, field.TypeString, value)
+		_node.ExtURL = &value
+	}
+	if value, ok := _c.mutation.Permissions(); ok {
+		_spec.SetField(menu.FieldPermissions, field.TypeJSON, value)
+		_node.Permissions = value
+	}
+	if value, ok := _c.mutation.Redirect(); ok {
+		_spec.SetField(menu.FieldRedirect, field.TypeString, value)
+		_node.Redirect = &value
+	}
+	if value, ok := _c.mutation.CurrentActiveMenu(); ok {
+		_spec.SetField(menu.FieldCurrentActiveMenu, field.TypeString, value)
+		_node.CurrentActiveMenu = &value
+	}
+	if value, ok := _c.mutation.KeepAlive(); ok {
+		_spec.SetField(menu.FieldKeepAlive, field.TypeBool, value)
+		_node.KeepAlive = &value
+	}
+	if value, ok := _c.mutation.Visible(); ok {
+		_spec.SetField(menu.FieldVisible, field.TypeBool, value)
+		_node.Visible = &value
+	}
+	if value, ok := _c.mutation.HideTab(); ok {
+		_spec.SetField(menu.FieldHideTab, field.TypeBool, value)
+		_node.HideTab = &value
+	}
+	if value, ok := _c.mutation.HideMenu(); ok {
+		_spec.SetField(menu.FieldHideMenu, field.TypeBool, value)
+		_node.HideMenu = &value
+	}
+	if value, ok := _c.mutation.HideBreadcrumb(); ok {
+		_spec.SetField(menu.FieldHideBreadcrumb, field.TypeBool, value)
+		_node.HideBreadcrumb = &value
+	}
+	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   menu.ParentTable,
+			Columns: []string{menu.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ParentID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menu.ChildrenTable,
+			Columns: []string{menu.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -89,16 +720,22 @@ func (mc *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Menu.Create().
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.MenuUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
-func (mc *MenuCreate) OnConflict(opts ...sql.ConflictOption) *MenuUpsertOne {
-	mc.conflict = opts
+func (_c *MenuCreate) OnConflict(opts ...sql.ConflictOption) *MenuUpsertOne {
+	_c.conflict = opts
 	return &MenuUpsertOne{
-		create: mc,
+		create: _c,
 	}
 }
 
@@ -108,10 +745,10 @@ func (mc *MenuCreate) OnConflict(opts ...sql.ConflictOption) *MenuUpsertOne {
 //	client.Menu.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (mc *MenuCreate) OnConflictColumns(columns ...string) *MenuUpsertOne {
-	mc.conflict = append(mc.conflict, sql.ConflictColumns(columns...))
+func (_c *MenuCreate) OnConflictColumns(columns ...string) *MenuUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &MenuUpsertOne{
-		create: mc,
+		create: _c,
 	}
 }
 
@@ -128,16 +765,315 @@ type (
 	}
 )
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetUpdatedAt sets the "updated_at" field.
+func (u *MenuUpsert) SetUpdatedAt(v time.Time) *MenuUpsert {
+	u.Set(menu.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateUpdatedAt() *MenuUpsert {
+	u.SetExcluded(menu.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *MenuUpsert) SetDeletedAt(v time.Time) *MenuUpsert {
+	u.Set(menu.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateDeletedAt() *MenuUpsert {
+	u.SetExcluded(menu.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *MenuUpsert) ClearDeletedAt() *MenuUpsert {
+	u.SetNull(menu.FieldDeletedAt)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *MenuUpsert) SetStatus(v int32) *MenuUpsert {
+	u.Set(menu.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateStatus() *MenuUpsert {
+	u.SetExcluded(menu.FieldStatus)
+	return u
+}
+
+// AddStatus adds v to the "status" field.
+func (u *MenuUpsert) AddStatus(v int32) *MenuUpsert {
+	u.Add(menu.FieldStatus, v)
+	return u
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *MenuUpsert) SetDomainID(v uint32) *MenuUpsert {
+	u.Set(menu.FieldDomainID, v)
+	return u
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateDomainID() *MenuUpsert {
+	u.SetExcluded(menu.FieldDomainID)
+	return u
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *MenuUpsert) AddDomainID(v uint32) *MenuUpsert {
+	u.Add(menu.FieldDomainID, v)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *MenuUpsert) SetName(v string) *MenuUpsert {
+	u.Set(menu.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateName() *MenuUpsert {
+	u.SetExcluded(menu.FieldName)
+	return u
+}
+
+// SetTitle sets the "title" field.
+func (u *MenuUpsert) SetTitle(v string) *MenuUpsert {
+	u.Set(menu.FieldTitle, v)
+	return u
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateTitle() *MenuUpsert {
+	u.SetExcluded(menu.FieldTitle)
+	return u
+}
+
+// SetParentID sets the "parent_id" field.
+func (u *MenuUpsert) SetParentID(v uint32) *MenuUpsert {
+	u.Set(menu.FieldParentID, v)
+	return u
+}
+
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateParentID() *MenuUpsert {
+	u.SetExcluded(menu.FieldParentID)
+	return u
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (u *MenuUpsert) ClearParentID() *MenuUpsert {
+	u.SetNull(menu.FieldParentID)
+	return u
+}
+
+// SetType sets the "type" field.
+func (u *MenuUpsert) SetType(v int32) *MenuUpsert {
+	u.Set(menu.FieldType, v)
+	return u
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateType() *MenuUpsert {
+	u.SetExcluded(menu.FieldType)
+	return u
+}
+
+// AddType adds v to the "type" field.
+func (u *MenuUpsert) AddType(v int32) *MenuUpsert {
+	u.Add(menu.FieldType, v)
+	return u
+}
+
+// SetPath sets the "path" field.
+func (u *MenuUpsert) SetPath(v string) *MenuUpsert {
+	u.Set(menu.FieldPath, v)
+	return u
+}
+
+// UpdatePath sets the "path" field to the value that was provided on create.
+func (u *MenuUpsert) UpdatePath() *MenuUpsert {
+	u.SetExcluded(menu.FieldPath)
+	return u
+}
+
+// SetComponent sets the "component" field.
+func (u *MenuUpsert) SetComponent(v string) *MenuUpsert {
+	u.Set(menu.FieldComponent, v)
+	return u
+}
+
+// UpdateComponent sets the "component" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateComponent() *MenuUpsert {
+	u.SetExcluded(menu.FieldComponent)
+	return u
+}
+
+// SetIcon sets the "icon" field.
+func (u *MenuUpsert) SetIcon(v string) *MenuUpsert {
+	u.Set(menu.FieldIcon, v)
+	return u
+}
+
+// UpdateIcon sets the "icon" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateIcon() *MenuUpsert {
+	u.SetExcluded(menu.FieldIcon)
+	return u
+}
+
+// SetIsExt sets the "is_ext" field.
+func (u *MenuUpsert) SetIsExt(v bool) *MenuUpsert {
+	u.Set(menu.FieldIsExt, v)
+	return u
+}
+
+// UpdateIsExt sets the "is_ext" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateIsExt() *MenuUpsert {
+	u.SetExcluded(menu.FieldIsExt)
+	return u
+}
+
+// SetExtURL sets the "ext_url" field.
+func (u *MenuUpsert) SetExtURL(v string) *MenuUpsert {
+	u.Set(menu.FieldExtURL, v)
+	return u
+}
+
+// UpdateExtURL sets the "ext_url" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateExtURL() *MenuUpsert {
+	u.SetExcluded(menu.FieldExtURL)
+	return u
+}
+
+// SetPermissions sets the "permissions" field.
+func (u *MenuUpsert) SetPermissions(v []string) *MenuUpsert {
+	u.Set(menu.FieldPermissions, v)
+	return u
+}
+
+// UpdatePermissions sets the "permissions" field to the value that was provided on create.
+func (u *MenuUpsert) UpdatePermissions() *MenuUpsert {
+	u.SetExcluded(menu.FieldPermissions)
+	return u
+}
+
+// ClearPermissions clears the value of the "permissions" field.
+func (u *MenuUpsert) ClearPermissions() *MenuUpsert {
+	u.SetNull(menu.FieldPermissions)
+	return u
+}
+
+// SetRedirect sets the "redirect" field.
+func (u *MenuUpsert) SetRedirect(v string) *MenuUpsert {
+	u.Set(menu.FieldRedirect, v)
+	return u
+}
+
+// UpdateRedirect sets the "redirect" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateRedirect() *MenuUpsert {
+	u.SetExcluded(menu.FieldRedirect)
+	return u
+}
+
+// SetCurrentActiveMenu sets the "current_active_menu" field.
+func (u *MenuUpsert) SetCurrentActiveMenu(v string) *MenuUpsert {
+	u.Set(menu.FieldCurrentActiveMenu, v)
+	return u
+}
+
+// UpdateCurrentActiveMenu sets the "current_active_menu" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateCurrentActiveMenu() *MenuUpsert {
+	u.SetExcluded(menu.FieldCurrentActiveMenu)
+	return u
+}
+
+// SetKeepAlive sets the "keep_alive" field.
+func (u *MenuUpsert) SetKeepAlive(v bool) *MenuUpsert {
+	u.Set(menu.FieldKeepAlive, v)
+	return u
+}
+
+// UpdateKeepAlive sets the "keep_alive" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateKeepAlive() *MenuUpsert {
+	u.SetExcluded(menu.FieldKeepAlive)
+	return u
+}
+
+// SetVisible sets the "visible" field.
+func (u *MenuUpsert) SetVisible(v bool) *MenuUpsert {
+	u.Set(menu.FieldVisible, v)
+	return u
+}
+
+// UpdateVisible sets the "visible" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateVisible() *MenuUpsert {
+	u.SetExcluded(menu.FieldVisible)
+	return u
+}
+
+// SetHideTab sets the "hide_tab" field.
+func (u *MenuUpsert) SetHideTab(v bool) *MenuUpsert {
+	u.Set(menu.FieldHideTab, v)
+	return u
+}
+
+// UpdateHideTab sets the "hide_tab" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateHideTab() *MenuUpsert {
+	u.SetExcluded(menu.FieldHideTab)
+	return u
+}
+
+// SetHideMenu sets the "hide_menu" field.
+func (u *MenuUpsert) SetHideMenu(v bool) *MenuUpsert {
+	u.Set(menu.FieldHideMenu, v)
+	return u
+}
+
+// UpdateHideMenu sets the "hide_menu" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateHideMenu() *MenuUpsert {
+	u.SetExcluded(menu.FieldHideMenu)
+	return u
+}
+
+// SetHideBreadcrumb sets the "hide_breadcrumb" field.
+func (u *MenuUpsert) SetHideBreadcrumb(v bool) *MenuUpsert {
+	u.Set(menu.FieldHideBreadcrumb, v)
+	return u
+}
+
+// UpdateHideBreadcrumb sets the "hide_breadcrumb" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateHideBreadcrumb() *MenuUpsert {
+	u.SetExcluded(menu.FieldHideBreadcrumb)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Menu.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(menu.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *MenuUpsertOne) UpdateNewValues() *MenuUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(menu.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(menu.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -168,6 +1104,342 @@ func (u *MenuUpsertOne) Update(set func(*MenuUpsert)) *MenuUpsertOne {
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *MenuUpsertOne) SetUpdatedAt(v time.Time) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateUpdatedAt() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *MenuUpsertOne) SetDeletedAt(v time.Time) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateDeletedAt() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *MenuUpsertOne) ClearDeletedAt() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *MenuUpsertOne) SetStatus(v int32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *MenuUpsertOne) AddStatus(v int32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateStatus() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *MenuUpsertOne) SetDomainID(v uint32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *MenuUpsertOne) AddDomainID(v uint32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateDomainID() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *MenuUpsertOne) SetName(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateName() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *MenuUpsertOne) SetTitle(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateTitle() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// SetParentID sets the "parent_id" field.
+func (u *MenuUpsertOne) SetParentID(v uint32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetParentID(v)
+	})
+}
+
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateParentID() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateParentID()
+	})
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (u *MenuUpsertOne) ClearParentID() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearParentID()
+	})
+}
+
+// SetType sets the "type" field.
+func (u *MenuUpsertOne) SetType(v int32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetType(v)
+	})
+}
+
+// AddType adds v to the "type" field.
+func (u *MenuUpsertOne) AddType(v int32) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.AddType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateType() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateType()
+	})
+}
+
+// SetPath sets the "path" field.
+func (u *MenuUpsertOne) SetPath(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetPath(v)
+	})
+}
+
+// UpdatePath sets the "path" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdatePath() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdatePath()
+	})
+}
+
+// SetComponent sets the "component" field.
+func (u *MenuUpsertOne) SetComponent(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetComponent(v)
+	})
+}
+
+// UpdateComponent sets the "component" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateComponent() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateComponent()
+	})
+}
+
+// SetIcon sets the "icon" field.
+func (u *MenuUpsertOne) SetIcon(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetIcon(v)
+	})
+}
+
+// UpdateIcon sets the "icon" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateIcon() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateIcon()
+	})
+}
+
+// SetIsExt sets the "is_ext" field.
+func (u *MenuUpsertOne) SetIsExt(v bool) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetIsExt(v)
+	})
+}
+
+// UpdateIsExt sets the "is_ext" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateIsExt() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateIsExt()
+	})
+}
+
+// SetExtURL sets the "ext_url" field.
+func (u *MenuUpsertOne) SetExtURL(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetExtURL(v)
+	})
+}
+
+// UpdateExtURL sets the "ext_url" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateExtURL() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateExtURL()
+	})
+}
+
+// SetPermissions sets the "permissions" field.
+func (u *MenuUpsertOne) SetPermissions(v []string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetPermissions(v)
+	})
+}
+
+// UpdatePermissions sets the "permissions" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdatePermissions() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdatePermissions()
+	})
+}
+
+// ClearPermissions clears the value of the "permissions" field.
+func (u *MenuUpsertOne) ClearPermissions() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearPermissions()
+	})
+}
+
+// SetRedirect sets the "redirect" field.
+func (u *MenuUpsertOne) SetRedirect(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetRedirect(v)
+	})
+}
+
+// UpdateRedirect sets the "redirect" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateRedirect() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateRedirect()
+	})
+}
+
+// SetCurrentActiveMenu sets the "current_active_menu" field.
+func (u *MenuUpsertOne) SetCurrentActiveMenu(v string) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetCurrentActiveMenu(v)
+	})
+}
+
+// UpdateCurrentActiveMenu sets the "current_active_menu" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateCurrentActiveMenu() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateCurrentActiveMenu()
+	})
+}
+
+// SetKeepAlive sets the "keep_alive" field.
+func (u *MenuUpsertOne) SetKeepAlive(v bool) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetKeepAlive(v)
+	})
+}
+
+// UpdateKeepAlive sets the "keep_alive" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateKeepAlive() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateKeepAlive()
+	})
+}
+
+// SetVisible sets the "visible" field.
+func (u *MenuUpsertOne) SetVisible(v bool) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetVisible(v)
+	})
+}
+
+// UpdateVisible sets the "visible" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateVisible() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateVisible()
+	})
+}
+
+// SetHideTab sets the "hide_tab" field.
+func (u *MenuUpsertOne) SetHideTab(v bool) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetHideTab(v)
+	})
+}
+
+// UpdateHideTab sets the "hide_tab" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateHideTab() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateHideTab()
+	})
+}
+
+// SetHideMenu sets the "hide_menu" field.
+func (u *MenuUpsertOne) SetHideMenu(v bool) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetHideMenu(v)
+	})
+}
+
+// UpdateHideMenu sets the "hide_menu" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateHideMenu() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateHideMenu()
+	})
+}
+
+// SetHideBreadcrumb sets the "hide_breadcrumb" field.
+func (u *MenuUpsertOne) SetHideBreadcrumb(v bool) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetHideBreadcrumb(v)
+	})
+}
+
+// UpdateHideBreadcrumb sets the "hide_breadcrumb" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateHideBreadcrumb() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateHideBreadcrumb()
+	})
+}
+
 // Exec executes the query.
 func (u *MenuUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -184,7 +1456,7 @@ func (u *MenuUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *MenuUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *MenuUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -193,7 +1465,7 @@ func (u *MenuUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *MenuUpsertOne) IDX(ctx context.Context) int {
+func (u *MenuUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -210,16 +1482,17 @@ type MenuCreateBulk struct {
 }
 
 // Save creates the Menu entities in the database.
-func (mcb *MenuCreateBulk) Save(ctx context.Context) ([]*Menu, error) {
-	if mcb.err != nil {
-		return nil, mcb.err
+func (_c *MenuCreateBulk) Save(ctx context.Context) ([]*Menu, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
-	nodes := make([]*Menu, len(mcb.builders))
-	mutators := make([]Mutator, len(mcb.builders))
-	for i := range mcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Menu, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := mcb.builders[i]
+			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MenuMutation)
 				if !ok {
@@ -232,12 +1505,12 @@ func (mcb *MenuCreateBulk) Save(ctx context.Context) ([]*Menu, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = mcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -247,9 +1520,9 @@ func (mcb *MenuCreateBulk) Save(ctx context.Context) ([]*Menu, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
+					nodes[i].ID = uint32(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -261,7 +1534,7 @@ func (mcb *MenuCreateBulk) Save(ctx context.Context) ([]*Menu, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, mcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -269,8 +1542,8 @@ func (mcb *MenuCreateBulk) Save(ctx context.Context) ([]*Menu, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (mcb *MenuCreateBulk) SaveX(ctx context.Context) []*Menu {
-	v, err := mcb.Save(ctx)
+func (_c *MenuCreateBulk) SaveX(ctx context.Context) []*Menu {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -278,14 +1551,14 @@ func (mcb *MenuCreateBulk) SaveX(ctx context.Context) []*Menu {
 }
 
 // Exec executes the query.
-func (mcb *MenuCreateBulk) Exec(ctx context.Context) error {
-	_, err := mcb.Save(ctx)
+func (_c *MenuCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mcb *MenuCreateBulk) ExecX(ctx context.Context) {
-	if err := mcb.Exec(ctx); err != nil {
+func (_c *MenuCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -299,11 +1572,16 @@ func (mcb *MenuCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.MenuUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
-func (mcb *MenuCreateBulk) OnConflict(opts ...sql.ConflictOption) *MenuUpsertBulk {
-	mcb.conflict = opts
+func (_c *MenuCreateBulk) OnConflict(opts ...sql.ConflictOption) *MenuUpsertBulk {
+	_c.conflict = opts
 	return &MenuUpsertBulk{
-		create: mcb,
+		create: _c,
 	}
 }
 
@@ -313,10 +1591,10 @@ func (mcb *MenuCreateBulk) OnConflict(opts ...sql.ConflictOption) *MenuUpsertBul
 //	client.Menu.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (mcb *MenuCreateBulk) OnConflictColumns(columns ...string) *MenuUpsertBulk {
-	mcb.conflict = append(mcb.conflict, sql.ConflictColumns(columns...))
+func (_c *MenuCreateBulk) OnConflictColumns(columns ...string) *MenuUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &MenuUpsertBulk{
-		create: mcb,
+		create: _c,
 	}
 }
 
@@ -332,10 +1610,23 @@ type MenuUpsertBulk struct {
 //	client.Menu.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(menu.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *MenuUpsertBulk) UpdateNewValues() *MenuUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(menu.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(menu.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -364,6 +1655,342 @@ func (u *MenuUpsertBulk) Update(set func(*MenuUpsert)) *MenuUpsertBulk {
 		set(&MenuUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *MenuUpsertBulk) SetUpdatedAt(v time.Time) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateUpdatedAt() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *MenuUpsertBulk) SetDeletedAt(v time.Time) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateDeletedAt() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *MenuUpsertBulk) ClearDeletedAt() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *MenuUpsertBulk) SetStatus(v int32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *MenuUpsertBulk) AddStatus(v int32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateStatus() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *MenuUpsertBulk) SetDomainID(v uint32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *MenuUpsertBulk) AddDomainID(v uint32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateDomainID() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *MenuUpsertBulk) SetName(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateName() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *MenuUpsertBulk) SetTitle(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateTitle() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// SetParentID sets the "parent_id" field.
+func (u *MenuUpsertBulk) SetParentID(v uint32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetParentID(v)
+	})
+}
+
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateParentID() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateParentID()
+	})
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (u *MenuUpsertBulk) ClearParentID() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearParentID()
+	})
+}
+
+// SetType sets the "type" field.
+func (u *MenuUpsertBulk) SetType(v int32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetType(v)
+	})
+}
+
+// AddType adds v to the "type" field.
+func (u *MenuUpsertBulk) AddType(v int32) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.AddType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateType() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateType()
+	})
+}
+
+// SetPath sets the "path" field.
+func (u *MenuUpsertBulk) SetPath(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetPath(v)
+	})
+}
+
+// UpdatePath sets the "path" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdatePath() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdatePath()
+	})
+}
+
+// SetComponent sets the "component" field.
+func (u *MenuUpsertBulk) SetComponent(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetComponent(v)
+	})
+}
+
+// UpdateComponent sets the "component" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateComponent() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateComponent()
+	})
+}
+
+// SetIcon sets the "icon" field.
+func (u *MenuUpsertBulk) SetIcon(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetIcon(v)
+	})
+}
+
+// UpdateIcon sets the "icon" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateIcon() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateIcon()
+	})
+}
+
+// SetIsExt sets the "is_ext" field.
+func (u *MenuUpsertBulk) SetIsExt(v bool) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetIsExt(v)
+	})
+}
+
+// UpdateIsExt sets the "is_ext" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateIsExt() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateIsExt()
+	})
+}
+
+// SetExtURL sets the "ext_url" field.
+func (u *MenuUpsertBulk) SetExtURL(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetExtURL(v)
+	})
+}
+
+// UpdateExtURL sets the "ext_url" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateExtURL() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateExtURL()
+	})
+}
+
+// SetPermissions sets the "permissions" field.
+func (u *MenuUpsertBulk) SetPermissions(v []string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetPermissions(v)
+	})
+}
+
+// UpdatePermissions sets the "permissions" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdatePermissions() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdatePermissions()
+	})
+}
+
+// ClearPermissions clears the value of the "permissions" field.
+func (u *MenuUpsertBulk) ClearPermissions() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearPermissions()
+	})
+}
+
+// SetRedirect sets the "redirect" field.
+func (u *MenuUpsertBulk) SetRedirect(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetRedirect(v)
+	})
+}
+
+// UpdateRedirect sets the "redirect" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateRedirect() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateRedirect()
+	})
+}
+
+// SetCurrentActiveMenu sets the "current_active_menu" field.
+func (u *MenuUpsertBulk) SetCurrentActiveMenu(v string) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetCurrentActiveMenu(v)
+	})
+}
+
+// UpdateCurrentActiveMenu sets the "current_active_menu" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateCurrentActiveMenu() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateCurrentActiveMenu()
+	})
+}
+
+// SetKeepAlive sets the "keep_alive" field.
+func (u *MenuUpsertBulk) SetKeepAlive(v bool) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetKeepAlive(v)
+	})
+}
+
+// UpdateKeepAlive sets the "keep_alive" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateKeepAlive() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateKeepAlive()
+	})
+}
+
+// SetVisible sets the "visible" field.
+func (u *MenuUpsertBulk) SetVisible(v bool) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetVisible(v)
+	})
+}
+
+// UpdateVisible sets the "visible" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateVisible() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateVisible()
+	})
+}
+
+// SetHideTab sets the "hide_tab" field.
+func (u *MenuUpsertBulk) SetHideTab(v bool) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetHideTab(v)
+	})
+}
+
+// UpdateHideTab sets the "hide_tab" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateHideTab() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateHideTab()
+	})
+}
+
+// SetHideMenu sets the "hide_menu" field.
+func (u *MenuUpsertBulk) SetHideMenu(v bool) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetHideMenu(v)
+	})
+}
+
+// UpdateHideMenu sets the "hide_menu" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateHideMenu() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateHideMenu()
+	})
+}
+
+// SetHideBreadcrumb sets the "hide_breadcrumb" field.
+func (u *MenuUpsertBulk) SetHideBreadcrumb(v bool) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetHideBreadcrumb(v)
+	})
+}
+
+// UpdateHideBreadcrumb sets the "hide_breadcrumb" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateHideBreadcrumb() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateHideBreadcrumb()
+	})
 }
 
 // Exec executes the query.

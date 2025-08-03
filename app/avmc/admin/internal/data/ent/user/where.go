@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -69,6 +70,11 @@ func DeletedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
+func Status(v int32) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStatus, v))
+}
+
 // DomainID applies equality check predicate on the "domain_id" field. It's identical to DomainIDEQ.
 func DomainID(v uint32) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDomainID, v))
@@ -122,11 +128,6 @@ func Gender(v int32) predicate.User {
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldAge, v))
-}
-
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v int32) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldStatus, v))
 }
 
 // LastLoginAt applies equality check predicate on the "last_login_at" field. It's identical to LastLoginAtEQ.
@@ -277,6 +278,46 @@ func DeletedAtIsNil() predicate.User {
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v int32) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v int32) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...int32) predicate.User {
+	return predicate.User(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...int32) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// StatusGT applies the GT predicate on the "status" field.
+func StatusGT(v int32) predicate.User {
+	return predicate.User(sql.FieldGT(FieldStatus, v))
+}
+
+// StatusGTE applies the GTE predicate on the "status" field.
+func StatusGTE(v int32) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldStatus, v))
+}
+
+// StatusLT applies the LT predicate on the "status" field.
+func StatusLT(v int32) predicate.User {
+	return predicate.User(sql.FieldLT(FieldStatus, v))
+}
+
+// StatusLTE applies the LTE predicate on the "status" field.
+func StatusLTE(v int32) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldStatus, v))
 }
 
 // DomainIDEQ applies the EQ predicate on the "domain_id" field.
@@ -964,46 +1005,6 @@ func AgeNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldAge))
 }
 
-// StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v int32) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldStatus, v))
-}
-
-// StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v int32) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldStatus, v))
-}
-
-// StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...int32) predicate.User {
-	return predicate.User(sql.FieldIn(FieldStatus, vs...))
-}
-
-// StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...int32) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldStatus, vs...))
-}
-
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v int32) predicate.User {
-	return predicate.User(sql.FieldGT(FieldStatus, v))
-}
-
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v int32) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldStatus, v))
-}
-
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v int32) predicate.User {
-	return predicate.User(sql.FieldLT(FieldStatus, v))
-}
-
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v int32) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldStatus, v))
-}
-
 // LastLoginAtEQ applies the EQ predicate on the "last_login_at" field.
 func LastLoginAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldLastLoginAt, v))
@@ -1262,6 +1263,52 @@ func DescriptionEqualFold(v string) predicate.User {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HasRoles applies the HasEdge predicate on the "roles" edge.
+func HasRoles() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, RolesTable, RolesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRolesWith applies the HasEdge predicate on the "roles" edge with a given conditions (other predicates).
+func HasRolesWith(preds ...predicate.Role) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newRolesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPosts applies the HasEdge predicate on the "posts" edge.
+func HasPosts() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PostsTable, PostsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPostsWith applies the HasEdge predicate on the "posts" edge with a given conditions (other predicates).
+func HasPostsWith(preds ...predicate.Post) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newPostsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

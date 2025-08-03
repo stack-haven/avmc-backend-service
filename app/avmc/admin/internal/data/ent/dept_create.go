@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,19 +22,142 @@ type DeptCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (_c *DeptCreate) SetCreatedAt(v time.Time) *DeptCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableCreatedAt(v *time.Time) *DeptCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
+	}
+	return _c
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_c *DeptCreate) SetUpdatedAt(v time.Time) *DeptCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableUpdatedAt(v *time.Time) *DeptCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *DeptCreate) SetDeletedAt(v time.Time) *DeptCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableDeletedAt(v *time.Time) *DeptCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *DeptCreate) SetStatus(v int32) *DeptCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableStatus(v *int32) *DeptCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetDomainID sets the "domain_id" field.
+func (_c *DeptCreate) SetDomainID(v uint32) *DeptCreate {
+	_c.mutation.SetDomainID(v)
+	return _c
+}
+
+// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableDomainID(v *uint32) *DeptCreate {
+	if v != nil {
+		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetName sets the "name" field.
+func (_c *DeptCreate) SetName(v string) *DeptCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetParentID sets the "parent_id" field.
+func (_c *DeptCreate) SetParentID(v uint32) *DeptCreate {
+	_c.mutation.SetParentID(v)
+	return _c
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableParentID(v *uint32) *DeptCreate {
+	if v != nil {
+		_c.SetParentID(*v)
+	}
+	return _c
+}
+
+// SetAncestors sets the "ancestors" field.
+func (_c *DeptCreate) SetAncestors(v []int) *DeptCreate {
+	_c.mutation.SetAncestors(v)
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *DeptCreate) SetID(v uint32) *DeptCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetParent sets the "parent" edge to the Dept entity.
+func (_c *DeptCreate) SetParent(v *Dept) *DeptCreate {
+	return _c.SetParentID(v.ID)
+}
+
+// AddChildIDs adds the "children" edge to the Dept entity by IDs.
+func (_c *DeptCreate) AddChildIDs(ids ...uint32) *DeptCreate {
+	_c.mutation.AddChildIDs(ids...)
+	return _c
+}
+
+// AddChildren adds the "children" edges to the Dept entity.
+func (_c *DeptCreate) AddChildren(v ...*Dept) *DeptCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddChildIDs(ids...)
+}
+
 // Mutation returns the DeptMutation object of the builder.
-func (dc *DeptCreate) Mutation() *DeptMutation {
-	return dc.mutation
+func (_c *DeptCreate) Mutation() *DeptMutation {
+	return _c.mutation
 }
 
 // Save creates the Dept in the database.
-func (dc *DeptCreate) Save(ctx context.Context) (*Dept, error) {
-	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
+func (_c *DeptCreate) Save(ctx context.Context) (*Dept, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (dc *DeptCreate) SaveX(ctx context.Context) *Dept {
-	v, err := dc.Save(ctx)
+func (_c *DeptCreate) SaveX(ctx context.Context) *Dept {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -41,47 +165,177 @@ func (dc *DeptCreate) SaveX(ctx context.Context) *Dept {
 }
 
 // Exec executes the query.
-func (dc *DeptCreate) Exec(ctx context.Context) error {
-	_, err := dc.Save(ctx)
+func (_c *DeptCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dc *DeptCreate) ExecX(ctx context.Context) {
-	if err := dc.Exec(ctx); err != nil {
+func (_c *DeptCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *DeptCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		v := dept.DefaultCreatedAt()
+		_c.mutation.SetCreatedAt(v)
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		v := dept.DefaultUpdatedAt()
+		_c.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := dept.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.DomainID(); !ok {
+		v := dept.DefaultDomainID()
+		_c.mutation.SetDomainID(v)
+	}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		v := dept.DefaultParentID
+		_c.mutation.SetParentID(v)
+	}
+	if _, ok := _c.mutation.Ancestors(); !ok {
+		v := dept.DefaultAncestors
+		_c.mutation.SetAncestors(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
-func (dc *DeptCreate) check() error {
+func (_c *DeptCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Dept.created_at"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Dept.updated_at"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Dept.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := dept.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Dept.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DomainID(); !ok {
+		return &ValidationError{Name: "domain_id", err: errors.New(`ent: missing required field "Dept.domain_id"`)}
+	}
+	if v, ok := _c.mutation.DomainID(); ok {
+		if err := dept.DomainIDValidator(v); err != nil {
+			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "Dept.domain_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Dept.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := dept.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Dept.name": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := dept.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Dept.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
-func (dc *DeptCreate) sqlSave(ctx context.Context) (*Dept, error) {
-	if err := dc.check(); err != nil {
+func (_c *DeptCreate) sqlSave(ctx context.Context) (*Dept, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := dc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, dc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
-	dc.mutation.id = &_node.ID
-	dc.mutation.done = true
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
+	}
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (dc *DeptCreate) createSpec() (*Dept, *sqlgraph.CreateSpec) {
+func (_c *DeptCreate) createSpec() (*Dept, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Dept{config: dc.config}
-		_spec = sqlgraph.NewCreateSpec(dept.Table, sqlgraph.NewFieldSpec(dept.FieldID, field.TypeInt))
+		_node = &Dept{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(dept.Table, sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32))
 	)
-	_spec.OnConflict = dc.conflict
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(dept.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(dept.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(dept.FieldStatus, field.TypeInt32, value)
+		_node.Status = &value
+	}
+	if value, ok := _c.mutation.DomainID(); ok {
+		_spec.SetField(dept.FieldDomainID, field.TypeUint32, value)
+		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(dept.FieldName, field.TypeString, value)
+		_node.Name = &value
+	}
+	if value, ok := _c.mutation.Ancestors(); ok {
+		_spec.SetField(dept.FieldAncestors, field.TypeJSON, value)
+		_node.Ancestors = value
+	}
+	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dept.ParentTable,
+			Columns: []string{dept.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ParentID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.ChildrenTable,
+			Columns: []string{dept.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -89,16 +343,22 @@ func (dc *DeptCreate) createSpec() (*Dept, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Dept.Create().
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.DeptUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
-func (dc *DeptCreate) OnConflict(opts ...sql.ConflictOption) *DeptUpsertOne {
-	dc.conflict = opts
+func (_c *DeptCreate) OnConflict(opts ...sql.ConflictOption) *DeptUpsertOne {
+	_c.conflict = opts
 	return &DeptUpsertOne{
-		create: dc,
+		create: _c,
 	}
 }
 
@@ -108,10 +368,10 @@ func (dc *DeptCreate) OnConflict(opts ...sql.ConflictOption) *DeptUpsertOne {
 //	client.Dept.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dc *DeptCreate) OnConflictColumns(columns ...string) *DeptUpsertOne {
-	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
+func (_c *DeptCreate) OnConflictColumns(columns ...string) *DeptUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &DeptUpsertOne{
-		create: dc,
+		create: _c,
 	}
 }
 
@@ -128,16 +388,141 @@ type (
 	}
 )
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetUpdatedAt sets the "updated_at" field.
+func (u *DeptUpsert) SetUpdatedAt(v time.Time) *DeptUpsert {
+	u.Set(dept.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateUpdatedAt() *DeptUpsert {
+	u.SetExcluded(dept.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DeptUpsert) SetDeletedAt(v time.Time) *DeptUpsert {
+	u.Set(dept.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateDeletedAt() *DeptUpsert {
+	u.SetExcluded(dept.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DeptUpsert) ClearDeletedAt() *DeptUpsert {
+	u.SetNull(dept.FieldDeletedAt)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *DeptUpsert) SetStatus(v int32) *DeptUpsert {
+	u.Set(dept.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateStatus() *DeptUpsert {
+	u.SetExcluded(dept.FieldStatus)
+	return u
+}
+
+// AddStatus adds v to the "status" field.
+func (u *DeptUpsert) AddStatus(v int32) *DeptUpsert {
+	u.Add(dept.FieldStatus, v)
+	return u
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *DeptUpsert) SetDomainID(v uint32) *DeptUpsert {
+	u.Set(dept.FieldDomainID, v)
+	return u
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateDomainID() *DeptUpsert {
+	u.SetExcluded(dept.FieldDomainID)
+	return u
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *DeptUpsert) AddDomainID(v uint32) *DeptUpsert {
+	u.Add(dept.FieldDomainID, v)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *DeptUpsert) SetName(v string) *DeptUpsert {
+	u.Set(dept.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateName() *DeptUpsert {
+	u.SetExcluded(dept.FieldName)
+	return u
+}
+
+// SetParentID sets the "parent_id" field.
+func (u *DeptUpsert) SetParentID(v uint32) *DeptUpsert {
+	u.Set(dept.FieldParentID, v)
+	return u
+}
+
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateParentID() *DeptUpsert {
+	u.SetExcluded(dept.FieldParentID)
+	return u
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (u *DeptUpsert) ClearParentID() *DeptUpsert {
+	u.SetNull(dept.FieldParentID)
+	return u
+}
+
+// SetAncestors sets the "ancestors" field.
+func (u *DeptUpsert) SetAncestors(v []int) *DeptUpsert {
+	u.Set(dept.FieldAncestors, v)
+	return u
+}
+
+// UpdateAncestors sets the "ancestors" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateAncestors() *DeptUpsert {
+	u.SetExcluded(dept.FieldAncestors)
+	return u
+}
+
+// ClearAncestors clears the value of the "ancestors" field.
+func (u *DeptUpsert) ClearAncestors() *DeptUpsert {
+	u.SetNull(dept.FieldAncestors)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Dept.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(dept.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *DeptUpsertOne) UpdateNewValues() *DeptUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(dept.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(dept.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -168,6 +553,139 @@ func (u *DeptUpsertOne) Update(set func(*DeptUpsert)) *DeptUpsertOne {
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *DeptUpsertOne) SetUpdatedAt(v time.Time) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateUpdatedAt() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DeptUpsertOne) SetDeletedAt(v time.Time) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateDeletedAt() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DeptUpsertOne) ClearDeletedAt() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *DeptUpsertOne) SetStatus(v int32) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *DeptUpsertOne) AddStatus(v int32) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateStatus() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *DeptUpsertOne) SetDomainID(v uint32) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *DeptUpsertOne) AddDomainID(v uint32) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateDomainID() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *DeptUpsertOne) SetName(v string) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateName() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetParentID sets the "parent_id" field.
+func (u *DeptUpsertOne) SetParentID(v uint32) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetParentID(v)
+	})
+}
+
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateParentID() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateParentID()
+	})
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (u *DeptUpsertOne) ClearParentID() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearParentID()
+	})
+}
+
+// SetAncestors sets the "ancestors" field.
+func (u *DeptUpsertOne) SetAncestors(v []int) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetAncestors(v)
+	})
+}
+
+// UpdateAncestors sets the "ancestors" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateAncestors() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateAncestors()
+	})
+}
+
+// ClearAncestors clears the value of the "ancestors" field.
+func (u *DeptUpsertOne) ClearAncestors() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearAncestors()
+	})
+}
+
 // Exec executes the query.
 func (u *DeptUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -184,7 +702,7 @@ func (u *DeptUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *DeptUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *DeptUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -193,7 +711,7 @@ func (u *DeptUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *DeptUpsertOne) IDX(ctx context.Context) int {
+func (u *DeptUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -210,16 +728,17 @@ type DeptCreateBulk struct {
 }
 
 // Save creates the Dept entities in the database.
-func (dcb *DeptCreateBulk) Save(ctx context.Context) ([]*Dept, error) {
-	if dcb.err != nil {
-		return nil, dcb.err
+func (_c *DeptCreateBulk) Save(ctx context.Context) ([]*Dept, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(dcb.builders))
-	nodes := make([]*Dept, len(dcb.builders))
-	mutators := make([]Mutator, len(dcb.builders))
-	for i := range dcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Dept, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := dcb.builders[i]
+			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DeptMutation)
 				if !ok {
@@ -232,12 +751,12 @@ func (dcb *DeptCreateBulk) Save(ctx context.Context) ([]*Dept, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, dcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = dcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, dcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -247,9 +766,9 @@ func (dcb *DeptCreateBulk) Save(ctx context.Context) ([]*Dept, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
+					nodes[i].ID = uint32(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -261,7 +780,7 @@ func (dcb *DeptCreateBulk) Save(ctx context.Context) ([]*Dept, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, dcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -269,8 +788,8 @@ func (dcb *DeptCreateBulk) Save(ctx context.Context) ([]*Dept, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (dcb *DeptCreateBulk) SaveX(ctx context.Context) []*Dept {
-	v, err := dcb.Save(ctx)
+func (_c *DeptCreateBulk) SaveX(ctx context.Context) []*Dept {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -278,14 +797,14 @@ func (dcb *DeptCreateBulk) SaveX(ctx context.Context) []*Dept {
 }
 
 // Exec executes the query.
-func (dcb *DeptCreateBulk) Exec(ctx context.Context) error {
-	_, err := dcb.Save(ctx)
+func (_c *DeptCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dcb *DeptCreateBulk) ExecX(ctx context.Context) {
-	if err := dcb.Exec(ctx); err != nil {
+func (_c *DeptCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -299,11 +818,16 @@ func (dcb *DeptCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.DeptUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
-func (dcb *DeptCreateBulk) OnConflict(opts ...sql.ConflictOption) *DeptUpsertBulk {
-	dcb.conflict = opts
+func (_c *DeptCreateBulk) OnConflict(opts ...sql.ConflictOption) *DeptUpsertBulk {
+	_c.conflict = opts
 	return &DeptUpsertBulk{
-		create: dcb,
+		create: _c,
 	}
 }
 
@@ -313,10 +837,10 @@ func (dcb *DeptCreateBulk) OnConflict(opts ...sql.ConflictOption) *DeptUpsertBul
 //	client.Dept.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dcb *DeptCreateBulk) OnConflictColumns(columns ...string) *DeptUpsertBulk {
-	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
+func (_c *DeptCreateBulk) OnConflictColumns(columns ...string) *DeptUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &DeptUpsertBulk{
-		create: dcb,
+		create: _c,
 	}
 }
 
@@ -332,10 +856,23 @@ type DeptUpsertBulk struct {
 //	client.Dept.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(dept.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *DeptUpsertBulk) UpdateNewValues() *DeptUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(dept.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(dept.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -364,6 +901,139 @@ func (u *DeptUpsertBulk) Update(set func(*DeptUpsert)) *DeptUpsertBulk {
 		set(&DeptUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *DeptUpsertBulk) SetUpdatedAt(v time.Time) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateUpdatedAt() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DeptUpsertBulk) SetDeletedAt(v time.Time) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateDeletedAt() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DeptUpsertBulk) ClearDeletedAt() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *DeptUpsertBulk) SetStatus(v int32) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *DeptUpsertBulk) AddStatus(v int32) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateStatus() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetDomainID sets the "domain_id" field.
+func (u *DeptUpsertBulk) SetDomainID(v uint32) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetDomainID(v)
+	})
+}
+
+// AddDomainID adds v to the "domain_id" field.
+func (u *DeptUpsertBulk) AddDomainID(v uint32) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.AddDomainID(v)
+	})
+}
+
+// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateDomainID() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateDomainID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *DeptUpsertBulk) SetName(v string) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateName() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetParentID sets the "parent_id" field.
+func (u *DeptUpsertBulk) SetParentID(v uint32) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetParentID(v)
+	})
+}
+
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateParentID() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateParentID()
+	})
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (u *DeptUpsertBulk) ClearParentID() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearParentID()
+	})
+}
+
+// SetAncestors sets the "ancestors" field.
+func (u *DeptUpsertBulk) SetAncestors(v []int) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetAncestors(v)
+	})
+}
+
+// UpdateAncestors sets the "ancestors" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateAncestors() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateAncestors()
+	})
+}
+
+// ClearAncestors clears the value of the "ancestors" field.
+func (u *DeptUpsertBulk) ClearAncestors() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearAncestors()
+	})
 }
 
 // Exec executes the query.

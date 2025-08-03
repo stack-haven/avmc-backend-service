@@ -3,7 +3,9 @@
 package ent
 
 import (
+	"backend-service/app/avmc/admin/internal/data/ent/post"
 	"backend-service/app/avmc/admin/internal/data/ent/predicate"
+	"backend-service/app/avmc/admin/internal/data/ent/role"
 	"backend-service/app/avmc/admin/internal/data/ent/user"
 	"context"
 	"errors"
@@ -25,406 +27,478 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdatedAt(t)
-	return uu
+func (_u *UserUpdate) SetUpdatedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uu *UserUpdate) SetDeletedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetDeletedAt(t)
-	return uu
+func (_u *UserUpdate) SetDeletedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableDeletedAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetDeletedAt(*t)
+func (_u *UserUpdate) SetNillableDeletedAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uu *UserUpdate) ClearDeletedAt() *UserUpdate {
-	uu.mutation.ClearDeletedAt()
-	return uu
-}
-
-// SetDomainID sets the "domain_id" field.
-func (uu *UserUpdate) SetDomainID(u uint32) *UserUpdate {
-	uu.mutation.ResetDomainID()
-	uu.mutation.SetDomainID(u)
-	return uu
-}
-
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableDomainID(u *uint32) *UserUpdate {
-	if u != nil {
-		uu.SetDomainID(*u)
-	}
-	return uu
-}
-
-// AddDomainID adds u to the "domain_id" field.
-func (uu *UserUpdate) AddDomainID(u int32) *UserUpdate {
-	uu.mutation.AddDomainID(u)
-	return uu
-}
-
-// SetName sets the "name" field.
-func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.mutation.SetName(s)
-	return uu
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetName(*s)
-	}
-	return uu
-}
-
-// SetPassword sets the "password" field.
-func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
-	uu.mutation.SetPassword(s)
-	return uu
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetPassword(*s)
-	}
-	return uu
-}
-
-// SetRealname sets the "realname" field.
-func (uu *UserUpdate) SetRealname(s string) *UserUpdate {
-	uu.mutation.SetRealname(s)
-	return uu
-}
-
-// SetNillableRealname sets the "realname" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableRealname(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetRealname(*s)
-	}
-	return uu
-}
-
-// ClearRealname clears the value of the "realname" field.
-func (uu *UserUpdate) ClearRealname() *UserUpdate {
-	uu.mutation.ClearRealname()
-	return uu
-}
-
-// SetNickname sets the "nickname" field.
-func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
-	uu.mutation.SetNickname(s)
-	return uu
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetNickname(*s)
-	}
-	return uu
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (uu *UserUpdate) ClearNickname() *UserUpdate {
-	uu.mutation.ClearNickname()
-	return uu
-}
-
-// SetEmail sets the "email" field.
-func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
-	uu.mutation.SetEmail(s)
-	return uu
-}
-
-// SetNillableEmail sets the "email" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetEmail(*s)
-	}
-	return uu
-}
-
-// ClearEmail clears the value of the "email" field.
-func (uu *UserUpdate) ClearEmail() *UserUpdate {
-	uu.mutation.ClearEmail()
-	return uu
-}
-
-// SetPhone sets the "phone" field.
-func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
-	uu.mutation.SetPhone(s)
-	return uu
-}
-
-// SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetPhone(*s)
-	}
-	return uu
-}
-
-// ClearPhone clears the value of the "phone" field.
-func (uu *UserUpdate) ClearPhone() *UserUpdate {
-	uu.mutation.ClearPhone()
-	return uu
-}
-
-// SetAvatar sets the "avatar" field.
-func (uu *UserUpdate) SetAvatar(s string) *UserUpdate {
-	uu.mutation.SetAvatar(s)
-	return uu
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAvatar(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetAvatar(*s)
-	}
-	return uu
-}
-
-// ClearAvatar clears the value of the "avatar" field.
-func (uu *UserUpdate) ClearAvatar() *UserUpdate {
-	uu.mutation.ClearAvatar()
-	return uu
-}
-
-// SetBirthday sets the "birthday" field.
-func (uu *UserUpdate) SetBirthday(t time.Time) *UserUpdate {
-	uu.mutation.SetBirthday(t)
-	return uu
-}
-
-// SetNillableBirthday sets the "birthday" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableBirthday(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetBirthday(*t)
-	}
-	return uu
-}
-
-// ClearBirthday clears the value of the "birthday" field.
-func (uu *UserUpdate) ClearBirthday() *UserUpdate {
-	uu.mutation.ClearBirthday()
-	return uu
-}
-
-// SetGender sets the "gender" field.
-func (uu *UserUpdate) SetGender(i int32) *UserUpdate {
-	uu.mutation.ResetGender()
-	uu.mutation.SetGender(i)
-	return uu
-}
-
-// SetNillableGender sets the "gender" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableGender(i *int32) *UserUpdate {
-	if i != nil {
-		uu.SetGender(*i)
-	}
-	return uu
-}
-
-// AddGender adds i to the "gender" field.
-func (uu *UserUpdate) AddGender(i int32) *UserUpdate {
-	uu.mutation.AddGender(i)
-	return uu
-}
-
-// SetAge sets the "age" field.
-func (uu *UserUpdate) SetAge(i int) *UserUpdate {
-	uu.mutation.ResetAge()
-	uu.mutation.SetAge(i)
-	return uu
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAge(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetAge(*i)
-	}
-	return uu
-}
-
-// AddAge adds i to the "age" field.
-func (uu *UserUpdate) AddAge(i int) *UserUpdate {
-	uu.mutation.AddAge(i)
-	return uu
-}
-
-// ClearAge clears the value of the "age" field.
-func (uu *UserUpdate) ClearAge() *UserUpdate {
-	uu.mutation.ClearAge()
-	return uu
+func (_u *UserUpdate) ClearDeletedAt() *UserUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (uu *UserUpdate) SetStatus(i int32) *UserUpdate {
-	uu.mutation.ResetStatus()
-	uu.mutation.SetStatus(i)
-	return uu
+func (_u *UserUpdate) SetStatus(v int32) *UserUpdate {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableStatus(i *int32) *UserUpdate {
-	if i != nil {
-		uu.SetStatus(*i)
+func (_u *UserUpdate) SetNillableStatus(v *int32) *UserUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return uu
+	return _u
 }
 
-// AddStatus adds i to the "status" field.
-func (uu *UserUpdate) AddStatus(i int32) *UserUpdate {
-	uu.mutation.AddStatus(i)
-	return uu
+// AddStatus adds value to the "status" field.
+func (_u *UserUpdate) AddStatus(v int32) *UserUpdate {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// SetDomainID sets the "domain_id" field.
+func (_u *UserUpdate) SetDomainID(v uint32) *UserUpdate {
+	_u.mutation.ResetDomainID()
+	_u.mutation.SetDomainID(v)
+	return _u
+}
+
+// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableDomainID(v *uint32) *UserUpdate {
+	if v != nil {
+		_u.SetDomainID(*v)
+	}
+	return _u
+}
+
+// AddDomainID adds value to the "domain_id" field.
+func (_u *UserUpdate) AddDomainID(v int32) *UserUpdate {
+	_u.mutation.AddDomainID(v)
+	return _u
+}
+
+// SetName sets the "name" field.
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetPassword sets the "password" field.
+func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
+	_u.mutation.SetPassword(v)
+	return _u
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (_u *UserUpdate) SetNillablePassword(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPassword(*v)
+	}
+	return _u
+}
+
+// SetRealname sets the "realname" field.
+func (_u *UserUpdate) SetRealname(v string) *UserUpdate {
+	_u.mutation.SetRealname(v)
+	return _u
+}
+
+// SetNillableRealname sets the "realname" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableRealname(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetRealname(*v)
+	}
+	return _u
+}
+
+// ClearRealname clears the value of the "realname" field.
+func (_u *UserUpdate) ClearRealname() *UserUpdate {
+	_u.mutation.ClearRealname()
+	return _u
+}
+
+// SetNickname sets the "nickname" field.
+func (_u *UserUpdate) SetNickname(v string) *UserUpdate {
+	_u.mutation.SetNickname(v)
+	return _u
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableNickname(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetNickname(*v)
+	}
+	return _u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (_u *UserUpdate) ClearNickname() *UserUpdate {
+	_u.mutation.ClearNickname()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *UserUpdate) SetEmail(v string) *UserUpdate {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableEmail(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (_u *UserUpdate) ClearEmail() *UserUpdate {
+	_u.mutation.ClearEmail()
+	return _u
+}
+
+// SetPhone sets the "phone" field.
+func (_u *UserUpdate) SetPhone(v string) *UserUpdate {
+	_u.mutation.SetPhone(v)
+	return _u
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_u *UserUpdate) SetNillablePhone(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPhone(*v)
+	}
+	return _u
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (_u *UserUpdate) ClearPhone() *UserUpdate {
+	_u.mutation.ClearPhone()
+	return _u
+}
+
+// SetAvatar sets the "avatar" field.
+func (_u *UserUpdate) SetAvatar(v string) *UserUpdate {
+	_u.mutation.SetAvatar(v)
+	return _u
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAvatar(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetAvatar(*v)
+	}
+	return _u
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (_u *UserUpdate) ClearAvatar() *UserUpdate {
+	_u.mutation.ClearAvatar()
+	return _u
+}
+
+// SetBirthday sets the "birthday" field.
+func (_u *UserUpdate) SetBirthday(v time.Time) *UserUpdate {
+	_u.mutation.SetBirthday(v)
+	return _u
+}
+
+// SetNillableBirthday sets the "birthday" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableBirthday(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetBirthday(*v)
+	}
+	return _u
+}
+
+// ClearBirthday clears the value of the "birthday" field.
+func (_u *UserUpdate) ClearBirthday() *UserUpdate {
+	_u.mutation.ClearBirthday()
+	return _u
+}
+
+// SetGender sets the "gender" field.
+func (_u *UserUpdate) SetGender(v int32) *UserUpdate {
+	_u.mutation.ResetGender()
+	_u.mutation.SetGender(v)
+	return _u
+}
+
+// SetNillableGender sets the "gender" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableGender(v *int32) *UserUpdate {
+	if v != nil {
+		_u.SetGender(*v)
+	}
+	return _u
+}
+
+// AddGender adds value to the "gender" field.
+func (_u *UserUpdate) AddGender(v int32) *UserUpdate {
+	_u.mutation.AddGender(v)
+	return _u
+}
+
+// SetAge sets the "age" field.
+func (_u *UserUpdate) SetAge(v int) *UserUpdate {
+	_u.mutation.ResetAge()
+	_u.mutation.SetAge(v)
+	return _u
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAge(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetAge(*v)
+	}
+	return _u
+}
+
+// AddAge adds value to the "age" field.
+func (_u *UserUpdate) AddAge(v int) *UserUpdate {
+	_u.mutation.AddAge(v)
+	return _u
+}
+
+// ClearAge clears the value of the "age" field.
+func (_u *UserUpdate) ClearAge() *UserUpdate {
+	_u.mutation.ClearAge()
+	return _u
 }
 
 // SetLastLoginAt sets the "last_login_at" field.
-func (uu *UserUpdate) SetLastLoginAt(t time.Time) *UserUpdate {
-	uu.mutation.SetLastLoginAt(t)
-	return uu
+func (_u *UserUpdate) SetLastLoginAt(v time.Time) *UserUpdate {
+	_u.mutation.SetLastLoginAt(v)
+	return _u
 }
 
 // SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableLastLoginAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetLastLoginAt(*t)
+func (_u *UserUpdate) SetNillableLastLoginAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetLastLoginAt(*v)
 	}
-	return uu
+	return _u
 }
 
 // ClearLastLoginAt clears the value of the "last_login_at" field.
-func (uu *UserUpdate) ClearLastLoginAt() *UserUpdate {
-	uu.mutation.ClearLastLoginAt()
-	return uu
+func (_u *UserUpdate) ClearLastLoginAt() *UserUpdate {
+	_u.mutation.ClearLastLoginAt()
+	return _u
 }
 
 // SetLastLoginIP sets the "last_login_ip" field.
-func (uu *UserUpdate) SetLastLoginIP(s string) *UserUpdate {
-	uu.mutation.SetLastLoginIP(s)
-	return uu
+func (_u *UserUpdate) SetLastLoginIP(v string) *UserUpdate {
+	_u.mutation.SetLastLoginIP(v)
+	return _u
 }
 
 // SetNillableLastLoginIP sets the "last_login_ip" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableLastLoginIP(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetLastLoginIP(*s)
+func (_u *UserUpdate) SetNillableLastLoginIP(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetLastLoginIP(*v)
 	}
-	return uu
+	return _u
 }
 
 // ClearLastLoginIP clears the value of the "last_login_ip" field.
-func (uu *UserUpdate) ClearLastLoginIP() *UserUpdate {
-	uu.mutation.ClearLastLoginIP()
-	return uu
+func (_u *UserUpdate) ClearLastLoginIP() *UserUpdate {
+	_u.mutation.ClearLastLoginIP()
+	return _u
 }
 
 // SetLoginCount sets the "login_count" field.
-func (uu *UserUpdate) SetLoginCount(i int) *UserUpdate {
-	uu.mutation.ResetLoginCount()
-	uu.mutation.SetLoginCount(i)
-	return uu
+func (_u *UserUpdate) SetLoginCount(v int) *UserUpdate {
+	_u.mutation.ResetLoginCount()
+	_u.mutation.SetLoginCount(v)
+	return _u
 }
 
 // SetNillableLoginCount sets the "login_count" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableLoginCount(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetLoginCount(*i)
+func (_u *UserUpdate) SetNillableLoginCount(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetLoginCount(*v)
 	}
-	return uu
+	return _u
 }
 
-// AddLoginCount adds i to the "login_count" field.
-func (uu *UserUpdate) AddLoginCount(i int) *UserUpdate {
-	uu.mutation.AddLoginCount(i)
-	return uu
+// AddLoginCount adds value to the "login_count" field.
+func (_u *UserUpdate) AddLoginCount(v int) *UserUpdate {
+	_u.mutation.AddLoginCount(v)
+	return _u
 }
 
 // SetSettings sets the "settings" field.
-func (uu *UserUpdate) SetSettings(s []string) *UserUpdate {
-	uu.mutation.SetSettings(s)
-	return uu
+func (_u *UserUpdate) SetSettings(v []string) *UserUpdate {
+	_u.mutation.SetSettings(v)
+	return _u
 }
 
-// AppendSettings appends s to the "settings" field.
-func (uu *UserUpdate) AppendSettings(s []string) *UserUpdate {
-	uu.mutation.AppendSettings(s)
-	return uu
+// AppendSettings appends value to the "settings" field.
+func (_u *UserUpdate) AppendSettings(v []string) *UserUpdate {
+	_u.mutation.AppendSettings(v)
+	return _u
 }
 
 // ClearSettings clears the value of the "settings" field.
-func (uu *UserUpdate) ClearSettings() *UserUpdate {
-	uu.mutation.ClearSettings()
-	return uu
+func (_u *UserUpdate) ClearSettings() *UserUpdate {
+	_u.mutation.ClearSettings()
+	return _u
 }
 
 // SetMetadata sets the "metadata" field.
-func (uu *UserUpdate) SetMetadata(s []string) *UserUpdate {
-	uu.mutation.SetMetadata(s)
-	return uu
+func (_u *UserUpdate) SetMetadata(v []string) *UserUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
 }
 
-// AppendMetadata appends s to the "metadata" field.
-func (uu *UserUpdate) AppendMetadata(s []string) *UserUpdate {
-	uu.mutation.AppendMetadata(s)
-	return uu
+// AppendMetadata appends value to the "metadata" field.
+func (_u *UserUpdate) AppendMetadata(v []string) *UserUpdate {
+	_u.mutation.AppendMetadata(v)
+	return _u
 }
 
 // ClearMetadata clears the value of the "metadata" field.
-func (uu *UserUpdate) ClearMetadata() *UserUpdate {
-	uu.mutation.ClearMetadata()
-	return uu
+func (_u *UserUpdate) ClearMetadata() *UserUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (uu *UserUpdate) SetDescription(s string) *UserUpdate {
-	uu.mutation.SetDescription(s)
-	return uu
+func (_u *UserUpdate) SetDescription(v string) *UserUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableDescription(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetDescription(*s)
+func (_u *UserUpdate) SetNillableDescription(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
-	return uu
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (uu *UserUpdate) ClearDescription() *UserUpdate {
-	uu.mutation.ClearDescription()
-	return uu
+func (_u *UserUpdate) ClearDescription() *UserUpdate {
+	_u.mutation.ClearDescription()
+	return _u
+}
+
+// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
+func (_u *UserUpdate) AddRoleIDs(ids ...uint32) *UserUpdate {
+	_u.mutation.AddRoleIDs(ids...)
+	return _u
+}
+
+// AddRoles adds the "roles" edges to the Role entity.
+func (_u *UserUpdate) AddRoles(v ...*Role) *UserUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRoleIDs(ids...)
+}
+
+// AddPostIDs adds the "posts" edge to the Post entity by IDs.
+func (_u *UserUpdate) AddPostIDs(ids ...uint32) *UserUpdate {
+	_u.mutation.AddPostIDs(ids...)
+	return _u
+}
+
+// AddPosts adds the "posts" edges to the Post entity.
+func (_u *UserUpdate) AddPosts(v ...*Post) *UserUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPostIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (_u *UserUpdate) Mutation() *UserMutation {
+	return _u.mutation
+}
+
+// ClearRoles clears all "roles" edges to the Role entity.
+func (_u *UserUpdate) ClearRoles() *UserUpdate {
+	_u.mutation.ClearRoles()
+	return _u
+}
+
+// RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
+func (_u *UserUpdate) RemoveRoleIDs(ids ...uint32) *UserUpdate {
+	_u.mutation.RemoveRoleIDs(ids...)
+	return _u
+}
+
+// RemoveRoles removes "roles" edges to Role entities.
+func (_u *UserUpdate) RemoveRoles(v ...*Role) *UserUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRoleIDs(ids...)
+}
+
+// ClearPosts clears all "posts" edges to the Post entity.
+func (_u *UserUpdate) ClearPosts() *UserUpdate {
+	_u.mutation.ClearPosts()
+	return _u
+}
+
+// RemovePostIDs removes the "posts" edge to Post entities by IDs.
+func (_u *UserUpdate) RemovePostIDs(ids ...uint32) *UserUpdate {
+	_u.mutation.RemovePostIDs(ids...)
+	return _u
+}
+
+// RemovePosts removes "posts" edges to Post entities.
+func (_u *UserUpdate) RemovePosts(v ...*Post) *UserUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePostIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	uu.defaults()
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (_u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -432,89 +506,89 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (_u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (_u *UserUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uu *UserUpdate) defaults() {
-	if _, ok := uu.mutation.UpdatedAt(); !ok {
+func (_u *UserUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := user.UpdateDefaultUpdatedAt()
-		uu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.DomainID(); ok {
-		if err := user.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "User.domain_id": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Name(); ok {
-		if err := user.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Password(); ok {
-		if err := user.PasswordValidator(v); err != nil {
-			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Realname(); ok {
-		if err := user.RealnameValidator(v); err != nil {
-			return &ValidationError{Name: "realname", err: fmt.Errorf(`ent: validator failed for field "User.realname": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Nickname(); ok {
-		if err := user.NicknameValidator(v); err != nil {
-			return &ValidationError{Name: "nickname", err: fmt.Errorf(`ent: validator failed for field "User.nickname": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Email(); ok {
-		if err := user.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Phone(); ok {
-		if err := user.PhoneValidator(v); err != nil {
-			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Avatar(); ok {
-		if err := user.AvatarValidator(v); err != nil {
-			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "User.avatar": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Gender(); ok {
-		if err := user.GenderValidator(v); err != nil {
-			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Age(); ok {
-		if err := user.AgeValidator(v); err != nil {
-			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Status(); ok {
+func (_u *UserUpdate) check() error {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.LastLoginIP(); ok {
+	if v, ok := _u.mutation.DomainID(); ok {
+		if err := user.DomainIDValidator(v); err != nil {
+			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "User.domain_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Realname(); ok {
+		if err := user.RealnameValidator(v); err != nil {
+			return &ValidationError{Name: "realname", err: fmt.Errorf(`ent: validator failed for field "User.realname": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Nickname(); ok {
+		if err := user.NicknameValidator(v); err != nil {
+			return &ValidationError{Name: "nickname", err: fmt.Errorf(`ent: validator failed for field "User.nickname": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Phone(); ok {
+		if err := user.PhoneValidator(v); err != nil {
+			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Avatar(); ok {
+		if err := user.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "User.avatar": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Gender(); ok {
+		if err := user.GenderValidator(v); err != nil {
+			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Age(); ok {
+		if err := user.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LastLoginIP(); ok {
 		if err := user.LastLoginIPValidator(v); err != nil {
 			return &ValidationError{Name: "last_login_ip", err: fmt.Errorf(`ent: validator failed for field "User.last_login_ip": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.Description(); ok {
+	if v, ok := _u.mutation.Description(); ok {
 		if err := user.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "User.description": %w`, err)}
 		}
@@ -523,149 +597,239 @@ func (uu *UserUpdate) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (uu *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
-	uu.modifiers = append(uu.modifiers, modifiers...)
-	return uu
+func (_u *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
-		return n, err
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := uu.mutation.DomainID(); ok {
-		_spec.SetField(user.FieldDomainID, field.TypeUint32, value)
-	}
-	if value, ok := uu.mutation.AddedDomainID(); ok {
-		_spec.AddField(user.FieldDomainID, field.TypeUint32, value)
-	}
-	if value, ok := uu.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Realname(); ok {
-		_spec.SetField(user.FieldRealname, field.TypeString, value)
-	}
-	if uu.mutation.RealnameCleared() {
-		_spec.ClearField(user.FieldRealname, field.TypeString)
-	}
-	if value, ok := uu.mutation.Nickname(); ok {
-		_spec.SetField(user.FieldNickname, field.TypeString, value)
-	}
-	if uu.mutation.NicknameCleared() {
-		_spec.ClearField(user.FieldNickname, field.TypeString)
-	}
-	if value, ok := uu.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
-	}
-	if uu.mutation.EmailCleared() {
-		_spec.ClearField(user.FieldEmail, field.TypeString)
-	}
-	if value, ok := uu.mutation.Phone(); ok {
-		_spec.SetField(user.FieldPhone, field.TypeString, value)
-	}
-	if uu.mutation.PhoneCleared() {
-		_spec.ClearField(user.FieldPhone, field.TypeString)
-	}
-	if value, ok := uu.mutation.Avatar(); ok {
-		_spec.SetField(user.FieldAvatar, field.TypeString, value)
-	}
-	if uu.mutation.AvatarCleared() {
-		_spec.ClearField(user.FieldAvatar, field.TypeString)
-	}
-	if value, ok := uu.mutation.Birthday(); ok {
-		_spec.SetField(user.FieldBirthday, field.TypeTime, value)
-	}
-	if uu.mutation.BirthdayCleared() {
-		_spec.ClearField(user.FieldBirthday, field.TypeTime)
-	}
-	if value, ok := uu.mutation.Gender(); ok {
-		_spec.SetField(user.FieldGender, field.TypeInt32, value)
-	}
-	if value, ok := uu.mutation.AddedGender(); ok {
-		_spec.AddField(user.FieldGender, field.TypeInt32, value)
-	}
-	if value, ok := uu.mutation.Age(); ok {
-		_spec.SetField(user.FieldAge, field.TypeInt, value)
-	}
-	if value, ok := uu.mutation.AddedAge(); ok {
-		_spec.AddField(user.FieldAge, field.TypeInt, value)
-	}
-	if uu.mutation.AgeCleared() {
-		_spec.ClearField(user.FieldAge, field.TypeInt)
-	}
-	if value, ok := uu.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := uu.mutation.AddedStatus(); ok {
+	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(user.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := uu.mutation.LastLoginAt(); ok {
+	if value, ok := _u.mutation.DomainID(); ok {
+		_spec.SetField(user.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDomainID(); ok {
+		_spec.AddField(user.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Realname(); ok {
+		_spec.SetField(user.FieldRealname, field.TypeString, value)
+	}
+	if _u.mutation.RealnameCleared() {
+		_spec.ClearField(user.FieldRealname, field.TypeString)
+	}
+	if value, ok := _u.mutation.Nickname(); ok {
+		_spec.SetField(user.FieldNickname, field.TypeString, value)
+	}
+	if _u.mutation.NicknameCleared() {
+		_spec.ClearField(user.FieldNickname, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if _u.mutation.EmailCleared() {
+		_spec.ClearField(user.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+	}
+	if _u.mutation.PhoneCleared() {
+		_spec.ClearField(user.FieldPhone, field.TypeString)
+	}
+	if value, ok := _u.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+	}
+	if _u.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
+	if value, ok := _u.mutation.Birthday(); ok {
+		_spec.SetField(user.FieldBirthday, field.TypeTime, value)
+	}
+	if _u.mutation.BirthdayCleared() {
+		_spec.ClearField(user.FieldBirthday, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Gender(); ok {
+		_spec.SetField(user.FieldGender, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedGender(); ok {
+		_spec.AddField(user.FieldGender, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.Age(); ok {
+		_spec.SetField(user.FieldAge, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAge(); ok {
+		_spec.AddField(user.FieldAge, field.TypeInt, value)
+	}
+	if _u.mutation.AgeCleared() {
+		_spec.ClearField(user.FieldAge, field.TypeInt)
+	}
+	if value, ok := _u.mutation.LastLoginAt(); ok {
 		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)
 	}
-	if uu.mutation.LastLoginAtCleared() {
+	if _u.mutation.LastLoginAtCleared() {
 		_spec.ClearField(user.FieldLastLoginAt, field.TypeTime)
 	}
-	if value, ok := uu.mutation.LastLoginIP(); ok {
+	if value, ok := _u.mutation.LastLoginIP(); ok {
 		_spec.SetField(user.FieldLastLoginIP, field.TypeString, value)
 	}
-	if uu.mutation.LastLoginIPCleared() {
+	if _u.mutation.LastLoginIPCleared() {
 		_spec.ClearField(user.FieldLastLoginIP, field.TypeString)
 	}
-	if value, ok := uu.mutation.LoginCount(); ok {
+	if value, ok := _u.mutation.LoginCount(); ok {
 		_spec.SetField(user.FieldLoginCount, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.AddedLoginCount(); ok {
+	if value, ok := _u.mutation.AddedLoginCount(); ok {
 		_spec.AddField(user.FieldLoginCount, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.Settings(); ok {
+	if value, ok := _u.mutation.Settings(); ok {
 		_spec.SetField(user.FieldSettings, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedSettings(); ok {
+	if value, ok := _u.mutation.AppendedSettings(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldSettings, value)
 		})
 	}
-	if uu.mutation.SettingsCleared() {
+	if _u.mutation.SettingsCleared() {
 		_spec.ClearField(user.FieldSettings, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Metadata(); ok {
+	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(user.FieldMetadata, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedMetadata(); ok {
+	if value, ok := _u.mutation.AppendedMetadata(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldMetadata, value)
 		})
 	}
-	if uu.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(user.FieldMetadata, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(user.FieldDescription, field.TypeString, value)
 	}
-	if uu.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(user.FieldDescription, field.TypeString)
 	}
-	_spec.AddModifiers(uu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if _u.mutation.RolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRolesIDs(); len(nodes) > 0 && !_u.mutation.RolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPostsIDs(); len(nodes) > 0 && !_u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -673,8 +837,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -687,413 +851,485 @@ type UserUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdatedAt(t)
-	return uuo
+func (_u *UserUpdateOne) SetUpdatedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uuo *UserUpdateOne) SetDeletedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetDeletedAt(t)
-	return uuo
+func (_u *UserUpdateOne) SetDeletedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDeletedAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetDeletedAt(*t)
+func (_u *UserUpdateOne) SetNillableDeletedAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uuo *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
-	uuo.mutation.ClearDeletedAt()
-	return uuo
-}
-
-// SetDomainID sets the "domain_id" field.
-func (uuo *UserUpdateOne) SetDomainID(u uint32) *UserUpdateOne {
-	uuo.mutation.ResetDomainID()
-	uuo.mutation.SetDomainID(u)
-	return uuo
-}
-
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDomainID(u *uint32) *UserUpdateOne {
-	if u != nil {
-		uuo.SetDomainID(*u)
-	}
-	return uuo
-}
-
-// AddDomainID adds u to the "domain_id" field.
-func (uuo *UserUpdateOne) AddDomainID(u int32) *UserUpdateOne {
-	uuo.mutation.AddDomainID(u)
-	return uuo
-}
-
-// SetName sets the "name" field.
-func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.mutation.SetName(s)
-	return uuo
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetName(*s)
-	}
-	return uuo
-}
-
-// SetPassword sets the "password" field.
-func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	uuo.mutation.SetPassword(s)
-	return uuo
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetPassword(*s)
-	}
-	return uuo
-}
-
-// SetRealname sets the "realname" field.
-func (uuo *UserUpdateOne) SetRealname(s string) *UserUpdateOne {
-	uuo.mutation.SetRealname(s)
-	return uuo
-}
-
-// SetNillableRealname sets the "realname" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableRealname(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetRealname(*s)
-	}
-	return uuo
-}
-
-// ClearRealname clears the value of the "realname" field.
-func (uuo *UserUpdateOne) ClearRealname() *UserUpdateOne {
-	uuo.mutation.ClearRealname()
-	return uuo
-}
-
-// SetNickname sets the "nickname" field.
-func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
-	uuo.mutation.SetNickname(s)
-	return uuo
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetNickname(*s)
-	}
-	return uuo
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (uuo *UserUpdateOne) ClearNickname() *UserUpdateOne {
-	uuo.mutation.ClearNickname()
-	return uuo
-}
-
-// SetEmail sets the "email" field.
-func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
-	uuo.mutation.SetEmail(s)
-	return uuo
-}
-
-// SetNillableEmail sets the "email" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetEmail(*s)
-	}
-	return uuo
-}
-
-// ClearEmail clears the value of the "email" field.
-func (uuo *UserUpdateOne) ClearEmail() *UserUpdateOne {
-	uuo.mutation.ClearEmail()
-	return uuo
-}
-
-// SetPhone sets the "phone" field.
-func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
-	uuo.mutation.SetPhone(s)
-	return uuo
-}
-
-// SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetPhone(*s)
-	}
-	return uuo
-}
-
-// ClearPhone clears the value of the "phone" field.
-func (uuo *UserUpdateOne) ClearPhone() *UserUpdateOne {
-	uuo.mutation.ClearPhone()
-	return uuo
-}
-
-// SetAvatar sets the "avatar" field.
-func (uuo *UserUpdateOne) SetAvatar(s string) *UserUpdateOne {
-	uuo.mutation.SetAvatar(s)
-	return uuo
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAvatar(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetAvatar(*s)
-	}
-	return uuo
-}
-
-// ClearAvatar clears the value of the "avatar" field.
-func (uuo *UserUpdateOne) ClearAvatar() *UserUpdateOne {
-	uuo.mutation.ClearAvatar()
-	return uuo
-}
-
-// SetBirthday sets the "birthday" field.
-func (uuo *UserUpdateOne) SetBirthday(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetBirthday(t)
-	return uuo
-}
-
-// SetNillableBirthday sets the "birthday" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableBirthday(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetBirthday(*t)
-	}
-	return uuo
-}
-
-// ClearBirthday clears the value of the "birthday" field.
-func (uuo *UserUpdateOne) ClearBirthday() *UserUpdateOne {
-	uuo.mutation.ClearBirthday()
-	return uuo
-}
-
-// SetGender sets the "gender" field.
-func (uuo *UserUpdateOne) SetGender(i int32) *UserUpdateOne {
-	uuo.mutation.ResetGender()
-	uuo.mutation.SetGender(i)
-	return uuo
-}
-
-// SetNillableGender sets the "gender" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableGender(i *int32) *UserUpdateOne {
-	if i != nil {
-		uuo.SetGender(*i)
-	}
-	return uuo
-}
-
-// AddGender adds i to the "gender" field.
-func (uuo *UserUpdateOne) AddGender(i int32) *UserUpdateOne {
-	uuo.mutation.AddGender(i)
-	return uuo
-}
-
-// SetAge sets the "age" field.
-func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
-	uuo.mutation.ResetAge()
-	uuo.mutation.SetAge(i)
-	return uuo
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAge(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetAge(*i)
-	}
-	return uuo
-}
-
-// AddAge adds i to the "age" field.
-func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	uuo.mutation.AddAge(i)
-	return uuo
-}
-
-// ClearAge clears the value of the "age" field.
-func (uuo *UserUpdateOne) ClearAge() *UserUpdateOne {
-	uuo.mutation.ClearAge()
-	return uuo
+func (_u *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (uuo *UserUpdateOne) SetStatus(i int32) *UserUpdateOne {
-	uuo.mutation.ResetStatus()
-	uuo.mutation.SetStatus(i)
-	return uuo
+func (_u *UserUpdateOne) SetStatus(v int32) *UserUpdateOne {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableStatus(i *int32) *UserUpdateOne {
-	if i != nil {
-		uuo.SetStatus(*i)
+func (_u *UserUpdateOne) SetNillableStatus(v *int32) *UserUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return uuo
+	return _u
 }
 
-// AddStatus adds i to the "status" field.
-func (uuo *UserUpdateOne) AddStatus(i int32) *UserUpdateOne {
-	uuo.mutation.AddStatus(i)
-	return uuo
+// AddStatus adds value to the "status" field.
+func (_u *UserUpdateOne) AddStatus(v int32) *UserUpdateOne {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// SetDomainID sets the "domain_id" field.
+func (_u *UserUpdateOne) SetDomainID(v uint32) *UserUpdateOne {
+	_u.mutation.ResetDomainID()
+	_u.mutation.SetDomainID(v)
+	return _u
+}
+
+// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableDomainID(v *uint32) *UserUpdateOne {
+	if v != nil {
+		_u.SetDomainID(*v)
+	}
+	return _u
+}
+
+// AddDomainID adds value to the "domain_id" field.
+func (_u *UserUpdateOne) AddDomainID(v int32) *UserUpdateOne {
+	_u.mutation.AddDomainID(v)
+	return _u
+}
+
+// SetName sets the "name" field.
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetPassword sets the "password" field.
+func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
+	_u.mutation.SetPassword(v)
+	return _u
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillablePassword(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPassword(*v)
+	}
+	return _u
+}
+
+// SetRealname sets the "realname" field.
+func (_u *UserUpdateOne) SetRealname(v string) *UserUpdateOne {
+	_u.mutation.SetRealname(v)
+	return _u
+}
+
+// SetNillableRealname sets the "realname" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableRealname(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetRealname(*v)
+	}
+	return _u
+}
+
+// ClearRealname clears the value of the "realname" field.
+func (_u *UserUpdateOne) ClearRealname() *UserUpdateOne {
+	_u.mutation.ClearRealname()
+	return _u
+}
+
+// SetNickname sets the "nickname" field.
+func (_u *UserUpdateOne) SetNickname(v string) *UserUpdateOne {
+	_u.mutation.SetNickname(v)
+	return _u
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableNickname(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetNickname(*v)
+	}
+	return _u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (_u *UserUpdateOne) ClearNickname() *UserUpdateOne {
+	_u.mutation.ClearNickname()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *UserUpdateOne) SetEmail(v string) *UserUpdateOne {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableEmail(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (_u *UserUpdateOne) ClearEmail() *UserUpdateOne {
+	_u.mutation.ClearEmail()
+	return _u
+}
+
+// SetPhone sets the "phone" field.
+func (_u *UserUpdateOne) SetPhone(v string) *UserUpdateOne {
+	_u.mutation.SetPhone(v)
+	return _u
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillablePhone(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPhone(*v)
+	}
+	return _u
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (_u *UserUpdateOne) ClearPhone() *UserUpdateOne {
+	_u.mutation.ClearPhone()
+	return _u
+}
+
+// SetAvatar sets the "avatar" field.
+func (_u *UserUpdateOne) SetAvatar(v string) *UserUpdateOne {
+	_u.mutation.SetAvatar(v)
+	return _u
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAvatar(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetAvatar(*v)
+	}
+	return _u
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (_u *UserUpdateOne) ClearAvatar() *UserUpdateOne {
+	_u.mutation.ClearAvatar()
+	return _u
+}
+
+// SetBirthday sets the "birthday" field.
+func (_u *UserUpdateOne) SetBirthday(v time.Time) *UserUpdateOne {
+	_u.mutation.SetBirthday(v)
+	return _u
+}
+
+// SetNillableBirthday sets the "birthday" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableBirthday(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetBirthday(*v)
+	}
+	return _u
+}
+
+// ClearBirthday clears the value of the "birthday" field.
+func (_u *UserUpdateOne) ClearBirthday() *UserUpdateOne {
+	_u.mutation.ClearBirthday()
+	return _u
+}
+
+// SetGender sets the "gender" field.
+func (_u *UserUpdateOne) SetGender(v int32) *UserUpdateOne {
+	_u.mutation.ResetGender()
+	_u.mutation.SetGender(v)
+	return _u
+}
+
+// SetNillableGender sets the "gender" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableGender(v *int32) *UserUpdateOne {
+	if v != nil {
+		_u.SetGender(*v)
+	}
+	return _u
+}
+
+// AddGender adds value to the "gender" field.
+func (_u *UserUpdateOne) AddGender(v int32) *UserUpdateOne {
+	_u.mutation.AddGender(v)
+	return _u
+}
+
+// SetAge sets the "age" field.
+func (_u *UserUpdateOne) SetAge(v int) *UserUpdateOne {
+	_u.mutation.ResetAge()
+	_u.mutation.SetAge(v)
+	return _u
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAge(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
+	}
+	return _u
+}
+
+// AddAge adds value to the "age" field.
+func (_u *UserUpdateOne) AddAge(v int) *UserUpdateOne {
+	_u.mutation.AddAge(v)
+	return _u
+}
+
+// ClearAge clears the value of the "age" field.
+func (_u *UserUpdateOne) ClearAge() *UserUpdateOne {
+	_u.mutation.ClearAge()
+	return _u
 }
 
 // SetLastLoginAt sets the "last_login_at" field.
-func (uuo *UserUpdateOne) SetLastLoginAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetLastLoginAt(t)
-	return uuo
+func (_u *UserUpdateOne) SetLastLoginAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetLastLoginAt(v)
+	return _u
 }
 
 // SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableLastLoginAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetLastLoginAt(*t)
+func (_u *UserUpdateOne) SetNillableLastLoginAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetLastLoginAt(*v)
 	}
-	return uuo
+	return _u
 }
 
 // ClearLastLoginAt clears the value of the "last_login_at" field.
-func (uuo *UserUpdateOne) ClearLastLoginAt() *UserUpdateOne {
-	uuo.mutation.ClearLastLoginAt()
-	return uuo
+func (_u *UserUpdateOne) ClearLastLoginAt() *UserUpdateOne {
+	_u.mutation.ClearLastLoginAt()
+	return _u
 }
 
 // SetLastLoginIP sets the "last_login_ip" field.
-func (uuo *UserUpdateOne) SetLastLoginIP(s string) *UserUpdateOne {
-	uuo.mutation.SetLastLoginIP(s)
-	return uuo
+func (_u *UserUpdateOne) SetLastLoginIP(v string) *UserUpdateOne {
+	_u.mutation.SetLastLoginIP(v)
+	return _u
 }
 
 // SetNillableLastLoginIP sets the "last_login_ip" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableLastLoginIP(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetLastLoginIP(*s)
+func (_u *UserUpdateOne) SetNillableLastLoginIP(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetLastLoginIP(*v)
 	}
-	return uuo
+	return _u
 }
 
 // ClearLastLoginIP clears the value of the "last_login_ip" field.
-func (uuo *UserUpdateOne) ClearLastLoginIP() *UserUpdateOne {
-	uuo.mutation.ClearLastLoginIP()
-	return uuo
+func (_u *UserUpdateOne) ClearLastLoginIP() *UserUpdateOne {
+	_u.mutation.ClearLastLoginIP()
+	return _u
 }
 
 // SetLoginCount sets the "login_count" field.
-func (uuo *UserUpdateOne) SetLoginCount(i int) *UserUpdateOne {
-	uuo.mutation.ResetLoginCount()
-	uuo.mutation.SetLoginCount(i)
-	return uuo
+func (_u *UserUpdateOne) SetLoginCount(v int) *UserUpdateOne {
+	_u.mutation.ResetLoginCount()
+	_u.mutation.SetLoginCount(v)
+	return _u
 }
 
 // SetNillableLoginCount sets the "login_count" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableLoginCount(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetLoginCount(*i)
+func (_u *UserUpdateOne) SetNillableLoginCount(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetLoginCount(*v)
 	}
-	return uuo
+	return _u
 }
 
-// AddLoginCount adds i to the "login_count" field.
-func (uuo *UserUpdateOne) AddLoginCount(i int) *UserUpdateOne {
-	uuo.mutation.AddLoginCount(i)
-	return uuo
+// AddLoginCount adds value to the "login_count" field.
+func (_u *UserUpdateOne) AddLoginCount(v int) *UserUpdateOne {
+	_u.mutation.AddLoginCount(v)
+	return _u
 }
 
 // SetSettings sets the "settings" field.
-func (uuo *UserUpdateOne) SetSettings(s []string) *UserUpdateOne {
-	uuo.mutation.SetSettings(s)
-	return uuo
+func (_u *UserUpdateOne) SetSettings(v []string) *UserUpdateOne {
+	_u.mutation.SetSettings(v)
+	return _u
 }
 
-// AppendSettings appends s to the "settings" field.
-func (uuo *UserUpdateOne) AppendSettings(s []string) *UserUpdateOne {
-	uuo.mutation.AppendSettings(s)
-	return uuo
+// AppendSettings appends value to the "settings" field.
+func (_u *UserUpdateOne) AppendSettings(v []string) *UserUpdateOne {
+	_u.mutation.AppendSettings(v)
+	return _u
 }
 
 // ClearSettings clears the value of the "settings" field.
-func (uuo *UserUpdateOne) ClearSettings() *UserUpdateOne {
-	uuo.mutation.ClearSettings()
-	return uuo
+func (_u *UserUpdateOne) ClearSettings() *UserUpdateOne {
+	_u.mutation.ClearSettings()
+	return _u
 }
 
 // SetMetadata sets the "metadata" field.
-func (uuo *UserUpdateOne) SetMetadata(s []string) *UserUpdateOne {
-	uuo.mutation.SetMetadata(s)
-	return uuo
+func (_u *UserUpdateOne) SetMetadata(v []string) *UserUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
 }
 
-// AppendMetadata appends s to the "metadata" field.
-func (uuo *UserUpdateOne) AppendMetadata(s []string) *UserUpdateOne {
-	uuo.mutation.AppendMetadata(s)
-	return uuo
+// AppendMetadata appends value to the "metadata" field.
+func (_u *UserUpdateOne) AppendMetadata(v []string) *UserUpdateOne {
+	_u.mutation.AppendMetadata(v)
+	return _u
 }
 
 // ClearMetadata clears the value of the "metadata" field.
-func (uuo *UserUpdateOne) ClearMetadata() *UserUpdateOne {
-	uuo.mutation.ClearMetadata()
-	return uuo
+func (_u *UserUpdateOne) ClearMetadata() *UserUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (uuo *UserUpdateOne) SetDescription(s string) *UserUpdateOne {
-	uuo.mutation.SetDescription(s)
-	return uuo
+func (_u *UserUpdateOne) SetDescription(v string) *UserUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDescription(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetDescription(*s)
+func (_u *UserUpdateOne) SetNillableDescription(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
-	return uuo
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (uuo *UserUpdateOne) ClearDescription() *UserUpdateOne {
-	uuo.mutation.ClearDescription()
-	return uuo
+func (_u *UserUpdateOne) ClearDescription() *UserUpdateOne {
+	_u.mutation.ClearDescription()
+	return _u
+}
+
+// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
+func (_u *UserUpdateOne) AddRoleIDs(ids ...uint32) *UserUpdateOne {
+	_u.mutation.AddRoleIDs(ids...)
+	return _u
+}
+
+// AddRoles adds the "roles" edges to the Role entity.
+func (_u *UserUpdateOne) AddRoles(v ...*Role) *UserUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRoleIDs(ids...)
+}
+
+// AddPostIDs adds the "posts" edge to the Post entity by IDs.
+func (_u *UserUpdateOne) AddPostIDs(ids ...uint32) *UserUpdateOne {
+	_u.mutation.AddPostIDs(ids...)
+	return _u
+}
+
+// AddPosts adds the "posts" edges to the Post entity.
+func (_u *UserUpdateOne) AddPosts(v ...*Post) *UserUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPostIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (_u *UserUpdateOne) Mutation() *UserMutation {
+	return _u.mutation
+}
+
+// ClearRoles clears all "roles" edges to the Role entity.
+func (_u *UserUpdateOne) ClearRoles() *UserUpdateOne {
+	_u.mutation.ClearRoles()
+	return _u
+}
+
+// RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
+func (_u *UserUpdateOne) RemoveRoleIDs(ids ...uint32) *UserUpdateOne {
+	_u.mutation.RemoveRoleIDs(ids...)
+	return _u
+}
+
+// RemoveRoles removes "roles" edges to Role entities.
+func (_u *UserUpdateOne) RemoveRoles(v ...*Role) *UserUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRoleIDs(ids...)
+}
+
+// ClearPosts clears all "posts" edges to the Post entity.
+func (_u *UserUpdateOne) ClearPosts() *UserUpdateOne {
+	_u.mutation.ClearPosts()
+	return _u
+}
+
+// RemovePostIDs removes the "posts" edge to Post entities by IDs.
+func (_u *UserUpdateOne) RemovePostIDs(ids ...uint32) *UserUpdateOne {
+	_u.mutation.RemovePostIDs(ids...)
+	return _u
+}
+
+// RemovePosts removes "posts" edges to Post entities.
+func (_u *UserUpdateOne) RemovePosts(v ...*Post) *UserUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePostIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	uuo.defaults()
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1101,89 +1337,89 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (_u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uuo *UserUpdateOne) defaults() {
-	if _, ok := uuo.mutation.UpdatedAt(); !ok {
+func (_u *UserUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := user.UpdateDefaultUpdatedAt()
-		uuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.DomainID(); ok {
-		if err := user.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "User.domain_id": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Name(); ok {
-		if err := user.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Password(); ok {
-		if err := user.PasswordValidator(v); err != nil {
-			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Realname(); ok {
-		if err := user.RealnameValidator(v); err != nil {
-			return &ValidationError{Name: "realname", err: fmt.Errorf(`ent: validator failed for field "User.realname": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Nickname(); ok {
-		if err := user.NicknameValidator(v); err != nil {
-			return &ValidationError{Name: "nickname", err: fmt.Errorf(`ent: validator failed for field "User.nickname": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Email(); ok {
-		if err := user.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Phone(); ok {
-		if err := user.PhoneValidator(v); err != nil {
-			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Avatar(); ok {
-		if err := user.AvatarValidator(v); err != nil {
-			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "User.avatar": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Gender(); ok {
-		if err := user.GenderValidator(v); err != nil {
-			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Age(); ok {
-		if err := user.AgeValidator(v); err != nil {
-			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Status(); ok {
+func (_u *UserUpdateOne) check() error {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.LastLoginIP(); ok {
+	if v, ok := _u.mutation.DomainID(); ok {
+		if err := user.DomainIDValidator(v); err != nil {
+			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`ent: validator failed for field "User.domain_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Realname(); ok {
+		if err := user.RealnameValidator(v); err != nil {
+			return &ValidationError{Name: "realname", err: fmt.Errorf(`ent: validator failed for field "User.realname": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Nickname(); ok {
+		if err := user.NicknameValidator(v); err != nil {
+			return &ValidationError{Name: "nickname", err: fmt.Errorf(`ent: validator failed for field "User.nickname": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Email(); ok {
+		if err := user.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Phone(); ok {
+		if err := user.PhoneValidator(v); err != nil {
+			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Avatar(); ok {
+		if err := user.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "User.avatar": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Gender(); ok {
+		if err := user.GenderValidator(v); err != nil {
+			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Age(); ok {
+		if err := user.AgeValidator(v); err != nil {
+			return &ValidationError{Name: "age", err: fmt.Errorf(`ent: validator failed for field "User.age": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.LastLoginIP(); ok {
 		if err := user.LastLoginIPValidator(v); err != nil {
 			return &ValidationError{Name: "last_login_ip", err: fmt.Errorf(`ent: validator failed for field "User.last_login_ip": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.Description(); ok {
+	if v, ok := _u.mutation.Description(); ok {
 		if err := user.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "User.description": %w`, err)}
 		}
@@ -1192,22 +1428,22 @@ func (uuo *UserUpdateOne) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (uuo *UserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdateOne {
-	uuo.modifiers = append(uuo.modifiers, modifiers...)
-	return uuo
+func (_u *UserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
+func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32))
-	id, ok := uuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -1219,142 +1455,232 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := uuo.mutation.DomainID(); ok {
-		_spec.SetField(user.FieldDomainID, field.TypeUint32, value)
-	}
-	if value, ok := uuo.mutation.AddedDomainID(); ok {
-		_spec.AddField(user.FieldDomainID, field.TypeUint32, value)
-	}
-	if value, ok := uuo.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Realname(); ok {
-		_spec.SetField(user.FieldRealname, field.TypeString, value)
-	}
-	if uuo.mutation.RealnameCleared() {
-		_spec.ClearField(user.FieldRealname, field.TypeString)
-	}
-	if value, ok := uuo.mutation.Nickname(); ok {
-		_spec.SetField(user.FieldNickname, field.TypeString, value)
-	}
-	if uuo.mutation.NicknameCleared() {
-		_spec.ClearField(user.FieldNickname, field.TypeString)
-	}
-	if value, ok := uuo.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
-	}
-	if uuo.mutation.EmailCleared() {
-		_spec.ClearField(user.FieldEmail, field.TypeString)
-	}
-	if value, ok := uuo.mutation.Phone(); ok {
-		_spec.SetField(user.FieldPhone, field.TypeString, value)
-	}
-	if uuo.mutation.PhoneCleared() {
-		_spec.ClearField(user.FieldPhone, field.TypeString)
-	}
-	if value, ok := uuo.mutation.Avatar(); ok {
-		_spec.SetField(user.FieldAvatar, field.TypeString, value)
-	}
-	if uuo.mutation.AvatarCleared() {
-		_spec.ClearField(user.FieldAvatar, field.TypeString)
-	}
-	if value, ok := uuo.mutation.Birthday(); ok {
-		_spec.SetField(user.FieldBirthday, field.TypeTime, value)
-	}
-	if uuo.mutation.BirthdayCleared() {
-		_spec.ClearField(user.FieldBirthday, field.TypeTime)
-	}
-	if value, ok := uuo.mutation.Gender(); ok {
-		_spec.SetField(user.FieldGender, field.TypeInt32, value)
-	}
-	if value, ok := uuo.mutation.AddedGender(); ok {
-		_spec.AddField(user.FieldGender, field.TypeInt32, value)
-	}
-	if value, ok := uuo.mutation.Age(); ok {
-		_spec.SetField(user.FieldAge, field.TypeInt, value)
-	}
-	if value, ok := uuo.mutation.AddedAge(); ok {
-		_spec.AddField(user.FieldAge, field.TypeInt, value)
-	}
-	if uuo.mutation.AgeCleared() {
-		_spec.ClearField(user.FieldAge, field.TypeInt)
-	}
-	if value, ok := uuo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := uuo.mutation.AddedStatus(); ok {
+	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(user.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := uuo.mutation.LastLoginAt(); ok {
+	if value, ok := _u.mutation.DomainID(); ok {
+		_spec.SetField(user.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDomainID(); ok {
+		_spec.AddField(user.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Realname(); ok {
+		_spec.SetField(user.FieldRealname, field.TypeString, value)
+	}
+	if _u.mutation.RealnameCleared() {
+		_spec.ClearField(user.FieldRealname, field.TypeString)
+	}
+	if value, ok := _u.mutation.Nickname(); ok {
+		_spec.SetField(user.FieldNickname, field.TypeString, value)
+	}
+	if _u.mutation.NicknameCleared() {
+		_spec.ClearField(user.FieldNickname, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if _u.mutation.EmailCleared() {
+		_spec.ClearField(user.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+	}
+	if _u.mutation.PhoneCleared() {
+		_spec.ClearField(user.FieldPhone, field.TypeString)
+	}
+	if value, ok := _u.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+	}
+	if _u.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
+	if value, ok := _u.mutation.Birthday(); ok {
+		_spec.SetField(user.FieldBirthday, field.TypeTime, value)
+	}
+	if _u.mutation.BirthdayCleared() {
+		_spec.ClearField(user.FieldBirthday, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Gender(); ok {
+		_spec.SetField(user.FieldGender, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedGender(); ok {
+		_spec.AddField(user.FieldGender, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.Age(); ok {
+		_spec.SetField(user.FieldAge, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAge(); ok {
+		_spec.AddField(user.FieldAge, field.TypeInt, value)
+	}
+	if _u.mutation.AgeCleared() {
+		_spec.ClearField(user.FieldAge, field.TypeInt)
+	}
+	if value, ok := _u.mutation.LastLoginAt(); ok {
 		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)
 	}
-	if uuo.mutation.LastLoginAtCleared() {
+	if _u.mutation.LastLoginAtCleared() {
 		_spec.ClearField(user.FieldLastLoginAt, field.TypeTime)
 	}
-	if value, ok := uuo.mutation.LastLoginIP(); ok {
+	if value, ok := _u.mutation.LastLoginIP(); ok {
 		_spec.SetField(user.FieldLastLoginIP, field.TypeString, value)
 	}
-	if uuo.mutation.LastLoginIPCleared() {
+	if _u.mutation.LastLoginIPCleared() {
 		_spec.ClearField(user.FieldLastLoginIP, field.TypeString)
 	}
-	if value, ok := uuo.mutation.LoginCount(); ok {
+	if value, ok := _u.mutation.LoginCount(); ok {
 		_spec.SetField(user.FieldLoginCount, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.AddedLoginCount(); ok {
+	if value, ok := _u.mutation.AddedLoginCount(); ok {
 		_spec.AddField(user.FieldLoginCount, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.Settings(); ok {
+	if value, ok := _u.mutation.Settings(); ok {
 		_spec.SetField(user.FieldSettings, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedSettings(); ok {
+	if value, ok := _u.mutation.AppendedSettings(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldSettings, value)
 		})
 	}
-	if uuo.mutation.SettingsCleared() {
+	if _u.mutation.SettingsCleared() {
 		_spec.ClearField(user.FieldSettings, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Metadata(); ok {
+	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(user.FieldMetadata, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedMetadata(); ok {
+	if value, ok := _u.mutation.AppendedMetadata(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldMetadata, value)
 		})
 	}
-	if uuo.mutation.MetadataCleared() {
+	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(user.FieldMetadata, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(user.FieldDescription, field.TypeString, value)
 	}
-	if uuo.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(user.FieldDescription, field.TypeString)
 	}
-	_spec.AddModifiers(uuo.modifiers...)
-	_node = &User{config: uuo.config}
+	if _u.mutation.RolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRolesIDs(); len(nodes) > 0 && !_u.mutation.RolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RolesTable,
+			Columns: user.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPostsIDs(); len(nodes) > 0 && !_u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1362,6 +1688,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }
