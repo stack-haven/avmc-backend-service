@@ -20,7 +20,7 @@ type DeptRepo interface {
 	Update(context.Context, *pbCore.Dept) (*pbCore.Dept, error)
 	FindByID(context.Context, uint32) (*pbCore.Dept, error)
 	ListAll(context.Context) ([]*pbCore.Dept, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) ([]*pbCore.ListDeptResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListDeptResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -52,7 +52,7 @@ func (uc *DeptUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-func (uc *DeptUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) ([]*pbCore.ListDeptResponse, error) {
+func (uc *DeptUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListDeptResponse, error) {
 	return uc.repo.ListPage(ctx, pagination)
 }
 

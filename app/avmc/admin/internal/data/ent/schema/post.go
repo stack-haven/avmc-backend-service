@@ -26,11 +26,7 @@ func (Post) Annotations() []schema.Annotation {
 // Fields of the Post.
 func (Post) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
-			Comment("名称").
-			MaxLen(50).
-			Default("").
-			Nillable(),
+		field.String("name").Comment("名称").MaxLen(50).Default("").Nillable(),
 	}
 }
 

@@ -36,7 +36,7 @@ var (
 	_ = anypb.Any{}
 	_ = sort.Sort
 
-	_ = enum.State(0)
+	_ = enum.Status(0)
 )
 
 // Validate checks the field values on Client with the rules defined in the
@@ -62,78 +62,12 @@ func (m *Client) validate(all bool) error {
 
 	// no validation rules for Id
 
-	if m.CreatedAt != nil {
-
-		if all {
-			switch v := interface{}(m.GetCreatedAt()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ClientValidationError{
-						field:  "CreatedAt",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ClientValidationError{
-						field:  "CreatedAt",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ClientValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if m.UpdatedAt != nil {
-
-		if all {
-			switch v := interface{}(m.GetUpdatedAt()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ClientValidationError{
-						field:  "UpdatedAt",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, ClientValidationError{
-						field:  "UpdatedAt",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return ClientValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
 	if m.Name != nil {
 
-		if utf8.RuneCountInString(m.GetName()) < 1 {
+		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 20 {
 			err := ClientValidationError{
 				field:  "Name",
-				reason: "value length must be at least 1 runes",
+				reason: "value length must be between 1 and 20 runes, inclusive",
 			}
 			if !all {
 				return err
@@ -147,12 +81,31 @@ func (m *Client) validate(all bool) error {
 		// no validation rules for Sort
 	}
 
-	if m.State != nil {
-		// no validation rules for State
+	if m.Status != nil {
+
+		if _, ok := enum.Status_name[int32(m.GetStatus())]; !ok {
+			err := ClientValidationError{
+				field:  "Status",
+				reason: "value must be one of the defined enum values",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
 	}
 
 	if m.Remark != nil {
 		// no validation rules for Remark
+	}
+
+	if m.CreatedAt != nil {
+		// no validation rules for CreatedAt
+	}
+
+	if m.UpdatedAt != nil {
+		// no validation rules for UpdatedAt
 	}
 
 	if len(errors) > 0 {
@@ -254,28 +207,36 @@ func (m *CreateClientRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetName()) < 1 {
-		err := CreateClientRequestValidationError{
-			field:  "Name",
-			reason: "value length must be at least 1 runes",
+	if all {
+		switch v := interface{}(m.GetClient()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateClientRequestValidationError{
+					field:  "Client",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateClientRequestValidationError{
+					field:  "Client",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
 		}
-		if !all {
-			return err
+	} else if v, ok := interface{}(m.GetClient()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateClientRequestValidationError{
+				field:  "Client",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
 		}
-		errors = append(errors, err)
 	}
 
-	if m.Sort != nil {
-		// no validation rules for Sort
-	}
-
-	if m.State != nil {
-		// no validation rules for State
-	}
-
-	if m.Remark != nil {
-		// no validation rules for Remark
-	}
+	// no validation rules for OperatorId
 
 	if len(errors) > 0 {
 		return CreateClientRequestMultiError(errors)
@@ -379,7 +340,9 @@ func (m *CreateClientResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ClientId
+	// no validation rules for Id
+
+	// no validation rules for Name
 
 	if len(errors) > 0 {
 		return CreateClientResponseMultiError(errors)
@@ -483,16 +446,38 @@ func (m *UpdateClientRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetClientId()) < 1 {
-		err := UpdateClientRequestValidationError{
-			field:  "ClientId",
-			reason: "value length must be at least 1 runes",
+	// no validation rules for Id
+
+	if all {
+		switch v := interface{}(m.GetClient()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateClientRequestValidationError{
+					field:  "Client",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateClientRequestValidationError{
+					field:  "Client",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
 		}
-		if !all {
-			return err
+	} else if v, ok := interface{}(m.GetClient()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateClientRequestValidationError{
+				field:  "Client",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
 		}
-		errors = append(errors, err)
 	}
+
+	// no validation rules for OperatorId
 
 	if len(errors) > 0 {
 		return UpdateClientRequestMultiError(errors)
@@ -596,7 +581,7 @@ func (m *UpdateClientResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ClientId
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return UpdateClientResponseMultiError(errors)
@@ -700,16 +685,9 @@ func (m *DeleteClientRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetClientId()) < 1 {
-		err := DeleteClientRequestValidationError{
-			field:  "ClientId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Id
+
+	// no validation rules for OperatorId
 
 	if len(errors) > 0 {
 		return DeleteClientRequestMultiError(errors)
@@ -813,7 +791,7 @@ func (m *DeleteClientResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ClientId
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return DeleteClientResponseMultiError(errors)
@@ -917,16 +895,7 @@ func (m *GetClientRequest) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetClientId()) < 1 {
-		err := GetClientRequestValidationError{
-			field:  "ClientId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return GetClientRequestMultiError(errors)
@@ -1028,7 +997,34 @@ func (m *GetClientResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ClientId
+	if all {
+		switch v := interface{}(m.GetClient()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetClientResponseValidationError{
+					field:  "Client",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetClientResponseValidationError{
+					field:  "Client",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetClient()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetClientResponseValidationError{
+				field:  "Client",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return GetClientResponseMultiError(errors)
@@ -1132,7 +1128,7 @@ func (m *ListClientResponse) validate(all bool) error {
 
 	var errors []error
 
-	for idx, item := range m.GetClients() {
+	for idx, item := range m.GetItems() {
 		_, _ = idx, item
 
 		if all {
@@ -1140,7 +1136,7 @@ func (m *ListClientResponse) validate(all bool) error {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
 					errors = append(errors, ListClientResponseValidationError{
-						field:  fmt.Sprintf("Clients[%v]", idx),
+						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -1148,7 +1144,7 @@ func (m *ListClientResponse) validate(all bool) error {
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
 					errors = append(errors, ListClientResponseValidationError{
-						field:  fmt.Sprintf("Clients[%v]", idx),
+						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
 					})
@@ -1157,7 +1153,7 @@ func (m *ListClientResponse) validate(all bool) error {
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				return ListClientResponseValidationError{
-					field:  fmt.Sprintf("Clients[%v]", idx),
+					field:  fmt.Sprintf("Items[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -1166,34 +1162,7 @@ func (m *ListClientResponse) validate(all bool) error {
 
 	}
 
-	if all {
-		switch v := interface{}(m.GetPaging()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListClientResponseValidationError{
-					field:  "Paging",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListClientResponseValidationError{
-					field:  "Paging",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPaging()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ListClientResponseValidationError{
-				field:  "Paging",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for Total
 
 	if len(errors) > 0 {
 		return ListClientResponseMultiError(errors)

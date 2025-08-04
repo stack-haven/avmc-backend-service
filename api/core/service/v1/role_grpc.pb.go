@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -31,11 +30,16 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RoleServiceClient interface {
+	// 创建角色
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*CreateRoleResponse, error)
+	// 更新角色
 	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error)
+	// 删除角色
 	DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*DeleteRoleResponse, error)
-	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*Role, error)
-	ListRole(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
+	// 获取角色
+	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error)
+	// 分页查询角色
+	ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
 }
 
 type roleServiceClient struct {
@@ -76,9 +80,9 @@ func (c *roleServiceClient) DeleteRole(ctx context.Context, in *DeleteRoleReques
 	return out, nil
 }
 
-func (c *roleServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*Role, error) {
+func (c *roleServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Role)
+	out := new(GetRoleResponse)
 	err := c.cc.Invoke(ctx, RoleService_GetRole_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -86,7 +90,7 @@ func (c *roleServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opt
 	return out, nil
 }
 
-func (c *roleServiceClient) ListRole(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListRoleResponse, error) {
+func (c *roleServiceClient) ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListRoleResponse)
 	err := c.cc.Invoke(ctx, RoleService_ListRole_FullMethodName, in, out, cOpts...)
@@ -100,11 +104,16 @@ func (c *roleServiceClient) ListRole(ctx context.Context, in *pagination.PagingR
 // All implementations must embed UnimplementedRoleServiceServer
 // for forward compatibility.
 type RoleServiceServer interface {
+	// 创建角色
 	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error)
+	// 更新角色
 	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
+	// 删除角色
 	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error)
-	GetRole(context.Context, *GetRoleRequest) (*Role, error)
-	ListRole(context.Context, *pagination.PagingRequest) (*ListRoleResponse, error)
+	// 获取角色
+	GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error)
+	// 分页查询角色
+	ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error)
 	mustEmbedUnimplementedRoleServiceServer()
 }
 
@@ -124,10 +133,10 @@ func (UnimplementedRoleServiceServer) UpdateRole(context.Context, *UpdateRoleReq
 func (UnimplementedRoleServiceServer) DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRole not implemented")
 }
-func (UnimplementedRoleServiceServer) GetRole(context.Context, *GetRoleRequest) (*Role, error) {
+func (UnimplementedRoleServiceServer) GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRole not implemented")
 }
-func (UnimplementedRoleServiceServer) ListRole(context.Context, *pagination.PagingRequest) (*ListRoleResponse, error) {
+func (UnimplementedRoleServiceServer) ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
 }
 func (UnimplementedRoleServiceServer) mustEmbedUnimplementedRoleServiceServer() {}
@@ -224,7 +233,7 @@ func _RoleService_GetRole_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(ListRoleRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -236,7 +245,7 @@ func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: RoleService_ListRole_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleServiceServer).ListRole(ctx, req.(*pagination.PagingRequest))
+		return srv.(RoleServiceServer).ListRole(ctx, req.(*ListRoleRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

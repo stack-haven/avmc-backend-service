@@ -20,7 +20,7 @@ type PostRepo interface {
 	Update(context.Context, *pbCore.Post) (*pbCore.Post, error)
 	FindByID(context.Context, uint32) (*pbCore.Post, error)
 	ListAll(context.Context) ([]*pbCore.Post, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) ([]*pbCore.ListPostResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListPostResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -52,7 +52,7 @@ func (uc *PostUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-func (uc *PostUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) ([]*pbCore.ListPostResponse, error) {
+func (uc *PostUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListPostResponse, error) {
 	return uc.repo.ListPage(ctx, pagination)
 }
 

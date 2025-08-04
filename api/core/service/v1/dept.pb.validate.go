@@ -58,16 +58,27 @@ func (m *Dept) validate(all bool) error {
 
 	// no validation rules for Id
 
-	if m.CreatedAt != nil {
-		// no validation rules for CreatedAt
-	}
-
-	if m.UpdatedAt != nil {
-		// no validation rules for UpdatedAt
-	}
-
 	if m.Name != nil {
-		// no validation rules for Name
+
+		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 20 {
+			err := DeptValidationError{
+				field:  "Name",
+				reason: "value length must be between 1 and 20 runes, inclusive",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
+	if m.ParentId != nil {
+		// no validation rules for ParentId
+	}
+
+	if m.LeaderId != nil {
+		// no validation rules for LeaderId
 	}
 
 	if m.Sort != nil {
@@ -82,12 +93,12 @@ func (m *Dept) validate(all bool) error {
 		// no validation rules for Remark
 	}
 
-	if m.ParentId != nil {
-		// no validation rules for ParentId
+	if m.CreatedAt != nil {
+		// no validation rules for CreatedAt
 	}
 
-	if m.LeaderId != nil {
-		// no validation rules for LeaderId
+	if m.UpdatedAt != nil {
+		// no validation rules for UpdatedAt
 	}
 
 	if len(errors) > 0 {
@@ -971,6 +982,35 @@ func (m *GetDeptResponse) validate(all bool) error {
 
 	var errors []error
 
+	if all {
+		switch v := interface{}(m.GetDept()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetDeptResponseValidationError{
+					field:  "Dept",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetDeptResponseValidationError{
+					field:  "Dept",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDept()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetDeptResponseValidationError{
+				field:  "Dept",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return GetDeptResponseMultiError(errors)
 	}
@@ -1070,6 +1110,47 @@ func (m *ListDeptRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetPagination()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ListDeptRequestValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ListDeptRequestValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPagination()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListDeptRequestValidationError{
+				field:  "Pagination",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if m.Name != nil {
+		// no validation rules for Name
+	}
+
+	if m.State != nil {
+		// no validation rules for State
+	}
+
+	if m.ParentId != nil {
+		// no validation rules for ParentId
+	}
 
 	if len(errors) > 0 {
 		return ListDeptRequestMultiError(errors)

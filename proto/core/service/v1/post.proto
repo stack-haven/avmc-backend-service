@@ -11,54 +11,102 @@ import "validate/validate.proto";
 import "buf/validate/validate.proto";
 
 import "common/pagination/pagination.proto";
+import "common/enum/enum.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
 
 service PostService {
+  // 创建岗位
 	rpc CreatePost (CreatePostRequest) returns (CreatePostResponse);
+  // 更新岗位
 	rpc UpdatePost (UpdatePostRequest) returns (UpdatePostResponse);
+  // 删除岗位
 	rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
-	rpc GetPost (GetPostRequest) returns (Post);
-	rpc ListPost (pagination.PagingRequest) returns (ListPostResponse);
+  // 获取岗位
+	rpc GetPost (GetPostRequest) returns (GetPostResponse);
+  // 分页查询岗位
+	rpc ListPost (ListPostRequest) returns (ListPostResponse);
 }
 
-// 岗位模块
+// 岗位信息
 message Post {
-  optional string created_at = 1;
-  optional string updated_at = 2;
-  uint32 id = 3;
-  optional int32 state = 4 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
-  optional string remark = 5;
-  optional int32 sort = 6;
-  optional string name = 7;
-}
-
-message CreatePostRequest {
-  Post post = 1;
-  uint32 operator_id = 2;
-}
-message CreatePostResponse {}
-
-message UpdatePostRequest {
+  // 岗位ID
   uint32 id = 1;
-  Post post = 2;
-  uint32 operator_id = 3;
+  // 岗位名称
+  optional string name = 2 [
+    (validate.rules).string = {min_len: 1, max_len: 20}, 
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 20,
+    (gnostic.openapi.v3.property) = {description: "岗位名称"}
+  ];
+  // 岗位状态 0 未知 1 启用 2 禁用
+  optional enum.Status status = 3 [
+    (validate.rules).enum.defined_only = true,
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "岗位状态", default: {number: 1}}
+  ];
+  // 排序字段
+  optional int32 sort = 4 [
+    (buf.validate.field).int32.gte = 0,
+    (buf.validate.field).int32.lte = 100,
+    (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
+  ];
+  // 岗位描述
+  optional string remark = 5 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "岗位描述"}
+  ];
+  // 创建时间
+  optional string created_at = 6 [
+    (gnostic.openapi.v3.property) = {description: "创建时间"}
+  ];
+  // 更新时间
+  optional string updated_at = 7 [
+    (gnostic.openapi.v3.property) = {description: "更新时间"}
+  ];
 }
+
+// 创建岗位请求
+message CreatePostRequest {
+  Post post = 1 [(buf.validate.field).required = true];
+  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+}
+// 创建岗位响应
+message CreatePostResponse {
+}
+
+// 更新岗位请求
+message UpdatePostRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  Post post = 2 [(buf.validate.field).required = true];
+  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+}
+// 更新岗位响应
 message UpdatePostResponse {
 }
 
+// 删除岗位请求
 message DeletePostRequest {
-  uint32 id = 1;
-  uint32 operator_id = 2;
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
 }
-message DeletePostResponse {}
+// 删除岗位响应
+message DeletePostResponse {
+}
 
+// 获取岗位请求
 message GetPostRequest {
-  uint32 id = 1;
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
 }
-message GetPostResponse {}
+// 获取岗位响应
+message GetPostResponse {
+  Post post = 1;
+}
 
-message ListPostRequest {}
+// 分页查询岗位请求
+message ListPostRequest {
+}
+// 分页查询岗位响应
 message ListPostResponse {
   repeated Post items = 1;
   int32 total = 2;

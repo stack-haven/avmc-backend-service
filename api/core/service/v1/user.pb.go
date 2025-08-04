@@ -152,17 +152,10 @@ type User struct {
 	Realname *string                `protobuf:"bytes,5,opt,name=realname,proto3,oneof" json:"realname,omitempty"`
 	Birthday *string                `protobuf:"bytes,6,opt,name=birthday,proto3,oneof" json:"birthday,omitempty"`
 	// optional int32 gender = 7 [(validate.rules).int32.gte = 0,(gnostic.openapi.v3.property) = {description: "性别 0 未知 1 男 2 女"}];
-	Gender *enum.Gender `protobuf:"varint,7,opt,name=gender,proto3,enum=enum.Gender,oneof" json:"gender,omitempty"`
-	Phone  *string      `protobuf:"bytes,8,opt,name=phone,proto3,oneof" json:"phone,omitempty"`
-	Email  *string      `protobuf:"bytes,9,opt,name=email,proto3,oneof" json:"email,omitempty"`
-	Avatar *string      `protobuf:"bytes,10,opt,name=avatar,proto3,oneof" json:"avatar,omitempty"`
-	// optional int32 status = 11 [
-	//
-	//	(validate.rules).int32.gte = 0,
-	//	(buf.validate.field).int32.gte = 0,
-	//	(gnostic.openapi.v3.property) = {description: "状态 0 未知 1 激活 2 未激活 3 禁用"}
-	//
-	// ];
+	Gender        *enum.Gender `protobuf:"varint,7,opt,name=gender,proto3,enum=enum.Gender,oneof" json:"gender,omitempty"`
+	Phone         *string      `protobuf:"bytes,8,opt,name=phone,proto3,oneof" json:"phone,omitempty"`
+	Email         *string      `protobuf:"bytes,9,opt,name=email,proto3,oneof" json:"email,omitempty"`
+	Avatar        *string      `protobuf:"bytes,10,opt,name=avatar,proto3,oneof" json:"avatar,omitempty"`
 	Status        *enum.Status `protobuf:"varint,11,opt,name=status,proto3,enum=enum.Status,oneof" json:"status,omitempty"`
 	CreatedAt     *string      `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`
 	UpdatedAt     *string      `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`

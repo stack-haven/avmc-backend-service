@@ -31,10 +31,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeptServiceClient interface {
+	// 创建部门
 	CreateDept(ctx context.Context, in *CreateDeptRequest, opts ...grpc.CallOption) (*CreateDeptResponse, error)
+	// 更新部门
 	UpdateDept(ctx context.Context, in *UpdateDeptRequest, opts ...grpc.CallOption) (*UpdateDeptResponse, error)
+	// 删除部门
 	DeleteDept(ctx context.Context, in *DeleteDeptRequest, opts ...grpc.CallOption) (*DeleteDeptResponse, error)
-	GetDept(ctx context.Context, in *GetDeptRequest, opts ...grpc.CallOption) (*Dept, error)
+	// 获取部门
+	GetDept(ctx context.Context, in *GetDeptRequest, opts ...grpc.CallOption) (*GetDeptResponse, error)
+	// 分页查询部门
 	ListDept(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListDeptResponse, error)
 }
 
@@ -76,9 +81,9 @@ func (c *deptServiceClient) DeleteDept(ctx context.Context, in *DeleteDeptReques
 	return out, nil
 }
 
-func (c *deptServiceClient) GetDept(ctx context.Context, in *GetDeptRequest, opts ...grpc.CallOption) (*Dept, error) {
+func (c *deptServiceClient) GetDept(ctx context.Context, in *GetDeptRequest, opts ...grpc.CallOption) (*GetDeptResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Dept)
+	out := new(GetDeptResponse)
 	err := c.cc.Invoke(ctx, DeptService_GetDept_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -100,10 +105,15 @@ func (c *deptServiceClient) ListDept(ctx context.Context, in *pagination.PagingR
 // All implementations must embed UnimplementedDeptServiceServer
 // for forward compatibility.
 type DeptServiceServer interface {
+	// 创建部门
 	CreateDept(context.Context, *CreateDeptRequest) (*CreateDeptResponse, error)
+	// 更新部门
 	UpdateDept(context.Context, *UpdateDeptRequest) (*UpdateDeptResponse, error)
+	// 删除部门
 	DeleteDept(context.Context, *DeleteDeptRequest) (*DeleteDeptResponse, error)
-	GetDept(context.Context, *GetDeptRequest) (*Dept, error)
+	// 获取部门
+	GetDept(context.Context, *GetDeptRequest) (*GetDeptResponse, error)
+	// 分页查询部门
 	ListDept(context.Context, *pagination.PagingRequest) (*ListDeptResponse, error)
 	mustEmbedUnimplementedDeptServiceServer()
 }
@@ -124,7 +134,7 @@ func (UnimplementedDeptServiceServer) UpdateDept(context.Context, *UpdateDeptReq
 func (UnimplementedDeptServiceServer) DeleteDept(context.Context, *DeleteDeptRequest) (*DeleteDeptResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDept not implemented")
 }
-func (UnimplementedDeptServiceServer) GetDept(context.Context, *GetDeptRequest) (*Dept, error) {
+func (UnimplementedDeptServiceServer) GetDept(context.Context, *GetDeptRequest) (*GetDeptResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDept not implemented")
 }
 func (UnimplementedDeptServiceServer) ListDept(context.Context, *pagination.PagingRequest) (*ListDeptResponse, error) {

@@ -27,20 +27,9 @@ func (Dept) Annotations() []schema.Annotation {
 // Fields of the Dept.
 func (Dept) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
-			Comment("名称").
-			MaxLen(128).
-			// Optional().
-			Nillable(),
-		field.Uint32("parent_id").
-			Comment("父级ID").
-			Default(0).
-			Optional().
-			Nillable(),
-		field.Ints("ancestors").
-			Comment("祖级列表").
-			Default([]int{}).
-			Optional(),
+		field.String("name").Comment("名称").MaxLen(128).Nillable(),
+		field.Uint32("parent_id").Comment("父级ID").Default(0).Optional().Nillable(),
+		field.Ints("ancestors").Comment("祖级列表").Default([]int{}).Optional(),
 	}
 }
 

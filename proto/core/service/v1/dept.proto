@@ -8,58 +8,108 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "validate/validate.proto";
+import "buf/validate/validate.proto";
 import "common/pagination/pagination.proto";
 import "common/enum/enum.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
 
 service DeptService {
+  // 创建部门
 	rpc CreateDept (CreateDeptRequest) returns (CreateDeptResponse);
+  // 更新部门
 	rpc UpdateDept (UpdateDeptRequest) returns (UpdateDeptResponse);
+  // 删除部门
 	rpc DeleteDept (DeleteDeptRequest) returns (DeleteDeptResponse);
-	rpc GetDept (GetDeptRequest) returns (Dept);
+  // 获取部门
+	rpc GetDept (GetDeptRequest) returns (GetDeptResponse);
+  // 分页查询部门
 	rpc ListDept (pagination.PagingRequest) returns (ListDeptResponse);
 }
 
-// 部门模块
+// 部门信息
 message Dept {
-  optional string created_at = 1;
-  optional string updated_at = 2;
-  uint32 id = 3;
-  optional string name = 4;
-  optional int32 sort = 5;
-  optional int32 state = 6 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用"}];
-  optional string remark = 7;
-  optional uint32 parent_id = 8;
-  optional uint32 leader_id = 9;
-}
-
-message CreateDeptRequest {
-  Dept dept = 1;
-  uint32 operator_id = 2;
-}
-message CreateDeptResponse {}
-
-message UpdateDeptRequest {
+  // 部门ID
   uint32 id = 1;
-  Dept dept = 2;
-  uint32 operator_id = 3;
+  // 部门名称
+  optional string name = 2 [
+    (validate.rules).string = {min_len: 1, max_len: 20}, 
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 20,
+    (gnostic.openapi.v3.property) = {description: "部门名称"}
+  ];
+  // 父部门ID
+  optional uint32 parent_id = 3;
+  // 部门领导ID
+  optional uint32 leader_id = 4;
+  // 排序字段
+  optional int32 sort = 5 [
+    (buf.validate.field).int32.gte = 0,
+    (buf.validate.field).int32.lte = 100,
+    (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
+  ];
+  // 部门状态 1 激活 2 未激活 3 禁用
+  optional int32 state = 6 [(gnostic.openapi.v3.property) = {description: "部门状态 1 激活 2 未激活 3 禁用"}];
+  // 部门描述
+  optional string remark = 7 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "部门描述"}
+  ];
+  // 创建时间
+  optional string created_at = 8 [
+    (gnostic.openapi.v3.property) = {description: "创建时间"}
+  ];
+  // 更新时间
+  optional string updated_at = 9 [
+    (gnostic.openapi.v3.property) = {description: "更新时间"}
+  ];
 }
+
+// 创建部门请求
+message CreateDeptRequest {
+  Dept dept = 1 [(buf.validate.field).required = true];
+  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+}
+// 创建部门响应
+message CreateDeptResponse {
+}
+
+// 更新部门请求
+message UpdateDeptRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  Dept dept = 2 [(buf.validate.field).required = true];
+  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+}
+// 更新部门响应
 message UpdateDeptResponse {
 }
 
+// 删除部门请求
 message DeleteDeptRequest {
-  uint32 id = 1;
-  uint32 operator_id = 2;
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
 }
-message DeleteDeptResponse {}
+// 删除部门响应
+message DeleteDeptResponse {
+}
 
+// 获取部门请求
 message GetDeptRequest {
-  uint32 id = 1;
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
 }
-message GetDeptResponse {}
+// 获取部门响应
+message GetDeptResponse {
+  Dept dept = 1;
+}
 
-message ListDeptRequest {}
+// 分页查询部门请求
+message ListDeptRequest {
+  pagination.PagingRequest pagination = 1 [(buf.validate.field).required = true];
+  optional string name = 2 [(buf.validate.field).string.max_len = 20];
+  optional int32 state = 3;
+  optional uint32 parent_id = 4;
+}
+// 分页查询部门响应
 message ListDeptResponse {
   repeated Dept items = 1;
   int32 total = 2;

@@ -39,7 +39,7 @@ func (User) Fields() []ent.Field {
 		field.String("phone").Optional().Unique().MaxLen(20).Nillable().Comment("手机号码，唯一"),
 		field.String("avatar").Optional().MaxLen(255).Nillable().Comment("头像URL"),
 		field.Time("birthday").Optional().SchemaType(map[string]string{dialect.MySQL: "date"}).Nillable().Comment("生日"),
-		field.Int32("gender").Max(5).Min(0).Default(0).SchemaType(map[string]string{dialect.MySQL: "tinyint"}).Nillable().Comment("性别：0=未知 1=男 2=女"),
+		field.Int32("gender").Max(5).Min(0).Default(0).SchemaType(map[string]string{dialect.MySQL: "tinyint", dialect.Postgres: "tinyint(2)"}).Nillable().Comment("性别：0=未知 1=男 2=女"),
 		field.Int("age").Optional().Min(0).Max(150).Nillable().Comment("年龄"),
 		field.Time("last_login_at").Optional().Nillable().Nillable().Comment("最后登录时间"),
 		field.String("last_login_ip").Optional().MaxLen(50).Nillable().Comment("最后登录IP"),

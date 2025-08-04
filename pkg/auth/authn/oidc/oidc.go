@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -15,20 +14,10 @@ import (
 	"backend-service/pkg/auth/authn"
 )
 
-var _ authn.Authenticator = (*OIDCAuthenticator)(nil)
-
-// OIDCAuthenticator 实现基于OpenID Connect的认证器
-type OIDCAuthenticator struct {
-	options      *authn.Options
-	provider     *oidc.Provider
-	verifier     *oidc.IDTokenVerifier
-	oauth2Config *oauth2.Config
-}
+var _ authn.AuthProvider = (*OIDCProvider)(nil)
 
 // OIDCProvider 实现OpenID Connect认证提供者
-type OIDCProvider struct {
-	options *authn.Options
-}
+type OIDCProvider struct{}
 
 // OIDCOptions 定义OIDC特定的选项
 type OIDCOptions struct {
@@ -44,32 +33,84 @@ type OIDCOptions struct {
 	Scopes []string
 }
 
-// NewOIDCProvider 创建新的OIDC认证提供者
-func NewOIDCProvider(options *authn.Options) *OIDCProvider {
-	return &OIDCProvider{options: options}
+// NewProvider 创建新的OIDC认证提供者
+func NewProvider() authn.AuthProvider {
+	return &OIDCProvider{}
 }
 
-// CreateAuthenticator 创建OIDC认证器
-func (p *OIDCProvider) CreateAuthenticator() (authn.Authenticator, error) {
+// Name 返回提供者名称
+func (p *OIDCProvider) Name() string {
+	return "oidc"
+}
+
+// NewAuthenticator 创建新的认证器实例
+func (p *OIDCProvider) NewAuthenticator(ctx context.Context, opts ...authn.Option) (authn.Authenticator, error) {
+	// 创建OIDC认证器
+	auth := new(OIDCAuthenticator)
+	// 使用默认选项
+	auth.options = authn.DefaultOptions()
+	// 应用选项
+	for _, opt := range opts {
+		opt(&auth.options)
+	}
+	// 初始化认证器
+	if err := auth.Init(ctx, opts...); err != nil {
+		return nil, authn.NewAuthError(authn.ErrCodeInvalidConfiguration, fmt.Sprintf("failed to initialize authenticator: %v", err), err)
+	}
+	return auth, nil
+}
+
+var _ authn.Authenticator = (*OIDCAuthenticator)(nil)
+
+// OIDCAuthenticator 实现基于OpenID Connect的认证器
+type OIDCAuthenticator struct {
+	// options 配置选项
+	options      authn.Options
+	provider     *oidc.Provider
+	verifier     *oidc.IDTokenVerifier
+	oauth2Config *oauth2.Config
+	// parseTokenFunc 解析令牌函数
+	parseTokenFunc authn.ParseContextTokenFunc
+}
+
+// Init 初始化认证器
+func (a *OIDCAuthenticator) Init(ctx context.Context, _ ...authn.Option) error {
+	// 注意：选项已在NewAuthenticator中应用，此处不再处理
+
 	// 获取OIDC特定选项
-	oidcOpts, ok := p.options.ProviderOptions.(*OIDCOptions)
-	if !ok || oidcOpts == nil {
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidOptions, "invalid or missing OIDC options")
+	providerOptions := a.options.ProviderOptions
+
+	// 解析OIDC选项
+	oidcOpts := &OIDCOptions{}
+	if providerURL, ok := providerOptions["provider_url"].(string); ok {
+		oidcOpts.ProviderURL = providerURL
+	}
+	if clientID, ok := providerOptions["client_id"].(string); ok {
+		oidcOpts.ClientID = clientID
+	}
+	if clientSecret, ok := providerOptions["client_secret"].(string); ok {
+		oidcOpts.ClientSecret = clientSecret
+	}
+	if redirectURL, ok := providerOptions["redirect_url"].(string); ok {
+		oidcOpts.RedirectURL = redirectURL
+	}
+	if scopes, ok := providerOptions["scopes"].([]string); ok {
+		oidcOpts.Scopes = scopes
 	}
 
 	// 验证必要的选项
 	if oidcOpts.ProviderURL == "" {
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidOptions, "missing OIDC provider URL")
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, "missing OIDC provider URL", nil)
 	}
 	if oidcOpts.ClientID == "" {
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidOptions, "missing OIDC client ID")
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, "missing OIDC client ID", nil)
 	}
 
 	// 创建OIDC提供者
-	ctx := context.Background()
-	provider, err := oidc.NewProvider(ctx, oidcOpts.ProviderURL)
+	discoveryCtx := oidc.InsecureIssuerURLContext(ctx, oidcOpts.ProviderURL)
+	provider, err := oidc.NewProvider(discoveryCtx, oidcOpts.ProviderURL)
 	if err != nil {
-		return nil, authn.NewAuthError(authn.ErrCodeInitializationFailed, fmt.Sprintf("failed to initialize OIDC provider: %v", err))
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, fmt.Sprintf("failed to initialize OIDC provider: %v", err), err)
 	}
 
 	// 创建ID令牌验证器
@@ -91,32 +132,43 @@ func (p *OIDCProvider) CreateAuthenticator() (authn.Authenticator, error) {
 		Scopes:       scopes,
 	}
 
-	// 创建认证器
-	authenticator := &OIDCAuthenticator{
-		options:      p.options,
-		provider:     provider,
-		verifier:     verifier,
-		oauth2Config: oauth2Config,
-	}
+	// 设置令牌解析函数
+	a.parseTokenFunc = authn.ParseContextToken(authn.HeaderAuthorize, a.options.TokenHeadName)
 
-	return authenticator, nil
+	// 保存初始化结果
+	a.provider = provider
+	a.verifier = verifier
+	a.oauth2Config = oauth2Config
+
+	return nil
 }
 
-// Name 返回提供者名称
-func (p *OIDCProvider) Name() string {
+// Name 返回认证器名称
+func (a *OIDCAuthenticator) Name() string {
 	return "oidc"
 }
 
-// Authenticate 从上下文中提取并验证令牌
+// Options 返回认证器选项
+func (a *OIDCAuthenticator) Options() authn.Options {
+	return a.options
+}
+
+// Close 关闭认证器，释放资源
+func (a *OIDCAuthenticator) Close() error {
+	// 无需特殊清理
+	return nil
+}
+
+// Authenticate 验证用户身份并返回认证声明
 func (a *OIDCAuthenticator) Authenticate(ctx context.Context) (*authn.AuthClaims, error) {
-	// 从上下文中提取令牌
-	token, err := authn.TokenFromContext(ctx)
+	// 从上下文中解析令牌
+	tokenString, err := a.parseTokenFunc(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// 验证令牌
-	return a.ValidateToken(ctx, token)
+	return a.ValidateToken(ctx, tokenString)
 }
 
 // ValidateToken 验证ID令牌并返回声明
@@ -125,47 +177,74 @@ func (a *OIDCAuthenticator) ValidateToken(ctx context.Context, tokenString strin
 	idToken, err := a.verifier.Verify(ctx, tokenString)
 	if err != nil {
 		if strings.Contains(err.Error(), "token is expired") {
-			return nil, authn.NewAuthError(authn.ErrCodeExpiredToken, "token has expired")
+			return nil, authn.NewAuthError(authn.ErrCodeExpiredToken, "token has expired", err)
 		}
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, fmt.Sprintf("invalid token: %v", err))
+		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, fmt.Sprintf("invalid token: %v", err), err)
 	}
 
 	// 解析声明
 	var claims map[string]interface{}
 	if err := idToken.Claims(&claims); err != nil {
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidClaims, fmt.Sprintf("failed to parse claims: %v", err))
+		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, fmt.Sprintf("failed to parse claims: %v", err), err)
+	}
+
+	// 验证签发者
+	if a.options.Issuer != "" {
+		if idToken.Issuer != a.options.Issuer {
+			return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid issuer", nil)
+		}
+	}
+
+	// 验证接收者
+	if len(a.options.Audience) > 0 {
+		audOk := false
+		for _, aud := range a.options.Audience {
+			for _, tokenAud := range idToken.Audience {
+				if aud == tokenAud {
+					audOk = true
+					break
+				}
+			}
+			if audOk {
+				break
+			}
+		}
+
+		if !audOk {
+			return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid audience", nil)
+		}
 	}
 
 	// 创建认证声明
-	authClaims := &authn.StandardClaims{
-		Subject:   idToken.Subject,
-		Issuer:    idToken.Issuer,
-		Audience:  idToken.Audience,
-		IssuedAt:  time.Unix(idToken.IssuedAt, 0),
-		ExpiresAt: time.Unix(idToken.Expiry.Unix(), 0),
-		Claims:    claims,
+	authClaims := make(authn.AuthClaims)
+	authClaims["sub"] = idToken.Subject
+	authClaims["iss"] = idToken.Issuer
+	authClaims["aud"] = idToken.Audience
+	authClaims["iat"] = idToken.IssuedAt
+	authClaims["exp"] = idToken.Expiry.Unix()
+
+	// 添加其他声明
+	for k, v := range claims {
+		authClaims[k] = v
 	}
 
-	return authClaims, nil
+	return &authClaims, nil
 }
 
 // CreateToken 创建新的访问令牌（不适用于OIDC，需要重定向到提供者）
-func (a *OIDCAuthenticator) CreateToken(ctx context.Context, subject string, customClaims map[string]interface{}) (string, error) {
-	return "", authn.NewAuthError(authn.ErrCodeUnsupportedOperation, "direct token creation not supported by OIDC, use authorization code flow instead")
+func (a *OIDCAuthenticator) CreateToken(ctx context.Context, claims authn.AuthClaims) (string, error) {
+	return "", authn.NewAuthError(authn.ErrCodeUnsupportedTokenType, "direct token creation not supported by OIDC, use authorization code flow instead", nil)
 }
 
 // RefreshToken 刷新访问令牌
 func (a *OIDCAuthenticator) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
-	// 使用刷新令牌获取新的访问令牌
-	token := &oauth2.Token{
+	tokenSource := a.oauth2Config.TokenSource(ctx, &oauth2.Token{
 		RefreshToken: refreshToken,
-	}
+	})
 
-	// 刷新令牌
-	source := a.oauth2Config.TokenSource(ctx, token)
-	newToken, err := source.Token()
+	newToken, err := tokenSource.Token()
 	if err != nil {
-		return "", authn.NewAuthError(authn.ErrCodeRefreshFailed, fmt.Sprintf("failed to refresh token: %v", err))
+		return "", authn.NewAuthError(authn.ErrCodeExpiredToken, fmt.Sprintf("failed to refresh token: %v", err), err)
 	}
 
 	return newToken.AccessToken, nil
@@ -173,10 +252,24 @@ func (a *OIDCAuthenticator) RefreshToken(ctx context.Context, refreshToken strin
 
 // RevokeToken 撤销令牌（如果OIDC提供者支持）
 func (a *OIDCAuthenticator) RevokeToken(ctx context.Context, token string) error {
+	// 检查是否启用了撤销功能
+	if !a.options.EnableRevocation {
+		return authn.NewAuthError(
+			authn.ErrCodeInvalidConfiguration,
+			"token revocation is not enabled",
+			nil,
+		)
+	}
+
 	// 获取OIDC特定选项
-	oidcOpts, ok := a.options.ProviderOptions.(*OIDCOptions)
-	if !ok || oidcOpts == nil {
-		return authn.NewAuthError(authn.ErrCodeInvalidOptions, "invalid or missing OIDC options")
+	providerOptions := a.options.ProviderOptions
+	oidcOpts := &OIDCOptions{}
+	if clientSecret, ok := providerOptions["client_secret"].(string); ok {
+		oidcOpts.ClientSecret = clientSecret
+	}
+
+	if clientID, ok := providerOptions["client_id"].(string); ok {
+		oidcOpts.ClientID = clientID
 	}
 
 	// 尝试从提供者元数据中获取撤销端点
@@ -192,14 +285,14 @@ func (a *OIDCAuthenticator) RevokeToken(ctx context.Context, token string) error
 
 	// 如果没有撤销端点，返回错误
 	if revocationEndpoint == "" {
-		return authn.NewAuthError(authn.ErrCodeUnsupportedOperation, "token revocation not supported by this OIDC provider")
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, "token revocation not supported by this OIDC provider", nil)
 	}
 
 	// 构建撤销请求
 	data := fmt.Sprintf("token=%s&client_id=%s&client_secret=%s", token, oidcOpts.ClientID, oidcOpts.ClientSecret)
 	req, err := http.NewRequestWithContext(ctx, "POST", revocationEndpoint, strings.NewReader(data))
 	if err != nil {
-		return authn.NewAuthError(authn.ErrCodeRevocationFailed, fmt.Sprintf("failed to create revocation request: %v", err))
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, fmt.Sprintf("failed to create revocation request: %v", err), err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -208,14 +301,14 @@ func (a *OIDCAuthenticator) RevokeToken(ctx context.Context, token string) error
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return authn.NewAuthError(authn.ErrCodeRevocationFailed, fmt.Sprintf("failed to send revocation request: %v", err))
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, fmt.Sprintf("failed to send revocation request: %v", err), err)
 	}
 	defer resp.Body.Close()
 
 	// 检查响应状态
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return authn.NewAuthError(authn.ErrCodeRevocationFailed, fmt.Sprintf("token revocation failed: %s - %s", resp.Status, string(body)))
+		return authn.NewAuthError(authn.ErrCodeInvalidConfiguration, fmt.Sprintf("token revocation failed: %s - %s", resp.Status, string(body)), nil)
 	}
 
 	return nil
@@ -226,23 +319,17 @@ func (a *OIDCAuthenticator) ParseUserFromContext(ctx context.Context) (authn.Sec
 	// 从上下文中获取认证声明
 	claims, ok := authn.AuthClaimsFromContext(ctx)
 	if !ok || claims == nil {
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid or missing auth claims")
-	}
-
-	// 获取声明数据
-	claimsData, ok := claims.GetClaims()
-	if !ok {
-		return nil, authn.NewAuthError(authn.ErrCodeInvalidClaims, "invalid or missing claims data")
+		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid or missing auth claims", nil)
 	}
 
 	// 创建用户信息
 	user := &OIDCUser{
 		id:       claims.GetSubject(),
-		username: getStringClaim(claimsData, "preferred_username", claims.GetSubject()),
-		email:    getStringClaim(claimsData, "email", ""),
-		name:     getStringClaim(claimsData, "name", ""),
-		roles:    getStringArrayClaim(claimsData, "roles"),
-		claims:   claimsData,
+		username: getStringClaim(*claims, "preferred_username", claims.GetSubject()),
+		email:    getStringClaim(*claims, "email", ""),
+		name:     getStringClaim(*claims, "name", ""),
+		roles:    getStringArrayClaim(*claims, "roles"),
+		claims:   *claims,
 	}
 
 	return user, nil
@@ -277,7 +364,7 @@ func (a *OIDCAuthenticator) ExchangeCodeForToken(ctx context.Context, code strin
 	// 使用授权码交换令牌
 	token, err := a.oauth2Config.Exchange(ctx, code)
 	if err != nil {
-		return "", "", authn.NewAuthError(authn.ErrCodeExchangeFailed, fmt.Sprintf("failed to exchange code for token: %v", err))
+		return "", "", authn.NewAuthError(authn.ErrCodeInvalidConfiguration, fmt.Sprintf("failed to exchange code for token: %v", err), nil)
 	}
 
 	// 返回访问令牌和刷新令牌
@@ -291,12 +378,46 @@ type OIDCUser struct {
 	email    string
 	name     string
 	roles    []string
-	claims   map[string]interface{}
+	claims   authn.AuthClaims
+}
+
+// GetAction 获取用户动作
+func (u *OIDCUser) GetAction() string {
+	return ""
 }
 
 // GetID 获取用户ID
 func (u *OIDCUser) GetID() string {
 	return u.id
+}
+
+// GetSubject 获取主体标识（通常是用户ID）
+func (u *OIDCUser) GetSubject() string {
+	return u.id
+}
+
+// Name 获取Security Name
+func (u *OIDCUser) Name() string {
+	return "oidc_user"
+}
+
+// ParseFromContext 从上下文中解析用户信息
+func (u *OIDCUser) ParseFromContext(ctx context.Context) error {
+	// 从上下文中获取认证声明
+	claims, ok := authn.AuthClaimsFromContext(ctx)
+	if !ok || claims == nil {
+		return authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid or missing auth claims", nil)
+	}
+
+	// 更新用户信息
+	u.id = claims.GetSubject()
+	u.username = getStringClaim(*claims, "preferred_username", u.id)
+	u.email = getStringClaim(*claims, "email", "")
+	u.name = getStringClaim(*claims, "name", "")
+	u.roles = getStringArrayClaim(*claims, "roles")
+	u.claims = *claims
+
+	return nil
 }
 
 // GetUsername 获取用户名
@@ -307,6 +428,18 @@ func (u *OIDCUser) GetUsername() string {
 // GetEmail 获取用户邮箱
 func (u *OIDCUser) GetEmail() string {
 	return u.email
+}
+
+// GetDomain 获取用户域
+func (u *OIDCUser) GetDomain() string {
+	// 从claims中获取domain，如果不存在则返回空字符串
+	return getStringClaim(u.claims, "domain", "")
+}
+
+// GetObject 获取对象标识
+func (u *OIDCUser) GetObject() string {
+	// 从claims中获取object，如果不存在则返回空字符串
+	return getStringClaim(u.claims, "object", "")
 }
 
 // GetName 获取用户姓名
@@ -349,7 +482,10 @@ func (u *OIDCUser) IsCredentialsNonExpired() bool {
 }
 
 // 辅助函数：从声明中获取字符串值
-func getStringClaim(claims map[string]interface{}, key string, defaultValue string) string {
+func getStringClaim(claims authn.AuthClaims, key string, defaultValue string) string {
+	if claims == nil {
+		return defaultValue
+	}
 	if value, ok := claims[key].(string); ok {
 		return value
 	}
@@ -357,7 +493,10 @@ func getStringClaim(claims map[string]interface{}, key string, defaultValue stri
 }
 
 // 辅助函数：从声明中获取字符串数组
-func getStringArrayClaim(claims map[string]interface{}, key string) []string {
+func getStringArrayClaim(claims authn.AuthClaims, key string) []string {
+	if claims == nil {
+		return []string{}
+	}
 	var result []string
 
 	value, ok := claims[key]

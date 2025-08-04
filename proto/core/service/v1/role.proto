@@ -8,59 +8,117 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "validate/validate.proto";
+import "buf/validate/validate.proto";
 import "common/pagination/pagination.proto";
+import "common/enum/enum.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
 
 service RoleService {
+  // 创建角色
 	rpc CreateRole (CreateRoleRequest) returns (CreateRoleResponse);
+  // 更新角色
 	rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleResponse);
+  // 删除角色
 	rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleResponse);
-	rpc GetRole (GetRoleRequest) returns (Role);
-	rpc ListRole (pagination.PagingRequest) returns (ListRoleResponse);
+  // 获取角色
+	rpc GetRole (GetRoleRequest) returns (GetRoleResponse);
+  // 分页查询角色
+	rpc ListRole (ListRoleRequest) returns (ListRoleResponse);
 }
 
-// 角色模块
+// 角色信息
 message Role {
-  optional string created_at = 1;
-  optional string updated_at = 2;
-  uint32 id = 3;
-  optional int32 state = 4 [(gnostic.openapi.v3.property) = {description: "状态 1 激活 2 未激活 3 禁用", default: {number: 1}}];
-  optional int32 sort = 5;
-  optional string remark = 6;
-  optional string name = 7;
-  optional string default_router = 8;
-	optional int32 menu_check_strictly = 9 [(gnostic.openapi.v3.property) = {description: "菜单树选择项是否关联显示", default: {number: 1}}]; 
-	optional int32 dept_check_strictly = 10 [(gnostic.openapi.v3.property) = {description: "部门树选择项是否关联显示", default: {number: 1}}]; 
-	optional int32 data_scope = 11;         
-}
-
-message CreateRoleRequest {
-  Role role = 1;
-  uint32 operator_id = 2;
-}
-message CreateRoleResponse {}
-
-message UpdateRoleRequest {
+  // 角色ID
   uint32 id = 1;
-  Role role = 2;
-  uint32 operator_id = 3;
+  // 角色名称
+  optional string name = 2 [
+    (validate.rules).string = {min_len: 1, max_len: 20}, 
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 20,
+    (gnostic.openapi.v3.property) = {description: "角色名称"}
+  ];
+  // 角色状态 0 未知 1 启用 2 禁用
+  optional enum.Status status = 3 [
+    (validate.rules).enum.defined_only = true,
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "角色状态", default: {number: 1}}
+  ];
+  // 排序字段
+  optional int32 sort = 4 [
+    (buf.validate.field).int32.gte = 0,
+    (buf.validate.field).int32.lte = 100,
+    (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
+  ];
+  // 角色描述
+  optional string remark = 5 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "角色描述"}
+  ];
+  // 默认路由
+  optional string default_router = 6 [
+    (gnostic.openapi.v3.property) = {description: "默认路由"}
+  ];
+  // 菜单树选择项是否关联显示
+  optional int32 menu_check_strictly = 7 [(gnostic.openapi.v3.property) = {description: "菜单树选择项是否关联显示", default: {number: 1}}]; 
+  // 部门树选择项是否关联显示
+  optional int32 dept_check_strictly = 8 [(gnostic.openapi.v3.property) = {description: "部门树选择项是否关联显示", default: {number: 1}}]; 
+  // 数据范围
+  optional int32 data_scope = 9;  
+  // 创建时间
+  optional string created_at = 10 [
+    (gnostic.openapi.v3.property) = {description: "创建时间"}
+  ];
+  // 更新时间
+  optional string updated_at = 11 [
+    (gnostic.openapi.v3.property) = {description: "更新时间"}
+  ];
 }
+
+// 创建角色请求
+message CreateRoleRequest {
+  Role role = 1 [(buf.validate.field).required = true];
+  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+}
+// 创建角色响应
+message CreateRoleResponse {
+}
+
+// 更新角色请求
+message UpdateRoleRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  Role role = 2 [(buf.validate.field).required = true];
+  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+}
+// 更新角色响应
 message UpdateRoleResponse {
 }
 
+// 删除角色请求
 message DeleteRoleRequest {
-  uint32 id = 1;
-  uint32 operator_id = 2;
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
 }
-message DeleteRoleResponse {}
+// 删除角色响应
+message DeleteRoleResponse {
+}
 
+// 获取角色请求
 message GetRoleRequest {
-  uint32 id = 1;
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
 }
-message GetRoleResponse {}
+// 获取角色响应
+message GetRoleResponse {
+  Role role = 1;
+}
 
-message ListRoleRequest {}
+// 分页查询角色请求
+message ListRoleRequest {
+  pagination.PagingRequest pagination = 1 [(buf.validate.field).required = true];
+  optional string name = 2 [(buf.validate.field).string.max_len = 20];
+  optional enum.Status status = 3 [(buf.validate.field).enum.defined_only = true];
+}
+// 分页查询角色响应
 message ListRoleResponse {
   repeated Role items = 1;
   int32 total = 2;

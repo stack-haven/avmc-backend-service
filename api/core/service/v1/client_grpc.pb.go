@@ -31,10 +31,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ClientServiceClient interface {
+	// 创建客户端
 	CreateClient(ctx context.Context, in *CreateClientRequest, opts ...grpc.CallOption) (*CreateClientResponse, error)
+	// 更新客户端
 	UpdateClient(ctx context.Context, in *UpdateClientRequest, opts ...grpc.CallOption) (*UpdateClientResponse, error)
+	// 删除客户端
 	DeleteClient(ctx context.Context, in *DeleteClientRequest, opts ...grpc.CallOption) (*DeleteClientResponse, error)
+	// 获取客户端
 	GetClient(ctx context.Context, in *GetClientRequest, opts ...grpc.CallOption) (*GetClientResponse, error)
+	// 分页查询客户端
 	ListClient(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListClientResponse, error)
 }
 
@@ -100,10 +105,15 @@ func (c *clientServiceClient) ListClient(ctx context.Context, in *pagination.Pag
 // All implementations must embed UnimplementedClientServiceServer
 // for forward compatibility.
 type ClientServiceServer interface {
+	// 创建客户端
 	CreateClient(context.Context, *CreateClientRequest) (*CreateClientResponse, error)
+	// 更新客户端
 	UpdateClient(context.Context, *UpdateClientRequest) (*UpdateClientResponse, error)
+	// 删除客户端
 	DeleteClient(context.Context, *DeleteClientRequest) (*DeleteClientResponse, error)
+	// 获取客户端
 	GetClient(context.Context, *GetClientRequest) (*GetClientResponse, error)
+	// 分页查询客户端
 	ListClient(context.Context, *pagination.PagingRequest) (*ListClientResponse, error)
 	mustEmbedUnimplementedClientServiceServer()
 }

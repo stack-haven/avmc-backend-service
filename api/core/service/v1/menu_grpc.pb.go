@@ -31,10 +31,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MenuServiceClient interface {
+	// 创建菜单
 	CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*CreateMenuResponse, error)
+	// 更新菜单
 	UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*UpdateMenuResponse, error)
+	// 删除菜单
 	DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*DeleteMenuResponse, error)
-	GetMenu(ctx context.Context, in *GetMenuRequest, opts ...grpc.CallOption) (*Menu, error)
+	// 获取菜单
+	GetMenu(ctx context.Context, in *GetMenuRequest, opts ...grpc.CallOption) (*GetMenuResponse, error)
+	// 分页查询菜单
 	ListMenu(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListMenuResponse, error)
 }
 
@@ -76,9 +81,9 @@ func (c *menuServiceClient) DeleteMenu(ctx context.Context, in *DeleteMenuReques
 	return out, nil
 }
 
-func (c *menuServiceClient) GetMenu(ctx context.Context, in *GetMenuRequest, opts ...grpc.CallOption) (*Menu, error) {
+func (c *menuServiceClient) GetMenu(ctx context.Context, in *GetMenuRequest, opts ...grpc.CallOption) (*GetMenuResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Menu)
+	out := new(GetMenuResponse)
 	err := c.cc.Invoke(ctx, MenuService_GetMenu_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -100,10 +105,15 @@ func (c *menuServiceClient) ListMenu(ctx context.Context, in *pagination.PagingR
 // All implementations must embed UnimplementedMenuServiceServer
 // for forward compatibility.
 type MenuServiceServer interface {
+	// 创建菜单
 	CreateMenu(context.Context, *CreateMenuRequest) (*CreateMenuResponse, error)
+	// 更新菜单
 	UpdateMenu(context.Context, *UpdateMenuRequest) (*UpdateMenuResponse, error)
+	// 删除菜单
 	DeleteMenu(context.Context, *DeleteMenuRequest) (*DeleteMenuResponse, error)
-	GetMenu(context.Context, *GetMenuRequest) (*Menu, error)
+	// 获取菜单
+	GetMenu(context.Context, *GetMenuRequest) (*GetMenuResponse, error)
+	// 分页查询菜单
 	ListMenu(context.Context, *pagination.PagingRequest) (*ListMenuResponse, error)
 	mustEmbedUnimplementedMenuServiceServer()
 }
@@ -124,7 +134,7 @@ func (UnimplementedMenuServiceServer) UpdateMenu(context.Context, *UpdateMenuReq
 func (UnimplementedMenuServiceServer) DeleteMenu(context.Context, *DeleteMenuRequest) (*DeleteMenuResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMenu not implemented")
 }
-func (UnimplementedMenuServiceServer) GetMenu(context.Context, *GetMenuRequest) (*Menu, error) {
+func (UnimplementedMenuServiceServer) GetMenu(context.Context, *GetMenuRequest) (*GetMenuResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMenu not implemented")
 }
 func (UnimplementedMenuServiceServer) ListMenu(context.Context, *pagination.PagingRequest) (*ListMenuResponse, error) {

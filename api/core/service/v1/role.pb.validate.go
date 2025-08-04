@@ -17,6 +17,8 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/protobuf/types/known/anypb"
+
+	enum "backend-service/api/common/enum"
 )
 
 // ensure the imports are used
@@ -33,6 +35,8 @@ var (
 	_ = (*mail.Address)(nil)
 	_ = anypb.Any{}
 	_ = sort.Sort
+
+	_ = enum.Status(0)
 )
 
 // Validate checks the field values on Role with the rules defined in the proto
@@ -58,16 +62,34 @@ func (m *Role) validate(all bool) error {
 
 	// no validation rules for Id
 
-	if m.CreatedAt != nil {
-		// no validation rules for CreatedAt
+	if m.Name != nil {
+
+		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 20 {
+			err := RoleValidationError{
+				field:  "Name",
+				reason: "value length must be between 1 and 20 runes, inclusive",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
 	}
 
-	if m.UpdatedAt != nil {
-		// no validation rules for UpdatedAt
-	}
+	if m.Status != nil {
 
-	if m.State != nil {
-		// no validation rules for State
+		if _, ok := enum.Status_name[int32(m.GetStatus())]; !ok {
+			err := RoleValidationError{
+				field:  "Status",
+				reason: "value must be one of the defined enum values",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
 	}
 
 	if m.Sort != nil {
@@ -76,10 +98,6 @@ func (m *Role) validate(all bool) error {
 
 	if m.Remark != nil {
 		// no validation rules for Remark
-	}
-
-	if m.Name != nil {
-		// no validation rules for Name
 	}
 
 	if m.DefaultRouter != nil {
@@ -96,6 +114,14 @@ func (m *Role) validate(all bool) error {
 
 	if m.DataScope != nil {
 		// no validation rules for DataScope
+	}
+
+	if m.CreatedAt != nil {
+		// no validation rules for CreatedAt
+	}
+
+	if m.UpdatedAt != nil {
+		// no validation rules for UpdatedAt
 	}
 
 	if len(errors) > 0 {
@@ -979,6 +1005,35 @@ func (m *GetRoleResponse) validate(all bool) error {
 
 	var errors []error
 
+	if all {
+		switch v := interface{}(m.GetRole()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetRoleResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetRoleResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRole()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetRoleResponseValidationError{
+				field:  "Role",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return GetRoleResponseMultiError(errors)
 	}
@@ -1078,6 +1133,43 @@ func (m *ListRoleRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetPagination()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ListRoleRequestValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ListRoleRequestValidationError{
+					field:  "Pagination",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPagination()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListRoleRequestValidationError{
+				field:  "Pagination",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if m.Name != nil {
+		// no validation rules for Name
+	}
+
+	if m.Status != nil {
+		// no validation rules for Status
+	}
 
 	if len(errors) > 0 {
 		return ListRoleRequestMultiError(errors)

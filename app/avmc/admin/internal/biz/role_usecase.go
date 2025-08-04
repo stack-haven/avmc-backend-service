@@ -20,7 +20,7 @@ type RoleRepo interface {
 	Update(context.Context, *pbCore.Role) (*pbCore.Role, error)
 	FindByID(context.Context, uint32) (*pbCore.Role, error)
 	ListAll(context.Context) ([]*pbCore.Role, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) ([]*pbCore.ListRoleResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListRoleResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -52,7 +52,7 @@ func (uc *RoleUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-func (uc *RoleUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) ([]*pbCore.ListRoleResponse, error) {
+func (uc *RoleUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListRoleResponse, error) {
 	return uc.repo.ListPage(ctx, pagination)
 }
 

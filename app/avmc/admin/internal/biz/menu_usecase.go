@@ -20,7 +20,7 @@ type MenuRepo interface {
 	Update(context.Context, *pbCore.Menu) (*pbCore.Menu, error)
 	FindByID(context.Context, uint32) (*pbCore.Menu, error)
 	ListAll(context.Context) ([]*pbCore.Menu, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) ([]*pbCore.ListMenuResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -52,7 +52,7 @@ func (uc *MenuUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-func (uc *MenuUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) ([]*pbCore.ListMenuResponse, error) {
+func (uc *MenuUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) {
 	return uc.repo.ListPage(ctx, pagination)
 }
 
