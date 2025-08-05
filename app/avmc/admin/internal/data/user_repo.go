@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -223,9 +224,30 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 	fmt.Printf("%v", res)
 	if err != nil {
 		r.log.Errorf("通过ID查询用户失败，ID：%d，错误：%v", id, err)
+		if ent.IsNotFound(err) {
+			return nil, errors.New("查询数据不存在")
+		}
 		return nil, err
 	}
 	return r.toProto(res), nil
+}
+
+// Count 统计用户数量
+// 参数：ctx 上下文
+// 返回值：用户数量，错误信息
+func (r *userRepo) Count(ctx context.Context, condition []string) (int64, error) {
+	r.log.Infof("统计用户数量")
+	entQuery := r.data.DB(ctx).User.Query().Where(user.DeletedAtIsNil())
+	if len(condition) > 0 {
+
+		// entQuery.Where(sql.Column(user.FieldName).)
+	}
+	count, err := entQuery.Count(ctx)
+	if err != nil {
+		r.log.Errorf("统计用户数量失败，错误：%v", err)
+		return 0, err
+	}
+	return int64(count), nil
 }
 
 // ListByName 通过用户名查询用户列表

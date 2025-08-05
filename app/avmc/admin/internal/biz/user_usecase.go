@@ -54,6 +54,9 @@ func (uc *UserUsecase) Create(ctx context.Context, g *pbCore.User) (*pbCore.User
 // 返回值：用户详情响应，错误信息
 func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("GetUser: %v", id)
+	if id == 0 {
+		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
+	}
 	return uc.repo.FindByID(ctx, id)
 }
 
@@ -61,6 +64,9 @@ func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error)
 // 参数：ctx 上下文，g 用户信息
 // 返回值：更新用户响应，错误信息
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
+	if g.Id == 0 {
+		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
+	}
 	return uc.repo.Update(ctx, g)
 }
 

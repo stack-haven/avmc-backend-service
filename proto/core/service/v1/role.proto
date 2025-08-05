@@ -33,21 +33,17 @@ message Role {
   uint32 id = 1;
   // 角色名称
   optional string name = 2 [
-    (validate.rules).string = {min_len: 1, max_len: 20}, 
-    (buf.validate.field).string.min_len = 1,
-    (buf.validate.field).string.max_len = 20,
+    (buf.validate.field).string = {min_len: 1, max_len: 20}, 
     (gnostic.openapi.v3.property) = {description: "角色名称"}
   ];
   // 角色状态 0 未知 1 启用 2 禁用
   optional enum.Status status = 3 [
-    (validate.rules).enum.defined_only = true,
     (buf.validate.field).enum.defined_only = true,
-    (gnostic.openapi.v3.property) = {description: "角色状态", default: {number: 1}}
+    (gnostic.openapi.v3.property) = {description: "角色状态 0 未知 1 启用 2 禁用", default: {number: 1}}
   ];
   // 排序字段
   optional int32 sort = 4 [
-    (buf.validate.field).int32.gte = 0,
-    (buf.validate.field).int32.lte = 100,
+    (buf.validate.field).int32 = {gte: 0, lte: 100},
     (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
   ];
   // 角色描述
@@ -57,6 +53,7 @@ message Role {
   ];
   // 默认路由
   optional string default_router = 6 [
+    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
     (gnostic.openapi.v3.property) = {description: "默认路由"}
   ];
   // 菜单树选择项是否关联显示
@@ -64,7 +61,7 @@ message Role {
   // 部门树选择项是否关联显示
   optional int32 dept_check_strictly = 8 [(gnostic.openapi.v3.property) = {description: "部门树选择项是否关联显示", default: {number: 1}}]; 
   // 数据范围
-  optional int32 data_scope = 9;  
+  optional int32 data_scope = 9 [(gnostic.openapi.v3.property) = {description: "数据范围", default: {number: 1}}];  
   // 创建时间
   optional string created_at = 10 [
     (gnostic.openapi.v3.property) = {description: "创建时间"}
@@ -77,8 +74,14 @@ message Role {
 
 // 创建角色请求
 message CreateRoleRequest {
-  Role role = 1 [(buf.validate.field).required = true];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  Role role = 1 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "角色信息"}
+  ];
+  uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 创建角色响应
 message CreateRoleResponse {
@@ -86,9 +89,18 @@ message CreateRoleResponse {
 
 // 更新角色请求
 message UpdateRoleRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  Role role = 2 [(buf.validate.field).required = true];
-  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "角色ID"}
+  ];
+  Role role = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "角色信息"}
+  ];
+  uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 更新角色响应
 message UpdateRoleResponse {
@@ -96,8 +108,14 @@ message UpdateRoleResponse {
 
 // 删除角色请求
 message DeleteRoleRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "角色ID"}
+  ];
+  uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 删除角色响应
 message DeleteRoleResponse {
@@ -105,7 +123,10 @@ message DeleteRoleResponse {
 
 // 获取角色请求
 message GetRoleRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "角色ID"}
+  ];
 }
 // 获取角色响应
 message GetRoleResponse {

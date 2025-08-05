@@ -2,11 +2,13 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
+	"backend-service/api/common/enum"
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
@@ -35,32 +37,52 @@ func NewMenuRepo(data *Data, logger log.Logger) biz.MenuRepo {
 // toProto 转换ent.Menu为pbCore.Menu
 func (r *menuRepo) toProto(res *ent.Menu) *pbCore.Menu {
 	return &pbCore.Menu{
-		Id:             res.ID,
-		Name:           res.Name,
-		Title:          res.Title,
-		ParentId:       res.ParentID,
-		Path:           res.Path,
-		Component:      res.Component,
-		Redirect:       res.Redirect,
-		Type:           res.Type,
-		Visible:        res.Visible,
-		CreatedAt:      convert.TimeValueToString(&res.CreatedAt, time.DateTime),
-		UpdatedAt:      convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
+		Id:                res.ID,
+		Name:              res.Name,
+		Title:             res.Title,
+		ParentId:          res.ParentID,
+		Path:              res.Path,
+		Component:         res.Component,
+		Type:              (*pbCore.MenuType)(res.Type),
+		Status:            (*enum.Status)(res.Status),
+		Icon:              res.Icon,
+		IsExt:             res.IsExt,
+		ExtUrl:            res.ExtURL,
+		Permissions:       res.Permissions,
+		Redirect:          res.Redirect,
+		CurrentActiveMenu: res.CurrentActiveMenu,
+		KeepAlive:         res.KeepAlive,
+		Visible:           res.Visible,
+		HideTab:           res.HideTab,
+		HideMenu:          res.HideMenu,
+		HideBreadcrumb:    res.HideBreadcrumb,
+		CreatedAt:         convert.TimeValueToString(&res.CreatedAt, time.DateTime),
+		UpdatedAt:         convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
 }
 
 // toEnt 转换pbCore.Menu为ent.Menu
 func (r *menuRepo) toEnt(g *pbCore.Menu) *ent.Menu {
 	return &ent.Menu{
-		ID:        g.GetId(),
-		Name:      g.Name,
-		Title:     g.Title,
-		ParentID:  g.ParentId,
-		Path:      g.Path,
-		Component: g.Component,
-		Redirect:  g.Redirect,
-		Type:      g.Type,
-		Visible:   g.Visible,
+		ID:                g.GetId(),
+		Name:              g.Name,
+		Title:             g.Title,
+		ParentID:          g.ParentId,
+		Path:              g.Path,
+		Component:         g.Component,
+		Redirect:          g.Redirect,
+		Type:              (*int32)(g.Type),
+		Visible:           g.Visible,
+		Status:            (*int32)(g.Status),
+		Icon:              g.Icon,
+		IsExt:             g.IsExt,
+		ExtURL:            g.ExtUrl,
+		Permissions:       g.Permissions,
+		CurrentActiveMenu: g.CurrentActiveMenu,
+		KeepAlive:         g.KeepAlive,
+		HideTab:           g.HideTab,
+		HideMenu:          g.HideMenu,
+		HideBreadcrumb:    g.HideBreadcrumb,
 	}
 }
 
@@ -146,6 +168,9 @@ func (r *menuRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Menu, error
 		Where(menu.IDEQ(id), menu.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询菜单失败，ID：%d，错误：%v", id, err)
+		if ent.IsNotFound(err) {
+			return nil, errors.New("查询数据不存在")
+		}
 		return nil, err
 	}
 	return r.toProto(res), nil

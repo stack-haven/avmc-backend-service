@@ -34,21 +34,17 @@ message Post {
   uint32 id = 1;
   // 岗位名称
   optional string name = 2 [
-    (validate.rules).string = {min_len: 1, max_len: 20}, 
-    (buf.validate.field).string.min_len = 1,
-    (buf.validate.field).string.max_len = 20,
+    (buf.validate.field).string = {min_len: 1, max_len: 20},
     (gnostic.openapi.v3.property) = {description: "岗位名称"}
   ];
   // 岗位状态 0 未知 1 启用 2 禁用
   optional enum.Status status = 3 [
-    (validate.rules).enum.defined_only = true,
     (buf.validate.field).enum.defined_only = true,
     (gnostic.openapi.v3.property) = {description: "岗位状态", default: {number: 1}}
   ];
   // 排序字段
   optional int32 sort = 4 [
-    (buf.validate.field).int32.gte = 0,
-    (buf.validate.field).int32.lte = 100,
+    (buf.validate.field).int32 = {gte: 0, lte: 100},
     (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
   ];
   // 岗位描述
@@ -69,7 +65,10 @@ message Post {
 // 创建岗位请求
 message CreatePostRequest {
   Post post = 1 [(buf.validate.field).required = true];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 创建岗位响应
 message CreatePostResponse {
@@ -77,9 +76,18 @@ message CreatePostResponse {
 
 // 更新岗位请求
 message UpdatePostRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  Post post = 2 [(buf.validate.field).required = true];
-  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "岗位ID"}
+  ];
+  Post post = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "岗位信息"}
+  ];
+  optional uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 更新岗位响应
 message UpdatePostResponse {
@@ -87,8 +95,14 @@ message UpdatePostResponse {
 
 // 删除岗位请求
 message DeletePostRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "岗位ID"}
+  ];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 删除岗位响应
 message DeletePostResponse {
@@ -96,7 +110,10 @@ message DeletePostResponse {
 
 // 获取岗位请求
 message GetPostRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "岗位ID"}
+  ];
 }
 // 获取岗位响应
 message GetPostResponse {

@@ -147,7 +147,7 @@ var (
 		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true, Size: 20, Comment: "手机号码，唯一"},
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 255, Comment: "头像URL"},
 		{Name: "birthday", Type: field.TypeTime, Nullable: true, Comment: "生日", SchemaType: map[string]string{"mysql": "date"}},
-		{Name: "gender", Type: field.TypeInt32, Comment: "性别：0=未知 1=男 2=女", Default: 0, SchemaType: map[string]string{"mysql": "tinyint"}},
+		{Name: "gender", Type: field.TypeInt32, Comment: "性别：0=未知 1=男 2=女", Default: 0, SchemaType: map[string]string{"mysql": "tinyint", "postgres": "tinyint(2)"}},
 		{Name: "age", Type: field.TypeInt, Nullable: true, Comment: "年龄"},
 		{Name: "last_login_at", Type: field.TypeTime, Nullable: true, Comment: "最后登录时间"},
 		{Name: "last_login_ip", Type: field.TypeString, Nullable: true, Size: 50, Comment: "最后登录IP"},

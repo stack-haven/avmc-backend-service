@@ -27,44 +27,59 @@ service MenuService {
 	rpc ListMenu (pagination.PagingRequest) returns (ListMenuResponse);
 }
 
+
+enum MenuType {
+  TYPE_UNSPECIFIED = 0;
+  // 目录
+  TYPE_DIR = 1;
+  // 菜单
+  TYPE_MENU = 2;
+  // 按钮·
+  TYPE_BUTTON = 3;
+}
+
 // 菜单信息
 message Menu {
   // 菜单ID
   uint32 id = 1;
   // 菜单名称
   optional string name = 2 [
-    (validate.rules).string = {min_len: 1, max_len: 20}, 
-    (buf.validate.field).string.min_len = 1,
-    (buf.validate.field).string.max_len = 20,
+    (buf.validate.field).string = {min_len: 1, max_len: 20},
     (gnostic.openapi.v3.property) = {description: "菜单名称"}
   ];
   // 父菜单ID
-  optional uint32 parent_id = 3;
+  optional uint32 parent_id = 3 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "父菜单ID"}
+  ];
   // 菜单标题
   optional string title = 4 [
-    (validate.rules).string = {min_len: 1, max_len: 20}, 
-    (buf.validate.field).string.min_len = 1,
-    (buf.validate.field).string.max_len = 20,
+    (buf.validate.field).string = {min_len: 1, max_len: 20}, 
     (gnostic.openapi.v3.property) = {description: "菜单标题"}
   ];
   // 菜单类型
-  optional int32 type = 5 [(gnostic.openapi.v3.property) = {description: "菜单类型"}];
+  optional MenuType type = 5 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "菜单类型", default: {number: 1}}
+  ];
   // 排序字段
   optional int32 sort = 6 [
-    (buf.validate.field).int32.gte = 0,
-    (buf.validate.field).int32.lte = 100,
+    (buf.validate.field).int32 = {gte: 0, lte: 100},
     (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
   ];
-  // 菜单状态 1 激活 2 未激活 3 禁用
-  optional int32 state = 7 [(gnostic.openapi.v3.property) = {description: "菜单状态 1 激活 2 未激活 3 禁用"}];
+  // 菜单状态 1 启用 2 禁用
+  optional enum.Status status = 7 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "菜单状态 1 启用 2 禁用", default: {number: 1}}
+  ];
   // 菜单路径
   optional string path = 8 [
-    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
     (gnostic.openapi.v3.property) = {description: "菜单路径"}
   ];
   // 组件路径
   optional string component = 9 [
-    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
     (gnostic.openapi.v3.property) = {description: "组件路径"}
   ];
   // 菜单图标
@@ -73,37 +88,55 @@ message Menu {
     (gnostic.openapi.v3.property) = {description: "菜单图标"}
   ];
   // 是否外部链接
-  optional bool is_ext = 11;
+  optional bool is_ext = 11 [
+    (gnostic.openapi.v3.property) = {description: "是否外部链接"}
+  ];
   // 外部链接地址
   optional string ext_url = 12 [
-    (buf.validate.field).string.max_len = 200,
+    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
     (gnostic.openapi.v3.property) = {description: "外部链接地址"}
   ];
   // 权限标识
-  optional string permissions = 13 [
-    (buf.validate.field).string.max_len = 100,
+  repeated string permissions = 13 [
+    (buf.validate.field).repeated = {min_items: 0},
+    (buf.validate.field).repeated.items = {
+      string: {
+        min_len: 0
+        max_len: 20
+      }
+    },
     (gnostic.openapi.v3.property) = {description: "权限标识"}
   ];
   // 重定向地址
   optional string redirect = 14 [
-    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
     (gnostic.openapi.v3.property) = {description: "重定向地址"}
   ];
   // 当前激活菜单
   optional string current_active_menu = 15 [
-    (buf.validate.field).string.max_len = 100,
+    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 100},
     (gnostic.openapi.v3.property) = {description: "当前激活菜单"}
   ];
   // 是否缓存
-  optional bool keep_alive = 16;
+  optional bool keep_alive = 16 [
+    (gnostic.openapi.v3.property) = {description: "是否缓存"}
+  ];
   // 是否可见
-  optional bool visible = 17;
+  optional bool visible = 17 [
+    (gnostic.openapi.v3.property) = {description: "是否可见"}
+  ];
   // 是否隐藏标签
-  optional bool hide_tab = 18;
+  optional bool hide_tab = 18 [
+    (gnostic.openapi.v3.property) = {description: "是否隐藏标签"}
+  ];
   // 是否隐藏菜单
-  optional bool hide_menu = 19;
+  optional bool hide_menu = 19 [
+    (gnostic.openapi.v3.property) = {description: "是否隐藏菜单"}
+  ];
   // 是否隐藏面包屑
-  optional bool hide_breadcrumb = 20;
+  optional bool hide_breadcrumb = 20 [
+    (gnostic.openapi.v3.property) = {description: "是否隐藏面包屑"}
+  ];
   // 菜单描述
   optional string remark = 21 [
     (buf.validate.field).string.max_len = 200,

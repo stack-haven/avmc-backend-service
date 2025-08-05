@@ -42,8 +42,8 @@ func SkipSoftDelete(parent context.Context) context.Context {
 }
 
 // Interceptors of the DeletedAt.
-func (d DeletedAt) Interceptors() []ent.Interceptor {
-	return []ent.Interceptor{
+func (d DeletedAt) Interceptors() []entgo.Interceptor {
+	return []entgo.Interceptor{
 		intercept.TraverseFunc(func(ctx context.Context, q intercept.Query) error {
 			// Skip soft-delete, means include soft-deleted entities.
 			if skip, _ := ctx.Value(softDeleteKey{}).(bool); skip {
@@ -56,11 +56,11 @@ func (d DeletedAt) Interceptors() []ent.Interceptor {
 }
 
 // Hooks of the DeletedAt.
-func (d DeletedAt) Hooks() []ent.Hook {
-	return []ent.Hook{
+func (d DeletedAt) Hooks() []entgo.Hook {
+	return []entgo.Hook{
 		hook.On(
-			func(next ent.Mutator) ent.Mutator {
-				return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			func(next entgo.Mutator) entgo.Mutator {
+				return entgo.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 					// Skip soft-delete, means delete the entity permanently.
 					if skip, _ := ctx.Value(softDeleteKey{}).(bool); skip {
 						return next.Mutate(ctx, m)

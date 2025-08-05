@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -35,11 +36,11 @@ func NewDeptRepo(data *Data, logger log.Logger) biz.DeptRepo {
 // toProto 转换ent.Dept为pbCore.Dept
 func (r *deptRepo) toProto(res *ent.Dept) *pbCore.Dept {
 	return &pbCore.Dept{
-		Id:          res.ID,
-		Name:        res.Name,
-		ParentId:    res.ParentID,
-		CreatedAt:   convert.TimeValueToString(&res.CreatedAt, time.DateTime),
-		UpdatedAt:   convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
+		Id:        res.ID,
+		Name:      res.Name,
+		ParentId:  res.ParentID,
+		CreatedAt: convert.TimeValueToString(&res.CreatedAt, time.DateTime),
+		UpdatedAt: convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
 }
 
@@ -122,6 +123,9 @@ func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error
 		Where(dept.IDEQ(id), dept.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询部门失败，ID：%d，错误：%v", id, err)
+		if ent.IsNotFound(err) {
+			return nil, errors.New("查询数据不存在")
+		}
 		return nil, err
 	}
 	return r.toProto(res), nil

@@ -9,10 +9,10 @@ ifeq ($(GOHOSTOS), windows)
 	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
 	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
 	INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find internal -name *.proto")
-	API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
+	API_PROTO_FILES=$(shell $(Git_Bash) -c "find proto -name *.proto")
 else
 	INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
-	API_PROTO_FILES=$(shell find api -name *.proto)
+	API_PROTO_FILES=$(shell find proto -name *.proto)
 endif
 
 .PHONY: init
@@ -36,13 +36,22 @@ config:
 .PHONY: api
 # generate api proto
 api:
-	protoc --proto_path=./api \
-	       --proto_path=./third_party \
+	protoc --proto_path=./proto \
+	       --proto_path=./proto/third_party \
  	       --go_out=paths=source_relative:./api \
  	       --go-http_out=paths=source_relative:./api \
  	       --go-grpc_out=paths=source_relative:./api \
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
+
+# generate protobuf api go code using buf
+# This target uses buf tool to manage protobuf files
+# located in the proto directory at the project root
+.PHONY: proto
+proto:
+	@cd proto && \
+	buf generate --template buf.gen.yaml
+
 
 .PHONY: build
 # build
@@ -58,9 +67,10 @@ generate:
 .PHONY: all
 # generate all
 all:
-	make api;
-	make config;
-	make generate;
+	# make api;
+	# make config;
+	# make generate;
+	make proto;
 
 # show help
 help:

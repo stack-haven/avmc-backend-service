@@ -2,11 +2,13 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
+	"backend-service/api/common/enum"
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
@@ -39,6 +41,7 @@ func (r *roleRepo) toProto(res *ent.Role) *pbCore.Role {
 		Name:              res.Name,
 		DefaultRouter:     res.DefaultRouter,
 		DataScope:         res.DataScope,
+		Status:            (*enum.Status)(res.Status),
 		MenuCheckStrictly: res.MenuCheckStrictly,
 		DeptCheckStrictly: res.DeptCheckStrictly,
 		CreatedAt:         convert.TimeValueToString(&res.CreatedAt, time.DateTime),
@@ -53,6 +56,7 @@ func (r *roleRepo) toEnt(g *pbCore.Role) *ent.Role {
 		Name:              g.Name,
 		DefaultRouter:     g.DefaultRouter,
 		DataScope:         g.DataScope,
+		Status:            (*int32)(g.Status),
 		MenuCheckStrictly: g.MenuCheckStrictly,
 		DeptCheckStrictly: g.DeptCheckStrictly,
 	}
@@ -132,6 +136,9 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 	res, err := r.data.DB(ctx).Role.Query().Where(role.ID(id), role.DeletedAtIsNil()).First(ctx)
 	if err != nil {
 		r.log.Errorf("根据ID查询角色失败，角色ID：%v，错误：%v", id, err)
+		if ent.IsNotFound(err) {
+			return nil, errors.New("查询数据不存在")
+		}
 		return nil, err
 	}
 	return r.toProto(res), nil
@@ -142,7 +149,7 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 // 返回值：错误信息
 func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 	r.log.Infof("删除角色，角色ID：%v", id)
-	_, err := r.data.DB(ctx).Role.UpdateOneID(id).SetDeletedAt(time.Now()).Save(ctx)
+	err := r.data.DB(ctx).Role.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
 	if err != nil {
 		r.log.Errorf("删除角色失败，角色ID：%v，错误：%v", id, err)
 		return err

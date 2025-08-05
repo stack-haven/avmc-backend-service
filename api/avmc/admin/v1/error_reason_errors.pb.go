@@ -11,6 +11,26 @@ import (
 // is compatible with the kratos package it is being compiled against.
 const _ = errors.SupportPackageIsVersion1
 
+// =======================================
+// HTTP标准错误 (0-99)
+// =======================================
+// 保留的默认错误值
+func IsReservedDefault(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_RESERVED_DEFAULT.String() && e.Code == 500
+}
+
+// =======================================
+// HTTP标准错误 (0-99)
+// =======================================
+// 保留的默认错误值
+func ErrorReservedDefault(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_RESERVED_DEFAULT.String(), fmt.Sprintf(format, args...))
+}
+
 // 客户端请求格式错误，服务器无法理解
 func IsBadRequest(err error) bool {
 	if err == nil {
@@ -179,20 +199,24 @@ func ErrorRequestNotSupport(format string, args ...interface{}) *errors.Error {
 	return errors.New(505, ErrorReason_REQUEST_NOT_SUPPORT.String(), fmt.Sprintf(format, args...))
 }
 
-// 认证相关错误
+// =======================================
+// 认证与授权错误 (100-199)
+// =======================================
 // 认证令牌已过期，需要重新获取
 func IsAuthTokenExpired(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_AUTH_TOKEN_EXPIRED.String() && e.Code == 103
+	return e.Reason == ErrorReason_AUTH_TOKEN_EXPIRED.String() && e.Code == 401
 }
 
-// 认证相关错误
+// =======================================
+// 认证与授权错误 (100-199)
+// =======================================
 // 认证令牌已过期，需要重新获取
 func ErrorAuthTokenExpired(format string, args ...interface{}) *errors.Error {
-	return errors.New(103, ErrorReason_AUTH_TOKEN_EXPIRED.String(), fmt.Sprintf(format, args...))
+	return errors.New(401, ErrorReason_AUTH_TOKEN_EXPIRED.String(), fmt.Sprintf(format, args...))
 }
 
 // 提供的认证令牌无效，可能格式错误或已被撤销
@@ -201,12 +225,12 @@ func IsAuthInvalidToken(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_AUTH_INVALID_TOKEN.String() && e.Code == 104
+	return e.Reason == ErrorReason_AUTH_INVALID_TOKEN.String() && e.Code == 401
 }
 
 // 提供的认证令牌无效，可能格式错误或已被撤销
 func ErrorAuthInvalidToken(format string, args ...interface{}) *errors.Error {
-	return errors.New(104, ErrorReason_AUTH_INVALID_TOKEN.String(), fmt.Sprintf(format, args...))
+	return errors.New(401, ErrorReason_AUTH_INVALID_TOKEN.String(), fmt.Sprintf(format, args...))
 }
 
 // 请求中未包含认证令牌
@@ -215,28 +239,102 @@ func IsAuthTokenNotExist(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_AUTH_TOKEN_NOT_EXIST.String() && e.Code == 105
+	return e.Reason == ErrorReason_AUTH_TOKEN_NOT_EXIST.String() && e.Code == 401
 }
 
 // 请求中未包含认证令牌
 func ErrorAuthTokenNotExist(format string, args ...interface{}) *errors.Error {
-	return errors.New(105, ErrorReason_AUTH_TOKEN_NOT_EXIST.String(), fmt.Sprintf(format, args...))
+	return errors.New(401, ErrorReason_AUTH_TOKEN_NOT_EXIST.String(), fmt.Sprintf(format, args...))
 }
 
-// 用户相关错误
+// 认证失败，用户名或密码错误
+func IsAuthFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AUTH_FAILED.String() && e.Code == 401
+}
+
+// 认证失败，用户名或密码错误
+func ErrorAuthFailed(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_AUTH_FAILED.String(), fmt.Sprintf(format, args...))
+}
+
+// 授权失败，用户没有足够权限
+func IsAuthorizationFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AUTHORIZATION_FAILED.String() && e.Code == 403
+}
+
+// 授权失败，用户没有足够权限
+func ErrorAuthorizationFailed(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_AUTHORIZATION_FAILED.String(), fmt.Sprintf(format, args...))
+}
+
+// 权限不足，无法执行操作
+func IsPermissionDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PERMISSION_DENIED.String() && e.Code == 403
+}
+
+// 权限不足，无法执行操作
+func ErrorPermissionDenied(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_PERMISSION_DENIED.String(), fmt.Sprintf(format, args...))
+}
+
+// 会话已过期，需要重新登录
+func IsSessionExpired(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_SESSION_EXPIRED.String() && e.Code == 401
+}
+
+// 会话已过期，需要重新登录
+func ErrorSessionExpired(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_SESSION_EXPIRED.String(), fmt.Sprintf(format, args...))
+}
+
+// 账号已在其他地方登录
+func IsAccountLoggedInElsewhere(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ACCOUNT_LOGGED_IN_ELSEWHERE.String() && e.Code == 401
+}
+
+// 账号已在其他地方登录
+func ErrorAccountLoggedInElsewhere(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_ACCOUNT_LOGGED_IN_ELSEWHERE.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 用户管理错误 (200-299)
+// =======================================
 // 未找到指定的用户记录
 func IsUserNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_NOT_FOUND.String() && e.Code == 110
+	return e.Reason == ErrorReason_USER_NOT_FOUND.String() && e.Code == 404
 }
 
-// 用户相关错误
+// =======================================
+// 用户管理错误 (200-299)
+// =======================================
 // 未找到指定的用户记录
 func ErrorUserNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(110, ErrorReason_USER_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_USER_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户不存在于系统中
@@ -245,12 +343,12 @@ func IsUserNotExist(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_NOT_EXIST.String() && e.Code == 112
+	return e.Reason == ErrorReason_USER_NOT_EXIST.String() && e.Code == 404
 }
 
 // 用户不存在于系统中
 func ErrorUserNotExist(format string, args ...interface{}) *errors.Error {
-	return errors.New(112, ErrorReason_USER_NOT_EXIST.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_USER_NOT_EXIST.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户输入的密码错误
@@ -259,26 +357,26 @@ func IsUserIncorrectPassword(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_INCORRECT_PASSWORD.String() && e.Code == 113
+	return e.Reason == ErrorReason_USER_INCORRECT_PASSWORD.String() && e.Code == 400
 }
 
 // 用户输入的密码错误
 func ErrorUserIncorrectPassword(format string, args ...interface{}) *errors.Error {
-	return errors.New(113, ErrorReason_USER_INCORRECT_PASSWORD.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_USER_INCORRECT_PASSWORD.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户账户已被冻结，无法进行操作
-func IsUserFreeze(err error) bool {
+func IsUserFrozen(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_FREEZE.String() && e.Code == 114
+	return e.Reason == ErrorReason_USER_FROZEN.String() && e.Code == 403
 }
 
 // 用户账户已被冻结，无法进行操作
-func ErrorUserFreeze(format string, args ...interface{}) *errors.Error {
-	return errors.New(114, ErrorReason_USER_FREEZE.String(), fmt.Sprintf(format, args...))
+func ErrorUserFrozen(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_USER_FROZEN.String(), fmt.Sprintf(format, args...))
 }
 
 // 提供的用户ID无效，可能格式错误或不存在
@@ -287,12 +385,12 @@ func IsUserInvalidId(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_INVALID_ID.String() && e.Code == 115
+	return e.Reason == ErrorReason_USER_INVALID_ID.String() && e.Code == 400
 }
 
 // 提供的用户ID无效，可能格式错误或不存在
 func ErrorUserInvalidId(format string, args ...interface{}) *errors.Error {
-	return errors.New(115, ErrorReason_USER_INVALID_ID.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_USER_INVALID_ID.String(), fmt.Sprintf(format, args...))
 }
 
 // 尝试创建的用户已经存在于系统中
@@ -301,12 +399,12 @@ func IsUserAlreadyExists(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_ALREADY_EXISTS.String() && e.Code == 117
+	return e.Reason == ErrorReason_USER_ALREADY_EXISTS.String() && e.Code == 400
 }
 
 // 尝试创建的用户已经存在于系统中
 func ErrorUserAlreadyExists(format string, args ...interface{}) *errors.Error {
-	return errors.New(117, ErrorReason_USER_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_USER_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户邮箱未经过验证
@@ -315,12 +413,12 @@ func IsUserEmailUnverified(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_EMAIL_UNVERIFIED.String() && e.Code == 118
+	return e.Reason == ErrorReason_USER_EMAIL_UNVERIFIED.String() && e.Code == 403
 }
 
 // 用户邮箱未经过验证
 func ErrorUserEmailUnverified(format string, args ...interface{}) *errors.Error {
-	return errors.New(118, ErrorReason_USER_EMAIL_UNVERIFIED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_EMAIL_UNVERIFIED.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户手机号未经过验证
@@ -329,12 +427,12 @@ func IsUserPhoneUnverified(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_PHONE_UNVERIFIED.String() && e.Code == 119
+	return e.Reason == ErrorReason_USER_PHONE_UNVERIFIED.String() && e.Code == 403
 }
 
 // 用户手机号未经过验证
 func ErrorUserPhoneUnverified(format string, args ...interface{}) *errors.Error {
-	return errors.New(119, ErrorReason_USER_PHONE_UNVERIFIED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_PHONE_UNVERIFIED.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户账户已被锁定，可能由于多次尝试失败
@@ -343,12 +441,12 @@ func IsUserAccountLocked(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_ACCOUNT_LOCKED.String() && e.Code == 120
+	return e.Reason == ErrorReason_USER_ACCOUNT_LOCKED.String() && e.Code == 403
 }
 
 // 用户账户已被锁定，可能由于多次尝试失败
 func ErrorUserAccountLocked(format string, args ...interface{}) *errors.Error {
-	return errors.New(120, ErrorReason_USER_ACCOUNT_LOCKED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_ACCOUNT_LOCKED.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户登录尝试次数过多，账户暂时被锁定
@@ -357,12 +455,12 @@ func IsUserTooManyLoginAttempts(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_TOO_MANY_LOGIN_ATTEMPTS.String() && e.Code == 121
+	return e.Reason == ErrorReason_USER_TOO_MANY_LOGIN_ATTEMPTS.String() && e.Code == 403
 }
 
 // 用户登录尝试次数过多，账户暂时被锁定
 func ErrorUserTooManyLoginAttempts(format string, args ...interface{}) *errors.Error {
-	return errors.New(121, ErrorReason_USER_TOO_MANY_LOGIN_ATTEMPTS.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_TOO_MANY_LOGIN_ATTEMPTS.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户密码已过期，需要重置
@@ -371,12 +469,12 @@ func IsUserPasswordExpired(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_PASSWORD_EXPIRED.String() && e.Code == 122
+	return e.Reason == ErrorReason_USER_PASSWORD_EXPIRED.String() && e.Code == 403
 }
 
 // 用户密码已过期，需要重置
 func ErrorUserPasswordExpired(format string, args ...interface{}) *errors.Error {
-	return errors.New(122, ErrorReason_USER_PASSWORD_EXPIRED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_PASSWORD_EXPIRED.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户必须重置密码才能继续使用账户
@@ -385,26 +483,12 @@ func IsUserMustResetPassword(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_MUST_RESET_PASSWORD.String() && e.Code == 123
+	return e.Reason == ErrorReason_USER_MUST_RESET_PASSWORD.String() && e.Code == 403
 }
 
 // 用户必须重置密码才能继续使用账户
 func ErrorUserMustResetPassword(format string, args ...interface{}) *errors.Error {
-	return errors.New(123, ErrorReason_USER_MUST_RESET_PASSWORD.String(), fmt.Sprintf(format, args...))
-}
-
-// 用户没有足够的权限执行请求的操作
-func IsUserPermissionDenied(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_PERMISSION_DENIED.String() && e.Code == 124
-}
-
-// 用户没有足够的权限执行请求的操作
-func ErrorUserPermissionDenied(format string, args ...interface{}) *errors.Error {
-	return errors.New(124, ErrorReason_USER_PERMISSION_DENIED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_MUST_RESET_PASSWORD.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户账户已被禁用
@@ -413,12 +497,12 @@ func IsUserDisabled(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_DISABLED.String() && e.Code == 125
+	return e.Reason == ErrorReason_USER_DISABLED.String() && e.Code == 403
 }
 
 // 用户账户已被禁用
 func ErrorUserDisabled(format string, args ...interface{}) *errors.Error {
-	return errors.New(125, ErrorReason_USER_DISABLED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_DISABLED.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户注册功能已被禁用
@@ -427,12 +511,12 @@ func IsUserRegistrationDisabled(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_REGISTRATION_DISABLED.String() && e.Code == 126
+	return e.Reason == ErrorReason_USER_REGISTRATION_DISABLED.String() && e.Code == 403
 }
 
 // 用户注册功能已被禁用
 func ErrorUserRegistrationDisabled(format string, args ...interface{}) *errors.Error {
-	return errors.New(126, ErrorReason_USER_REGISTRATION_DISABLED.String(), fmt.Sprintf(format, args...))
+	return errors.New(403, ErrorReason_USER_REGISTRATION_DISABLED.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户提供的邮箱格式无效
@@ -441,12 +525,12 @@ func IsUserInvalidEmailFormat(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_INVALID_EMAIL_FORMAT.String() && e.Code == 127
+	return e.Reason == ErrorReason_USER_INVALID_EMAIL_FORMAT.String() && e.Code == 400
 }
 
 // 用户提供的邮箱格式无效
 func ErrorUserInvalidEmailFormat(format string, args ...interface{}) *errors.Error {
-	return errors.New(127, ErrorReason_USER_INVALID_EMAIL_FORMAT.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_USER_INVALID_EMAIL_FORMAT.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户提供的手机号格式无效
@@ -455,12 +539,12 @@ func IsUserInvalidPhoneFormat(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_INVALID_PHONE_FORMAT.String() && e.Code == 128
+	return e.Reason == ErrorReason_USER_INVALID_PHONE_FORMAT.String() && e.Code == 400
 }
 
 // 用户提供的手机号格式无效
 func ErrorUserInvalidPhoneFormat(format string, args ...interface{}) *errors.Error {
-	return errors.New(128, ErrorReason_USER_INVALID_PHONE_FORMAT.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_USER_INVALID_PHONE_FORMAT.String(), fmt.Sprintf(format, args...))
 }
 
 // 用户社交登录失败
@@ -469,28 +553,406 @@ func IsUserSocialLoginFailed(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_USER_SOCIAL_LOGIN_FAILED.String() && e.Code == 129
+	return e.Reason == ErrorReason_USER_SOCIAL_LOGIN_FAILED.String() && e.Code == 400
 }
 
 // 用户社交登录失败
 func ErrorUserSocialLoginFailed(format string, args ...interface{}) *errors.Error {
-	return errors.New(129, ErrorReason_USER_SOCIAL_LOGIN_FAILED.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_USER_SOCIAL_LOGIN_FAILED.String(), fmt.Sprintf(format, args...))
 }
 
-// 数据库相关错误
+// =======================================
+// 角色管理错误 (300-399)
+// =======================================
+// 角色不存在
+func IsRoleNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_NOT_FOUND.String() && e.Code == 404
+}
+
+// =======================================
+// 角色管理错误 (300-399)
+// =======================================
+// 角色不存在
+func ErrorRoleNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_ROLE_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// 角色ID无效
+func IsRoleInvalidId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_INVALID_ID.String() && e.Code == 400
+}
+
+// 角色ID无效
+func ErrorRoleInvalidId(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_INVALID_ID.String(), fmt.Sprintf(format, args...))
+}
+
+// 角色已存在
+func IsRoleAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 角色已存在
+func ErrorRoleAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 无法删除系统内置角色
+func IsRoleCannotDeleteBuiltin(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_CANNOT_DELETE_BUILTIN.String() && e.Code == 403
+}
+
+// 无法删除系统内置角色
+func ErrorRoleCannotDeleteBuiltin(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_ROLE_CANNOT_DELETE_BUILTIN.String(), fmt.Sprintf(format, args...))
+}
+
+// 角色名称不能为空
+func IsRoleNameCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_NAME_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 角色名称不能为空
+func ErrorRoleNameCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_NAME_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 角色描述不能为空
+func IsRoleDescriptionCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_DESCRIPTION_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 角色描述不能为空
+func ErrorRoleDescriptionCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_DESCRIPTION_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 角色权限设置无效
+func IsRolePermissionInvalid(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_PERMISSION_INVALID.String() && e.Code == 400
+}
+
+// 角色权限设置无效
+func ErrorRolePermissionInvalid(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_PERMISSION_INVALID.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 岗位管理错误 (400-499)
+// =======================================
+// 岗位不存在
+func IsPostNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_NOT_FOUND.String() && e.Code == 404
+}
+
+// =======================================
+// 岗位管理错误 (400-499)
+// =======================================
+// 岗位不存在
+func ErrorPostNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_POST_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// 岗位ID无效
+func IsPostInvalidId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_INVALID_ID.String() && e.Code == 400
+}
+
+// 岗位ID无效
+func ErrorPostInvalidId(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_POST_INVALID_ID.String(), fmt.Sprintf(format, args...))
+}
+
+// 岗位已存在
+func IsPostAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 岗位已存在
+func ErrorPostAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_POST_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 岗位名称不能为空
+func IsPostNameCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_NAME_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 岗位名称不能为空
+func ErrorPostNameCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_POST_NAME_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 岗位描述不能为空
+func IsPostDescriptionCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_DESCRIPTION_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 岗位描述不能为空
+func ErrorPostDescriptionCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_POST_DESCRIPTION_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 菜单管理错误 (500-599)
+// =======================================
+// 菜单不存在
+func IsMenuNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_NOT_FOUND.String() && e.Code == 404
+}
+
+// =======================================
+// 菜单管理错误 (500-599)
+// =======================================
+// 菜单不存在
+func ErrorMenuNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_MENU_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// 菜单ID无效
+func IsMenuInvalidId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_INVALID_ID.String() && e.Code == 400
+}
+
+// 菜单ID无效
+func ErrorMenuInvalidId(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_INVALID_ID.String(), fmt.Sprintf(format, args...))
+}
+
+// 菜单已存在
+func IsMenuAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 菜单已存在
+func ErrorMenuAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 菜单名称不能为空
+func IsMenuNameCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_NAME_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 菜单名称不能为空
+func ErrorMenuNameCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_NAME_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 菜单路径不能为空
+func IsMenuPathCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_PATH_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 菜单路径不能为空
+func ErrorMenuPathCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_PATH_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 菜单组件不能为空
+func IsMenuComponentCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_COMPONENT_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 菜单组件不能为空
+func ErrorMenuComponentCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_COMPONENT_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 无法删除有子菜单的菜单
+func IsMenuCannotDeleteWithChildren(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_CANNOT_DELETE_WITH_CHILDREN.String() && e.Code == 403
+}
+
+// 无法删除有子菜单的菜单
+func ErrorMenuCannotDeleteWithChildren(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_MENU_CANNOT_DELETE_WITH_CHILDREN.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 部门管理错误 (600-699)
+// =======================================
+// 部门不存在
+func IsDeptNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_NOT_FOUND.String() && e.Code == 404
+}
+
+// =======================================
+// 部门管理错误 (600-699)
+// =======================================
+// 部门不存在
+func ErrorDeptNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_DEPT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// 部门ID无效
+func IsDeptInvalidId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_INVALID_ID.String() && e.Code == 400
+}
+
+// 部门ID无效
+func ErrorDeptInvalidId(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_DEPT_INVALID_ID.String(), fmt.Sprintf(format, args...))
+}
+
+// 部门已存在
+func IsDeptAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 部门已存在
+func ErrorDeptAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_DEPT_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 部门名称不能为空
+func IsDeptNameCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_NAME_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 部门名称不能为空
+func ErrorDeptNameCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_DEPT_NAME_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 无法删除有子部门的部门
+func IsDeptCannotDeleteWithChildren(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_CANNOT_DELETE_WITH_CHILDREN.String() && e.Code == 403
+}
+
+// 无法删除有子部门的部门
+func ErrorDeptCannotDeleteWithChildren(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_DEPT_CANNOT_DELETE_WITH_CHILDREN.String(), fmt.Sprintf(format, args...))
+}
+
+// 无法删除包含用户的部门
+func IsDeptCannotDeleteWithUsers(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_CANNOT_DELETE_WITH_USERS.String() && e.Code == 403
+}
+
+// 无法删除包含用户的部门
+func ErrorDeptCannotDeleteWithUsers(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, ErrorReason_DEPT_CANNOT_DELETE_WITH_USERS.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 数据层错误 (700-799)
+// =======================================
 // 无法建立与数据库的连接
 func IsDbConnectionError(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DB_CONNECTION_ERROR.String() && e.Code == 200
+	return e.Reason == ErrorReason_DB_CONNECTION_ERROR.String() && e.Code == 500
 }
 
-// 数据库相关错误
+// =======================================
+// 数据层错误 (700-799)
+// =======================================
 // 无法建立与数据库的连接
 func ErrorDbConnectionError(format string, args ...interface{}) *errors.Error {
-	return errors.New(200, ErrorReason_DB_CONNECTION_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_DB_CONNECTION_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据库查询操作失败
@@ -499,12 +961,12 @@ func IsDbQueryError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DB_QUERY_ERROR.String() && e.Code == 201
+	return e.Reason == ErrorReason_DB_QUERY_ERROR.String() && e.Code == 500
 }
 
 // 数据库查询操作失败
 func ErrorDbQueryError(format string, args ...interface{}) *errors.Error {
-	return errors.New(201, ErrorReason_DB_QUERY_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_DB_QUERY_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据库插入操作失败
@@ -513,12 +975,12 @@ func IsDbInsertError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DB_INSERT_ERROR.String() && e.Code == 202
+	return e.Reason == ErrorReason_DB_INSERT_ERROR.String() && e.Code == 500
 }
 
 // 数据库插入操作失败
 func ErrorDbInsertError(format string, args ...interface{}) *errors.Error {
-	return errors.New(202, ErrorReason_DB_INSERT_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_DB_INSERT_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据库更新操作失败
@@ -527,12 +989,12 @@ func IsDbUpdateError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DB_UPDATE_ERROR.String() && e.Code == 203
+	return e.Reason == ErrorReason_DB_UPDATE_ERROR.String() && e.Code == 500
 }
 
 // 数据库更新操作失败
 func ErrorDbUpdateError(format string, args ...interface{}) *errors.Error {
-	return errors.New(203, ErrorReason_DB_UPDATE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_DB_UPDATE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据库删除操作失败
@@ -541,28 +1003,60 @@ func IsDbDeleteError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DB_DELETE_ERROR.String() && e.Code == 204
+	return e.Reason == ErrorReason_DB_DELETE_ERROR.String() && e.Code == 500
 }
 
 // 数据库删除操作失败
 func ErrorDbDeleteError(format string, args ...interface{}) *errors.Error {
-	return errors.New(204, ErrorReason_DB_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_DB_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
-// 缓存相关错误
+// 数据库事务执行失败
+func IsDbTransactionError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DB_TRANSACTION_ERROR.String() && e.Code == 500
+}
+
+// 数据库事务执行失败
+func ErrorDbTransactionError(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DB_TRANSACTION_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
+// 数据校验失败
+func IsDataValidationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DATA_VALIDATION_ERROR.String() && e.Code == 400
+}
+
+// 数据校验失败
+func ErrorDataValidationError(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_DATA_VALIDATION_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 缓存错误 (800-899)
+// =======================================
 // 无法建立与缓存服务的连接
 func IsCacheConnectionError(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_CACHE_CONNECTION_ERROR.String() && e.Code == 210
+	return e.Reason == ErrorReason_CACHE_CONNECTION_ERROR.String() && e.Code == 500
 }
 
-// 缓存相关错误
+// =======================================
+// 缓存错误 (800-899)
+// =======================================
 // 无法建立与缓存服务的连接
 func ErrorCacheConnectionError(format string, args ...interface{}) *errors.Error {
-	return errors.New(210, ErrorReason_CACHE_CONNECTION_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_CACHE_CONNECTION_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 从缓存中获取数据失败
@@ -571,12 +1065,12 @@ func IsCacheGetError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_CACHE_GET_ERROR.String() && e.Code == 211
+	return e.Reason == ErrorReason_CACHE_GET_ERROR.String() && e.Code == 500
 }
 
 // 从缓存中获取数据失败
 func ErrorCacheGetError(format string, args ...interface{}) *errors.Error {
-	return errors.New(211, ErrorReason_CACHE_GET_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_CACHE_GET_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 向缓存中设置数据失败
@@ -585,12 +1079,12 @@ func IsCacheSetError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_CACHE_SET_ERROR.String() && e.Code == 212
+	return e.Reason == ErrorReason_CACHE_SET_ERROR.String() && e.Code == 500
 }
 
 // 向缓存中设置数据失败
 func ErrorCacheSetError(format string, args ...interface{}) *errors.Error {
-	return errors.New(212, ErrorReason_CACHE_SET_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_CACHE_SET_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 从缓存中删除数据失败
@@ -599,28 +1093,32 @@ func IsCacheDeleteError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_CACHE_DELETE_ERROR.String() && e.Code == 213
+	return e.Reason == ErrorReason_CACHE_DELETE_ERROR.String() && e.Code == 500
 }
 
 // 从缓存中删除数据失败
 func ErrorCacheDeleteError(format string, args ...interface{}) *errors.Error {
-	return errors.New(213, ErrorReason_CACHE_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_CACHE_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
-// 文件操作相关错误
+// =======================================
+// 文件操作错误 (900-999)
+// =======================================
 // 读取文件时发生错误
 func IsFileReadError(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_FILE_READ_ERROR.String() && e.Code == 220
+	return e.Reason == ErrorReason_FILE_READ_ERROR.String() && e.Code == 500
 }
 
-// 文件操作相关错误
+// =======================================
+// 文件操作错误 (900-999)
+// =======================================
 // 读取文件时发生错误
 func ErrorFileReadError(format string, args ...interface{}) *errors.Error {
-	return errors.New(220, ErrorReason_FILE_READ_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_FILE_READ_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 写入文件时发生错误
@@ -629,12 +1127,12 @@ func IsFileWriteError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_FILE_WRITE_ERROR.String() && e.Code == 221
+	return e.Reason == ErrorReason_FILE_WRITE_ERROR.String() && e.Code == 500
 }
 
 // 写入文件时发生错误
 func ErrorFileWriteError(format string, args ...interface{}) *errors.Error {
-	return errors.New(221, ErrorReason_FILE_WRITE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_FILE_WRITE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 删除文件时发生错误
@@ -643,12 +1141,12 @@ func IsFileDeleteError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_FILE_DELETE_ERROR.String() && e.Code == 222
+	return e.Reason == ErrorReason_FILE_DELETE_ERROR.String() && e.Code == 500
 }
 
 // 删除文件时发生错误
 func ErrorFileDeleteError(format string, args ...interface{}) *errors.Error {
-	return errors.New(222, ErrorReason_FILE_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_FILE_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 请求的文件在系统中不存在
@@ -657,28 +1155,60 @@ func IsFileNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_FILE_NOT_FOUND.String() && e.Code == 223
+	return e.Reason == ErrorReason_FILE_NOT_FOUND.String() && e.Code == 404
 }
 
 // 请求的文件在系统中不存在
 func ErrorFileNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(223, ErrorReason_FILE_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_FILE_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
-// 消息队列相关错误
+// 文件大小超过限制
+func IsFileSizeExceeded(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_FILE_SIZE_EXCEEDED.String() && e.Code == 400
+}
+
+// 文件大小超过限制
+func ErrorFileSizeExceeded(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_FILE_SIZE_EXCEEDED.String(), fmt.Sprintf(format, args...))
+}
+
+// 文件格式不支持
+func IsFileFormatNotSupported(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_FILE_FORMAT_NOT_SUPPORTED.String() && e.Code == 400
+}
+
+// 文件格式不支持
+func ErrorFileFormatNotSupported(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_FILE_FORMAT_NOT_SUPPORTED.String(), fmt.Sprintf(format, args...))
+}
+
+// =======================================
+// 消息队列错误 (1000-1099)
+// =======================================
 // 无法建立与消息队列的连接
 func IsMqConnectionError(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_MQ_CONNECTION_ERROR.String() && e.Code == 230
+	return e.Reason == ErrorReason_MQ_CONNECTION_ERROR.String() && e.Code == 500
 }
 
-// 消息队列相关错误
+// =======================================
+// 消息队列错误 (1000-1099)
+// =======================================
 // 无法建立与消息队列的连接
 func ErrorMqConnectionError(format string, args ...interface{}) *errors.Error {
-	return errors.New(230, ErrorReason_MQ_CONNECTION_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_MQ_CONNECTION_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 向消息队列发送消息失败
@@ -687,12 +1217,12 @@ func IsMqSendError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_MQ_SEND_ERROR.String() && e.Code == 231
+	return e.Reason == ErrorReason_MQ_SEND_ERROR.String() && e.Code == 500
 }
 
 // 向消息队列发送消息失败
 func ErrorMqSendError(format string, args ...interface{}) *errors.Error {
-	return errors.New(231, ErrorReason_MQ_SEND_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_MQ_SEND_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 从消息队列接收消息失败
@@ -701,28 +1231,32 @@ func IsMqReceiveError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_MQ_RECEIVE_ERROR.String() && e.Code == 232
+	return e.Reason == ErrorReason_MQ_RECEIVE_ERROR.String() && e.Code == 500
 }
 
 // 从消息队列接收消息失败
 func ErrorMqReceiveError(format string, args ...interface{}) *errors.Error {
-	return errors.New(232, ErrorReason_MQ_RECEIVE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_MQ_RECEIVE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
-// 第三方服务相关错误
+// =======================================
+// 第三方服务错误 (1100-1199)
+// =======================================
 // 调用第三方服务时发生错误
 func IsThirdPartyServiceError(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_THIRD_PARTY_SERVICE_ERROR.String() && e.Code == 240
+	return e.Reason == ErrorReason_THIRD_PARTY_SERVICE_ERROR.String() && e.Code == 500
 }
 
-// 第三方服务相关错误
+// =======================================
+// 第三方服务错误 (1100-1199)
+// =======================================
 // 调用第三方服务时发生错误
 func ErrorThirdPartyServiceError(format string, args ...interface{}) *errors.Error {
-	return errors.New(240, ErrorReason_THIRD_PARTY_SERVICE_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, ErrorReason_THIRD_PARTY_SERVICE_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
 // 调用第三方服务时超时，未在规定时间内得到响应
@@ -731,12 +1265,12 @@ func IsThirdPartyTimeout(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_THIRD_PARTY_TIMEOUT.String() && e.Code == 241
+	return e.Reason == ErrorReason_THIRD_PARTY_TIMEOUT.String() && e.Code == 504
 }
 
 // 调用第三方服务时超时，未在规定时间内得到响应
 func ErrorThirdPartyTimeout(format string, args ...interface{}) *errors.Error {
-	return errors.New(241, ErrorReason_THIRD_PARTY_TIMEOUT.String(), fmt.Sprintf(format, args...))
+	return errors.New(504, ErrorReason_THIRD_PARTY_TIMEOUT.String(), fmt.Sprintf(format, args...))
 }
 
 // 调用第三方服务时未获得授权
@@ -745,10 +1279,10 @@ func IsThirdPartyUnauthorized(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_THIRD_PARTY_UNAUTHORIZED.String() && e.Code == 242
+	return e.Reason == ErrorReason_THIRD_PARTY_UNAUTHORIZED.String() && e.Code == 401
 }
 
 // 调用第三方服务时未获得授权
 func ErrorThirdPartyUnauthorized(format string, args ...interface{}) *errors.Error {
-	return errors.New(242, ErrorReason_THIRD_PARTY_UNAUTHORIZED.String(), fmt.Sprintf(format, args...))
+	return errors.New(401, ErrorReason_THIRD_PARTY_UNAUTHORIZED.String(), fmt.Sprintf(format, args...))
 }

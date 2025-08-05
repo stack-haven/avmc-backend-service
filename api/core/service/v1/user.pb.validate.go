@@ -63,124 +63,35 @@ func (m *User) validate(all bool) error {
 	// no validation rules for Id
 
 	if m.Name != nil {
-
-		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 10 {
-			err := UserValidationError{
-				field:  "Name",
-				reason: "value length must be between 1 and 10 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Name
 	}
 
 	if m.Password != nil {
-
-		if l := utf8.RuneCountInString(m.GetPassword()); l < 6 || l > 28 {
-			err := UserValidationError{
-				field:  "Password",
-				reason: "value length must be between 6 and 28 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Password
 	}
 
 	if m.Nickname != nil {
-
-		if l := utf8.RuneCountInString(m.GetNickname()); l < 1 || l > 10 {
-			err := UserValidationError{
-				field:  "Nickname",
-				reason: "value length must be between 1 and 10 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Nickname
 	}
 
 	if m.Realname != nil {
-
-		if l := utf8.RuneCountInString(m.GetRealname()); l < 2 || l > 10 {
-			err := UserValidationError{
-				field:  "Realname",
-				reason: "value length must be between 2 and 10 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Realname
 	}
 
 	if m.Birthday != nil {
-
-		if !_User_Birthday_Pattern.MatchString(m.GetBirthday()) {
-			err := UserValidationError{
-				field:  "Birthday",
-				reason: "value does not match regex pattern \"^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$\"",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Birthday
 	}
 
 	if m.Gender != nil {
-
-		if _, ok := enum.Gender_name[int32(m.GetGender())]; !ok {
-			err := UserValidationError{
-				field:  "Gender",
-				reason: "value must be one of the defined enum values",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Gender
 	}
 
 	if m.Phone != nil {
-
-		if !_User_Phone_Pattern.MatchString(m.GetPhone()) {
-			err := UserValidationError{
-				field:  "Phone",
-				reason: "value does not match regex pattern \"^1[0-9]{10}$\"",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Phone
 	}
 
 	if m.Email != nil {
-
-		if err := m._validateEmail(m.GetEmail()); err != nil {
-			err = UserValidationError{
-				field:  "Email",
-				reason: "value must be a valid email address",
-				cause:  err,
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Email
 	}
 
 	if m.Avatar != nil {
@@ -188,18 +99,7 @@ func (m *User) validate(all bool) error {
 	}
 
 	if m.Status != nil {
-
-		if _, ok := enum.Status_name[int32(m.GetStatus())]; !ok {
-			err := UserValidationError{
-				field:  "Status",
-				reason: "value must be one of the defined enum values",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Status
 	}
 
 	if m.CreatedAt != nil {
@@ -219,56 +119,6 @@ func (m *User) validate(all bool) error {
 	}
 
 	return nil
-}
-
-func (m *User) _validateHostname(host string) error {
-	s := strings.ToLower(strings.TrimSuffix(host, "."))
-
-	if len(host) > 253 {
-		return errors.New("hostname cannot exceed 253 characters")
-	}
-
-	for _, part := range strings.Split(s, ".") {
-		if l := len(part); l == 0 || l > 63 {
-			return errors.New("hostname part must be non-empty and cannot exceed 63 characters")
-		}
-
-		if part[0] == '-' {
-			return errors.New("hostname parts cannot begin with hyphens")
-		}
-
-		if part[len(part)-1] == '-' {
-			return errors.New("hostname parts cannot end with hyphens")
-		}
-
-		for _, r := range part {
-			if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' {
-				return fmt.Errorf("hostname parts can only contain alphanumeric characters or hyphens, got %q", string(r))
-			}
-		}
-	}
-
-	return nil
-}
-
-func (m *User) _validateEmail(addr string) error {
-	a, err := mail.ParseAddress(addr)
-	if err != nil {
-		return err
-	}
-	addr = a.Address
-
-	if len(addr) > 254 {
-		return errors.New("email addresses cannot exceed 254 characters")
-	}
-
-	parts := strings.SplitN(addr, "@", 2)
-
-	if len(parts[0]) > 64 {
-		return errors.New("email address local phrase cannot exceed 64 characters")
-	}
-
-	return m._validateHostname(parts[1])
 }
 
 // UserMultiError is an error wrapping multiple validation errors returned by
@@ -340,10 +190,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UserValidationError{}
-
-var _User_Birthday_Pattern = regexp.MustCompile("^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$")
-
-var _User_Phone_Pattern = regexp.MustCompile("^1[0-9]{10}$")
 
 // Validate checks the field values on CreateUserRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the

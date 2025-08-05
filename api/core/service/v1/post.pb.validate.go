@@ -63,33 +63,11 @@ func (m *Post) validate(all bool) error {
 	// no validation rules for Id
 
 	if m.Name != nil {
-
-		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 20 {
-			err := PostValidationError{
-				field:  "Name",
-				reason: "value length must be between 1 and 20 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Name
 	}
 
 	if m.Status != nil {
-
-		if _, ok := enum.Status_name[int32(m.GetStatus())]; !ok {
-			err := PostValidationError{
-				field:  "Status",
-				reason: "value must be one of the defined enum values",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Status
 	}
 
 	if m.Sort != nil {
@@ -236,7 +214,9 @@ func (m *CreatePostRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for OperatorId
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
 
 	if len(errors) > 0 {
 		return CreatePostRequestMultiError(errors)
@@ -473,7 +453,9 @@ func (m *UpdatePostRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for OperatorId
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
 
 	if len(errors) > 0 {
 		return UpdatePostRequestMultiError(errors)
@@ -681,7 +663,9 @@ func (m *DeletePostRequest) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for OperatorId
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
 
 	if len(errors) > 0 {
 		return DeletePostRequestMultiError(errors)

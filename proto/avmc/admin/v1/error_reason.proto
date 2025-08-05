@@ -12,123 +12,224 @@ option objc_class_prefix = "RESOURCEapiV1";
 enum ErrorReason {
   // 设置缺省错误码为500
   option (errors.default_code) = 500;
-  // 客户端请求格式错误，服务器无法理解
-  BAD_REQUEST = 0 [(errors.code) = 400];
+
+  // =======================================
+   // HTTP标准错误 (0-99)
+   // =======================================
+   // 保留的默认错误值
+   RESERVED_DEFAULT = 0 [(errors.code) = 500];
+   // 客户端请求格式错误，服务器无法理解
+   BAD_REQUEST = 1 [(errors.code) = 400];
   // 用户未登录，尝试访问需要认证的资源
-  NOT_LOGGED_IN = 1 [(errors.code) = 401];
+  NOT_LOGGED_IN = 2 [(errors.code) = 401];
   // 用户没有权限访问请求的资源
-  ACCESS_FORBIDDEN = 2 [(errors.code) = 403];
+  ACCESS_FORBIDDEN = 3 [(errors.code) = 403];
   // 请求的资源在服务器上不存在
-  RESOURCE_NOT_FOUND = 3 [(errors.code) = 404];
+  RESOURCE_NOT_FOUND = 4 [(errors.code) = 404];
   // 请求的方法不被资源支持
-  METHOD_NOT_ALLOWED = 4 [(errors.code) = 405];
+  METHOD_NOT_ALLOWED = 5 [(errors.code) = 405];
   // 客户端请求超时，服务器未在规定时间内收到完整请求
-  REQUEST_TIMEOUT = 5 [(errors.code) = 408];
-
+  REQUEST_TIMEOUT = 6 [(errors.code) = 408];
   // 服务器内部发生错误，无法完成请求
-  INTERNAL_SERVER_ERROR = 10 [(errors.code) = 500];
+  INTERNAL_SERVER_ERROR = 7 [(errors.code) = 500];
   // 请求的功能尚未在服务器上实现
-  NOT_IMPLEMENTED = 11 [(errors.code) = 501];
+  NOT_IMPLEMENTED = 8 [(errors.code) = 501];
   // 网络连接出现问题，无法与其他服务通信
-  NETWORK_ERROR = 12 [(errors.code) = 502];
+  NETWORK_ERROR = 9 [(errors.code) = 502];
   // 服务器当前无法处理请求，可能处于过载或维护状态
-  SERVICE_UNAVAILABLE = 13 [(errors.code) = 503];
+  SERVICE_UNAVAILABLE = 10 [(errors.code) = 503];
   // 网络请求超时，与其他服务通信时未在规定时间内得到响应
-  NETWORK_TIMEOUT = 14 [(errors.code) = 504];
+  NETWORK_TIMEOUT = 11 [(errors.code) = 504];
   // 服务器不支持请求的协议版本或功能
-  REQUEST_NOT_SUPPORT = 15 [(errors.code) = 505];
-  
-  // 认证相关错误
+  REQUEST_NOT_SUPPORT = 12 [(errors.code) = 505];
+
+  // =======================================
+  // 认证与授权错误 (100-199)
+  // =======================================
   // 认证令牌已过期，需要重新获取
-  AUTH_TOKEN_EXPIRED = 30 [(errors.code) = 103];
+  AUTH_TOKEN_EXPIRED = 100 [(errors.code) = 401];
   // 提供的认证令牌无效，可能格式错误或已被撤销
-  AUTH_INVALID_TOKEN = 31 [(errors.code) = 104];
+  AUTH_INVALID_TOKEN = 101 [(errors.code) = 401];
   // 请求中未包含认证令牌
-  AUTH_TOKEN_NOT_EXIST = 32 [(errors.code) = 105];
+  AUTH_TOKEN_NOT_EXIST = 102 [(errors.code) = 401];
+  // 认证失败，用户名或密码错误
+  AUTH_FAILED = 103 [(errors.code) = 401];
+  // 授权失败，用户没有足够权限
+  AUTHORIZATION_FAILED = 104 [(errors.code) = 403];
+  // 权限不足，无法执行操作
+  PERMISSION_DENIED = 105 [(errors.code) = 403];
+  // 会话已过期，需要重新登录
+  SESSION_EXPIRED = 106 [(errors.code) = 401];
+  // 账号已在其他地方登录
+  ACCOUNT_LOGGED_IN_ELSEWHERE = 107 [(errors.code) = 401];
 
-  // 用户相关错误
+  // =======================================
+  // 用户管理错误 (200-299)
+  // =======================================
   // 未找到指定的用户记录
-  USER_NOT_FOUND = 50 [(errors.code) = 110];
+  USER_NOT_FOUND = 200 [(errors.code) = 404];
   // 用户不存在于系统中
-  USER_NOT_EXIST = 51 [(errors.code) = 112];
+  USER_NOT_EXIST = 201 [(errors.code) = 404];
   // 用户输入的密码错误
-  USER_INCORRECT_PASSWORD = 52 [(errors.code) = 113];
+  USER_INCORRECT_PASSWORD = 202 [(errors.code) = 400];
   // 用户账户已被冻结，无法进行操作
-  USER_FREEZE = 53 [(errors.code) = 114];
+  USER_FROZEN = 203 [(errors.code) = 403];
   // 提供的用户ID无效，可能格式错误或不存在
-  USER_INVALID_ID = 54 [(errors.code) = 115];
+  USER_INVALID_ID = 204 [(errors.code) = 400];
   // 尝试创建的用户已经存在于系统中
-  USER_ALREADY_EXISTS = 56 [(errors.code) = 117];
+  USER_ALREADY_EXISTS = 205 [(errors.code) = 400];
   // 用户邮箱未经过验证
-  USER_EMAIL_UNVERIFIED = 57 [(errors.code) = 118];
+  USER_EMAIL_UNVERIFIED = 206 [(errors.code) = 403];
   // 用户手机号未经过验证
-  USER_PHONE_UNVERIFIED = 58 [(errors.code) = 119];
+  USER_PHONE_UNVERIFIED = 207 [(errors.code) = 403];
   // 用户账户已被锁定，可能由于多次尝试失败
-  USER_ACCOUNT_LOCKED = 59 [(errors.code) = 120];
+  USER_ACCOUNT_LOCKED = 208 [(errors.code) = 403];
   // 用户登录尝试次数过多，账户暂时被锁定
-  USER_TOO_MANY_LOGIN_ATTEMPTS = 60 [(errors.code) = 121];
+  USER_TOO_MANY_LOGIN_ATTEMPTS = 209 [(errors.code) = 403];
   // 用户密码已过期，需要重置
-  USER_PASSWORD_EXPIRED = 61 [(errors.code) = 122];
+  USER_PASSWORD_EXPIRED = 210 [(errors.code) = 403];
   // 用户必须重置密码才能继续使用账户
-  USER_MUST_RESET_PASSWORD = 62 [(errors.code) = 123];
-  // 用户没有足够的权限执行请求的操作
-  USER_PERMISSION_DENIED = 63 [(errors.code) = 124];
+  USER_MUST_RESET_PASSWORD = 211 [(errors.code) = 403];
   // 用户账户已被禁用
-  USER_DISABLED = 64 [(errors.code) = 125];
+  USER_DISABLED = 212 [(errors.code) = 403];
   // 用户注册功能已被禁用
-  USER_REGISTRATION_DISABLED = 65 [(errors.code) = 126];
+  USER_REGISTRATION_DISABLED = 213 [(errors.code) = 403];
   // 用户提供的邮箱格式无效
-  USER_INVALID_EMAIL_FORMAT = 66 [(errors.code) = 127];
+  USER_INVALID_EMAIL_FORMAT = 214 [(errors.code) = 400];
   // 用户提供的手机号格式无效
-  USER_INVALID_PHONE_FORMAT = 67 [(errors.code) = 128];
+  USER_INVALID_PHONE_FORMAT = 215 [(errors.code) = 400];
   // 用户社交登录失败
-  USER_SOCIAL_LOGIN_FAILED = 68 [(errors.code) = 129];
+  USER_SOCIAL_LOGIN_FAILED = 216 [(errors.code) = 400];
 
-  // 数据库相关错误
+  // =======================================
+  // 角色管理错误 (300-399)
+  // =======================================
+  // 角色不存在
+  ROLE_NOT_FOUND = 300 [(errors.code) = 404];
+  // 角色ID无效
+  ROLE_INVALID_ID = 301 [(errors.code) = 400];
+  // 角色已存在
+  ROLE_ALREADY_EXISTS = 302 [(errors.code) = 400];
+  // 无法删除系统内置角色
+  ROLE_CANNOT_DELETE_BUILTIN = 303 [(errors.code) = 403];
+  // 角色名称不能为空
+  ROLE_NAME_CANNOT_BE_EMPTY = 304 [(errors.code) = 400];
+  // 角色描述不能为空
+  ROLE_DESCRIPTION_CANNOT_BE_EMPTY = 305 [(errors.code) = 400];
+  // 角色权限设置无效
+  ROLE_PERMISSION_INVALID = 306 [(errors.code) = 400];
+
+  // =======================================
+  // 岗位管理错误 (400-499)
+  // =======================================
+  // 岗位不存在
+  POST_NOT_FOUND = 400 [(errors.code) = 404];
+  // 岗位ID无效
+  POST_INVALID_ID = 401 [(errors.code) = 400];
+  // 岗位已存在
+  POST_ALREADY_EXISTS = 402 [(errors.code) = 400];
+  // 岗位名称不能为空
+  POST_NAME_CANNOT_BE_EMPTY = 403 [(errors.code) = 400];
+  // 岗位描述不能为空
+  POST_DESCRIPTION_CANNOT_BE_EMPTY = 404 [(errors.code) = 400];
+
+  // =======================================
+  // 菜单管理错误 (500-599)
+  // =======================================
+  // 菜单不存在
+  MENU_NOT_FOUND = 500 [(errors.code) = 404];
+  // 菜单ID无效
+  MENU_INVALID_ID = 501 [(errors.code) = 400];
+  // 菜单已存在
+  MENU_ALREADY_EXISTS = 502 [(errors.code) = 400];
+  // 菜单名称不能为空
+  MENU_NAME_CANNOT_BE_EMPTY = 503 [(errors.code) = 400];
+  // 菜单路径不能为空
+  MENU_PATH_CANNOT_BE_EMPTY = 504 [(errors.code) = 400];
+  // 菜单组件不能为空
+  MENU_COMPONENT_CANNOT_BE_EMPTY = 505 [(errors.code) = 400];
+  // 无法删除有子菜单的菜单
+  MENU_CANNOT_DELETE_WITH_CHILDREN = 506 [(errors.code) = 403];
+
+  // =======================================
+  // 部门管理错误 (600-699)
+  // =======================================
+  // 部门不存在
+  DEPT_NOT_FOUND = 600 [(errors.code) = 404];
+  // 部门ID无效
+  DEPT_INVALID_ID = 601 [(errors.code) = 400];
+  // 部门已存在
+  DEPT_ALREADY_EXISTS = 602 [(errors.code) = 400];
+  // 部门名称不能为空
+  DEPT_NAME_CANNOT_BE_EMPTY = 603 [(errors.code) = 400];
+  // 无法删除有子部门的部门
+  DEPT_CANNOT_DELETE_WITH_CHILDREN = 604 [(errors.code) = 403];
+  // 无法删除包含用户的部门
+  DEPT_CANNOT_DELETE_WITH_USERS = 605 [(errors.code) = 403];
+
+  // =======================================
+  // 数据层错误 (700-799)
+  // =======================================
   // 无法建立与数据库的连接
-  DB_CONNECTION_ERROR = 100 [(errors.code) = 200];
+  DB_CONNECTION_ERROR = 700 [(errors.code) = 500];
   // 数据库查询操作失败
-  DB_QUERY_ERROR = 101 [(errors.code) = 201];
+  DB_QUERY_ERROR = 701 [(errors.code) = 500];
   // 数据库插入操作失败
-  DB_INSERT_ERROR = 102 [(errors.code) = 202];
+  DB_INSERT_ERROR = 702 [(errors.code) = 500];
   // 数据库更新操作失败
-  DB_UPDATE_ERROR = 103 [(errors.code) = 203];
+  DB_UPDATE_ERROR = 703 [(errors.code) = 500];
   // 数据库删除操作失败
-  DB_DELETE_ERROR = 104 [(errors.code) = 204];
+  DB_DELETE_ERROR = 704 [(errors.code) = 500];
+  // 数据库事务执行失败
+  DB_TRANSACTION_ERROR = 705 [(errors.code) = 500];
+  // 数据校验失败
+  DATA_VALIDATION_ERROR = 706 [(errors.code) = 400];
 
-  // 缓存相关错误
+  // =======================================
+  // 缓存错误 (800-899)
+  // =======================================
   // 无法建立与缓存服务的连接
-  CACHE_CONNECTION_ERROR = 110 [(errors.code) = 210];
+  CACHE_CONNECTION_ERROR = 800 [(errors.code) = 500];
   // 从缓存中获取数据失败
-  CACHE_GET_ERROR = 111 [(errors.code) = 211];
+  CACHE_GET_ERROR = 801 [(errors.code) = 500];
   // 向缓存中设置数据失败
-  CACHE_SET_ERROR = 112 [(errors.code) = 212];
+  CACHE_SET_ERROR = 802 [(errors.code) = 500];
   // 从缓存中删除数据失败
-  CACHE_DELETE_ERROR = 113 [(errors.code) = 213];
+  CACHE_DELETE_ERROR = 803 [(errors.code) = 500];
 
-  // 文件操作相关错误
+  // =======================================
+  // 文件操作错误 (900-999)
+  // =======================================
   // 读取文件时发生错误
-  FILE_READ_ERROR = 120 [(errors.code) = 220];
+  FILE_READ_ERROR = 900 [(errors.code) = 500];
   // 写入文件时发生错误
-  FILE_WRITE_ERROR = 121 [(errors.code) = 221];
+  FILE_WRITE_ERROR = 901 [(errors.code) = 500];
   // 删除文件时发生错误
-  FILE_DELETE_ERROR = 122 [(errors.code) = 222];
+  FILE_DELETE_ERROR = 902 [(errors.code) = 500];
   // 请求的文件在系统中不存在
-  FILE_NOT_FOUND = 123 [(errors.code) = 223];
+  FILE_NOT_FOUND = 903 [(errors.code) = 404];
+  // 文件大小超过限制
+  FILE_SIZE_EXCEEDED = 904 [(errors.code) = 400];
+  // 文件格式不支持
+  FILE_FORMAT_NOT_SUPPORTED = 905 [(errors.code) = 400];
 
-  // 消息队列相关错误
+  // =======================================
+  // 消息队列错误 (1000-1099)
+  // =======================================
   // 无法建立与消息队列的连接
-  MQ_CONNECTION_ERROR = 130 [(errors.code) = 230];
+  MQ_CONNECTION_ERROR = 1000 [(errors.code) = 500];
   // 向消息队列发送消息失败
-  MQ_SEND_ERROR = 131 [(errors.code) = 231];
+  MQ_SEND_ERROR = 1001 [(errors.code) = 500];
   // 从消息队列接收消息失败
-  MQ_RECEIVE_ERROR = 132 [(errors.code) = 232];
+  MQ_RECEIVE_ERROR = 1002 [(errors.code) = 500];
 
-  // 第三方服务相关错误
+  // =======================================
+  // 第三方服务错误 (1100-1199)
+  // =======================================
   // 调用第三方服务时发生错误
-  THIRD_PARTY_SERVICE_ERROR = 140 [(errors.code) = 240];
+  THIRD_PARTY_SERVICE_ERROR = 1100 [(errors.code) = 500];
   // 调用第三方服务时超时，未在规定时间内得到响应
-  THIRD_PARTY_TIMEOUT = 141 [(errors.code) = 241];
+  THIRD_PARTY_TIMEOUT = 1101 [(errors.code) = 504];
   // 调用第三方服务时未获得授权
-  THIRD_PARTY_UNAUTHORIZED = 142 [(errors.code) = 242];
+  THIRD_PARTY_UNAUTHORIZED = 1102 [(errors.code) = 401];
 }

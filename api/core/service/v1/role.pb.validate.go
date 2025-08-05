@@ -63,33 +63,11 @@ func (m *Role) validate(all bool) error {
 	// no validation rules for Id
 
 	if m.Name != nil {
-
-		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 20 {
-			err := RoleValidationError{
-				field:  "Name",
-				reason: "value length must be between 1 and 20 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Name
 	}
 
 	if m.Status != nil {
-
-		if _, ok := enum.Status_name[int32(m.GetStatus())]; !ok {
-			err := RoleValidationError{
-				field:  "Status",
-				reason: "value must be one of the defined enum values",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Status
 	}
 
 	if m.Sort != nil {

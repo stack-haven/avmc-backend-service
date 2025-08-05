@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -118,6 +119,9 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 		Where(post.IDEQ(id), post.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询岗位失败，ID：%d，错误：%v", id, err)
+		if ent.IsNotFound(err) {
+			return nil, errors.New("查询数据不存在")
+		}
 		return nil, err
 	}
 	return r.toProto(res), nil

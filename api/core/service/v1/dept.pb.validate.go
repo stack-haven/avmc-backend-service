@@ -17,6 +17,8 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/protobuf/types/known/anypb"
+
+	enum "backend-service/api/common/enum"
 )
 
 // ensure the imports are used
@@ -33,6 +35,8 @@ var (
 	_ = (*mail.Address)(nil)
 	_ = anypb.Any{}
 	_ = sort.Sort
+
+	_ = enum.Status(0)
 )
 
 // Validate checks the field values on Dept with the rules defined in the proto
@@ -59,18 +63,7 @@ func (m *Dept) validate(all bool) error {
 	// no validation rules for Id
 
 	if m.Name != nil {
-
-		if l := utf8.RuneCountInString(m.GetName()); l < 1 || l > 20 {
-			err := DeptValidationError{
-				field:  "Name",
-				reason: "value length must be between 1 and 20 runes, inclusive",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
-		}
-
+		// no validation rules for Name
 	}
 
 	if m.ParentId != nil {
@@ -85,8 +78,8 @@ func (m *Dept) validate(all bool) error {
 		// no validation rules for Sort
 	}
 
-	if m.State != nil {
-		// no validation rules for State
+	if m.Status != nil {
+		// no validation rules for Status
 	}
 
 	if m.Remark != nil {

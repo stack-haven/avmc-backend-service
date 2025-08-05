@@ -33,23 +33,29 @@ message Dept {
   uint32 id = 1;
   // 部门名称
   optional string name = 2 [
-    (validate.rules).string = {min_len: 1, max_len: 20}, 
-    (buf.validate.field).string.min_len = 1,
-    (buf.validate.field).string.max_len = 20,
+    (buf.validate.field).string = {min_len: 1, max_len: 20},
     (gnostic.openapi.v3.property) = {description: "部门名称"}
   ];
   // 父部门ID
-  optional uint32 parent_id = 3;
+  optional uint32 parent_id = 3 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "父部门ID"}
+  ];
   // 部门领导ID
-  optional uint32 leader_id = 4;
+  optional uint32 leader_id = 4 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "部门领导ID"}
+  ];
   // 排序字段
   optional int32 sort = 5 [
-    (buf.validate.field).int32.gte = 0,
-    (buf.validate.field).int32.lte = 100,
+    (buf.validate.field).int32 = {gte: 0, lte: 100},
     (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
   ];
-  // 部门状态 1 激活 2 未激活 3 禁用
-  optional int32 state = 6 [(gnostic.openapi.v3.property) = {description: "部门状态 1 激活 2 未激活 3 禁用"}];
+  // 部门状态 1 启用 2 禁用
+  optional enum.Status status = 6 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "部门状态 1 启用 2 禁用", default: {number: 1}}
+  ];
   // 部门描述
   optional string remark = 7 [
     (buf.validate.field).string.max_len = 200,
@@ -67,8 +73,14 @@ message Dept {
 
 // 创建部门请求
 message CreateDeptRequest {
-  Dept dept = 1 [(buf.validate.field).required = true];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  Dept dept = 1 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "部门信息"}
+  ];
+  uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 创建部门响应
 message CreateDeptResponse {
@@ -76,9 +88,18 @@ message CreateDeptResponse {
 
 // 更新部门请求
 message UpdateDeptRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  Dept dept = 2 [(buf.validate.field).required = true];
-  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "部门ID"}
+  ];
+  Dept dept = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "部门信息"}
+  ];
+  uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 更新部门响应
 message UpdateDeptResponse {
@@ -86,8 +107,14 @@ message UpdateDeptResponse {
 
 // 删除部门请求
 message DeleteDeptRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "部门ID"}
+  ];
+  uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 // 删除部门响应
 message DeleteDeptResponse {
@@ -95,7 +122,10 @@ message DeleteDeptResponse {
 
 // 获取部门请求
 message GetDeptRequest {
-  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "部门ID"}
+  ];
 }
 // 获取部门响应
 message GetDeptResponse {

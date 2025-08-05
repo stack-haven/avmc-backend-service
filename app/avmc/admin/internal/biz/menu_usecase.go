@@ -25,37 +25,68 @@ type MenuRepo interface {
 }
 
 // MenuUsecase is a Menu usecase.
+// 包含菜单仓库和日志记录器
 type MenuUsecase struct {
 	repo MenuRepo
 	log  *log.Helper
 }
 
 // NewMenuUsecase new a Menu usecase.
+// 参数：repo 菜单仓库，logger 日志记录器
+// 返回值：菜单用例实例指针
 func NewMenuUsecase(repo MenuRepo, logger log.Logger) *MenuUsecase {
 	return &MenuUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
+// Create 处理创建菜单请求
+// 参数：ctx 上下文，g 菜单信息
+// 返回值：创建后的菜单信息，错误信息
 func (uc *MenuUsecase) Create(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
 	uc.log.WithContext(ctx).Infof("CreateMenu: %v", g.Name)
 	return uc.repo.Save(ctx, g)
 }
 
+// Get 处理获取菜单详情请求
+// 参数：ctx 上下文，id 菜单ID
+// 返回值：菜单详情，错误信息
 func (uc *MenuUsecase) Get(ctx context.Context, id uint32) (*pbCore.Menu, error) {
 	return uc.repo.FindByID(ctx, id)
 }
 
+// Update 处理更新菜单请求
+// 参数：ctx 上下文，g 菜单信息
+// 返回值：更新后的菜单信息，错误信息
 func (uc *MenuUsecase) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
+	uc.log.WithContext(ctx).Infof("UpdateMenu: %v", g.Name)
+	_, err := uc.repo.FindByID(ctx, g.GetId())
+	if err != nil {
+		return nil, err
+	}
 	return uc.repo.Update(ctx, g)
 }
 
+// ListSimple 处理获取菜单简单列表请求
+// 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
+// 返回值：菜单列表，错误信息
 func (uc *MenuUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) ([]*pbCore.Menu, error) {
 	return uc.repo.ListAll(ctx)
 }
 
+// ListPage 处理获取菜单分页列表请求
+// 参数：ctx 上下文，pagination 分页请求
+// 返回值：菜单列表响应，错误信息
 func (uc *MenuUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) {
 	return uc.repo.ListPage(ctx, pagination)
 }
 
+// Delete 处理删除菜单请求
+// 参数：ctx 上下文，id 菜单ID
+// 返回值：错误信息
 func (uc *MenuUsecase) Delete(ctx context.Context, id uint32) error {
+	uc.log.WithContext(ctx).Infof("DeleteMenu: %v", id)
+	_, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
 	return uc.repo.Delete(ctx, id)
 }
