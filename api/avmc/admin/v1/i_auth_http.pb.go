@@ -19,13 +19,18 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationAuthServiceLogin = "/avmc.admin.v1.AuthService/Login"
+const OperationAuthServiceCodes = "/avmc.admin.v1.AuthService/Codes"
+const OperationAuthServiceLoginCode = "/avmc.admin.v1.AuthService/LoginCode"
+const OperationAuthServiceLoginPassword = "/avmc.admin.v1.AuthService/LoginPassword"
 const OperationAuthServiceLogout = "/avmc.admin.v1.AuthService/Logout"
 const OperationAuthServiceProfile = "/avmc.admin.v1.AuthService/Profile"
 const OperationAuthServiceRefreshToken = "/avmc.admin.v1.AuthService/RefreshToken"
 
 type AuthServiceHTTPServer interface {
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	// Codes 登录用户权限码
+	Codes(context.Context, *CodesRequest) (*CodesResponse, error)
+	LoginCode(context.Context, *LoginRequest) (*LoginResponse, error)
+	LoginPassword(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Logout 后台登出
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	// Profile 登录用户信息
@@ -38,24 +43,48 @@ type AuthServiceHTTPServer interface {
 
 func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/admin/v1/auth/login", _AuthService_Login0_HTTP_Handler(srv))
+	r.POST("/admin/v1/auth/login/password", _AuthService_LoginPassword0_HTTP_Handler(srv))
+	r.POST("/admin/v1/auth/login/code", _AuthService_LoginCode0_HTTP_Handler(srv))
 	r.POST("/admin/v1/auth/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
 	r.POST("/admin/v1/auth/logout", _AuthService_Logout0_HTTP_Handler(srv))
 	r.GET("/admin/v1/auth/profile", _AuthService_Profile0_HTTP_Handler(srv))
+	r.GET("/admin/v1/auth/codes", _AuthService_Codes0_HTTP_Handler(srv))
 }
 
-func _AuthService_Login0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
+func _AuthService_LoginPassword0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in LoginRequest
-		if err := ctx.Bind(&in); err != nil {
+		if err := ctx.Bind(&in.Password); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationAuthServiceLogin)
+		http.SetOperation(ctx, OperationAuthServiceLoginPassword)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Login(ctx, req.(*LoginRequest))
+			return srv.LoginPassword(ctx, req.(*LoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthService_LoginCode0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LoginRequest
+		if err := ctx.Bind(&in.Code); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthServiceLoginCode)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.LoginCode(ctx, req.(*LoginRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -129,8 +158,29 @@ func _AuthService_Profile0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http
 	}
 }
 
+func _AuthService_Codes0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CodesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthServiceCodes)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Codes(ctx, req.(*CodesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CodesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AuthServiceHTTPClient interface {
-	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
+	Codes(ctx context.Context, req *CodesRequest, opts ...http.CallOption) (rsp *CodesResponse, err error)
+	LoginCode(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
+	LoginPassword(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
 	Profile(ctx context.Context, req *ProfileRequest, opts ...http.CallOption) (rsp *ProfileResponse, err error)
 	RefreshToken(ctx context.Context, req *RefreshTokenRequest, opts ...http.CallOption) (rsp *RefreshTokenResponse, err error)
@@ -144,13 +194,39 @@ func NewAuthServiceHTTPClient(client *http.Client) AuthServiceHTTPClient {
 	return &AuthServiceHTTPClientImpl{client}
 }
 
-func (c *AuthServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
-	var out LoginResponse
-	pattern := "/admin/v1/auth/login"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationAuthServiceLogin))
+func (c *AuthServiceHTTPClientImpl) Codes(ctx context.Context, in *CodesRequest, opts ...http.CallOption) (*CodesResponse, error) {
+	var out CodesResponse
+	pattern := "/admin/v1/auth/codes"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAuthServiceCodes))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AuthServiceHTTPClientImpl) LoginCode(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
+	var out LoginResponse
+	pattern := "/admin/v1/auth/login/code"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthServiceLoginCode))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.Code, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AuthServiceHTTPClientImpl) LoginPassword(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
+	var out LoginResponse
+	pattern := "/admin/v1/auth/login/password"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthServiceLoginPassword))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.Password, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

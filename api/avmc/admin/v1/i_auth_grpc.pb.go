@@ -19,10 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_Login_FullMethodName        = "/avmc.admin.v1.AuthService/Login"
-	AuthService_RefreshToken_FullMethodName = "/avmc.admin.v1.AuthService/RefreshToken"
-	AuthService_Logout_FullMethodName       = "/avmc.admin.v1.AuthService/Logout"
-	AuthService_Profile_FullMethodName      = "/avmc.admin.v1.AuthService/Profile"
+	AuthService_LoginPassword_FullMethodName = "/avmc.admin.v1.AuthService/LoginPassword"
+	AuthService_LoginCode_FullMethodName     = "/avmc.admin.v1.AuthService/LoginCode"
+	AuthService_RefreshToken_FullMethodName  = "/avmc.admin.v1.AuthService/RefreshToken"
+	AuthService_Logout_FullMethodName        = "/avmc.admin.v1.AuthService/Logout"
+	AuthService_Profile_FullMethodName       = "/avmc.admin.v1.AuthService/Profile"
+	AuthService_Codes_FullMethodName         = "/avmc.admin.v1.AuthService/Codes"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -31,7 +33,8 @@ const (
 //
 // The greeting service definition.
 type AuthServiceClient interface {
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	LoginPassword(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	LoginCode(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
 	// @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
@@ -40,6 +43,8 @@ type AuthServiceClient interface {
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	// 登录用户信息
 	Profile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*ProfileResponse, error)
+	// 登录用户权限码
+	Codes(ctx context.Context, in *CodesRequest, opts ...grpc.CallOption) (*CodesResponse, error)
 }
 
 type authServiceClient struct {
@@ -50,10 +55,20 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+func (c *authServiceClient) LoginPassword(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, AuthService_Login_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthService_LoginPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) LoginCode(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_LoginCode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,13 +105,24 @@ func (c *authServiceClient) Profile(ctx context.Context, in *ProfileRequest, opt
 	return out, nil
 }
 
+func (c *authServiceClient) Codes(ctx context.Context, in *CodesRequest, opts ...grpc.CallOption) (*CodesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CodesResponse)
+	err := c.cc.Invoke(ctx, AuthService_Codes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 //
 // The greeting service definition.
 type AuthServiceServer interface {
-	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	LoginPassword(context.Context, *LoginRequest) (*LoginResponse, error)
+	LoginCode(context.Context, *LoginRequest) (*LoginResponse, error)
 	// 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
 	// @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
@@ -105,6 +131,8 @@ type AuthServiceServer interface {
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	// 登录用户信息
 	Profile(context.Context, *ProfileRequest) (*ProfileResponse, error)
+	// 登录用户权限码
+	Codes(context.Context, *CodesRequest) (*CodesResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -115,8 +143,11 @@ type AuthServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+func (UnimplementedAuthServiceServer) LoginPassword(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) LoginCode(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginCode not implemented")
 }
 func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
@@ -126,6 +157,9 @@ func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*
 }
 func (UnimplementedAuthServiceServer) Profile(context.Context, *ProfileRequest) (*ProfileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Profile not implemented")
+}
+func (UnimplementedAuthServiceServer) Codes(context.Context, *CodesRequest) (*CodesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Codes not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -148,20 +182,38 @@ func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 	s.RegisterService(&AuthService_ServiceDesc, srv)
 }
 
-func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthService_LoginPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).Login(ctx, in)
+		return srv.(AuthServiceServer).LoginPassword(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_Login_FullMethodName,
+		FullMethod: AuthService_LoginPassword_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).Login(ctx, req.(*LoginRequest))
+		return srv.(AuthServiceServer).LoginPassword(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_LoginCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LoginCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LoginCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LoginCode(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -220,6 +272,24 @@ func _AuthService_Profile_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_Codes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CodesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).Codes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_Codes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).Codes(ctx, req.(*CodesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,8 +298,12 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Login",
-			Handler:    _AuthService_Login_Handler,
+			MethodName: "LoginPassword",
+			Handler:    _AuthService_LoginPassword_Handler,
+		},
+		{
+			MethodName: "LoginCode",
+			Handler:    _AuthService_LoginCode_Handler,
 		},
 		{
 			MethodName: "RefreshToken",
@@ -242,6 +316,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Profile",
 			Handler:    _AuthService_Profile_Handler,
+		},
+		{
+			MethodName: "Codes",
+			Handler:    _AuthService_Codes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

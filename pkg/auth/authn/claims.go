@@ -2,6 +2,7 @@ package authn
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -129,6 +130,36 @@ func AuthUserFromContext(ctx context.Context) (SecurityUser, bool) {
 		return nil, false
 	}
 	return user, true
+}
+
+// GetAuthUserID 从上下文中提取认证用户ID
+// ctx: 上下文
+// 返回: 认证用户ID和是否存在的标志
+func GetAuthUserID(ctx context.Context) uint32 {
+	user, ok := ctx.Value(authUserContextKey).(SecurityUser)
+	if !ok {
+		return 0
+	}
+	ut64, err := strconv.ParseUint(user.GetSubject(), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return uint32(ut64)
+}
+
+// GetAuthUserDomainID 从上下文中提取认证用户域ID
+// ctx: 上下文
+// 返回: 认证用户域ID和是否存在的标志
+func GetAuthUserDomainID(ctx context.Context) uint32 {
+	user, ok := ctx.Value(authUserContextKey).(SecurityUser)
+	if !ok {
+		return 0
+	}
+	domainID, err := strconv.ParseUint(user.GetDomain(), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return uint32(domainID)
 }
 
 // GetSubject 获取主体标识

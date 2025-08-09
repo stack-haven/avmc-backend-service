@@ -1,7 +1,6 @@
 package biz
 
 import (
-	v1 "backend-service/api/avmc/admin/v1"
 	pbPagination "backend-service/api/common/pagination"
 	"context"
 
@@ -9,11 +8,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-)
-
-var (
-	// ErrUserNotFound is user not found.
-	ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
 // UserRepo is a User repo.
@@ -24,9 +18,12 @@ type UserRepo interface {
 	ListByName(context.Context, string) ([]*pbCore.User, error)
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
-	ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
-	ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
-	Delete(ctx context.Context, id uint32) error
+	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
+	ListPageSimple(context.Context, *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
+	Delete(context.Context, uint32) error
+	GetUserExistByName(context.Context, string) (uint32, error)
+	GetUserExistByPhone(context.Context, string) (uint32, error)
+	GetUserExistByEmail(context.Context, string) (uint32, error)
 }
 
 // UserUsecase is a User usecase.
@@ -64,9 +61,10 @@ func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error)
 // 参数：ctx 上下文，g 用户信息
 // 返回值：更新用户响应，错误信息
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	if g.Id == 0 {
+	if g.GetId() == 0 {
 		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
 	}
+	uc.log.WithContext(ctx).Infof("UpdateUser: %v", g.GetId())
 	return uc.repo.Update(ctx, g)
 }
 

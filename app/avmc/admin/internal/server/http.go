@@ -25,7 +25,8 @@ import (
 // NewWhiteListMatcher 创建jwt白名单
 func newHTTPWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]bool)
-	whiteList[v1.OperationAuthServiceLogin] = true
+	whiteList[v1.OperationAuthServiceLoginCode] = true
+	whiteList[v1.OperationAuthServiceLoginPassword] = true
 	whiteList[v1.OperationAuthServiceRefreshToken] = true
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {

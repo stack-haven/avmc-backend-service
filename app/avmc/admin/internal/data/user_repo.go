@@ -59,13 +59,12 @@ func (r *userRepo) toProto(res *ent.User) *pbCore.User {
 // toEnt 转换pbCore.User为ent.User
 func (r *userRepo) toEnt(g *pbCore.User) *ent.User {
 	return &ent.User{
-		ID:       g.GetId(),
-		Name:     g.Name,
-		Email:    g.Email,
-		Nickname: g.Nickname,
-		Realname: g.Realname,
-		Birthday: convert.StringValueToTime(g.Birthday, time.DateOnly),
-		// Birthday:    *convert.StringValueToTime(g.Birthday, time.DateOnly),
+		ID:          g.GetId(),
+		Name:        g.Name,
+		Email:       g.Email,
+		Nickname:    g.Nickname,
+		Realname:    g.Realname,
+		Birthday:    convert.StringValueToTime(g.Birthday, time.DateOnly),
 		Phone:       g.Phone,
 		Avatar:      g.Avatar,
 		Description: g.Description,
@@ -171,13 +170,17 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	r.log.Infof("更新用户，用户信息：%v", g)
 	entUser := r.toEnt(g)
 	builder := r.data.DB(ctx).User.UpdateOneID(g.GetId())
-	id, _ := r.GetUserExistByName(ctx, *entUser.Name)
-	if id > 0 && id != g.GetId() {
-		r.log.Errorf("用户名已存在，用户信息：%v", g)
-		return nil, fmt.Errorf("user name already exists")
+	if g.Name != nil {
+		id, _ := r.GetUserExistByName(ctx, *entUser.Name)
+		if id > 0 && id != g.GetId() {
+			r.log.Errorf("用户名已存在，用户信息：%v", g)
+			return nil, fmt.Errorf("user name already exists")
+		}
+		builder = builder.SetName(*entUser.Name)
 	}
+
 	if entUser.Email != nil {
-		id, _ = r.GetUserExistByEmail(ctx, *entUser.Email)
+		id, _ := r.GetUserExistByEmail(ctx, *entUser.Email)
 		if id > 0 && id != g.GetId() {
 			r.log.Errorf("用户名已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user email already exists")
@@ -185,7 +188,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 		builder = builder.SetNillableEmail(entUser.Email)
 	}
 	if entUser.Phone != nil {
-		id, _ = r.GetUserExistByPhone(ctx, *entUser.Phone)
+		id, _ := r.GetUserExistByPhone(ctx, *entUser.Phone)
 		if id > 0 && id != g.GetId() {
 			r.log.Errorf("手机号已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user phone already exists")
@@ -197,7 +200,6 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 		builder = builder.SetPassword(hashPassword)
 	}
 	res, err := builder.
-		SetName(*entUser.Name).
 		SetNillableNickname(entUser.Nickname).
 		SetNillableRealname(entUser.Realname).
 		SetNillableBirthday(entUser.Birthday).

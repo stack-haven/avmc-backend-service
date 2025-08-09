@@ -32,20 +32,27 @@ func NewAuthServiceService(auc *biz.AuthUsecase, uuc *biz.UserUsecase, logger lo
 // Login 处理后台登录请求
 // 参数：ctx 上下文，req 登录请求
 // 返回值：登录响应，错误信息
-func (s *AuthServiceService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	if req.Name == "" || req.Password == "" {
+func (s *AuthServiceService) LoginPassword(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	loginPassword := req.GetPassword()
+	if loginPassword.GetUsername() == "" || loginPassword.GetPassword() == "" {
 		s.log.Errorf("用户名或密码为空")
 		return nil, pb.ErrorUserIncorrectPassword("用户名或密码为空")
 	}
-
 	// 调用业务逻辑层
-	resp, err := s.auc.Login(ctx, req.GetName(), req.GetPassword(), req.GetDomainId())
+	resp, err := s.auc.Login(ctx, loginPassword.GetUsername(), loginPassword.GetPassword(), req.GetDomainId())
 	if err != nil {
 		s.log.Errorf("登录失败: %v", err)
 		return nil, err
 	}
 
 	return resp, nil
+}
+
+// Login 处理后台登录请求
+// 参数：ctx 上下文，req 登录请求
+// 返回值：登录响应，错误信息
+func (s *AuthServiceService) LoginCode(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	return nil, nil
 }
 
 // RefreshToken 处理刷新令牌请求
@@ -92,4 +99,20 @@ func (s *AuthServiceService) Profile(ctx context.Context, req *pb.ProfileRequest
 	}
 
 	return resp, nil
+}
+
+// Codes 处理登录用户权限码请求
+// 参数：ctx 上下文，req 登录用户权限码请求
+// 返回值：登录用户权限码响应，错误信息
+func (s *AuthServiceService) Codes(ctx context.Context, req *pb.CodesRequest) (*pb.CodesResponse, error) {
+	// 调用业务逻辑层
+	resp, err := s.auc.Codes(ctx)
+	if err != nil {
+		s.log.Errorf("获取登录用户权限码失败: %v", err)
+		return nil, err
+	}
+
+	return &pb.CodesResponse{
+		Codes: resp,
+	}, nil
 }

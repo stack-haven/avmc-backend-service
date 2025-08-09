@@ -6,7 +6,6 @@ doc:
 	@cd ../../../proto && \
 	buf generate --template avmc/admin/v1/buf.openapi.gen.yaml
 
-
 # generate config
 .PHONY: config
 config:
@@ -15,6 +14,13 @@ config:
 	rm -rf internal/conf && \
 	mv proto/common/conf internal && \
 	rm -rf proto
+
+# generate protobuf ts code
+.PHONY: ts
+ts:
+	@cd ../../../proto && \
+	buf generate --template ../app/avmc/admin/buf.typescript.gen.yaml
+
 
 .PHONY: demo
 demo:

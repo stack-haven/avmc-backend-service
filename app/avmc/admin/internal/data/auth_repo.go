@@ -3,11 +3,9 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/user"
-	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 	"context"
-	"errors"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -21,6 +19,7 @@ type authRepo struct {
 	data *Data
 	log  *log.Helper
 	atr  *authTokenRepo
+	ur   *userRepo
 }
 
 // NewAuthRepo 创建新的用户数据仓库实例
@@ -31,6 +30,7 @@ func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo
 		data: data,
 		log:  log.NewHelper(logger),
 		atr:  atr,
+		ur:   NewUserRepo(data, logger).(*userRepo),
 	}
 }
 
@@ -92,14 +92,9 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 // Logout 处理后台登出数据操作
 // 参数：ctx 上下文
 // 返回值：错误信息
-func (r *authRepo) Logout(ctx context.Context) error {
+func (r *authRepo) Logout(ctx context.Context, userId uint32) error {
 	// 这里实现具体的登出数据操作
-	securityUser, success := authn.AuthUserFromContext(ctx)
-	if !success {
-		return errors.New("failed to parse user")
-	}
-	r.log.Infof("尝试登出数据操作，访问令牌：%s", securityUser.GetSubject())
-	userId := convert.StringToUnit32(securityUser.GetSubject())
+	r.log.Infof("尝试登出数据操作，用户ID：%d", userId)
 	return r.atr.RemoveToken(ctx, userId)
 }
 
@@ -116,4 +111,29 @@ func (r *authRepo) Register(ctx context.Context, name, password string) error {
 		return err
 	}
 	return nil
+}
+
+// Profile 获取用户简介信息
+// 参数：ctx 上下文，userId 用户ID
+// 返回值：用户简介信息响应结构体，错误信息
+func (r *authRepo) Profile(ctx context.Context, userId uint32) (*pb.ProfileResponse, error) {
+	// 这里实现具体的获取用户简介信息数据操作
+	r.log.Infof("尝试获取用户简介信息数据操作，用户ID：%d", userId)
+	user, err := r.ur.FindByID(ctx, userId)
+	if err != nil {
+		r.log.Errorf("获取用户简介信息数据操作失败，用户ID：%d，错误：%v", userId, err)
+		return nil, err
+	}
+	return &pb.ProfileResponse{
+		User: user,
+	}, nil
+}
+
+// Codes 获取用户权限码
+// 参数：ctx 上下文，userId 用户ID
+// 返回值：用户权限码响应结构体，错误信息
+func (r *authRepo) Codes(ctx context.Context, userId uint32) ([]string, error) {
+	// 这里实现具体的获取用户权限码数据操作
+	r.log.Infof("尝试获取用户权限码数据操作，用户ID：%d", userId)
+	return nil, nil
 }

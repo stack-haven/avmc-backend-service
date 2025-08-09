@@ -58,19 +58,31 @@ option (gnostic.openapi.v3.document) = {
 
 // The greeting service definition.
 service AuthService {
-  rpc Login (LoginRequest) returns (LoginResponse) {
+  rpc LoginPassword (LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/admin/v1/auth/login"
-      body: "*"
+      post: "/admin/v1/auth/login/password"
+      body: "password"
     };
     option (gnostic.openapi.v3.operation) = {
       // operation_id: "LoginUser"
-      summary: "用户登录"
+      summary: "用户密码登录"
       description: "通过用户名和密码登录认证服务"
       tags: ["认证服务"]
     };
   }
   
+  rpc LoginCode (LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/auth/login/code"
+      body: "code"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      // operation_id: "LoginUser"
+      summary: "用户验证码登录"
+      description: "通过手机号和验证码登录认证服务"
+      tags: ["认证服务"]
+    };
+  }
   // 刷新令牌
   // @param RefreshTokenRequest 请求参数，包含刷新令牌
   // @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
@@ -131,6 +143,29 @@ service AuthService {
       ]
     };
   }
+
+
+  // 登录用户权限码
+  rpc Codes (CodesRequest) returns (CodesResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/auth/codes"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "登录用户权限码";
+      description: "登录用户权限码";
+      tags: ["认证服务"];
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth";
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
 }
 
 // 授权类型
@@ -158,25 +193,39 @@ message Auth {
   ]; // 权限
 }
 
+// 登录密码
+message LoginPassword {
+  string username = 1 [
+    (buf.validate.field).string = {min_len: 1, max_len: 10},
+    (gnostic.openapi.v3.property) = {description: "登录用户名"}
+  ]; // 用户名
+  string password = 2 [
+    (buf.validate.field).string = {min_len: 6, max_len: 25},
+    (gnostic.openapi.v3.property) = {description: "登录密码"}
+  ]; // 密码
+}
+
+// 登录验证码
+message LoginCode {
+  string phone = 1 [
+    (buf.validate.field).string = {min_len: 1, max_len: 10},
+    (gnostic.openapi.v3.property) = {description: "登录手机号"}
+  ]; // 手机号
+  string code = 2 [
+    (buf.validate.field).string = {min_len: 1, max_len: 10},
+    (gnostic.openapi.v3.property) = {description: "登录验证码"}
+  ]; // 验证码
+}
+
 // 用户后台登陆 - 请求
 message LoginRequest {
-  string name = 1 [
-    (validate.rules).string = {min_len: 1, max_len: 10},
-    (buf.validate.field).string = {min_len: 1, max_len: 10},
-    (gnostic.openapi.v3.property) = {description: "登录用户"}
-  ]; // 账号
-  string password = 2 [
-    (validate.rules).string = {min_len: 6, max_len: 25},
-    (buf.validate.field).string = {min_len: 6, max_len: 25},
-    (gnostic.openapi.v3.property) = {description: "密码"}
-  ]; // 密码
+  LoginPassword password = 1;
+  LoginCode code = 2;
   optional uint32 domain_id = 3 [
-    (validate.rules).uint32.gte = 0,
     (buf.validate.field).uint32.gte = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
   optional GrandType grand_type = 4 [
-    (validate.rules).enum = {not_in: 0},
     (gnostic.openapi.v3.property) = {description: "授权类型"}
   ]; // 授权类型，一直为：password
 }
@@ -206,7 +255,6 @@ message LoginResponse {
 // 请求 - 刷新令牌
 message RefreshTokenRequest {
   string refresh_token = 1 [
-    (validate.rules).string.min_len = 1,
     (gnostic.openapi.v3.property) = {description: "刷新令牌"}
   ]; // 刷新令牌
 }
@@ -247,4 +295,14 @@ message ProfileResponse {
   repeated string menus = 4 [
     (gnostic.openapi.v3.property) = {description: "登录用户菜单信息"}
   ]; // 登录用户菜单信息
+}
+
+// 登录用户权限码 - 请求
+message CodesRequest {}
+
+// 登录用户权限码 - 回应
+message CodesResponse {
+  repeated string codes = 1 [
+    (gnostic.openapi.v3.property) = {description: "登录用户权限码"}
+  ]; // 登录用户权限码
 }

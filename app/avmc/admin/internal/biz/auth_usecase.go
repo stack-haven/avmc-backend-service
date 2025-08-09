@@ -2,6 +2,7 @@ package biz
 
 import (
 	v1 "backend-service/api/avmc/admin/v1"
+	"backend-service/pkg/auth/authn"
 	"context"
 	"errors"
 
@@ -17,9 +18,16 @@ var (
 
 // UserRepo is a Greater repo.
 type AuthRepo interface {
+	// Login 登录
 	Login(ctx context.Context, name, password string, domainID uint32) (*v1.LoginResponse, error)
-	Logout(context.Context) error
+	// Logout 登出
+	Logout(context.Context, uint32) error
+	// RefreshToken 刷新令牌
 	RefreshToken(context.Context, string) (*v1.RefreshTokenResponse, error)
+	// Profile 获取用户简介信息
+	Profile(context.Context, uint32) (*v1.ProfileResponse, error)
+	// Codes 获取用户权限码
+	Codes(context.Context, uint32) ([]string, error)
 }
 
 // AuthUsecase 业务用例结构体
@@ -62,8 +70,9 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*
 // 返回值：错误信息
 func (uc *AuthUsecase) Logout(ctx context.Context) error {
 	// 这里实现具体的登出业务逻辑
+	userId := authn.GetAuthUserID(ctx)
 	uc.log.Infof("尝试登出")
-	return uc.repo.Logout(ctx)
+	return uc.repo.Logout(ctx, userId)
 }
 
 // Register 处理注册业务逻辑
@@ -81,6 +90,16 @@ func (uc *AuthUsecase) Register(ctx context.Context, name, password string) erro
 func (uc *AuthUsecase) Profile(ctx context.Context) (*v1.ProfileResponse, error) {
 	// 这里实现具体的登录用户简介信息业务逻辑
 	uc.log.Infof("尝试获取登录用户简介信息")
+	userId := authn.GetAuthUserID(ctx)
+	return uc.repo.Profile(ctx, userId)
+}
 
-	return nil, nil
+// Codes 处理登录用户权限码业务逻辑
+// 参数：ctx 上下文
+// 返回值：登录用户权限码响应结构体，错误信息
+func (uc *AuthUsecase) Codes(ctx context.Context) ([]string, error) {
+	// 这里实现具体的登录用户权限码业务逻辑
+	uc.log.Infof("尝试获取登录用户权限码")
+	userId := authn.GetAuthUserID(ctx)
+	return uc.repo.Codes(ctx, userId)
 }

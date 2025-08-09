@@ -17,19 +17,103 @@ servers:
     - url: https://api.example.com/v1
       description: Production server
 paths:
-    /admin/v1/auth/login:
+    /admin/v1/auth/codes:
+        get:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 登录用户权限码
+            description: 登录用户权限码
+            operationId: AuthService_Codes
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CodesResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/auth/login/code:
         post:
             tags:
                 - AuthService
                 - 认证服务
-            summary: 用户登录
-            description: 通过用户名和密码登录认证服务
-            operationId: AuthService_Login
+            summary: 用户验证码登录
+            description: 通过手机号和验证码登录认证服务
+            operationId: AuthService_LoginCode
+            parameters:
+                - name: password.username
+                  in: query
+                  schema:
+                    type: string
+                - name: password.password
+                  in: query
+                  schema:
+                    type: string
+                - name: domainId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: grandType
+                  in: query
+                  schema:
+                    enum:
+                        - GRAND_TYPE_UNSPECIFIED
+                        - GRAND_TYPE_PASSWORD
+                        - GRAND_TYPE_CODE
+                    type: string
+                    format: enum
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/LoginRequest'
+                            $ref: '#/components/schemas/LoginCode'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/LoginResponse'
+    /admin/v1/auth/login/password:
+        post:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 用户密码登录
+            description: 通过用户名和密码登录认证服务
+            operationId: AuthService_LoginPassword
+            parameters:
+                - name: code.phone
+                  in: query
+                  schema:
+                    type: string
+                - name: code.code
+                  in: query
+                  schema:
+                    type: string
+                - name: domainId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: grandType
+                  in: query
+                  schema:
+                    enum:
+                        - GRAND_TYPE_UNSPECIFIED
+                        - GRAND_TYPE_PASSWORD
+                        - GRAND_TYPE_CODE
+                    type: string
+                    format: enum
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/LoginPassword'
                 required: true
             responses:
                 "200":
@@ -1021,6 +1105,15 @@ paths:
                 - BearerAuth: []
 components:
     schemas:
+        CodesResponse:
+            type: object
+            properties:
+                codes:
+                    type: array
+                    items:
+                        type: string
+                    description: 登录用户权限码
+            description: 登录用户权限码 - 回应
         CreateDeptResponse:
             type: object
             properties: {}
@@ -1155,28 +1248,26 @@ components:
                 total:
                     type: integer
                     format: int32
-        LoginRequest:
+        LoginCode:
             type: object
             properties:
-                name:
+                phone:
                     type: string
-                    description: 登录用户
+                    description: 登录手机号
+                code:
+                    type: string
+                    description: 登录验证码
+            description: 登录验证码
+        LoginPassword:
+            type: object
+            properties:
+                username:
+                    type: string
+                    description: 登录用户名
                 password:
                     type: string
-                    description: 密码
-                domainId:
-                    type: integer
-                    description: 租户/域ID
-                    format: uint32
-                grandType:
-                    enum:
-                        - GRAND_TYPE_UNSPECIFIED
-                        - GRAND_TYPE_PASSWORD
-                        - GRAND_TYPE_CODE
-                    type: string
-                    description: 授权类型
-                    format: enum
-            description: 用户后台登陆 - 请求
+                    description: 登录密码
+            description: 登录密码
         LoginResponse:
             type: object
             properties:

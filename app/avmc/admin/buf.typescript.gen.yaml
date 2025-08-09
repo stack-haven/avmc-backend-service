@@ -7,6 +7,8 @@ managed:
   enabled: true
 
   disable:
+    - file_option: go_package_prefix
+      module: buf.build/bufbuild/protovalidate
     - module: 'buf.build/googleapis/googleapis'
     - module: 'buf.build/envoyproxy/protoc-gen-validate'
     - module: 'buf.build/kratos/apis'
@@ -16,21 +18,26 @@ managed:
 inputs:
   - directory: .
     paths:
-      - ./admin/interface
+      - ./avmc/admin
 
 plugins:
-  - remote: buf.build/bufbuild/es:v2.2.3
-    out: ../gen/es/api
-  - remote: buf.build/bufbuild/knit-ts:v0.0.7
-    out: ../gen/kts/api
+  # - remote: buf.build/bufbuild/es:v2.2.3
+  #   out: ../../frontend-service/apps/admin-antd-avmc/src/gen/es/api
+  # - remote: buf.build/bufbuild/knit-ts:v0.0.7
+  #   out: ../../frontend-service/apps/admin-antd-avmc/src/gen/kts/api
   # generate typescript code
   #  - remote: buf.build/community/stephenh-ts-proto
-  - remote: buf.build/community/timostamm-protobuf-ts:v2.9.4
-    out: ../gen/ts/api
+  # - remote: buf.build/community/timostamm-protobuf-ts:v2.9.4
+  #   out: ../../frontend-service/apps/admin-antd-avmc/src/gen/ts/api
   - remote: buf.build/community/stephenh-ts-proto:v2.6.1
-    out: ../gen/tts/api
+    out: ../../frontend-service/apps/admin-antd-avmc/src/api/gen
+    opt:
+      - outputSchema=false # 生成模式 (const, no-file-descriptor, true, false)
+      - outputTypeRegistry=false # 生成类型注册表
+      - outputIndex=true # 生成索引文件
+      - comments=true # 注释输出
   # - local: protoc-gen-ts_proto
-  #   out: ../../frontend/apps/admin/src/rpc/api
+  #   out: ../../frontend-service/apps/admin-antd-avmc/src/rpc/api
   #   opt:
   #     - outputSchema=false # 生成模式 (const, no-file-descriptor, true, false)
   #     - outputTypeRegistry=false # 生成类型注册表
@@ -54,7 +61,7 @@ plugins:
   #     - enumsAsLiterals=false # 枚举作为文字
   #     - comments=true # 注释输出
   #     - exportCommonSymbols=false # 导出公共符号，如果为true，则生成protobufPackage，否则不导出。
-  #     - esModuleInterop=true
+  #     - esModuleInterop=true # 生成es模块interop代码
   #     - forceLong=string # 强制long类型为string
   #     - oneof=unions # oneof生成的类型，如果为unions，则生成联合类型，否则生成交叉类型。
   #     - stringEnums=true # 枚举项生成的类型，如果为true，则生成字符串，否则生成为整型。
