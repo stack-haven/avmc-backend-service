@@ -104,7 +104,7 @@ docker:
 gen: ent wire api openapi
 
 # generate ent code
-ent:
+ent01:
 ifneq ("$(wildcard ./internal/data/ent)","")
 	@go run -mod=mod entgo.io/ent/cmd/ent generate \
 				--feature privacy \
@@ -114,6 +114,12 @@ ifneq ("$(wildcard ./internal/data/ent)","")
 				--feature sql/lock \
 				--feature intercept,schema/snapshot \
 				./internal/data/ent/schema
+endif
+
+# generate ent code
+ent:
+ifneq ("$(wildcard ./internal/data/ent)","")
+	@go run -mod=mod ./internal/data/ent/entc.go
 endif
 
 # generate wire code

@@ -3,7 +3,8 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/conf"
-	gen "backend-service/app/avmc/admin/internal/data/ent"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
+	_ "backend-service/app/avmc/admin/internal/data/ent/gen/runtime"
 	"context"
 	"fmt"
 	"time"
@@ -23,8 +24,6 @@ import (
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authzCasbin "backend-service/pkg/auth/authz/casbin"
-
-	// _ "backend-service/app/avmc/admin/internal/data/ent/runtime"
 
 	_ "github.com/go-sql-driver/mysql"
 )

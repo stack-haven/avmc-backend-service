@@ -1,0 +1,24 @@
+{{ define "page" }}
+
+{{/* Add the base header for the generated file */}}
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+{{/* Loop over all nodes and add the Greet method */}}
+{{ range $n := $.Nodes }}
+    {{ $receiver := $n.Receiver }}
+    func ({{ $receiver }} *{{ $n.QueryName }}) Page(ctx context.Context, page, size int) ([]*{{ $n.Name }}, int, error) {
+        cnt, err := {{ $receiver }}.Count(ctx)
+        if err != nil {
+            return nil, 0, err
+        }
+        offset := size * (page - 1)
+        rs, err := {{ $receiver }}.Offset(offset).Limit(size).All(ctx)
+        if err != nil {
+            return nil, 0, err
+        }
+        return rs, cnt, nil
+    }
+{{ end }}
+
+{{ end }}

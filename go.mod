@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250425153114-8976f5be98c1.1
-	entgo.io/ent v0.14.5
+	entgo.io/ent v0.14.4
 	github.com/BurntSushi/toml v1.5.0
 	github.com/beiduoke/go-scaffold v0.0.0-20250212073303-100dcab722d7
 	github.com/casbin/casbin/v2 v2.115.0

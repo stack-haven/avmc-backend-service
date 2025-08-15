@@ -12,8 +12,8 @@ import (
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
-	"backend-service/app/avmc/admin/internal/data/ent"
-	"backend-service/app/avmc/admin/internal/data/ent/role"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -34,8 +34,8 @@ func NewRoleRepo(data *Data, logger log.Logger) biz.RoleRepo {
 	}
 }
 
-// toProto 转换ent.Role为pbCore.Role
-func (r *roleRepo) toProto(res *ent.Role) *pbCore.Role {
+// toProto 转换gen.Role为pbCore.Role
+func (r *roleRepo) toProto(res *gen.Role) *pbCore.Role {
 	return &pbCore.Role{
 		Id:                res.ID,
 		Name:              res.Name,
@@ -49,9 +49,9 @@ func (r *roleRepo) toProto(res *ent.Role) *pbCore.Role {
 	}
 }
 
-// toEnt 转换pbCore.Role为ent.Role
-func (r *roleRepo) toEnt(g *pbCore.Role) *ent.Role {
-	return &ent.Role{
+// toEnt 转换pbCore.Role为gen.Role
+func (r *roleRepo) toEnt(g *pbCore.Role) *gen.Role {
+	return &gen.Role{
 		ID:                g.GetId(),
 		Name:              g.Name,
 		DefaultRouter:     g.DefaultRouter,
@@ -136,7 +136,7 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 	res, err := r.data.DB(ctx).Role.Query().Where(role.ID(id), role.DeletedAtIsNil()).First(ctx)
 	if err != nil {
 		r.log.Errorf("根据ID查询角色失败，角色ID：%v，错误：%v", id, err)
-		if ent.IsNotFound(err) {
+		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
 		return nil, err

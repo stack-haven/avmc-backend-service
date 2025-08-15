@@ -4,13 +4,11 @@ import (
 	"backend-service/app/avmc/admin/internal/conf"
 	"context"
 
-	gen "backend-service/app/avmc/admin/internal/data/ent"
-	"backend-service/app/avmc/admin/internal/data/ent/intercept"
-	"backend-service/app/avmc/admin/internal/data/ent/migrate"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/intercept"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/migrate"
 
 	// init mysql driver
-
-	_ "backend-service/app/avmc/admin/internal/data/ent/runtime"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"

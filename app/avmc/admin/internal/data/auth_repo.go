@@ -2,7 +2,7 @@ package data
 
 import (
 	"backend-service/app/avmc/admin/internal/biz"
-	"backend-service/app/avmc/admin/internal/data/ent/user"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 	"context"

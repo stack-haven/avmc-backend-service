@@ -11,8 +11,8 @@ import (
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
-	"backend-service/app/avmc/admin/internal/data/ent"
-	"backend-service/app/avmc/admin/internal/data/ent/dept"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/dept"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -33,8 +33,8 @@ func NewDeptRepo(data *Data, logger log.Logger) biz.DeptRepo {
 	}
 }
 
-// toProto 转换ent.Dept为pbCore.Dept
-func (r *deptRepo) toProto(res *ent.Dept) *pbCore.Dept {
+// toProto 转换gen.Dept为pbCore.Dept
+func (r *deptRepo) toProto(res *gen.Dept) *pbCore.Dept {
 	return &pbCore.Dept{
 		Id:        res.ID,
 		Name:      res.Name,
@@ -44,9 +44,9 @@ func (r *deptRepo) toProto(res *ent.Dept) *pbCore.Dept {
 	}
 }
 
-// toEnt 转换pbCore.Dept为ent.Dept
-func (r *deptRepo) toEnt(g *pbCore.Dept) *ent.Dept {
-	return &ent.Dept{
+// toEnt 转换pbCore.Dept为gen.Dept
+func (r *deptRepo) toEnt(g *pbCore.Dept) *gen.Dept {
+	return &gen.Dept{
 		ID:       g.GetId(),
 		Name:     g.Name,
 		ParentID: g.ParentId,
@@ -123,7 +123,7 @@ func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error
 		Where(dept.IDEQ(id), dept.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询部门失败，ID：%d，错误：%v", id, err)
-		if ent.IsNotFound(err) {
+		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
 		return nil, err
@@ -162,7 +162,7 @@ func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept,
 // 返回值：部门列表，错误信息
 func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 	r.log.Infof("查询所有部门列表")
-	res, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID, dept.FieldName).Where(dept.DeletedAtIsNil()).Order(ent.Desc(dept.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID, dept.FieldName).Where(dept.DeletedAtIsNil()).Order(gen.Desc(dept.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
 		return nil, err
@@ -191,7 +191,7 @@ func (r *deptRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 		Where(dept.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
-		Order(ent.Desc(dept.FieldID)).
+		Order(gen.Desc(dept.FieldID)).
 		All(ctx)
 	if err != nil {
 		r.log.Errorf("查询部门列表分页失败，分页请求：%v，错误：%v", pagination, err)

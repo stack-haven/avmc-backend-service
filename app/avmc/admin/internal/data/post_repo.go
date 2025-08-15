@@ -11,8 +11,8 @@ import (
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
-	"backend-service/app/avmc/admin/internal/data/ent"
-	"backend-service/app/avmc/admin/internal/data/ent/post"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/post"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -33,8 +33,8 @@ func NewPostRepo(data *Data, logger log.Logger) biz.PostRepo {
 	}
 }
 
-// toProto 转换ent.Post为pbCore.Post
-func (r *postRepo) toProto(res *ent.Post) *pbCore.Post {
+// toProto 转换gen.Post为pbCore.Post
+func (r *postRepo) toProto(res *gen.Post) *pbCore.Post {
 	return &pbCore.Post{
 		Id:        res.ID,
 		Name:      res.Name,
@@ -43,9 +43,9 @@ func (r *postRepo) toProto(res *ent.Post) *pbCore.Post {
 	}
 }
 
-// toEnt 转换pbCore.Post为ent.Post
-func (r *postRepo) toEnt(g *pbCore.Post) *ent.Post {
-	return &ent.Post{
+// toEnt 转换pbCore.Post为gen.Post
+func (r *postRepo) toEnt(g *pbCore.Post) *gen.Post {
+	return &gen.Post{
 		ID:   g.GetId(),
 		Name: g.Name,
 	}
@@ -119,7 +119,7 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 		Where(post.IDEQ(id), post.DeletedAtIsNil()).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询岗位失败，ID：%d，错误：%v", id, err)
-		if ent.IsNotFound(err) {
+		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
 		return nil, err
@@ -158,7 +158,7 @@ func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post,
 // 返回值：岗位列表，错误信息
 func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 	r.log.Infof("查询所有岗位列表")
-	res, err := r.data.DB(ctx).Post.Query().Select(post.FieldID, post.FieldName).Where(post.DeletedAtIsNil()).Order(ent.Desc(post.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).Post.Query().Select(post.FieldID, post.FieldName).Where(post.DeletedAtIsNil()).Order(gen.Desc(post.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
 		return nil, err
@@ -186,7 +186,7 @@ func (r *postRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 		Where(post.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
-		Order(ent.Desc(post.FieldID)).
+		Order(gen.Desc(post.FieldID)).
 		All(ctx)
 	if err != nil {
 		r.log.Errorf("查询岗位列表分页失败，分页请求：%v，错误：%v", pagination, err)

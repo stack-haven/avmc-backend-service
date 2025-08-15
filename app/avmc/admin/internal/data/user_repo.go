@@ -12,8 +12,8 @@ import (
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
-	"backend-service/app/avmc/admin/internal/data/ent"
-	"backend-service/app/avmc/admin/internal/data/ent/user"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 )
@@ -37,8 +37,8 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 	}
 }
 
-// toProto 转换ent.User为pbCore.User
-func (r *userRepo) toProto(res *ent.User) *pbCore.User {
+// toProto 转换gen.User为pbCore.User
+func (r *userRepo) toProto(res *gen.User) *pbCore.User {
 	return &pbCore.User{
 		Id:          res.ID,
 		Name:        res.Name,
@@ -56,9 +56,9 @@ func (r *userRepo) toProto(res *ent.User) *pbCore.User {
 	}
 }
 
-// toEnt 转换pbCore.User为ent.User
-func (r *userRepo) toEnt(g *pbCore.User) *ent.User {
-	return &ent.User{
+// toEnt 转换pbCore.User为gen.User
+func (r *userRepo) toEnt(g *pbCore.User) *gen.User {
+	return &gen.User{
 		ID:          g.GetId(),
 		Name:        g.Name,
 		Email:       g.Email,
@@ -226,7 +226,7 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 	fmt.Printf("%v", res)
 	if err != nil {
 		r.log.Errorf("通过ID查询用户失败，ID：%d，错误：%v", id, err)
-		if ent.IsNotFound(err) {
+		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
 		return nil, err
@@ -283,7 +283,7 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 // 返回值：用户列表，错误信息
 func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 	r.log.Infof("查询所有用户列表")
-	res, err := r.data.DB(ctx).User.Query().Select(user.FieldID, user.FieldName).Where(user.DeletedAtIsNil()).Order(ent.Desc(user.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).User.Query().Select(user.FieldID, user.FieldName).Where(user.DeletedAtIsNil()).Order(gen.Desc(user.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err
@@ -306,7 +306,7 @@ func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.
 		Where(user.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
-		Order(ent.Desc(user.FieldID)).
+		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
 		r.log.Errorf("查询用户简单列表分页失败，分页请求：%v，错误：%v", pagination, err)
@@ -346,7 +346,7 @@ func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 		Where(user.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
-		Order(ent.Desc(user.FieldID)).
+		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
 		r.log.Errorf("查询用户列表分页失败，分页请求：%v，错误：%v", pagination, err)
