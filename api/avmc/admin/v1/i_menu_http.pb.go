@@ -12,6 +12,7 @@ import (
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,6 +26,7 @@ const OperationMenuServiceCreateMenu = "/avmc.admin.v1.MenuService/CreateMenu"
 const OperationMenuServiceDeleteMenu = "/avmc.admin.v1.MenuService/DeleteMenu"
 const OperationMenuServiceGetMenu = "/avmc.admin.v1.MenuService/GetMenu"
 const OperationMenuServiceListMenu = "/avmc.admin.v1.MenuService/ListMenu"
+const OperationMenuServiceListMenuAll = "/avmc.admin.v1.MenuService/ListMenuAll"
 const OperationMenuServiceUpdateMenu = "/avmc.admin.v1.MenuService/UpdateMenu"
 
 type MenuServiceHTTPServer interface {
@@ -36,17 +38,39 @@ type MenuServiceHTTPServer interface {
 	GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error)
 	// ListMenu 获取菜单列表
 	ListMenu(context.Context, *pagination.PagingRequest) (*v1.ListMenuResponse, error)
+	// ListMenuAll 获取所有菜单
+	ListMenuAll(context.Context, *emptypb.Empty) (*v1.ListMenuResponse, error)
 	// UpdateMenu 更新菜单
 	UpdateMenu(context.Context, *v1.UpdateMenuRequest) (*v1.UpdateMenuResponse, error)
 }
 
 func RegisterMenuServiceHTTPServer(s *http.Server, srv MenuServiceHTTPServer) {
 	r := s.Route("/")
+	r.GET("/admin/v1/menus/all", _MenuService_ListMenuAll0_HTTP_Handler(srv))
 	r.GET("/admin/v1/menus", _MenuService_ListMenu0_HTTP_Handler(srv))
 	r.GET("/admin/v1/menus/{id}", _MenuService_GetMenu0_HTTP_Handler(srv))
 	r.POST("/admin/v1/menus", _MenuService_CreateMenu0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/menus/{id}", _MenuService_UpdateMenu0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/menus/{id}", _MenuService_DeleteMenu0_HTTP_Handler(srv))
+}
+
+func _MenuService_ListMenuAll0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in emptypb.Empty
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuServiceListMenuAll)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListMenuAll(ctx, req.(*emptypb.Empty))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListMenuResponse)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _MenuService_ListMenu0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
@@ -164,6 +188,7 @@ type MenuServiceHTTPClient interface {
 	DeleteMenu(ctx context.Context, req *v1.DeleteMenuRequest, opts ...http.CallOption) (rsp *v1.DeleteMenuResponse, err error)
 	GetMenu(ctx context.Context, req *v1.GetMenuRequest, opts ...http.CallOption) (rsp *v1.Menu, err error)
 	ListMenu(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
+	ListMenuAll(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
 	UpdateMenu(ctx context.Context, req *v1.UpdateMenuRequest, opts ...http.CallOption) (rsp *v1.UpdateMenuResponse, err error)
 }
 
@@ -219,6 +244,19 @@ func (c *MenuServiceHTTPClientImpl) ListMenu(ctx context.Context, in *pagination
 	pattern := "/admin/v1/menus"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMenuServiceListMenu))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *MenuServiceHTTPClientImpl) ListMenuAll(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*v1.ListMenuResponse, error) {
+	var out v1.ListMenuResponse
+	pattern := "/admin/v1/menus/all"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMenuServiceListMenuAll))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
