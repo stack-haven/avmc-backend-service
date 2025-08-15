@@ -3,6 +3,7 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/conf"
+	gen "backend-service/app/avmc/admin/internal/data/ent"
 	"context"
 	"fmt"
 	"time"
@@ -23,7 +24,7 @@ import (
 	authzEngine "backend-service/pkg/auth/authz"
 	authzCasbin "backend-service/pkg/auth/authz/casbin"
 
-	"backend-service/app/avmc/admin/internal/data/ent"
+	// _ "backend-service/app/avmc/admin/internal/data/ent/runtime"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -45,7 +46,7 @@ var ProviderSet = wire.NewSet(
 // Data .
 type Data struct {
 	// TODO wrapped database client
-	db  *ent.Client
+	db  *gen.Client
 	rdb *redis.Client
 	sf  *snowflake.Node
 }
@@ -53,7 +54,7 @@ type Data struct {
 // NewData .
 func NewData(
 	c *conf.Data,
-	db *ent.Client,
+	db *gen.Client,
 	rdb *redis.Client,
 	sf *snowflake.Node,
 	logger log.Logger,
@@ -85,7 +86,7 @@ func NewTransaction(data *Data) biz.Transaction {
 
 // InTx 执行事务
 func (d *Data) InTx(ctx context.Context, fn func(ctx context.Context) error) error {
-	tx := ent.TxFromContext(ctx)
+	tx := gen.TxFromContext(ctx)
 	if tx != nil {
 		return fn(ctx)
 	}
@@ -95,7 +96,7 @@ func (d *Data) InTx(ctx context.Context, fn func(ctx context.Context) error) err
 		return fmt.Errorf("starting transaction: %w", err)
 	}
 
-	if err = fn(ent.NewTxContext(ctx, tx)); err != nil {
+	if err = fn(gen.NewTxContext(ctx, tx)); err != nil {
 		if err2 := tx.Rollback(); err2 != nil {
 			return fmt.Errorf("rolling back transaction: %v (original error: %w)", err2, err)
 		}
@@ -108,8 +109,8 @@ func (d *Data) InTx(ctx context.Context, fn func(ctx context.Context) error) err
 	return err
 }
 
-func (d *Data) DB(ctx context.Context) *ent.Client {
-	tx := ent.TxFromContext(ctx)
+func (d *Data) DB(ctx context.Context) *gen.Client {
+	tx := gen.TxFromContext(ctx)
 	if tx != nil {
 		return tx.Client()
 	}

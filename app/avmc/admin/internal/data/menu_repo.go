@@ -220,7 +220,9 @@ func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
 // 返回值：菜单列表响应，错误信息
 func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) {
 	r.log.Infof("查询菜单列表分页，分页请求：%v", pagination)
-	count, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID).Where(menu.DeletedAtIsNil()).Count(ctx)
+	count, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID).
+		// Where(menu.DeletedAtIsNil()).
+		Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
@@ -238,7 +240,6 @@ func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			menu.FieldCreatedAt,
 			menu.FieldUpdatedAt,
 		).
-		Where(menu.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(ent.Desc(menu.FieldID)).

@@ -4,13 +4,15 @@ import (
 	"backend-service/app/avmc/admin/internal/conf"
 	"context"
 
-	"backend-service/app/avmc/admin/internal/data/ent"
+	gen "backend-service/app/avmc/admin/internal/data/ent"
+	"backend-service/app/avmc/admin/internal/data/ent/intercept"
 	"backend-service/app/avmc/admin/internal/data/ent/migrate"
 
 	// init mysql driver
-	"backend-service/app/avmc/admin/internal/data/ent/intercept"
 
-	entgo "entgo.io/ent"
+	_ "backend-service/app/avmc/admin/internal/data/ent/runtime"
+
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
 
@@ -18,7 +20,7 @@ import (
 )
 
 // NewEntClient .
-func NewEntClient(cfg *conf.Data, logger log.Logger) *ent.Client {
+func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 	l := log.NewHelper(log.With(logger, "module", "ent/data/initialize"))
 	drv, err := sql.Open(cfg.Database.Driver, cfg.Database.Source)
 	if err != nil {
@@ -35,9 +37,9 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *ent.Client {
 		db.SetConnMaxLifetime(cfg.Database.ConnectionMaxLifetime.AsDuration())
 	}
 
-	client := ent.NewClient(
-		ent.Driver(drv),
-		ent.Log(func(a ...any) {
+	client := gen.NewClient(
+		gen.Driver(drv),
+		gen.Log(func(a ...any) {
 			l.Debug(a...)
 		}),
 	)
@@ -58,12 +60,12 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *ent.Client {
 			l.Fatalf("failed creating schema resources: %v", err)
 		}
 	}
-
+	// client.Use()
 	client.Intercept(
 		intercept.Func(func(ctx context.Context, q intercept.Query) error {
 			// Limit all queries to 1000 records.
 			// q.Limit(1000)
-			if entgo.QueryFromContext(ctx).Limit == nil {
+			if ent.QueryFromContext(ctx).Limit == nil {
 				q.Limit(1000)
 			}
 			return nil

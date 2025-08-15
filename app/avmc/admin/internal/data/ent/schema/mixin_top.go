@@ -1,7 +1,8 @@
 package schema
 
 import (
-	// selfMixin "backend-service/app/avmc/admin/internal/data/ent/mixin"
+	// "backend-service/app/avmc/admin/internal/data/mixins"
+
 	pkgMixin "backend-service/pkg/entgo/mixin"
 
 	"entgo.io/ent/schema/mixin"
@@ -16,8 +17,10 @@ type MixinTop struct{ mixin.Schema }
 func (MixinTop) Fields() []ent.Field {
 	var fields []ent.Field
 	fields = append(fields, pkgMixin.ID{}.Fields()...)
-	fields = append(fields, pkgMixin.TimeAt{}.Fields()...)
-	// fields = append(fields, selfMixin.DeletedAt{}.Fields()...)
+	// fields = append(fields, pkgMixin.TimeAt{}.Fields()...)
+	fields = append(fields, pkgMixin.CreatedAt{}.Fields()...)
+	fields = append(fields, pkgMixin.UpdatedAt{}.Fields()...)
+	fields = append(fields, SoftDeleteMixin{}.Fields()...)
 	fields = append(fields, pkgMixin.Status{}.Fields()...)
 	fields = append(fields, pkgMixin.DomainID{}.Fields()...)
 	return fields
