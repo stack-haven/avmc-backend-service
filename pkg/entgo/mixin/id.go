@@ -4,7 +4,6 @@ import (
 	"log"
 	"math/rand"
 
-	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
@@ -27,7 +26,7 @@ func (ID) Fields() []ent.Field {
 				dialect.Postgres: "serial",
 			}).
 			Annotations(
-				entproto.Field(1),
+			// entproto.Field(1),
 			).
 			Positive().
 			Immutable().
