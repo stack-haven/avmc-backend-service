@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"backend-service/app/avmc/admin/internal/data/ent/mixins"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
@@ -38,7 +40,8 @@ func (Post) Edges() []ent.Edge {
 // Mixin of the Post.
 func (Post) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		MixinTop{},
+		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

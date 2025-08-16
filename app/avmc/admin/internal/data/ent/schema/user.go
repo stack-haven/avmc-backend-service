@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"backend-service/app/avmc/admin/internal/data/ent/mixins"
 	"regexp"
 
 	"entgo.io/ent"
@@ -61,7 +62,8 @@ func (User) Edges() []ent.Edge {
 // Mixin of the User.
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		MixinTop{},
+		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

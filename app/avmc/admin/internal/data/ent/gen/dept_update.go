@@ -36,26 +36,6 @@ func (_u *DeptUpdate) SetUpdatedAt(v time.Time) *DeptUpdate {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *DeptUpdate) SetDeletedAt(v time.Time) *DeptUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *DeptUpdate) SetNillableDeletedAt(v *time.Time) *DeptUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *DeptUpdate) ClearDeletedAt() *DeptUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *DeptUpdate) SetStatus(v int32) *DeptUpdate {
 	_u.mutation.ResetStatus()
@@ -95,6 +75,26 @@ func (_u *DeptUpdate) SetNillableDomainID(v *uint32) *DeptUpdate {
 // AddDomainID adds value to the "domain_id" field.
 func (_u *DeptUpdate) AddDomainID(v int32) *DeptUpdate {
 	_u.mutation.AddDomainID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DeptUpdate) SetDeletedAt(v time.Time) *DeptUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DeptUpdate) SetNillableDeletedAt(v *time.Time) *DeptUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DeptUpdate) ClearDeletedAt() *DeptUpdate {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -204,7 +204,9 @@ func (_u *DeptUpdate) RemoveChildren(v ...*Dept) *DeptUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *DeptUpdate) Save(ctx context.Context) (int, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -231,11 +233,15 @@ func (_u *DeptUpdate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *DeptUpdate) defaults() {
+func (_u *DeptUpdate) defaults() error {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if dept.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized dept.UpdateDefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := dept.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -279,12 +285,6 @@ func (_u *DeptUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(dept.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(dept.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(dept.FieldStatus, field.TypeInt32, value)
 	}
@@ -296,6 +296,12 @@ func (_u *DeptUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedDomainID(); ok {
 		_spec.AddField(dept.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dept.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(dept.FieldName, field.TypeString, value)
@@ -413,26 +419,6 @@ func (_u *DeptUpdateOne) SetUpdatedAt(v time.Time) *DeptUpdateOne {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *DeptUpdateOne) SetDeletedAt(v time.Time) *DeptUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *DeptUpdateOne) SetNillableDeletedAt(v *time.Time) *DeptUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *DeptUpdateOne) ClearDeletedAt() *DeptUpdateOne {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *DeptUpdateOne) SetStatus(v int32) *DeptUpdateOne {
 	_u.mutation.ResetStatus()
@@ -472,6 +458,26 @@ func (_u *DeptUpdateOne) SetNillableDomainID(v *uint32) *DeptUpdateOne {
 // AddDomainID adds value to the "domain_id" field.
 func (_u *DeptUpdateOne) AddDomainID(v int32) *DeptUpdateOne {
 	_u.mutation.AddDomainID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DeptUpdateOne) SetDeletedAt(v time.Time) *DeptUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DeptUpdateOne) SetNillableDeletedAt(v *time.Time) *DeptUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DeptUpdateOne) ClearDeletedAt() *DeptUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -594,7 +600,9 @@ func (_u *DeptUpdateOne) Select(field string, fields ...string) *DeptUpdateOne {
 
 // Save executes the query and returns the updated Dept entity.
 func (_u *DeptUpdateOne) Save(ctx context.Context) (*Dept, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -621,11 +629,15 @@ func (_u *DeptUpdateOne) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *DeptUpdateOne) defaults() {
+func (_u *DeptUpdateOne) defaults() error {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if dept.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized dept.UpdateDefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := dept.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -686,12 +698,6 @@ func (_u *DeptUpdateOne) sqlSave(ctx context.Context) (_node *Dept, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(dept.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(dept.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(dept.FieldStatus, field.TypeInt32, value)
 	}
@@ -703,6 +709,12 @@ func (_u *DeptUpdateOne) sqlSave(ctx context.Context) (_node *Dept, err error) {
 	}
 	if value, ok := _u.mutation.AddedDomainID(); ok {
 		_spec.AddField(dept.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dept.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(dept.FieldName, field.TypeString, value)

@@ -50,20 +50,6 @@ func (_c *DeptCreate) SetNillableUpdatedAt(v *time.Time) *DeptCreate {
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *DeptCreate) SetDeletedAt(v time.Time) *DeptCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *DeptCreate) SetNillableDeletedAt(v *time.Time) *DeptCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetStatus sets the "status" field.
 func (_c *DeptCreate) SetStatus(v int32) *DeptCreate {
 	_c.mutation.SetStatus(v)
@@ -88,6 +74,20 @@ func (_c *DeptCreate) SetDomainID(v uint32) *DeptCreate {
 func (_c *DeptCreate) SetNillableDomainID(v *uint32) *DeptCreate {
 	if v != nil {
 		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *DeptCreate) SetDeletedAt(v time.Time) *DeptCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *DeptCreate) SetNillableDeletedAt(v *time.Time) *DeptCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
 	return _c
 }
@@ -151,7 +151,9 @@ func (_c *DeptCreate) Mutation() *DeptMutation {
 
 // Save creates the Dept in the database.
 func (_c *DeptCreate) Save(ctx context.Context) (*Dept, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -178,12 +180,18 @@ func (_c *DeptCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *DeptCreate) defaults() {
+func (_c *DeptCreate) defaults() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
+		if dept.DefaultCreatedAt == nil {
+			return fmt.Errorf("gen: uninitialized dept.DefaultCreatedAt (forgotten import gen/runtime?)")
+		}
 		v := dept.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		if dept.DefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized dept.DefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := dept.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
@@ -192,6 +200,9 @@ func (_c *DeptCreate) defaults() {
 		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.DomainID(); !ok {
+		if dept.DefaultDomainID == nil {
+			return fmt.Errorf("gen: uninitialized dept.DefaultDomainID (forgotten import gen/runtime?)")
+		}
 		v := dept.DefaultDomainID()
 		_c.mutation.SetDomainID(v)
 	}
@@ -203,6 +214,7 @@ func (_c *DeptCreate) defaults() {
 		v := dept.DefaultAncestors
 		_c.mutation.SetAncestors(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -283,10 +295,6 @@ func (_c *DeptCreate) createSpec() (*Dept, *sqlgraph.CreateSpec) {
 		_spec.SetField(dept.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(dept.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
@@ -294,6 +302,10 @@ func (_c *DeptCreate) createSpec() (*Dept, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DomainID(); ok {
 		_spec.SetField(dept.FieldDomainID, field.TypeUint32, value)
 		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(dept.FieldName, field.TypeString, value)
@@ -400,24 +412,6 @@ func (u *DeptUpsert) UpdateUpdatedAt() *DeptUpsert {
 	return u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *DeptUpsert) SetDeletedAt(v time.Time) *DeptUpsert {
-	u.Set(dept.FieldDeletedAt, v)
-	return u
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *DeptUpsert) UpdateDeletedAt() *DeptUpsert {
-	u.SetExcluded(dept.FieldDeletedAt)
-	return u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *DeptUpsert) ClearDeletedAt() *DeptUpsert {
-	u.SetNull(dept.FieldDeletedAt)
-	return u
-}
-
 // SetStatus sets the "status" field.
 func (u *DeptUpsert) SetStatus(v int32) *DeptUpsert {
 	u.Set(dept.FieldStatus, v)
@@ -451,6 +445,24 @@ func (u *DeptUpsert) UpdateDomainID() *DeptUpsert {
 // AddDomainID adds v to the "domain_id" field.
 func (u *DeptUpsert) AddDomainID(v uint32) *DeptUpsert {
 	u.Add(dept.FieldDomainID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DeptUpsert) SetDeletedAt(v time.Time) *DeptUpsert {
+	u.Set(dept.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DeptUpsert) UpdateDeletedAt() *DeptUpsert {
+	u.SetExcluded(dept.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DeptUpsert) ClearDeletedAt() *DeptUpsert {
+	u.SetNull(dept.FieldDeletedAt)
 	return u
 }
 
@@ -567,27 +579,6 @@ func (u *DeptUpsertOne) UpdateUpdatedAt() *DeptUpsertOne {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *DeptUpsertOne) SetDeletedAt(v time.Time) *DeptUpsertOne {
-	return u.Update(func(s *DeptUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *DeptUpsertOne) UpdateDeletedAt() *DeptUpsertOne {
-	return u.Update(func(s *DeptUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *DeptUpsertOne) ClearDeletedAt() *DeptUpsertOne {
-	return u.Update(func(s *DeptUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *DeptUpsertOne) SetStatus(v int32) *DeptUpsertOne {
 	return u.Update(func(s *DeptUpsert) {
@@ -627,6 +618,27 @@ func (u *DeptUpsertOne) AddDomainID(v uint32) *DeptUpsertOne {
 func (u *DeptUpsertOne) UpdateDomainID() *DeptUpsertOne {
 	return u.Update(func(s *DeptUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DeptUpsertOne) SetDeletedAt(v time.Time) *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DeptUpsertOne) UpdateDeletedAt() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DeptUpsertOne) ClearDeletedAt() *DeptUpsertOne {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -917,27 +929,6 @@ func (u *DeptUpsertBulk) UpdateUpdatedAt() *DeptUpsertBulk {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *DeptUpsertBulk) SetDeletedAt(v time.Time) *DeptUpsertBulk {
-	return u.Update(func(s *DeptUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *DeptUpsertBulk) UpdateDeletedAt() *DeptUpsertBulk {
-	return u.Update(func(s *DeptUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *DeptUpsertBulk) ClearDeletedAt() *DeptUpsertBulk {
-	return u.Update(func(s *DeptUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *DeptUpsertBulk) SetStatus(v int32) *DeptUpsertBulk {
 	return u.Update(func(s *DeptUpsert) {
@@ -977,6 +968,27 @@ func (u *DeptUpsertBulk) AddDomainID(v uint32) *DeptUpsertBulk {
 func (u *DeptUpsertBulk) UpdateDomainID() *DeptUpsertBulk {
 	return u.Update(func(s *DeptUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DeptUpsertBulk) SetDeletedAt(v time.Time) *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DeptUpsertBulk) UpdateDeletedAt() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DeptUpsertBulk) ClearDeletedAt() *DeptUpsertBulk {
+	return u.Update(func(s *DeptUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

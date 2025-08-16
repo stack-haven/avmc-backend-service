@@ -36,26 +36,6 @@ func (_u *MenuUpdate) SetUpdatedAt(v time.Time) *MenuUpdate {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *MenuUpdate) SetDeletedAt(v time.Time) *MenuUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *MenuUpdate) SetNillableDeletedAt(v *time.Time) *MenuUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *MenuUpdate) ClearDeletedAt() *MenuUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *MenuUpdate) SetStatus(v int32) *MenuUpdate {
 	_u.mutation.ResetStatus()
@@ -95,6 +75,26 @@ func (_u *MenuUpdate) SetNillableDomainID(v *uint32) *MenuUpdate {
 // AddDomainID adds value to the "domain_id" field.
 func (_u *MenuUpdate) AddDomainID(v int32) *MenuUpdate {
 	_u.mutation.AddDomainID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *MenuUpdate) SetDeletedAt(v time.Time) *MenuUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *MenuUpdate) SetNillableDeletedAt(v *time.Time) *MenuUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *MenuUpdate) ClearDeletedAt() *MenuUpdate {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -407,7 +407,9 @@ func (_u *MenuUpdate) RemoveChildren(v ...*Menu) *MenuUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MenuUpdate) Save(ctx context.Context) (int, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -434,11 +436,15 @@ func (_u *MenuUpdate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *MenuUpdate) defaults() {
+func (_u *MenuUpdate) defaults() error {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if menu.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized menu.UpdateDefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := menu.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -497,12 +503,6 @@ func (_u *MenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(menu.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(menu.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(menu.FieldStatus, field.TypeInt32, value)
 	}
@@ -514,6 +514,12 @@ func (_u *MenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedDomainID(); ok {
 		_spec.AddField(menu.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(menu.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(menu.FieldName, field.TypeString, value)
@@ -676,26 +682,6 @@ func (_u *MenuUpdateOne) SetUpdatedAt(v time.Time) *MenuUpdateOne {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *MenuUpdateOne) SetDeletedAt(v time.Time) *MenuUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *MenuUpdateOne) SetNillableDeletedAt(v *time.Time) *MenuUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *MenuUpdateOne) ClearDeletedAt() *MenuUpdateOne {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *MenuUpdateOne) SetStatus(v int32) *MenuUpdateOne {
 	_u.mutation.ResetStatus()
@@ -735,6 +721,26 @@ func (_u *MenuUpdateOne) SetNillableDomainID(v *uint32) *MenuUpdateOne {
 // AddDomainID adds value to the "domain_id" field.
 func (_u *MenuUpdateOne) AddDomainID(v int32) *MenuUpdateOne {
 	_u.mutation.AddDomainID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *MenuUpdateOne) SetDeletedAt(v time.Time) *MenuUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *MenuUpdateOne) SetNillableDeletedAt(v *time.Time) *MenuUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *MenuUpdateOne) ClearDeletedAt() *MenuUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -1060,7 +1066,9 @@ func (_u *MenuUpdateOne) Select(field string, fields ...string) *MenuUpdateOne {
 
 // Save executes the query and returns the updated Menu entity.
 func (_u *MenuUpdateOne) Save(ctx context.Context) (*Menu, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -1087,11 +1095,15 @@ func (_u *MenuUpdateOne) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *MenuUpdateOne) defaults() {
+func (_u *MenuUpdateOne) defaults() error {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if menu.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized menu.UpdateDefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := menu.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -1167,12 +1179,6 @@ func (_u *MenuUpdateOne) sqlSave(ctx context.Context) (_node *Menu, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(menu.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(menu.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(menu.FieldStatus, field.TypeInt32, value)
 	}
@@ -1184,6 +1190,12 @@ func (_u *MenuUpdateOne) sqlSave(ctx context.Context) (_node *Menu, err error) {
 	}
 	if value, ok := _u.mutation.AddedDomainID(); ok {
 		_spec.AddField(menu.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(menu.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(menu.FieldName, field.TypeString, value)

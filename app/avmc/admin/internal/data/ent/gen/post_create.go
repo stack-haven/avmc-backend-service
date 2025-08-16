@@ -50,20 +50,6 @@ func (_c *PostCreate) SetNillableUpdatedAt(v *time.Time) *PostCreate {
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *PostCreate) SetDeletedAt(v time.Time) *PostCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *PostCreate) SetNillableDeletedAt(v *time.Time) *PostCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetStatus sets the "status" field.
 func (_c *PostCreate) SetStatus(v int32) *PostCreate {
 	_c.mutation.SetStatus(v)
@@ -88,6 +74,20 @@ func (_c *PostCreate) SetDomainID(v uint32) *PostCreate {
 func (_c *PostCreate) SetNillableDomainID(v *uint32) *PostCreate {
 	if v != nil {
 		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *PostCreate) SetDeletedAt(v time.Time) *PostCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *PostCreate) SetNillableDeletedAt(v *time.Time) *PostCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
 	return _c
 }
@@ -119,7 +119,9 @@ func (_c *PostCreate) Mutation() *PostMutation {
 
 // Save creates the Post in the database.
 func (_c *PostCreate) Save(ctx context.Context) (*Post, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -146,12 +148,18 @@ func (_c *PostCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *PostCreate) defaults() {
+func (_c *PostCreate) defaults() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
+		if post.DefaultCreatedAt == nil {
+			return fmt.Errorf("gen: uninitialized post.DefaultCreatedAt (forgotten import gen/runtime?)")
+		}
 		v := post.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		if post.DefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized post.DefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := post.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
@@ -160,6 +168,9 @@ func (_c *PostCreate) defaults() {
 		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.DomainID(); !ok {
+		if post.DefaultDomainID == nil {
+			return fmt.Errorf("gen: uninitialized post.DefaultDomainID (forgotten import gen/runtime?)")
+		}
 		v := post.DefaultDomainID()
 		_c.mutation.SetDomainID(v)
 	}
@@ -167,6 +178,7 @@ func (_c *PostCreate) defaults() {
 		v := post.DefaultName
 		_c.mutation.SetName(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -247,10 +259,6 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(post.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
@@ -258,6 +266,10 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DomainID(); ok {
 		_spec.SetField(post.FieldDomainID, field.TypeUint32, value)
 		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(post.FieldName, field.TypeString, value)
@@ -327,24 +339,6 @@ func (u *PostUpsert) UpdateUpdatedAt() *PostUpsert {
 	return u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *PostUpsert) SetDeletedAt(v time.Time) *PostUpsert {
-	u.Set(post.FieldDeletedAt, v)
-	return u
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *PostUpsert) UpdateDeletedAt() *PostUpsert {
-	u.SetExcluded(post.FieldDeletedAt)
-	return u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *PostUpsert) ClearDeletedAt() *PostUpsert {
-	u.SetNull(post.FieldDeletedAt)
-	return u
-}
-
 // SetStatus sets the "status" field.
 func (u *PostUpsert) SetStatus(v int32) *PostUpsert {
 	u.Set(post.FieldStatus, v)
@@ -378,6 +372,24 @@ func (u *PostUpsert) UpdateDomainID() *PostUpsert {
 // AddDomainID adds v to the "domain_id" field.
 func (u *PostUpsert) AddDomainID(v uint32) *PostUpsert {
 	u.Add(post.FieldDomainID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *PostUpsert) SetDeletedAt(v time.Time) *PostUpsert {
+	u.Set(post.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *PostUpsert) UpdateDeletedAt() *PostUpsert {
+	u.SetExcluded(post.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *PostUpsert) ClearDeletedAt() *PostUpsert {
+	u.SetNull(post.FieldDeletedAt)
 	return u
 }
 
@@ -458,27 +470,6 @@ func (u *PostUpsertOne) UpdateUpdatedAt() *PostUpsertOne {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *PostUpsertOne) SetDeletedAt(v time.Time) *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *PostUpsertOne) UpdateDeletedAt() *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *PostUpsertOne) ClearDeletedAt() *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *PostUpsertOne) SetStatus(v int32) *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
@@ -518,6 +509,27 @@ func (u *PostUpsertOne) AddDomainID(v uint32) *PostUpsertOne {
 func (u *PostUpsertOne) UpdateDomainID() *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *PostUpsertOne) SetDeletedAt(v time.Time) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateDeletedAt() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *PostUpsertOne) ClearDeletedAt() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -766,27 +778,6 @@ func (u *PostUpsertBulk) UpdateUpdatedAt() *PostUpsertBulk {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *PostUpsertBulk) SetDeletedAt(v time.Time) *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *PostUpsertBulk) UpdateDeletedAt() *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *PostUpsertBulk) ClearDeletedAt() *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *PostUpsertBulk) SetStatus(v int32) *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
@@ -826,6 +817,27 @@ func (u *PostUpsertBulk) AddDomainID(v uint32) *PostUpsertBulk {
 func (u *PostUpsertBulk) UpdateDomainID() *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *PostUpsertBulk) SetDeletedAt(v time.Time) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateDeletedAt() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *PostUpsertBulk) ClearDeletedAt() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

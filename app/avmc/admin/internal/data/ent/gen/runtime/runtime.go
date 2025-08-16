@@ -17,6 +17,10 @@ import (
 // to their package variables.
 func init() {
 	deptMixin := schema.Dept{}.Mixin()
+	deptMixinHooks1 := deptMixin[1].Hooks()
+	dept.Hooks[0] = deptMixinHooks1[0]
+	deptMixinInters1 := deptMixin[1].Interceptors()
+	dept.Interceptors[0] = deptMixinInters1[0]
 	deptMixinFields0 := deptMixin[0].Fields()
 	_ = deptMixinFields0
 	deptFields := schema.Dept{}.Fields()
@@ -32,7 +36,7 @@ func init() {
 	// dept.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	dept.UpdateDefaultUpdatedAt = deptDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// deptDescStatus is the schema descriptor for status field.
-	deptDescStatus := deptMixinFields0[4].Descriptor()
+	deptDescStatus := deptMixinFields0[3].Descriptor()
 	// dept.DefaultStatus holds the default value on creation for the status field.
 	dept.DefaultStatus = deptDescStatus.Default.(int32)
 	// dept.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -52,7 +56,7 @@ func init() {
 		}
 	}()
 	// deptDescDomainID is the schema descriptor for domain_id field.
-	deptDescDomainID := deptMixinFields0[5].Descriptor()
+	deptDescDomainID := deptMixinFields0[4].Descriptor()
 	// dept.DefaultDomainID holds the default value on creation for the domain_id field.
 	dept.DefaultDomainID = deptDescDomainID.Default.(func() uint32)
 	// dept.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
@@ -74,6 +78,10 @@ func init() {
 	// dept.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	dept.IDValidator = deptDescID.Validators[0].(func(uint32) error)
 	menuMixin := schema.Menu{}.Mixin()
+	menuMixinHooks1 := menuMixin[1].Hooks()
+	menu.Hooks[0] = menuMixinHooks1[0]
+	menuMixinInters1 := menuMixin[1].Interceptors()
+	menu.Interceptors[0] = menuMixinInters1[0]
 	menuMixinFields0 := menuMixin[0].Fields()
 	_ = menuMixinFields0
 	menuFields := schema.Menu{}.Fields()
@@ -89,7 +97,7 @@ func init() {
 	// menu.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	menu.UpdateDefaultUpdatedAt = menuDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// menuDescStatus is the schema descriptor for status field.
-	menuDescStatus := menuMixinFields0[4].Descriptor()
+	menuDescStatus := menuMixinFields0[3].Descriptor()
 	// menu.DefaultStatus holds the default value on creation for the status field.
 	menu.DefaultStatus = menuDescStatus.Default.(int32)
 	// menu.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -109,7 +117,7 @@ func init() {
 		}
 	}()
 	// menuDescDomainID is the schema descriptor for domain_id field.
-	menuDescDomainID := menuMixinFields0[5].Descriptor()
+	menuDescDomainID := menuMixinFields0[4].Descriptor()
 	// menu.DefaultDomainID holds the default value on creation for the domain_id field.
 	menu.DefaultDomainID = menuDescDomainID.Default.(func() uint32)
 	// menu.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
@@ -209,6 +217,10 @@ func init() {
 	// menu.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	menu.IDValidator = menuDescID.Validators[0].(func(uint32) error)
 	postMixin := schema.Post{}.Mixin()
+	postMixinHooks1 := postMixin[1].Hooks()
+	post.Hooks[0] = postMixinHooks1[0]
+	postMixinInters1 := postMixin[1].Interceptors()
+	post.Interceptors[0] = postMixinInters1[0]
 	postMixinFields0 := postMixin[0].Fields()
 	_ = postMixinFields0
 	postFields := schema.Post{}.Fields()
@@ -224,7 +236,7 @@ func init() {
 	// post.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	post.UpdateDefaultUpdatedAt = postDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// postDescStatus is the schema descriptor for status field.
-	postDescStatus := postMixinFields0[4].Descriptor()
+	postDescStatus := postMixinFields0[3].Descriptor()
 	// post.DefaultStatus holds the default value on creation for the status field.
 	post.DefaultStatus = postDescStatus.Default.(int32)
 	// post.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -244,7 +256,7 @@ func init() {
 		}
 	}()
 	// postDescDomainID is the schema descriptor for domain_id field.
-	postDescDomainID := postMixinFields0[5].Descriptor()
+	postDescDomainID := postMixinFields0[4].Descriptor()
 	// post.DefaultDomainID holds the default value on creation for the domain_id field.
 	post.DefaultDomainID = postDescDomainID.Default.(func() uint32)
 	// post.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
@@ -260,6 +272,10 @@ func init() {
 	// post.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	post.IDValidator = postDescID.Validators[0].(func(uint32) error)
 	roleMixin := schema.Role{}.Mixin()
+	roleMixinHooks1 := roleMixin[1].Hooks()
+	role.Hooks[0] = roleMixinHooks1[0]
+	roleMixinInters1 := roleMixin[1].Interceptors()
+	role.Interceptors[0] = roleMixinInters1[0]
 	roleMixinFields0 := roleMixin[0].Fields()
 	_ = roleMixinFields0
 	roleFields := schema.Role{}.Fields()
@@ -275,7 +291,7 @@ func init() {
 	// role.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	role.UpdateDefaultUpdatedAt = roleDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// roleDescStatus is the schema descriptor for status field.
-	roleDescStatus := roleMixinFields0[4].Descriptor()
+	roleDescStatus := roleMixinFields0[3].Descriptor()
 	// role.DefaultStatus holds the default value on creation for the status field.
 	role.DefaultStatus = roleDescStatus.Default.(int32)
 	// role.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -295,7 +311,7 @@ func init() {
 		}
 	}()
 	// roleDescDomainID is the schema descriptor for domain_id field.
-	roleDescDomainID := roleMixinFields0[5].Descriptor()
+	roleDescDomainID := roleMixinFields0[4].Descriptor()
 	// role.DefaultDomainID holds the default value on creation for the domain_id field.
 	role.DefaultDomainID = roleDescDomainID.Default.(func() uint32)
 	// role.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
@@ -329,6 +345,10 @@ func init() {
 	// role.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	role.IDValidator = roleDescID.Validators[0].(func(uint32) error)
 	userMixin := schema.User{}.Mixin()
+	userMixinHooks1 := userMixin[1].Hooks()
+	user.Hooks[0] = userMixinHooks1[0]
+	userMixinInters1 := userMixin[1].Interceptors()
+	user.Interceptors[0] = userMixinInters1[0]
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
@@ -344,7 +364,7 @@ func init() {
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescStatus is the schema descriptor for status field.
-	userDescStatus := userMixinFields0[4].Descriptor()
+	userDescStatus := userMixinFields0[3].Descriptor()
 	// user.DefaultStatus holds the default value on creation for the status field.
 	user.DefaultStatus = userDescStatus.Default.(int32)
 	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -364,7 +384,7 @@ func init() {
 		}
 	}()
 	// userDescDomainID is the schema descriptor for domain_id field.
-	userDescDomainID := userMixinFields0[5].Descriptor()
+	userDescDomainID := userMixinFields0[4].Descriptor()
 	// user.DefaultDomainID holds the default value on creation for the domain_id field.
 	user.DefaultDomainID = userDescDomainID.Default.(func() uint32)
 	// user.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
@@ -503,3 +523,8 @@ func init() {
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	user.IDValidator = userDescID.Validators[0].(func(uint32) error)
 }
+
+const (
+	Version = "v0.14.5"                                         // Version of ent codegen.
+	Sum     = "h1:Rj2WOYJtCkWyFo6a+5wB3EfBRP0rnx1fMk6gGA0UUe4=" // Sum of ent codegen.
+)

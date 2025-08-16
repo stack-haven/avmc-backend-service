@@ -43,11 +43,11 @@ type DeptMutation struct {
 	id              *uint32
 	created_at      *time.Time
 	updated_at      *time.Time
-	deleted_at      *time.Time
 	status          *int32
 	addstatus       *int32
 	domain_id       *uint32
 	adddomain_id    *int32
+	deleted_at      *time.Time
 	name            *string
 	ancestors       *[]int
 	appendancestors []int
@@ -238,55 +238,6 @@ func (m *DeptMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *DeptMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *DeptMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the Dept entity.
-// If the Dept object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeptMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *DeptMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[dept.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *DeptMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[dept.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *DeptMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, dept.FieldDeletedAt)
-}
-
 // SetStatus sets the "status" field.
 func (m *DeptMutation) SetStatus(i int32) {
 	m.status = &i
@@ -397,6 +348,55 @@ func (m *DeptMutation) AddedDomainID() (r int32, exists bool) {
 func (m *DeptMutation) ResetDomainID() {
 	m.domain_id = nil
 	m.adddomain_id = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DeptMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DeptMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Dept entity.
+// If the Dept object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeptMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *DeptMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[dept.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *DeptMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[dept.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DeptMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, dept.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -671,14 +671,14 @@ func (m *DeptMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, dept.FieldUpdatedAt)
 	}
-	if m.deleted_at != nil {
-		fields = append(fields, dept.FieldDeletedAt)
-	}
 	if m.status != nil {
 		fields = append(fields, dept.FieldStatus)
 	}
 	if m.domain_id != nil {
 		fields = append(fields, dept.FieldDomainID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, dept.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, dept.FieldName)
@@ -701,12 +701,12 @@ func (m *DeptMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case dept.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case dept.FieldDeletedAt:
-		return m.DeletedAt()
 	case dept.FieldStatus:
 		return m.Status()
 	case dept.FieldDomainID:
 		return m.DomainID()
+	case dept.FieldDeletedAt:
+		return m.DeletedAt()
 	case dept.FieldName:
 		return m.Name()
 	case dept.FieldParentID:
@@ -726,12 +726,12 @@ func (m *DeptMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case dept.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case dept.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case dept.FieldStatus:
 		return m.OldStatus(ctx)
 	case dept.FieldDomainID:
 		return m.OldDomainID(ctx)
+	case dept.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case dept.FieldName:
 		return m.OldName(ctx)
 	case dept.FieldParentID:
@@ -761,13 +761,6 @@ func (m *DeptMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case dept.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	case dept.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
@@ -781,6 +774,13 @@ func (m *DeptMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomainID(v)
+		return nil
+	case dept.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case dept.FieldName:
 		v, ok := value.(string)
@@ -906,14 +906,14 @@ func (m *DeptMutation) ResetField(name string) error {
 	case dept.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case dept.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
 	case dept.FieldStatus:
 		m.ResetStatus()
 		return nil
 	case dept.FieldDomainID:
 		m.ResetDomainID()
+		return nil
+	case dept.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case dept.FieldName:
 		m.ResetName()
@@ -1038,11 +1038,11 @@ type MenuMutation struct {
 	id                  *uint32
 	created_at          *time.Time
 	updated_at          *time.Time
-	deleted_at          *time.Time
 	status              *int32
 	addstatus           *int32
 	domain_id           *uint32
 	adddomain_id        *int32
+	deleted_at          *time.Time
 	name                *string
 	title               *string
 	_type               *int32
@@ -1248,55 +1248,6 @@ func (m *MenuMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *MenuMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *MenuMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *MenuMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[menu.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *MenuMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[menu.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *MenuMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, menu.FieldDeletedAt)
-}
-
 // SetStatus sets the "status" field.
 func (m *MenuMutation) SetStatus(i int32) {
 	m.status = &i
@@ -1407,6 +1358,55 @@ func (m *MenuMutation) AddedDomainID() (r int32, exists bool) {
 func (m *MenuMutation) ResetDomainID() {
 	m.domain_id = nil
 	m.adddomain_id = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *MenuMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *MenuMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *MenuMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[menu.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *MenuMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[menu.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *MenuMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, menu.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -2205,14 +2205,14 @@ func (m *MenuMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, menu.FieldUpdatedAt)
 	}
-	if m.deleted_at != nil {
-		fields = append(fields, menu.FieldDeletedAt)
-	}
 	if m.status != nil {
 		fields = append(fields, menu.FieldStatus)
 	}
 	if m.domain_id != nil {
 		fields = append(fields, menu.FieldDomainID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, menu.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, menu.FieldName)
@@ -2277,12 +2277,12 @@ func (m *MenuMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case menu.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case menu.FieldDeletedAt:
-		return m.DeletedAt()
 	case menu.FieldStatus:
 		return m.Status()
 	case menu.FieldDomainID:
 		return m.DomainID()
+	case menu.FieldDeletedAt:
+		return m.DeletedAt()
 	case menu.FieldName:
 		return m.Name()
 	case menu.FieldTitle:
@@ -2330,12 +2330,12 @@ func (m *MenuMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case menu.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case menu.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case menu.FieldStatus:
 		return m.OldStatus(ctx)
 	case menu.FieldDomainID:
 		return m.OldDomainID(ctx)
+	case menu.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case menu.FieldName:
 		return m.OldName(ctx)
 	case menu.FieldTitle:
@@ -2393,13 +2393,6 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case menu.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	case menu.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
@@ -2413,6 +2406,13 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomainID(v)
+		return nil
+	case menu.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case menu.FieldName:
 		v, ok := value.(string)
@@ -2648,14 +2648,14 @@ func (m *MenuMutation) ResetField(name string) error {
 	case menu.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case menu.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
 	case menu.FieldStatus:
 		m.ResetStatus()
 		return nil
 	case menu.FieldDomainID:
 		m.ResetDomainID()
+		return nil
+	case menu.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case menu.FieldName:
 		m.ResetName()
@@ -2822,11 +2822,11 @@ type PostMutation struct {
 	id            *uint32
 	created_at    *time.Time
 	updated_at    *time.Time
-	deleted_at    *time.Time
 	status        *int32
 	addstatus     *int32
 	domain_id     *uint32
 	adddomain_id  *int32
+	deleted_at    *time.Time
 	name          *string
 	clearedFields map[string]struct{}
 	done          bool
@@ -3010,55 +3010,6 @@ func (m *PostMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *PostMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *PostMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the Post entity.
-// If the Post object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PostMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *PostMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[post.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *PostMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[post.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *PostMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, post.FieldDeletedAt)
-}
-
 // SetStatus sets the "status" field.
 func (m *PostMutation) SetStatus(i int32) {
 	m.status = &i
@@ -3171,6 +3122,55 @@ func (m *PostMutation) ResetDomainID() {
 	m.adddomain_id = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *PostMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *PostMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Post entity.
+// If the Post object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PostMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *PostMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[post.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *PostMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[post.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *PostMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, post.FieldDeletedAt)
+}
+
 // SetName sets the "name" field.
 func (m *PostMutation) SetName(s string) {
 	m.name = &s
@@ -3248,14 +3248,14 @@ func (m *PostMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, post.FieldUpdatedAt)
 	}
-	if m.deleted_at != nil {
-		fields = append(fields, post.FieldDeletedAt)
-	}
 	if m.status != nil {
 		fields = append(fields, post.FieldStatus)
 	}
 	if m.domain_id != nil {
 		fields = append(fields, post.FieldDomainID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, post.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, post.FieldName)
@@ -3272,12 +3272,12 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case post.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case post.FieldDeletedAt:
-		return m.DeletedAt()
 	case post.FieldStatus:
 		return m.Status()
 	case post.FieldDomainID:
 		return m.DomainID()
+	case post.FieldDeletedAt:
+		return m.DeletedAt()
 	case post.FieldName:
 		return m.Name()
 	}
@@ -3293,12 +3293,12 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case post.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case post.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case post.FieldStatus:
 		return m.OldStatus(ctx)
 	case post.FieldDomainID:
 		return m.OldDomainID(ctx)
+	case post.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case post.FieldName:
 		return m.OldName(ctx)
 	}
@@ -3324,13 +3324,6 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case post.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	case post.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
@@ -3344,6 +3337,13 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomainID(v)
+		return nil
+	case post.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case post.FieldName:
 		v, ok := value.(string)
@@ -3443,14 +3443,14 @@ func (m *PostMutation) ResetField(name string) error {
 	case post.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case post.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
 	case post.FieldStatus:
 		m.ResetStatus()
 		return nil
 	case post.FieldDomainID:
 		m.ResetDomainID()
+		return nil
+	case post.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case post.FieldName:
 		m.ResetName()
@@ -3515,11 +3515,11 @@ type RoleMutation struct {
 	id                     *uint32
 	created_at             *time.Time
 	updated_at             *time.Time
-	deleted_at             *time.Time
 	status                 *int32
 	addstatus              *int32
 	domain_id              *uint32
 	adddomain_id           *int32
+	deleted_at             *time.Time
 	name                   *string
 	default_router         *string
 	data_scope             *int32
@@ -3713,55 +3713,6 @@ func (m *RoleMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *RoleMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *RoleMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the Role entity.
-// If the Role object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *RoleMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[role.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *RoleMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[role.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *RoleMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, role.FieldDeletedAt)
-}
-
 // SetStatus sets the "status" field.
 func (m *RoleMutation) SetStatus(i int32) {
 	m.status = &i
@@ -3872,6 +3823,55 @@ func (m *RoleMutation) AddedDomainID() (r int32, exists bool) {
 func (m *RoleMutation) ResetDomainID() {
 	m.domain_id = nil
 	m.adddomain_id = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *RoleMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *RoleMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Role entity.
+// If the Role object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *RoleMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[role.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *RoleMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[role.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *RoleMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, role.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -4209,14 +4209,14 @@ func (m *RoleMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, role.FieldUpdatedAt)
 	}
-	if m.deleted_at != nil {
-		fields = append(fields, role.FieldDeletedAt)
-	}
 	if m.status != nil {
 		fields = append(fields, role.FieldStatus)
 	}
 	if m.domain_id != nil {
 		fields = append(fields, role.FieldDomainID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, role.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, role.FieldName)
@@ -4245,12 +4245,12 @@ func (m *RoleMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case role.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case role.FieldDeletedAt:
-		return m.DeletedAt()
 	case role.FieldStatus:
 		return m.Status()
 	case role.FieldDomainID:
 		return m.DomainID()
+	case role.FieldDeletedAt:
+		return m.DeletedAt()
 	case role.FieldName:
 		return m.Name()
 	case role.FieldDefaultRouter:
@@ -4274,12 +4274,12 @@ func (m *RoleMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case role.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case role.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case role.FieldStatus:
 		return m.OldStatus(ctx)
 	case role.FieldDomainID:
 		return m.OldDomainID(ctx)
+	case role.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case role.FieldName:
 		return m.OldName(ctx)
 	case role.FieldDefaultRouter:
@@ -4313,13 +4313,6 @@ func (m *RoleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case role.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	case role.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
@@ -4333,6 +4326,13 @@ func (m *RoleMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomainID(v)
+		return nil
+	case role.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case role.FieldName:
 		v, ok := value.(string)
@@ -4496,14 +4496,14 @@ func (m *RoleMutation) ResetField(name string) error {
 	case role.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case role.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
 	case role.FieldStatus:
 		m.ResetStatus()
 		return nil
 	case role.FieldDomainID:
 		m.ResetDomainID()
+		return nil
+	case role.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case role.FieldName:
 		m.ResetName()
@@ -4616,11 +4616,11 @@ type UserMutation struct {
 	id             *uint32
 	created_at     *time.Time
 	updated_at     *time.Time
-	deleted_at     *time.Time
 	status         *int32
 	addstatus      *int32
 	domain_id      *uint32
 	adddomain_id   *int32
+	deleted_at     *time.Time
 	name           *string
 	password       *string
 	realname       *string
@@ -4830,55 +4830,6 @@ func (m *UserMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *UserMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *UserMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *UserMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[user.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *UserMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[user.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *UserMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, user.FieldDeletedAt)
-}
-
 // SetStatus sets the "status" field.
 func (m *UserMutation) SetStatus(i int32) {
 	m.status = &i
@@ -4989,6 +4940,55 @@ func (m *UserMutation) AddedDomainID() (r int32, exists bool) {
 func (m *UserMutation) ResetDomainID() {
 	m.domain_id = nil
 	m.adddomain_id = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *UserMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *UserMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *UserMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[user.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *UserMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[user.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *UserMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, user.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -5965,14 +5965,14 @@ func (m *UserMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, user.FieldUpdatedAt)
 	}
-	if m.deleted_at != nil {
-		fields = append(fields, user.FieldDeletedAt)
-	}
 	if m.status != nil {
 		fields = append(fields, user.FieldStatus)
 	}
 	if m.domain_id != nil {
 		fields = append(fields, user.FieldDomainID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, user.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
@@ -6034,12 +6034,12 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case user.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case user.FieldDeletedAt:
-		return m.DeletedAt()
 	case user.FieldStatus:
 		return m.Status()
 	case user.FieldDomainID:
 		return m.DomainID()
+	case user.FieldDeletedAt:
+		return m.DeletedAt()
 	case user.FieldName:
 		return m.Name()
 	case user.FieldPassword:
@@ -6085,12 +6085,12 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case user.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case user.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case user.FieldStatus:
 		return m.OldStatus(ctx)
 	case user.FieldDomainID:
 		return m.OldDomainID(ctx)
+	case user.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
 	case user.FieldPassword:
@@ -6146,13 +6146,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case user.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	case user.FieldStatus:
 		v, ok := value.(int32)
 		if !ok {
@@ -6166,6 +6159,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomainID(v)
+		return nil
+	case user.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case user.FieldName:
 		v, ok := value.(string)
@@ -6478,14 +6478,14 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case user.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
 	case user.FieldStatus:
 		m.ResetStatus()
 		return nil
 	case user.FieldDomainID:
 		m.ResetDomainID()
+		return nil
+	case user.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case user.FieldName:
 		m.ResetName()

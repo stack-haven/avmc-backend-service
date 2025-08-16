@@ -50,20 +50,6 @@ func (_c *MenuCreate) SetNillableUpdatedAt(v *time.Time) *MenuCreate {
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *MenuCreate) SetDeletedAt(v time.Time) *MenuCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *MenuCreate) SetNillableDeletedAt(v *time.Time) *MenuCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetStatus sets the "status" field.
 func (_c *MenuCreate) SetStatus(v int32) *MenuCreate {
 	_c.mutation.SetStatus(v)
@@ -88,6 +74,20 @@ func (_c *MenuCreate) SetDomainID(v uint32) *MenuCreate {
 func (_c *MenuCreate) SetNillableDomainID(v *uint32) *MenuCreate {
 	if v != nil {
 		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *MenuCreate) SetDeletedAt(v time.Time) *MenuCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableDeletedAt(v *time.Time) *MenuCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
 	return _c
 }
@@ -355,7 +355,9 @@ func (_c *MenuCreate) Mutation() *MenuMutation {
 
 // Save creates the Menu in the database.
 func (_c *MenuCreate) Save(ctx context.Context) (*Menu, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -382,12 +384,18 @@ func (_c *MenuCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *MenuCreate) defaults() {
+func (_c *MenuCreate) defaults() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
+		if menu.DefaultCreatedAt == nil {
+			return fmt.Errorf("gen: uninitialized menu.DefaultCreatedAt (forgotten import gen/runtime?)")
+		}
 		v := menu.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		if menu.DefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized menu.DefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := menu.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
@@ -396,6 +404,9 @@ func (_c *MenuCreate) defaults() {
 		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.DomainID(); !ok {
+		if menu.DefaultDomainID == nil {
+			return fmt.Errorf("gen: uninitialized menu.DefaultDomainID (forgotten import gen/runtime?)")
+		}
 		v := menu.DefaultDomainID()
 		_c.mutation.SetDomainID(v)
 	}
@@ -467,6 +478,7 @@ func (_c *MenuCreate) defaults() {
 		v := menu.DefaultHideBreadcrumb
 		_c.mutation.SetHideBreadcrumb(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -604,10 +616,6 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 		_spec.SetField(menu.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(menu.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
@@ -615,6 +623,10 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DomainID(); ok {
 		_spec.SetField(menu.FieldDomainID, field.TypeUint32, value)
 		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(menu.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(menu.FieldName, field.TypeString, value)
@@ -777,24 +789,6 @@ func (u *MenuUpsert) UpdateUpdatedAt() *MenuUpsert {
 	return u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *MenuUpsert) SetDeletedAt(v time.Time) *MenuUpsert {
-	u.Set(menu.FieldDeletedAt, v)
-	return u
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *MenuUpsert) UpdateDeletedAt() *MenuUpsert {
-	u.SetExcluded(menu.FieldDeletedAt)
-	return u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *MenuUpsert) ClearDeletedAt() *MenuUpsert {
-	u.SetNull(menu.FieldDeletedAt)
-	return u
-}
-
 // SetStatus sets the "status" field.
 func (u *MenuUpsert) SetStatus(v int32) *MenuUpsert {
 	u.Set(menu.FieldStatus, v)
@@ -828,6 +822,24 @@ func (u *MenuUpsert) UpdateDomainID() *MenuUpsert {
 // AddDomainID adds v to the "domain_id" field.
 func (u *MenuUpsert) AddDomainID(v uint32) *MenuUpsert {
 	u.Add(menu.FieldDomainID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *MenuUpsert) SetDeletedAt(v time.Time) *MenuUpsert {
+	u.Set(menu.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateDeletedAt() *MenuUpsert {
+	u.SetExcluded(menu.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *MenuUpsert) ClearDeletedAt() *MenuUpsert {
+	u.SetNull(menu.FieldDeletedAt)
 	return u
 }
 
@@ -1118,27 +1130,6 @@ func (u *MenuUpsertOne) UpdateUpdatedAt() *MenuUpsertOne {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *MenuUpsertOne) SetDeletedAt(v time.Time) *MenuUpsertOne {
-	return u.Update(func(s *MenuUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *MenuUpsertOne) UpdateDeletedAt() *MenuUpsertOne {
-	return u.Update(func(s *MenuUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *MenuUpsertOne) ClearDeletedAt() *MenuUpsertOne {
-	return u.Update(func(s *MenuUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *MenuUpsertOne) SetStatus(v int32) *MenuUpsertOne {
 	return u.Update(func(s *MenuUpsert) {
@@ -1178,6 +1169,27 @@ func (u *MenuUpsertOne) AddDomainID(v uint32) *MenuUpsertOne {
 func (u *MenuUpsertOne) UpdateDomainID() *MenuUpsertOne {
 	return u.Update(func(s *MenuUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *MenuUpsertOne) SetDeletedAt(v time.Time) *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateDeletedAt() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *MenuUpsertOne) ClearDeletedAt() *MenuUpsertOne {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -1671,27 +1683,6 @@ func (u *MenuUpsertBulk) UpdateUpdatedAt() *MenuUpsertBulk {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *MenuUpsertBulk) SetDeletedAt(v time.Time) *MenuUpsertBulk {
-	return u.Update(func(s *MenuUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *MenuUpsertBulk) UpdateDeletedAt() *MenuUpsertBulk {
-	return u.Update(func(s *MenuUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *MenuUpsertBulk) ClearDeletedAt() *MenuUpsertBulk {
-	return u.Update(func(s *MenuUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *MenuUpsertBulk) SetStatus(v int32) *MenuUpsertBulk {
 	return u.Update(func(s *MenuUpsert) {
@@ -1731,6 +1722,27 @@ func (u *MenuUpsertBulk) AddDomainID(v uint32) *MenuUpsertBulk {
 func (u *MenuUpsertBulk) UpdateDomainID() *MenuUpsertBulk {
 	return u.Update(func(s *MenuUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *MenuUpsertBulk) SetDeletedAt(v time.Time) *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateDeletedAt() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *MenuUpsertBulk) ClearDeletedAt() *MenuUpsertBulk {
+	return u.Update(func(s *MenuUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

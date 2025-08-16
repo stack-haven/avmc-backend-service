@@ -35,26 +35,6 @@ func (_u *PostUpdate) SetUpdatedAt(v time.Time) *PostUpdate {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *PostUpdate) SetDeletedAt(v time.Time) *PostUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *PostUpdate) SetNillableDeletedAt(v *time.Time) *PostUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *PostUpdate) ClearDeletedAt() *PostUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetStatus sets the "status" field.
 func (_u *PostUpdate) SetStatus(v int32) *PostUpdate {
 	_u.mutation.ResetStatus()
@@ -97,6 +77,26 @@ func (_u *PostUpdate) AddDomainID(v int32) *PostUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *PostUpdate) SetDeletedAt(v time.Time) *PostUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *PostUpdate) SetNillableDeletedAt(v *time.Time) *PostUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *PostUpdate) ClearDeletedAt() *PostUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PostUpdate) SetName(v string) *PostUpdate {
 	_u.mutation.SetName(v)
@@ -118,7 +118,9 @@ func (_u *PostUpdate) Mutation() *PostMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PostUpdate) Save(ctx context.Context) (int, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -145,11 +147,15 @@ func (_u *PostUpdate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *PostUpdate) defaults() {
+func (_u *PostUpdate) defaults() error {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if post.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized post.UpdateDefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := post.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -193,12 +199,6 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(post.FieldStatus, field.TypeInt32, value)
 	}
@@ -210,6 +210,12 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedDomainID(); ok {
 		_spec.AddField(post.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(post.FieldName, field.TypeString, value)
@@ -239,26 +245,6 @@ type PostUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PostUpdateOne) SetUpdatedAt(v time.Time) *PostUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *PostUpdateOne) SetDeletedAt(v time.Time) *PostUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *PostUpdateOne) SetNillableDeletedAt(v *time.Time) *PostUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *PostUpdateOne) ClearDeletedAt() *PostUpdateOne {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -304,6 +290,26 @@ func (_u *PostUpdateOne) AddDomainID(v int32) *PostUpdateOne {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *PostUpdateOne) SetDeletedAt(v time.Time) *PostUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *PostUpdateOne) SetNillableDeletedAt(v *time.Time) *PostUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *PostUpdateOne) ClearDeletedAt() *PostUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PostUpdateOne) SetName(v string) *PostUpdateOne {
 	_u.mutation.SetName(v)
@@ -338,7 +344,9 @@ func (_u *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne {
 
 // Save executes the query and returns the updated Post entity.
 func (_u *PostUpdateOne) Save(ctx context.Context) (*Post, error) {
-	_u.defaults()
+	if err := _u.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -365,11 +373,15 @@ func (_u *PostUpdateOne) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *PostUpdateOne) defaults() {
+func (_u *PostUpdateOne) defaults() error {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if post.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized post.UpdateDefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := post.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -430,12 +442,6 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(post.FieldStatus, field.TypeInt32, value)
 	}
@@ -447,6 +453,12 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	}
 	if value, ok := _u.mutation.AddedDomainID(); ok {
 		_spec.AddField(post.FieldDomainID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(post.FieldName, field.TypeString, value)

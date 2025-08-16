@@ -9,13 +9,13 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// SoftDeleteMixin a mixin that adds soft delete capabilities to a schema.
-type SoftDeleteMixin struct {
+// DeletedAtMixin a mixin that adds soft delete capabilities to a schema.
+type DeletedAtMixin struct {
 	mixin.Schema
 }
 
-// Fields of the SoftDeleteMixin.
-func (SoftDeleteMixin) Fields() []ent.Field {
+// Fields of the DeletedAtMixin.
+func (DeletedAtMixin) Fields() []ent.Field {
 	return []ent.Field{
 		// 关键字段：deleted_at，类型为时间，允许为 nil
 		field.Time("deleted_at").
@@ -25,9 +25,9 @@ func (SoftDeleteMixin) Fields() []ent.Field {
 	}
 }
 
-// Hooks of the SoftDeleteMixin.
+// Hooks of the DeletedAtMixin.
 // 这是实现自动软删除的关键！
-func (d SoftDeleteMixin) Hooks() []ent.Hook {
+func (d DeletedAtMixin) Hooks() []ent.Hook {
 	return []ent.Hook{
 		// 定义一个钩子，它会在 OpDelete 和 OpDeleteOne 操作上触发
 		hookOn(d.softDeleteHook, ent.OpDelete|ent.OpDeleteOne),
@@ -35,7 +35,7 @@ func (d SoftDeleteMixin) Hooks() []ent.Hook {
 }
 
 // softDeleteHook is the hook that sets the "deleted_at" field instead of deleting the row.
-func (d SoftDeleteMixin) softDeleteHook(next ent.Mutator) ent.Mutator {
+func (d DeletedAtMixin) softDeleteHook(next ent.Mutator) ent.Mutator {
 	// ent.MutateFunc 是一个适配器，允许我们将普通函数用作 Mutator
 	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 		// 检查此 schema 是否有 "deleted_at" 字段

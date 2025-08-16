@@ -51,20 +51,6 @@ func (_c *RoleCreate) SetNillableUpdatedAt(v *time.Time) *RoleCreate {
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *RoleCreate) SetDeletedAt(v time.Time) *RoleCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *RoleCreate) SetNillableDeletedAt(v *time.Time) *RoleCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetStatus sets the "status" field.
 func (_c *RoleCreate) SetStatus(v int32) *RoleCreate {
 	_c.mutation.SetStatus(v)
@@ -89,6 +75,20 @@ func (_c *RoleCreate) SetDomainID(v uint32) *RoleCreate {
 func (_c *RoleCreate) SetNillableDomainID(v *uint32) *RoleCreate {
 	if v != nil {
 		_c.SetDomainID(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *RoleCreate) SetDeletedAt(v time.Time) *RoleCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *RoleCreate) SetNillableDeletedAt(v *time.Time) *RoleCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
 	return _c
 }
@@ -191,7 +191,9 @@ func (_c *RoleCreate) Mutation() *RoleMutation {
 
 // Save creates the Role in the database.
 func (_c *RoleCreate) Save(ctx context.Context) (*Role, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -218,12 +220,18 @@ func (_c *RoleCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *RoleCreate) defaults() {
+func (_c *RoleCreate) defaults() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
+		if role.DefaultCreatedAt == nil {
+			return fmt.Errorf("gen: uninitialized role.DefaultCreatedAt (forgotten import gen/runtime?)")
+		}
 		v := role.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		if role.DefaultUpdatedAt == nil {
+			return fmt.Errorf("gen: uninitialized role.DefaultUpdatedAt (forgotten import gen/runtime?)")
+		}
 		v := role.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
@@ -232,6 +240,9 @@ func (_c *RoleCreate) defaults() {
 		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.DomainID(); !ok {
+		if role.DefaultDomainID == nil {
+			return fmt.Errorf("gen: uninitialized role.DefaultDomainID (forgotten import gen/runtime?)")
+		}
 		v := role.DefaultDomainID()
 		_c.mutation.SetDomainID(v)
 	}
@@ -255,6 +266,7 @@ func (_c *RoleCreate) defaults() {
 		v := role.DefaultDeptCheckStrictly
 		_c.mutation.SetDeptCheckStrictly(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -352,10 +364,6 @@ func (_c *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 		_spec.SetField(role.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(role.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(role.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
@@ -363,6 +371,10 @@ func (_c *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DomainID(); ok {
 		_spec.SetField(role.FieldDomainID, field.TypeUint32, value)
 		_node.DomainID = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(role.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(role.FieldName, field.TypeString, value)
@@ -464,24 +476,6 @@ func (u *RoleUpsert) UpdateUpdatedAt() *RoleUpsert {
 	return u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *RoleUpsert) SetDeletedAt(v time.Time) *RoleUpsert {
-	u.Set(role.FieldDeletedAt, v)
-	return u
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *RoleUpsert) UpdateDeletedAt() *RoleUpsert {
-	u.SetExcluded(role.FieldDeletedAt)
-	return u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *RoleUpsert) ClearDeletedAt() *RoleUpsert {
-	u.SetNull(role.FieldDeletedAt)
-	return u
-}
-
 // SetStatus sets the "status" field.
 func (u *RoleUpsert) SetStatus(v int32) *RoleUpsert {
 	u.Set(role.FieldStatus, v)
@@ -515,6 +509,24 @@ func (u *RoleUpsert) UpdateDomainID() *RoleUpsert {
 // AddDomainID adds v to the "domain_id" field.
 func (u *RoleUpsert) AddDomainID(v uint32) *RoleUpsert {
 	u.Add(role.FieldDomainID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *RoleUpsert) SetDeletedAt(v time.Time) *RoleUpsert {
+	u.Set(role.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *RoleUpsert) UpdateDeletedAt() *RoleUpsert {
+	u.SetExcluded(role.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *RoleUpsert) ClearDeletedAt() *RoleUpsert {
+	u.SetNull(role.FieldDeletedAt)
 	return u
 }
 
@@ -661,27 +673,6 @@ func (u *RoleUpsertOne) UpdateUpdatedAt() *RoleUpsertOne {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *RoleUpsertOne) SetDeletedAt(v time.Time) *RoleUpsertOne {
-	return u.Update(func(s *RoleUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *RoleUpsertOne) UpdateDeletedAt() *RoleUpsertOne {
-	return u.Update(func(s *RoleUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *RoleUpsertOne) ClearDeletedAt() *RoleUpsertOne {
-	return u.Update(func(s *RoleUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *RoleUpsertOne) SetStatus(v int32) *RoleUpsertOne {
 	return u.Update(func(s *RoleUpsert) {
@@ -721,6 +712,27 @@ func (u *RoleUpsertOne) AddDomainID(v uint32) *RoleUpsertOne {
 func (u *RoleUpsertOne) UpdateDomainID() *RoleUpsertOne {
 	return u.Update(func(s *RoleUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *RoleUpsertOne) SetDeletedAt(v time.Time) *RoleUpsertOne {
+	return u.Update(func(s *RoleUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *RoleUpsertOne) UpdateDeletedAt() *RoleUpsertOne {
+	return u.Update(func(s *RoleUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *RoleUpsertOne) ClearDeletedAt() *RoleUpsertOne {
+	return u.Update(func(s *RoleUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -1046,27 +1058,6 @@ func (u *RoleUpsertBulk) UpdateUpdatedAt() *RoleUpsertBulk {
 	})
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (u *RoleUpsertBulk) SetDeletedAt(v time.Time) *RoleUpsertBulk {
-	return u.Update(func(s *RoleUpsert) {
-		s.SetDeletedAt(v)
-	})
-}
-
-// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
-func (u *RoleUpsertBulk) UpdateDeletedAt() *RoleUpsertBulk {
-	return u.Update(func(s *RoleUpsert) {
-		s.UpdateDeletedAt()
-	})
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (u *RoleUpsertBulk) ClearDeletedAt() *RoleUpsertBulk {
-	return u.Update(func(s *RoleUpsert) {
-		s.ClearDeletedAt()
-	})
-}
-
 // SetStatus sets the "status" field.
 func (u *RoleUpsertBulk) SetStatus(v int32) *RoleUpsertBulk {
 	return u.Update(func(s *RoleUpsert) {
@@ -1106,6 +1097,27 @@ func (u *RoleUpsertBulk) AddDomainID(v uint32) *RoleUpsertBulk {
 func (u *RoleUpsertBulk) UpdateDomainID() *RoleUpsertBulk {
 	return u.Update(func(s *RoleUpsert) {
 		s.UpdateDomainID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *RoleUpsertBulk) SetDeletedAt(v time.Time) *RoleUpsertBulk {
+	return u.Update(func(s *RoleUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *RoleUpsertBulk) UpdateDeletedAt() *RoleUpsertBulk {
+	return u.Update(func(s *RoleUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *RoleUpsertBulk) ClearDeletedAt() *RoleUpsertBulk {
+	return u.Update(func(s *RoleUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
