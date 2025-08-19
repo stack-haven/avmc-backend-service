@@ -240,7 +240,7 @@ func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			menu.FieldCreatedAt,
 			menu.FieldUpdatedAt,
 		).
-		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
+		Offset(int((pagination.GetPage()-1)*pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(gen.Desc(menu.FieldID)).
 		All(ctx)
