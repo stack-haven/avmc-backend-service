@@ -24,6 +24,7 @@ const (
 	AuthService_RefreshToken_FullMethodName  = "/avmc.admin.v1.AuthService/RefreshToken"
 	AuthService_Logout_FullMethodName        = "/avmc.admin.v1.AuthService/Logout"
 	AuthService_Profile_FullMethodName       = "/avmc.admin.v1.AuthService/Profile"
+	AuthService_VbenProfile_FullMethodName   = "/avmc.admin.v1.AuthService/VbenProfile"
 	AuthService_Codes_FullMethodName         = "/avmc.admin.v1.AuthService/Codes"
 )
 
@@ -43,6 +44,8 @@ type AuthServiceClient interface {
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	// 登录用户信息
 	Profile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*ProfileResponse, error)
+	// 登录用户Vben信息
+	VbenProfile(ctx context.Context, in *VbenProfileRequest, opts ...grpc.CallOption) (*VbenProfileResponse, error)
 	// 登录用户权限码
 	Codes(ctx context.Context, in *CodesRequest, opts ...grpc.CallOption) (*CodesResponse, error)
 }
@@ -105,6 +108,16 @@ func (c *authServiceClient) Profile(ctx context.Context, in *ProfileRequest, opt
 	return out, nil
 }
 
+func (c *authServiceClient) VbenProfile(ctx context.Context, in *VbenProfileRequest, opts ...grpc.CallOption) (*VbenProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VbenProfileResponse)
+	err := c.cc.Invoke(ctx, AuthService_VbenProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authServiceClient) Codes(ctx context.Context, in *CodesRequest, opts ...grpc.CallOption) (*CodesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CodesResponse)
@@ -131,6 +144,8 @@ type AuthServiceServer interface {
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	// 登录用户信息
 	Profile(context.Context, *ProfileRequest) (*ProfileResponse, error)
+	// 登录用户Vben信息
+	VbenProfile(context.Context, *VbenProfileRequest) (*VbenProfileResponse, error)
 	// 登录用户权限码
 	Codes(context.Context, *CodesRequest) (*CodesResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
@@ -157,6 +172,9 @@ func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*
 }
 func (UnimplementedAuthServiceServer) Profile(context.Context, *ProfileRequest) (*ProfileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Profile not implemented")
+}
+func (UnimplementedAuthServiceServer) VbenProfile(context.Context, *VbenProfileRequest) (*VbenProfileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VbenProfile not implemented")
 }
 func (UnimplementedAuthServiceServer) Codes(context.Context, *CodesRequest) (*CodesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Codes not implemented")
@@ -272,6 +290,24 @@ func _AuthService_Profile_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_VbenProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VbenProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).VbenProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_VbenProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).VbenProfile(ctx, req.(*VbenProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AuthService_Codes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CodesRequest)
 	if err := dec(in); err != nil {
@@ -316,6 +352,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Profile",
 			Handler:    _AuthService_Profile_Handler,
+		},
+		{
+			MethodName: "VbenProfile",
+			Handler:    _AuthService_VbenProfile_Handler,
 		},
 		{
 			MethodName: "Codes",

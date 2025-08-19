@@ -82,7 +82,7 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 // 返回值：部门ID，错误信息
 func (r *deptRepo) GetDeptExistByName(ctx context.Context, name string) (uint32, error) {
 	r.log.Infof("获取部门名称是否存在，部门名称：%v", name)
-	entDept, err := r.data.DB(ctx).Dept.Query().Where(dept.Name(name), dept.DeletedAtIsNil()).Select(dept.FieldID).First(ctx)
+	entDept, err := r.data.DB(ctx).Dept.Query().Where(dept.Name(name)).Select(dept.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取部门名称是否存在失败，部门名称：%v，错误：%v", name, err)
 		return 0, err
@@ -120,7 +120,7 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error) {
 	r.log.Infof("通过ID查询部门，ID：%d", id)
 	res, err := r.data.DB(ctx).Dept.Query().
-		Where(dept.IDEQ(id), dept.DeletedAtIsNil()).Only(ctx)
+		Where(dept.IDEQ(id)).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询部门失败，ID：%d，错误：%v", id, err)
 		if gen.IsNotFound(err) {
@@ -149,7 +149,7 @@ func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
 // 返回值：部门列表，错误信息
 func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept, error) {
 	r.log.Infof("通过部门名称查询部门，部门名称：%s", name)
-	res, err := r.data.DB(ctx).Dept.Query().Where(dept.NameContains(name), dept.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).Dept.Query().Where(dept.NameContains(name)).All(ctx)
 	if err != nil {
 		r.log.Errorf("通过部门名称查询部门失败，部门名称：%s，错误：%v", name, err)
 		return nil, err
@@ -162,7 +162,7 @@ func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept,
 // 返回值：部门列表，错误信息
 func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 	r.log.Infof("查询所有部门列表")
-	res, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID, dept.FieldName).Where(dept.DeletedAtIsNil()).Order(gen.Desc(dept.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID, dept.FieldName).Where().Order(gen.Desc(dept.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
 		return nil, err
@@ -188,7 +188,6 @@ func (r *deptRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			dept.FieldCreatedAt,
 			dept.FieldUpdatedAt,
 		).
-		Where(dept.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(gen.Desc(dept.FieldID)).

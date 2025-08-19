@@ -22,13 +22,15 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx        *QueryContext
-	order      []user.OrderOption
-	inters     []Interceptor
-	predicates []predicate.User
-	withRoles  *RoleQuery
-	withPosts  *PostQuery
-	modifiers  []func(*sql.Selector)
+	ctx            *QueryContext
+	order          []user.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.User
+	withRoles      *RoleQuery
+	withPosts      *PostQuery
+	modifiers      []func(*sql.Selector)
+	withNamedRoles map[string]*RoleQuery
+	withNamedPosts map[string]*PostQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -450,6 +452,20 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	for name, query := range _q.withNamedRoles {
+		if err := _q.loadRoles(ctx, query, nodes,
+			func(n *User) { n.appendNamedRoles(name) },
+			func(n *User, e *Role) { n.appendNamedRoles(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range _q.withNamedPosts {
+		if err := _q.loadPosts(ctx, query, nodes,
+			func(n *User) { n.appendNamedPosts(name) },
+			func(n *User, e *Post) { n.appendNamedPosts(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -663,6 +679,34 @@ func (_q *UserQuery) ForShare(opts ...sql.LockOption) *UserQuery {
 func (_q *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
+}
+
+// WithNamedRoles tells the query-builder to eager-load the nodes that are connected to the "roles"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithNamedRoles(name string, opts ...func(*RoleQuery)) *UserQuery {
+	query := (&RoleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedRoles == nil {
+		_q.withNamedRoles = make(map[string]*RoleQuery)
+	}
+	_q.withNamedRoles[name] = query
+	return _q
+}
+
+// WithNamedPosts tells the query-builder to eager-load the nodes that are connected to the "posts"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithNamedPosts(name string, opts ...func(*PostQuery)) *UserQuery {
+	query := (&PostClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedPosts == nil {
+		_q.withNamedPosts = make(map[string]*PostQuery)
+	}
+	_q.withNamedPosts[name] = query
+	return _q
 }
 
 // UserGroupBy is the group-by builder for User entities.

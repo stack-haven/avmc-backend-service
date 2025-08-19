@@ -94,6 +94,29 @@ func (uc *AuthUsecase) Profile(ctx context.Context) (*v1.ProfileResponse, error)
 	return uc.repo.Profile(ctx, userId)
 }
 
+// VbenProfile 处理登录用户简介信息业务逻辑
+// 参数：ctx 上下文
+// 返回值：登录用户简介信息响应结构体，错误信息
+func (uc *AuthUsecase) VbenProfile(ctx context.Context) (*v1.VbenProfileResponse, error) {
+	// 这里实现具体的登录用户简介信息业务逻辑
+	uc.log.Infof("尝试获取登录用户简介信息")
+	userId := authn.GetAuthUserID(ctx)
+	profile, err := uc.repo.Profile(ctx, userId)
+	if err != nil {
+		uc.log.Errorf("获取登录用户简介信息失败: %v", err)
+		return nil, err
+	}
+	return &v1.VbenProfileResponse{
+		UserId:   profile.User.Id,
+		Username: profile.User.Name,
+		RealName: profile.User.Realname,
+		Desc:     profile.User.Description,
+		Avatar:   profile.User.Avatar,
+		Role:     profile.Role,
+		Roles:    profile.Roles,
+	}, nil
+}
+
 // Codes 处理登录用户权限码业务逻辑
 // 参数：ctx 上下文
 // 返回值：登录用户权限码响应结构体，错误信息

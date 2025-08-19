@@ -79,7 +79,7 @@ func (r *userRepo) toEnt(g *pbCore.User) *gen.User {
 // 返回值：用户ID，错误信息
 func (r *userRepo) GetUserExistByEmail(ctx context.Context, email string) (uint32, error) {
 	r.log.Infof("获取用户邮箱是否存在，用户email：%v", email)
-	entUser, err := r.data.DB(ctx).User.Query().Where(user.Email(email), user.DeletedAtIsNil()).Select(user.FieldID).First(ctx)
+	entUser, err := r.data.DB(ctx).User.Query().Where(user.Email(email)).Select(user.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取用户邮箱是否存在失败，用户email：%v，错误：%v", email, err)
 		return 0, err
@@ -92,7 +92,7 @@ func (r *userRepo) GetUserExistByEmail(ctx context.Context, email string) (uint3
 // 返回值：用户ID，错误信息
 func (r *userRepo) GetUserExistByName(ctx context.Context, name string) (uint32, error) {
 	r.log.Infof("获取用户名是否存在，用户名：%v", name)
-	entUser, err := r.data.DB(ctx).User.Query().Where(user.Name(name), user.DeletedAtIsNil()).Select(user.FieldID).First(ctx)
+	entUser, err := r.data.DB(ctx).User.Query().Where(user.Name(name)).Select(user.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取用户名是否存在失败，用户名：%v，错误：%v", name, err)
 		return 0, err
@@ -105,7 +105,7 @@ func (r *userRepo) GetUserExistByName(ctx context.Context, name string) (uint32,
 // 返回值：用户ID，错误信息
 func (r *userRepo) GetUserExistByPhone(ctx context.Context, phone string) (uint32, error) {
 	r.log.Infof("获取用户手机号是否存在，手机号：%v", phone)
-	entUser, err := r.data.DB(ctx).User.Query().Where(user.Phone(phone), user.DeletedAtIsNil()).Select(user.FieldID).First(ctx)
+	entUser, err := r.data.DB(ctx).User.Query().Where(user.Phone(phone)).Select(user.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取用户手机号是否存在失败，手机号：%v，错误：%v", phone, err)
 		return 0, err
@@ -222,7 +222,7 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 	r.log.Infof("通过ID查询用户，ID：%d", id)
 	res, err := r.data.DB(ctx).User.Query().
 		// Select(user.FieldID, user.FieldName, user.FieldEmail, user.FieldNickname, user.FieldRealname, user.FieldGender, user.FieldAvatar, user.FieldDescription, user.FieldPhone, user.FieldStatus, user.FieldBirthday, user.FieldCreatedAt, user.FieldUpdatedAt).
-		Where(user.IDEQ(id), user.DeletedAtIsNil()).Only(ctx)
+		Where(user.IDEQ(id)).Only(ctx)
 	fmt.Printf("%v", res)
 	if err != nil {
 		r.log.Errorf("通过ID查询用户失败，ID：%d，错误：%v", id, err)
@@ -239,7 +239,7 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 // 返回值：用户数量，错误信息
 func (r *userRepo) Count(ctx context.Context, condition []string) (int64, error) {
 	r.log.Infof("统计用户数量")
-	entQuery := r.data.DB(ctx).User.Query().Where(user.DeletedAtIsNil())
+	entQuery := r.data.DB(ctx).User.Query()
 	if len(condition) > 0 {
 
 		// entQuery.Where(sql.Column(user.FieldName).)
@@ -257,7 +257,7 @@ func (r *userRepo) Count(ctx context.Context, condition []string) (int64, error)
 // 返回值：用户列表，错误信息
 func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User, error) {
 	r.log.Infof("通过用户名查询用户，用户名：%s", name)
-	res, err := r.data.DB(ctx).User.Query().Where(user.NameContains(name), user.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).User.Query().Where(user.NameContains(name)).All(ctx)
 	if err != nil {
 		r.log.Errorf("通过用户名查询用户失败，用户名：%s，错误：%v", name, err)
 		return nil, err
@@ -270,7 +270,7 @@ func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User,
 // 返回值：用户列表，错误信息
 func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.User, error) {
 	r.log.Infof("通过手机号查询用户，手机号：%s", phone)
-	res, err := r.data.DB(ctx).User.Query().Where(user.PhoneEQ(phone), user.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).User.Query().Where(user.PhoneEQ(phone)).All(ctx)
 	if err != nil {
 		r.log.Errorf("通过手机号查询用户失败，手机号：%s，错误：%v", phone, err)
 		return nil, err
@@ -283,7 +283,7 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 // 返回值：用户列表，错误信息
 func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 	r.log.Infof("查询所有用户列表")
-	res, err := r.data.DB(ctx).User.Query().Select(user.FieldID, user.FieldName).Where(user.DeletedAtIsNil()).Order(gen.Desc(user.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).User.Query().Select(user.FieldID, user.FieldName).Order(gen.Desc(user.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err
@@ -296,14 +296,14 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 // 返回值：用户列表响应，错误信息
 func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
 	r.log.Infof("查询用户简单列表分页，分页请求：%v", pagination)
-	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Where(user.DeletedAtIsNil()).Count(ctx)
+	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Where().Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err
 	}
 	res, err := r.data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
-		Where(user.DeletedAtIsNil()).
+		Where().
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(gen.Desc(user.FieldID)).
@@ -323,7 +323,7 @@ func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.
 // 返回值：用户列表响应，错误信息
 func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
 	r.log.Infof("查询用户列表分页，分页请求：%v", pagination)
-	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Where(user.DeletedAtIsNil()).Count(ctx)
+	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
 		return nil, err
@@ -343,7 +343,6 @@ func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			user.FieldCreatedAt,
 			user.FieldUpdatedAt,
 		).
-		Where(user.DeletedAtIsNil()).
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(gen.Desc(user.FieldID)).
@@ -369,4 +368,19 @@ func (r *userRepo) Delete(ctx context.Context, id uint32) error {
 		return err
 	}
 	return nil
+}
+
+func filterUser(q *gen.UserQuery, req *pbCore.User) {
+	if req.GetName() != "" {
+		q.Where(user.NameContains(req.GetName()))
+	}
+	if req.GetPhone() != "" {
+		q.Where(user.PhoneContains(req.GetPhone()))
+	}
+	if req.GetEmail() != "" {
+		q.Where(user.EmailContains(req.GetEmail()))
+	}
+	if req.GetStatus() != 0 {
+		q.Where(user.Status(int32(*req.Status)))
+	}
 }

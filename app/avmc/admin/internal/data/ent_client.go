@@ -8,6 +8,8 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/intercept"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/migrate"
 
+	_ "backend-service/app/avmc/admin/internal/data/ent/gen/runtime"
+
 	// init mysql driver
 
 	"entgo.io/ent"

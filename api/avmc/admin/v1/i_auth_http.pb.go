@@ -25,6 +25,7 @@ const OperationAuthServiceLoginPassword = "/avmc.admin.v1.AuthService/LoginPassw
 const OperationAuthServiceLogout = "/avmc.admin.v1.AuthService/Logout"
 const OperationAuthServiceProfile = "/avmc.admin.v1.AuthService/Profile"
 const OperationAuthServiceRefreshToken = "/avmc.admin.v1.AuthService/RefreshToken"
+const OperationAuthServiceVbenProfile = "/avmc.admin.v1.AuthService/VbenProfile"
 
 type AuthServiceHTTPServer interface {
 	// Codes 登录用户权限码
@@ -39,6 +40,8 @@ type AuthServiceHTTPServer interface {
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
 	// @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	// VbenProfile 登录用户Vben信息
+	VbenProfile(context.Context, *VbenProfileRequest) (*VbenProfileResponse, error)
 }
 
 func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
@@ -48,6 +51,7 @@ func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
 	r.POST("/admin/v1/auth/refresh-token", _AuthService_RefreshToken0_HTTP_Handler(srv))
 	r.POST("/admin/v1/auth/logout", _AuthService_Logout0_HTTP_Handler(srv))
 	r.GET("/admin/v1/auth/profile", _AuthService_Profile0_HTTP_Handler(srv))
+	r.GET("/admin/v1/auth/vben/profile", _AuthService_VbenProfile0_HTTP_Handler(srv))
 	r.GET("/admin/v1/auth/codes", _AuthService_Codes0_HTTP_Handler(srv))
 }
 
@@ -158,6 +162,25 @@ func _AuthService_Profile0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http
 	}
 }
 
+func _AuthService_VbenProfile0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in VbenProfileRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthServiceVbenProfile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.VbenProfile(ctx, req.(*VbenProfileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*VbenProfileResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _AuthService_Codes0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in CodesRequest
@@ -184,6 +207,7 @@ type AuthServiceHTTPClient interface {
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
 	Profile(ctx context.Context, req *ProfileRequest, opts ...http.CallOption) (rsp *ProfileResponse, err error)
 	RefreshToken(ctx context.Context, req *RefreshTokenRequest, opts ...http.CallOption) (rsp *RefreshTokenResponse, err error)
+	VbenProfile(ctx context.Context, req *VbenProfileRequest, opts ...http.CallOption) (rsp *VbenProfileResponse, err error)
 }
 
 type AuthServiceHTTPClientImpl struct {
@@ -266,6 +290,19 @@ func (c *AuthServiceHTTPClientImpl) RefreshToken(ctx context.Context, in *Refres
 	opts = append(opts, http.Operation(OperationAuthServiceRefreshToken))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AuthServiceHTTPClientImpl) VbenProfile(ctx context.Context, in *VbenProfileRequest, opts ...http.CallOption) (*VbenProfileResponse, error) {
+	var out VbenProfileResponse
+	pattern := "/admin/v1/auth/vben/profile"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAuthServiceVbenProfile))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

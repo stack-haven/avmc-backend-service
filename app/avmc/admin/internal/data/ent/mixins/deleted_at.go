@@ -16,6 +16,28 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/intercept"
 )
 
+// 注意：
+// 1. 软删除Mixin会自动为所有实体添加deleted_at字段
+// 2. 删除操作会将deleted_at设置为当前时间，而不是实际删除
+// 3. 查询操作默认会过滤掉已软删除的实体
+// 4. 可以使用SkipSoftDelete(ctx)上下文来跳过软删除过滤
+
+// 重点：
+// 1. 不能放到base中使用，否则无法自动生成拦截器，同时会导致循环依赖
+// 2. 软删除Mixin只能在实体中使用一次
+
+// 举例：
+// ```go
+// func (User) Mixin() []ent.Mixin {
+// 	return []ent.Mixin{
+// 		mixins.BaseMixin{},
+//		# 软删除Mixin只能在实体中使用一次
+//		# 不能放到base中使用，否则无法自动生成拦截器，同时会导致循环依赖
+// 		mixins.SoftDeleteMixin{},
+// 	}
+// }
+// ```
+
 // SoftDeleteMixin 实现软删除模式
 type SoftDeleteMixin struct {
 	mixin.Schema

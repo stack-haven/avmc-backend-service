@@ -144,6 +144,28 @@ service AuthService {
     };
   }
 
+  // 登录用户Vben信息
+  rpc VbenProfile (VbenProfileRequest) returns (VbenProfileResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/auth/vben/profile"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "登录用户Vben简介信息";
+      description: "登录用户Vben简介信息";
+      tags: ["认证服务"];
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth";
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
 
   // 登录用户权限码
   rpc Codes (CodesRequest) returns (CodesResponse) {
@@ -289,12 +311,47 @@ message ProfileResponse {
   optional core.service.v1.Role role = 2 [
     (gnostic.openapi.v3.property) = {description: "登录用户角色信息"}
   ]; // 登录用户角色信息  
-  repeated string permissions = 3 [
-    (gnostic.openapi.v3.property) = {description: "登录用户权限信息"}
-  ]; // 登录用户权限信息
-  repeated string menus = 4 [
+
+  repeated string roles = 3 [
+    (gnostic.openapi.v3.property) = {description: "登录用户角色列表信息"}
+  ]; // 登录用户角色列表信息  
+    repeated string permissions = 4 [
+    (gnostic.openapi.v3.property) = {description: "登录用户权限列表信息"}
+  ]; // 登录用户权限列表信息
+   repeated string menus = 5 [
     (gnostic.openapi.v3.property) = {description: "登录用户菜单信息"}
   ]; // 登录用户菜单信息
+}
+
+// 登录用户Vben简介信息 - 请求
+message VbenProfileRequest {}
+
+// 登录用户Vben简介信息 - 回应
+message VbenProfileResponse {
+  uint32 user_id = 1 [
+    (gnostic.openapi.v3.property) = {description: "用户ID"}
+  ];
+  optional string username = 2 [
+    (gnostic.openapi.v3.property) = {description: "用户名"}
+  ];
+  optional string real_name = 3 [
+    (gnostic.openapi.v3.property) = {description: "真实姓名"}
+  ];
+  optional string avatar = 4 [
+    (gnostic.openapi.v3.property) = {description: "头像"}
+  ];
+  optional string home_path = 5 [
+    (gnostic.openapi.v3.property) = {description: "首页路径"}
+  ];
+  optional string desc = 6 [
+    (gnostic.openapi.v3.property) = {description: "描述"}
+  ];
+  optional core.service.v1.Role role = 7 [
+    (gnostic.openapi.v3.property) = {description: "登录用户角色信息"}
+  ]; // 登录用户角色信息  
+  repeated string roles = 8 [
+    (gnostic.openapi.v3.property) = {description: "登录用户角色列表信息"}
+  ]; // 登录用户角色列表信息  
 }
 
 // 登录用户权限码 - 请求

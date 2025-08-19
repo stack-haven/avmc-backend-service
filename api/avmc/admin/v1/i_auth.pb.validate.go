@@ -1305,6 +1305,265 @@ var _ interface {
 	ErrorName() string
 } = ProfileResponseValidationError{}
 
+// Validate checks the field values on VbenProfileRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *VbenProfileRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on VbenProfileRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// VbenProfileRequestMultiError, or nil if none found.
+func (m *VbenProfileRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *VbenProfileRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return VbenProfileRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// VbenProfileRequestMultiError is an error wrapping multiple validation errors
+// returned by VbenProfileRequest.ValidateAll() if the designated constraints
+// aren't met.
+type VbenProfileRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m VbenProfileRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m VbenProfileRequestMultiError) AllErrors() []error { return m }
+
+// VbenProfileRequestValidationError is the validation error returned by
+// VbenProfileRequest.Validate if the designated constraints aren't met.
+type VbenProfileRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VbenProfileRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VbenProfileRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VbenProfileRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VbenProfileRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VbenProfileRequestValidationError) ErrorName() string {
+	return "VbenProfileRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e VbenProfileRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVbenProfileRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VbenProfileRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VbenProfileRequestValidationError{}
+
+// Validate checks the field values on VbenProfileResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *VbenProfileResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on VbenProfileResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// VbenProfileResponseMultiError, or nil if none found.
+func (m *VbenProfileResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *VbenProfileResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	if m.Username != nil {
+		// no validation rules for Username
+	}
+
+	if m.RealName != nil {
+		// no validation rules for RealName
+	}
+
+	if m.Avatar != nil {
+		// no validation rules for Avatar
+	}
+
+	if m.HomePath != nil {
+		// no validation rules for HomePath
+	}
+
+	if m.Desc != nil {
+		// no validation rules for Desc
+	}
+
+	if m.Role != nil {
+
+		if all {
+			switch v := interface{}(m.GetRole()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, VbenProfileResponseValidationError{
+						field:  "Role",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, VbenProfileResponseValidationError{
+						field:  "Role",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetRole()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return VbenProfileResponseValidationError{
+					field:  "Role",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return VbenProfileResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// VbenProfileResponseMultiError is an error wrapping multiple validation
+// errors returned by VbenProfileResponse.ValidateAll() if the designated
+// constraints aren't met.
+type VbenProfileResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m VbenProfileResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m VbenProfileResponseMultiError) AllErrors() []error { return m }
+
+// VbenProfileResponseValidationError is the validation error returned by
+// VbenProfileResponse.Validate if the designated constraints aren't met.
+type VbenProfileResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VbenProfileResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VbenProfileResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VbenProfileResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VbenProfileResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VbenProfileResponseValidationError) ErrorName() string {
+	return "VbenProfileResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e VbenProfileResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVbenProfileResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VbenProfileResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VbenProfileResponseValidationError{}
+
 // Validate checks the field values on CodesRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.

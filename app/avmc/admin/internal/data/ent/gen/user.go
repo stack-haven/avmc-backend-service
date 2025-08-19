@@ -76,6 +76,8 @@ type UserEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	namedRoles  map[string][]*Role
+	namedPosts  map[string][]*Post
 }
 
 // RolesOrErr returns the Roles value or an error if the edge
@@ -415,6 +417,54 @@ func (_m *User) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedRoles returns the Roles named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (_m *User) NamedRoles(name string) ([]*Role, error) {
+	if _m.Edges.namedRoles == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := _m.Edges.namedRoles[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (_m *User) appendNamedRoles(name string, edges ...*Role) {
+	if _m.Edges.namedRoles == nil {
+		_m.Edges.namedRoles = make(map[string][]*Role)
+	}
+	if len(edges) == 0 {
+		_m.Edges.namedRoles[name] = []*Role{}
+	} else {
+		_m.Edges.namedRoles[name] = append(_m.Edges.namedRoles[name], edges...)
+	}
+}
+
+// NamedPosts returns the Posts named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (_m *User) NamedPosts(name string) ([]*Post, error) {
+	if _m.Edges.namedPosts == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := _m.Edges.namedPosts[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (_m *User) appendNamedPosts(name string, edges ...*Post) {
+	if _m.Edges.namedPosts == nil {
+		_m.Edges.namedPosts = make(map[string][]*Post)
+	}
+	if len(edges) == 0 {
+		_m.Edges.namedPosts[name] = []*Post{}
+	} else {
+		_m.Edges.namedPosts[name] = append(_m.Edges.namedPosts[name], edges...)
+	}
 }
 
 // Users is a parsable slice of User.

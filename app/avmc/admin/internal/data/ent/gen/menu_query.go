@@ -20,13 +20,14 @@ import (
 // MenuQuery is the builder for querying Menu entities.
 type MenuQuery struct {
 	config
-	ctx          *QueryContext
-	order        []menu.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Menu
-	withParent   *MenuQuery
-	withChildren *MenuQuery
-	modifiers    []func(*sql.Selector)
+	ctx               *QueryContext
+	order             []menu.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.Menu
+	withParent        *MenuQuery
+	withChildren      *MenuQuery
+	modifiers         []func(*sql.Selector)
+	withNamedChildren map[string]*MenuQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -447,6 +448,13 @@ func (_q *MenuQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menu, e
 			return nil, err
 		}
 	}
+	for name, query := range _q.withNamedChildren {
+		if err := _q.loadChildren(ctx, query, nodes,
+			func(n *Menu) { n.appendNamedChildren(name) },
+			func(n *Menu, e *Menu) { n.appendNamedChildren(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -636,6 +644,20 @@ func (_q *MenuQuery) ForShare(opts ...sql.LockOption) *MenuQuery {
 func (_q *MenuQuery) Modify(modifiers ...func(s *sql.Selector)) *MenuSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
+}
+
+// WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *MenuQuery) WithNamedChildren(name string, opts ...func(*MenuQuery)) *MenuQuery {
+	query := (&MenuClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedChildren == nil {
+		_q.withNamedChildren = make(map[string]*MenuQuery)
+	}
+	_q.withNamedChildren[name] = query
+	return _q
 }
 
 // MenuGroupBy is the group-by builder for Menu entities.

@@ -20,13 +20,14 @@ import (
 // DeptQuery is the builder for querying Dept entities.
 type DeptQuery struct {
 	config
-	ctx          *QueryContext
-	order        []dept.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Dept
-	withParent   *DeptQuery
-	withChildren *DeptQuery
-	modifiers    []func(*sql.Selector)
+	ctx               *QueryContext
+	order             []dept.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.Dept
+	withParent        *DeptQuery
+	withChildren      *DeptQuery
+	modifiers         []func(*sql.Selector)
+	withNamedChildren map[string]*DeptQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -447,6 +448,13 @@ func (_q *DeptQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dept, e
 			return nil, err
 		}
 	}
+	for name, query := range _q.withNamedChildren {
+		if err := _q.loadChildren(ctx, query, nodes,
+			func(n *Dept) { n.appendNamedChildren(name) },
+			func(n *Dept, e *Dept) { n.appendNamedChildren(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -636,6 +644,20 @@ func (_q *DeptQuery) ForShare(opts ...sql.LockOption) *DeptQuery {
 func (_q *DeptQuery) Modify(modifiers ...func(s *sql.Selector)) *DeptSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
+}
+
+// WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *DeptQuery) WithNamedChildren(name string, opts ...func(*DeptQuery)) *DeptQuery {
+	query := (&DeptClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedChildren == nil {
+		_q.withNamedChildren = make(map[string]*DeptQuery)
+	}
+	_q.withNamedChildren[name] = query
+	return _q
 }
 
 // DeptGroupBy is the group-by builder for Dept entities.

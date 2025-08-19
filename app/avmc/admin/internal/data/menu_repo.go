@@ -121,7 +121,7 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 // 返回值：菜单ID，错误信息
 func (r *menuRepo) GetMenuExistByName(ctx context.Context, name string) (uint32, error) {
 	r.log.Infof("获取菜单名称是否存在，菜单名称：%v", name)
-	entMenu, err := r.data.DB(ctx).Menu.Query().Where(menu.Name(name), menu.DeletedAtIsNil()).Select(menu.FieldID).First(ctx)
+	entMenu, err := r.data.DB(ctx).Menu.Query().Where(menu.Name(name)).Select(menu.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取菜单名称是否存在失败，菜单名称：%v，错误：%v", name, err)
 		return 0, err
@@ -165,7 +165,7 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 func (r *menuRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Menu, error) {
 	r.log.Infof("通过ID查询菜单，ID：%d", id)
 	res, err := r.data.DB(ctx).Menu.Query().
-		Where(menu.IDEQ(id), menu.DeletedAtIsNil()).Only(ctx)
+		Where(menu.IDEQ(id)).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询菜单失败，ID：%d，错误：%v", id, err)
 		if gen.IsNotFound(err) {
@@ -194,7 +194,7 @@ func (r *menuRepo) Delete(ctx context.Context, id uint32) error {
 // 返回值：菜单列表，错误信息
 func (r *menuRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Menu, error) {
 	r.log.Infof("通过菜单名称查询菜单，菜单名称：%s", name)
-	res, err := r.data.DB(ctx).Menu.Query().Where(menu.NameContains(name), menu.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).Menu.Query().Where(menu.NameContains(name)).All(ctx)
 	if err != nil {
 		r.log.Errorf("通过菜单名称查询菜单失败，菜单名称：%s，错误：%v", name, err)
 		return nil, err
@@ -207,7 +207,7 @@ func (r *menuRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Menu,
 // 返回值：菜单列表，错误信息
 func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
 	r.log.Infof("查询所有菜单列表")
-	res, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID, menu.FieldName).Where(menu.DeletedAtIsNil()).Order(gen.Desc(menu.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID, menu.FieldName).Where().Order(gen.Desc(menu.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
@@ -240,7 +240,7 @@ func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			menu.FieldCreatedAt,
 			menu.FieldUpdatedAt,
 		).
-		Offset(int((pagination.GetPage()-1)*pagination.GetPageSize())).
+		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(gen.Desc(menu.FieldID)).
 		All(ctx)

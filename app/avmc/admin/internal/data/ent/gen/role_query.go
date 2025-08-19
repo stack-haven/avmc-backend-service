@@ -21,12 +21,13 @@ import (
 // RoleQuery is the builder for querying Role entities.
 type RoleQuery struct {
 	config
-	ctx        *QueryContext
-	order      []role.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Role
-	withUsers  *UserQuery
-	modifiers  []func(*sql.Selector)
+	ctx            *QueryContext
+	order          []role.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Role
+	withUsers      *UserQuery
+	modifiers      []func(*sql.Selector)
+	withNamedUsers map[string]*UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -406,6 +407,13 @@ func (_q *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 			return nil, err
 		}
 	}
+	for name, query := range _q.withNamedUsers {
+		if err := _q.loadUsers(ctx, query, nodes,
+			func(n *Role) { n.appendNamedUsers(name) },
+			func(n *Role, e *User) { n.appendNamedUsers(name, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -588,6 +596,20 @@ func (_q *RoleQuery) ForShare(opts ...sql.LockOption) *RoleQuery {
 func (_q *RoleQuery) Modify(modifiers ...func(s *sql.Selector)) *RoleSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
+}
+
+// WithNamedUsers tells the query-builder to eager-load the nodes that are connected to the "users"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (_q *RoleQuery) WithNamedUsers(name string, opts ...func(*UserQuery)) *RoleQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if _q.withNamedUsers == nil {
+		_q.withNamedUsers = make(map[string]*UserQuery)
+	}
+	_q.withNamedUsers[name] = query
+	return _q
 }
 
 // RoleGroupBy is the group-by builder for Role entities.

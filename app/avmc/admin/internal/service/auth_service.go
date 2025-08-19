@@ -101,6 +101,20 @@ func (s *AuthServiceService) Profile(ctx context.Context, req *pb.ProfileRequest
 	return resp, nil
 }
 
+// Profile 处理登录用户简介信息请求
+// 参数：ctx 上下文，req 登录用户简介信息请求
+// 返回值：登录用户简介信息响应，错误信息
+func (s *AuthServiceService) VbenProfile(ctx context.Context, req *pb.VbenProfileRequest) (*pb.VbenProfileResponse, error) {
+	// 调用业务逻辑层
+	resp, err := s.auc.VbenProfile(ctx)
+	if err != nil {
+		s.log.Errorf("获取登录用户简介信息失败: %v", err)
+		return nil, err
+	}
+
+	return resp, nil
+}
+
 // Codes 处理登录用户权限码请求
 // 参数：ctx 上下文，req 登录用户权限码请求
 // 返回值：登录用户权限码响应，错误信息

@@ -79,7 +79,7 @@ func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, erro
 // 返回值：岗位ID，错误信息
 func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32, error) {
 	r.log.Infof("获取岗位名称是否存在，岗位名称：%v", name)
-	entPost, err := r.data.DB(ctx).Post.Query().Where(post.Name(name), post.DeletedAtIsNil()).Select(post.FieldID).First(ctx)
+	entPost, err := r.data.DB(ctx).Post.Query().Where(post.Name(name)).Select(post.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取岗位名称是否存在失败，岗位名称：%v，错误：%v", name, err)
 		return 0, err
@@ -116,7 +116,7 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error) {
 	r.log.Infof("通过ID查询岗位，ID：%d", id)
 	res, err := r.data.DB(ctx).Post.Query().
-		Where(post.IDEQ(id), post.DeletedAtIsNil()).Only(ctx)
+		Where(post.IDEQ(id)).Only(ctx)
 	if err != nil {
 		r.log.Errorf("通过ID查询岗位失败，ID：%d，错误：%v", id, err)
 		if gen.IsNotFound(err) {
@@ -145,7 +145,7 @@ func (r *postRepo) Delete(ctx context.Context, id uint32) error {
 // 返回值：岗位列表，错误信息
 func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post, error) {
 	r.log.Infof("通过岗位名称查询岗位，岗位名称：%s", name)
-	res, err := r.data.DB(ctx).Post.Query().Where(post.NameContains(name), post.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).Post.Query().Where(post.NameContains(name)).All(ctx)
 	if err != nil {
 		r.log.Errorf("通过岗位名称查询岗位失败，岗位名称：%s，错误：%v", name, err)
 		return nil, err
@@ -158,7 +158,7 @@ func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post,
 // 返回值：岗位列表，错误信息
 func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 	r.log.Infof("查询所有岗位列表")
-	res, err := r.data.DB(ctx).Post.Query().Select(post.FieldID, post.FieldName).Where(post.DeletedAtIsNil()).Order(gen.Desc(post.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).Post.Query().Select(post.FieldID, post.FieldName).Where().Order(gen.Desc(post.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
 		return nil, err
@@ -183,7 +183,7 @@ func (r *postRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			post.FieldCreatedAt,
 			post.FieldUpdatedAt,
 		).
-		Where(post.DeletedAtIsNil()).
+		Where().
 		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
 		Limit(int(pagination.GetPageSize())).
 		Order(gen.Desc(post.FieldID)).

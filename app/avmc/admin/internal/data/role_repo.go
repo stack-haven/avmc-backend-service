@@ -67,7 +67,7 @@ func (r *roleRepo) toEnt(g *pbCore.Role) *gen.Role {
 // 返回值：角色ID，错误信息
 func (r *roleRepo) GetRoleExistByName(ctx context.Context, name string) (uint32, error) {
 	r.log.Infof("获取角色名称是否存在，角色名称：%v", name)
-	entRole, err := r.data.DB(ctx).Role.Query().Where(role.Name(name), role.DeletedAtIsNil()).Select(role.FieldID).First(ctx)
+	entRole, err := r.data.DB(ctx).Role.Query().Where(role.Name(name)).Select(role.FieldID).First(ctx)
 	if err != nil {
 		r.log.Errorf("获取角色名称是否存在失败，角色名称：%v，错误：%v", name, err)
 		return 0, err
@@ -133,7 +133,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 // 返回值：角色信息，错误信息
 func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error) {
 	r.log.Infof("根据ID查询角色，角色ID：%v", id)
-	res, err := r.data.DB(ctx).Role.Query().Where(role.ID(id), role.DeletedAtIsNil()).First(ctx)
+	res, err := r.data.DB(ctx).Role.Query().Where(role.ID(id)).First(ctx)
 	if err != nil {
 		r.log.Errorf("根据ID查询角色失败，角色ID：%v，错误：%v", id, err)
 		if gen.IsNotFound(err) {
@@ -162,7 +162,7 @@ func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 // 返回值：角色列表，错误信息
 func (r *roleRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Role, error) {
 	r.log.Infof("根据名称模糊查询角色，角色名称：%v", name)
-	res, err := r.data.DB(ctx).Role.Query().Where(role.NameContains(name), role.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).Role.Query().Where(role.NameContains(name)).All(ctx)
 	if err != nil {
 		r.log.Errorf("根据名称模糊查询角色失败，角色名称：%v，错误：%v", name, err)
 		return nil, err
@@ -180,7 +180,7 @@ func (r *roleRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Role,
 // 返回值：角色列表，错误信息
 func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 	r.log.Infof("查询所有角色")
-	res, err := r.data.DB(ctx).Role.Query().Where(role.DeletedAtIsNil()).All(ctx)
+	res, err := r.data.DB(ctx).Role.Query().All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有角色失败，错误：%v", err)
 		return nil, err
@@ -210,7 +210,11 @@ func (r *roleRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 	offset := (pagination.GetPage() - 1) * pagination.GetPageSize()
 
 	// 查询分页数据
-	res, err := r.data.DB(ctx).Role.Query().Where(role.DeletedAtIsNil()).Offset(int(offset)).Limit(int(pagination.GetPageSize())).All(ctx)
+	res, err := r.data.DB(ctx).Role.Query().
+		Where(role.DeletedAtIsNil()).
+		Offset(int(offset)).
+		Limit(int(pagination.GetPageSize())).
+		All(ctx)
 	if err != nil {
 		r.log.Errorf("分页查询角色失败，错误：%v", err)
 		return nil, err
