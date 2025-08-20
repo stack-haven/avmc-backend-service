@@ -2,83 +2,119 @@ syntax = "proto3";
 
 package avmc.admin.v1;
 
-
+import "common/pagination/pagination.proto";
+import "core/service/v1/dept.proto";
 import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-
-import "common/pagination/pagination.proto";
-
-import "core/service/v1/dept.proto";
 
 option go_package = "backend-service/api/avmc/admin/v1;v1";
 
 // 部门管理服务
 service DeptService {
   // 获取部门列表
-  rpc ListDept (pagination.PagingRequest) returns (core.service.v1.ListDeptResponse) {
-    option (google.api.http) = {
-      get: "/admin/v1/depts"
-    };
+  rpc ListDept(pagination.PagingRequest) returns (core.service.v1.ListDeptResponse) {
+    option (google.api.http) = {get: "/admin/v1/depts"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "获取部门列表";
-      description: "获取部门列表";
-      tags: ["部门管理服务"];
-      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
+      summary: "获取部门列表"
+      description: "获取部门列表"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 
   // 获取部门数据
-  rpc GetDept (core.service.v1.GetDeptRequest) returns (core.service.v1.Dept) {
-    option (google.api.http) = {
-      get: "/admin/v1/depts/{id}"
-    };
+  rpc GetDept(core.service.v1.GetDeptRequest) returns (core.service.v1.Dept) {
+    option (google.api.http) = {get: "/admin/v1/depts/{id}"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "获取部门数据";
-      description: "获取部门数据";
-      tags: ["部门管理服务"];
-      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
+      summary: "获取部门数据"
+      description: "获取部门数据"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 
   // 创建部门
-  rpc CreateDept (core.service.v1.CreateDeptRequest) returns (core.service.v1.CreateDeptResponse) {
+  rpc CreateDept(core.service.v1.CreateDeptRequest) returns (core.service.v1.CreateDeptResponse) {
     option (google.api.http) = {
       post: "/admin/v1/depts"
       body: "dept"
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "创建部门";
-      description: "创建部门";
-      tags: ["部门管理服务"];
-      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
+      summary: "创建部门"
+      description: "创建部门"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 
   // 更新部门
-  rpc UpdateDept (core.service.v1.UpdateDeptRequest) returns (core.service.v1.UpdateDeptResponse) {
+  rpc UpdateDept(core.service.v1.UpdateDeptRequest) returns (core.service.v1.UpdateDeptResponse) {
     option (google.api.http) = {
       put: "/admin/v1/depts/{id}"
       body: "dept"
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "更新部门";
-      description: "更新部门";
-      tags: ["部门管理服务"];
-      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
+      summary: "更新部门"
+      description: "更新部门"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 
   // 删除部门
-  rpc DeleteDept (core.service.v1.DeleteDeptRequest) returns (core.service.v1.DeleteDeptResponse) {
-    option (google.api.http) = {
-      delete: "/admin/v1/depts/{id}"
-    };
+  rpc DeleteDept(core.service.v1.DeleteDeptRequest) returns (core.service.v1.DeleteDeptResponse) {
+    option (google.api.http) = {delete: "/admin/v1/depts/{id}"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "删除部门";
-      description: "删除部门";
-      tags: ["部门管理服务"];
-      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
+      summary: "删除部门"
+      description: "删除部门"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
     };
   }
 }

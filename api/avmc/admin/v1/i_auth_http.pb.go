@@ -23,6 +23,7 @@ const OperationAuthServiceCodes = "/avmc.admin.v1.AuthService/Codes"
 const OperationAuthServiceLoginCode = "/avmc.admin.v1.AuthService/LoginCode"
 const OperationAuthServiceLoginPassword = "/avmc.admin.v1.AuthService/LoginPassword"
 const OperationAuthServiceLogout = "/avmc.admin.v1.AuthService/Logout"
+const OperationAuthServiceMenus = "/avmc.admin.v1.AuthService/Menus"
 const OperationAuthServiceProfile = "/avmc.admin.v1.AuthService/Profile"
 const OperationAuthServiceRefreshToken = "/avmc.admin.v1.AuthService/RefreshToken"
 const OperationAuthServiceVbenProfile = "/avmc.admin.v1.AuthService/VbenProfile"
@@ -34,6 +35,8 @@ type AuthServiceHTTPServer interface {
 	LoginPassword(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Logout 后台登出
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	// Menus 登录用户信息
+	Menus(context.Context, *MenusRequest) (*MenusResponse, error)
 	// Profile 登录用户信息
 	Profile(context.Context, *ProfileRequest) (*ProfileResponse, error)
 	// RefreshToken 刷新令牌
@@ -53,6 +56,7 @@ func RegisterAuthServiceHTTPServer(s *http.Server, srv AuthServiceHTTPServer) {
 	r.GET("/admin/v1/auth/profile", _AuthService_Profile0_HTTP_Handler(srv))
 	r.GET("/admin/v1/auth/vben/profile", _AuthService_VbenProfile0_HTTP_Handler(srv))
 	r.GET("/admin/v1/auth/codes", _AuthService_Codes0_HTTP_Handler(srv))
+	r.GET("/admin/v1/auth/menus", _AuthService_Menus0_HTTP_Handler(srv))
 }
 
 func _AuthService_LoginPassword0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
@@ -200,11 +204,31 @@ func _AuthService_Codes0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.C
 	}
 }
 
+func _AuthService_Menus0_HTTP_Handler(srv AuthServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in MenusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthServiceMenus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Menus(ctx, req.(*MenusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*MenusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AuthServiceHTTPClient interface {
 	Codes(ctx context.Context, req *CodesRequest, opts ...http.CallOption) (rsp *CodesResponse, err error)
 	LoginCode(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	LoginPassword(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
+	Menus(ctx context.Context, req *MenusRequest, opts ...http.CallOption) (rsp *MenusResponse, err error)
 	Profile(ctx context.Context, req *ProfileRequest, opts ...http.CallOption) (rsp *ProfileResponse, err error)
 	RefreshToken(ctx context.Context, req *RefreshTokenRequest, opts ...http.CallOption) (rsp *RefreshTokenResponse, err error)
 	VbenProfile(ctx context.Context, req *VbenProfileRequest, opts ...http.CallOption) (rsp *VbenProfileResponse, err error)
@@ -264,6 +288,19 @@ func (c *AuthServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutReques
 	opts = append(opts, http.Operation(OperationAuthServiceLogout))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AuthServiceHTTPClientImpl) Menus(ctx context.Context, in *MenusRequest, opts ...http.CallOption) (*MenusResponse, error) {
+	var out MenusResponse
+	pattern := "/admin/v1/auth/menus"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAuthServiceMenus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

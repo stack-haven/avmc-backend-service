@@ -26,6 +26,7 @@ const (
 	AuthService_Profile_FullMethodName       = "/avmc.admin.v1.AuthService/Profile"
 	AuthService_VbenProfile_FullMethodName   = "/avmc.admin.v1.AuthService/VbenProfile"
 	AuthService_Codes_FullMethodName         = "/avmc.admin.v1.AuthService/Codes"
+	AuthService_Menus_FullMethodName         = "/avmc.admin.v1.AuthService/Menus"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -48,6 +49,8 @@ type AuthServiceClient interface {
 	VbenProfile(ctx context.Context, in *VbenProfileRequest, opts ...grpc.CallOption) (*VbenProfileResponse, error)
 	// 登录用户权限码
 	Codes(ctx context.Context, in *CodesRequest, opts ...grpc.CallOption) (*CodesResponse, error)
+	// 登录用户信息
+	Menus(ctx context.Context, in *MenusRequest, opts ...grpc.CallOption) (*MenusResponse, error)
 }
 
 type authServiceClient struct {
@@ -128,6 +131,16 @@ func (c *authServiceClient) Codes(ctx context.Context, in *CodesRequest, opts ..
 	return out, nil
 }
 
+func (c *authServiceClient) Menus(ctx context.Context, in *MenusRequest, opts ...grpc.CallOption) (*MenusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MenusResponse)
+	err := c.cc.Invoke(ctx, AuthService_Menus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -148,6 +161,8 @@ type AuthServiceServer interface {
 	VbenProfile(context.Context, *VbenProfileRequest) (*VbenProfileResponse, error)
 	// 登录用户权限码
 	Codes(context.Context, *CodesRequest) (*CodesResponse, error)
+	// 登录用户信息
+	Menus(context.Context, *MenusRequest) (*MenusResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -178,6 +193,9 @@ func (UnimplementedAuthServiceServer) VbenProfile(context.Context, *VbenProfileR
 }
 func (UnimplementedAuthServiceServer) Codes(context.Context, *CodesRequest) (*CodesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Codes not implemented")
+}
+func (UnimplementedAuthServiceServer) Menus(context.Context, *MenusRequest) (*MenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Menus not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -326,6 +344,24 @@ func _AuthService_Codes_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_Menus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MenusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).Menus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_Menus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).Menus(ctx, req.(*MenusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -360,6 +396,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Codes",
 			Handler:    _AuthService_Codes_Handler,
+		},
+		{
+			MethodName: "Menus",
+			Handler:    _AuthService_Menus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,40 +2,39 @@ syntax = "proto3";
 
 package core.service.v1;
 
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "common/pagination/pagination.proto";
 import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
 import "validate/validate.proto";
-import "buf/validate/validate.proto";
-import "common/pagination/pagination.proto";
-import "common/enum/enum.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
 
 service MenuService {
   // 创建菜单
-	rpc CreateMenu (CreateMenuRequest) returns (CreateMenuResponse);
+  rpc CreateMenu(CreateMenuRequest) returns (CreateMenuResponse);
   // 更新菜单
-	rpc UpdateMenu (UpdateMenuRequest) returns (UpdateMenuResponse);
+  rpc UpdateMenu(UpdateMenuRequest) returns (UpdateMenuResponse);
   // 删除菜单
-	rpc DeleteMenu (DeleteMenuRequest) returns (DeleteMenuResponse);
+  rpc DeleteMenu(DeleteMenuRequest) returns (DeleteMenuResponse);
   // 获取菜单
-	rpc GetMenu (GetMenuRequest) returns (GetMenuResponse);
+  rpc GetMenu(GetMenuRequest) returns (GetMenuResponse);
   // 分页查询菜单
-	rpc ListMenu (pagination.PagingRequest) returns (ListMenuResponse);
+  rpc ListMenu(pagination.PagingRequest) returns (ListMenuResponse);
 }
 
-
 enum MenuType {
-  TYPE_UNSPECIFIED = 0;
+  MENU_TYPE_UNSPECIFIED = 0;
   // 目录
-  TYPE_DIR = 1;
+  MENU_TYPE_DIR = 1;
   // 菜单
-  TYPE_MENU = 2;
+  MENU_TYPE_MENU = 2;
   // 按钮·
-  TYPE_BUTTON = 3;
+  MENU_TYPE_BUTTON = 3;
 }
 
 // 菜单信息
@@ -44,7 +43,10 @@ message Menu {
   uint32 id = 1;
   // 菜单名称
   optional string name = 2 [
-    (buf.validate.field).string = {min_len: 1, max_len: 20},
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 20
+    },
     (gnostic.openapi.v3.property) = {description: "菜单名称"}
   ];
   // 父菜单ID
@@ -54,32 +56,55 @@ message Menu {
   ];
   // 菜单标题
   optional string title = 4 [
-    (buf.validate.field).string = {min_len: 1, max_len: 20}, 
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 20
+    },
     (gnostic.openapi.v3.property) = {description: "菜单标题"}
   ];
   // 菜单类型
   optional MenuType type = 5 [
     (buf.validate.field).enum.defined_only = true,
-    (gnostic.openapi.v3.property) = {description: "菜单类型", default: {number: 1}}
+    (gnostic.openapi.v3.property) = {
+      description: "菜单类型"
+      default: {number: 1}
+    }
   ];
   // 排序字段
   optional int32 sort = 6 [
-    (buf.validate.field).int32 = {gte: 0, lte: 100},
-    (gnostic.openapi.v3.property) = {description: "排序字段", default: {number: 10}}
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 100
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "排序字段"
+      default: {number: 10}
+    }
   ];
   // 菜单状态 1 启用 2 禁用
   optional enum.Status status = 7 [
     (buf.validate.field).enum.defined_only = true,
-    (gnostic.openapi.v3.property) = {description: "菜单状态 1 启用 2 禁用", default: {number: 1}}
+    (gnostic.openapi.v3.property) = {
+      description: "菜单状态 1 启用 2 禁用"
+      default: {number: 1}
+    }
   ];
   // 菜单路径
   optional string path = 8 [
-    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
+    (buf.validate.field).string = {
+      uri_ref: true
+      min_len: 1
+      max_len: 200
+    },
     (gnostic.openapi.v3.property) = {description: "菜单路径"}
   ];
   // 组件路径
   optional string component = 9 [
-    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
+    (buf.validate.field).string = {
+      uri_ref: true
+      min_len: 1
+      max_len: 200
+    },
     (gnostic.openapi.v3.property) = {description: "组件路径"}
   ];
   // 菜单图标
@@ -88,12 +113,14 @@ message Menu {
     (gnostic.openapi.v3.property) = {description: "菜单图标"}
   ];
   // 是否外部链接
-  optional bool is_ext = 11 [
-    (gnostic.openapi.v3.property) = {description: "是否外部链接"}
-  ];
+  optional bool is_ext = 11 [(gnostic.openapi.v3.property) = {description: "是否外部链接"}];
   // 外部链接地址
   optional string ext_url = 12 [
-    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
+    (buf.validate.field).string = {
+      uri_ref: true
+      min_len: 1
+      max_len: 200
+    },
     (gnostic.openapi.v3.property) = {description: "外部链接地址"}
   ];
   // 权限标识
@@ -109,47 +136,41 @@ message Menu {
   ];
   // 重定向地址
   optional string redirect = 14 [
-    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 200},
+    (buf.validate.field).string = {
+      uri_ref: true
+      min_len: 1
+      max_len: 200
+    },
     (gnostic.openapi.v3.property) = {description: "重定向地址"}
   ];
   // 当前激活菜单
   optional string current_active_menu = 15 [
-    (buf.validate.field).string = {uri_ref: true, min_len: 1, max_len: 100},
+    (buf.validate.field).string = {
+      uri_ref: true
+      min_len: 1
+      max_len: 100
+    },
     (gnostic.openapi.v3.property) = {description: "当前激活菜单"}
   ];
   // 是否缓存
-  optional bool keep_alive = 16 [
-    (gnostic.openapi.v3.property) = {description: "是否缓存"}
-  ];
+  optional bool keep_alive = 16 [(gnostic.openapi.v3.property) = {description: "是否缓存"}];
   // 是否可见
-  optional bool visible = 17 [
-    (gnostic.openapi.v3.property) = {description: "是否可见"}
-  ];
+  optional bool visible = 17 [(gnostic.openapi.v3.property) = {description: "是否可见"}];
   // 是否隐藏标签
-  optional bool hide_tab = 18 [
-    (gnostic.openapi.v3.property) = {description: "是否隐藏标签"}
-  ];
+  optional bool hide_tab = 18 [(gnostic.openapi.v3.property) = {description: "是否隐藏标签"}];
   // 是否隐藏菜单
-  optional bool hide_menu = 19 [
-    (gnostic.openapi.v3.property) = {description: "是否隐藏菜单"}
-  ];
+  optional bool hide_menu = 19 [(gnostic.openapi.v3.property) = {description: "是否隐藏菜单"}];
   // 是否隐藏面包屑
-  optional bool hide_breadcrumb = 20 [
-    (gnostic.openapi.v3.property) = {description: "是否隐藏面包屑"}
-  ];
+  optional bool hide_breadcrumb = 20 [(gnostic.openapi.v3.property) = {description: "是否隐藏面包屑"}];
   // 菜单描述
   optional string remark = 21 [
     (buf.validate.field).string.max_len = 200,
     (gnostic.openapi.v3.property) = {description: "菜单描述"}
   ];
   // 创建时间
-  optional string created_at = 22 [
-    (gnostic.openapi.v3.property) = {description: "创建时间"}
-  ];
+  optional string created_at = 22 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
   // 更新时间
-  optional string updated_at = 23 [
-    (gnostic.openapi.v3.property) = {description: "更新时间"}
-  ];
+  optional string updated_at = 23 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
 }
 
 // 创建菜单请求
@@ -157,9 +178,9 @@ message CreateMenuRequest {
   Menu menu = 1 [(buf.validate.field).required = true];
   uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
 }
+
 // 创建菜单响应
-message CreateMenuResponse {
-}
+message CreateMenuResponse {}
 
 // 更新菜单请求
 message UpdateMenuRequest {
@@ -167,23 +188,24 @@ message UpdateMenuRequest {
   Menu menu = 2 [(buf.validate.field).required = true];
   uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
 }
+
 // 更新菜单响应
-message UpdateMenuResponse {
-}
+message UpdateMenuResponse {}
 
 // 删除菜单请求
 message DeleteMenuRequest {
   uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
   uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
 }
+
 // 删除菜单响应
-message DeleteMenuResponse {
-}
+message DeleteMenuResponse {}
 
 // 获取菜单请求
 message GetMenuRequest {
   uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
 }
+
 // 获取菜单响应
 message GetMenuResponse {
   Menu menu = 1;
@@ -196,6 +218,7 @@ message ListMenuRequest {
   optional int32 type = 3;
   optional int32 state = 4;
 }
+
 // 分页查询菜单响应
 message ListMenuResponse {
   repeated Menu items = 1;

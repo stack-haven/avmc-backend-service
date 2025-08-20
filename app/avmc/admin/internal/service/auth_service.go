@@ -130,3 +130,16 @@ func (s *AuthServiceService) Codes(ctx context.Context, req *pb.CodesRequest) (*
 		Codes: resp,
 	}, nil
 }
+
+func (s *AuthServiceService) Menus(ctx context.Context, req *pb.MenusRequest) (*pb.MenusResponse, error) {
+	// 调用业务逻辑层
+	resp, err := s.auc.MenuRoutes(ctx)
+	if err != nil {
+		s.log.Errorf("获取登录用户菜单失败: %v", err)
+		return nil, err
+	}
+
+	return &pb.MenusResponse{
+		Routes: resp,
+	}, nil
+}

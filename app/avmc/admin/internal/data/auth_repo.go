@@ -11,6 +11,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "backend-service/api/avmc/admin/v1"
+
+	pbCore "backend-service/api/core/service/v1"
 )
 
 // AuthRepo 数据仓库结构体
@@ -135,5 +137,15 @@ func (r *authRepo) Profile(ctx context.Context, userId uint32) (*pb.ProfileRespo
 func (r *authRepo) Codes(ctx context.Context, userId uint32) ([]string, error) {
 	// 这里实现具体的获取用户权限码数据操作
 	r.log.Infof("尝试获取用户权限码数据操作，用户ID：%d", userId)
+	return nil, nil
+}
+
+// Menus 获取用户菜单
+// 参数：ctx 上下文，userId 用户ID
+// 返回值：用户菜单响应结构体，错误信息
+func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, error) {
+	// 这里实现具体的获取用户菜单数据操作
+	r.log.Infof("尝试获取用户菜单数据操作，用户ID：%d", userId)
+
 	return nil, nil
 }

@@ -2,52 +2,50 @@ syntax = "proto3";
 
 package avmc.admin.v1;
 
+import "buf/validate/validate.proto";
+import "core/service/v1/auth.proto";
+import "core/service/v1/role.proto";
+import "core/service/v1/user.proto";
 import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
 import "validate/validate.proto";
-import "buf/validate/validate.proto";
-
-import "core/service/v1/auth.proto";
-import "core/service/v1/user.proto";
-import "core/service/v1/role.proto";
 
 option go_package = "backend-service/api/avmc/admin/v1;v1";
-
 option (gnostic.openapi.v3.document) = {
   info: {
-    title: "AVMC Admin Auth API";
-    description: "AVMC 后台管理脚手架系统-认证服务";
-    version: "1.0.0";
-		contact: {
-			name: "AVMC Admin架构";
-			url: "https://github.com/grpc-ecosystem/grpc-gateway";
-			email: "737043980@qq.com";
-		};
-		license: {
-			name: "BSD 3-Clause License";
-			url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt";
-		};
-  };
+    title: "AVMC Admin Auth API"
+    description: "AVMC 后台管理脚手架系统-认证服务"
+    version: "1.0.0"
+    contact: {
+      name: "AVMC Admin架构"
+      url: "https://github.com/grpc-ecosystem/grpc-gateway"
+      email: "737043980@qq.com"
+    }
+    license: {
+      name: "BSD 3-Clause License"
+      url: "https://github.com/grpc-ecosystem/grpc-gateway/blob/master/LICENSE.txt"
+    }
+  }
   servers: [
     {
-      url: "https://api.example.com/v1";
-      description: "Production server";
+      url: "https://api.example.com/v1"
+      description: "Production server"
     }
-  ];
+  ]
   components: {
     security_schemes: {
       additional_properties: [
         {
-          name: "BearerAuth";
+          name: "BearerAuth"
           value: {
             security_scheme: {
-              type: "http";
-              scheme: "bearer";
-              bearer_format: "JWT";
-              description: "JWT Bearer token for authenticating requests...";
+              type: "http"
+              scheme: "bearer"
+              bearer_format: "JWT"
+              description: "JWT Bearer token for authenticating requests..."
             }
           }
         }
@@ -58,7 +56,7 @@ option (gnostic.openapi.v3.document) = {
 
 // The greeting service definition.
 service AuthService {
-  rpc LoginPassword (LoginRequest) returns (LoginResponse) {
+  rpc LoginPassword(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
       post: "/admin/v1/auth/login/password"
       body: "password"
@@ -70,8 +68,8 @@ service AuthService {
       tags: ["认证服务"]
     };
   }
-  
-  rpc LoginCode (LoginRequest) returns (LoginResponse) {
+
+  rpc LoginCode(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
       post: "/admin/v1/auth/login/code"
       body: "code"
@@ -86,34 +84,20 @@ service AuthService {
   // 刷新令牌
   // @param RefreshTokenRequest 请求参数，包含刷新令牌
   // @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
-  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = {
       post: "/admin/v1/auth/refresh-token"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "刷新令牌";
-      description: "使用刷新令牌获取新的访问令牌";
-      tags: ["认证服务"];
-      security: [{additional_properties: [{name: "BearerAuth"; value: {}}]}]
-    };
-  }
-
-  // 后台登出
-  rpc Logout (LogoutRequest) returns (LogoutResponse) {
-    option (google.api.http) = {
-      post: "/admin/v1/auth/logout"
-      body: "*"
-    };
-    option (gnostic.openapi.v3.operation) = {
-      summary: "用户登出";
-      description: "退出登录并失效当前令牌";
-      tags: ["认证服务"];
+      summary: "刷新令牌"
+      description: "使用刷新令牌获取新的访问令牌"
+      tags: ["认证服务"]
       security: [
         {
           additional_properties: [
             {
-              name: "BearerAuth";
+              name: "BearerAuth"
               value: {}
             }
           ]
@@ -121,21 +105,42 @@ service AuthService {
       ]
     };
   }
-  
-  // 登录用户信息
-  rpc Profile (ProfileRequest) returns (ProfileResponse) {
+
+  // 后台登出
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
-      get: "/admin/v1/auth/profile"
+      post: "/admin/v1/auth/logout"
+      body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "登录用户简介信息";
-      description: "登录用户简介信息";
-      tags: ["认证服务"];
+      summary: "用户登出"
+      description: "退出登录并失效当前令牌"
+      tags: ["认证服务"]
       security: [
         {
           additional_properties: [
             {
-              name: "BearerAuth";
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 登录用户信息
+  rpc Profile(ProfileRequest) returns (ProfileResponse) {
+    option (google.api.http) = {get: "/admin/v1/auth/profile"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "登录用户简介信息"
+      description: "登录用户简介信息"
+      tags: ["认证服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
               value: {}
             }
           ]
@@ -145,19 +150,17 @@ service AuthService {
   }
 
   // 登录用户Vben信息
-  rpc VbenProfile (VbenProfileRequest) returns (VbenProfileResponse) {
-    option (google.api.http) = {
-      get: "/admin/v1/auth/vben/profile"
-    };
+  rpc VbenProfile(VbenProfileRequest) returns (VbenProfileResponse) {
+    option (google.api.http) = {get: "/admin/v1/auth/vben/profile"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "登录用户Vben简介信息";
-      description: "登录用户Vben简介信息";
-      tags: ["认证服务"];
+      summary: "登录用户Vben简介信息"
+      description: "登录用户Vben简介信息"
+      tags: ["认证服务"]
       security: [
         {
           additional_properties: [
             {
-              name: "BearerAuth";
+              name: "BearerAuth"
               value: {}
             }
           ]
@@ -166,21 +169,38 @@ service AuthService {
     };
   }
 
-
   // 登录用户权限码
-  rpc Codes (CodesRequest) returns (CodesResponse) {
-    option (google.api.http) = {
-      get: "/admin/v1/auth/codes"
-    };
+  rpc Codes(CodesRequest) returns (CodesResponse) {
+    option (google.api.http) = {get: "/admin/v1/auth/codes"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "登录用户权限码";
-      description: "登录用户权限码";
-      tags: ["认证服务"];
+      summary: "登录用户权限码"
+      description: "登录用户权限码"
+      tags: ["认证服务"]
       security: [
         {
           additional_properties: [
             {
-              name: "BearerAuth";
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 登录用户信息
+  rpc Menus(MenusRequest) returns (MenusResponse) {
+    option (google.api.http) = {get: "/admin/v1/auth/menus"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "登录用户菜单信息"
+      description: "登录用户菜单信息"
+      tags: ["认证服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
               value: {}
             }
           ]
@@ -198,31 +218,27 @@ enum GrandType {
 }
 
 message Auth {
-  string username = 1 [
-    (gnostic.openapi.v3.property) = {description: "认证名称"}
-  ]; // 认证名称
-  uint32 user_id = 2 [
-    (gnostic.openapi.v3.property) = {description: "用户ID"}
-  ]; // 用户ID
-  uint32 domain_id = 3 [
-    (gnostic.openapi.v3.property) = {description: "域ID"}
-  ]; // 域ID
-  repeated string roles = 4 [
-    (gnostic.openapi.v3.property) = {description: "角色"}
-  ]; // 角色
-  repeated string permissions = 5 [
-    (gnostic.openapi.v3.property) = {description: "权限"}
-  ]; // 权限
+  string username = 1 [(gnostic.openapi.v3.property) = {description: "认证名称"}]; // 认证名称
+  uint32 user_id = 2 [(gnostic.openapi.v3.property) = {description: "用户ID"}]; // 用户ID
+  uint32 domain_id = 3 [(gnostic.openapi.v3.property) = {description: "域ID"}]; // 域ID
+  repeated string roles = 4 [(gnostic.openapi.v3.property) = {description: "角色"}]; // 角色
+  repeated string permissions = 5 [(gnostic.openapi.v3.property) = {description: "权限"}]; // 权限
 }
 
 // 登录密码
 message LoginPassword {
   string username = 1 [
-    (buf.validate.field).string = {min_len: 1, max_len: 10},
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 10
+    },
     (gnostic.openapi.v3.property) = {description: "登录用户名"}
   ]; // 用户名
   string password = 2 [
-    (buf.validate.field).string = {min_len: 6, max_len: 25},
+    (buf.validate.field).string = {
+      min_len: 6
+      max_len: 25
+    },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
 }
@@ -230,11 +246,17 @@ message LoginPassword {
 // 登录验证码
 message LoginCode {
   string phone = 1 [
-    (buf.validate.field).string = {min_len: 1, max_len: 10},
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 10
+    },
     (gnostic.openapi.v3.property) = {description: "登录手机号"}
   ]; // 手机号
   string code = 2 [
-    (buf.validate.field).string = {min_len: 1, max_len: 10},
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 10
+    },
     (gnostic.openapi.v3.property) = {description: "登录验证码"}
   ]; // 验证码
 }
@@ -247,51 +269,29 @@ message LoginRequest {
     (buf.validate.field).uint32.gte = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
-  optional GrandType grand_type = 4 [
-    (gnostic.openapi.v3.property) = {description: "授权类型"}
-  ]; // 授权类型，一直为：password
+  optional GrandType grand_type = 4 [(gnostic.openapi.v3.property) = {description: "授权类型"}]; // 授权类型，一直为：password
 }
 
 // 用户后台登陆 - 回应
 message LoginResponse {
-  uint32 id = 1 [
-    (gnostic.openapi.v3.property) = {description: "用户ID"}
-  ]; // 用户ID
-  optional string name = 2 [
-    (gnostic.openapi.v3.property) = {description: "用户名"}
-  ]; // 用户名
-  optional string token_type = 3 [
-    (gnostic.openapi.v3.property) = {description: "令牌类型"}
-  ]; // 令牌类型
-  string access_token = 4 [
-    (gnostic.openapi.v3.property) = {description: "访问令牌"}
-  ]; // 访问令牌
-  string refresh_token = 5 [
-    (gnostic.openapi.v3.property) = {description: "刷新令牌"}
-  ]; // 刷新令牌
-  optional string expires_in = 6 [
-    (gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}
-  ]; // 访问令牌过期时间
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "用户ID"}]; // 用户ID
+  optional string name = 2 [(gnostic.openapi.v3.property) = {description: "用户名"}]; // 用户名
+  optional string token_type = 3 [(gnostic.openapi.v3.property) = {description: "令牌类型"}]; // 令牌类型
+  string access_token = 4 [(gnostic.openapi.v3.property) = {description: "访问令牌"}]; // 访问令牌
+  string refresh_token = 5 [(gnostic.openapi.v3.property) = {description: "刷新令牌"}]; // 刷新令牌
+  optional string expires_in = 6 [(gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}]; // 访问令牌过期时间
 }
 
 // 请求 - 刷新令牌
 message RefreshTokenRequest {
-  string refresh_token = 1 [
-    (gnostic.openapi.v3.property) = {description: "刷新令牌"}
-  ]; // 刷新令牌
+  string refresh_token = 1 [(gnostic.openapi.v3.property) = {description: "刷新令牌"}]; // 刷新令牌
 }
 
 // 回应 - 刷新令牌
 message RefreshTokenResponse {
-  string access_token = 1 [
-    (gnostic.openapi.v3.property) = {description: "新的访问令牌"}
-  ]; // 新的访问令牌
-  string refresh_token = 2 [
-    (gnostic.openapi.v3.property) = {description: "新的刷新令牌"}
-  ]; // 新的刷新令牌
-  optional string expires_in = 3 [
-    (gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}
-  ]; // 访问令牌过期时间
+  string access_token = 1 [(gnostic.openapi.v3.property) = {description: "新的访问令牌"}]; // 新的访问令牌
+  string refresh_token = 2 [(gnostic.openapi.v3.property) = {description: "新的刷新令牌"}]; // 新的刷新令牌
+  optional string expires_in = 3 [(gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}]; // 访问令牌过期时间
 }
 
 // 用户后台登出 - 请求
@@ -305,22 +305,11 @@ message ProfileRequest {}
 
 // 登录用户简介信息 - 回应
 message ProfileResponse {
-  core.service.v1.User user = 1 [
-    (gnostic.openapi.v3.property) = {description: "登录用户简介信息"}
-  ]; // 登录用户简介信息
-  optional core.service.v1.Role role = 2 [
-    (gnostic.openapi.v3.property) = {description: "登录用户角色信息"}
-  ]; // 登录用户角色信息  
-
-  repeated string roles = 3 [
-    (gnostic.openapi.v3.property) = {description: "登录用户角色列表信息"}
-  ]; // 登录用户角色列表信息  
-    repeated string permissions = 4 [
-    (gnostic.openapi.v3.property) = {description: "登录用户权限列表信息"}
-  ]; // 登录用户权限列表信息
-   repeated string menus = 5 [
-    (gnostic.openapi.v3.property) = {description: "登录用户菜单信息"}
-  ]; // 登录用户菜单信息
+  core.service.v1.User user = 1 [(gnostic.openapi.v3.property) = {description: "登录用户简介信息"}]; // 登录用户简介信息
+  optional core.service.v1.Role role = 2 [(gnostic.openapi.v3.property) = {description: "登录用户角色信息"}]; // 登录用户角色信息
+  repeated string roles = 3 [(gnostic.openapi.v3.property) = {description: "登录用户角色列表信息"}]; // 登录用户角色列表信息
+  repeated string permissions = 4 [(gnostic.openapi.v3.property) = {description: "登录用户权限列表信息"}]; // 登录用户权限列表信息
+  repeated string menus = 5 [(gnostic.openapi.v3.property) = {description: "登录用户菜单信息"}]; // 登录用户菜单信息
 }
 
 // 登录用户Vben简介信息 - 请求
@@ -328,30 +317,14 @@ message VbenProfileRequest {}
 
 // 登录用户Vben简介信息 - 回应
 message VbenProfileResponse {
-  uint32 user_id = 1 [
-    (gnostic.openapi.v3.property) = {description: "用户ID"}
-  ];
-  optional string username = 2 [
-    (gnostic.openapi.v3.property) = {description: "用户名"}
-  ];
-  optional string real_name = 3 [
-    (gnostic.openapi.v3.property) = {description: "真实姓名"}
-  ];
-  optional string avatar = 4 [
-    (gnostic.openapi.v3.property) = {description: "头像"}
-  ];
-  optional string home_path = 5 [
-    (gnostic.openapi.v3.property) = {description: "首页路径"}
-  ];
-  optional string desc = 6 [
-    (gnostic.openapi.v3.property) = {description: "描述"}
-  ];
-  optional core.service.v1.Role role = 7 [
-    (gnostic.openapi.v3.property) = {description: "登录用户角色信息"}
-  ]; // 登录用户角色信息  
-  repeated string roles = 8 [
-    (gnostic.openapi.v3.property) = {description: "登录用户角色列表信息"}
-  ]; // 登录用户角色列表信息  
+  uint32 user_id = 1 [(gnostic.openapi.v3.property) = {description: "用户ID"}];
+  optional string username = 2 [(gnostic.openapi.v3.property) = {description: "用户名"}];
+  optional string real_name = 3 [(gnostic.openapi.v3.property) = {description: "真实姓名"}];
+  optional string avatar = 4 [(gnostic.openapi.v3.property) = {description: "头像"}];
+  optional string home_path = 5 [(gnostic.openapi.v3.property) = {description: "首页路径"}];
+  optional string desc = 6 [(gnostic.openapi.v3.property) = {description: "描述"}];
+  optional core.service.v1.Role role = 7 [(gnostic.openapi.v3.property) = {description: "登录用户角色信息"}]; // 登录用户角色信息
+  repeated string roles = 8 [(gnostic.openapi.v3.property) = {description: "登录用户角色列表信息"}]; // 登录用户角色列表信息
 }
 
 // 登录用户权限码 - 请求
@@ -359,7 +332,78 @@ message CodesRequest {}
 
 // 登录用户权限码 - 回应
 message CodesResponse {
-  repeated string codes = 1 [
-    (gnostic.openapi.v3.property) = {description: "登录用户权限码"}
-  ]; // 登录用户权限码
+  repeated string codes = 1 [(gnostic.openapi.v3.property) = {description: "登录用户权限码"}]; // 登录用户权限码
+}
+
+// 登录用户菜单 - 请求
+message MenusRequest {}
+
+// 登录用户菜单 - 回应
+message MenusResponse {
+  repeated RouteResponse routes = 1 [(gnostic.openapi.v3.property) = {description: "路由响应列表"}];
+}
+
+message RouteResponse {
+  string name = 1 [(gnostic.openapi.v3.property) = {description: "路由名称"}];
+  string path = 2 [(gnostic.openapi.v3.property) = {description: "路由路径"}];
+  optional string redirect = 3 [(gnostic.openapi.v3.property) = {description: "重定向路径"}];
+  optional string component = 4 [(gnostic.openapi.v3.property) = {description: "路由组件"}];
+  optional MenuMetaResponse meta = 5 [(gnostic.openapi.v3.property) = {description: "菜单元数据"}];
+  repeated RouteResponse children = 6 [(gnostic.openapi.v3.property) = {description: "子路由列表"}];
+}
+
+// 登录用户菜单元数据 - 回应
+message MenuMetaResponse {
+  optional string active_icon = 1 [(gnostic.openapi.v3.property) = {description: "激活图标（菜单）"}]; // 激活图标（菜单）
+  optional string active_path = 2 [(gnostic.openapi.v3.property) = {description: "当前激活的菜单，有时候不想激活现有菜单，需要激活父级菜单时使用"}]; // 当前激活的菜单，有时候不想激活现有菜单，需要激活父级菜单时使用
+  optional bool affix_tab = 3 [(gnostic.openapi.v3.property) = {description: "是否固定标签页"}]; // 是否固定标签页
+  optional int32 affix_tab_order = 4 [(gnostic.openapi.v3.property) = {description: "固定标签页的顺序"}]; // 固定标签页的顺序
+  repeated string authority = 5 [(gnostic.openapi.v3.property) = {description: "需要特定的角色标识才可以访问"}]; // 需要特定的角色标识才可以访问
+  optional string badge = 6 [(gnostic.openapi.v3.property) = {description: "徽标"}]; // 徽标
+  optional string badge_type = 7 [(gnostic.openapi.v3.property) = {description: "徽标类型 'dot' | 'normal'"}]; // 徽标类型
+  optional string badge_variants = 8 [(gnostic.openapi.v3.property) = {description: "徽标颜色 | 'default'| 'destructive'| 'primary'| 'success'| 'warning' | string "}]; // 徽标颜色
+  optional bool full_path_key = 9 [(gnostic.openapi.v3.property) = {description: "路由的完整路径作为key（默认true）"}]; // 路由的完整路径作为key（默认true）
+  optional bool hide_children_in_menu = 10 [(gnostic.openapi.v3.property) = {description: "当前路由的子级在菜单中不展现"}]; // 当前路由的子级在菜单中不展现
+  optional bool hide_in_breadcrumb = 11 [(gnostic.openapi.v3.property) = {description: "当前路由在面包屑中不展现"}]; // 当前路由在面包屑中不展现
+  optional bool hide_in_menu = 12 [(gnostic.openapi.v3.property) = {description: "当前路由在菜单中不展现"}]; // 当前路由在菜单中不展现
+  optional bool hide_in_tab = 13 [(gnostic.openapi.v3.property) = {description: "当前路由在标签页不展现"}]; // 当前路由在标签页不展现
+  optional string icon = 14 [(gnostic.openapi.v3.property) = {description: "图标（菜单/tab）"}]; // 图标（菜单/tab）
+  optional string iframe_src = 15 [(gnostic.openapi.v3.property) = {description: "iframe 地址"}]; // iframe 地址
+  optional bool ignore_access = 16 [(gnostic.openapi.v3.property) = {description: "忽略权限，直接可以访问"}]; // 忽略权限，直接可以访问
+  optional bool keep_alive = 17 [(gnostic.openapi.v3.property) = {description: "开启KeepAlive缓存"}]; // 开启KeepAlive缓存
+  optional string link = 18 [(gnostic.openapi.v3.property) = {description: "外链-跳转路径"}]; // 外链-跳转路径
+  optional bool loaded = 19 [(gnostic.openapi.v3.property) = {description: "路由是否已经加载过"}]; // 路由是否已经加载过
+  optional int32 max_num_of_open_tab = 20 [(gnostic.openapi.v3.property) = {description: "标签页最大打开数量"}]; // 标签页最大打开数量
+  optional bool menu_visible_with_forbidden = 21 [(gnostic.openapi.v3.property) = {description: "菜单可以看到，但是访问会被重定向到403"}]; // 菜单可以看到，但是访问会被重定向到403
+  optional bool no_basic_layout = 22 [(gnostic.openapi.v3.property) = {description: "当前路由不使用基础布局（仅在顶级生效）"}]; // 当前路由不使用基础布局（仅在顶级生效）
+  optional bool open_in_new_window = 23 [(gnostic.openapi.v3.property) = {description: "在新窗口打开"}]; // 在新窗口打开
+  optional int32 order = 24 [(gnostic.openapi.v3.property) = {description: "用于路由->菜单排序"}]; // 用于路由->菜单排序
+  optional string query = 25 [(gnostic.openapi.v3.property) = {description: "菜单所携带的参数"}]; // 菜单所携带的参数
+  string title = 26 [(gnostic.openapi.v3.property) = {description: "标题名称"}]; // 标题名称
+}
+
+// 徽标类型
+enum BadgeType {
+  // 未指定
+  BADGE_TYPE_UNSPECIFIED = 0;
+  // 点类型徽标
+  BADGE_TYPE_DOT = 1;
+  // 普通类型徽标
+  BADGE_TYPE_NORMAL = 2;
+}
+
+// 徽标颜色
+enum BadgeVariants {
+  // 未指定
+  BADGE_VARIANTS_UNSPECIFIED = 0;
+  // 默认颜色
+  BADGE_VARIANTS_DEFAULT = 1;
+  // 破坏性颜色
+  BADGE_VARIANTS_DESTRUCTIVE = 2;
+  // 主要颜色
+  BADGE_VARIANTS_PRIMARY = 3;
+  // 成功颜色
+  BADGE_VARIANTS_SUCCESS = 4;
+  // 警告颜色
+  BADGE_VARIANTS_WARNING = 5;
 }
