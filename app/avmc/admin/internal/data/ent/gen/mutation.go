@@ -1033,43 +1033,56 @@ func (m *DeptMutation) ResetEdge(name string) error {
 // MenuMutation represents an operation that mutates the Menu nodes in the graph.
 type MenuMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *uint32
-	created_at          *time.Time
-	updated_at          *time.Time
-	status              *int32
-	addstatus           *int32
-	domain_id           *uint32
-	adddomain_id        *int32
-	deleted_at          *time.Time
-	name                *string
-	title               *string
-	_type               *int32
-	add_type            *int32
-	_path               *string
-	component           *string
-	icon                *string
-	is_ext              *bool
-	ext_url             *string
-	permissions         *[]string
-	appendpermissions   []string
-	redirect            *string
-	current_active_menu *string
-	keep_alive          *bool
-	visible             *bool
-	hide_tab            *bool
-	hide_menu           *bool
-	hide_breadcrumb     *bool
-	clearedFields       map[string]struct{}
-	parent              *uint32
-	clearedparent       bool
-	children            map[uint32]struct{}
-	removedchildren     map[uint32]struct{}
-	clearedchildren     bool
-	done                bool
-	oldValue            func(context.Context) (*Menu, error)
-	predicates          []predicate.Menu
+	op                     Op
+	typ                    string
+	id                     *uint32
+	status                 *int32
+	addstatus              *int32
+	created_at             *time.Time
+	updated_at             *time.Time
+	deleted_at             *time.Time
+	name                   *string
+	_path                  *string
+	_type                  *int32
+	add_type               *int32
+	component              *string
+	redirect               *string
+	auth_code              *string
+	active_icon            *string
+	active_path            *string
+	affix_tab              *bool
+	affix_tab_order        *int32
+	addaffix_tab_order     *int32
+	badge                  *string
+	badge_type             *int32
+	addbadge_type          *int32
+	badge_variants         *int32
+	addbadge_variants      *int32
+	hide_children_in_menu  *bool
+	hide_in_breadcrumb     *bool
+	hide_in_menu           *bool
+	hide_in_tab            *bool
+	icon                   *string
+	iframe_src             *string
+	keep_alive             *bool
+	link                   *string
+	max_num_of_open_tab    *int32
+	addmax_num_of_open_tab *int32
+	no_basic_layout        *bool
+	open_in_new_window     *bool
+	sort                   *int32
+	addsort                *int32
+	query                  *string
+	title                  *string
+	clearedFields          map[string]struct{}
+	parent                 *uint32
+	clearedparent          bool
+	children               map[uint32]struct{}
+	removedchildren        map[uint32]struct{}
+	clearedchildren        bool
+	done                   bool
+	oldValue               func(context.Context) (*Menu, error)
+	predicates             []predicate.Menu
 }
 
 var _ ent.Mutation = (*MenuMutation)(nil)
@@ -1176,6 +1189,62 @@ func (m *MenuMutation) IDs(ctx context.Context) ([]uint32, error) {
 	}
 }
 
+// SetStatus sets the "status" field.
+func (m *MenuMutation) SetStatus(i int32) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *MenuMutation) Status() (r int32, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldStatus(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *MenuMutation) AddStatus(i int32) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *MenuMutation) AddedStatus() (r int32, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *MenuMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *MenuMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -1248,118 +1317,6 @@ func (m *MenuMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetStatus sets the "status" field.
-func (m *MenuMutation) SetStatus(i int32) {
-	m.status = &i
-	m.addstatus = nil
-}
-
-// Status returns the value of the "status" field in the mutation.
-func (m *MenuMutation) Status() (r int32, exists bool) {
-	v := m.status
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStatus returns the old "status" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldStatus(ctx context.Context) (v *int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatus requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
-	}
-	return oldValue.Status, nil
-}
-
-// AddStatus adds i to the "status" field.
-func (m *MenuMutation) AddStatus(i int32) {
-	if m.addstatus != nil {
-		*m.addstatus += i
-	} else {
-		m.addstatus = &i
-	}
-}
-
-// AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *MenuMutation) AddedStatus() (r int32, exists bool) {
-	v := m.addstatus
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetStatus resets all changes to the "status" field.
-func (m *MenuMutation) ResetStatus() {
-	m.status = nil
-	m.addstatus = nil
-}
-
-// SetDomainID sets the "domain_id" field.
-func (m *MenuMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
-}
-
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *MenuMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDomainID returns the old "domain_id" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
-	}
-	return oldValue.DomainID, nil
-}
-
-// AddDomainID adds u to the "domain_id" field.
-func (m *MenuMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
-	} else {
-		m.adddomain_id = &u
-	}
-}
-
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *MenuMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *MenuMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (m *MenuMutation) SetDeletedAt(t time.Time) {
 	m.deleted_at = &t
@@ -1426,7 +1383,7 @@ func (m *MenuMutation) Name() (r string, exists bool) {
 // OldName returns the old "name" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldName(ctx context.Context) (v *string, err error) {
+func (m *MenuMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
@@ -1443,147 +1400,6 @@ func (m *MenuMutation) OldName(ctx context.Context) (v *string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *MenuMutation) ResetName() {
 	m.name = nil
-}
-
-// SetTitle sets the "title" field.
-func (m *MenuMutation) SetTitle(s string) {
-	m.title = &s
-}
-
-// Title returns the value of the "title" field in the mutation.
-func (m *MenuMutation) Title() (r string, exists bool) {
-	v := m.title
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTitle returns the old "title" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldTitle(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTitle requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
-	}
-	return oldValue.Title, nil
-}
-
-// ResetTitle resets all changes to the "title" field.
-func (m *MenuMutation) ResetTitle() {
-	m.title = nil
-}
-
-// SetParentID sets the "parent_id" field.
-func (m *MenuMutation) SetParentID(u uint32) {
-	m.parent = &u
-}
-
-// ParentID returns the value of the "parent_id" field in the mutation.
-func (m *MenuMutation) ParentID() (r uint32, exists bool) {
-	v := m.parent
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldParentID returns the old "parent_id" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldParentID(ctx context.Context) (v *uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldParentID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
-	}
-	return oldValue.ParentID, nil
-}
-
-// ClearParentID clears the value of the "parent_id" field.
-func (m *MenuMutation) ClearParentID() {
-	m.parent = nil
-	m.clearedFields[menu.FieldParentID] = struct{}{}
-}
-
-// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
-func (m *MenuMutation) ParentIDCleared() bool {
-	_, ok := m.clearedFields[menu.FieldParentID]
-	return ok
-}
-
-// ResetParentID resets all changes to the "parent_id" field.
-func (m *MenuMutation) ResetParentID() {
-	m.parent = nil
-	delete(m.clearedFields, menu.FieldParentID)
-}
-
-// SetType sets the "type" field.
-func (m *MenuMutation) SetType(i int32) {
-	m._type = &i
-	m.add_type = nil
-}
-
-// GetType returns the value of the "type" field in the mutation.
-func (m *MenuMutation) GetType() (r int32, exists bool) {
-	v := m._type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldType returns the old "type" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldType(ctx context.Context) (v *int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
-	}
-	return oldValue.Type, nil
-}
-
-// AddType adds i to the "type" field.
-func (m *MenuMutation) AddType(i int32) {
-	if m.add_type != nil {
-		*m.add_type += i
-	} else {
-		m.add_type = &i
-	}
-}
-
-// AddedType returns the value that was added to the "type" field in this mutation.
-func (m *MenuMutation) AddedType() (r int32, exists bool) {
-	v := m.add_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetType resets all changes to the "type" field.
-func (m *MenuMutation) ResetType() {
-	m._type = nil
-	m.add_type = nil
 }
 
 // SetPath sets the "path" field.
@@ -1617,9 +1433,92 @@ func (m *MenuMutation) OldPath(ctx context.Context) (v *string, err error) {
 	return oldValue.Path, nil
 }
 
+// ClearPath clears the value of the "path" field.
+func (m *MenuMutation) ClearPath() {
+	m._path = nil
+	m.clearedFields[menu.FieldPath] = struct{}{}
+}
+
+// PathCleared returns if the "path" field was cleared in this mutation.
+func (m *MenuMutation) PathCleared() bool {
+	_, ok := m.clearedFields[menu.FieldPath]
+	return ok
+}
+
 // ResetPath resets all changes to the "path" field.
 func (m *MenuMutation) ResetPath() {
 	m._path = nil
+	delete(m.clearedFields, menu.FieldPath)
+}
+
+// SetType sets the "type" field.
+func (m *MenuMutation) SetType(i int32) {
+	m._type = &i
+	m.add_type = nil
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *MenuMutation) GetType() (r int32, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldType(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// AddType adds i to the "type" field.
+func (m *MenuMutation) AddType(i int32) {
+	if m.add_type != nil {
+		*m.add_type += i
+	} else {
+		m.add_type = &i
+	}
+}
+
+// AddedType returns the value that was added to the "type" field in this mutation.
+func (m *MenuMutation) AddedType() (r int32, exists bool) {
+	v := m.add_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearType clears the value of the "type" field.
+func (m *MenuMutation) ClearType() {
+	m._type = nil
+	m.add_type = nil
+	m.clearedFields[menu.FieldType] = struct{}{}
+}
+
+// TypeCleared returns if the "type" field was cleared in this mutation.
+func (m *MenuMutation) TypeCleared() bool {
+	_, ok := m.clearedFields[menu.FieldType]
+	return ok
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *MenuMutation) ResetType() {
+	m._type = nil
+	m.add_type = nil
+	delete(m.clearedFields, menu.FieldType)
 }
 
 // SetComponent sets the "component" field.
@@ -1653,9 +1552,612 @@ func (m *MenuMutation) OldComponent(ctx context.Context) (v *string, err error) 
 	return oldValue.Component, nil
 }
 
+// ClearComponent clears the value of the "component" field.
+func (m *MenuMutation) ClearComponent() {
+	m.component = nil
+	m.clearedFields[menu.FieldComponent] = struct{}{}
+}
+
+// ComponentCleared returns if the "component" field was cleared in this mutation.
+func (m *MenuMutation) ComponentCleared() bool {
+	_, ok := m.clearedFields[menu.FieldComponent]
+	return ok
+}
+
 // ResetComponent resets all changes to the "component" field.
 func (m *MenuMutation) ResetComponent() {
 	m.component = nil
+	delete(m.clearedFields, menu.FieldComponent)
+}
+
+// SetPid sets the "pid" field.
+func (m *MenuMutation) SetPid(u uint32) {
+	m.parent = &u
+}
+
+// Pid returns the value of the "pid" field in the mutation.
+func (m *MenuMutation) Pid() (r uint32, exists bool) {
+	v := m.parent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPid returns the old "pid" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldPid(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPid: %w", err)
+	}
+	return oldValue.Pid, nil
+}
+
+// ClearPid clears the value of the "pid" field.
+func (m *MenuMutation) ClearPid() {
+	m.parent = nil
+	m.clearedFields[menu.FieldPid] = struct{}{}
+}
+
+// PidCleared returns if the "pid" field was cleared in this mutation.
+func (m *MenuMutation) PidCleared() bool {
+	_, ok := m.clearedFields[menu.FieldPid]
+	return ok
+}
+
+// ResetPid resets all changes to the "pid" field.
+func (m *MenuMutation) ResetPid() {
+	m.parent = nil
+	delete(m.clearedFields, menu.FieldPid)
+}
+
+// SetRedirect sets the "redirect" field.
+func (m *MenuMutation) SetRedirect(s string) {
+	m.redirect = &s
+}
+
+// Redirect returns the value of the "redirect" field in the mutation.
+func (m *MenuMutation) Redirect() (r string, exists bool) {
+	v := m.redirect
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRedirect returns the old "redirect" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldRedirect(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRedirect is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRedirect requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRedirect: %w", err)
+	}
+	return oldValue.Redirect, nil
+}
+
+// ClearRedirect clears the value of the "redirect" field.
+func (m *MenuMutation) ClearRedirect() {
+	m.redirect = nil
+	m.clearedFields[menu.FieldRedirect] = struct{}{}
+}
+
+// RedirectCleared returns if the "redirect" field was cleared in this mutation.
+func (m *MenuMutation) RedirectCleared() bool {
+	_, ok := m.clearedFields[menu.FieldRedirect]
+	return ok
+}
+
+// ResetRedirect resets all changes to the "redirect" field.
+func (m *MenuMutation) ResetRedirect() {
+	m.redirect = nil
+	delete(m.clearedFields, menu.FieldRedirect)
+}
+
+// SetAuthCode sets the "auth_code" field.
+func (m *MenuMutation) SetAuthCode(s string) {
+	m.auth_code = &s
+}
+
+// AuthCode returns the value of the "auth_code" field in the mutation.
+func (m *MenuMutation) AuthCode() (r string, exists bool) {
+	v := m.auth_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthCode returns the old "auth_code" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldAuthCode(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuthCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuthCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthCode: %w", err)
+	}
+	return oldValue.AuthCode, nil
+}
+
+// ResetAuthCode resets all changes to the "auth_code" field.
+func (m *MenuMutation) ResetAuthCode() {
+	m.auth_code = nil
+}
+
+// SetActiveIcon sets the "active_icon" field.
+func (m *MenuMutation) SetActiveIcon(s string) {
+	m.active_icon = &s
+}
+
+// ActiveIcon returns the value of the "active_icon" field in the mutation.
+func (m *MenuMutation) ActiveIcon() (r string, exists bool) {
+	v := m.active_icon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActiveIcon returns the old "active_icon" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldActiveIcon(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActiveIcon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActiveIcon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActiveIcon: %w", err)
+	}
+	return oldValue.ActiveIcon, nil
+}
+
+// ResetActiveIcon resets all changes to the "active_icon" field.
+func (m *MenuMutation) ResetActiveIcon() {
+	m.active_icon = nil
+}
+
+// SetActivePath sets the "active_path" field.
+func (m *MenuMutation) SetActivePath(s string) {
+	m.active_path = &s
+}
+
+// ActivePath returns the value of the "active_path" field in the mutation.
+func (m *MenuMutation) ActivePath() (r string, exists bool) {
+	v := m.active_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActivePath returns the old "active_path" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldActivePath(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActivePath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActivePath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActivePath: %w", err)
+	}
+	return oldValue.ActivePath, nil
+}
+
+// ResetActivePath resets all changes to the "active_path" field.
+func (m *MenuMutation) ResetActivePath() {
+	m.active_path = nil
+}
+
+// SetAffixTab sets the "affix_tab" field.
+func (m *MenuMutation) SetAffixTab(b bool) {
+	m.affix_tab = &b
+}
+
+// AffixTab returns the value of the "affix_tab" field in the mutation.
+func (m *MenuMutation) AffixTab() (r bool, exists bool) {
+	v := m.affix_tab
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAffixTab returns the old "affix_tab" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldAffixTab(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAffixTab is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAffixTab requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAffixTab: %w", err)
+	}
+	return oldValue.AffixTab, nil
+}
+
+// ResetAffixTab resets all changes to the "affix_tab" field.
+func (m *MenuMutation) ResetAffixTab() {
+	m.affix_tab = nil
+}
+
+// SetAffixTabOrder sets the "affix_tab_order" field.
+func (m *MenuMutation) SetAffixTabOrder(i int32) {
+	m.affix_tab_order = &i
+	m.addaffix_tab_order = nil
+}
+
+// AffixTabOrder returns the value of the "affix_tab_order" field in the mutation.
+func (m *MenuMutation) AffixTabOrder() (r int32, exists bool) {
+	v := m.affix_tab_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAffixTabOrder returns the old "affix_tab_order" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldAffixTabOrder(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAffixTabOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAffixTabOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAffixTabOrder: %w", err)
+	}
+	return oldValue.AffixTabOrder, nil
+}
+
+// AddAffixTabOrder adds i to the "affix_tab_order" field.
+func (m *MenuMutation) AddAffixTabOrder(i int32) {
+	if m.addaffix_tab_order != nil {
+		*m.addaffix_tab_order += i
+	} else {
+		m.addaffix_tab_order = &i
+	}
+}
+
+// AddedAffixTabOrder returns the value that was added to the "affix_tab_order" field in this mutation.
+func (m *MenuMutation) AddedAffixTabOrder() (r int32, exists bool) {
+	v := m.addaffix_tab_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAffixTabOrder resets all changes to the "affix_tab_order" field.
+func (m *MenuMutation) ResetAffixTabOrder() {
+	m.affix_tab_order = nil
+	m.addaffix_tab_order = nil
+}
+
+// SetBadge sets the "badge" field.
+func (m *MenuMutation) SetBadge(s string) {
+	m.badge = &s
+}
+
+// Badge returns the value of the "badge" field in the mutation.
+func (m *MenuMutation) Badge() (r string, exists bool) {
+	v := m.badge
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBadge returns the old "badge" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldBadge(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBadge is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBadge requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBadge: %w", err)
+	}
+	return oldValue.Badge, nil
+}
+
+// ResetBadge resets all changes to the "badge" field.
+func (m *MenuMutation) ResetBadge() {
+	m.badge = nil
+}
+
+// SetBadgeType sets the "badge_type" field.
+func (m *MenuMutation) SetBadgeType(i int32) {
+	m.badge_type = &i
+	m.addbadge_type = nil
+}
+
+// BadgeType returns the value of the "badge_type" field in the mutation.
+func (m *MenuMutation) BadgeType() (r int32, exists bool) {
+	v := m.badge_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBadgeType returns the old "badge_type" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldBadgeType(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBadgeType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBadgeType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBadgeType: %w", err)
+	}
+	return oldValue.BadgeType, nil
+}
+
+// AddBadgeType adds i to the "badge_type" field.
+func (m *MenuMutation) AddBadgeType(i int32) {
+	if m.addbadge_type != nil {
+		*m.addbadge_type += i
+	} else {
+		m.addbadge_type = &i
+	}
+}
+
+// AddedBadgeType returns the value that was added to the "badge_type" field in this mutation.
+func (m *MenuMutation) AddedBadgeType() (r int32, exists bool) {
+	v := m.addbadge_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBadgeType resets all changes to the "badge_type" field.
+func (m *MenuMutation) ResetBadgeType() {
+	m.badge_type = nil
+	m.addbadge_type = nil
+}
+
+// SetBadgeVariants sets the "badge_variants" field.
+func (m *MenuMutation) SetBadgeVariants(i int32) {
+	m.badge_variants = &i
+	m.addbadge_variants = nil
+}
+
+// BadgeVariants returns the value of the "badge_variants" field in the mutation.
+func (m *MenuMutation) BadgeVariants() (r int32, exists bool) {
+	v := m.badge_variants
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBadgeVariants returns the old "badge_variants" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldBadgeVariants(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBadgeVariants is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBadgeVariants requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBadgeVariants: %w", err)
+	}
+	return oldValue.BadgeVariants, nil
+}
+
+// AddBadgeVariants adds i to the "badge_variants" field.
+func (m *MenuMutation) AddBadgeVariants(i int32) {
+	if m.addbadge_variants != nil {
+		*m.addbadge_variants += i
+	} else {
+		m.addbadge_variants = &i
+	}
+}
+
+// AddedBadgeVariants returns the value that was added to the "badge_variants" field in this mutation.
+func (m *MenuMutation) AddedBadgeVariants() (r int32, exists bool) {
+	v := m.addbadge_variants
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBadgeVariants resets all changes to the "badge_variants" field.
+func (m *MenuMutation) ResetBadgeVariants() {
+	m.badge_variants = nil
+	m.addbadge_variants = nil
+}
+
+// SetHideChildrenInMenu sets the "hide_children_in_menu" field.
+func (m *MenuMutation) SetHideChildrenInMenu(b bool) {
+	m.hide_children_in_menu = &b
+}
+
+// HideChildrenInMenu returns the value of the "hide_children_in_menu" field in the mutation.
+func (m *MenuMutation) HideChildrenInMenu() (r bool, exists bool) {
+	v := m.hide_children_in_menu
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHideChildrenInMenu returns the old "hide_children_in_menu" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldHideChildrenInMenu(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHideChildrenInMenu is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHideChildrenInMenu requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHideChildrenInMenu: %w", err)
+	}
+	return oldValue.HideChildrenInMenu, nil
+}
+
+// ResetHideChildrenInMenu resets all changes to the "hide_children_in_menu" field.
+func (m *MenuMutation) ResetHideChildrenInMenu() {
+	m.hide_children_in_menu = nil
+}
+
+// SetHideInBreadcrumb sets the "hide_in_breadcrumb" field.
+func (m *MenuMutation) SetHideInBreadcrumb(b bool) {
+	m.hide_in_breadcrumb = &b
+}
+
+// HideInBreadcrumb returns the value of the "hide_in_breadcrumb" field in the mutation.
+func (m *MenuMutation) HideInBreadcrumb() (r bool, exists bool) {
+	v := m.hide_in_breadcrumb
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHideInBreadcrumb returns the old "hide_in_breadcrumb" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldHideInBreadcrumb(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHideInBreadcrumb is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHideInBreadcrumb requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHideInBreadcrumb: %w", err)
+	}
+	return oldValue.HideInBreadcrumb, nil
+}
+
+// ResetHideInBreadcrumb resets all changes to the "hide_in_breadcrumb" field.
+func (m *MenuMutation) ResetHideInBreadcrumb() {
+	m.hide_in_breadcrumb = nil
+}
+
+// SetHideInMenu sets the "hide_in_menu" field.
+func (m *MenuMutation) SetHideInMenu(b bool) {
+	m.hide_in_menu = &b
+}
+
+// HideInMenu returns the value of the "hide_in_menu" field in the mutation.
+func (m *MenuMutation) HideInMenu() (r bool, exists bool) {
+	v := m.hide_in_menu
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHideInMenu returns the old "hide_in_menu" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldHideInMenu(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHideInMenu is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHideInMenu requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHideInMenu: %w", err)
+	}
+	return oldValue.HideInMenu, nil
+}
+
+// ResetHideInMenu resets all changes to the "hide_in_menu" field.
+func (m *MenuMutation) ResetHideInMenu() {
+	m.hide_in_menu = nil
+}
+
+// SetHideInTab sets the "hide_in_tab" field.
+func (m *MenuMutation) SetHideInTab(b bool) {
+	m.hide_in_tab = &b
+}
+
+// HideInTab returns the value of the "hide_in_tab" field in the mutation.
+func (m *MenuMutation) HideInTab() (r bool, exists bool) {
+	v := m.hide_in_tab
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHideInTab returns the old "hide_in_tab" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldHideInTab(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHideInTab is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHideInTab requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHideInTab: %w", err)
+	}
+	return oldValue.HideInTab, nil
+}
+
+// ResetHideInTab resets all changes to the "hide_in_tab" field.
+func (m *MenuMutation) ResetHideInTab() {
+	m.hide_in_tab = nil
 }
 
 // SetIcon sets the "icon" field.
@@ -1694,213 +2196,40 @@ func (m *MenuMutation) ResetIcon() {
 	m.icon = nil
 }
 
-// SetIsExt sets the "is_ext" field.
-func (m *MenuMutation) SetIsExt(b bool) {
-	m.is_ext = &b
+// SetIframeSrc sets the "iframe_src" field.
+func (m *MenuMutation) SetIframeSrc(s string) {
+	m.iframe_src = &s
 }
 
-// IsExt returns the value of the "is_ext" field in the mutation.
-func (m *MenuMutation) IsExt() (r bool, exists bool) {
-	v := m.is_ext
+// IframeSrc returns the value of the "iframe_src" field in the mutation.
+func (m *MenuMutation) IframeSrc() (r string, exists bool) {
+	v := m.iframe_src
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIsExt returns the old "is_ext" field's value of the Menu entity.
+// OldIframeSrc returns the old "iframe_src" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldIsExt(ctx context.Context) (v *bool, err error) {
+func (m *MenuMutation) OldIframeSrc(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsExt is only allowed on UpdateOne operations")
+		return v, errors.New("OldIframeSrc is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsExt requires an ID field in the mutation")
+		return v, errors.New("OldIframeSrc requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsExt: %w", err)
+		return v, fmt.Errorf("querying old value for OldIframeSrc: %w", err)
 	}
-	return oldValue.IsExt, nil
+	return oldValue.IframeSrc, nil
 }
 
-// ResetIsExt resets all changes to the "is_ext" field.
-func (m *MenuMutation) ResetIsExt() {
-	m.is_ext = nil
-}
-
-// SetExtURL sets the "ext_url" field.
-func (m *MenuMutation) SetExtURL(s string) {
-	m.ext_url = &s
-}
-
-// ExtURL returns the value of the "ext_url" field in the mutation.
-func (m *MenuMutation) ExtURL() (r string, exists bool) {
-	v := m.ext_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldExtURL returns the old "ext_url" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldExtURL(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldExtURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldExtURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldExtURL: %w", err)
-	}
-	return oldValue.ExtURL, nil
-}
-
-// ResetExtURL resets all changes to the "ext_url" field.
-func (m *MenuMutation) ResetExtURL() {
-	m.ext_url = nil
-}
-
-// SetPermissions sets the "permissions" field.
-func (m *MenuMutation) SetPermissions(s []string) {
-	m.permissions = &s
-	m.appendpermissions = nil
-}
-
-// Permissions returns the value of the "permissions" field in the mutation.
-func (m *MenuMutation) Permissions() (r []string, exists bool) {
-	v := m.permissions
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPermissions returns the old "permissions" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldPermissions(ctx context.Context) (v []string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPermissions is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPermissions requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPermissions: %w", err)
-	}
-	return oldValue.Permissions, nil
-}
-
-// AppendPermissions adds s to the "permissions" field.
-func (m *MenuMutation) AppendPermissions(s []string) {
-	m.appendpermissions = append(m.appendpermissions, s...)
-}
-
-// AppendedPermissions returns the list of values that were appended to the "permissions" field in this mutation.
-func (m *MenuMutation) AppendedPermissions() ([]string, bool) {
-	if len(m.appendpermissions) == 0 {
-		return nil, false
-	}
-	return m.appendpermissions, true
-}
-
-// ClearPermissions clears the value of the "permissions" field.
-func (m *MenuMutation) ClearPermissions() {
-	m.permissions = nil
-	m.appendpermissions = nil
-	m.clearedFields[menu.FieldPermissions] = struct{}{}
-}
-
-// PermissionsCleared returns if the "permissions" field was cleared in this mutation.
-func (m *MenuMutation) PermissionsCleared() bool {
-	_, ok := m.clearedFields[menu.FieldPermissions]
-	return ok
-}
-
-// ResetPermissions resets all changes to the "permissions" field.
-func (m *MenuMutation) ResetPermissions() {
-	m.permissions = nil
-	m.appendpermissions = nil
-	delete(m.clearedFields, menu.FieldPermissions)
-}
-
-// SetRedirect sets the "redirect" field.
-func (m *MenuMutation) SetRedirect(s string) {
-	m.redirect = &s
-}
-
-// Redirect returns the value of the "redirect" field in the mutation.
-func (m *MenuMutation) Redirect() (r string, exists bool) {
-	v := m.redirect
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRedirect returns the old "redirect" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldRedirect(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRedirect is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRedirect requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRedirect: %w", err)
-	}
-	return oldValue.Redirect, nil
-}
-
-// ResetRedirect resets all changes to the "redirect" field.
-func (m *MenuMutation) ResetRedirect() {
-	m.redirect = nil
-}
-
-// SetCurrentActiveMenu sets the "current_active_menu" field.
-func (m *MenuMutation) SetCurrentActiveMenu(s string) {
-	m.current_active_menu = &s
-}
-
-// CurrentActiveMenu returns the value of the "current_active_menu" field in the mutation.
-func (m *MenuMutation) CurrentActiveMenu() (r string, exists bool) {
-	v := m.current_active_menu
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCurrentActiveMenu returns the old "current_active_menu" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldCurrentActiveMenu(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCurrentActiveMenu is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCurrentActiveMenu requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCurrentActiveMenu: %w", err)
-	}
-	return oldValue.CurrentActiveMenu, nil
-}
-
-// ResetCurrentActiveMenu resets all changes to the "current_active_menu" field.
-func (m *MenuMutation) ResetCurrentActiveMenu() {
-	m.current_active_menu = nil
+// ResetIframeSrc resets all changes to the "iframe_src" field.
+func (m *MenuMutation) ResetIframeSrc() {
+	m.iframe_src = nil
 }
 
 // SetKeepAlive sets the "keep_alive" field.
@@ -1939,159 +2268,333 @@ func (m *MenuMutation) ResetKeepAlive() {
 	m.keep_alive = nil
 }
 
-// SetVisible sets the "visible" field.
-func (m *MenuMutation) SetVisible(b bool) {
-	m.visible = &b
+// SetLink sets the "link" field.
+func (m *MenuMutation) SetLink(s string) {
+	m.link = &s
 }
 
-// Visible returns the value of the "visible" field in the mutation.
-func (m *MenuMutation) Visible() (r bool, exists bool) {
-	v := m.visible
+// Link returns the value of the "link" field in the mutation.
+func (m *MenuMutation) Link() (r string, exists bool) {
+	v := m.link
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldVisible returns the old "visible" field's value of the Menu entity.
+// OldLink returns the old "link" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldVisible(ctx context.Context) (v *bool, err error) {
+func (m *MenuMutation) OldLink(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVisible is only allowed on UpdateOne operations")
+		return v, errors.New("OldLink is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVisible requires an ID field in the mutation")
+		return v, errors.New("OldLink requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVisible: %w", err)
+		return v, fmt.Errorf("querying old value for OldLink: %w", err)
 	}
-	return oldValue.Visible, nil
+	return oldValue.Link, nil
 }
 
-// ResetVisible resets all changes to the "visible" field.
-func (m *MenuMutation) ResetVisible() {
-	m.visible = nil
+// ResetLink resets all changes to the "link" field.
+func (m *MenuMutation) ResetLink() {
+	m.link = nil
 }
 
-// SetHideTab sets the "hide_tab" field.
-func (m *MenuMutation) SetHideTab(b bool) {
-	m.hide_tab = &b
+// SetMaxNumOfOpenTab sets the "max_num_of_open_tab" field.
+func (m *MenuMutation) SetMaxNumOfOpenTab(i int32) {
+	m.max_num_of_open_tab = &i
+	m.addmax_num_of_open_tab = nil
 }
 
-// HideTab returns the value of the "hide_tab" field in the mutation.
-func (m *MenuMutation) HideTab() (r bool, exists bool) {
-	v := m.hide_tab
+// MaxNumOfOpenTab returns the value of the "max_num_of_open_tab" field in the mutation.
+func (m *MenuMutation) MaxNumOfOpenTab() (r int32, exists bool) {
+	v := m.max_num_of_open_tab
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHideTab returns the old "hide_tab" field's value of the Menu entity.
+// OldMaxNumOfOpenTab returns the old "max_num_of_open_tab" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldHideTab(ctx context.Context) (v *bool, err error) {
+func (m *MenuMutation) OldMaxNumOfOpenTab(ctx context.Context) (v *int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHideTab is only allowed on UpdateOne operations")
+		return v, errors.New("OldMaxNumOfOpenTab is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHideTab requires an ID field in the mutation")
+		return v, errors.New("OldMaxNumOfOpenTab requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHideTab: %w", err)
+		return v, fmt.Errorf("querying old value for OldMaxNumOfOpenTab: %w", err)
 	}
-	return oldValue.HideTab, nil
+	return oldValue.MaxNumOfOpenTab, nil
 }
 
-// ResetHideTab resets all changes to the "hide_tab" field.
-func (m *MenuMutation) ResetHideTab() {
-	m.hide_tab = nil
+// AddMaxNumOfOpenTab adds i to the "max_num_of_open_tab" field.
+func (m *MenuMutation) AddMaxNumOfOpenTab(i int32) {
+	if m.addmax_num_of_open_tab != nil {
+		*m.addmax_num_of_open_tab += i
+	} else {
+		m.addmax_num_of_open_tab = &i
+	}
 }
 
-// SetHideMenu sets the "hide_menu" field.
-func (m *MenuMutation) SetHideMenu(b bool) {
-	m.hide_menu = &b
-}
-
-// HideMenu returns the value of the "hide_menu" field in the mutation.
-func (m *MenuMutation) HideMenu() (r bool, exists bool) {
-	v := m.hide_menu
+// AddedMaxNumOfOpenTab returns the value that was added to the "max_num_of_open_tab" field in this mutation.
+func (m *MenuMutation) AddedMaxNumOfOpenTab() (r int32, exists bool) {
+	v := m.addmax_num_of_open_tab
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHideMenu returns the old "hide_menu" field's value of the Menu entity.
-// If the Menu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldHideMenu(ctx context.Context) (v *bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHideMenu is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHideMenu requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHideMenu: %w", err)
-	}
-	return oldValue.HideMenu, nil
+// ResetMaxNumOfOpenTab resets all changes to the "max_num_of_open_tab" field.
+func (m *MenuMutation) ResetMaxNumOfOpenTab() {
+	m.max_num_of_open_tab = nil
+	m.addmax_num_of_open_tab = nil
 }
 
-// ResetHideMenu resets all changes to the "hide_menu" field.
-func (m *MenuMutation) ResetHideMenu() {
-	m.hide_menu = nil
+// SetNoBasicLayout sets the "no_basic_layout" field.
+func (m *MenuMutation) SetNoBasicLayout(b bool) {
+	m.no_basic_layout = &b
 }
 
-// SetHideBreadcrumb sets the "hide_breadcrumb" field.
-func (m *MenuMutation) SetHideBreadcrumb(b bool) {
-	m.hide_breadcrumb = &b
-}
-
-// HideBreadcrumb returns the value of the "hide_breadcrumb" field in the mutation.
-func (m *MenuMutation) HideBreadcrumb() (r bool, exists bool) {
-	v := m.hide_breadcrumb
+// NoBasicLayout returns the value of the "no_basic_layout" field in the mutation.
+func (m *MenuMutation) NoBasicLayout() (r bool, exists bool) {
+	v := m.no_basic_layout
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHideBreadcrumb returns the old "hide_breadcrumb" field's value of the Menu entity.
+// OldNoBasicLayout returns the old "no_basic_layout" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldHideBreadcrumb(ctx context.Context) (v *bool, err error) {
+func (m *MenuMutation) OldNoBasicLayout(ctx context.Context) (v *bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHideBreadcrumb is only allowed on UpdateOne operations")
+		return v, errors.New("OldNoBasicLayout is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHideBreadcrumb requires an ID field in the mutation")
+		return v, errors.New("OldNoBasicLayout requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHideBreadcrumb: %w", err)
+		return v, fmt.Errorf("querying old value for OldNoBasicLayout: %w", err)
 	}
-	return oldValue.HideBreadcrumb, nil
+	return oldValue.NoBasicLayout, nil
 }
 
-// ResetHideBreadcrumb resets all changes to the "hide_breadcrumb" field.
-func (m *MenuMutation) ResetHideBreadcrumb() {
-	m.hide_breadcrumb = nil
+// ResetNoBasicLayout resets all changes to the "no_basic_layout" field.
+func (m *MenuMutation) ResetNoBasicLayout() {
+	m.no_basic_layout = nil
+}
+
+// SetOpenInNewWindow sets the "open_in_new_window" field.
+func (m *MenuMutation) SetOpenInNewWindow(b bool) {
+	m.open_in_new_window = &b
+}
+
+// OpenInNewWindow returns the value of the "open_in_new_window" field in the mutation.
+func (m *MenuMutation) OpenInNewWindow() (r bool, exists bool) {
+	v := m.open_in_new_window
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOpenInNewWindow returns the old "open_in_new_window" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldOpenInNewWindow(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOpenInNewWindow is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOpenInNewWindow requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOpenInNewWindow: %w", err)
+	}
+	return oldValue.OpenInNewWindow, nil
+}
+
+// ResetOpenInNewWindow resets all changes to the "open_in_new_window" field.
+func (m *MenuMutation) ResetOpenInNewWindow() {
+	m.open_in_new_window = nil
+}
+
+// SetSort sets the "sort" field.
+func (m *MenuMutation) SetSort(i int32) {
+	m.sort = &i
+	m.addsort = nil
+}
+
+// Sort returns the value of the "sort" field in the mutation.
+func (m *MenuMutation) Sort() (r int32, exists bool) {
+	v := m.sort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSort returns the old "sort" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldSort(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSort: %w", err)
+	}
+	return oldValue.Sort, nil
+}
+
+// AddSort adds i to the "sort" field.
+func (m *MenuMutation) AddSort(i int32) {
+	if m.addsort != nil {
+		*m.addsort += i
+	} else {
+		m.addsort = &i
+	}
+}
+
+// AddedSort returns the value that was added to the "sort" field in this mutation.
+func (m *MenuMutation) AddedSort() (r int32, exists bool) {
+	v := m.addsort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSort resets all changes to the "sort" field.
+func (m *MenuMutation) ResetSort() {
+	m.sort = nil
+	m.addsort = nil
+}
+
+// SetQuery sets the "query" field.
+func (m *MenuMutation) SetQuery(s string) {
+	m.query = &s
+}
+
+// Query returns the value of the "query" field in the mutation.
+func (m *MenuMutation) Query() (r string, exists bool) {
+	v := m.query
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuery returns the old "query" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldQuery(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuery is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuery requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuery: %w", err)
+	}
+	return oldValue.Query, nil
+}
+
+// ClearQuery clears the value of the "query" field.
+func (m *MenuMutation) ClearQuery() {
+	m.query = nil
+	m.clearedFields[menu.FieldQuery] = struct{}{}
+}
+
+// QueryCleared returns if the "query" field was cleared in this mutation.
+func (m *MenuMutation) QueryCleared() bool {
+	_, ok := m.clearedFields[menu.FieldQuery]
+	return ok
+}
+
+// ResetQuery resets all changes to the "query" field.
+func (m *MenuMutation) ResetQuery() {
+	m.query = nil
+	delete(m.clearedFields, menu.FieldQuery)
+}
+
+// SetTitle sets the "title" field.
+func (m *MenuMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *MenuMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Menu entity.
+// If the Menu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuMutation) OldTitle(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *MenuMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetParentID sets the "parent" edge to the Menu entity by id.
+func (m *MenuMutation) SetParentID(id uint32) {
+	m.parent = &id
 }
 
 // ClearParent clears the "parent" edge to the Menu entity.
 func (m *MenuMutation) ClearParent() {
 	m.clearedparent = true
-	m.clearedFields[menu.FieldParentID] = struct{}{}
+	m.clearedFields[menu.FieldPid] = struct{}{}
 }
 
 // ParentCleared reports if the "parent" edge to the Menu entity was cleared.
 func (m *MenuMutation) ParentCleared() bool {
-	return m.ParentIDCleared() || m.clearedparent
+	return m.PidCleared() || m.clearedparent
+}
+
+// ParentID returns the "parent" edge ID in the mutation.
+func (m *MenuMutation) ParentID() (id uint32, exists bool) {
+	if m.parent != nil {
+		return *m.parent, true
+	}
+	return
 }
 
 // ParentIDs returns the "parent" edge IDs in the mutation.
@@ -2198,18 +2701,15 @@ func (m *MenuMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MenuMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 32)
+	if m.status != nil {
+		fields = append(fields, menu.FieldStatus)
+	}
 	if m.created_at != nil {
 		fields = append(fields, menu.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, menu.FieldUpdatedAt)
-	}
-	if m.status != nil {
-		fields = append(fields, menu.FieldStatus)
-	}
-	if m.domain_id != nil {
-		fields = append(fields, menu.FieldDomainID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, menu.FieldDeletedAt)
@@ -2217,53 +2717,86 @@ func (m *MenuMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, menu.FieldName)
 	}
-	if m.title != nil {
-		fields = append(fields, menu.FieldTitle)
-	}
-	if m.parent != nil {
-		fields = append(fields, menu.FieldParentID)
+	if m._path != nil {
+		fields = append(fields, menu.FieldPath)
 	}
 	if m._type != nil {
 		fields = append(fields, menu.FieldType)
 	}
-	if m._path != nil {
-		fields = append(fields, menu.FieldPath)
-	}
 	if m.component != nil {
 		fields = append(fields, menu.FieldComponent)
 	}
-	if m.icon != nil {
-		fields = append(fields, menu.FieldIcon)
-	}
-	if m.is_ext != nil {
-		fields = append(fields, menu.FieldIsExt)
-	}
-	if m.ext_url != nil {
-		fields = append(fields, menu.FieldExtURL)
-	}
-	if m.permissions != nil {
-		fields = append(fields, menu.FieldPermissions)
+	if m.parent != nil {
+		fields = append(fields, menu.FieldPid)
 	}
 	if m.redirect != nil {
 		fields = append(fields, menu.FieldRedirect)
 	}
-	if m.current_active_menu != nil {
-		fields = append(fields, menu.FieldCurrentActiveMenu)
+	if m.auth_code != nil {
+		fields = append(fields, menu.FieldAuthCode)
+	}
+	if m.active_icon != nil {
+		fields = append(fields, menu.FieldActiveIcon)
+	}
+	if m.active_path != nil {
+		fields = append(fields, menu.FieldActivePath)
+	}
+	if m.affix_tab != nil {
+		fields = append(fields, menu.FieldAffixTab)
+	}
+	if m.affix_tab_order != nil {
+		fields = append(fields, menu.FieldAffixTabOrder)
+	}
+	if m.badge != nil {
+		fields = append(fields, menu.FieldBadge)
+	}
+	if m.badge_type != nil {
+		fields = append(fields, menu.FieldBadgeType)
+	}
+	if m.badge_variants != nil {
+		fields = append(fields, menu.FieldBadgeVariants)
+	}
+	if m.hide_children_in_menu != nil {
+		fields = append(fields, menu.FieldHideChildrenInMenu)
+	}
+	if m.hide_in_breadcrumb != nil {
+		fields = append(fields, menu.FieldHideInBreadcrumb)
+	}
+	if m.hide_in_menu != nil {
+		fields = append(fields, menu.FieldHideInMenu)
+	}
+	if m.hide_in_tab != nil {
+		fields = append(fields, menu.FieldHideInTab)
+	}
+	if m.icon != nil {
+		fields = append(fields, menu.FieldIcon)
+	}
+	if m.iframe_src != nil {
+		fields = append(fields, menu.FieldIframeSrc)
 	}
 	if m.keep_alive != nil {
 		fields = append(fields, menu.FieldKeepAlive)
 	}
-	if m.visible != nil {
-		fields = append(fields, menu.FieldVisible)
+	if m.link != nil {
+		fields = append(fields, menu.FieldLink)
 	}
-	if m.hide_tab != nil {
-		fields = append(fields, menu.FieldHideTab)
+	if m.max_num_of_open_tab != nil {
+		fields = append(fields, menu.FieldMaxNumOfOpenTab)
 	}
-	if m.hide_menu != nil {
-		fields = append(fields, menu.FieldHideMenu)
+	if m.no_basic_layout != nil {
+		fields = append(fields, menu.FieldNoBasicLayout)
 	}
-	if m.hide_breadcrumb != nil {
-		fields = append(fields, menu.FieldHideBreadcrumb)
+	if m.open_in_new_window != nil {
+		fields = append(fields, menu.FieldOpenInNewWindow)
+	}
+	if m.sort != nil {
+		fields = append(fields, menu.FieldSort)
+	}
+	if m.query != nil {
+		fields = append(fields, menu.FieldQuery)
+	}
+	if m.title != nil {
+		fields = append(fields, menu.FieldTitle)
 	}
 	return fields
 }
@@ -2273,50 +2806,70 @@ func (m *MenuMutation) Fields() []string {
 // schema.
 func (m *MenuMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case menu.FieldStatus:
+		return m.Status()
 	case menu.FieldCreatedAt:
 		return m.CreatedAt()
 	case menu.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case menu.FieldStatus:
-		return m.Status()
-	case menu.FieldDomainID:
-		return m.DomainID()
 	case menu.FieldDeletedAt:
 		return m.DeletedAt()
 	case menu.FieldName:
 		return m.Name()
-	case menu.FieldTitle:
-		return m.Title()
-	case menu.FieldParentID:
-		return m.ParentID()
-	case menu.FieldType:
-		return m.GetType()
 	case menu.FieldPath:
 		return m.Path()
+	case menu.FieldType:
+		return m.GetType()
 	case menu.FieldComponent:
 		return m.Component()
-	case menu.FieldIcon:
-		return m.Icon()
-	case menu.FieldIsExt:
-		return m.IsExt()
-	case menu.FieldExtURL:
-		return m.ExtURL()
-	case menu.FieldPermissions:
-		return m.Permissions()
+	case menu.FieldPid:
+		return m.Pid()
 	case menu.FieldRedirect:
 		return m.Redirect()
-	case menu.FieldCurrentActiveMenu:
-		return m.CurrentActiveMenu()
+	case menu.FieldAuthCode:
+		return m.AuthCode()
+	case menu.FieldActiveIcon:
+		return m.ActiveIcon()
+	case menu.FieldActivePath:
+		return m.ActivePath()
+	case menu.FieldAffixTab:
+		return m.AffixTab()
+	case menu.FieldAffixTabOrder:
+		return m.AffixTabOrder()
+	case menu.FieldBadge:
+		return m.Badge()
+	case menu.FieldBadgeType:
+		return m.BadgeType()
+	case menu.FieldBadgeVariants:
+		return m.BadgeVariants()
+	case menu.FieldHideChildrenInMenu:
+		return m.HideChildrenInMenu()
+	case menu.FieldHideInBreadcrumb:
+		return m.HideInBreadcrumb()
+	case menu.FieldHideInMenu:
+		return m.HideInMenu()
+	case menu.FieldHideInTab:
+		return m.HideInTab()
+	case menu.FieldIcon:
+		return m.Icon()
+	case menu.FieldIframeSrc:
+		return m.IframeSrc()
 	case menu.FieldKeepAlive:
 		return m.KeepAlive()
-	case menu.FieldVisible:
-		return m.Visible()
-	case menu.FieldHideTab:
-		return m.HideTab()
-	case menu.FieldHideMenu:
-		return m.HideMenu()
-	case menu.FieldHideBreadcrumb:
-		return m.HideBreadcrumb()
+	case menu.FieldLink:
+		return m.Link()
+	case menu.FieldMaxNumOfOpenTab:
+		return m.MaxNumOfOpenTab()
+	case menu.FieldNoBasicLayout:
+		return m.NoBasicLayout()
+	case menu.FieldOpenInNewWindow:
+		return m.OpenInNewWindow()
+	case menu.FieldSort:
+		return m.Sort()
+	case menu.FieldQuery:
+		return m.Query()
+	case menu.FieldTitle:
+		return m.Title()
 	}
 	return nil, false
 }
@@ -2326,50 +2879,70 @@ func (m *MenuMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *MenuMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case menu.FieldStatus:
+		return m.OldStatus(ctx)
 	case menu.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case menu.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case menu.FieldStatus:
-		return m.OldStatus(ctx)
-	case menu.FieldDomainID:
-		return m.OldDomainID(ctx)
 	case menu.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case menu.FieldName:
 		return m.OldName(ctx)
-	case menu.FieldTitle:
-		return m.OldTitle(ctx)
-	case menu.FieldParentID:
-		return m.OldParentID(ctx)
-	case menu.FieldType:
-		return m.OldType(ctx)
 	case menu.FieldPath:
 		return m.OldPath(ctx)
+	case menu.FieldType:
+		return m.OldType(ctx)
 	case menu.FieldComponent:
 		return m.OldComponent(ctx)
-	case menu.FieldIcon:
-		return m.OldIcon(ctx)
-	case menu.FieldIsExt:
-		return m.OldIsExt(ctx)
-	case menu.FieldExtURL:
-		return m.OldExtURL(ctx)
-	case menu.FieldPermissions:
-		return m.OldPermissions(ctx)
+	case menu.FieldPid:
+		return m.OldPid(ctx)
 	case menu.FieldRedirect:
 		return m.OldRedirect(ctx)
-	case menu.FieldCurrentActiveMenu:
-		return m.OldCurrentActiveMenu(ctx)
+	case menu.FieldAuthCode:
+		return m.OldAuthCode(ctx)
+	case menu.FieldActiveIcon:
+		return m.OldActiveIcon(ctx)
+	case menu.FieldActivePath:
+		return m.OldActivePath(ctx)
+	case menu.FieldAffixTab:
+		return m.OldAffixTab(ctx)
+	case menu.FieldAffixTabOrder:
+		return m.OldAffixTabOrder(ctx)
+	case menu.FieldBadge:
+		return m.OldBadge(ctx)
+	case menu.FieldBadgeType:
+		return m.OldBadgeType(ctx)
+	case menu.FieldBadgeVariants:
+		return m.OldBadgeVariants(ctx)
+	case menu.FieldHideChildrenInMenu:
+		return m.OldHideChildrenInMenu(ctx)
+	case menu.FieldHideInBreadcrumb:
+		return m.OldHideInBreadcrumb(ctx)
+	case menu.FieldHideInMenu:
+		return m.OldHideInMenu(ctx)
+	case menu.FieldHideInTab:
+		return m.OldHideInTab(ctx)
+	case menu.FieldIcon:
+		return m.OldIcon(ctx)
+	case menu.FieldIframeSrc:
+		return m.OldIframeSrc(ctx)
 	case menu.FieldKeepAlive:
 		return m.OldKeepAlive(ctx)
-	case menu.FieldVisible:
-		return m.OldVisible(ctx)
-	case menu.FieldHideTab:
-		return m.OldHideTab(ctx)
-	case menu.FieldHideMenu:
-		return m.OldHideMenu(ctx)
-	case menu.FieldHideBreadcrumb:
-		return m.OldHideBreadcrumb(ctx)
+	case menu.FieldLink:
+		return m.OldLink(ctx)
+	case menu.FieldMaxNumOfOpenTab:
+		return m.OldMaxNumOfOpenTab(ctx)
+	case menu.FieldNoBasicLayout:
+		return m.OldNoBasicLayout(ctx)
+	case menu.FieldOpenInNewWindow:
+		return m.OldOpenInNewWindow(ctx)
+	case menu.FieldSort:
+		return m.OldSort(ctx)
+	case menu.FieldQuery:
+		return m.OldQuery(ctx)
+	case menu.FieldTitle:
+		return m.OldTitle(ctx)
 	}
 	return nil, fmt.Errorf("unknown Menu field %s", name)
 }
@@ -2379,6 +2952,13 @@ func (m *MenuMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *MenuMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case menu.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
 	case menu.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -2392,20 +2972,6 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
-		return nil
-	case menu.FieldStatus:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStatus(v)
-		return nil
-	case menu.FieldDomainID:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDomainID(v)
 		return nil
 	case menu.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -2421,19 +2987,12 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case menu.FieldTitle:
+	case menu.FieldPath:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTitle(v)
-		return nil
-	case menu.FieldParentID:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetParentID(v)
+		m.SetPath(v)
 		return nil
 	case menu.FieldType:
 		v, ok := value.(int32)
@@ -2442,13 +3001,6 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetType(v)
 		return nil
-	case menu.FieldPath:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPath(v)
-		return nil
 	case menu.FieldComponent:
 		v, ok := value.(string)
 		if !ok {
@@ -2456,33 +3008,12 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetComponent(v)
 		return nil
-	case menu.FieldIcon:
-		v, ok := value.(string)
+	case menu.FieldPid:
+		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIcon(v)
-		return nil
-	case menu.FieldIsExt:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsExt(v)
-		return nil
-	case menu.FieldExtURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetExtURL(v)
-		return nil
-	case menu.FieldPermissions:
-		v, ok := value.([]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPermissions(v)
+		m.SetPid(v)
 		return nil
 	case menu.FieldRedirect:
 		v, ok := value.(string)
@@ -2491,12 +3022,103 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRedirect(v)
 		return nil
-	case menu.FieldCurrentActiveMenu:
+	case menu.FieldAuthCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCurrentActiveMenu(v)
+		m.SetAuthCode(v)
+		return nil
+	case menu.FieldActiveIcon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActiveIcon(v)
+		return nil
+	case menu.FieldActivePath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActivePath(v)
+		return nil
+	case menu.FieldAffixTab:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAffixTab(v)
+		return nil
+	case menu.FieldAffixTabOrder:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAffixTabOrder(v)
+		return nil
+	case menu.FieldBadge:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBadge(v)
+		return nil
+	case menu.FieldBadgeType:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBadgeType(v)
+		return nil
+	case menu.FieldBadgeVariants:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBadgeVariants(v)
+		return nil
+	case menu.FieldHideChildrenInMenu:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHideChildrenInMenu(v)
+		return nil
+	case menu.FieldHideInBreadcrumb:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHideInBreadcrumb(v)
+		return nil
+	case menu.FieldHideInMenu:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHideInMenu(v)
+		return nil
+	case menu.FieldHideInTab:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHideInTab(v)
+		return nil
+	case menu.FieldIcon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIcon(v)
+		return nil
+	case menu.FieldIframeSrc:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIframeSrc(v)
 		return nil
 	case menu.FieldKeepAlive:
 		v, ok := value.(bool)
@@ -2505,33 +3127,54 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetKeepAlive(v)
 		return nil
-	case menu.FieldVisible:
-		v, ok := value.(bool)
+	case menu.FieldLink:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetVisible(v)
+		m.SetLink(v)
 		return nil
-	case menu.FieldHideTab:
-		v, ok := value.(bool)
+	case menu.FieldMaxNumOfOpenTab:
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHideTab(v)
+		m.SetMaxNumOfOpenTab(v)
 		return nil
-	case menu.FieldHideMenu:
+	case menu.FieldNoBasicLayout:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHideMenu(v)
+		m.SetNoBasicLayout(v)
 		return nil
-	case menu.FieldHideBreadcrumb:
+	case menu.FieldOpenInNewWindow:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHideBreadcrumb(v)
+		m.SetOpenInNewWindow(v)
+		return nil
+	case menu.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSort(v)
+		return nil
+	case menu.FieldQuery:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuery(v)
+		return nil
+	case menu.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Menu field %s", name)
@@ -2544,11 +3187,23 @@ func (m *MenuMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, menu.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, menu.FieldDomainID)
-	}
 	if m.add_type != nil {
 		fields = append(fields, menu.FieldType)
+	}
+	if m.addaffix_tab_order != nil {
+		fields = append(fields, menu.FieldAffixTabOrder)
+	}
+	if m.addbadge_type != nil {
+		fields = append(fields, menu.FieldBadgeType)
+	}
+	if m.addbadge_variants != nil {
+		fields = append(fields, menu.FieldBadgeVariants)
+	}
+	if m.addmax_num_of_open_tab != nil {
+		fields = append(fields, menu.FieldMaxNumOfOpenTab)
+	}
+	if m.addsort != nil {
+		fields = append(fields, menu.FieldSort)
 	}
 	return fields
 }
@@ -2560,10 +3215,18 @@ func (m *MenuMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case menu.FieldStatus:
 		return m.AddedStatus()
-	case menu.FieldDomainID:
-		return m.AddedDomainID()
 	case menu.FieldType:
 		return m.AddedType()
+	case menu.FieldAffixTabOrder:
+		return m.AddedAffixTabOrder()
+	case menu.FieldBadgeType:
+		return m.AddedBadgeType()
+	case menu.FieldBadgeVariants:
+		return m.AddedBadgeVariants()
+	case menu.FieldMaxNumOfOpenTab:
+		return m.AddedMaxNumOfOpenTab()
+	case menu.FieldSort:
+		return m.AddedSort()
 	}
 	return nil, false
 }
@@ -2580,19 +3243,47 @@ func (m *MenuMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case menu.FieldDomainID:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDomainID(v)
-		return nil
 	case menu.FieldType:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddType(v)
+		return nil
+	case menu.FieldAffixTabOrder:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAffixTabOrder(v)
+		return nil
+	case menu.FieldBadgeType:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBadgeType(v)
+		return nil
+	case menu.FieldBadgeVariants:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBadgeVariants(v)
+		return nil
+	case menu.FieldMaxNumOfOpenTab:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxNumOfOpenTab(v)
+		return nil
+	case menu.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSort(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Menu numeric field %s", name)
@@ -2605,11 +3296,23 @@ func (m *MenuMutation) ClearedFields() []string {
 	if m.FieldCleared(menu.FieldDeletedAt) {
 		fields = append(fields, menu.FieldDeletedAt)
 	}
-	if m.FieldCleared(menu.FieldParentID) {
-		fields = append(fields, menu.FieldParentID)
+	if m.FieldCleared(menu.FieldPath) {
+		fields = append(fields, menu.FieldPath)
 	}
-	if m.FieldCleared(menu.FieldPermissions) {
-		fields = append(fields, menu.FieldPermissions)
+	if m.FieldCleared(menu.FieldType) {
+		fields = append(fields, menu.FieldType)
+	}
+	if m.FieldCleared(menu.FieldComponent) {
+		fields = append(fields, menu.FieldComponent)
+	}
+	if m.FieldCleared(menu.FieldPid) {
+		fields = append(fields, menu.FieldPid)
+	}
+	if m.FieldCleared(menu.FieldRedirect) {
+		fields = append(fields, menu.FieldRedirect)
+	}
+	if m.FieldCleared(menu.FieldQuery) {
+		fields = append(fields, menu.FieldQuery)
 	}
 	return fields
 }
@@ -2628,11 +3331,23 @@ func (m *MenuMutation) ClearField(name string) error {
 	case menu.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
-	case menu.FieldParentID:
-		m.ClearParentID()
+	case menu.FieldPath:
+		m.ClearPath()
 		return nil
-	case menu.FieldPermissions:
-		m.ClearPermissions()
+	case menu.FieldType:
+		m.ClearType()
+		return nil
+	case menu.FieldComponent:
+		m.ClearComponent()
+		return nil
+	case menu.FieldPid:
+		m.ClearPid()
+		return nil
+	case menu.FieldRedirect:
+		m.ClearRedirect()
+		return nil
+	case menu.FieldQuery:
+		m.ClearQuery()
 		return nil
 	}
 	return fmt.Errorf("unknown Menu nullable field %s", name)
@@ -2642,17 +3357,14 @@ func (m *MenuMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *MenuMutation) ResetField(name string) error {
 	switch name {
+	case menu.FieldStatus:
+		m.ResetStatus()
+		return nil
 	case menu.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
 	case menu.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case menu.FieldStatus:
-		m.ResetStatus()
-		return nil
-	case menu.FieldDomainID:
-		m.ResetDomainID()
 		return nil
 	case menu.FieldDeletedAt:
 		m.ResetDeletedAt()
@@ -2660,53 +3372,86 @@ func (m *MenuMutation) ResetField(name string) error {
 	case menu.FieldName:
 		m.ResetName()
 		return nil
-	case menu.FieldTitle:
-		m.ResetTitle()
-		return nil
-	case menu.FieldParentID:
-		m.ResetParentID()
+	case menu.FieldPath:
+		m.ResetPath()
 		return nil
 	case menu.FieldType:
 		m.ResetType()
 		return nil
-	case menu.FieldPath:
-		m.ResetPath()
-		return nil
 	case menu.FieldComponent:
 		m.ResetComponent()
 		return nil
-	case menu.FieldIcon:
-		m.ResetIcon()
-		return nil
-	case menu.FieldIsExt:
-		m.ResetIsExt()
-		return nil
-	case menu.FieldExtURL:
-		m.ResetExtURL()
-		return nil
-	case menu.FieldPermissions:
-		m.ResetPermissions()
+	case menu.FieldPid:
+		m.ResetPid()
 		return nil
 	case menu.FieldRedirect:
 		m.ResetRedirect()
 		return nil
-	case menu.FieldCurrentActiveMenu:
-		m.ResetCurrentActiveMenu()
+	case menu.FieldAuthCode:
+		m.ResetAuthCode()
+		return nil
+	case menu.FieldActiveIcon:
+		m.ResetActiveIcon()
+		return nil
+	case menu.FieldActivePath:
+		m.ResetActivePath()
+		return nil
+	case menu.FieldAffixTab:
+		m.ResetAffixTab()
+		return nil
+	case menu.FieldAffixTabOrder:
+		m.ResetAffixTabOrder()
+		return nil
+	case menu.FieldBadge:
+		m.ResetBadge()
+		return nil
+	case menu.FieldBadgeType:
+		m.ResetBadgeType()
+		return nil
+	case menu.FieldBadgeVariants:
+		m.ResetBadgeVariants()
+		return nil
+	case menu.FieldHideChildrenInMenu:
+		m.ResetHideChildrenInMenu()
+		return nil
+	case menu.FieldHideInBreadcrumb:
+		m.ResetHideInBreadcrumb()
+		return nil
+	case menu.FieldHideInMenu:
+		m.ResetHideInMenu()
+		return nil
+	case menu.FieldHideInTab:
+		m.ResetHideInTab()
+		return nil
+	case menu.FieldIcon:
+		m.ResetIcon()
+		return nil
+	case menu.FieldIframeSrc:
+		m.ResetIframeSrc()
 		return nil
 	case menu.FieldKeepAlive:
 		m.ResetKeepAlive()
 		return nil
-	case menu.FieldVisible:
-		m.ResetVisible()
+	case menu.FieldLink:
+		m.ResetLink()
 		return nil
-	case menu.FieldHideTab:
-		m.ResetHideTab()
+	case menu.FieldMaxNumOfOpenTab:
+		m.ResetMaxNumOfOpenTab()
 		return nil
-	case menu.FieldHideMenu:
-		m.ResetHideMenu()
+	case menu.FieldNoBasicLayout:
+		m.ResetNoBasicLayout()
 		return nil
-	case menu.FieldHideBreadcrumb:
-		m.ResetHideBreadcrumb()
+	case menu.FieldOpenInNewWindow:
+		m.ResetOpenInNewWindow()
+		return nil
+	case menu.FieldSort:
+		m.ResetSort()
+		return nil
+	case menu.FieldQuery:
+		m.ResetQuery()
+		return nil
+	case menu.FieldTitle:
+		m.ResetTitle()
 		return nil
 	}
 	return fmt.Errorf("unknown Menu field %s", name)

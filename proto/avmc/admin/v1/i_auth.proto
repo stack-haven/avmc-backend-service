@@ -340,7 +340,7 @@ message MenusRequest {}
 
 // 登录用户菜单 - 回应
 message MenusResponse {
-  repeated RouteResponse routes = 1 [(gnostic.openapi.v3.property) = {description: "路由响应列表"}];
+  repeated RouteResponse items = 1 [(gnostic.openapi.v3.property) = {description: "路由响应列表"}];
 }
 
 message RouteResponse {

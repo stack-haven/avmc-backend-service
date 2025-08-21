@@ -51,28 +51,38 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Menu",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			menu.FieldCreatedAt:         {Type: field.TypeTime, Column: menu.FieldCreatedAt},
-			menu.FieldUpdatedAt:         {Type: field.TypeTime, Column: menu.FieldUpdatedAt},
-			menu.FieldStatus:            {Type: field.TypeInt32, Column: menu.FieldStatus},
-			menu.FieldDomainID:          {Type: field.TypeUint32, Column: menu.FieldDomainID},
-			menu.FieldDeletedAt:         {Type: field.TypeTime, Column: menu.FieldDeletedAt},
-			menu.FieldName:              {Type: field.TypeString, Column: menu.FieldName},
-			menu.FieldTitle:             {Type: field.TypeString, Column: menu.FieldTitle},
-			menu.FieldParentID:          {Type: field.TypeUint32, Column: menu.FieldParentID},
-			menu.FieldType:              {Type: field.TypeInt32, Column: menu.FieldType},
-			menu.FieldPath:              {Type: field.TypeString, Column: menu.FieldPath},
-			menu.FieldComponent:         {Type: field.TypeString, Column: menu.FieldComponent},
-			menu.FieldIcon:              {Type: field.TypeString, Column: menu.FieldIcon},
-			menu.FieldIsExt:             {Type: field.TypeBool, Column: menu.FieldIsExt},
-			menu.FieldExtURL:            {Type: field.TypeString, Column: menu.FieldExtURL},
-			menu.FieldPermissions:       {Type: field.TypeJSON, Column: menu.FieldPermissions},
-			menu.FieldRedirect:          {Type: field.TypeString, Column: menu.FieldRedirect},
-			menu.FieldCurrentActiveMenu: {Type: field.TypeString, Column: menu.FieldCurrentActiveMenu},
-			menu.FieldKeepAlive:         {Type: field.TypeBool, Column: menu.FieldKeepAlive},
-			menu.FieldVisible:           {Type: field.TypeBool, Column: menu.FieldVisible},
-			menu.FieldHideTab:           {Type: field.TypeBool, Column: menu.FieldHideTab},
-			menu.FieldHideMenu:          {Type: field.TypeBool, Column: menu.FieldHideMenu},
-			menu.FieldHideBreadcrumb:    {Type: field.TypeBool, Column: menu.FieldHideBreadcrumb},
+			menu.FieldStatus:             {Type: field.TypeInt32, Column: menu.FieldStatus},
+			menu.FieldCreatedAt:          {Type: field.TypeTime, Column: menu.FieldCreatedAt},
+			menu.FieldUpdatedAt:          {Type: field.TypeTime, Column: menu.FieldUpdatedAt},
+			menu.FieldDeletedAt:          {Type: field.TypeTime, Column: menu.FieldDeletedAt},
+			menu.FieldName:               {Type: field.TypeString, Column: menu.FieldName},
+			menu.FieldPath:               {Type: field.TypeString, Column: menu.FieldPath},
+			menu.FieldType:               {Type: field.TypeInt32, Column: menu.FieldType},
+			menu.FieldComponent:          {Type: field.TypeString, Column: menu.FieldComponent},
+			menu.FieldPid:                {Type: field.TypeUint32, Column: menu.FieldPid},
+			menu.FieldRedirect:           {Type: field.TypeString, Column: menu.FieldRedirect},
+			menu.FieldAuthCode:           {Type: field.TypeString, Column: menu.FieldAuthCode},
+			menu.FieldActiveIcon:         {Type: field.TypeString, Column: menu.FieldActiveIcon},
+			menu.FieldActivePath:         {Type: field.TypeString, Column: menu.FieldActivePath},
+			menu.FieldAffixTab:           {Type: field.TypeBool, Column: menu.FieldAffixTab},
+			menu.FieldAffixTabOrder:      {Type: field.TypeInt32, Column: menu.FieldAffixTabOrder},
+			menu.FieldBadge:              {Type: field.TypeString, Column: menu.FieldBadge},
+			menu.FieldBadgeType:          {Type: field.TypeInt32, Column: menu.FieldBadgeType},
+			menu.FieldBadgeVariants:      {Type: field.TypeInt32, Column: menu.FieldBadgeVariants},
+			menu.FieldHideChildrenInMenu: {Type: field.TypeBool, Column: menu.FieldHideChildrenInMenu},
+			menu.FieldHideInBreadcrumb:   {Type: field.TypeBool, Column: menu.FieldHideInBreadcrumb},
+			menu.FieldHideInMenu:         {Type: field.TypeBool, Column: menu.FieldHideInMenu},
+			menu.FieldHideInTab:          {Type: field.TypeBool, Column: menu.FieldHideInTab},
+			menu.FieldIcon:               {Type: field.TypeString, Column: menu.FieldIcon},
+			menu.FieldIframeSrc:          {Type: field.TypeString, Column: menu.FieldIframeSrc},
+			menu.FieldKeepAlive:          {Type: field.TypeBool, Column: menu.FieldKeepAlive},
+			menu.FieldLink:               {Type: field.TypeString, Column: menu.FieldLink},
+			menu.FieldMaxNumOfOpenTab:    {Type: field.TypeInt32, Column: menu.FieldMaxNumOfOpenTab},
+			menu.FieldNoBasicLayout:      {Type: field.TypeBool, Column: menu.FieldNoBasicLayout},
+			menu.FieldOpenInNewWindow:    {Type: field.TypeBool, Column: menu.FieldOpenInNewWindow},
+			menu.FieldSort:               {Type: field.TypeInt32, Column: menu.FieldSort},
+			menu.FieldQuery:              {Type: field.TypeString, Column: menu.FieldQuery},
+			menu.FieldTitle:              {Type: field.TypeString, Column: menu.FieldTitle},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -392,6 +402,11 @@ func (f *MenuFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(menu.FieldID))
 }
 
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *MenuFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(menu.FieldStatus))
+}
+
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
 func (f *MenuFilter) WhereCreatedAt(p entql.TimeP) {
 	f.Where(p.Field(menu.FieldCreatedAt))
@@ -400,16 +415,6 @@ func (f *MenuFilter) WhereCreatedAt(p entql.TimeP) {
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
 func (f *MenuFilter) WhereUpdatedAt(p entql.TimeP) {
 	f.Where(p.Field(menu.FieldUpdatedAt))
-}
-
-// WhereStatus applies the entql int32 predicate on the status field.
-func (f *MenuFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(menu.FieldStatus))
-}
-
-// WhereDomainID applies the entql uint32 predicate on the domain_id field.
-func (f *MenuFilter) WhereDomainID(p entql.Uint32P) {
-	f.Where(p.Field(menu.FieldDomainID))
 }
 
 // WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
@@ -422,14 +427,9 @@ func (f *MenuFilter) WhereName(p entql.StringP) {
 	f.Where(p.Field(menu.FieldName))
 }
 
-// WhereTitle applies the entql string predicate on the title field.
-func (f *MenuFilter) WhereTitle(p entql.StringP) {
-	f.Where(p.Field(menu.FieldTitle))
-}
-
-// WhereParentID applies the entql uint32 predicate on the parent_id field.
-func (f *MenuFilter) WhereParentID(p entql.Uint32P) {
-	f.Where(p.Field(menu.FieldParentID))
+// WherePath applies the entql string predicate on the path field.
+func (f *MenuFilter) WherePath(p entql.StringP) {
+	f.Where(p.Field(menu.FieldPath))
 }
 
 // WhereType applies the entql int32 predicate on the type field.
@@ -437,34 +437,14 @@ func (f *MenuFilter) WhereType(p entql.Int32P) {
 	f.Where(p.Field(menu.FieldType))
 }
 
-// WherePath applies the entql string predicate on the path field.
-func (f *MenuFilter) WherePath(p entql.StringP) {
-	f.Where(p.Field(menu.FieldPath))
-}
-
 // WhereComponent applies the entql string predicate on the component field.
 func (f *MenuFilter) WhereComponent(p entql.StringP) {
 	f.Where(p.Field(menu.FieldComponent))
 }
 
-// WhereIcon applies the entql string predicate on the icon field.
-func (f *MenuFilter) WhereIcon(p entql.StringP) {
-	f.Where(p.Field(menu.FieldIcon))
-}
-
-// WhereIsExt applies the entql bool predicate on the is_ext field.
-func (f *MenuFilter) WhereIsExt(p entql.BoolP) {
-	f.Where(p.Field(menu.FieldIsExt))
-}
-
-// WhereExtURL applies the entql string predicate on the ext_url field.
-func (f *MenuFilter) WhereExtURL(p entql.StringP) {
-	f.Where(p.Field(menu.FieldExtURL))
-}
-
-// WherePermissions applies the entql json.RawMessage predicate on the permissions field.
-func (f *MenuFilter) WherePermissions(p entql.BytesP) {
-	f.Where(p.Field(menu.FieldPermissions))
+// WherePid applies the entql uint32 predicate on the pid field.
+func (f *MenuFilter) WherePid(p entql.Uint32P) {
+	f.Where(p.Field(menu.FieldPid))
 }
 
 // WhereRedirect applies the entql string predicate on the redirect field.
@@ -472,9 +452,74 @@ func (f *MenuFilter) WhereRedirect(p entql.StringP) {
 	f.Where(p.Field(menu.FieldRedirect))
 }
 
-// WhereCurrentActiveMenu applies the entql string predicate on the current_active_menu field.
-func (f *MenuFilter) WhereCurrentActiveMenu(p entql.StringP) {
-	f.Where(p.Field(menu.FieldCurrentActiveMenu))
+// WhereAuthCode applies the entql string predicate on the auth_code field.
+func (f *MenuFilter) WhereAuthCode(p entql.StringP) {
+	f.Where(p.Field(menu.FieldAuthCode))
+}
+
+// WhereActiveIcon applies the entql string predicate on the active_icon field.
+func (f *MenuFilter) WhereActiveIcon(p entql.StringP) {
+	f.Where(p.Field(menu.FieldActiveIcon))
+}
+
+// WhereActivePath applies the entql string predicate on the active_path field.
+func (f *MenuFilter) WhereActivePath(p entql.StringP) {
+	f.Where(p.Field(menu.FieldActivePath))
+}
+
+// WhereAffixTab applies the entql bool predicate on the affix_tab field.
+func (f *MenuFilter) WhereAffixTab(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldAffixTab))
+}
+
+// WhereAffixTabOrder applies the entql int32 predicate on the affix_tab_order field.
+func (f *MenuFilter) WhereAffixTabOrder(p entql.Int32P) {
+	f.Where(p.Field(menu.FieldAffixTabOrder))
+}
+
+// WhereBadge applies the entql string predicate on the badge field.
+func (f *MenuFilter) WhereBadge(p entql.StringP) {
+	f.Where(p.Field(menu.FieldBadge))
+}
+
+// WhereBadgeType applies the entql int32 predicate on the badge_type field.
+func (f *MenuFilter) WhereBadgeType(p entql.Int32P) {
+	f.Where(p.Field(menu.FieldBadgeType))
+}
+
+// WhereBadgeVariants applies the entql int32 predicate on the badge_variants field.
+func (f *MenuFilter) WhereBadgeVariants(p entql.Int32P) {
+	f.Where(p.Field(menu.FieldBadgeVariants))
+}
+
+// WhereHideChildrenInMenu applies the entql bool predicate on the hide_children_in_menu field.
+func (f *MenuFilter) WhereHideChildrenInMenu(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldHideChildrenInMenu))
+}
+
+// WhereHideInBreadcrumb applies the entql bool predicate on the hide_in_breadcrumb field.
+func (f *MenuFilter) WhereHideInBreadcrumb(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldHideInBreadcrumb))
+}
+
+// WhereHideInMenu applies the entql bool predicate on the hide_in_menu field.
+func (f *MenuFilter) WhereHideInMenu(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldHideInMenu))
+}
+
+// WhereHideInTab applies the entql bool predicate on the hide_in_tab field.
+func (f *MenuFilter) WhereHideInTab(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldHideInTab))
+}
+
+// WhereIcon applies the entql string predicate on the icon field.
+func (f *MenuFilter) WhereIcon(p entql.StringP) {
+	f.Where(p.Field(menu.FieldIcon))
+}
+
+// WhereIframeSrc applies the entql string predicate on the iframe_src field.
+func (f *MenuFilter) WhereIframeSrc(p entql.StringP) {
+	f.Where(p.Field(menu.FieldIframeSrc))
 }
 
 // WhereKeepAlive applies the entql bool predicate on the keep_alive field.
@@ -482,24 +527,39 @@ func (f *MenuFilter) WhereKeepAlive(p entql.BoolP) {
 	f.Where(p.Field(menu.FieldKeepAlive))
 }
 
-// WhereVisible applies the entql bool predicate on the visible field.
-func (f *MenuFilter) WhereVisible(p entql.BoolP) {
-	f.Where(p.Field(menu.FieldVisible))
+// WhereLink applies the entql string predicate on the link field.
+func (f *MenuFilter) WhereLink(p entql.StringP) {
+	f.Where(p.Field(menu.FieldLink))
 }
 
-// WhereHideTab applies the entql bool predicate on the hide_tab field.
-func (f *MenuFilter) WhereHideTab(p entql.BoolP) {
-	f.Where(p.Field(menu.FieldHideTab))
+// WhereMaxNumOfOpenTab applies the entql int32 predicate on the max_num_of_open_tab field.
+func (f *MenuFilter) WhereMaxNumOfOpenTab(p entql.Int32P) {
+	f.Where(p.Field(menu.FieldMaxNumOfOpenTab))
 }
 
-// WhereHideMenu applies the entql bool predicate on the hide_menu field.
-func (f *MenuFilter) WhereHideMenu(p entql.BoolP) {
-	f.Where(p.Field(menu.FieldHideMenu))
+// WhereNoBasicLayout applies the entql bool predicate on the no_basic_layout field.
+func (f *MenuFilter) WhereNoBasicLayout(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldNoBasicLayout))
 }
 
-// WhereHideBreadcrumb applies the entql bool predicate on the hide_breadcrumb field.
-func (f *MenuFilter) WhereHideBreadcrumb(p entql.BoolP) {
-	f.Where(p.Field(menu.FieldHideBreadcrumb))
+// WhereOpenInNewWindow applies the entql bool predicate on the open_in_new_window field.
+func (f *MenuFilter) WhereOpenInNewWindow(p entql.BoolP) {
+	f.Where(p.Field(menu.FieldOpenInNewWindow))
+}
+
+// WhereSort applies the entql int32 predicate on the sort field.
+func (f *MenuFilter) WhereSort(p entql.Int32P) {
+	f.Where(p.Field(menu.FieldSort))
+}
+
+// WhereQuery applies the entql string predicate on the query field.
+func (f *MenuFilter) WhereQuery(p entql.StringP) {
+	f.Where(p.Field(menu.FieldQuery))
+}
+
+// WhereTitle applies the entql string predicate on the title field.
+func (f *MenuFilter) WhereTitle(p entql.StringP) {
+	f.Where(p.Field(menu.FieldTitle))
 }
 
 // WhereHasParent applies a predicate to check if query has an edge parent.

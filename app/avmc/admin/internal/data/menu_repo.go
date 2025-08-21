@@ -37,52 +37,75 @@ func NewMenuRepo(data *Data, logger log.Logger) biz.MenuRepo {
 // toProto 转换gen.Menu为pbCore.Menu
 func (r *menuRepo) toProto(res *gen.Menu) *pbCore.Menu {
 	return &pbCore.Menu{
-		Id:                res.ID,
-		Name:              res.Name,
-		Title:             res.Title,
-		ParentId:          res.ParentID,
-		Path:              res.Path,
-		Component:         res.Component,
-		Type:              (*pbCore.MenuType)(res.Type),
-		Status:            (*enum.Status)(res.Status),
-		Icon:              res.Icon,
-		IsExt:             res.IsExt,
-		ExtUrl:            res.ExtURL,
-		Permissions:       res.Permissions,
-		Redirect:          res.Redirect,
-		CurrentActiveMenu: res.CurrentActiveMenu,
-		KeepAlive:         res.KeepAlive,
-		Visible:           res.Visible,
-		HideTab:           res.HideTab,
-		HideMenu:          res.HideMenu,
-		HideBreadcrumb:    res.HideBreadcrumb,
-		CreatedAt:         convert.TimeValueToString(&res.CreatedAt, time.DateTime),
-		UpdatedAt:         convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
+		Id:        res.ID,
+		Name:      res.Name,
+		Pid:       res.Pid,
+		Path:      res.Path,
+		Component: res.Component,
+		Type:      res.Type,
+		AuthCode:  res.AuthCode,
+		Meta: &pbCore.MenuMeta{
+			Title:              res.Title,
+			ActiveIcon:         res.ActiveIcon,
+			ActivePath:         res.ActivePath,
+			AffixTab:           res.AffixTab,
+			AffixTabOrder:      res.AffixTabOrder,
+			Badge:              res.Badge,
+			BadgeType:          res.BadgeType,
+			BadgeVariants:      res.BadgeVariants,
+			HideChildrenInMenu: res.HideChildrenInMenu,
+			HideInBreadcrumb:   res.HideInBreadcrumb,
+			HideInMenu:         res.HideInMenu,
+			HideInTab:          res.HideInTab,
+			Icon:               res.Icon,
+			IframeSrc:          res.IframeSrc,
+			KeepAlive:          res.KeepAlive,
+			Link:               res.Link,
+			MaxNumOfOpenTab:    res.MaxNumOfOpenTab,
+			NoBasicLayout:      res.NoBasicLayout,
+			OpenInNewWindow:    res.OpenInNewWindow,
+			Order:              res.Sort,
+			Query:              res.Query,
+		},
+		Status:    (*enum.Status)(res.Status),
+		CreatedAt: convert.TimeValueToString(&res.CreatedAt, time.DateTime),
+		UpdatedAt: convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
 }
 
 // toEnt 转换pbCore.Menu为gen.Menu
 func (r *menuRepo) toEnt(g *pbCore.Menu) *gen.Menu {
 	return &gen.Menu{
-		ID:                g.GetId(),
-		Name:              g.Name,
-		Title:             g.Title,
-		ParentID:          g.ParentId,
-		Path:              g.Path,
-		Component:         g.Component,
-		Redirect:          g.Redirect,
-		Type:              (*int32)(g.Type),
-		Visible:           g.Visible,
-		Status:            (*int32)(g.Status),
-		Icon:              g.Icon,
-		IsExt:             g.IsExt,
-		ExtURL:            g.ExtUrl,
-		Permissions:       g.Permissions,
-		CurrentActiveMenu: g.CurrentActiveMenu,
-		KeepAlive:         g.KeepAlive,
-		HideTab:           g.HideTab,
-		HideMenu:          g.HideMenu,
-		HideBreadcrumb:    g.HideBreadcrumb,
+		ID:                 g.GetId(),
+		Name:               g.Name,
+		Pid:                g.Pid,
+		Path:               g.Path,
+		Component:          g.Component,
+		Redirect:           g.Redirect,
+		Type:               g.Type,
+		Status:             (*int32)(g.Status),
+		Title:              g.Meta.Title,
+		AuthCode:           g.AuthCode,
+		ActiveIcon:         g.Meta.ActiveIcon,
+		ActivePath:         g.Meta.ActivePath,
+		AffixTab:           g.Meta.AffixTab,
+		AffixTabOrder:      g.Meta.AffixTabOrder,
+		Badge:              g.Meta.Badge,
+		BadgeType:          g.Meta.BadgeType,
+		BadgeVariants:      g.Meta.BadgeVariants,
+		HideChildrenInMenu: g.Meta.HideChildrenInMenu,
+		HideInBreadcrumb:   g.Meta.HideInBreadcrumb,
+		HideInMenu:         g.Meta.HideInMenu,
+		HideInTab:          g.Meta.HideInTab,
+		Icon:               g.Meta.Icon,
+		IframeSrc:          g.Meta.IframeSrc,
+		KeepAlive:          g.Meta.KeepAlive,
+		Link:               g.Meta.Link,
+		MaxNumOfOpenTab:    g.Meta.MaxNumOfOpenTab,
+		NoBasicLayout:      g.Meta.NoBasicLayout,
+		OpenInNewWindow:    g.Meta.OpenInNewWindow,
+		Sort:               g.Meta.Order,
+		Query:              g.Meta.Query,
 	}
 }
 
@@ -94,20 +117,41 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 	entMenu := r.toEnt(g)
 	builder := r.data.DB(ctx).Menu.Create()
 
-	id, _ := r.GetMenuExistByName(ctx, *entMenu.Name)
+	id, _ := r.GetMenuExistByName(ctx, entMenu.Name)
 	if id > 0 {
 		r.log.Errorf("菜单名称已存在，菜单信息：%v", g)
 		return nil, fmt.Errorf("menu name already exists")
 	}
 
-	res, err := builder.SetName(*entMenu.Name).
+	res, err := builder.SetName(entMenu.Name).
 		SetNillableTitle(entMenu.Title).
-		SetNillableParentID(entMenu.ParentID).
+		SetNillablePid(&entMenu.Pid).
 		SetNillablePath(entMenu.Path).
 		SetNillableComponent(entMenu.Component).
 		SetNillableRedirect(entMenu.Redirect).
-		SetNillableType(entMenu.Type).
-		SetNillableVisible(entMenu.Visible).
+		SetNillableType(&entMenu.Type).
+		SetNillableStatus(entMenu.Status).
+		SetNillableAuthCode(entMenu.AuthCode).
+		SetNillableActiveIcon(entMenu.ActiveIcon).
+		SetNillableActivePath(entMenu.ActivePath).
+		SetNillableAffixTab(entMenu.AffixTab).
+		SetNillableAffixTabOrder(entMenu.AffixTabOrder).
+		SetNillableBadge(entMenu.Badge).
+		SetNillableBadgeType(entMenu.BadgeType).
+		SetNillableBadgeVariants(entMenu.BadgeVariants).
+		SetNillableHideChildrenInMenu(entMenu.HideChildrenInMenu).
+		SetNillableHideInBreadcrumb(entMenu.HideInBreadcrumb).
+		SetNillableHideInMenu(entMenu.HideInMenu).
+		SetNillableHideInTab(entMenu.HideInTab).
+		SetNillableIcon(entMenu.Icon).
+		SetNillableIframeSrc(entMenu.IframeSrc).
+		SetNillableKeepAlive(entMenu.KeepAlive).
+		SetNillableLink(entMenu.Link).
+		SetNillableMaxNumOfOpenTab(entMenu.MaxNumOfOpenTab).
+		SetNillableNoBasicLayout(entMenu.NoBasicLayout).
+		SetNillableOpenInNewWindow(entMenu.OpenInNewWindow).
+		SetNillableSort(entMenu.Sort).
+		SetNillableQuery(entMenu.Query).
 		Save(ctx)
 	if err != nil {
 		r.log.Errorf("保存菜单失败，菜单信息：%v，错误：%v", g, err)
@@ -136,21 +180,42 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 	r.log.Infof("更新菜单，菜单信息：%v", g)
 	entMenu := r.toEnt(g)
 	builder := r.data.DB(ctx).Menu.UpdateOneID(g.GetId())
-	id, _ := r.GetMenuExistByName(ctx, *entMenu.Name)
+	id, _ := r.GetMenuExistByName(ctx, entMenu.Name)
 	if id > 0 && id != g.GetId() {
 		r.log.Errorf("菜单名称已存在，菜单信息：%v", g)
 		return nil, fmt.Errorf("menu name already exists")
 	}
 
 	res, err := builder.
-		SetName(*entMenu.Name).
+		SetName(entMenu.Name).
 		SetNillableTitle(entMenu.Title).
-		SetNillableParentID(entMenu.ParentID).
+		SetNillablePid(&entMenu.Pid).
 		SetNillablePath(entMenu.Path).
 		SetNillableComponent(entMenu.Component).
 		SetNillableRedirect(entMenu.Redirect).
-		SetNillableType(entMenu.Type).
-		SetNillableVisible(entMenu.Visible).
+		SetNillableType(&entMenu.Type).
+		SetNillableStatus(entMenu.Status).
+		SetNillableAuthCode(entMenu.AuthCode).
+		SetNillableActiveIcon(entMenu.ActiveIcon).
+		SetNillableActivePath(entMenu.ActivePath).
+		SetNillableAffixTab(entMenu.AffixTab).
+		SetNillableAffixTabOrder(entMenu.AffixTabOrder).
+		SetNillableBadge(entMenu.Badge).
+		SetNillableBadgeType(entMenu.BadgeType).
+		SetNillableBadgeVariants(entMenu.BadgeVariants).
+		SetNillableHideChildrenInMenu(entMenu.HideChildrenInMenu).
+		SetNillableHideInBreadcrumb(entMenu.HideInBreadcrumb).
+		SetNillableHideInMenu(entMenu.HideInMenu).
+		SetNillableHideInTab(entMenu.HideInTab).
+		SetNillableIcon(entMenu.Icon).
+		SetNillableIframeSrc(entMenu.IframeSrc).
+		SetNillableKeepAlive(entMenu.KeepAlive).
+		SetNillableLink(entMenu.Link).
+		SetNillableMaxNumOfOpenTab(entMenu.MaxNumOfOpenTab).
+		SetNillableNoBasicLayout(entMenu.NoBasicLayout).
+		SetNillableOpenInNewWindow(entMenu.OpenInNewWindow).
+		SetNillableSort(entMenu.Sort).
+		SetNillableQuery(entMenu.Query).
 		Save(ctx)
 	if err != nil {
 		r.log.Errorf("更新菜单失败，菜单信息：%v，错误：%v", g, err)
@@ -205,9 +270,22 @@ func (r *menuRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Menu,
 // ListAll 查询所有菜单列表
 // 参数：ctx 上下文
 // 返回值：菜单列表，错误信息
-func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
+func (r *menuRepo) ListAllSimple(ctx context.Context) ([]*pbCore.Menu, error) {
 	r.log.Infof("查询所有菜单列表")
 	res, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID, menu.FieldName).Where().Order(gen.Desc(menu.FieldID)).All(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
+		return nil, err
+	}
+	return convert.SliceToAny(res, r.toProto), nil
+}
+
+// ListAll 查询所有菜单列表
+// 参数：ctx 上下文
+// 返回值：菜单列表，错误信息
+func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
+	r.log.Infof("查询所有菜单列表")
+	res, err := r.data.DB(ctx).Menu.Query().Where().Order(gen.Desc(menu.FieldSort, menu.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
@@ -232,11 +310,11 @@ func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			menu.FieldID,
 			menu.FieldName,
 			menu.FieldTitle,
-			menu.FieldParentID,
+			menu.FieldPid,
 			menu.FieldPath,
 			menu.FieldComponent,
 			menu.FieldType,
-			menu.FieldVisible,
+			menu.FieldStatus,
 			menu.FieldCreatedAt,
 			menu.FieldUpdatedAt,
 		).

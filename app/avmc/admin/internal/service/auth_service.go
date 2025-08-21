@@ -140,6 +140,6 @@ func (s *AuthServiceService) Menus(ctx context.Context, req *pb.MenusRequest) (*
 	}
 
 	return &pb.MenusResponse{
-		Routes: resp,
+		Items: resp,
 	}, nil
 }

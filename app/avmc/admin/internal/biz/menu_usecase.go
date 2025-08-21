@@ -79,6 +79,23 @@ func (uc *MenuUsecase) ListPage(ctx context.Context, pagination *pbPagination.Pa
 	return uc.repo.ListPage(ctx, pagination)
 }
 
+// ListTree 处理获取菜单树形列表请求
+// 参数：ctx 上下文，pagination 分页请求
+// 返回值：菜单树形列表响应，错误信息
+func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMenuTreeResponse, error) {
+	menus, err := uc.repo.ListAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	tree := make([]*pbCore.Menu, 0)
+	for _, menu := range menus {
+		if menu.Pid == pid {
+			tree = append(tree, menu)
+		}
+	}
+	return &pbCore.ListMenuTreeResponse{Items: tree}, nil
+}
+
 // Delete 处理删除菜单请求
 // 参数：ctx 上下文，id 菜单ID
 // 返回值：错误信息

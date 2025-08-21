@@ -337,12 +337,12 @@ func (_q *MenuQuery) WithChildren(opts ...func(*MenuQuery)) *MenuQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Status int32 `json:"status,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Menu.Query().
-//		GroupBy(menu.FieldCreatedAt).
+//		GroupBy(menu.FieldStatus).
 //		Aggregate(gen.Count()).
 //		Scan(ctx, &v)
 func (_q *MenuQuery) GroupBy(field string, fields ...string) *MenuGroupBy {
@@ -360,11 +360,11 @@ func (_q *MenuQuery) GroupBy(field string, fields ...string) *MenuGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Status int32 `json:"status,omitempty"`
 //	}
 //
 //	client.Menu.Query().
-//		Select(menu.FieldCreatedAt).
+//		Select(menu.FieldStatus).
 //		Scan(ctx, &v)
 func (_q *MenuQuery) Select(fields ...string) *MenuSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -462,10 +462,7 @@ func (_q *MenuQuery) loadParent(ctx context.Context, query *MenuQuery, nodes []*
 	ids := make([]uint32, 0, len(nodes))
 	nodeids := make(map[uint32][]*Menu)
 	for i := range nodes {
-		if nodes[i].ParentID == nil {
-			continue
-		}
-		fk := *nodes[i].ParentID
+		fk := nodes[i].Pid
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -482,7 +479,7 @@ func (_q *MenuQuery) loadParent(ctx context.Context, query *MenuQuery, nodes []*
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "pid" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -501,7 +498,7 @@ func (_q *MenuQuery) loadChildren(ctx context.Context, query *MenuQuery, nodes [
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(menu.FieldParentID)
+		query.ctx.AppendFieldOnce(menu.FieldPid)
 	}
 	query.Where(predicate.Menu(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(menu.ChildrenColumn), fks...))
@@ -511,13 +508,10 @@ func (_q *MenuQuery) loadChildren(ctx context.Context, query *MenuQuery, nodes [
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ParentID
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "parent_id" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.Pid
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "pid" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -553,7 +547,7 @@ func (_q *MenuQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 		if _q.withParent != nil {
-			_spec.Node.AddColumnOnce(menu.FieldParentID)
+			_spec.Node.AddColumnOnce(menu.FieldPid)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

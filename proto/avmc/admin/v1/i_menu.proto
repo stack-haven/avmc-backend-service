@@ -31,6 +31,25 @@ service MenuService {
       ]
     };
   }
+  // 获取菜单树
+  rpc ListMenuTree(core.service.v1.ListMenuTreeRequest) returns (core.service.v1.ListMenuTreeResponse) {
+    option (google.api.http) = {get: "/admin/v1/menus/tree/{pid}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单树"
+      description: "获取菜单树"
+      tags: ["菜单管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
   // 获取菜单列表
   rpc ListMenu(pagination.PagingRequest) returns (core.service.v1.ListMenuResponse) {
     option (google.api.http) = {get: "/admin/v1/menus"};

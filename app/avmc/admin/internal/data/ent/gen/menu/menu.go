@@ -15,50 +15,70 @@ const (
 	Label = "menu"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldStatus holds the string denoting the status field in the database.
-	FieldStatus = "status"
-	// FieldDomainID holds the string denoting the domain_id field in the database.
-	FieldDomainID = "domain_id"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldTitle holds the string denoting the title field in the database.
-	FieldTitle = "title"
-	// FieldParentID holds the string denoting the parent_id field in the database.
-	FieldParentID = "parent_id"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
 	// FieldPath holds the string denoting the path field in the database.
 	FieldPath = "path"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldComponent holds the string denoting the component field in the database.
 	FieldComponent = "component"
-	// FieldIcon holds the string denoting the icon field in the database.
-	FieldIcon = "icon"
-	// FieldIsExt holds the string denoting the is_ext field in the database.
-	FieldIsExt = "is_ext"
-	// FieldExtURL holds the string denoting the ext_url field in the database.
-	FieldExtURL = "ext_url"
-	// FieldPermissions holds the string denoting the permissions field in the database.
-	FieldPermissions = "permissions"
+	// FieldPid holds the string denoting the pid field in the database.
+	FieldPid = "pid"
 	// FieldRedirect holds the string denoting the redirect field in the database.
 	FieldRedirect = "redirect"
-	// FieldCurrentActiveMenu holds the string denoting the current_active_menu field in the database.
-	FieldCurrentActiveMenu = "current_active_menu"
+	// FieldAuthCode holds the string denoting the auth_code field in the database.
+	FieldAuthCode = "auth_code"
+	// FieldActiveIcon holds the string denoting the active_icon field in the database.
+	FieldActiveIcon = "active_icon"
+	// FieldActivePath holds the string denoting the active_path field in the database.
+	FieldActivePath = "active_path"
+	// FieldAffixTab holds the string denoting the affix_tab field in the database.
+	FieldAffixTab = "affix_tab"
+	// FieldAffixTabOrder holds the string denoting the affix_tab_order field in the database.
+	FieldAffixTabOrder = "affix_tab_order"
+	// FieldBadge holds the string denoting the badge field in the database.
+	FieldBadge = "badge"
+	// FieldBadgeType holds the string denoting the badge_type field in the database.
+	FieldBadgeType = "badge_type"
+	// FieldBadgeVariants holds the string denoting the badge_variants field in the database.
+	FieldBadgeVariants = "badge_variants"
+	// FieldHideChildrenInMenu holds the string denoting the hide_children_in_menu field in the database.
+	FieldHideChildrenInMenu = "hide_children_in_menu"
+	// FieldHideInBreadcrumb holds the string denoting the hide_in_breadcrumb field in the database.
+	FieldHideInBreadcrumb = "hide_in_breadcrumb"
+	// FieldHideInMenu holds the string denoting the hide_in_menu field in the database.
+	FieldHideInMenu = "hide_in_menu"
+	// FieldHideInTab holds the string denoting the hide_in_tab field in the database.
+	FieldHideInTab = "hide_in_tab"
+	// FieldIcon holds the string denoting the icon field in the database.
+	FieldIcon = "icon"
+	// FieldIframeSrc holds the string denoting the iframe_src field in the database.
+	FieldIframeSrc = "iframe_src"
 	// FieldKeepAlive holds the string denoting the keep_alive field in the database.
 	FieldKeepAlive = "keep_alive"
-	// FieldVisible holds the string denoting the visible field in the database.
-	FieldVisible = "visible"
-	// FieldHideTab holds the string denoting the hide_tab field in the database.
-	FieldHideTab = "hide_tab"
-	// FieldHideMenu holds the string denoting the hide_menu field in the database.
-	FieldHideMenu = "hide_menu"
-	// FieldHideBreadcrumb holds the string denoting the hide_breadcrumb field in the database.
-	FieldHideBreadcrumb = "hide_breadcrumb"
+	// FieldLink holds the string denoting the link field in the database.
+	FieldLink = "link"
+	// FieldMaxNumOfOpenTab holds the string denoting the max_num_of_open_tab field in the database.
+	FieldMaxNumOfOpenTab = "max_num_of_open_tab"
+	// FieldNoBasicLayout holds the string denoting the no_basic_layout field in the database.
+	FieldNoBasicLayout = "no_basic_layout"
+	// FieldOpenInNewWindow holds the string denoting the open_in_new_window field in the database.
+	FieldOpenInNewWindow = "open_in_new_window"
+	// FieldSort holds the string denoting the sort field in the database.
+	FieldSort = "sort"
+	// FieldQuery holds the string denoting the query field in the database.
+	FieldQuery = "query"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -68,38 +88,48 @@ const (
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "menus"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "parent_id"
+	ParentColumn = "pid"
 	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "menus"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "parent_id"
+	ChildrenColumn = "pid"
 )
 
 // Columns holds all SQL columns for menu fields.
 var Columns = []string{
 	FieldID,
+	FieldStatus,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldStatus,
-	FieldDomainID,
 	FieldDeletedAt,
 	FieldName,
-	FieldTitle,
-	FieldParentID,
-	FieldType,
 	FieldPath,
+	FieldType,
 	FieldComponent,
-	FieldIcon,
-	FieldIsExt,
-	FieldExtURL,
-	FieldPermissions,
+	FieldPid,
 	FieldRedirect,
-	FieldCurrentActiveMenu,
+	FieldAuthCode,
+	FieldActiveIcon,
+	FieldActivePath,
+	FieldAffixTab,
+	FieldAffixTabOrder,
+	FieldBadge,
+	FieldBadgeType,
+	FieldBadgeVariants,
+	FieldHideChildrenInMenu,
+	FieldHideInBreadcrumb,
+	FieldHideInMenu,
+	FieldHideInTab,
+	FieldIcon,
+	FieldIframeSrc,
 	FieldKeepAlive,
-	FieldVisible,
-	FieldHideTab,
-	FieldHideMenu,
-	FieldHideBreadcrumb,
+	FieldLink,
+	FieldMaxNumOfOpenTab,
+	FieldNoBasicLayout,
+	FieldOpenInNewWindow,
+	FieldSort,
+	FieldQuery,
+	FieldTitle,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -120,62 +150,78 @@ func ValidColumn(column string) bool {
 var (
 	Hooks        [1]ent.Hook
 	Interceptors [1]ent.Interceptor
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int32
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(int32) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus int32
-	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	StatusValidator func(int32) error
-	// DefaultDomainID holds the default value on creation for the "domain_id" field.
-	DefaultDomainID func() uint32
-	// DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	DomainIDValidator func(uint32) error
 	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultTitle holds the default value on creation for the "title" field.
-	DefaultTitle string
-	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	TitleValidator func(string) error
-	// DefaultParentID holds the default value on creation for the "parent_id" field.
-	DefaultParentID uint32
-	// DefaultType holds the default value on creation for the "type" field.
-	DefaultType int32
 	// DefaultPath holds the default value on creation for the "path" field.
 	DefaultPath string
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType int32
 	// DefaultComponent holds the default value on creation for the "component" field.
 	DefaultComponent string
+	// DefaultPid holds the default value on creation for the "pid" field.
+	DefaultPid uint32
+	// DefaultRedirect holds the default value on creation for the "redirect" field.
+	DefaultRedirect string
+	// DefaultAuthCode holds the default value on creation for the "auth_code" field.
+	DefaultAuthCode string
+	// DefaultActiveIcon holds the default value on creation for the "active_icon" field.
+	DefaultActiveIcon string
+	// DefaultActivePath holds the default value on creation for the "active_path" field.
+	DefaultActivePath string
+	// DefaultAffixTab holds the default value on creation for the "affix_tab" field.
+	DefaultAffixTab bool
+	// DefaultAffixTabOrder holds the default value on creation for the "affix_tab_order" field.
+	DefaultAffixTabOrder int32
+	// DefaultBadge holds the default value on creation for the "badge" field.
+	DefaultBadge string
+	// DefaultBadgeType holds the default value on creation for the "badge_type" field.
+	DefaultBadgeType int32
+	// DefaultBadgeVariants holds the default value on creation for the "badge_variants" field.
+	DefaultBadgeVariants int32
+	// DefaultHideChildrenInMenu holds the default value on creation for the "hide_children_in_menu" field.
+	DefaultHideChildrenInMenu bool
+	// DefaultHideInBreadcrumb holds the default value on creation for the "hide_in_breadcrumb" field.
+	DefaultHideInBreadcrumb bool
+	// DefaultHideInMenu holds the default value on creation for the "hide_in_menu" field.
+	DefaultHideInMenu bool
+	// DefaultHideInTab holds the default value on creation for the "hide_in_tab" field.
+	DefaultHideInTab bool
 	// DefaultIcon holds the default value on creation for the "icon" field.
 	DefaultIcon string
 	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	IconValidator func(string) error
-	// DefaultIsExt holds the default value on creation for the "is_ext" field.
-	DefaultIsExt bool
-	// DefaultExtURL holds the default value on creation for the "ext_url" field.
-	DefaultExtURL string
-	// ExtURLValidator is a validator for the "ext_url" field. It is called by the builders before save.
-	ExtURLValidator func(string) error
-	// DefaultPermissions holds the default value on creation for the "permissions" field.
-	DefaultPermissions []string
-	// DefaultRedirect holds the default value on creation for the "redirect" field.
-	DefaultRedirect string
-	// DefaultCurrentActiveMenu holds the default value on creation for the "current_active_menu" field.
-	DefaultCurrentActiveMenu string
+	// DefaultIframeSrc holds the default value on creation for the "iframe_src" field.
+	DefaultIframeSrc string
 	// DefaultKeepAlive holds the default value on creation for the "keep_alive" field.
 	DefaultKeepAlive bool
-	// DefaultVisible holds the default value on creation for the "visible" field.
-	DefaultVisible bool
-	// DefaultHideTab holds the default value on creation for the "hide_tab" field.
-	DefaultHideTab bool
-	// DefaultHideMenu holds the default value on creation for the "hide_menu" field.
-	DefaultHideMenu bool
-	// DefaultHideBreadcrumb holds the default value on creation for the "hide_breadcrumb" field.
-	DefaultHideBreadcrumb bool
+	// DefaultLink holds the default value on creation for the "link" field.
+	DefaultLink string
+	// DefaultMaxNumOfOpenTab holds the default value on creation for the "max_num_of_open_tab" field.
+	DefaultMaxNumOfOpenTab int32
+	// DefaultNoBasicLayout holds the default value on creation for the "no_basic_layout" field.
+	DefaultNoBasicLayout bool
+	// DefaultOpenInNewWindow holds the default value on creation for the "open_in_new_window" field.
+	DefaultOpenInNewWindow bool
+	// DefaultSort holds the default value on creation for the "sort" field.
+	DefaultSort int32
+	// DefaultQuery holds the default value on creation for the "query" field.
+	DefaultQuery string
+	// DefaultTitle holds the default value on creation for the "title" field.
+	DefaultTitle string
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -188,6 +234,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -196,16 +247,6 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
-}
-
-// ByStatus orders the results by the status field.
-func ByStatus(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByDomainID orders the results by the domain_id field.
-func ByDomainID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDomainID, opts...).ToFunc()
 }
 
 // ByDeletedAt orders the results by the deleted_at field.
@@ -218,14 +259,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByTitle orders the results by the title field.
-func ByTitle(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTitle, opts...).ToFunc()
-}
-
-// ByParentID orders the results by the parent_id field.
-func ByParentID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+// ByPath orders the results by the path field.
+func ByPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPath, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.
@@ -233,29 +269,14 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
-// ByPath orders the results by the path field.
-func ByPath(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPath, opts...).ToFunc()
-}
-
 // ByComponent orders the results by the component field.
 func ByComponent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldComponent, opts...).ToFunc()
 }
 
-// ByIcon orders the results by the icon field.
-func ByIcon(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIcon, opts...).ToFunc()
-}
-
-// ByIsExt orders the results by the is_ext field.
-func ByIsExt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsExt, opts...).ToFunc()
-}
-
-// ByExtURL orders the results by the ext_url field.
-func ByExtURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExtURL, opts...).ToFunc()
+// ByPid orders the results by the pid field.
+func ByPid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPid, opts...).ToFunc()
 }
 
 // ByRedirect orders the results by the redirect field.
@@ -263,9 +284,74 @@ func ByRedirect(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRedirect, opts...).ToFunc()
 }
 
-// ByCurrentActiveMenu orders the results by the current_active_menu field.
-func ByCurrentActiveMenu(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCurrentActiveMenu, opts...).ToFunc()
+// ByAuthCode orders the results by the auth_code field.
+func ByAuthCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAuthCode, opts...).ToFunc()
+}
+
+// ByActiveIcon orders the results by the active_icon field.
+func ByActiveIcon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActiveIcon, opts...).ToFunc()
+}
+
+// ByActivePath orders the results by the active_path field.
+func ByActivePath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActivePath, opts...).ToFunc()
+}
+
+// ByAffixTab orders the results by the affix_tab field.
+func ByAffixTab(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAffixTab, opts...).ToFunc()
+}
+
+// ByAffixTabOrder orders the results by the affix_tab_order field.
+func ByAffixTabOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAffixTabOrder, opts...).ToFunc()
+}
+
+// ByBadge orders the results by the badge field.
+func ByBadge(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBadge, opts...).ToFunc()
+}
+
+// ByBadgeType orders the results by the badge_type field.
+func ByBadgeType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBadgeType, opts...).ToFunc()
+}
+
+// ByBadgeVariants orders the results by the badge_variants field.
+func ByBadgeVariants(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBadgeVariants, opts...).ToFunc()
+}
+
+// ByHideChildrenInMenu orders the results by the hide_children_in_menu field.
+func ByHideChildrenInMenu(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideChildrenInMenu, opts...).ToFunc()
+}
+
+// ByHideInBreadcrumb orders the results by the hide_in_breadcrumb field.
+func ByHideInBreadcrumb(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideInBreadcrumb, opts...).ToFunc()
+}
+
+// ByHideInMenu orders the results by the hide_in_menu field.
+func ByHideInMenu(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideInMenu, opts...).ToFunc()
+}
+
+// ByHideInTab orders the results by the hide_in_tab field.
+func ByHideInTab(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideInTab, opts...).ToFunc()
+}
+
+// ByIcon orders the results by the icon field.
+func ByIcon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIcon, opts...).ToFunc()
+}
+
+// ByIframeSrc orders the results by the iframe_src field.
+func ByIframeSrc(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIframeSrc, opts...).ToFunc()
 }
 
 // ByKeepAlive orders the results by the keep_alive field.
@@ -273,24 +359,39 @@ func ByKeepAlive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKeepAlive, opts...).ToFunc()
 }
 
-// ByVisible orders the results by the visible field.
-func ByVisible(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldVisible, opts...).ToFunc()
+// ByLink orders the results by the link field.
+func ByLink(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLink, opts...).ToFunc()
 }
 
-// ByHideTab orders the results by the hide_tab field.
-func ByHideTab(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideTab, opts...).ToFunc()
+// ByMaxNumOfOpenTab orders the results by the max_num_of_open_tab field.
+func ByMaxNumOfOpenTab(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxNumOfOpenTab, opts...).ToFunc()
 }
 
-// ByHideMenu orders the results by the hide_menu field.
-func ByHideMenu(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideMenu, opts...).ToFunc()
+// ByNoBasicLayout orders the results by the no_basic_layout field.
+func ByNoBasicLayout(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNoBasicLayout, opts...).ToFunc()
 }
 
-// ByHideBreadcrumb orders the results by the hide_breadcrumb field.
-func ByHideBreadcrumb(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideBreadcrumb, opts...).ToFunc()
+// ByOpenInNewWindow orders the results by the open_in_new_window field.
+func ByOpenInNewWindow(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOpenInNewWindow, opts...).ToFunc()
+}
+
+// BySort orders the results by the sort field.
+func BySort(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSort, opts...).ToFunc()
+}
+
+// ByQuery orders the results by the query field.
+func ByQuery(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuery, opts...).ToFunc()
+}
+
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByParentField orders the results by parent field.

@@ -37,6 +37,14 @@ func (s *MenuServiceService) ListMenu(ctx context.Context, req *pbPagination.Pag
 	return s.muc.ListPage(ctx, req)
 }
 
+// ListMenuTree 处理菜单树形列表请求
+// 参数：ctx 上下文，req 分页请求
+// 返回值：菜单树形列表响应，错误信息
+func (s *MenuServiceService) ListMenuTree(ctx context.Context, req *pbCore.ListMenuTreeRequest) (*pbCore.ListMenuTreeResponse, error) {
+	s.log.Infof("查询菜单列表分页，分页请求：%v", req)
+	return s.muc.ListTree(ctx, req.GetPid())
+}
+
 // GetMenu 处理获取菜单详情请求
 // 参数：ctx 上下文，req 获取菜单请求
 // 返回值：菜单详情，错误信息

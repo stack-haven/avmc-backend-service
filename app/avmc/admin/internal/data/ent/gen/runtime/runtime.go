@@ -78,26 +78,22 @@ func init() {
 	// dept.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	dept.IDValidator = deptDescID.Validators[0].(func(uint32) error)
 	menuMixin := schema.Menu{}.Mixin()
-	menuMixinHooks1 := menuMixin[1].Hooks()
-	menu.Hooks[0] = menuMixinHooks1[0]
-	menuMixinInters1 := menuMixin[1].Interceptors()
-	menu.Interceptors[0] = menuMixinInters1[0]
+	menuMixinHooks4 := menuMixin[4].Hooks()
+	menu.Hooks[0] = menuMixinHooks4[0]
+	menuMixinInters4 := menuMixin[4].Interceptors()
+	menu.Interceptors[0] = menuMixinInters4[0]
 	menuMixinFields0 := menuMixin[0].Fields()
 	_ = menuMixinFields0
+	menuMixinFields1 := menuMixin[1].Fields()
+	_ = menuMixinFields1
+	menuMixinFields2 := menuMixin[2].Fields()
+	_ = menuMixinFields2
+	menuMixinFields3 := menuMixin[3].Fields()
+	_ = menuMixinFields3
 	menuFields := schema.Menu{}.Fields()
 	_ = menuFields
-	// menuDescCreatedAt is the schema descriptor for created_at field.
-	menuDescCreatedAt := menuMixinFields0[1].Descriptor()
-	// menu.DefaultCreatedAt holds the default value on creation for the created_at field.
-	menu.DefaultCreatedAt = menuDescCreatedAt.Default.(func() time.Time)
-	// menuDescUpdatedAt is the schema descriptor for updated_at field.
-	menuDescUpdatedAt := menuMixinFields0[2].Descriptor()
-	// menu.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	menu.DefaultUpdatedAt = menuDescUpdatedAt.Default.(func() time.Time)
-	// menu.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	menu.UpdateDefaultUpdatedAt = menuDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// menuDescStatus is the schema descriptor for status field.
-	menuDescStatus := menuMixinFields0[3].Descriptor()
+	menuDescStatus := menuMixinFields1[0].Descriptor()
 	// menu.DefaultStatus holds the default value on creation for the status field.
 	menu.DefaultStatus = menuDescStatus.Default.(int32)
 	// menu.StatusValidator is a validator for the "status" field. It is called by the builders before save.
@@ -116,12 +112,16 @@ func init() {
 			return nil
 		}
 	}()
-	// menuDescDomainID is the schema descriptor for domain_id field.
-	menuDescDomainID := menuMixinFields0[4].Descriptor()
-	// menu.DefaultDomainID holds the default value on creation for the domain_id field.
-	menu.DefaultDomainID = menuDescDomainID.Default.(func() uint32)
-	// menu.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	menu.DomainIDValidator = menuDescDomainID.Validators[0].(func(uint32) error)
+	// menuDescCreatedAt is the schema descriptor for created_at field.
+	menuDescCreatedAt := menuMixinFields2[0].Descriptor()
+	// menu.DefaultCreatedAt holds the default value on creation for the created_at field.
+	menu.DefaultCreatedAt = menuDescCreatedAt.Default.(func() time.Time)
+	// menuDescUpdatedAt is the schema descriptor for updated_at field.
+	menuDescUpdatedAt := menuMixinFields3[0].Descriptor()
+	// menu.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	menu.DefaultUpdatedAt = menuDescUpdatedAt.Default.(func() time.Time)
+	// menu.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	menu.UpdateDefaultUpdatedAt = menuDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// menuDescName is the schema descriptor for name field.
 	menuDescName := menuFields[0].Descriptor()
 	// menu.DefaultName holds the default value on creation for the name field.
@@ -142,76 +142,118 @@ func init() {
 			return nil
 		}
 	}()
-	// menuDescTitle is the schema descriptor for title field.
-	menuDescTitle := menuFields[1].Descriptor()
-	// menu.DefaultTitle holds the default value on creation for the title field.
-	menu.DefaultTitle = menuDescTitle.Default.(string)
-	// menu.TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	menu.TitleValidator = menuDescTitle.Validators[0].(func(string) error)
-	// menuDescParentID is the schema descriptor for parent_id field.
-	menuDescParentID := menuFields[2].Descriptor()
-	// menu.DefaultParentID holds the default value on creation for the parent_id field.
-	menu.DefaultParentID = menuDescParentID.Default.(uint32)
-	// menuDescType is the schema descriptor for type field.
-	menuDescType := menuFields[3].Descriptor()
-	// menu.DefaultType holds the default value on creation for the type field.
-	menu.DefaultType = menuDescType.Default.(int32)
 	// menuDescPath is the schema descriptor for path field.
-	menuDescPath := menuFields[4].Descriptor()
+	menuDescPath := menuFields[1].Descriptor()
 	// menu.DefaultPath holds the default value on creation for the path field.
 	menu.DefaultPath = menuDescPath.Default.(string)
+	// menuDescType is the schema descriptor for type field.
+	menuDescType := menuFields[2].Descriptor()
+	// menu.DefaultType holds the default value on creation for the type field.
+	menu.DefaultType = menuDescType.Default.(int32)
 	// menuDescComponent is the schema descriptor for component field.
-	menuDescComponent := menuFields[5].Descriptor()
+	menuDescComponent := menuFields[3].Descriptor()
 	// menu.DefaultComponent holds the default value on creation for the component field.
 	menu.DefaultComponent = menuDescComponent.Default.(string)
+	// menuDescPid is the schema descriptor for pid field.
+	menuDescPid := menuFields[4].Descriptor()
+	// menu.DefaultPid holds the default value on creation for the pid field.
+	menu.DefaultPid = menuDescPid.Default.(uint32)
+	// menuDescRedirect is the schema descriptor for redirect field.
+	menuDescRedirect := menuFields[5].Descriptor()
+	// menu.DefaultRedirect holds the default value on creation for the redirect field.
+	menu.DefaultRedirect = menuDescRedirect.Default.(string)
+	// menuDescAuthCode is the schema descriptor for auth_code field.
+	menuDescAuthCode := menuFields[6].Descriptor()
+	// menu.DefaultAuthCode holds the default value on creation for the auth_code field.
+	menu.DefaultAuthCode = menuDescAuthCode.Default.(string)
+	// menuDescActiveIcon is the schema descriptor for active_icon field.
+	menuDescActiveIcon := menuFields[7].Descriptor()
+	// menu.DefaultActiveIcon holds the default value on creation for the active_icon field.
+	menu.DefaultActiveIcon = menuDescActiveIcon.Default.(string)
+	// menuDescActivePath is the schema descriptor for active_path field.
+	menuDescActivePath := menuFields[8].Descriptor()
+	// menu.DefaultActivePath holds the default value on creation for the active_path field.
+	menu.DefaultActivePath = menuDescActivePath.Default.(string)
+	// menuDescAffixTab is the schema descriptor for affix_tab field.
+	menuDescAffixTab := menuFields[9].Descriptor()
+	// menu.DefaultAffixTab holds the default value on creation for the affix_tab field.
+	menu.DefaultAffixTab = menuDescAffixTab.Default.(bool)
+	// menuDescAffixTabOrder is the schema descriptor for affix_tab_order field.
+	menuDescAffixTabOrder := menuFields[10].Descriptor()
+	// menu.DefaultAffixTabOrder holds the default value on creation for the affix_tab_order field.
+	menu.DefaultAffixTabOrder = menuDescAffixTabOrder.Default.(int32)
+	// menuDescBadge is the schema descriptor for badge field.
+	menuDescBadge := menuFields[11].Descriptor()
+	// menu.DefaultBadge holds the default value on creation for the badge field.
+	menu.DefaultBadge = menuDescBadge.Default.(string)
+	// menuDescBadgeType is the schema descriptor for badge_type field.
+	menuDescBadgeType := menuFields[12].Descriptor()
+	// menu.DefaultBadgeType holds the default value on creation for the badge_type field.
+	menu.DefaultBadgeType = menuDescBadgeType.Default.(int32)
+	// menuDescBadgeVariants is the schema descriptor for badge_variants field.
+	menuDescBadgeVariants := menuFields[13].Descriptor()
+	// menu.DefaultBadgeVariants holds the default value on creation for the badge_variants field.
+	menu.DefaultBadgeVariants = menuDescBadgeVariants.Default.(int32)
+	// menuDescHideChildrenInMenu is the schema descriptor for hide_children_in_menu field.
+	menuDescHideChildrenInMenu := menuFields[14].Descriptor()
+	// menu.DefaultHideChildrenInMenu holds the default value on creation for the hide_children_in_menu field.
+	menu.DefaultHideChildrenInMenu = menuDescHideChildrenInMenu.Default.(bool)
+	// menuDescHideInBreadcrumb is the schema descriptor for hide_in_breadcrumb field.
+	menuDescHideInBreadcrumb := menuFields[15].Descriptor()
+	// menu.DefaultHideInBreadcrumb holds the default value on creation for the hide_in_breadcrumb field.
+	menu.DefaultHideInBreadcrumb = menuDescHideInBreadcrumb.Default.(bool)
+	// menuDescHideInMenu is the schema descriptor for hide_in_menu field.
+	menuDescHideInMenu := menuFields[16].Descriptor()
+	// menu.DefaultHideInMenu holds the default value on creation for the hide_in_menu field.
+	menu.DefaultHideInMenu = menuDescHideInMenu.Default.(bool)
+	// menuDescHideInTab is the schema descriptor for hide_in_tab field.
+	menuDescHideInTab := menuFields[17].Descriptor()
+	// menu.DefaultHideInTab holds the default value on creation for the hide_in_tab field.
+	menu.DefaultHideInTab = menuDescHideInTab.Default.(bool)
 	// menuDescIcon is the schema descriptor for icon field.
-	menuDescIcon := menuFields[6].Descriptor()
+	menuDescIcon := menuFields[18].Descriptor()
 	// menu.DefaultIcon holds the default value on creation for the icon field.
 	menu.DefaultIcon = menuDescIcon.Default.(string)
 	// menu.IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	menu.IconValidator = menuDescIcon.Validators[0].(func(string) error)
-	// menuDescIsExt is the schema descriptor for is_ext field.
-	menuDescIsExt := menuFields[7].Descriptor()
-	// menu.DefaultIsExt holds the default value on creation for the is_ext field.
-	menu.DefaultIsExt = menuDescIsExt.Default.(bool)
-	// menuDescExtURL is the schema descriptor for ext_url field.
-	menuDescExtURL := menuFields[8].Descriptor()
-	// menu.DefaultExtURL holds the default value on creation for the ext_url field.
-	menu.DefaultExtURL = menuDescExtURL.Default.(string)
-	// menu.ExtURLValidator is a validator for the "ext_url" field. It is called by the builders before save.
-	menu.ExtURLValidator = menuDescExtURL.Validators[0].(func(string) error)
-	// menuDescPermissions is the schema descriptor for permissions field.
-	menuDescPermissions := menuFields[9].Descriptor()
-	// menu.DefaultPermissions holds the default value on creation for the permissions field.
-	menu.DefaultPermissions = menuDescPermissions.Default.([]string)
-	// menuDescRedirect is the schema descriptor for redirect field.
-	menuDescRedirect := menuFields[10].Descriptor()
-	// menu.DefaultRedirect holds the default value on creation for the redirect field.
-	menu.DefaultRedirect = menuDescRedirect.Default.(string)
-	// menuDescCurrentActiveMenu is the schema descriptor for current_active_menu field.
-	menuDescCurrentActiveMenu := menuFields[11].Descriptor()
-	// menu.DefaultCurrentActiveMenu holds the default value on creation for the current_active_menu field.
-	menu.DefaultCurrentActiveMenu = menuDescCurrentActiveMenu.Default.(string)
+	// menuDescIframeSrc is the schema descriptor for iframe_src field.
+	menuDescIframeSrc := menuFields[19].Descriptor()
+	// menu.DefaultIframeSrc holds the default value on creation for the iframe_src field.
+	menu.DefaultIframeSrc = menuDescIframeSrc.Default.(string)
 	// menuDescKeepAlive is the schema descriptor for keep_alive field.
-	menuDescKeepAlive := menuFields[12].Descriptor()
+	menuDescKeepAlive := menuFields[20].Descriptor()
 	// menu.DefaultKeepAlive holds the default value on creation for the keep_alive field.
 	menu.DefaultKeepAlive = menuDescKeepAlive.Default.(bool)
-	// menuDescVisible is the schema descriptor for visible field.
-	menuDescVisible := menuFields[13].Descriptor()
-	// menu.DefaultVisible holds the default value on creation for the visible field.
-	menu.DefaultVisible = menuDescVisible.Default.(bool)
-	// menuDescHideTab is the schema descriptor for hide_tab field.
-	menuDescHideTab := menuFields[14].Descriptor()
-	// menu.DefaultHideTab holds the default value on creation for the hide_tab field.
-	menu.DefaultHideTab = menuDescHideTab.Default.(bool)
-	// menuDescHideMenu is the schema descriptor for hide_menu field.
-	menuDescHideMenu := menuFields[15].Descriptor()
-	// menu.DefaultHideMenu holds the default value on creation for the hide_menu field.
-	menu.DefaultHideMenu = menuDescHideMenu.Default.(bool)
-	// menuDescHideBreadcrumb is the schema descriptor for hide_breadcrumb field.
-	menuDescHideBreadcrumb := menuFields[16].Descriptor()
-	// menu.DefaultHideBreadcrumb holds the default value on creation for the hide_breadcrumb field.
-	menu.DefaultHideBreadcrumb = menuDescHideBreadcrumb.Default.(bool)
+	// menuDescLink is the schema descriptor for link field.
+	menuDescLink := menuFields[21].Descriptor()
+	// menu.DefaultLink holds the default value on creation for the link field.
+	menu.DefaultLink = menuDescLink.Default.(string)
+	// menuDescMaxNumOfOpenTab is the schema descriptor for max_num_of_open_tab field.
+	menuDescMaxNumOfOpenTab := menuFields[22].Descriptor()
+	// menu.DefaultMaxNumOfOpenTab holds the default value on creation for the max_num_of_open_tab field.
+	menu.DefaultMaxNumOfOpenTab = menuDescMaxNumOfOpenTab.Default.(int32)
+	// menuDescNoBasicLayout is the schema descriptor for no_basic_layout field.
+	menuDescNoBasicLayout := menuFields[23].Descriptor()
+	// menu.DefaultNoBasicLayout holds the default value on creation for the no_basic_layout field.
+	menu.DefaultNoBasicLayout = menuDescNoBasicLayout.Default.(bool)
+	// menuDescOpenInNewWindow is the schema descriptor for open_in_new_window field.
+	menuDescOpenInNewWindow := menuFields[24].Descriptor()
+	// menu.DefaultOpenInNewWindow holds the default value on creation for the open_in_new_window field.
+	menu.DefaultOpenInNewWindow = menuDescOpenInNewWindow.Default.(bool)
+	// menuDescSort is the schema descriptor for sort field.
+	menuDescSort := menuFields[25].Descriptor()
+	// menu.DefaultSort holds the default value on creation for the sort field.
+	menu.DefaultSort = menuDescSort.Default.(int32)
+	// menuDescQuery is the schema descriptor for query field.
+	menuDescQuery := menuFields[26].Descriptor()
+	// menu.DefaultQuery holds the default value on creation for the query field.
+	menu.DefaultQuery = menuDescQuery.Default.(string)
+	// menuDescTitle is the schema descriptor for title field.
+	menuDescTitle := menuFields[27].Descriptor()
+	// menu.DefaultTitle holds the default value on creation for the title field.
+	menu.DefaultTitle = menuDescTitle.Default.(string)
+	// menu.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	menu.TitleValidator = menuDescTitle.Validators[0].(func(string) error)
 	// menuDescID is the schema descriptor for id field.
 	menuDescID := menuMixinFields0[0].Descriptor()
 	// menu.IDValidator is a validator for the "id" field. It is called by the builders before save.
