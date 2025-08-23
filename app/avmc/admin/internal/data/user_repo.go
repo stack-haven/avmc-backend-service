@@ -74,10 +74,10 @@ func (r *userRepo) toEnt(g *pbCore.User) *gen.User {
 	}
 }
 
-// GetUserExistByEmail 获取用户邮箱是否存在
+// ExistByEmail 获取用户邮箱是否存在
 // 参数：ctx 上下文，email 用户邮箱
 // 返回值：用户ID，错误信息
-func (r *userRepo) GetUserExistByEmail(ctx context.Context, email string) (uint32, error) {
+func (r *userRepo) ExistByEmail(ctx context.Context, email string) (uint32, error) {
 	r.log.Infof("获取用户邮箱是否存在，用户email：%v", email)
 	entUser, err := r.data.DB(ctx).User.Query().Where(user.Email(email)).Select(user.FieldID).First(ctx)
 	if err != nil {
@@ -87,10 +87,10 @@ func (r *userRepo) GetUserExistByEmail(ctx context.Context, email string) (uint3
 	return entUser.ID, nil
 }
 
-// GetUserExistByName 获取用户名是否存在
+// ExistByName 获取用户名是否存在
 // 参数：ctx 上下文，name 用户名
 // 返回值：用户ID，错误信息
-func (r *userRepo) GetUserExistByName(ctx context.Context, name string) (uint32, error) {
+func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error) {
 	r.log.Infof("获取用户名是否存在，用户名：%v", name)
 	entUser, err := r.data.DB(ctx).User.Query().Where(user.Name(name)).Select(user.FieldID).First(ctx)
 	if err != nil {
@@ -100,10 +100,10 @@ func (r *userRepo) GetUserExistByName(ctx context.Context, name string) (uint32,
 	return entUser.ID, nil
 }
 
-// GetUserExistByPhone 获取用户手机号是否存在
+// ExistByPhone 获取用户手机号是否存在
 // 参数：ctx 上下文，phone 手机号
 // 返回值：用户ID，错误信息
-func (r *userRepo) GetUserExistByPhone(ctx context.Context, phone string) (uint32, error) {
+func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, error) {
 	r.log.Infof("获取用户手机号是否存在，手机号：%v", phone)
 	entUser, err := r.data.DB(ctx).User.Query().Where(user.Phone(phone)).Select(user.FieldID).First(ctx)
 	if err != nil {
@@ -121,13 +121,13 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	entUser := r.toEnt(g)
 	builder := r.data.DB(ctx).User.Create()
 
-	id, _ := r.GetUserExistByName(ctx, *entUser.Name)
+	id, _ := r.ExistByName(ctx, *entUser.Name)
 	if id > 0 {
 		r.log.Errorf("用户名已存在，用户信息：%v", g)
 		return nil, fmt.Errorf("user name already exists")
 	}
 	if entUser.Email != nil {
-		id, _ = r.GetUserExistByEmail(ctx, *entUser.Email)
+		id, _ = r.ExistByEmail(ctx, *entUser.Email)
 		if id > 0 {
 			r.log.Errorf("用户名已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user email already exists")
@@ -135,7 +135,7 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 		builder = builder.SetNillableEmail(entUser.Email)
 	}
 	if entUser.Phone != nil {
-		id, _ = r.GetUserExistByPhone(ctx, *entUser.Phone)
+		id, _ = r.ExistByPhone(ctx, *entUser.Phone)
 		if id > 0 {
 			r.log.Errorf("手机号已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user phone already exists")
@@ -171,7 +171,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	entUser := r.toEnt(g)
 	builder := r.data.DB(ctx).User.UpdateOneID(g.GetId())
 	if g.Name != nil {
-		id, _ := r.GetUserExistByName(ctx, *entUser.Name)
+		id, _ := r.ExistByName(ctx, *entUser.Name)
 		if id > 0 && id != g.GetId() {
 			r.log.Errorf("用户名已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user name already exists")
@@ -180,7 +180,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	}
 
 	if entUser.Email != nil {
-		id, _ := r.GetUserExistByEmail(ctx, *entUser.Email)
+		id, _ := r.ExistByEmail(ctx, *entUser.Email)
 		if id > 0 && id != g.GetId() {
 			r.log.Errorf("用户名已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user email already exists")
@@ -188,7 +188,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 		builder = builder.SetNillableEmail(entUser.Email)
 	}
 	if entUser.Phone != nil {
-		id, _ := r.GetUserExistByPhone(ctx, *entUser.Phone)
+		id, _ := r.ExistByPhone(ctx, *entUser.Phone)
 		if id > 0 && id != g.GetId() {
 			r.log.Errorf("手机号已存在，用户信息：%v", g)
 			return nil, fmt.Errorf("user phone already exists")

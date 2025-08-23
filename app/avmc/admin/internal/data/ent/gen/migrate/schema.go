@@ -70,7 +70,7 @@ var (
 		{Name: "sort", Type: field.TypeInt32, Comment: "菜单排序", Default: 10},
 		{Name: "query", Type: field.TypeString, Nullable: true, Comment: "额外的路由参数", Default: ""},
 		{Name: "title", Type: field.TypeString, Comment: "菜单标题", Default: ""},
-		{Name: "pid", Type: field.TypeUint32, Nullable: true, Comment: "父级ID", Default: 0, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "parent_id", Type: field.TypeUint32, Nullable: true, Comment: "父级ID", Default: 0, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// MenusTable holds the schema information for the "menus" table.
 	MenusTable = &schema.Table{
@@ -103,7 +103,7 @@ var (
 				Columns: []*schema.Column{MenusColumns[1]},
 			},
 			{
-				Name:    "menu_pid",
+				Name:    "menu_parent_id",
 				Unique:  false,
 				Columns: []*schema.Column{MenusColumns[32]},
 			},

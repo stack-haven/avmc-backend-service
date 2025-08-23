@@ -95,9 +95,9 @@ func Component(v string) predicate.Menu {
 	return predicate.Menu(sql.FieldEQ(FieldComponent, v))
 }
 
-// Pid applies equality check predicate on the "pid" field. It's identical to PidEQ.
-func Pid(v uint32) predicate.Menu {
-	return predicate.Menu(sql.FieldEQ(FieldPid, v))
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v uint32) predicate.Menu {
+	return predicate.Menu(sql.FieldEQ(FieldParentID, v))
 }
 
 // Redirect applies equality check predicate on the "redirect" field. It's identical to RedirectEQ.
@@ -650,34 +650,34 @@ func ComponentContainsFold(v string) predicate.Menu {
 	return predicate.Menu(sql.FieldContainsFold(FieldComponent, v))
 }
 
-// PidEQ applies the EQ predicate on the "pid" field.
-func PidEQ(v uint32) predicate.Menu {
-	return predicate.Menu(sql.FieldEQ(FieldPid, v))
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v uint32) predicate.Menu {
+	return predicate.Menu(sql.FieldEQ(FieldParentID, v))
 }
 
-// PidNEQ applies the NEQ predicate on the "pid" field.
-func PidNEQ(v uint32) predicate.Menu {
-	return predicate.Menu(sql.FieldNEQ(FieldPid, v))
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v uint32) predicate.Menu {
+	return predicate.Menu(sql.FieldNEQ(FieldParentID, v))
 }
 
-// PidIn applies the In predicate on the "pid" field.
-func PidIn(vs ...uint32) predicate.Menu {
-	return predicate.Menu(sql.FieldIn(FieldPid, vs...))
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...uint32) predicate.Menu {
+	return predicate.Menu(sql.FieldIn(FieldParentID, vs...))
 }
 
-// PidNotIn applies the NotIn predicate on the "pid" field.
-func PidNotIn(vs ...uint32) predicate.Menu {
-	return predicate.Menu(sql.FieldNotIn(FieldPid, vs...))
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...uint32) predicate.Menu {
+	return predicate.Menu(sql.FieldNotIn(FieldParentID, vs...))
 }
 
-// PidIsNil applies the IsNil predicate on the "pid" field.
-func PidIsNil() predicate.Menu {
-	return predicate.Menu(sql.FieldIsNull(FieldPid))
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.Menu {
+	return predicate.Menu(sql.FieldIsNull(FieldParentID))
 }
 
-// PidNotNil applies the NotNil predicate on the "pid" field.
-func PidNotNil() predicate.Menu {
-	return predicate.Menu(sql.FieldNotNull(FieldPid))
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.Menu {
+	return predicate.Menu(sql.FieldNotNull(FieldParentID))
 }
 
 // RedirectEQ applies the EQ predicate on the "redirect" field.

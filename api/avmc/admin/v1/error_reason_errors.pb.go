@@ -845,6 +845,34 @@ func ErrorMenuCannotDeleteWithChildren(format string, args ...interface{}) *erro
 	return errors.New(403, ErrorReason_MENU_CANNOT_DELETE_WITH_CHILDREN.String(), fmt.Sprintf(format, args...))
 }
 
+// 菜单路径已存在
+func IsMenuPathAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_PATH_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 菜单路径已存在
+func ErrorMenuPathAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_PATH_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 菜单名已存在
+func IsMenuNameAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_MENU_NAME_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 菜单名已存在
+func ErrorMenuNameAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_MENU_NAME_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
 // =======================================
 // 部门管理错误 (600-699)
 // =======================================

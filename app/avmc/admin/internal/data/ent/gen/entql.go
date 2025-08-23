@@ -59,7 +59,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			menu.FieldPath:               {Type: field.TypeString, Column: menu.FieldPath},
 			menu.FieldType:               {Type: field.TypeInt32, Column: menu.FieldType},
 			menu.FieldComponent:          {Type: field.TypeString, Column: menu.FieldComponent},
-			menu.FieldPid:                {Type: field.TypeUint32, Column: menu.FieldPid},
+			menu.FieldParentID:           {Type: field.TypeUint32, Column: menu.FieldParentID},
 			menu.FieldRedirect:           {Type: field.TypeString, Column: menu.FieldRedirect},
 			menu.FieldAuthCode:           {Type: field.TypeString, Column: menu.FieldAuthCode},
 			menu.FieldActiveIcon:         {Type: field.TypeString, Column: menu.FieldActiveIcon},
@@ -442,9 +442,9 @@ func (f *MenuFilter) WhereComponent(p entql.StringP) {
 	f.Where(p.Field(menu.FieldComponent))
 }
 
-// WherePid applies the entql uint32 predicate on the pid field.
-func (f *MenuFilter) WherePid(p entql.Uint32P) {
-	f.Where(p.Field(menu.FieldPid))
+// WhereParentID applies the entql uint32 predicate on the parent_id field.
+func (f *MenuFilter) WhereParentID(p entql.Uint32P) {
+	f.Where(p.Field(menu.FieldParentID))
 }
 
 // WhereRedirect applies the entql string predicate on the redirect field.

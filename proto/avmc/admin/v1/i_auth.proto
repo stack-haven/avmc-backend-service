@@ -6,6 +6,7 @@ import "buf/validate/validate.proto";
 import "core/service/v1/auth.proto";
 import "core/service/v1/role.proto";
 import "core/service/v1/user.proto";
+import "core/service/v1/menu.proto";
 import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
@@ -340,7 +341,7 @@ message MenusRequest {}
 
 // 登录用户菜单 - 回应
 message MenusResponse {
-  repeated RouteResponse items = 1 [(gnostic.openapi.v3.property) = {description: "路由响应列表"}];
+  repeated core.service.v1.Menu items = 1 [(gnostic.openapi.v3.property) = {description: "登录用户菜单列表"}];
 }
 
 message RouteResponse {
@@ -380,30 +381,4 @@ message MenuMetaResponse {
   optional int32 order = 24 [(gnostic.openapi.v3.property) = {description: "用于路由->菜单排序"}]; // 用于路由->菜单排序
   optional string query = 25 [(gnostic.openapi.v3.property) = {description: "菜单所携带的参数"}]; // 菜单所携带的参数
   string title = 26 [(gnostic.openapi.v3.property) = {description: "标题名称"}]; // 标题名称
-}
-
-// 徽标类型
-enum BadgeType {
-  // 未指定
-  BADGE_TYPE_UNSPECIFIED = 0;
-  // 点类型徽标
-  BADGE_TYPE_DOT = 1;
-  // 普通类型徽标
-  BADGE_TYPE_NORMAL = 2;
-}
-
-// 徽标颜色
-enum BadgeVariants {
-  // 未指定
-  BADGE_VARIANTS_UNSPECIFIED = 0;
-  // 默认颜色
-  BADGE_VARIANTS_DEFAULT = 1;
-  // 破坏性颜色
-  BADGE_VARIANTS_DESTRUCTIVE = 2;
-  // 主要颜色
-  BADGE_VARIANTS_PRIMARY = 3;
-  // 成功颜色
-  BADGE_VARIANTS_SUCCESS = 4;
-  // 警告颜色
-  BADGE_VARIANTS_WARNING = 5;
 }

@@ -22,6 +22,8 @@ type MenuRepo interface {
 	ListAll(context.Context) ([]*pbCore.Menu, error)
 	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
+	ExistByName(context.Context, *pbCore.ExistMenuByNameRequest) (bool, error)
+	ExistByPath(context.Context, *pbCore.ExistMenuByPathRequest) (bool, error)
 }
 
 // MenuUsecase is a Menu usecase.
@@ -89,7 +91,7 @@ func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMe
 	}
 	tree := make([]*pbCore.Menu, 0)
 	for _, menu := range menus {
-		if menu.Pid == pid {
+		if menu.GetPid() == pid {
 			tree = append(tree, menu)
 		}
 	}
@@ -106,4 +108,20 @@ func (uc *MenuUsecase) Delete(ctx context.Context, id uint32) error {
 		return err
 	}
 	return uc.repo.Delete(ctx, id)
+}
+
+// ExistByPath 处理判断菜单路径是否存在请求
+// 参数：ctx 上下文，req 判断菜单路径是否存在请求
+// 返回值：是否存在，错误信息
+func (uc *MenuUsecase) ExistByPath(ctx context.Context, req *pbCore.ExistMenuByPathRequest) (bool, error) {
+	uc.log.WithContext(ctx).Infof("ExistByPath：%v", req.GetPath())
+	return uc.repo.ExistByPath(ctx, req)
+}
+
+// ExistByName 处理判断菜单名是否存在请求
+// 参数：ctx 上下文，req 判断菜单名是否存在请求
+// 返回值：是否存在，错误信息
+func (uc *MenuUsecase) ExistByName(ctx context.Context, req *pbCore.ExistMenuByNameRequest) (bool, error) {
+	uc.log.WithContext(ctx).Infof("ExistByName：%v", req.GetName())
+	return uc.repo.ExistByName(ctx, req)
 }

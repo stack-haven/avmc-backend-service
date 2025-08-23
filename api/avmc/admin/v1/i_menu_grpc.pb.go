@@ -22,13 +22,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MenuService_ListMenuAll_FullMethodName  = "/avmc.admin.v1.MenuService/ListMenuAll"
-	MenuService_ListMenuTree_FullMethodName = "/avmc.admin.v1.MenuService/ListMenuTree"
-	MenuService_ListMenu_FullMethodName     = "/avmc.admin.v1.MenuService/ListMenu"
-	MenuService_GetMenu_FullMethodName      = "/avmc.admin.v1.MenuService/GetMenu"
-	MenuService_CreateMenu_FullMethodName   = "/avmc.admin.v1.MenuService/CreateMenu"
-	MenuService_UpdateMenu_FullMethodName   = "/avmc.admin.v1.MenuService/UpdateMenu"
-	MenuService_DeleteMenu_FullMethodName   = "/avmc.admin.v1.MenuService/DeleteMenu"
+	MenuService_ListMenuAll_FullMethodName     = "/avmc.admin.v1.MenuService/ListMenuAll"
+	MenuService_ListMenuTree_FullMethodName    = "/avmc.admin.v1.MenuService/ListMenuTree"
+	MenuService_ListMenu_FullMethodName        = "/avmc.admin.v1.MenuService/ListMenu"
+	MenuService_GetMenu_FullMethodName         = "/avmc.admin.v1.MenuService/GetMenu"
+	MenuService_CreateMenu_FullMethodName      = "/avmc.admin.v1.MenuService/CreateMenu"
+	MenuService_UpdateMenu_FullMethodName      = "/avmc.admin.v1.MenuService/UpdateMenu"
+	MenuService_DeleteMenu_FullMethodName      = "/avmc.admin.v1.MenuService/DeleteMenu"
+	MenuService_ExistMenuByPath_FullMethodName = "/avmc.admin.v1.MenuService/ExistMenuByPath"
+	MenuService_ExistMenuByName_FullMethodName = "/avmc.admin.v1.MenuService/ExistMenuByName"
 )
 
 // MenuServiceClient is the client API for MenuService service.
@@ -51,6 +53,10 @@ type MenuServiceClient interface {
 	UpdateMenu(ctx context.Context, in *v1.UpdateMenuRequest, opts ...grpc.CallOption) (*v1.UpdateMenuResponse, error)
 	// 删除菜单
 	DeleteMenu(ctx context.Context, in *v1.DeleteMenuRequest, opts ...grpc.CallOption) (*v1.DeleteMenuResponse, error)
+	// 判断菜单路径是否存在
+	ExistMenuByPath(ctx context.Context, in *v1.ExistMenuByPathRequest, opts ...grpc.CallOption) (*v1.ExistMenuByPathResponse, error)
+	// 判断菜单名是否存在
+	ExistMenuByName(ctx context.Context, in *v1.ExistMenuByNameRequest, opts ...grpc.CallOption) (*v1.ExistMenuByNameResponse, error)
 }
 
 type menuServiceClient struct {
@@ -131,6 +137,26 @@ func (c *menuServiceClient) DeleteMenu(ctx context.Context, in *v1.DeleteMenuReq
 	return out, nil
 }
 
+func (c *menuServiceClient) ExistMenuByPath(ctx context.Context, in *v1.ExistMenuByPathRequest, opts ...grpc.CallOption) (*v1.ExistMenuByPathResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ExistMenuByPathResponse)
+	err := c.cc.Invoke(ctx, MenuService_ExistMenuByPath_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *menuServiceClient) ExistMenuByName(ctx context.Context, in *v1.ExistMenuByNameRequest, opts ...grpc.CallOption) (*v1.ExistMenuByNameResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ExistMenuByNameResponse)
+	err := c.cc.Invoke(ctx, MenuService_ExistMenuByName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MenuServiceServer is the server API for MenuService service.
 // All implementations must embed UnimplementedMenuServiceServer
 // for forward compatibility.
@@ -151,6 +177,10 @@ type MenuServiceServer interface {
 	UpdateMenu(context.Context, *v1.UpdateMenuRequest) (*v1.UpdateMenuResponse, error)
 	// 删除菜单
 	DeleteMenu(context.Context, *v1.DeleteMenuRequest) (*v1.DeleteMenuResponse, error)
+	// 判断菜单路径是否存在
+	ExistMenuByPath(context.Context, *v1.ExistMenuByPathRequest) (*v1.ExistMenuByPathResponse, error)
+	// 判断菜单名是否存在
+	ExistMenuByName(context.Context, *v1.ExistMenuByNameRequest) (*v1.ExistMenuByNameResponse, error)
 	mustEmbedUnimplementedMenuServiceServer()
 }
 
@@ -181,6 +211,12 @@ func (UnimplementedMenuServiceServer) UpdateMenu(context.Context, *v1.UpdateMenu
 }
 func (UnimplementedMenuServiceServer) DeleteMenu(context.Context, *v1.DeleteMenuRequest) (*v1.DeleteMenuResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMenu not implemented")
+}
+func (UnimplementedMenuServiceServer) ExistMenuByPath(context.Context, *v1.ExistMenuByPathRequest) (*v1.ExistMenuByPathResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExistMenuByPath not implemented")
+}
+func (UnimplementedMenuServiceServer) ExistMenuByName(context.Context, *v1.ExistMenuByNameRequest) (*v1.ExistMenuByNameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExistMenuByName not implemented")
 }
 func (UnimplementedMenuServiceServer) mustEmbedUnimplementedMenuServiceServer() {}
 func (UnimplementedMenuServiceServer) testEmbeddedByValue()                     {}
@@ -329,6 +365,42 @@ func _MenuService_DeleteMenu_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MenuService_ExistMenuByPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ExistMenuByPathRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuServiceServer).ExistMenuByPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuService_ExistMenuByPath_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuServiceServer).ExistMenuByPath(ctx, req.(*v1.ExistMenuByPathRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MenuService_ExistMenuByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ExistMenuByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuServiceServer).ExistMenuByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuService_ExistMenuByName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuServiceServer).ExistMenuByName(ctx, req.(*v1.ExistMenuByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MenuService_ServiceDesc is the grpc.ServiceDesc for MenuService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -363,6 +435,14 @@ var MenuService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMenu",
 			Handler:    _MenuService_DeleteMenu_Handler,
+		},
+		{
+			MethodName: "ExistMenuByPath",
+			Handler:    _MenuService_ExistMenuByPath_Handler,
+		},
+		{
+			MethodName: "ExistMenuByName",
+			Handler:    _MenuService_ExistMenuByName_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

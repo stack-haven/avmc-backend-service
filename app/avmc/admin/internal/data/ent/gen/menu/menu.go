@@ -31,8 +31,8 @@ const (
 	FieldType = "type"
 	// FieldComponent holds the string denoting the component field in the database.
 	FieldComponent = "component"
-	// FieldPid holds the string denoting the pid field in the database.
-	FieldPid = "pid"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
 	// FieldRedirect holds the string denoting the redirect field in the database.
 	FieldRedirect = "redirect"
 	// FieldAuthCode holds the string denoting the auth_code field in the database.
@@ -88,11 +88,11 @@ const (
 	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "menus"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "pid"
+	ParentColumn = "parent_id"
 	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "menus"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "pid"
+	ChildrenColumn = "parent_id"
 )
 
 // Columns holds all SQL columns for menu fields.
@@ -106,7 +106,7 @@ var Columns = []string{
 	FieldPath,
 	FieldType,
 	FieldComponent,
-	FieldPid,
+	FieldParentID,
 	FieldRedirect,
 	FieldAuthCode,
 	FieldActiveIcon,
@@ -170,8 +170,8 @@ var (
 	DefaultType int32
 	// DefaultComponent holds the default value on creation for the "component" field.
 	DefaultComponent string
-	// DefaultPid holds the default value on creation for the "pid" field.
-	DefaultPid uint32
+	// DefaultParentID holds the default value on creation for the "parent_id" field.
+	DefaultParentID uint32
 	// DefaultRedirect holds the default value on creation for the "redirect" field.
 	DefaultRedirect string
 	// DefaultAuthCode holds the default value on creation for the "auth_code" field.
@@ -274,9 +274,9 @@ func ByComponent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldComponent, opts...).ToFunc()
 }
 
-// ByPid orders the results by the pid field.
-func ByPid(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPid, opts...).ToFunc()
+// ByParentID orders the results by the parent_id field.
+func ByParentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
 // ByRedirect orders the results by the redirect field.

@@ -157,23 +157,23 @@ func (_u *MenuUpdate) ClearComponent() *MenuUpdate {
 	return _u
 }
 
-// SetPid sets the "pid" field.
-func (_u *MenuUpdate) SetPid(v uint32) *MenuUpdate {
-	_u.mutation.SetPid(v)
+// SetParentID sets the "parent_id" field.
+func (_u *MenuUpdate) SetParentID(v uint32) *MenuUpdate {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
-// SetNillablePid sets the "pid" field if the given value is not nil.
-func (_u *MenuUpdate) SetNillablePid(v *uint32) *MenuUpdate {
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *MenuUpdate) SetNillableParentID(v *uint32) *MenuUpdate {
 	if v != nil {
-		_u.SetPid(*v)
+		_u.SetParentID(*v)
 	}
 	return _u
 }
 
-// ClearPid clears the value of the "pid" field.
-func (_u *MenuUpdate) ClearPid() *MenuUpdate {
-	_u.mutation.ClearPid()
+// ClearParentID clears the value of the "parent_id" field.
+func (_u *MenuUpdate) ClearParentID() *MenuUpdate {
+	_u.mutation.ClearParentID()
 	return _u
 }
 
@@ -542,20 +542,6 @@ func (_u *MenuUpdate) SetTitle(v string) *MenuUpdate {
 func (_u *MenuUpdate) SetNillableTitle(v *string) *MenuUpdate {
 	if v != nil {
 		_u.SetTitle(*v)
-	}
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Menu entity by ID.
-func (_u *MenuUpdate) SetParentID(id uint32) *MenuUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Menu entity by ID if the given value is not nil.
-func (_u *MenuUpdate) SetNillableParentID(id *uint32) *MenuUpdate {
-	if id != nil {
-		_u = _u.SetParentID(*id)
 	}
 	return _u
 }
@@ -1050,23 +1036,23 @@ func (_u *MenuUpdateOne) ClearComponent() *MenuUpdateOne {
 	return _u
 }
 
-// SetPid sets the "pid" field.
-func (_u *MenuUpdateOne) SetPid(v uint32) *MenuUpdateOne {
-	_u.mutation.SetPid(v)
+// SetParentID sets the "parent_id" field.
+func (_u *MenuUpdateOne) SetParentID(v uint32) *MenuUpdateOne {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
-// SetNillablePid sets the "pid" field if the given value is not nil.
-func (_u *MenuUpdateOne) SetNillablePid(v *uint32) *MenuUpdateOne {
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *MenuUpdateOne) SetNillableParentID(v *uint32) *MenuUpdateOne {
 	if v != nil {
-		_u.SetPid(*v)
+		_u.SetParentID(*v)
 	}
 	return _u
 }
 
-// ClearPid clears the value of the "pid" field.
-func (_u *MenuUpdateOne) ClearPid() *MenuUpdateOne {
-	_u.mutation.ClearPid()
+// ClearParentID clears the value of the "parent_id" field.
+func (_u *MenuUpdateOne) ClearParentID() *MenuUpdateOne {
+	_u.mutation.ClearParentID()
 	return _u
 }
 
@@ -1435,20 +1421,6 @@ func (_u *MenuUpdateOne) SetTitle(v string) *MenuUpdateOne {
 func (_u *MenuUpdateOne) SetNillableTitle(v *string) *MenuUpdateOne {
 	if v != nil {
 		_u.SetTitle(*v)
-	}
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Menu entity by ID.
-func (_u *MenuUpdateOne) SetParentID(id uint32) *MenuUpdateOne {
-	_u.mutation.SetParentID(id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Menu entity by ID if the given value is not nil.
-func (_u *MenuUpdateOne) SetNillableParentID(id *uint32) *MenuUpdateOne {
-	if id != nil {
-		_u = _u.SetParentID(*id)
 	}
 	return _u
 }

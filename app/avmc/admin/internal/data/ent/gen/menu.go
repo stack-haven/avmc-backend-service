@@ -35,7 +35,7 @@ type Menu struct {
 	// 组件
 	Component *string `json:"component,omitempty"`
 	// 父级ID
-	Pid uint32 `json:"pid,omitempty"`
+	ParentID *uint32 `json:"parent_id,omitempty"`
 	// 重定向
 	Redirect *string `json:"redirect,omitempty"`
 	// 后端权限标识
@@ -127,7 +127,7 @@ func (*Menu) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menu.FieldAffixTab, menu.FieldHideChildrenInMenu, menu.FieldHideInBreadcrumb, menu.FieldHideInMenu, menu.FieldHideInTab, menu.FieldKeepAlive, menu.FieldNoBasicLayout, menu.FieldOpenInNewWindow:
 			values[i] = new(sql.NullBool)
-		case menu.FieldID, menu.FieldStatus, menu.FieldType, menu.FieldPid, menu.FieldAffixTabOrder, menu.FieldBadgeType, menu.FieldBadgeVariants, menu.FieldMaxNumOfOpenTab, menu.FieldSort:
+		case menu.FieldID, menu.FieldStatus, menu.FieldType, menu.FieldParentID, menu.FieldAffixTabOrder, menu.FieldBadgeType, menu.FieldBadgeVariants, menu.FieldMaxNumOfOpenTab, menu.FieldSort:
 			values[i] = new(sql.NullInt64)
 		case menu.FieldName, menu.FieldPath, menu.FieldComponent, menu.FieldRedirect, menu.FieldAuthCode, menu.FieldActiveIcon, menu.FieldActivePath, menu.FieldBadge, menu.FieldIcon, menu.FieldIframeSrc, menu.FieldLink, menu.FieldQuery, menu.FieldTitle:
 			values[i] = new(sql.NullString)
@@ -206,11 +206,12 @@ func (_m *Menu) assignValues(columns []string, values []any) error {
 				_m.Component = new(string)
 				*_m.Component = value.String
 			}
-		case menu.FieldPid:
+		case menu.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field pid", values[i])
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				_m.Pid = uint32(value.Int64)
+				_m.ParentID = new(uint32)
+				*_m.ParentID = uint32(value.Int64)
 			}
 		case menu.FieldRedirect:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -451,8 +452,10 @@ func (_m *Menu) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	builder.WriteString("pid=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Pid))
+	if v := _m.ParentID; v != nil {
+		builder.WriteString("parent_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	if v := _m.Redirect; v != nil {
 		builder.WriteString("redirect=")

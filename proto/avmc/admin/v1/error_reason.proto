@@ -150,6 +150,10 @@ enum ErrorReason {
   MENU_COMPONENT_CANNOT_BE_EMPTY = 505 [(errors.code) = 400];
   // 无法删除有子菜单的菜单
   MENU_CANNOT_DELETE_WITH_CHILDREN = 506 [(errors.code) = 403];
+  // 菜单路径已存在
+  MENU_PATH_ALREADY_EXISTS = 507 [(errors.code) = 400];
+  // 菜单名已存在
+  MENU_NAME_ALREADY_EXISTS = 508 [(errors.code) = 400];
 
   // =======================================
   // 部门管理错误 (600-699)

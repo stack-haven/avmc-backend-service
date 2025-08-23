@@ -36,7 +36,7 @@ func (Menu) Fields() []ent.Field {
 		field.String("path").Comment("路径,当其类型为'按钮'的时候对应的数据操作名,例如:/user.service.v1.UserService/Login").Default("").Optional().Nillable(),
 		field.Int32("type").Comment("菜单类型 0 UNSPECIFIED, 目录 1 -> FOLDER, 菜单 2 -> MENU, 按钮 3 -> BUTTON").Default(1).SchemaType(map[string]string{dialect.MySQL: "tinyint", dialect.Postgres: "tinyint(2)"}).Optional(),
 		field.String("component").Comment("组件").Default("").Optional().Nillable(),
-		field.Uint32("pid").Comment("父级ID").Default(0).Optional(),
+		field.Uint32("parent_id").Comment("父级ID").Default(0).Optional().Nillable(),
 		field.String("redirect").Comment("重定向").Default("").Optional().Nillable(),
 		field.String("auth_code").Comment("后端权限标识").Default("").Nillable(),
 		// 以下为MenuMata字段仅对目录和菜单有效
@@ -70,7 +70,7 @@ func (Menu) Edges() []ent.Edge {
 		edge.To("children", Menu.Type).
 			From("parent").
 			Unique().
-			Field("pid"),
+			Field("parent_id"),
 	}
 }
 
@@ -90,6 +90,6 @@ func (Menu) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("name"),
 		index.Fields("status"),
-		index.Fields("pid"),
+		index.Fields("parent_id"),
 	}
 }

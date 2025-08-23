@@ -132,18 +132,18 @@ func (uc *AuthUsecase) Codes(ctx context.Context) ([]string, error) {
 	return uc.repo.Codes(ctx, userId)
 }
 
-// MenuRoutes 处理登录用户菜单路由业务逻辑
+// Menus 处理登录用户菜单业务逻辑
 // 参数：ctx 上下文
 // 返回值：登录用户菜单响应结构体，错误信息
-func (uc *AuthUsecase) MenuRoutes(ctx context.Context) ([]*v1.RouteResponse, error) {
+func (uc *AuthUsecase) Menus(ctx context.Context) ([]*pbCore.Menu, error) {
 	// 这里实现具体的登录用户菜单业务逻辑
-	uc.log.Infof("尝试获取登录用户菜单路由")
+	uc.log.Infof("尝试获取登录用户菜单")
 	userId := authn.GetAuthUserID(ctx)
 	menus, err := uc.repo.Menus(ctx, userId)
 	if err != nil {
-		uc.log.Errorf("获取登录用户菜单路由失败: %v", err)
+		uc.log.Errorf("获取登录用户菜单失败: %v", err)
 		return nil, err
 	}
 	fmt.Println(menus)
-	return []*v1.RouteResponse{}, nil
+	return []*pbCore.Menu{}, nil
 }

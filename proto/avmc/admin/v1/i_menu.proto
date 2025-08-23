@@ -33,7 +33,14 @@ service MenuService {
   }
   // 获取菜单树
   rpc ListMenuTree(core.service.v1.ListMenuTreeRequest) returns (core.service.v1.ListMenuTreeResponse) {
-    option (google.api.http) = {get: "/admin/v1/menus/tree/{pid}"};
+    option (google.api.http) = {
+      get: "/admin/v1/menus/tree/{pid}"
+      additional_bindings: [
+        {
+          get: "/admin/v1/menus/tree"
+        }
+      ]
+    };
     option (gnostic.openapi.v3.operation) = {
       summary: "获取菜单树"
       description: "获取菜单树"
@@ -142,6 +149,58 @@ service MenuService {
     option (gnostic.openapi.v3.operation) = {
       summary: "删除菜单"
       description: "删除菜单"
+      tags: ["菜单管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  // 判断菜单路径是否存在
+  rpc ExistMenuByPath(core.service.v1.ExistMenuByPathRequest) returns (core.service.v1.ExistMenuByPathResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/menus/path-exists"
+      additional_bindings: [
+        {
+          get: "/admin/v1/menus/path-exists/{path}"
+        }
+      ]
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "判断菜单路径是否存在"
+      description: "判断菜单路径是否存在"
+      tags: ["菜单管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  // 判断菜单名是否存在
+  rpc ExistMenuByName(core.service.v1.ExistMenuByNameRequest) returns (core.service.v1.ExistMenuByNameResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/menus/name-exists"
+      additional_bindings: [
+        {
+          get: "/admin/v1/menus/name-exists/{name}"
+        }
+      ]
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单名是否存在"
+      description: "获取菜单名是否存在"
       tags: ["菜单管理服务"]
       security: [
         {

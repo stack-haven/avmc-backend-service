@@ -154,10 +154,10 @@ func init() {
 	menuDescComponent := menuFields[3].Descriptor()
 	// menu.DefaultComponent holds the default value on creation for the component field.
 	menu.DefaultComponent = menuDescComponent.Default.(string)
-	// menuDescPid is the schema descriptor for pid field.
-	menuDescPid := menuFields[4].Descriptor()
-	// menu.DefaultPid holds the default value on creation for the pid field.
-	menu.DefaultPid = menuDescPid.Default.(uint32)
+	// menuDescParentID is the schema descriptor for parent_id field.
+	menuDescParentID := menuFields[4].Descriptor()
+	// menu.DefaultParentID holds the default value on creation for the parent_id field.
+	menu.DefaultParentID = menuDescParentID.Default.(uint32)
 	// menuDescRedirect is the schema descriptor for redirect field.
 	menuDescRedirect := menuFields[5].Descriptor()
 	// menu.DefaultRedirect holds the default value on creation for the redirect field.

@@ -24,6 +24,8 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationMenuServiceCreateMenu = "/avmc.admin.v1.MenuService/CreateMenu"
 const OperationMenuServiceDeleteMenu = "/avmc.admin.v1.MenuService/DeleteMenu"
+const OperationMenuServiceExistMenuByName = "/avmc.admin.v1.MenuService/ExistMenuByName"
+const OperationMenuServiceExistMenuByPath = "/avmc.admin.v1.MenuService/ExistMenuByPath"
 const OperationMenuServiceGetMenu = "/avmc.admin.v1.MenuService/GetMenu"
 const OperationMenuServiceListMenu = "/avmc.admin.v1.MenuService/ListMenu"
 const OperationMenuServiceListMenuAll = "/avmc.admin.v1.MenuService/ListMenuAll"
@@ -35,6 +37,10 @@ type MenuServiceHTTPServer interface {
 	CreateMenu(context.Context, *v1.CreateMenuRequest) (*v1.CreateMenuResponse, error)
 	// DeleteMenu 删除菜单
 	DeleteMenu(context.Context, *v1.DeleteMenuRequest) (*v1.DeleteMenuResponse, error)
+	// ExistMenuByName 判断菜单名是否存在
+	ExistMenuByName(context.Context, *v1.ExistMenuByNameRequest) (*v1.ExistMenuByNameResponse, error)
+	// ExistMenuByPath 判断菜单路径是否存在
+	ExistMenuByPath(context.Context, *v1.ExistMenuByPathRequest) (*v1.ExistMenuByPathResponse, error)
 	// GetMenu 获取菜单数据
 	GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error)
 	// ListMenu 获取菜单列表
@@ -50,12 +56,17 @@ type MenuServiceHTTPServer interface {
 func RegisterMenuServiceHTTPServer(s *http.Server, srv MenuServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/admin/v1/menus/all", _MenuService_ListMenuAll0_HTTP_Handler(srv))
-	r.GET("/admin/v1/menus/tree/{pid}", _MenuService_ListMenuTree0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/tree", _MenuService_ListMenuTree0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/tree/{pid}", _MenuService_ListMenuTree1_HTTP_Handler(srv))
 	r.GET("/admin/v1/menus", _MenuService_ListMenu0_HTTP_Handler(srv))
 	r.GET("/admin/v1/menus/{id}", _MenuService_GetMenu0_HTTP_Handler(srv))
 	r.POST("/admin/v1/menus", _MenuService_CreateMenu0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/menus/{id}", _MenuService_UpdateMenu0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/menus/{id}", _MenuService_DeleteMenu0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/path-exists/{path}", _MenuService_ExistMenuByPath0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/path-exists", _MenuService_ExistMenuByPath1_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/name-exists/{name}", _MenuService_ExistMenuByName0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/name-exists", _MenuService_ExistMenuByName1_HTTP_Handler(srv))
 }
 
 func _MenuService_ListMenuAll0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
@@ -78,6 +89,25 @@ func _MenuService_ListMenuAll0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx 
 }
 
 func _MenuService_ListMenuTree0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListMenuTreeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuServiceListMenuTree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListMenuTree(ctx, req.(*v1.ListMenuTreeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListMenuTreeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MenuService_ListMenuTree1_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.ListMenuTreeRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -209,9 +239,93 @@ func _MenuService_DeleteMenu0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx h
 	}
 }
 
+func _MenuService_ExistMenuByPath0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ExistMenuByPathRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuServiceExistMenuByPath)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExistMenuByPath(ctx, req.(*v1.ExistMenuByPathRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ExistMenuByPathResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MenuService_ExistMenuByPath1_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ExistMenuByPathRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuServiceExistMenuByPath)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExistMenuByPath(ctx, req.(*v1.ExistMenuByPathRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ExistMenuByPathResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MenuService_ExistMenuByName0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ExistMenuByNameRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuServiceExistMenuByName)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExistMenuByName(ctx, req.(*v1.ExistMenuByNameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ExistMenuByNameResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MenuService_ExistMenuByName1_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ExistMenuByNameRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuServiceExistMenuByName)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExistMenuByName(ctx, req.(*v1.ExistMenuByNameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ExistMenuByNameResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type MenuServiceHTTPClient interface {
 	CreateMenu(ctx context.Context, req *v1.CreateMenuRequest, opts ...http.CallOption) (rsp *v1.CreateMenuResponse, err error)
 	DeleteMenu(ctx context.Context, req *v1.DeleteMenuRequest, opts ...http.CallOption) (rsp *v1.DeleteMenuResponse, err error)
+	ExistMenuByName(ctx context.Context, req *v1.ExistMenuByNameRequest, opts ...http.CallOption) (rsp *v1.ExistMenuByNameResponse, err error)
+	ExistMenuByPath(ctx context.Context, req *v1.ExistMenuByPathRequest, opts ...http.CallOption) (rsp *v1.ExistMenuByPathResponse, err error)
 	GetMenu(ctx context.Context, req *v1.GetMenuRequest, opts ...http.CallOption) (rsp *v1.Menu, err error)
 	ListMenu(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
 	ListMenuAll(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
@@ -247,6 +361,32 @@ func (c *MenuServiceHTTPClientImpl) DeleteMenu(ctx context.Context, in *v1.Delet
 	opts = append(opts, http.Operation(OperationMenuServiceDeleteMenu))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *MenuServiceHTTPClientImpl) ExistMenuByName(ctx context.Context, in *v1.ExistMenuByNameRequest, opts ...http.CallOption) (*v1.ExistMenuByNameResponse, error) {
+	var out v1.ExistMenuByNameResponse
+	pattern := "/admin/v1/menus/name-exists"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMenuServiceExistMenuByName))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *MenuServiceHTTPClientImpl) ExistMenuByPath(ctx context.Context, in *v1.ExistMenuByPathRequest, opts ...http.CallOption) (*v1.ExistMenuByPathResponse, error) {
+	var out v1.ExistMenuByPathResponse
+	pattern := "/admin/v1/menus/path-exists"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMenuServiceExistMenuByPath))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

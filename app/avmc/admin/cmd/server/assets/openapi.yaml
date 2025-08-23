@@ -145,6 +145,23 @@ paths:
                                 $ref: '#/components/schemas/LogoutResponse'
             security:
                 - BearerAuth: []
+    /admin/v1/auth/menus:
+        get:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 登录用户菜单信息
+            description: 登录用户菜单信息
+            operationId: AuthService_Menus
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MenusResponse'
+            security:
+                - BearerAuth: []
     /admin/v1/auth/profile:
         get:
             tags:
@@ -183,6 +200,23 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/RefreshTokenResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/auth/vben/profile:
+        get:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 登录用户Vben简介信息
+            description: 登录用户Vben简介信息
+            operationId: AuthService_VbenProfile
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/VbenProfileResponse'
             security:
                 - BearerAuth: []
     /admin/v1/depts:
@@ -441,6 +475,180 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CreateMenuResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/all:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取所有菜单
+            description: 获取所有菜单
+            operationId: MenuService_ListMenuAll
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMenuResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/name-exists:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取菜单名是否存在
+            description: 获取菜单名是否存在
+            operationId: MenuService_ExistMenuByName
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByNameResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/name-exists/{name}:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取菜单名是否存在
+            description: 获取菜单名是否存在
+            operationId: MenuService_ExistMenuByName
+            parameters:
+                - name: name
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: id
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByNameResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/path-exists:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 判断菜单路径是否存在
+            description: 判断菜单路径是否存在
+            operationId: MenuService_ExistMenuByPath
+            parameters:
+                - name: id
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: path
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByPathResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/path-exists/{path}:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 判断菜单路径是否存在
+            description: 判断菜单路径是否存在
+            operationId: MenuService_ExistMenuByPath
+            parameters:
+                - name: path
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: id
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByPathResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/tree:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取菜单树
+            description: 获取菜单树
+            operationId: MenuService_ListMenuTree
+            parameters:
+                - name: pid
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMenuTreeResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/tree/{pid}:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取菜单树
+            description: 获取菜单树
+            operationId: MenuService_ListMenuTree
+            parameters:
+                - name: pid
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMenuTreeResponse'
             security:
                 - BearerAuth: []
     /admin/v1/menus/{id}:
@@ -1194,6 +1402,20 @@ components:
                     type: string
                     description: 更新时间
             description: 部门信息
+        ExistMenuByNameResponse:
+            type: object
+            properties:
+                exist:
+                    type: boolean
+                    description: 菜单名是否存在
+            description: 判断菜单名是否存在响应
+        ExistMenuByPathResponse:
+            type: object
+            properties:
+                exist:
+                    type: boolean
+                    description: 菜单路径是否存在
+            description: 判断菜单路径是否存在响应
         ListDeptResponse:
             type: object
             properties:
@@ -1216,6 +1438,15 @@ components:
                     type: integer
                     format: int32
             description: 分页查询菜单响应
+        ListMenuTreeResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Menu'
+                    description: 菜单树
+            description: 获取菜单树响应
         ListPostResponse:
             type: object
             properties:
@@ -1309,27 +1540,35 @@ components:
                 name:
                     type: string
                     description: 菜单名称
-                parentId:
+                path:
+                    type: string
+                    description: 路由路径
+                authCode:
+                    type: string
+                    description: 权限标识
+                meta:
+                    allOf:
+                        - $ref: '#/components/schemas/MenuMeta'
+                    description: 菜单元数据
+                children:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Menu'
+                    description: 子级
+                component:
+                    type: string
+                    description: 组件
+                pid:
                     type: integer
-                    description: 父菜单ID
+                    description: 父级ID
                     format: uint32
-                title:
+                redirect:
                     type: string
-                    description: 菜单标题
+                    description: 重定向
                 type:
-                    enum:
-                        - TYPE_UNSPECIFIED
-                        - TYPE_DIR
-                        - TYPE_MENU
-                        - TYPE_BUTTON
-                    type: string
+                    type: integer
                     default: !!float 1
                     description: 菜单类型
-                    format: enum
-                sort:
-                    type: integer
-                    default: !!float 10
-                    description: 排序字段
                     format: int32
                 status:
                     enum:
@@ -1340,57 +1579,94 @@ components:
                     default: !!float 1
                     description: 菜单状态 1 启用 2 禁用
                     format: enum
-                path:
-                    type: string
-                    description: 菜单路径
-                component:
-                    type: string
-                    description: 组件路径
-                icon:
-                    type: string
-                    description: 菜单图标
-                isExt:
-                    type: boolean
-                    description: 是否外部链接
-                extUrl:
-                    type: string
-                    description: 外部链接地址
-                permissions:
-                    type: array
-                    items:
-                        type: string
-                    description: 权限标识
-                redirect:
-                    type: string
-                    description: 重定向地址
-                currentActiveMenu:
-                    type: string
-                    description: 当前激活菜单
-                keepAlive:
-                    type: boolean
-                    description: 是否缓存
-                visible:
-                    type: boolean
-                    description: 是否可见
-                hideTab:
-                    type: boolean
-                    description: 是否隐藏标签
-                hideMenu:
-                    type: boolean
-                    description: 是否隐藏菜单
-                hideBreadcrumb:
-                    type: boolean
-                    description: 是否隐藏面包屑
-                remark:
-                    type: string
-                    description: 菜单描述
                 createdAt:
                     type: string
                     description: 创建时间
                 updatedAt:
                     type: string
                     description: 更新时间
-            description: 菜单信息
+        MenuMeta:
+            type: object
+            properties:
+                activeIcon:
+                    type: string
+                    description: 激活时显示的图标
+                activePath:
+                    type: string
+                    description: 作为路由时，需要激活的菜单的Path
+                affixTab:
+                    type: boolean
+                    description: 固定在标签栏
+                affixTabOrder:
+                    type: integer
+                    description: 在标签栏固定的顺序
+                    format: int32
+                badge:
+                    type: string
+                    description: 徽标内容(当徽标类型为normal时有效)
+                badgeType:
+                    type: integer
+                    description: 徽标类型
+                    format: int32
+                badgeVariants:
+                    type: integer
+                    description: 徽标颜色
+                    format: int32
+                hideChildrenInMenu:
+                    type: boolean
+                    description: 在菜单中隐藏下级
+                hideInBreadcrumb:
+                    type: boolean
+                    description: 在面包屑中隐藏
+                hideInMenu:
+                    type: boolean
+                    description: 在菜单中隐藏
+                hideInTab:
+                    type: boolean
+                    description: 在标签栏中隐藏
+                icon:
+                    type: string
+                    description: 菜单图标
+                iframeSrc:
+                    type: string
+                    description: 内嵌Iframe的URL
+                keepAlive:
+                    type: boolean
+                    description: 是否缓存页面
+                link:
+                    type: string
+                    description: 外链页面的URL
+                maxNumOfOpenTab:
+                    type: integer
+                    description: 同一个路由最大打开的标签数
+                    format: int32
+                noBasicLayout:
+                    type: boolean
+                    description: 无需基础布局
+                openInNewWindow:
+                    type: boolean
+                    description: 是否在新窗口打开
+                order:
+                    type: integer
+                    default: !!float 10
+                    description: 菜单排序
+                    format: int32
+                query:
+                    type: string
+                    description: 额外的路由参数
+                title:
+                    type: string
+                    description: 菜单标题
+            description: 菜单元数据
+        MenusResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Menu'
+                    description: 登录用户菜单列表
+            description: 登录用户菜单 - 回应
         Post:
             type: object
             properties:
@@ -1432,11 +1708,16 @@ components:
                     $ref: '#/components/schemas/User'
                 role:
                     $ref: '#/components/schemas/Role'
+                roles:
+                    type: array
+                    items:
+                        type: string
+                    description: 登录用户角色列表信息
                 permissions:
                     type: array
                     items:
                         type: string
-                    description: 登录用户权限信息
+                    description: 登录用户权限列表信息
                 menus:
                     type: array
                     items:
@@ -1590,6 +1871,36 @@ components:
                 description:
                     type: string
                     description: 个人说明
+        VbenProfileResponse:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    description: 用户ID
+                    format: uint32
+                username:
+                    type: string
+                    description: 用户名
+                realName:
+                    type: string
+                    description: 真实姓名
+                avatar:
+                    type: string
+                    description: 头像
+                homePath:
+                    type: string
+                    description: 首页路径
+                desc:
+                    type: string
+                    description: 描述
+                role:
+                    $ref: '#/components/schemas/Role'
+                roles:
+                    type: array
+                    items:
+                        type: string
+                    description: 登录用户角色列表信息
+            description: 登录用户Vben简介信息 - 回应
     securitySchemes:
         BearerAuth:
             type: http

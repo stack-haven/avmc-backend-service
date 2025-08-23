@@ -1570,13 +1570,13 @@ func (m *MenuMutation) ResetComponent() {
 	delete(m.clearedFields, menu.FieldComponent)
 }
 
-// SetPid sets the "pid" field.
-func (m *MenuMutation) SetPid(u uint32) {
+// SetParentID sets the "parent_id" field.
+func (m *MenuMutation) SetParentID(u uint32) {
 	m.parent = &u
 }
 
-// Pid returns the value of the "pid" field in the mutation.
-func (m *MenuMutation) Pid() (r uint32, exists bool) {
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *MenuMutation) ParentID() (r uint32, exists bool) {
 	v := m.parent
 	if v == nil {
 		return
@@ -1584,39 +1584,39 @@ func (m *MenuMutation) Pid() (r uint32, exists bool) {
 	return *v, true
 }
 
-// OldPid returns the old "pid" field's value of the Menu entity.
+// OldParentID returns the old "parent_id" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldPid(ctx context.Context) (v uint32, err error) {
+func (m *MenuMutation) OldParentID(ctx context.Context) (v *uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPid is only allowed on UpdateOne operations")
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPid requires an ID field in the mutation")
+		return v, errors.New("OldParentID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPid: %w", err)
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
 	}
-	return oldValue.Pid, nil
+	return oldValue.ParentID, nil
 }
 
-// ClearPid clears the value of the "pid" field.
-func (m *MenuMutation) ClearPid() {
+// ClearParentID clears the value of the "parent_id" field.
+func (m *MenuMutation) ClearParentID() {
 	m.parent = nil
-	m.clearedFields[menu.FieldPid] = struct{}{}
+	m.clearedFields[menu.FieldParentID] = struct{}{}
 }
 
-// PidCleared returns if the "pid" field was cleared in this mutation.
-func (m *MenuMutation) PidCleared() bool {
-	_, ok := m.clearedFields[menu.FieldPid]
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *MenuMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[menu.FieldParentID]
 	return ok
 }
 
-// ResetPid resets all changes to the "pid" field.
-func (m *MenuMutation) ResetPid() {
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *MenuMutation) ResetParentID() {
 	m.parent = nil
-	delete(m.clearedFields, menu.FieldPid)
+	delete(m.clearedFields, menu.FieldParentID)
 }
 
 // SetRedirect sets the "redirect" field.
@@ -2573,28 +2573,15 @@ func (m *MenuMutation) ResetTitle() {
 	m.title = nil
 }
 
-// SetParentID sets the "parent" edge to the Menu entity by id.
-func (m *MenuMutation) SetParentID(id uint32) {
-	m.parent = &id
-}
-
 // ClearParent clears the "parent" edge to the Menu entity.
 func (m *MenuMutation) ClearParent() {
 	m.clearedparent = true
-	m.clearedFields[menu.FieldPid] = struct{}{}
+	m.clearedFields[menu.FieldParentID] = struct{}{}
 }
 
 // ParentCleared reports if the "parent" edge to the Menu entity was cleared.
 func (m *MenuMutation) ParentCleared() bool {
-	return m.PidCleared() || m.clearedparent
-}
-
-// ParentID returns the "parent" edge ID in the mutation.
-func (m *MenuMutation) ParentID() (id uint32, exists bool) {
-	if m.parent != nil {
-		return *m.parent, true
-	}
-	return
+	return m.ParentIDCleared() || m.clearedparent
 }
 
 // ParentIDs returns the "parent" edge IDs in the mutation.
@@ -2727,7 +2714,7 @@ func (m *MenuMutation) Fields() []string {
 		fields = append(fields, menu.FieldComponent)
 	}
 	if m.parent != nil {
-		fields = append(fields, menu.FieldPid)
+		fields = append(fields, menu.FieldParentID)
 	}
 	if m.redirect != nil {
 		fields = append(fields, menu.FieldRedirect)
@@ -2822,8 +2809,8 @@ func (m *MenuMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case menu.FieldComponent:
 		return m.Component()
-	case menu.FieldPid:
-		return m.Pid()
+	case menu.FieldParentID:
+		return m.ParentID()
 	case menu.FieldRedirect:
 		return m.Redirect()
 	case menu.FieldAuthCode:
@@ -2895,8 +2882,8 @@ func (m *MenuMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldType(ctx)
 	case menu.FieldComponent:
 		return m.OldComponent(ctx)
-	case menu.FieldPid:
-		return m.OldPid(ctx)
+	case menu.FieldParentID:
+		return m.OldParentID(ctx)
 	case menu.FieldRedirect:
 		return m.OldRedirect(ctx)
 	case menu.FieldAuthCode:
@@ -3008,12 +2995,12 @@ func (m *MenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetComponent(v)
 		return nil
-	case menu.FieldPid:
+	case menu.FieldParentID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPid(v)
+		m.SetParentID(v)
 		return nil
 	case menu.FieldRedirect:
 		v, ok := value.(string)
@@ -3305,8 +3292,8 @@ func (m *MenuMutation) ClearedFields() []string {
 	if m.FieldCleared(menu.FieldComponent) {
 		fields = append(fields, menu.FieldComponent)
 	}
-	if m.FieldCleared(menu.FieldPid) {
-		fields = append(fields, menu.FieldPid)
+	if m.FieldCleared(menu.FieldParentID) {
+		fields = append(fields, menu.FieldParentID)
 	}
 	if m.FieldCleared(menu.FieldRedirect) {
 		fields = append(fields, menu.FieldRedirect)
@@ -3340,8 +3327,8 @@ func (m *MenuMutation) ClearField(name string) error {
 	case menu.FieldComponent:
 		m.ClearComponent()
 		return nil
-	case menu.FieldPid:
-		m.ClearPid()
+	case menu.FieldParentID:
+		m.ClearParentID()
 		return nil
 	case menu.FieldRedirect:
 		m.ClearRedirect()
@@ -3381,8 +3368,8 @@ func (m *MenuMutation) ResetField(name string) error {
 	case menu.FieldComponent:
 		m.ResetComponent()
 		return nil
-	case menu.FieldPid:
-		m.ResetPid()
+	case menu.FieldParentID:
+		m.ResetParentID()
 		return nil
 	case menu.FieldRedirect:
 		m.ResetRedirect()

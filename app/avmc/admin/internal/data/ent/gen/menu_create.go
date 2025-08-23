@@ -134,16 +134,16 @@ func (_c *MenuCreate) SetNillableComponent(v *string) *MenuCreate {
 	return _c
 }
 
-// SetPid sets the "pid" field.
-func (_c *MenuCreate) SetPid(v uint32) *MenuCreate {
-	_c.mutation.SetPid(v)
+// SetParentID sets the "parent_id" field.
+func (_c *MenuCreate) SetParentID(v uint32) *MenuCreate {
+	_c.mutation.SetParentID(v)
 	return _c
 }
 
-// SetNillablePid sets the "pid" field if the given value is not nil.
-func (_c *MenuCreate) SetNillablePid(v *uint32) *MenuCreate {
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_c *MenuCreate) SetNillableParentID(v *uint32) *MenuCreate {
 	if v != nil {
-		_c.SetPid(*v)
+		_c.SetParentID(*v)
 	}
 	return _c
 }
@@ -476,20 +476,6 @@ func (_c *MenuCreate) SetID(v uint32) *MenuCreate {
 	return _c
 }
 
-// SetParentID sets the "parent" edge to the Menu entity by ID.
-func (_c *MenuCreate) SetParentID(id uint32) *MenuCreate {
-	_c.mutation.SetParentID(id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the Menu entity by ID if the given value is not nil.
-func (_c *MenuCreate) SetNillableParentID(id *uint32) *MenuCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
-	}
-	return _c
-}
-
 // SetParent sets the "parent" edge to the Menu entity.
 func (_c *MenuCreate) SetParent(v *Menu) *MenuCreate {
 	return _c.SetParentID(v.ID)
@@ -581,9 +567,9 @@ func (_c *MenuCreate) defaults() error {
 		v := menu.DefaultComponent
 		_c.mutation.SetComponent(v)
 	}
-	if _, ok := _c.mutation.Pid(); !ok {
-		v := menu.DefaultPid
-		_c.mutation.SetPid(v)
+	if _, ok := _c.mutation.ParentID(); !ok {
+		v := menu.DefaultParentID
+		_c.mutation.SetParentID(v)
 	}
 	if _, ok := _c.mutation.Redirect(); !ok {
 		v := menu.DefaultRedirect
@@ -953,7 +939,7 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.Pid = nodes[0]
+		_node.ParentID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
@@ -1144,21 +1130,21 @@ func (u *MenuUpsert) ClearComponent() *MenuUpsert {
 	return u
 }
 
-// SetPid sets the "pid" field.
-func (u *MenuUpsert) SetPid(v uint32) *MenuUpsert {
-	u.Set(menu.FieldPid, v)
+// SetParentID sets the "parent_id" field.
+func (u *MenuUpsert) SetParentID(v uint32) *MenuUpsert {
+	u.Set(menu.FieldParentID, v)
 	return u
 }
 
-// UpdatePid sets the "pid" field to the value that was provided on create.
-func (u *MenuUpsert) UpdatePid() *MenuUpsert {
-	u.SetExcluded(menu.FieldPid)
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *MenuUpsert) UpdateParentID() *MenuUpsert {
+	u.SetExcluded(menu.FieldParentID)
 	return u
 }
 
-// ClearPid clears the value of the "pid" field.
-func (u *MenuUpsert) ClearPid() *MenuUpsert {
-	u.SetNull(menu.FieldPid)
+// ClearParentID clears the value of the "parent_id" field.
+func (u *MenuUpsert) ClearParentID() *MenuUpsert {
+	u.SetNull(menu.FieldParentID)
 	return u
 }
 
@@ -1671,24 +1657,24 @@ func (u *MenuUpsertOne) ClearComponent() *MenuUpsertOne {
 	})
 }
 
-// SetPid sets the "pid" field.
-func (u *MenuUpsertOne) SetPid(v uint32) *MenuUpsertOne {
+// SetParentID sets the "parent_id" field.
+func (u *MenuUpsertOne) SetParentID(v uint32) *MenuUpsertOne {
 	return u.Update(func(s *MenuUpsert) {
-		s.SetPid(v)
+		s.SetParentID(v)
 	})
 }
 
-// UpdatePid sets the "pid" field to the value that was provided on create.
-func (u *MenuUpsertOne) UpdatePid() *MenuUpsertOne {
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *MenuUpsertOne) UpdateParentID() *MenuUpsertOne {
 	return u.Update(func(s *MenuUpsert) {
-		s.UpdatePid()
+		s.UpdateParentID()
 	})
 }
 
-// ClearPid clears the value of the "pid" field.
-func (u *MenuUpsertOne) ClearPid() *MenuUpsertOne {
+// ClearParentID clears the value of the "parent_id" field.
+func (u *MenuUpsertOne) ClearParentID() *MenuUpsertOne {
 	return u.Update(func(s *MenuUpsert) {
-		s.ClearPid()
+		s.ClearParentID()
 	})
 }
 
@@ -2420,24 +2406,24 @@ func (u *MenuUpsertBulk) ClearComponent() *MenuUpsertBulk {
 	})
 }
 
-// SetPid sets the "pid" field.
-func (u *MenuUpsertBulk) SetPid(v uint32) *MenuUpsertBulk {
+// SetParentID sets the "parent_id" field.
+func (u *MenuUpsertBulk) SetParentID(v uint32) *MenuUpsertBulk {
 	return u.Update(func(s *MenuUpsert) {
-		s.SetPid(v)
+		s.SetParentID(v)
 	})
 }
 
-// UpdatePid sets the "pid" field to the value that was provided on create.
-func (u *MenuUpsertBulk) UpdatePid() *MenuUpsertBulk {
+// UpdateParentID sets the "parent_id" field to the value that was provided on create.
+func (u *MenuUpsertBulk) UpdateParentID() *MenuUpsertBulk {
 	return u.Update(func(s *MenuUpsert) {
-		s.UpdatePid()
+		s.UpdateParentID()
 	})
 }
 
-// ClearPid clears the value of the "pid" field.
-func (u *MenuUpsertBulk) ClearPid() *MenuUpsertBulk {
+// ClearParentID clears the value of the "parent_id" field.
+func (u *MenuUpsertBulk) ClearParentID() *MenuUpsertBulk {
 	return u.Update(func(s *MenuUpsert) {
-		s.ClearPid()
+		s.ClearParentID()
 	})
 }
 

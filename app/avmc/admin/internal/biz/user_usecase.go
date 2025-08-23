@@ -21,9 +21,9 @@ type UserRepo interface {
 	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
 	ListPageSimple(context.Context, *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
 	Delete(context.Context, uint32) error
-	GetUserExistByName(context.Context, string) (uint32, error)
-	GetUserExistByPhone(context.Context, string) (uint32, error)
-	GetUserExistByEmail(context.Context, string) (uint32, error)
+	ExistByName(context.Context, string) (uint32, error)
+	ExistByPhone(context.Context, string) (uint32, error)
+	ExistByEmail(context.Context, string) (uint32, error)
 }
 
 // UserUsecase is a User usecase.
