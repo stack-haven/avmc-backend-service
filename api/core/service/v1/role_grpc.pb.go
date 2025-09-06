@@ -19,11 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RoleService_CreateRole_FullMethodName = "/core.service.v1.RoleService/CreateRole"
-	RoleService_UpdateRole_FullMethodName = "/core.service.v1.RoleService/UpdateRole"
-	RoleService_DeleteRole_FullMethodName = "/core.service.v1.RoleService/DeleteRole"
-	RoleService_GetRole_FullMethodName    = "/core.service.v1.RoleService/GetRole"
-	RoleService_ListRole_FullMethodName   = "/core.service.v1.RoleService/ListRole"
+	RoleService_CreateRole_FullMethodName         = "/core.service.v1.RoleService/CreateRole"
+	RoleService_UpdateRole_FullMethodName         = "/core.service.v1.RoleService/UpdateRole"
+	RoleService_DeleteRole_FullMethodName         = "/core.service.v1.RoleService/DeleteRole"
+	RoleService_GetRole_FullMethodName            = "/core.service.v1.RoleService/GetRole"
+	RoleService_ListRole_FullMethodName           = "/core.service.v1.RoleService/ListRole"
+	RoleService_ExistRoleByName_FullMethodName    = "/core.service.v1.RoleService/ExistRoleByName"
+	RoleService_UpdateRoleByStatus_FullMethodName = "/core.service.v1.RoleService/UpdateRoleByStatus"
 )
 
 // RoleServiceClient is the client API for RoleService service.
@@ -40,6 +42,10 @@ type RoleServiceClient interface {
 	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error)
 	// 分页查询角色
 	ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
+	// 判断角色名是否存在
+	ExistRoleByName(ctx context.Context, in *ExistRoleByNameRequest, opts ...grpc.CallOption) (*ExistRoleByNameResponse, error)
+	// 更新角色状态
+	UpdateRoleByStatus(ctx context.Context, in *UpdateRoleByStatusRequest, opts ...grpc.CallOption) (*UpdateRoleByStatusResponse, error)
 }
 
 type roleServiceClient struct {
@@ -100,6 +106,26 @@ func (c *roleServiceClient) ListRole(ctx context.Context, in *ListRoleRequest, o
 	return out, nil
 }
 
+func (c *roleServiceClient) ExistRoleByName(ctx context.Context, in *ExistRoleByNameRequest, opts ...grpc.CallOption) (*ExistRoleByNameResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExistRoleByNameResponse)
+	err := c.cc.Invoke(ctx, RoleService_ExistRoleByName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *roleServiceClient) UpdateRoleByStatus(ctx context.Context, in *UpdateRoleByStatusRequest, opts ...grpc.CallOption) (*UpdateRoleByStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateRoleByStatusResponse)
+	err := c.cc.Invoke(ctx, RoleService_UpdateRoleByStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoleServiceServer is the server API for RoleService service.
 // All implementations must embed UnimplementedRoleServiceServer
 // for forward compatibility.
@@ -114,6 +140,10 @@ type RoleServiceServer interface {
 	GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error)
 	// 分页查询角色
 	ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error)
+	// 判断角色名是否存在
+	ExistRoleByName(context.Context, *ExistRoleByNameRequest) (*ExistRoleByNameResponse, error)
+	// 更新角色状态
+	UpdateRoleByStatus(context.Context, *UpdateRoleByStatusRequest) (*UpdateRoleByStatusResponse, error)
 	mustEmbedUnimplementedRoleServiceServer()
 }
 
@@ -138,6 +168,12 @@ func (UnimplementedRoleServiceServer) GetRole(context.Context, *GetRoleRequest) 
 }
 func (UnimplementedRoleServiceServer) ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
+}
+func (UnimplementedRoleServiceServer) ExistRoleByName(context.Context, *ExistRoleByNameRequest) (*ExistRoleByNameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExistRoleByName not implemented")
+}
+func (UnimplementedRoleServiceServer) UpdateRoleByStatus(context.Context, *UpdateRoleByStatusRequest) (*UpdateRoleByStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRoleByStatus not implemented")
 }
 func (UnimplementedRoleServiceServer) mustEmbedUnimplementedRoleServiceServer() {}
 func (UnimplementedRoleServiceServer) testEmbeddedByValue()                     {}
@@ -250,6 +286,42 @@ func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoleService_ExistRoleByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExistRoleByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServiceServer).ExistRoleByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoleService_ExistRoleByName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServiceServer).ExistRoleByName(ctx, req.(*ExistRoleByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RoleService_UpdateRoleByStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleByStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServiceServer).UpdateRoleByStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoleService_UpdateRoleByStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServiceServer).UpdateRoleByStatus(ctx, req.(*UpdateRoleByStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoleService_ServiceDesc is the grpc.ServiceDesc for RoleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +348,14 @@ var RoleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListRole",
 			Handler:    _RoleService_ListRole_Handler,
+		},
+		{
+			MethodName: "ExistRoleByName",
+			Handler:    _RoleService_ExistRoleByName_Handler,
+		},
+		{
+			MethodName: "UpdateRoleByStatus",
+			Handler:    _RoleService_UpdateRoleByStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

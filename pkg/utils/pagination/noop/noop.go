@@ -1,7 +1,7 @@
 package noop
 
 import (
-	"github.com/beiduoke/go-scaffold/pkg/util/pagination"
+	"backend-service/pkg/utils/pagination"
 )
 
 var _ pagination.PaginationHandler = (*noop)(nil)

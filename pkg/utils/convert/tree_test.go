@@ -81,13 +81,72 @@ func (d *DomainTest) AppendChildren(arg any) {
 
 func Test_TreeProto(t *testing.T) {
 	t.Log("测试泛型树形结构开始")
-	data, err := ToTree(domainData, 0, func(t *Domain, ts ...*Domain) error {
-		t.Children = append(t.Children, ts...)
+
+	addChildrenFunc := func(parent *Domain, children ...*Domain) error {
+		parent.Children = append(parent.Children, children...)
 		return nil
-	})
+	}
+	data, err := ToTree(domainData, 0, addChildrenFunc)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Logf("%v", data)
 	t.Log("测试泛型树形结构结束")
+}
+
+// 定义一个测试用的节点结构体
+type TestNode struct {
+	ID       int
+	ParentID int
+	Children []*TestNode
+}
+
+// 测试 ToTreeWith 函数
+func TestToTreeWith(t *testing.T) {
+	// 准备测试数据
+	nodes := []*TestNode{
+		{ID: 1, ParentID: 0},
+		{ID: 2, ParentID: 1},
+		{ID: 3, ParentID: 1},
+		{ID: 4, ParentID: 2},
+		{ID: 5, ParentID: 0},
+	}
+
+	// 定义辅助函数
+	idOf := func(n *TestNode) int {
+		return n.ID
+	}
+	parentOf := func(n *TestNode) int {
+		return n.ParentID
+	}
+	addChildren := func(parent *TestNode, children ...*TestNode) error {
+		parent.Children = append(parent.Children, children...)
+		return nil
+	}
+
+	// 调用 ToTreeWith 函数
+	roots, err := ToTreeWith(nodes, 0, idOf, parentOf, addChildren)
+	if err != nil {
+		t.Errorf("ToTreeWith failed: %v", err)
+	}
+
+	// 验证根节点数量
+	if len(roots) != 2 {
+		t.Errorf("Expected 2 root nodes, got %d", len(roots))
+	}
+
+	// 验证第一个根节点的子节点
+	if len(roots[0].Children) != 2 {
+		t.Errorf("Expected root node 1 to have 2 children, got %d", len(roots[0].Children))
+	}
+
+	// 验证第二个根节点的子节点
+	if len(roots[1].Children) != 0 {
+		t.Errorf("Expected root node 5 to have 0 children, got %d", len(roots[1].Children))
+	}
+
+	// 验证孙子节点
+	if len(roots[0].Children[0].Children) != 1 {
+		t.Errorf("Expected node 2 to have 1 child, got %d", len(roots[0].Children[0].Children))
+	}
 }

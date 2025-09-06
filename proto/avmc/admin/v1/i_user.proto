@@ -137,4 +137,27 @@ service UserService {
       ]
     };
   }
+
+  // 更新用户状态
+  rpc UpdateUserByStatus(core.service.v1.UpdateUserByStatusRequest) returns (core.service.v1.UpdateUserByStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/users/status-update/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新用户状态"
+      description: "更新用户状态"
+      tags: ["用户管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
 }

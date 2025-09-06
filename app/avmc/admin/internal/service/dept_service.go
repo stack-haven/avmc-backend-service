@@ -96,3 +96,11 @@ func (s *DeptServiceService) DeleteDept(ctx context.Context, req *pbCore.DeleteD
 	}
 	return &pbCore.DeleteDeptResponse{}, nil
 }
+
+// ListDeptTree 处理部门树形列表请求
+// 参数：ctx 上下文，req 分页请求
+// 返回值：部门树形列表响应，错误信息
+func (s *DeptServiceService) ListDeptTree(ctx context.Context, req *pbCore.ListDeptTreeRequest) (*pbCore.ListDeptTreeResponse, error) {
+	s.log.Infof("查询部门列表分页，分页请求：%v", req)
+	return s.duc.ListTree(ctx, req.GetParentId())
+}

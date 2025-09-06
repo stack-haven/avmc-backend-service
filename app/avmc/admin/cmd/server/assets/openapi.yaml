@@ -305,6 +305,81 @@ paths:
                                 $ref: '#/components/schemas/CreateDeptResponse'
             security:
                 - BearerAuth: []
+    /admin/v1/depts/status-update/{id}:
+        put:
+            tags:
+                - DeptService
+                - 部门管理服务
+            summary: 更新部门状态
+            description: 更新部门状态
+            operationId: DeptService_UpdateDeptByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateDeptByStatusResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/depts/tree:
+        get:
+            tags:
+                - DeptService
+                - 部门管理服务
+            summary: 获取部门树
+            description: 获取部门树
+            operationId: DeptService_ListDeptTree
+            parameters:
+                - name: parentId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListDeptTreeResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/depts/tree/{parentId}:
+        get:
+            tags:
+                - DeptService
+                - 部门管理服务
+            summary: 获取部门树
+            description: 获取部门树
+            operationId: DeptService_ListDeptTree
+            parameters:
+                - name: parentId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListDeptTreeResponse'
+            security:
+                - BearerAuth: []
     /admin/v1/depts/{id}:
         get:
             tags:
@@ -495,23 +570,19 @@ paths:
             security:
                 - BearerAuth: []
     /admin/v1/menus/name-exists:
-        get:
+        post:
             tags:
                 - MenuService
                 - 菜单管理服务
-            summary: 获取菜单名是否存在
-            description: 获取菜单名是否存在
+            summary: 判断菜单名是否存在
+            description: 判断菜单名是否存在
             operationId: MenuService_ExistMenuByName
-            parameters:
-                - name: id
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: name
-                  in: query
-                  schema:
-                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ExistMenuByNameRequest'
+                required: true
             responses:
                 "200":
                     description: OK
@@ -521,25 +592,25 @@ paths:
                                 $ref: '#/components/schemas/ExistMenuByNameResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/name-exists/{name}:
+    /admin/v1/menus/name-exists/{id}:
         get:
             tags:
                 - MenuService
                 - 菜单管理服务
-            summary: 获取菜单名是否存在
-            description: 获取菜单名是否存在
+            summary: 判断菜单名是否存在
+            description: 判断菜单名是否存在
             operationId: MenuService_ExistMenuByName
             parameters:
-                - name: name
+                - name: id
                   in: path
                   required: true
                   schema:
-                    type: string
-                - name: id
-                  in: query
-                  schema:
                     type: integer
                     format: uint32
+                - name: name
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -550,6 +621,29 @@ paths:
             security:
                 - BearerAuth: []
     /admin/v1/menus/path-exists:
+        post:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 判断菜单路径是否存在
+            description: 判断菜单路径是否存在
+            operationId: MenuService_ExistMenuByPath
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ExistMenuByPathRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByPathResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/menus/path-exists/{id}:
         get:
             tags:
                 - MenuService
@@ -559,7 +653,8 @@ paths:
             operationId: MenuService_ExistMenuByPath
             parameters:
                 - name: id
-                  in: query
+                  in: path
+                  required: true
                   schema:
                     type: integer
                     format: uint32
@@ -576,32 +671,32 @@ paths:
                                 $ref: '#/components/schemas/ExistMenuByPathResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/path-exists/{path}:
-        get:
+    /admin/v1/menus/status-update/{id}:
+        put:
             tags:
                 - MenuService
                 - 菜单管理服务
-            summary: 判断菜单路径是否存在
-            description: 判断菜单路径是否存在
-            operationId: MenuService_ExistMenuByPath
+            summary: 更新菜单状态
+            description: 更新菜单状态
+            operationId: MenuService_UpdateMenuByStatus
             parameters:
-                - name: path
+                - name: id
                   in: path
                   required: true
                   schema:
-                    type: string
-                - name: id
-                  in: query
-                  schema:
                     type: integer
                     format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ExistMenuByPathResponse'
+                                $ref: '#/components/schemas/UpdateMenuByStatusResponse'
             security:
                 - BearerAuth: []
     /admin/v1/menus/tree:
@@ -613,7 +708,7 @@ paths:
             description: 获取菜单树
             operationId: MenuService_ListMenuTree
             parameters:
-                - name: pid
+                - name: parentId
                   in: query
                   schema:
                     type: integer
@@ -627,7 +722,7 @@ paths:
                                 $ref: '#/components/schemas/ListMenuTreeResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/tree/{pid}:
+    /admin/v1/menus/tree/{parentId}:
         get:
             tags:
                 - MenuService
@@ -636,7 +731,7 @@ paths:
             description: 获取菜单树
             operationId: MenuService_ListMenuTree
             parameters:
-                - name: pid
+                - name: parentId
                   in: path
                   required: true
                   schema:
@@ -823,6 +918,34 @@ paths:
                                 $ref: '#/components/schemas/CreatePostResponse'
             security:
                 - BearerAuth: []
+    /admin/v1/posts/status-update/{id}:
+        put:
+            tags:
+                - PostService
+                - 岗位管理服务
+            summary: 更新岗位状态
+            description: 更新岗位状态
+            operationId: PostService_UpdatePostByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdatePostByStatusResponse'
+            security:
+                - BearerAuth: []
     /admin/v1/posts/{id}:
         get:
             tags:
@@ -930,34 +1053,40 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: query
-                  in: query
-                  description: 与过滤参数
-                  schema:
-                    type: string
-                - name: or
-                  in: query
-                  description: 或过滤参数
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: 排序条件
-                  schema:
-                    type: array
-                    items:
-                        type: string
                 - name: nopaging
                   in: query
                   description: 是否不分页
                   schema:
                     type: boolean
-                - name: fieldMask
+                - name: name
                   in: query
-                  description: 字段掩码
+                  description: 角色名称
                   schema:
                     type: string
-                    format: field-mask
+                - name: status
+                  in: query
+                  description: 角色状态
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
+                - name: remark
+                  in: query
+                  description: 角色描述
+                  schema:
+                    type: string
+                - name: startCreatedAt
+                  in: query
+                  description: 创建时间
+                  schema:
+                    type: string
+                - name: endCreatedAt
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -993,6 +1122,87 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CreateRoleResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/roles/name-exists:
+        post:
+            tags:
+                - RoleService
+                - 菜单管理服务
+            summary: 判断菜单名是否存在
+            description: 判断菜单名是否存在
+            operationId: RoleService_ExistRoleByName
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ExistRoleByNameRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistRoleByNameResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/roles/name-exists/{id}:
+        get:
+            tags:
+                - RoleService
+                - 菜单管理服务
+            summary: 判断菜单名是否存在
+            description: 判断菜单名是否存在
+            operationId: RoleService_ExistRoleByName
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistRoleByNameResponse'
+            security:
+                - BearerAuth: []
+    /admin/v1/roles/status-update/{id}:
+        put:
+            tags:
+                - RoleService
+                - 角色管理服务
+            summary: 更新角色状态
+            description: 更新角色状态
+            operationId: RoleService_UpdateRoleByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateRoleByStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateRoleByStatusResponse'
             security:
                 - BearerAuth: []
     /admin/v1/roles/{id}:
@@ -1225,6 +1435,36 @@ paths:
                                 $ref: '#/components/schemas/ListUserResponse'
             security:
                 - BearerAuth: []
+    /admin/v1/users/status-update/{id}:
+        put:
+            tags:
+                - UserService
+                - 用户管理服务
+            summary: 更新用户状态
+            description: 更新用户状态
+            operationId: UserService_UpdateUserByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateUserByStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateUserByStatusResponse'
+            security:
+                - BearerAuth: []
     /admin/v1/users/{id}:
         get:
             tags:
@@ -1401,7 +1641,29 @@ components:
                 updatedAt:
                     type: string
                     description: 更新时间
+                children:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Dept'
+                    description: 子级
+                ancestors:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 祖籍
             description: 部门信息
+        ExistMenuByNameRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 菜单ID
+                    format: uint32
+                name:
+                    type: string
+                    description: 菜单名
+            description: 判断菜单名是否存在请求
         ExistMenuByNameResponse:
             type: object
             properties:
@@ -1409,6 +1671,17 @@ components:
                     type: boolean
                     description: 菜单名是否存在
             description: 判断菜单名是否存在响应
+        ExistMenuByPathRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 菜单ID
+                    format: uint32
+                path:
+                    type: string
+                    description: 菜单路径
+            description: 判断菜单路径是否存在请求
         ExistMenuByPathResponse:
             type: object
             properties:
@@ -1416,6 +1689,24 @@ components:
                     type: boolean
                     description: 菜单路径是否存在
             description: 判断菜单路径是否存在响应
+        ExistRoleByNameRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 角色ID
+                    format: uint32
+                name:
+                    type: string
+                    description: 角色名
+            description: 判断角色名是否存在请求
+        ExistRoleByNameResponse:
+            type: object
+            properties:
+                exist:
+                    type: boolean
+                    description: 角色名是否存在
+            description: 判断角色名是否存在响应
         ListDeptResponse:
             type: object
             properties:
@@ -1423,10 +1714,21 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Dept'
+                    description: 部门列表
                 total:
                     type: integer
+                    description: 总条数
                     format: int32
             description: 分页查询部门响应
+        ListDeptTreeResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Dept'
+                    description: 部门树形列表
+            description: 查询部门树形列表响应
         ListMenuResponse:
             type: object
             properties:
@@ -1558,7 +1860,7 @@ components:
                 component:
                     type: string
                     description: 组件
-                pid:
+                parentId:
                     type: integer
                     description: 父级ID
                     format: uint32
@@ -1566,10 +1868,17 @@ components:
                     type: string
                     description: 重定向
                 type:
-                    type: integer
+                    enum:
+                        - MENU_TYPE_UNSPECIFIED
+                        - MENU_TYPE_CATALOG
+                        - MENU_TYPE_MENU
+                        - MENU_TYPE_BUTTON
+                        - MENU_TYPE_EMBEDDED
+                        - MENU_TYPE_LINK
+                    type: string
                     default: !!float 1
                     description: 菜单类型
-                    format: int32
+                    format: enum
                 status:
                     enum:
                         - STATUS_UNSPECIFIED
@@ -1605,13 +1914,24 @@ components:
                     type: string
                     description: 徽标内容(当徽标类型为normal时有效)
                 badgeType:
-                    type: integer
+                    enum:
+                        - BADGE_TYPE_UNSPECIFIED
+                        - BADGE_TYPE_DOT
+                        - BADGE_TYPE_NORMAL
+                    type: string
                     description: 徽标类型
-                    format: int32
+                    format: enum
                 badgeVariants:
-                    type: integer
+                    enum:
+                        - BADGE_VARIANTS_UNSPECIFIED
+                        - BADGE_VARIANTS_DEFAULT
+                        - BADGE_VARIANTS_DESTRUCTIVE
+                        - BADGE_VARIANTS_PRIMARY
+                        - BADGE_VARIANTS_SUCCESS
+                        - BADGE_VARIANTS_WARNING
+                    type: string
                     description: 徽标颜色
-                    format: int32
+                    format: enum
                 hideChildrenInMenu:
                     type: boolean
                     description: 在菜单中隐藏下级
@@ -1796,22 +2116,82 @@ components:
                     type: string
                     description: 更新时间
             description: 角色信息
+        UpdateDeptByStatusResponse:
+            type: object
+            properties: {}
+            description: 更新部门状态响应
         UpdateDeptResponse:
             type: object
             properties: {}
             description: 更新部门响应
+        UpdateMenuByStatusResponse:
+            type: object
+            properties: {}
+            description: 更新菜单状态响应
         UpdateMenuResponse:
             type: object
             properties: {}
             description: 更新菜单响应
+        UpdatePostByStatusResponse:
+            type: object
+            properties: {}
+            description: 更新岗位状态响应
         UpdatePostResponse:
             type: object
             properties: {}
             description: 更新岗位响应
+        UpdateRoleByStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 角色ID
+                    format: uint32
+                status:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    description: 角色状态 0 未知 1 启用 2 禁用
+                    format: enum
+                operatorId:
+                    type: integer
+                    description: 操作人ID
+                    format: uint32
+            description: 更新角色状态请求
+        UpdateRoleByStatusResponse:
+            type: object
+            properties: {}
+            description: 更新角色状态响应
         UpdateRoleResponse:
             type: object
             properties: {}
             description: 更新角色响应
+        UpdateUserByStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 用户ID
+                    format: uint32
+                status:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    description: 状态 0 未知 1 启用 2 禁用
+                    format: enum
+                operatorId:
+                    type: integer
+                    description: 操作人ID
+                    format: uint32
+            description: 更新用户状态 - 请求
+        UpdateUserByStatusResponse:
+            type: object
+            properties: {}
+            description: 更新用户状态 - 回应
         UpdateUserResponse:
             type: object
             properties: {}
@@ -1820,6 +2200,7 @@ components:
             properties:
                 id:
                     type: integer
+                    description: 用户ID
                     format: uint32
                 name:
                     type: string

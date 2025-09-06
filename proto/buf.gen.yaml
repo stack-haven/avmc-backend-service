@@ -10,8 +10,9 @@ managed:
 
 inputs:
   - directory: .
-    # paths:
-    #   - ./admin/interface/v1
+    paths:
+      - ./avmc/admin/v1
+      - ./core/service/v1
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.5
     out: ../api

@@ -31,16 +31,22 @@ service MenuService {
   rpc ExistMenuByPath(ExistMenuByPathRequest) returns (ExistMenuByPathResponse);
   // 判断菜单名是否存在
   rpc ExistMenuByName(ExistMenuByNameRequest) returns (ExistMenuByNameResponse);
+  // 更新菜单状态
+  rpc UpdateMenuByStatus(UpdateMenuByStatusRequest) returns (UpdateMenuByStatusResponse);
 }
 
 enum MenuType {
   MENU_TYPE_UNSPECIFIED = 0;
   // 目录
-  MENU_TYPE_DIR = 1;
+  MENU_TYPE_CATALOG = 1;
   // 菜单
   MENU_TYPE_MENU = 2;
   // 按钮·
   MENU_TYPE_BUTTON = 3;
+  // 内嵌
+  MENU_TYPE_EMBEDDED = 5;
+  // 外链
+  MENU_TYPE_LINK = 6;
 }
 
 // 徽标类型
@@ -71,10 +77,7 @@ enum BadgeVariants {
 
 message Menu {
   // 菜单ID
-  uint32 id = 1 [
-    (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "菜单ID"}
-  ];
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "菜单ID"}];
   // 菜单名称
   string name = 2 [
     (buf.validate.field).string.max_len = 20,
@@ -100,7 +103,7 @@ message Menu {
     (gnostic.openapi.v3.property) = {description: "组件"}
   ];
   // 父级ID
-  optional uint32 pid = 8 [
+  optional uint32 parent_id = 8 [
     (buf.validate.field).uint32.gte = 0,
     (gnostic.openapi.v3.property) = {description: "父级ID"}
   ];
@@ -110,10 +113,13 @@ message Menu {
     (gnostic.openapi.v3.property) = {description: "重定向"}
   ];
   // 菜单类型
-  int32 type = 10 [(gnostic.openapi.v3.property) = {
-    description: "菜单类型"
-    default: {number: 1}
-  }];
+  optional MenuType type = 10 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {
+      description: "菜单类型"
+      default: {number: 1}
+    }
+  ];
   // 菜单状态 1 启用 2 禁用
   optional enum.Status status = 11 [
     (buf.validate.field).enum.defined_only = true,
@@ -150,9 +156,22 @@ message MenuMeta {
     (gnostic.openapi.v3.property) = {description: "徽标内容(当徽标类型为normal时有效)"}
   ];
   // 徽标类型
-  optional int32 badge_type = 6 [(gnostic.openapi.v3.property) = {description: "徽标类型"}];
+  optional BadgeType badge_type = 6 [
+    (buf.validate.field).enum = {
+      defined_only: true
+      in: [
+        1,
+        2
+      ]
+      example: 1
+    },
+    (gnostic.openapi.v3.property) = {description: "徽标类型"}
+  ];
   // 徽标颜色
-  optional int32 badge_variants = 7 [(gnostic.openapi.v3.property) = {description: "徽标颜色"}];
+  optional BadgeVariants badge_variants = 7 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "徽标颜色"}
+  ];
   // 在菜单中隐藏下级
   optional bool hide_children_in_menu = 8 [(gnostic.openapi.v3.property) = {description: "在菜单中隐藏下级"}];
   // 在面包屑中隐藏
@@ -207,7 +226,7 @@ message CreateMenuRequest {
     (buf.validate.field).required = true,
     (gnostic.openapi.v3.property) = {description: "菜单"}
   ];
-  uint32 operator_id = 2 [
+  optional uint32 operator_id = 2 [
     (buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "操作人ID"}
   ];
@@ -220,7 +239,10 @@ message CreateMenuResponse {}
 message UpdateMenuRequest {
   uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
   Menu menu = 2 [(buf.validate.field).required = true];
-  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+  optional uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 
 // 更新菜单响应
@@ -229,7 +251,10 @@ message UpdateMenuResponse {}
 // 删除菜单请求
 message DeleteMenuRequest {
   uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
-  uint32 operator_id = 2 [(buf.validate.field).uint32.gt = 0];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
 }
 
 // 删除菜单响应
@@ -261,7 +286,7 @@ message ListMenuResponse {
 
 // 获取菜单树请求
 message ListMenuTreeRequest {
-  optional uint32 pid = 1 [
+  optional uint32 parent_id = 1 [
     (buf.validate.field).uint32.gte = 0,
     (gnostic.openapi.v3.property) = {description: "父级ID"}
   ];
@@ -274,7 +299,10 @@ message ListMenuTreeResponse {
 
 // 判断菜单路径是否存在请求
 message ExistMenuByPathRequest {
-  optional uint32 id = 1 [(buf.validate.field).uint32.gt = 0, (gnostic.openapi.v3.property) = {description: "菜单ID"}];
+  optional uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "菜单ID"}
+  ];
   string path = 2 [
     (buf.validate.field).string.max_len = 200,
     (gnostic.openapi.v3.property) = {description: "菜单路径"}
@@ -288,13 +316,26 @@ message ExistMenuByPathResponse {
 
 // 判断菜单名是否存在请求
 message ExistMenuByNameRequest {
-  optional uint32 id = 1 [(buf.validate.field).uint32.gt = 0, (gnostic.openapi.v3.property) = {description: "菜单ID"}];
+  optional uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "菜单ID"}
+  ];
   string name = 2 [
     (buf.validate.field).string.max_len = 20,
     (gnostic.openapi.v3.property) = {description: "菜单名"}
   ];
 }
+
 // 判断菜单名是否存在响应
 message ExistMenuByNameResponse {
   bool exist = 1 [(gnostic.openapi.v3.property) = {description: "菜单名是否存在"}];
 }
+
+// 更新菜单状态请求
+message UpdateMenuByStatusRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  int32 status = 2 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 1];
+}
+
+// 更新菜单状态响应
+message UpdateMenuByStatusResponse {}

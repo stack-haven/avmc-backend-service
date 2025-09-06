@@ -25,7 +25,9 @@ const OperationDeptServiceCreateDept = "/avmc.admin.v1.DeptService/CreateDept"
 const OperationDeptServiceDeleteDept = "/avmc.admin.v1.DeptService/DeleteDept"
 const OperationDeptServiceGetDept = "/avmc.admin.v1.DeptService/GetDept"
 const OperationDeptServiceListDept = "/avmc.admin.v1.DeptService/ListDept"
+const OperationDeptServiceListDeptTree = "/avmc.admin.v1.DeptService/ListDeptTree"
 const OperationDeptServiceUpdateDept = "/avmc.admin.v1.DeptService/UpdateDept"
+const OperationDeptServiceUpdateDeptByStatus = "/avmc.admin.v1.DeptService/UpdateDeptByStatus"
 
 type DeptServiceHTTPServer interface {
 	// CreateDept 创建部门
@@ -36,17 +38,24 @@ type DeptServiceHTTPServer interface {
 	GetDept(context.Context, *v1.GetDeptRequest) (*v1.Dept, error)
 	// ListDept 获取部门列表
 	ListDept(context.Context, *pagination.PagingRequest) (*v1.ListDeptResponse, error)
+	// ListDeptTree 获取部门树
+	ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error)
 	// UpdateDept 更新部门
 	UpdateDept(context.Context, *v1.UpdateDeptRequest) (*v1.UpdateDeptResponse, error)
+	// UpdateDeptByStatus 更新部门状态
+	UpdateDeptByStatus(context.Context, *v1.UpdateDeptByStatusRequest) (*v1.UpdateDeptByStatusResponse, error)
 }
 
 func RegisterDeptServiceHTTPServer(s *http.Server, srv DeptServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/admin/v1/depts", _DeptService_ListDept0_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts/tree", _DeptService_ListDeptTree0_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts/tree/{parent_id}", _DeptService_ListDeptTree1_HTTP_Handler(srv))
 	r.GET("/admin/v1/depts/{id}", _DeptService_GetDept0_HTTP_Handler(srv))
 	r.POST("/admin/v1/depts", _DeptService_CreateDept0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/depts/{id}", _DeptService_UpdateDept0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/depts/{id}", _DeptService_DeleteDept0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/depts/status-update/{id}", _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv))
 }
 
 func _DeptService_ListDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
@@ -64,6 +73,47 @@ func _DeptService_ListDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx htt
 			return err
 		}
 		reply := out.(*v1.ListDeptResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DeptService_ListDeptTree0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListDeptTreeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDeptServiceListDeptTree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListDeptTree(ctx, req.(*v1.ListDeptTreeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListDeptTreeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DeptService_ListDeptTree1_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListDeptTreeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDeptServiceListDeptTree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListDeptTree(ctx, req.(*v1.ListDeptTreeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListDeptTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -159,12 +209,39 @@ func _DeptService_DeleteDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx h
 	}
 }
 
+func _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UpdateDeptByStatusRequest
+		if err := ctx.Bind(&in.Status); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDeptServiceUpdateDeptByStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateDeptByStatus(ctx, req.(*v1.UpdateDeptByStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UpdateDeptByStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type DeptServiceHTTPClient interface {
 	CreateDept(ctx context.Context, req *v1.CreateDeptRequest, opts ...http.CallOption) (rsp *v1.CreateDeptResponse, err error)
 	DeleteDept(ctx context.Context, req *v1.DeleteDeptRequest, opts ...http.CallOption) (rsp *v1.DeleteDeptResponse, err error)
 	GetDept(ctx context.Context, req *v1.GetDeptRequest, opts ...http.CallOption) (rsp *v1.Dept, err error)
 	ListDept(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListDeptResponse, err error)
+	ListDeptTree(ctx context.Context, req *v1.ListDeptTreeRequest, opts ...http.CallOption) (rsp *v1.ListDeptTreeResponse, err error)
 	UpdateDept(ctx context.Context, req *v1.UpdateDeptRequest, opts ...http.CallOption) (rsp *v1.UpdateDeptResponse, err error)
+	UpdateDeptByStatus(ctx context.Context, req *v1.UpdateDeptByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdateDeptByStatusResponse, err error)
 }
 
 type DeptServiceHTTPClientImpl struct {
@@ -227,6 +304,19 @@ func (c *DeptServiceHTTPClientImpl) ListDept(ctx context.Context, in *pagination
 	return &out, nil
 }
 
+func (c *DeptServiceHTTPClientImpl) ListDeptTree(ctx context.Context, in *v1.ListDeptTreeRequest, opts ...http.CallOption) (*v1.ListDeptTreeResponse, error) {
+	var out v1.ListDeptTreeResponse
+	pattern := "/admin/v1/depts/tree/{parent_id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDeptServiceListDeptTree))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *DeptServiceHTTPClientImpl) UpdateDept(ctx context.Context, in *v1.UpdateDeptRequest, opts ...http.CallOption) (*v1.UpdateDeptResponse, error) {
 	var out v1.UpdateDeptResponse
 	pattern := "/admin/v1/depts/{id}"
@@ -234,6 +324,19 @@ func (c *DeptServiceHTTPClientImpl) UpdateDept(ctx context.Context, in *v1.Updat
 	opts = append(opts, http.Operation(OperationDeptServiceUpdateDept))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in.Dept, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *DeptServiceHTTPClientImpl) UpdateDeptByStatus(ctx context.Context, in *v1.UpdateDeptByStatusRequest, opts ...http.CallOption) (*v1.UpdateDeptByStatusResponse, error) {
+	var out v1.UpdateDeptByStatusResponse
+	pattern := "/admin/v1/depts/status-update/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDeptServiceUpdateDeptByStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in.Status, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

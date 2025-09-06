@@ -26,6 +26,8 @@ service PostService {
 	rpc GetPost (GetPostRequest) returns (GetPostResponse);
   // 分页查询岗位
 	rpc ListPost (ListPostRequest) returns (ListPostResponse);
+  // 更新岗位状态
+  rpc UpdatePostByStatus(UpdatePostByStatusRequest) returns (UpdatePostByStatusResponse);
 }
 
 // 岗位信息
@@ -128,3 +130,12 @@ message ListPostResponse {
   repeated Post items = 1;
   int32 total = 2;
 }
+
+// 更新岗位状态请求
+message UpdatePostByStatusRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  int32 status = 2 [(buf.validate.field).int32.gte = 0, (buf.validate.field).int32.lte = 1];
+}
+
+// 更新岗位状态响应
+message UpdatePostByStatusResponse {}

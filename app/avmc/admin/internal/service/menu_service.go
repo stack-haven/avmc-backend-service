@@ -42,7 +42,7 @@ func (s *MenuServiceService) ListMenu(ctx context.Context, req *pbPagination.Pag
 // 返回值：菜单树形列表响应，错误信息
 func (s *MenuServiceService) ListMenuTree(ctx context.Context, req *pbCore.ListMenuTreeRequest) (*pbCore.ListMenuTreeResponse, error) {
 	s.log.Infof("查询菜单列表分页，分页请求：%v", req)
-	return s.muc.ListTree(ctx, req.GetPid())
+	return s.muc.ListTree(ctx, req.GetParentId())
 }
 
 // GetMenu 处理获取菜单详情请求
@@ -110,7 +110,9 @@ func (s *MenuServiceService) DeleteMenu(ctx context.Context, req *pbCore.DeleteM
 // 返回值：判断菜单路径是否存在响应，错误信息
 func (s *MenuServiceService) ExistMenuByPath(ctx context.Context, req *pbCore.ExistMenuByPathRequest) (*pbCore.ExistMenuByPathResponse, error) {
 	if req.GetPath() == "" {
-		return nil, pb.ErrorMenuPathCannotBeEmpty("菜单路径不能为空")
+		return &pbCore.ExistMenuByPathResponse{
+			Exist: false,
+		}, nil
 	}
 	s.log.Infof("判断菜单路径是否存在，菜单路径：%v", req.GetPath())
 	exist, err := s.muc.ExistByPath(ctx, req)
@@ -127,7 +129,9 @@ func (s *MenuServiceService) ExistMenuByPath(ctx context.Context, req *pbCore.Ex
 // 返回值：判断菜单名是否存在响应，错误信息
 func (s *MenuServiceService) ExistMenuByName(ctx context.Context, req *pbCore.ExistMenuByNameRequest) (*pbCore.ExistMenuByNameResponse, error) {
 	if req.GetName() == "" {
-		return nil, pb.ErrorMenuNameCannotBeEmpty("菜单名不能为空")
+		return &pbCore.ExistMenuByNameResponse{
+			Exist: false,
+		}, nil
 	}
 	s.log.Infof("判断菜单名是否存在，菜单名：%v", req.GetName())
 	exist, err := s.muc.ExistByName(ctx, req)

@@ -106,6 +106,34 @@ func (_c *PostCreate) SetNillableName(v *string) *PostCreate {
 	return _c
 }
 
+// SetSort sets the "sort" field.
+func (_c *PostCreate) SetSort(v int32) *PostCreate {
+	_c.mutation.SetSort(v)
+	return _c
+}
+
+// SetNillableSort sets the "sort" field if the given value is not nil.
+func (_c *PostCreate) SetNillableSort(v *int32) *PostCreate {
+	if v != nil {
+		_c.SetSort(*v)
+	}
+	return _c
+}
+
+// SetRemark sets the "remark" field.
+func (_c *PostCreate) SetRemark(v string) *PostCreate {
+	_c.mutation.SetRemark(v)
+	return _c
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_c *PostCreate) SetNillableRemark(v *string) *PostCreate {
+	if v != nil {
+		_c.SetRemark(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *PostCreate) SetID(v uint32) *PostCreate {
 	_c.mutation.SetID(v)
@@ -178,6 +206,14 @@ func (_c *PostCreate) defaults() error {
 		v := post.DefaultName
 		_c.mutation.SetName(v)
 	}
+	if _, ok := _c.mutation.Sort(); !ok {
+		v := post.DefaultSort
+		_c.mutation.SetSort(v)
+	}
+	if _, ok := _c.mutation.Remark(); !ok {
+		v := post.DefaultRemark
+		_c.mutation.SetRemark(v)
+	}
 	return nil
 }
 
@@ -211,6 +247,17 @@ func (_c *PostCreate) check() error {
 	if v, ok := _c.mutation.Name(); ok {
 		if err := post.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`gen: validator failed for field "Post.name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Sort(); !ok {
+		return &ValidationError{Name: "sort", err: errors.New(`gen: missing required field "Post.sort"`)}
+	}
+	if _, ok := _c.mutation.Remark(); !ok {
+		return &ValidationError{Name: "remark", err: errors.New(`gen: missing required field "Post.remark"`)}
+	}
+	if v, ok := _c.mutation.Remark(); ok {
+		if err := post.RemarkValidator(v); err != nil {
+			return &ValidationError{Name: "remark", err: fmt.Errorf(`gen: validator failed for field "Post.remark": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
@@ -274,6 +321,14 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(post.FieldName, field.TypeString, value)
 		_node.Name = &value
+	}
+	if value, ok := _c.mutation.Sort(); ok {
+		_spec.SetField(post.FieldSort, field.TypeInt32, value)
+		_node.Sort = &value
+	}
+	if value, ok := _c.mutation.Remark(); ok {
+		_spec.SetField(post.FieldRemark, field.TypeString, value)
+		_node.Remark = &value
 	}
 	return _node, _spec
 }
@@ -402,6 +457,36 @@ func (u *PostUpsert) SetName(v string) *PostUpsert {
 // UpdateName sets the "name" field to the value that was provided on create.
 func (u *PostUpsert) UpdateName() *PostUpsert {
 	u.SetExcluded(post.FieldName)
+	return u
+}
+
+// SetSort sets the "sort" field.
+func (u *PostUpsert) SetSort(v int32) *PostUpsert {
+	u.Set(post.FieldSort, v)
+	return u
+}
+
+// UpdateSort sets the "sort" field to the value that was provided on create.
+func (u *PostUpsert) UpdateSort() *PostUpsert {
+	u.SetExcluded(post.FieldSort)
+	return u
+}
+
+// AddSort adds v to the "sort" field.
+func (u *PostUpsert) AddSort(v int32) *PostUpsert {
+	u.Add(post.FieldSort, v)
+	return u
+}
+
+// SetRemark sets the "remark" field.
+func (u *PostUpsert) SetRemark(v string) *PostUpsert {
+	u.Set(post.FieldRemark, v)
+	return u
+}
+
+// UpdateRemark sets the "remark" field to the value that was provided on create.
+func (u *PostUpsert) UpdateRemark() *PostUpsert {
+	u.SetExcluded(post.FieldRemark)
 	return u
 }
 
@@ -544,6 +629,41 @@ func (u *PostUpsertOne) SetName(v string) *PostUpsertOne {
 func (u *PostUpsertOne) UpdateName() *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetSort sets the "sort" field.
+func (u *PostUpsertOne) SetSort(v int32) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetSort(v)
+	})
+}
+
+// AddSort adds v to the "sort" field.
+func (u *PostUpsertOne) AddSort(v int32) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.AddSort(v)
+	})
+}
+
+// UpdateSort sets the "sort" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateSort() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateSort()
+	})
+}
+
+// SetRemark sets the "remark" field.
+func (u *PostUpsertOne) SetRemark(v string) *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.SetRemark(v)
+	})
+}
+
+// UpdateRemark sets the "remark" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateRemark() *PostUpsertOne {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateRemark()
 	})
 }
 
@@ -852,6 +972,41 @@ func (u *PostUpsertBulk) SetName(v string) *PostUpsertBulk {
 func (u *PostUpsertBulk) UpdateName() *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetSort sets the "sort" field.
+func (u *PostUpsertBulk) SetSort(v int32) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetSort(v)
+	})
+}
+
+// AddSort adds v to the "sort" field.
+func (u *PostUpsertBulk) AddSort(v int32) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.AddSort(v)
+	})
+}
+
+// UpdateSort sets the "sort" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateSort() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateSort()
+	})
+}
+
+// SetRemark sets the "remark" field.
+func (u *PostUpsertBulk) SetRemark(v string) *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.SetRemark(v)
+	})
+}
+
+// UpdateRemark sets the "remark" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateRemark() *PostUpsertBulk {
+	return u.Update(func(s *PostUpsert) {
+		s.UpdateRemark()
 	})
 }
 

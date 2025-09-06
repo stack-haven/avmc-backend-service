@@ -26,6 +26,10 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldSort holds the string denoting the sort field in the database.
+	FieldSort = "sort"
+	// FieldRemark holds the string denoting the remark field in the database.
+	FieldRemark = "remark"
 	// Table holds the table name of the post in the database.
 	Table = "posts"
 )
@@ -39,6 +43,8 @@ var Columns = []string{
 	FieldDomainID,
 	FieldDeletedAt,
 	FieldName,
+	FieldSort,
+	FieldRemark,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "posts"
@@ -88,6 +94,12 @@ var (
 	DefaultName string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultSort holds the default value on creation for the "sort" field.
+	DefaultSort int32
+	// DefaultRemark holds the default value on creation for the "remark" field.
+	DefaultRemark string
+	// RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	RemarkValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -128,4 +140,14 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// BySort orders the results by the sort field.
+func BySort(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSort, opts...).ToFunc()
+}
+
+// ByRemark orders the results by the remark field.
+func ByRemark(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemark, opts...).ToFunc()
 }

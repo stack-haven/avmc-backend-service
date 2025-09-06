@@ -5,6 +5,7 @@ import (
 
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -90,10 +91,18 @@ func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMe
 		return nil, err
 	}
 	tree := make([]*pbCore.Menu, 0)
-	for _, menu := range menus {
-		if menu.GetPid() == pid {
-			tree = append(tree, menu)
-		}
+
+	tree, err = convert.ToTree(menus, pid, func(parent *pbCore.Menu, childrens ...*pbCore.Menu) error {
+		parent.Children = append(parent.Children, childrens...)
+		return nil
+	})
+	// tree, err = convert.ToTreeWith(
+	// 	menus, pid, func(item *pbCore.Menu) uint32 { return item.Id }, func(item *pbCore.Menu) uint32 { return *item.ParentId }, func(parent *pbCore.Menu, children ...*pbCore.Menu) error {
+	// 		parent.Children = append(parent.Children, children...)
+	// 		return nil
+	// 	})
+	if err != nil {
+		return nil, err
 	}
 	return &pbCore.ListMenuTreeResponse{Items: tree}, nil
 }
@@ -103,10 +112,10 @@ func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMe
 // 返回值：错误信息
 func (uc *MenuUsecase) Delete(ctx context.Context, id uint32) error {
 	uc.log.WithContext(ctx).Infof("DeleteMenu: %v", id)
-	_, err := uc.repo.FindByID(ctx, id)
-	if err != nil {
-		return err
-	}
+	// _, err := uc.repo.FindByID(ctx, id)
+	// if err != nil {
+	// 	return err
+	// }
 	return uc.repo.Delete(ctx, id)
 }
 

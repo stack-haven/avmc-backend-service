@@ -34,7 +34,7 @@ service MenuService {
   // 获取菜单树
   rpc ListMenuTree(core.service.v1.ListMenuTreeRequest) returns (core.service.v1.ListMenuTreeResponse) {
     option (google.api.http) = {
-      get: "/admin/v1/menus/tree/{pid}"
+      get: "/admin/v1/menus/tree/{parent_id}"
       additional_bindings: [
         {
           get: "/admin/v1/menus/tree"
@@ -165,10 +165,11 @@ service MenuService {
   // 判断菜单路径是否存在
   rpc ExistMenuByPath(core.service.v1.ExistMenuByPathRequest) returns (core.service.v1.ExistMenuByPathResponse) {
     option (google.api.http) = {
-      get: "/admin/v1/menus/path-exists"
+      get: "/admin/v1/menus/path-exists/{id}"
       additional_bindings: [
         {
-          get: "/admin/v1/menus/path-exists/{path}"
+          post: "/admin/v1/menus/path-exists"
+          body: "*"
         }
       ]
     };
@@ -191,16 +192,41 @@ service MenuService {
   // 判断菜单名是否存在
   rpc ExistMenuByName(core.service.v1.ExistMenuByNameRequest) returns (core.service.v1.ExistMenuByNameResponse) {
     option (google.api.http) = {
-      get: "/admin/v1/menus/name-exists"
+      get: "/admin/v1/menus/name-exists/{id}"
+      // query 参数映射字段 ?id=123&name=菜单A
       additional_bindings: [
         {
-          get: "/admin/v1/menus/name-exists/{name}"
+          post: "/admin/v1/menus/name-exists"
+          body: "*"
         }
       ]
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "获取菜单名是否存在"
-      description: "获取菜单名是否存在"
+      summary: "判断菜单名是否存在"
+      description: "判断菜单名是否存在"
+      tags: ["菜单管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  
+  // 更新菜单状态
+  rpc UpdateMenuByStatus(core.service.v1.UpdateMenuByStatusRequest) returns (core.service.v1.UpdateMenuByStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/menus/status-update/{id}"
+      body: "status"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新菜单状态"
+      description: "更新菜单状态"
       tags: ["菜单管理服务"]
       security: [
         {

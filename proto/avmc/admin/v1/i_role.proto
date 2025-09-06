@@ -14,7 +14,7 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 // 角色管理服务
 service RoleService {
   // 获取角色列表
-  rpc ListRole(pagination.PagingRequest) returns (core.service.v1.ListRoleResponse) {
+  rpc ListRole(core.service.v1.ListRoleRequest) returns (core.service.v1.ListRoleResponse) {
     option (google.api.http) = {get: "/admin/v1/roles"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取角色列表"
@@ -118,4 +118,57 @@ service RoleService {
       ]
     };
   }
+
+  // 判断角色名是否存在
+  rpc ExistRoleByName(core.service.v1.ExistRoleByNameRequest) returns (core.service.v1.ExistRoleByNameResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/roles/name-exists/{id}"
+      // query 参数映射字段 ?id=123&name=角色A
+      additional_bindings: [
+        {
+          post: "/admin/v1/roles/name-exists"
+          body: "*"
+        }
+      ]
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "判断菜单名是否存在"
+      description: "判断菜单名是否存在"
+      tags: ["菜单管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新角色状态
+  rpc UpdateRoleByStatus(core.service.v1.UpdateRoleByStatusRequest) returns (core.service.v1.UpdateRoleByStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/roles/status-update/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新角色状态"
+      description: "更新角色状态"
+      tags: ["角色管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
 }

@@ -827,7 +827,7 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(menu.FieldType, field.TypeInt32, value)
-		_node.Type = value
+		_node.Type = &value
 	}
 	if value, ok := _c.mutation.Component(); ok {
 		_spec.SetField(menu.FieldComponent, field.TypeString, value)

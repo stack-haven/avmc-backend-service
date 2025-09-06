@@ -32,6 +32,34 @@ service DeptService {
     };
   }
 
+
+  // 获取部门树
+  rpc ListDeptTree(core.service.v1.ListDeptTreeRequest) returns (core.service.v1.ListDeptTreeResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/depts/tree/{parent_id}"
+      additional_bindings: [
+        {
+          get: "/admin/v1/depts/tree"
+        }
+      ]
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取部门树"
+      description: "获取部门树"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
   // 获取部门数据
   rpc GetDept(core.service.v1.GetDeptRequest) returns (core.service.v1.Dept) {
     option (google.api.http) = {get: "/admin/v1/depts/{id}"};
@@ -104,6 +132,29 @@ service DeptService {
     option (gnostic.openapi.v3.operation) = {
       summary: "删除部门"
       description: "删除部门"
+      tags: ["部门管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新部门状态
+  rpc UpdateDeptByStatus(core.service.v1.UpdateDeptByStatusRequest) returns (core.service.v1.UpdateDeptByStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/depts/status-update/{id}"
+      body: "status"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新部门状态"
+      description: "更新部门状态"
       tags: ["部门管理服务"]
       security: [
         {

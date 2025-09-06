@@ -37,7 +37,10 @@ var schemaGraph = func() *sqlgraph.Schema {
 			dept.FieldDeletedAt: {Type: field.TypeTime, Column: dept.FieldDeletedAt},
 			dept.FieldName:      {Type: field.TypeString, Column: dept.FieldName},
 			dept.FieldParentID:  {Type: field.TypeUint32, Column: dept.FieldParentID},
+			dept.FieldLeaderID:  {Type: field.TypeUint32, Column: dept.FieldLeaderID},
 			dept.FieldAncestors: {Type: field.TypeJSON, Column: dept.FieldAncestors},
+			dept.FieldSort:      {Type: field.TypeInt32, Column: dept.FieldSort},
+			dept.FieldRemark:    {Type: field.TypeString, Column: dept.FieldRemark},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -102,6 +105,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			post.FieldDomainID:  {Type: field.TypeUint32, Column: post.FieldDomainID},
 			post.FieldDeletedAt: {Type: field.TypeTime, Column: post.FieldDeletedAt},
 			post.FieldName:      {Type: field.TypeString, Column: post.FieldName},
+			post.FieldSort:      {Type: field.TypeInt32, Column: post.FieldSort},
+			post.FieldRemark:    {Type: field.TypeString, Column: post.FieldRemark},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
@@ -329,9 +334,24 @@ func (f *DeptFilter) WhereParentID(p entql.Uint32P) {
 	f.Where(p.Field(dept.FieldParentID))
 }
 
+// WhereLeaderID applies the entql uint32 predicate on the leader_id field.
+func (f *DeptFilter) WhereLeaderID(p entql.Uint32P) {
+	f.Where(p.Field(dept.FieldLeaderID))
+}
+
 // WhereAncestors applies the entql json.RawMessage predicate on the ancestors field.
 func (f *DeptFilter) WhereAncestors(p entql.BytesP) {
 	f.Where(p.Field(dept.FieldAncestors))
+}
+
+// WhereSort applies the entql int32 predicate on the sort field.
+func (f *DeptFilter) WhereSort(p entql.Int32P) {
+	f.Where(p.Field(dept.FieldSort))
+}
+
+// WhereRemark applies the entql string predicate on the remark field.
+func (f *DeptFilter) WhereRemark(p entql.StringP) {
+	f.Where(p.Field(dept.FieldRemark))
 }
 
 // WhereHasParent applies a predicate to check if query has an edge parent.
@@ -658,6 +678,16 @@ func (f *PostFilter) WhereDeletedAt(p entql.TimeP) {
 // WhereName applies the entql string predicate on the name field.
 func (f *PostFilter) WhereName(p entql.StringP) {
 	f.Where(p.Field(post.FieldName))
+}
+
+// WhereSort applies the entql int32 predicate on the sort field.
+func (f *PostFilter) WhereSort(p entql.Int32P) {
+	f.Where(p.Field(post.FieldSort))
+}
+
+// WhereRemark applies the entql string predicate on the remark field.
+func (f *PostFilter) WhereRemark(p entql.StringP) {
+	f.Where(p.Field(post.FieldRemark))
 }
 
 // addPredicate implements the predicateAdder interface.

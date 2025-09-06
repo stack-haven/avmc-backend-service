@@ -117,4 +117,27 @@ service PostService {
       ]
     };
   }
+
+  // 更新岗位状态
+  rpc UpdatePostByStatus(core.service.v1.UpdatePostByStatusRequest) returns (core.service.v1.UpdatePostByStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/posts/status-update/{id}"
+      body: "status"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新岗位状态"
+      description: "更新岗位状态"
+      tags: ["岗位管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
 }

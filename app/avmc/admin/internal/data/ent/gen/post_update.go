@@ -111,6 +111,41 @@ func (_u *PostUpdate) SetNillableName(v *string) *PostUpdate {
 	return _u
 }
 
+// SetSort sets the "sort" field.
+func (_u *PostUpdate) SetSort(v int32) *PostUpdate {
+	_u.mutation.ResetSort()
+	_u.mutation.SetSort(v)
+	return _u
+}
+
+// SetNillableSort sets the "sort" field if the given value is not nil.
+func (_u *PostUpdate) SetNillableSort(v *int32) *PostUpdate {
+	if v != nil {
+		_u.SetSort(*v)
+	}
+	return _u
+}
+
+// AddSort adds value to the "sort" field.
+func (_u *PostUpdate) AddSort(v int32) *PostUpdate {
+	_u.mutation.AddSort(v)
+	return _u
+}
+
+// SetRemark sets the "remark" field.
+func (_u *PostUpdate) SetRemark(v string) *PostUpdate {
+	_u.mutation.SetRemark(v)
+	return _u
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_u *PostUpdate) SetNillableRemark(v *string) *PostUpdate {
+	if v != nil {
+		_u.SetRemark(*v)
+	}
+	return _u
+}
+
 // Mutation returns the PostMutation object of the builder.
 func (_u *PostUpdate) Mutation() *PostMutation {
 	return _u.mutation
@@ -175,6 +210,11 @@ func (_u *PostUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`gen: validator failed for field "Post.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Remark(); ok {
+		if err := post.RemarkValidator(v); err != nil {
+			return &ValidationError{Name: "remark", err: fmt.Errorf(`gen: validator failed for field "Post.remark": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -219,6 +259,15 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(post.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Sort(); ok {
+		_spec.SetField(post.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedSort(); ok {
+		_spec.AddField(post.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.Remark(); ok {
+		_spec.SetField(post.FieldRemark, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -324,6 +373,41 @@ func (_u *PostUpdateOne) SetNillableName(v *string) *PostUpdateOne {
 	return _u
 }
 
+// SetSort sets the "sort" field.
+func (_u *PostUpdateOne) SetSort(v int32) *PostUpdateOne {
+	_u.mutation.ResetSort()
+	_u.mutation.SetSort(v)
+	return _u
+}
+
+// SetNillableSort sets the "sort" field if the given value is not nil.
+func (_u *PostUpdateOne) SetNillableSort(v *int32) *PostUpdateOne {
+	if v != nil {
+		_u.SetSort(*v)
+	}
+	return _u
+}
+
+// AddSort adds value to the "sort" field.
+func (_u *PostUpdateOne) AddSort(v int32) *PostUpdateOne {
+	_u.mutation.AddSort(v)
+	return _u
+}
+
+// SetRemark sets the "remark" field.
+func (_u *PostUpdateOne) SetRemark(v string) *PostUpdateOne {
+	_u.mutation.SetRemark(v)
+	return _u
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_u *PostUpdateOne) SetNillableRemark(v *string) *PostUpdateOne {
+	if v != nil {
+		_u.SetRemark(*v)
+	}
+	return _u
+}
+
 // Mutation returns the PostMutation object of the builder.
 func (_u *PostUpdateOne) Mutation() *PostMutation {
 	return _u.mutation
@@ -401,6 +485,11 @@ func (_u *PostUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`gen: validator failed for field "Post.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Remark(); ok {
+		if err := post.RemarkValidator(v); err != nil {
+			return &ValidationError{Name: "remark", err: fmt.Errorf(`gen: validator failed for field "Post.remark": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -462,6 +551,15 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(post.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Sort(); ok {
+		_spec.SetField(post.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedSort(); ok {
+		_spec.AddField(post.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.Remark(); ok {
+		_spec.SetField(post.FieldRemark, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Post{config: _u.config}

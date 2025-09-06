@@ -5,6 +5,7 @@ import (
 
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -89,4 +90,24 @@ func (uc *DeptUsecase) Delete(ctx context.Context, id uint32) error {
 		return err
 	}
 	return uc.repo.Delete(ctx, id)
+}
+
+// ListTree 处理获取菜单树形列表请求
+// 参数：ctx 上下文，pagination 分页请求
+// 返回值：菜单树形列表响应，错误信息
+func (uc *DeptUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListDeptTreeResponse, error) {
+	menus, err := uc.repo.ListAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	tree := make([]*pbCore.Dept, 0)
+
+	tree, err = convert.ToTree(menus, pid, func(parent *pbCore.Dept, childrens ...*pbCore.Dept) error {
+		parent.Children = append(parent.Children, childrens...)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ListDeptTreeResponse{Items: tree}, nil
 }

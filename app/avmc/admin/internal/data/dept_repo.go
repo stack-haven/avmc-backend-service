@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
+	"backend-service/api/common/enum"
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
@@ -36,9 +37,16 @@ func NewDeptRepo(data *Data, logger log.Logger) biz.DeptRepo {
 // toProto 转换gen.Dept为pbCore.Dept
 func (r *deptRepo) toProto(res *gen.Dept) *pbCore.Dept {
 	return &pbCore.Dept{
-		Id:        res.ID,
-		Name:      res.Name,
-		ParentId:  res.ParentID,
+		Id:       res.ID,
+		Name:     res.Name,
+		ParentId: res.ParentID,
+		Ancestors: convert.ToAny(res.Ancestors, func(i int) uint32 {
+			return uint32(i)
+		}),
+		LeaderId:  res.LeaderID,
+		Sort:      res.Sort,
+		Status:    convert.EmptyToNil(enum.Status(*res.Status)),
+		Remark:    res.Remark,
 		CreatedAt: convert.TimeValueToString(&res.CreatedAt, time.DateTime),
 		UpdatedAt: convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
@@ -50,6 +58,13 @@ func (r *deptRepo) toEnt(g *pbCore.Dept) *gen.Dept {
 		ID:       g.GetId(),
 		Name:     g.Name,
 		ParentID: g.ParentId,
+		Ancestors: convert.ToAny(g.Ancestors, func(i uint32) int {
+			return int(i)
+		}),
+		LeaderID: g.LeaderId,
+		Sort:     g.Sort,
+		Status:   convert.ToPointer(int32(g.GetStatus())),
+		Remark:   g.Remark,
 	}
 }
 
@@ -69,6 +84,11 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 
 	res, err := builder.SetName(*entDept.Name).
 		SetNillableParentID(entDept.ParentID).
+		SetNillableLeaderID(entDept.LeaderID).
+		SetNillableSort(entDept.Sort).
+		SetNillableRemark(entDept.Remark).
+		SetNillableStatus(entDept.Status).
+		SetAncestors(entDept.Ancestors).
 		Save(ctx)
 	if err != nil {
 		r.log.Errorf("保存部门失败，部门信息：%v，错误：%v", g, err)
@@ -106,6 +126,11 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 	res, err := builder.
 		SetName(*entDept.Name).
 		SetNillableParentID(entDept.ParentID).
+		SetNillableLeaderID(entDept.LeaderID).
+		SetNillableSort(entDept.Sort).
+		SetNillableRemark(entDept.Remark).
+		SetNillableStatus(entDept.Status).
+		SetAncestors(entDept.Ancestors).
 		Save(ctx)
 	if err != nil {
 		r.log.Errorf("更新部门失败，部门信息：%v，错误：%v", g, err)
@@ -162,7 +187,7 @@ func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept,
 // 返回值：部门列表，错误信息
 func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 	r.log.Infof("查询所有部门列表")
-	res, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID, dept.FieldName).Where().Order(gen.Desc(dept.FieldID)).All(ctx)
+	res, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID, dept.FieldName, dept.FieldParentID, dept.FieldStatus, dept.FieldRemark, dept.FieldLeaderID, dept.FieldSort).Where().Order(gen.Desc(dept.FieldID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
 		return nil, err
@@ -185,6 +210,10 @@ func (r *deptRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			dept.FieldID,
 			dept.FieldName,
 			dept.FieldParentID,
+			dept.FieldStatus,
+			dept.FieldRemark,
+			dept.FieldLeaderID,
+			dept.FieldSort,
 			dept.FieldCreatedAt,
 			dept.FieldUpdatedAt,
 		).

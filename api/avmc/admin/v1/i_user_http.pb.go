@@ -27,6 +27,7 @@ const OperationUserServiceGetUser = "/avmc.admin.v1.UserService/GetUser"
 const OperationUserServiceListUser = "/avmc.admin.v1.UserService/ListUser"
 const OperationUserServiceListUserSimple = "/avmc.admin.v1.UserService/ListUserSimple"
 const OperationUserServiceUpdateUser = "/avmc.admin.v1.UserService/UpdateUser"
+const OperationUserServiceUpdateUserByStatus = "/avmc.admin.v1.UserService/UpdateUserByStatus"
 
 type UserServiceHTTPServer interface {
 	// CreateUser 创建用户
@@ -41,6 +42,8 @@ type UserServiceHTTPServer interface {
 	ListUserSimple(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
 	// UpdateUser 更新用户
 	UpdateUser(context.Context, *v1.UpdateUserRequest) (*v1.UpdateUserResponse, error)
+	// UpdateUserByStatus 更新用户状态
+	UpdateUserByStatus(context.Context, *v1.UpdateUserByStatusRequest) (*v1.UpdateUserByStatusResponse, error)
 }
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
@@ -51,6 +54,7 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r.POST("/admin/v1/users", _UserService_CreateUser0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}", _UserService_UpdateUser0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/users/{id}", _UserService_DeleteUser0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/users/status-update/{id}", _UserService_UpdateUserByStatus0_HTTP_Handler(srv))
 }
 
 func _UserService_ListUserSimple0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -182,6 +186,31 @@ func _UserService_DeleteUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx h
 	}
 }
 
+func _UserService_UpdateUserByStatus0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UpdateUserByStatusRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceUpdateUserByStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateUserByStatus(ctx, req.(*v1.UpdateUserByStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UpdateUserByStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserServiceHTTPClient interface {
 	CreateUser(ctx context.Context, req *v1.CreateUserRequest, opts ...http.CallOption) (rsp *v1.CreateUserResponse, err error)
 	DeleteUser(ctx context.Context, req *v1.DeleteUserRequest, opts ...http.CallOption) (rsp *v1.DeleteUserResponse, err error)
@@ -189,6 +218,7 @@ type UserServiceHTTPClient interface {
 	ListUser(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
 	ListUserSimple(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
 	UpdateUser(ctx context.Context, req *v1.UpdateUserRequest, opts ...http.CallOption) (rsp *v1.UpdateUserResponse, err error)
+	UpdateUserByStatus(ctx context.Context, req *v1.UpdateUserByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdateUserByStatusResponse, err error)
 }
 
 type UserServiceHTTPClientImpl struct {
@@ -271,6 +301,19 @@ func (c *UserServiceHTTPClientImpl) UpdateUser(ctx context.Context, in *v1.Updat
 	opts = append(opts, http.Operation(OperationUserServiceUpdateUser))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in.User, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *UserServiceHTTPClientImpl) UpdateUserByStatus(ctx context.Context, in *v1.UpdateUserByStatusRequest, opts ...http.CallOption) (*v1.UpdateUserByStatusResponse, error) {
+	var out v1.UpdateUserByStatusResponse
+	pattern := "/admin/v1/users/status-update/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserServiceUpdateUserByStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

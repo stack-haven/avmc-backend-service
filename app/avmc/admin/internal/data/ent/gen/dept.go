@@ -33,8 +33,14 @@ type Dept struct {
 	Name *string `json:"name,omitempty"`
 	// 父级ID
 	ParentID *uint32 `json:"parent_id,omitempty"`
+	// 负责人ID
+	LeaderID *uint32 `json:"leader_id,omitempty"`
 	// 祖级列表
 	Ancestors []int `json:"ancestors,omitempty"`
+	// 排序
+	Sort *int32 `json:"sort,omitempty"`
+	// 备注
+	Remark *string `json:"remark,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DeptQuery when eager-loading is set.
 	Edges        DeptEdges `json:"edges"`
@@ -80,9 +86,9 @@ func (*Dept) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case dept.FieldAncestors:
 			values[i] = new([]byte)
-		case dept.FieldID, dept.FieldStatus, dept.FieldDomainID, dept.FieldParentID:
+		case dept.FieldID, dept.FieldStatus, dept.FieldDomainID, dept.FieldParentID, dept.FieldLeaderID, dept.FieldSort:
 			values[i] = new(sql.NullInt64)
-		case dept.FieldName:
+		case dept.FieldName, dept.FieldRemark:
 			values[i] = new(sql.NullString)
 		case dept.FieldCreatedAt, dept.FieldUpdatedAt, dept.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -153,6 +159,13 @@ func (_m *Dept) assignValues(columns []string, values []any) error {
 				_m.ParentID = new(uint32)
 				*_m.ParentID = uint32(value.Int64)
 			}
+		case dept.FieldLeaderID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field leader_id", values[i])
+			} else if value.Valid {
+				_m.LeaderID = new(uint32)
+				*_m.LeaderID = uint32(value.Int64)
+			}
 		case dept.FieldAncestors:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field ancestors", values[i])
@@ -160,6 +173,20 @@ func (_m *Dept) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &_m.Ancestors); err != nil {
 					return fmt.Errorf("unmarshal field ancestors: %w", err)
 				}
+			}
+		case dept.FieldSort:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field sort", values[i])
+			} else if value.Valid {
+				_m.Sort = new(int32)
+				*_m.Sort = int32(value.Int64)
+			}
+		case dept.FieldRemark:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field remark", values[i])
+			} else if value.Valid {
+				_m.Remark = new(string)
+				*_m.Remark = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -236,8 +263,23 @@ func (_m *Dept) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
+	if v := _m.LeaderID; v != nil {
+		builder.WriteString("leader_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("ancestors=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Ancestors))
+	builder.WriteString(", ")
+	if v := _m.Sort; v != nil {
+		builder.WriteString("sort=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.Remark; v != nil {
+		builder.WriteString("remark=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

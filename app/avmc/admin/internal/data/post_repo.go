@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
+	"backend-service/api/common/enum"
 	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
@@ -38,6 +39,9 @@ func (r *postRepo) toProto(res *gen.Post) *pbCore.Post {
 	return &pbCore.Post{
 		Id:        res.ID,
 		Name:      res.Name,
+		Sort:      res.Sort,
+		Status:    convert.EmptyToNil(enum.Status(*res.Status)),
+		Remark:    res.Remark,
 		CreatedAt: convert.TimeValueToString(&res.CreatedAt, time.DateTime),
 		UpdatedAt: convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
@@ -46,8 +50,11 @@ func (r *postRepo) toProto(res *gen.Post) *pbCore.Post {
 // toEnt 转换pbCore.Post为gen.Post
 func (r *postRepo) toEnt(g *pbCore.Post) *gen.Post {
 	return &gen.Post{
-		ID:   g.GetId(),
-		Name: g.Name,
+		ID:     g.GetId(),
+		Name:   g.Name,
+		Sort:   g.Sort,
+		Status: convert.ToPointer(int32(g.GetStatus())),
+		Remark: g.Remark,
 	}
 }
 

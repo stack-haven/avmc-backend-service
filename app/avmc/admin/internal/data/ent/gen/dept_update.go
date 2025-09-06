@@ -132,6 +132,33 @@ func (_u *DeptUpdate) ClearParentID() *DeptUpdate {
 	return _u
 }
 
+// SetLeaderID sets the "leader_id" field.
+func (_u *DeptUpdate) SetLeaderID(v uint32) *DeptUpdate {
+	_u.mutation.ResetLeaderID()
+	_u.mutation.SetLeaderID(v)
+	return _u
+}
+
+// SetNillableLeaderID sets the "leader_id" field if the given value is not nil.
+func (_u *DeptUpdate) SetNillableLeaderID(v *uint32) *DeptUpdate {
+	if v != nil {
+		_u.SetLeaderID(*v)
+	}
+	return _u
+}
+
+// AddLeaderID adds value to the "leader_id" field.
+func (_u *DeptUpdate) AddLeaderID(v int32) *DeptUpdate {
+	_u.mutation.AddLeaderID(v)
+	return _u
+}
+
+// ClearLeaderID clears the value of the "leader_id" field.
+func (_u *DeptUpdate) ClearLeaderID() *DeptUpdate {
+	_u.mutation.ClearLeaderID()
+	return _u
+}
+
 // SetAncestors sets the "ancestors" field.
 func (_u *DeptUpdate) SetAncestors(v []int) *DeptUpdate {
 	_u.mutation.SetAncestors(v)
@@ -147,6 +174,47 @@ func (_u *DeptUpdate) AppendAncestors(v []int) *DeptUpdate {
 // ClearAncestors clears the value of the "ancestors" field.
 func (_u *DeptUpdate) ClearAncestors() *DeptUpdate {
 	_u.mutation.ClearAncestors()
+	return _u
+}
+
+// SetSort sets the "sort" field.
+func (_u *DeptUpdate) SetSort(v int32) *DeptUpdate {
+	_u.mutation.ResetSort()
+	_u.mutation.SetSort(v)
+	return _u
+}
+
+// SetNillableSort sets the "sort" field if the given value is not nil.
+func (_u *DeptUpdate) SetNillableSort(v *int32) *DeptUpdate {
+	if v != nil {
+		_u.SetSort(*v)
+	}
+	return _u
+}
+
+// AddSort adds value to the "sort" field.
+func (_u *DeptUpdate) AddSort(v int32) *DeptUpdate {
+	_u.mutation.AddSort(v)
+	return _u
+}
+
+// SetRemark sets the "remark" field.
+func (_u *DeptUpdate) SetRemark(v string) *DeptUpdate {
+	_u.mutation.SetRemark(v)
+	return _u
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_u *DeptUpdate) SetNillableRemark(v *string) *DeptUpdate {
+	if v != nil {
+		_u.SetRemark(*v)
+	}
+	return _u
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (_u *DeptUpdate) ClearRemark() *DeptUpdate {
+	_u.mutation.ClearRemark()
 	return _u
 }
 
@@ -261,6 +329,11 @@ func (_u *DeptUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`gen: validator failed for field "Dept.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Remark(); ok {
+		if err := dept.RemarkValidator(v); err != nil {
+			return &ValidationError{Name: "remark", err: fmt.Errorf(`gen: validator failed for field "Dept.remark": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -306,6 +379,15 @@ func (_u *DeptUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(dept.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.LeaderID(); ok {
+		_spec.SetField(dept.FieldLeaderID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedLeaderID(); ok {
+		_spec.AddField(dept.FieldLeaderID, field.TypeUint32, value)
+	}
+	if _u.mutation.LeaderIDCleared() {
+		_spec.ClearField(dept.FieldLeaderID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.Ancestors(); ok {
 		_spec.SetField(dept.FieldAncestors, field.TypeJSON, value)
 	}
@@ -316,6 +398,18 @@ func (_u *DeptUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.AncestorsCleared() {
 		_spec.ClearField(dept.FieldAncestors, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Sort(); ok {
+		_spec.SetField(dept.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedSort(); ok {
+		_spec.AddField(dept.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.Remark(); ok {
+		_spec.SetField(dept.FieldRemark, field.TypeString, value)
+	}
+	if _u.mutation.RemarkCleared() {
+		_spec.ClearField(dept.FieldRemark, field.TypeString)
 	}
 	if _u.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -515,6 +609,33 @@ func (_u *DeptUpdateOne) ClearParentID() *DeptUpdateOne {
 	return _u
 }
 
+// SetLeaderID sets the "leader_id" field.
+func (_u *DeptUpdateOne) SetLeaderID(v uint32) *DeptUpdateOne {
+	_u.mutation.ResetLeaderID()
+	_u.mutation.SetLeaderID(v)
+	return _u
+}
+
+// SetNillableLeaderID sets the "leader_id" field if the given value is not nil.
+func (_u *DeptUpdateOne) SetNillableLeaderID(v *uint32) *DeptUpdateOne {
+	if v != nil {
+		_u.SetLeaderID(*v)
+	}
+	return _u
+}
+
+// AddLeaderID adds value to the "leader_id" field.
+func (_u *DeptUpdateOne) AddLeaderID(v int32) *DeptUpdateOne {
+	_u.mutation.AddLeaderID(v)
+	return _u
+}
+
+// ClearLeaderID clears the value of the "leader_id" field.
+func (_u *DeptUpdateOne) ClearLeaderID() *DeptUpdateOne {
+	_u.mutation.ClearLeaderID()
+	return _u
+}
+
 // SetAncestors sets the "ancestors" field.
 func (_u *DeptUpdateOne) SetAncestors(v []int) *DeptUpdateOne {
 	_u.mutation.SetAncestors(v)
@@ -530,6 +651,47 @@ func (_u *DeptUpdateOne) AppendAncestors(v []int) *DeptUpdateOne {
 // ClearAncestors clears the value of the "ancestors" field.
 func (_u *DeptUpdateOne) ClearAncestors() *DeptUpdateOne {
 	_u.mutation.ClearAncestors()
+	return _u
+}
+
+// SetSort sets the "sort" field.
+func (_u *DeptUpdateOne) SetSort(v int32) *DeptUpdateOne {
+	_u.mutation.ResetSort()
+	_u.mutation.SetSort(v)
+	return _u
+}
+
+// SetNillableSort sets the "sort" field if the given value is not nil.
+func (_u *DeptUpdateOne) SetNillableSort(v *int32) *DeptUpdateOne {
+	if v != nil {
+		_u.SetSort(*v)
+	}
+	return _u
+}
+
+// AddSort adds value to the "sort" field.
+func (_u *DeptUpdateOne) AddSort(v int32) *DeptUpdateOne {
+	_u.mutation.AddSort(v)
+	return _u
+}
+
+// SetRemark sets the "remark" field.
+func (_u *DeptUpdateOne) SetRemark(v string) *DeptUpdateOne {
+	_u.mutation.SetRemark(v)
+	return _u
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_u *DeptUpdateOne) SetNillableRemark(v *string) *DeptUpdateOne {
+	if v != nil {
+		_u.SetRemark(*v)
+	}
+	return _u
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (_u *DeptUpdateOne) ClearRemark() *DeptUpdateOne {
+	_u.mutation.ClearRemark()
 	return _u
 }
 
@@ -657,6 +819,11 @@ func (_u *DeptUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`gen: validator failed for field "Dept.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Remark(); ok {
+		if err := dept.RemarkValidator(v); err != nil {
+			return &ValidationError{Name: "remark", err: fmt.Errorf(`gen: validator failed for field "Dept.remark": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -719,6 +886,15 @@ func (_u *DeptUpdateOne) sqlSave(ctx context.Context) (_node *Dept, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(dept.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.LeaderID(); ok {
+		_spec.SetField(dept.FieldLeaderID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedLeaderID(); ok {
+		_spec.AddField(dept.FieldLeaderID, field.TypeUint32, value)
+	}
+	if _u.mutation.LeaderIDCleared() {
+		_spec.ClearField(dept.FieldLeaderID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.Ancestors(); ok {
 		_spec.SetField(dept.FieldAncestors, field.TypeJSON, value)
 	}
@@ -729,6 +905,18 @@ func (_u *DeptUpdateOne) sqlSave(ctx context.Context) (_node *Dept, err error) {
 	}
 	if _u.mutation.AncestorsCleared() {
 		_spec.ClearField(dept.FieldAncestors, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Sort(); ok {
+		_spec.SetField(dept.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedSort(); ok {
+		_spec.AddField(dept.FieldSort, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.Remark(); ok {
+		_spec.SetField(dept.FieldRemark, field.TypeString, value)
+	}
+	if _u.mutation.RemarkCleared() {
+		_spec.ClearField(dept.FieldRemark, field.TypeString)
 	}
 	if _u.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

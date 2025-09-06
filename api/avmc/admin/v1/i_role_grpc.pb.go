@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	grpc "google.golang.org/grpc"
@@ -21,11 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RoleService_ListRole_FullMethodName   = "/avmc.admin.v1.RoleService/ListRole"
-	RoleService_GetRole_FullMethodName    = "/avmc.admin.v1.RoleService/GetRole"
-	RoleService_CreateRole_FullMethodName = "/avmc.admin.v1.RoleService/CreateRole"
-	RoleService_UpdateRole_FullMethodName = "/avmc.admin.v1.RoleService/UpdateRole"
-	RoleService_DeleteRole_FullMethodName = "/avmc.admin.v1.RoleService/DeleteRole"
+	RoleService_ListRole_FullMethodName           = "/avmc.admin.v1.RoleService/ListRole"
+	RoleService_GetRole_FullMethodName            = "/avmc.admin.v1.RoleService/GetRole"
+	RoleService_CreateRole_FullMethodName         = "/avmc.admin.v1.RoleService/CreateRole"
+	RoleService_UpdateRole_FullMethodName         = "/avmc.admin.v1.RoleService/UpdateRole"
+	RoleService_DeleteRole_FullMethodName         = "/avmc.admin.v1.RoleService/DeleteRole"
+	RoleService_ExistRoleByName_FullMethodName    = "/avmc.admin.v1.RoleService/ExistRoleByName"
+	RoleService_UpdateRoleByStatus_FullMethodName = "/avmc.admin.v1.RoleService/UpdateRoleByStatus"
 )
 
 // RoleServiceClient is the client API for RoleService service.
@@ -35,7 +36,7 @@ const (
 // 角色管理服务
 type RoleServiceClient interface {
 	// 获取角色列表
-	ListRole(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListRoleResponse, error)
+	ListRole(ctx context.Context, in *v1.ListRoleRequest, opts ...grpc.CallOption) (*v1.ListRoleResponse, error)
 	// 获取角色数据
 	GetRole(ctx context.Context, in *v1.GetRoleRequest, opts ...grpc.CallOption) (*v1.Role, error)
 	// 创建角色
@@ -44,6 +45,10 @@ type RoleServiceClient interface {
 	UpdateRole(ctx context.Context, in *v1.UpdateRoleRequest, opts ...grpc.CallOption) (*v1.UpdateRoleResponse, error)
 	// 删除角色
 	DeleteRole(ctx context.Context, in *v1.DeleteRoleRequest, opts ...grpc.CallOption) (*v1.DeleteRoleResponse, error)
+	// 判断角色名是否存在
+	ExistRoleByName(ctx context.Context, in *v1.ExistRoleByNameRequest, opts ...grpc.CallOption) (*v1.ExistRoleByNameResponse, error)
+	// 更新角色状态
+	UpdateRoleByStatus(ctx context.Context, in *v1.UpdateRoleByStatusRequest, opts ...grpc.CallOption) (*v1.UpdateRoleByStatusResponse, error)
 }
 
 type roleServiceClient struct {
@@ -54,7 +59,7 @@ func NewRoleServiceClient(cc grpc.ClientConnInterface) RoleServiceClient {
 	return &roleServiceClient{cc}
 }
 
-func (c *roleServiceClient) ListRole(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListRoleResponse, error) {
+func (c *roleServiceClient) ListRole(ctx context.Context, in *v1.ListRoleRequest, opts ...grpc.CallOption) (*v1.ListRoleResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListRoleResponse)
 	err := c.cc.Invoke(ctx, RoleService_ListRole_FullMethodName, in, out, cOpts...)
@@ -104,6 +109,26 @@ func (c *roleServiceClient) DeleteRole(ctx context.Context, in *v1.DeleteRoleReq
 	return out, nil
 }
 
+func (c *roleServiceClient) ExistRoleByName(ctx context.Context, in *v1.ExistRoleByNameRequest, opts ...grpc.CallOption) (*v1.ExistRoleByNameResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ExistRoleByNameResponse)
+	err := c.cc.Invoke(ctx, RoleService_ExistRoleByName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *roleServiceClient) UpdateRoleByStatus(ctx context.Context, in *v1.UpdateRoleByStatusRequest, opts ...grpc.CallOption) (*v1.UpdateRoleByStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.UpdateRoleByStatusResponse)
+	err := c.cc.Invoke(ctx, RoleService_UpdateRoleByStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoleServiceServer is the server API for RoleService service.
 // All implementations must embed UnimplementedRoleServiceServer
 // for forward compatibility.
@@ -111,7 +136,7 @@ func (c *roleServiceClient) DeleteRole(ctx context.Context, in *v1.DeleteRoleReq
 // 角色管理服务
 type RoleServiceServer interface {
 	// 获取角色列表
-	ListRole(context.Context, *pagination.PagingRequest) (*v1.ListRoleResponse, error)
+	ListRole(context.Context, *v1.ListRoleRequest) (*v1.ListRoleResponse, error)
 	// 获取角色数据
 	GetRole(context.Context, *v1.GetRoleRequest) (*v1.Role, error)
 	// 创建角色
@@ -120,6 +145,10 @@ type RoleServiceServer interface {
 	UpdateRole(context.Context, *v1.UpdateRoleRequest) (*v1.UpdateRoleResponse, error)
 	// 删除角色
 	DeleteRole(context.Context, *v1.DeleteRoleRequest) (*v1.DeleteRoleResponse, error)
+	// 判断角色名是否存在
+	ExistRoleByName(context.Context, *v1.ExistRoleByNameRequest) (*v1.ExistRoleByNameResponse, error)
+	// 更新角色状态
+	UpdateRoleByStatus(context.Context, *v1.UpdateRoleByStatusRequest) (*v1.UpdateRoleByStatusResponse, error)
 	mustEmbedUnimplementedRoleServiceServer()
 }
 
@@ -130,7 +159,7 @@ type RoleServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRoleServiceServer struct{}
 
-func (UnimplementedRoleServiceServer) ListRole(context.Context, *pagination.PagingRequest) (*v1.ListRoleResponse, error) {
+func (UnimplementedRoleServiceServer) ListRole(context.Context, *v1.ListRoleRequest) (*v1.ListRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
 }
 func (UnimplementedRoleServiceServer) GetRole(context.Context, *v1.GetRoleRequest) (*v1.Role, error) {
@@ -144,6 +173,12 @@ func (UnimplementedRoleServiceServer) UpdateRole(context.Context, *v1.UpdateRole
 }
 func (UnimplementedRoleServiceServer) DeleteRole(context.Context, *v1.DeleteRoleRequest) (*v1.DeleteRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRole not implemented")
+}
+func (UnimplementedRoleServiceServer) ExistRoleByName(context.Context, *v1.ExistRoleByNameRequest) (*v1.ExistRoleByNameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExistRoleByName not implemented")
+}
+func (UnimplementedRoleServiceServer) UpdateRoleByStatus(context.Context, *v1.UpdateRoleByStatusRequest) (*v1.UpdateRoleByStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRoleByStatus not implemented")
 }
 func (UnimplementedRoleServiceServer) mustEmbedUnimplementedRoleServiceServer() {}
 func (UnimplementedRoleServiceServer) testEmbeddedByValue()                     {}
@@ -167,7 +202,7 @@ func RegisterRoleServiceServer(s grpc.ServiceRegistrar, srv RoleServiceServer) {
 }
 
 func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(v1.ListRoleRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -179,7 +214,7 @@ func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: RoleService_ListRole_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleServiceServer).ListRole(ctx, req.(*pagination.PagingRequest))
+		return srv.(RoleServiceServer).ListRole(ctx, req.(*v1.ListRoleRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -256,6 +291,42 @@ func _RoleService_DeleteRole_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoleService_ExistRoleByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ExistRoleByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServiceServer).ExistRoleByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoleService_ExistRoleByName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServiceServer).ExistRoleByName(ctx, req.(*v1.ExistRoleByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RoleService_UpdateRoleByStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.UpdateRoleByStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServiceServer).UpdateRoleByStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoleService_UpdateRoleByStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServiceServer).UpdateRoleByStatus(ctx, req.(*v1.UpdateRoleByStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoleService_ServiceDesc is the grpc.ServiceDesc for RoleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -282,6 +353,14 @@ var RoleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteRole",
 			Handler:    _RoleService_DeleteRole_Handler,
+		},
+		{
+			MethodName: "ExistRoleByName",
+			Handler:    _RoleService_ExistRoleByName_Handler,
+		},
+		{
+			MethodName: "UpdateRoleByStatus",
+			Handler:    _RoleService_UpdateRoleByStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

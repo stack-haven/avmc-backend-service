@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pb "backend-service/api/avmc/admin/v1"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 
@@ -32,7 +31,7 @@ func NewRoleServiceService(ruc *biz.RoleUsecase, logger log.Logger) *RoleService
 // ListRole 处理角色列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：角色列表响应，错误信息
-func (s *RoleServiceService) ListRole(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListRoleResponse, error) {
+func (s *RoleServiceService) ListRole(ctx context.Context, req *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) {
 	s.log.Infof("查询角色列表分页，分页请求：%v", req)
 	return s.ruc.ListPage(ctx, req)
 }
@@ -95,4 +94,39 @@ func (s *RoleServiceService) DeleteRole(ctx context.Context, req *pbCore.DeleteR
 		return nil, err
 	}
 	return &pbCore.DeleteRoleResponse{}, nil
+}
+
+// ExistRoleByName 处理判断角色名是否存在请求
+// 参数：ctx 上下文，req 判断角色名是否存在请求
+// 返回值：判断角色名是否存在响应，错误信息
+func (s *RoleServiceService) ExistRoleByName(ctx context.Context, req *pbCore.ExistRoleByNameRequest) (*pbCore.ExistRoleByNameResponse, error) {
+	if req.GetName() == "" {
+		return nil, pb.ErrorRoleNameCannotBeEmpty("角色名不能为空")
+	}
+	s.log.Infof("判断角色名是否存在，角色名：%v", req.GetName())
+	exist, err := s.ruc.ExistByName(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ExistRoleByNameResponse{
+		Exist: exist,
+	}, nil
+}
+
+// UpdateRoleByStatus 处理更新角色状态请求
+// 参数：ctx 上下文，req 更新角色状态请求
+// 返回值：更新角色状态响应，错误信息
+func (s *RoleServiceService) UpdateRoleByStatus(ctx context.Context, req *pbCore.UpdateRoleByStatusRequest) (*pbCore.UpdateRoleByStatusResponse, error) {
+	if req.GetId() == 0 {
+		return nil, pb.ErrorRoleInvalidId("角色ID不能为空")
+	}
+	if req.GetStatus() == 0 {
+		return nil, pb.ErrorRoleStatusCannotBeEmpty("角色状态不能为空")
+	}
+	s.log.Infof("更新角色状态，角色ID：%v，角色状态：%v", req.GetId(), req.GetStatus())
+	_, err := s.ruc.UpdateStatus(ctx, req.GetId(), req.GetStatus())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.UpdateRoleByStatusResponse{}, nil
 }

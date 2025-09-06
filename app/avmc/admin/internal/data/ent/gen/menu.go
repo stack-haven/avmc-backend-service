@@ -31,7 +31,7 @@ type Menu struct {
 	// 路径,当其类型为'按钮'的时候对应的数据操作名,例如:/user.service.v1.UserService/Login
 	Path *string `json:"path,omitempty"`
 	// 菜单类型 0 UNSPECIFIED, 目录 1 -> FOLDER, 菜单 2 -> MENU, 按钮 3 -> BUTTON
-	Type int32 `json:"type,omitempty"`
+	Type *int32 `json:"type,omitempty"`
 	// 组件
 	Component *string `json:"component,omitempty"`
 	// 父级ID
@@ -197,7 +197,8 @@ func (_m *Menu) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				_m.Type = int32(value.Int64)
+				_m.Type = new(int32)
+				*_m.Type = int32(value.Int64)
 			}
 		case menu.FieldComponent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -444,8 +445,10 @@ func (_m *Menu) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	if v := _m.Type; v != nil {
+		builder.WriteString("type=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	if v := _m.Component; v != nil {
 		builder.WriteString("component=")

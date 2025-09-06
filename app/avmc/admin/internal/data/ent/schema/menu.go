@@ -34,7 +34,7 @@ func (Menu) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").Comment("菜单名称").Default("").MaxLen(32).NotEmpty(),
 		field.String("path").Comment("路径,当其类型为'按钮'的时候对应的数据操作名,例如:/user.service.v1.UserService/Login").Default("").Optional().Nillable(),
-		field.Int32("type").Comment("菜单类型 0 UNSPECIFIED, 目录 1 -> FOLDER, 菜单 2 -> MENU, 按钮 3 -> BUTTON").Default(1).SchemaType(map[string]string{dialect.MySQL: "tinyint", dialect.Postgres: "tinyint(2)"}).Optional(),
+		field.Int32("type").Comment("菜单类型 0 UNSPECIFIED, 目录 1 -> FOLDER, 菜单 2 -> MENU, 按钮 3 -> BUTTON").Default(1).SchemaType(map[string]string{dialect.MySQL: "tinyint", dialect.Postgres: "tinyint(2)"}).Optional().Nillable(),
 		field.String("component").Comment("组件").Default("").Optional().Nillable(),
 		field.Uint32("parent_id").Comment("父级ID").Default(0).Optional().Nillable(),
 		field.String("redirect").Comment("重定向").Default("").Optional().Nillable(),

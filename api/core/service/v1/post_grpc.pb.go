@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PostService_CreatePost_FullMethodName = "/core.service.v1.PostService/CreatePost"
-	PostService_UpdatePost_FullMethodName = "/core.service.v1.PostService/UpdatePost"
-	PostService_DeletePost_FullMethodName = "/core.service.v1.PostService/DeletePost"
-	PostService_GetPost_FullMethodName    = "/core.service.v1.PostService/GetPost"
-	PostService_ListPost_FullMethodName   = "/core.service.v1.PostService/ListPost"
+	PostService_CreatePost_FullMethodName         = "/core.service.v1.PostService/CreatePost"
+	PostService_UpdatePost_FullMethodName         = "/core.service.v1.PostService/UpdatePost"
+	PostService_DeletePost_FullMethodName         = "/core.service.v1.PostService/DeletePost"
+	PostService_GetPost_FullMethodName            = "/core.service.v1.PostService/GetPost"
+	PostService_ListPost_FullMethodName           = "/core.service.v1.PostService/ListPost"
+	PostService_UpdatePostByStatus_FullMethodName = "/core.service.v1.PostService/UpdatePostByStatus"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -40,6 +41,8 @@ type PostServiceClient interface {
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	// 分页查询岗位
 	ListPost(ctx context.Context, in *ListPostRequest, opts ...grpc.CallOption) (*ListPostResponse, error)
+	// 更新岗位状态
+	UpdatePostByStatus(ctx context.Context, in *UpdatePostByStatusRequest, opts ...grpc.CallOption) (*UpdatePostByStatusResponse, error)
 }
 
 type postServiceClient struct {
@@ -100,6 +103,16 @@ func (c *postServiceClient) ListPost(ctx context.Context, in *ListPostRequest, o
 	return out, nil
 }
 
+func (c *postServiceClient) UpdatePostByStatus(ctx context.Context, in *UpdatePostByStatusRequest, opts ...grpc.CallOption) (*UpdatePostByStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdatePostByStatusResponse)
+	err := c.cc.Invoke(ctx, PostService_UpdatePostByStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility.
@@ -114,6 +127,8 @@ type PostServiceServer interface {
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	// 分页查询岗位
 	ListPost(context.Context, *ListPostRequest) (*ListPostResponse, error)
+	// 更新岗位状态
+	UpdatePostByStatus(context.Context, *UpdatePostByStatusRequest) (*UpdatePostByStatusResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -138,6 +153,9 @@ func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) 
 }
 func (UnimplementedPostServiceServer) ListPost(context.Context, *ListPostRequest) (*ListPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPost not implemented")
+}
+func (UnimplementedPostServiceServer) UpdatePostByStatus(context.Context, *UpdatePostByStatusRequest) (*UpdatePostByStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePostByStatus not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 func (UnimplementedPostServiceServer) testEmbeddedByValue()                     {}
@@ -250,6 +268,24 @@ func _PostService_ListPost_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_UpdatePostByStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePostByStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).UpdatePostByStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_UpdatePostByStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).UpdatePostByStatus(ctx, req.(*UpdatePostByStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -276,6 +312,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPost",
 			Handler:    _PostService_ListPost_Handler,
+		},
+		{
+			MethodName: "UpdatePostByStatus",
+			Handler:    _PostService_UpdatePostByStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

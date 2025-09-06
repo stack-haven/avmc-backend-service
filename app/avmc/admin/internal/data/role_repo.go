@@ -9,7 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
@@ -62,19 +61,6 @@ func (r *roleRepo) toEnt(g *pbCore.Role) *gen.Role {
 	}
 }
 
-// GetRoleExistByName 获取角色名称是否存在
-// 参数：ctx 上下文，name 角色名称
-// 返回值：角色ID，错误信息
-func (r *roleRepo) GetRoleExistByName(ctx context.Context, name string) (uint32, error) {
-	r.log.Infof("获取角色名称是否存在，角色名称：%v", name)
-	entRole, err := r.data.DB(ctx).Role.Query().Where(role.Name(name)).Select(role.FieldID).First(ctx)
-	if err != nil {
-		r.log.Errorf("获取角色名称是否存在失败，角色名称：%v，错误：%v", name, err)
-		return 0, err
-	}
-	return entRole.ID, nil
-}
-
 // Save 保存角色信息
 // 参数：ctx 上下文，g 角色信息
 // 返回值：角色信息，错误信息
@@ -83,8 +69,10 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	entRole := r.toEnt(g)
 	builder := r.data.DB(ctx).Role.Create()
 
-	id, _ := r.GetRoleExistByName(ctx, *entRole.Name)
-	if id > 0 {
+	exist, _ := r.ExistByName(ctx, &pbCore.ExistRoleByNameRequest{
+		Name: g.GetName(),
+	})
+	if exist {
 		r.log.Errorf("角色名称已存在，角色信息：%v", g)
 		return nil, fmt.Errorf("role name already exists")
 	}
@@ -94,6 +82,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 		SetNillableDataScope(entRole.DataScope).
 		SetNillableMenuCheckStrictly(entRole.MenuCheckStrictly).
 		SetNillableDeptCheckStrictly(entRole.DeptCheckStrictly).
+		SetNillableStatus(entRole.Status).
 		Save(ctx)
 	if err != nil {
 		r.log.Errorf("保存角色失败，角色信息：%v，错误：%v", g, err)
@@ -107,19 +96,23 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 // 返回值：角色信息，错误信息
 func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, error) {
 	r.log.Infof("更新角色，角色信息：%v", g)
-	entRole := r.toEnt(g)
-	id, _ := r.GetRoleExistByName(ctx, *entRole.Name)
-	if id > 0 && id != g.GetId() {
+	exist, _ := r.ExistByName(ctx, &pbCore.ExistRoleByNameRequest{
+		Id:   &g.Id,
+		Name: g.GetName(),
+	})
+	if exist {
 		r.log.Errorf("角色名称已存在，角色信息：%v", g)
 		return nil, fmt.Errorf("role name already exists")
 	}
 
+	entRole := r.toEnt(g)
 	res, err := r.data.DB(ctx).Role.UpdateOneID(g.GetId()).
 		SetName(*entRole.Name).
 		SetNillableDefaultRouter(entRole.DefaultRouter).
 		SetNillableDataScope(entRole.DataScope).
 		SetNillableMenuCheckStrictly(entRole.MenuCheckStrictly).
 		SetNillableDeptCheckStrictly(entRole.DeptCheckStrictly).
+		SetNillableStatus(entRole.Status).
 		Save(ctx)
 	if err != nil {
 		r.log.Errorf("更新角色失败，角色信息：%v，错误：%v", g, err)
@@ -196,30 +189,61 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 // ListPage 分页查询角色
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：角色列表响应，错误信息
-func (r *roleRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListRoleResponse, error) {
-	r.log.Infof("分页查询角色，分页请求：%v", pagination)
+func (r *roleRepo) ListPage(ctx context.Context, req *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) {
+	r.log.Infof("分页查询角色，分页请求：%v", req)
+	query := r.data.DB(ctx).Role.Query()
+	if req.GetName() != "" {
+		query = query.Where(role.NameContains(req.GetName()))
+	}
+	if req.GetStatus() != 0 {
+		query = query.Where(role.Status(int32(req.GetStatus())))
+	}
+	if startTime := convert.StringValueToTime(req.StartCreatedAt, time.DateTime); startTime != nil {
+		query = query.Where(role.CreatedAtGTE(*startTime))
+	}
+	if endTime := convert.StringValueToTime(req.EndCreatedAt, time.DateTime); endTime != nil {
+		query = query.Where(role.CreatedAtLTE(*endTime))
+	}
 
-	// 查询总数
-	count, err := r.data.DB(ctx).Role.Query().Where(role.DeletedAtIsNil()).Count(ctx)
+	// if req.GetStartCreatedAt() != "" && req.GetEndCreatedAt() != "" {
+	// 	startTime := convert.StringValueToTime(req.StartCreatedAt, time.DateTime)
+	// 	endTime := convert.StringValueToTime(req.EndCreatedAt, time.DateTime)
+	// 	// 查询创建时间在指定范围内的角色
+	// 	query = query.Where(role.CreatedAtGTE(*startTime), role.CreatedAtLTE(*endTime))
+	// }
+
+	count, err := query.Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询角色总数失败，错误：%v", err)
 		return nil, err
 	}
-
-	// 计算偏移量
-	offset := (pagination.GetPage() - 1) * pagination.GetPageSize()
-
-	// 查询分页数据
-	res, err := r.data.DB(ctx).Role.Query().
-		Where(role.DeletedAtIsNil()).
-		Offset(int(offset)).
-		Limit(int(pagination.GetPageSize())).
-		All(ctx)
+	if count == 0 {
+		return &pbCore.ListRoleResponse{
+			Items: nil,
+			Total: 0,
+		}, nil
+	}
+	query = query.Select(
+		role.FieldID,
+		role.FieldName,
+		role.FieldDefaultRouter,
+		role.FieldDataScope,
+		role.FieldMenuCheckStrictly,
+		role.FieldDeptCheckStrictly,
+		role.FieldStatus,
+		role.FieldCreatedAt,
+		role.FieldUpdatedAt,
+	).
+		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
+		Limit(int(req.GetPageSize())).
+		Order(gen.Desc(role.FieldID))
+		// query = paging.WithPagination(query, int(req.GetPage()), int(req.GetPageSize())).All(ctx)
+	res, err := query.All(ctx)
+	// 使用类型断言转换为具体的查询类型
 	if err != nil {
 		r.log.Errorf("分页查询角色失败，错误：%v", err)
 		return nil, err
 	}
-
 	// 转换数据
 	return &pbCore.ListRoleResponse{
 		Items: convert.SliceToAny(res, r.toProto),
@@ -227,4 +251,25 @@ func (r *roleRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 	}, nil
 }
 
-// 重复方法定义已删除
+// ExistByName 判断角色名称是否存在
+// 参数：ctx 上下文，req 角色名称请求
+// 返回值：是否存在，错误信息
+func (r *roleRepo) ExistByName(ctx context.Context, req *pbCore.ExistRoleByNameRequest) (bool, error) {
+	r.log.Infof("判断角色名称是否存在，角色名称：%s", req.GetName())
+	if req.GetName() == "" {
+		return false, nil
+	}
+	builder := r.data.DB(ctx).Role.Query()
+	if req.GetId() != 0 {
+		builder = builder.Where(role.IDNotIn(req.GetId()))
+	}
+	_, err := builder.Select(role.FieldID).Where(role.Name(req.GetName())).First(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return false, nil
+		}
+		r.log.Errorf("判断角色名称是否存在失败，角色名称：%s，错误：%v", req.GetName(), err)
+		return false, err
+	}
+	return true, nil
+}

@@ -31,6 +31,9 @@ func StringValueToTime(t *string, layout string) *time.Time {
 			// log.Println(err)
 			return nil
 		}
+		if p.IsZero() {
+			return nil
+		}
 		return &p
 	}
 	return nil

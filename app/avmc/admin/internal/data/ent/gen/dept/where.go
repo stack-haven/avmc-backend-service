@@ -90,6 +90,21 @@ func ParentID(v uint32) predicate.Dept {
 	return predicate.Dept(sql.FieldEQ(FieldParentID, v))
 }
 
+// LeaderID applies equality check predicate on the "leader_id" field. It's identical to LeaderIDEQ.
+func LeaderID(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldLeaderID, v))
+}
+
+// Sort applies equality check predicate on the "sort" field. It's identical to SortEQ.
+func Sort(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldSort, v))
+}
+
+// Remark applies equality check predicate on the "remark" field. It's identical to RemarkEQ.
+func Remark(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldRemark, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Dept {
 	return predicate.Dept(sql.FieldEQ(FieldCreatedAt, v))
@@ -395,6 +410,56 @@ func ParentIDNotNil() predicate.Dept {
 	return predicate.Dept(sql.FieldNotNull(FieldParentID))
 }
 
+// LeaderIDEQ applies the EQ predicate on the "leader_id" field.
+func LeaderIDEQ(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldLeaderID, v))
+}
+
+// LeaderIDNEQ applies the NEQ predicate on the "leader_id" field.
+func LeaderIDNEQ(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldNEQ(FieldLeaderID, v))
+}
+
+// LeaderIDIn applies the In predicate on the "leader_id" field.
+func LeaderIDIn(vs ...uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldIn(FieldLeaderID, vs...))
+}
+
+// LeaderIDNotIn applies the NotIn predicate on the "leader_id" field.
+func LeaderIDNotIn(vs ...uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldNotIn(FieldLeaderID, vs...))
+}
+
+// LeaderIDGT applies the GT predicate on the "leader_id" field.
+func LeaderIDGT(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldGT(FieldLeaderID, v))
+}
+
+// LeaderIDGTE applies the GTE predicate on the "leader_id" field.
+func LeaderIDGTE(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldGTE(FieldLeaderID, v))
+}
+
+// LeaderIDLT applies the LT predicate on the "leader_id" field.
+func LeaderIDLT(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldLT(FieldLeaderID, v))
+}
+
+// LeaderIDLTE applies the LTE predicate on the "leader_id" field.
+func LeaderIDLTE(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldLTE(FieldLeaderID, v))
+}
+
+// LeaderIDIsNil applies the IsNil predicate on the "leader_id" field.
+func LeaderIDIsNil() predicate.Dept {
+	return predicate.Dept(sql.FieldIsNull(FieldLeaderID))
+}
+
+// LeaderIDNotNil applies the NotNil predicate on the "leader_id" field.
+func LeaderIDNotNil() predicate.Dept {
+	return predicate.Dept(sql.FieldNotNull(FieldLeaderID))
+}
+
 // AncestorsIsNil applies the IsNil predicate on the "ancestors" field.
 func AncestorsIsNil() predicate.Dept {
 	return predicate.Dept(sql.FieldIsNull(FieldAncestors))
@@ -403,6 +468,121 @@ func AncestorsIsNil() predicate.Dept {
 // AncestorsNotNil applies the NotNil predicate on the "ancestors" field.
 func AncestorsNotNil() predicate.Dept {
 	return predicate.Dept(sql.FieldNotNull(FieldAncestors))
+}
+
+// SortEQ applies the EQ predicate on the "sort" field.
+func SortEQ(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldSort, v))
+}
+
+// SortNEQ applies the NEQ predicate on the "sort" field.
+func SortNEQ(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldNEQ(FieldSort, v))
+}
+
+// SortIn applies the In predicate on the "sort" field.
+func SortIn(vs ...int32) predicate.Dept {
+	return predicate.Dept(sql.FieldIn(FieldSort, vs...))
+}
+
+// SortNotIn applies the NotIn predicate on the "sort" field.
+func SortNotIn(vs ...int32) predicate.Dept {
+	return predicate.Dept(sql.FieldNotIn(FieldSort, vs...))
+}
+
+// SortGT applies the GT predicate on the "sort" field.
+func SortGT(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldGT(FieldSort, v))
+}
+
+// SortGTE applies the GTE predicate on the "sort" field.
+func SortGTE(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldGTE(FieldSort, v))
+}
+
+// SortLT applies the LT predicate on the "sort" field.
+func SortLT(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldLT(FieldSort, v))
+}
+
+// SortLTE applies the LTE predicate on the "sort" field.
+func SortLTE(v int32) predicate.Dept {
+	return predicate.Dept(sql.FieldLTE(FieldSort, v))
+}
+
+// RemarkEQ applies the EQ predicate on the "remark" field.
+func RemarkEQ(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldRemark, v))
+}
+
+// RemarkNEQ applies the NEQ predicate on the "remark" field.
+func RemarkNEQ(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldNEQ(FieldRemark, v))
+}
+
+// RemarkIn applies the In predicate on the "remark" field.
+func RemarkIn(vs ...string) predicate.Dept {
+	return predicate.Dept(sql.FieldIn(FieldRemark, vs...))
+}
+
+// RemarkNotIn applies the NotIn predicate on the "remark" field.
+func RemarkNotIn(vs ...string) predicate.Dept {
+	return predicate.Dept(sql.FieldNotIn(FieldRemark, vs...))
+}
+
+// RemarkGT applies the GT predicate on the "remark" field.
+func RemarkGT(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldGT(FieldRemark, v))
+}
+
+// RemarkGTE applies the GTE predicate on the "remark" field.
+func RemarkGTE(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldGTE(FieldRemark, v))
+}
+
+// RemarkLT applies the LT predicate on the "remark" field.
+func RemarkLT(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldLT(FieldRemark, v))
+}
+
+// RemarkLTE applies the LTE predicate on the "remark" field.
+func RemarkLTE(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldLTE(FieldRemark, v))
+}
+
+// RemarkContains applies the Contains predicate on the "remark" field.
+func RemarkContains(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldContains(FieldRemark, v))
+}
+
+// RemarkHasPrefix applies the HasPrefix predicate on the "remark" field.
+func RemarkHasPrefix(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldHasPrefix(FieldRemark, v))
+}
+
+// RemarkHasSuffix applies the HasSuffix predicate on the "remark" field.
+func RemarkHasSuffix(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldHasSuffix(FieldRemark, v))
+}
+
+// RemarkIsNil applies the IsNil predicate on the "remark" field.
+func RemarkIsNil() predicate.Dept {
+	return predicate.Dept(sql.FieldIsNull(FieldRemark))
+}
+
+// RemarkNotNil applies the NotNil predicate on the "remark" field.
+func RemarkNotNil() predicate.Dept {
+	return predicate.Dept(sql.FieldNotNull(FieldRemark))
+}
+
+// RemarkEqualFold applies the EqualFold predicate on the "remark" field.
+func RemarkEqualFold(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldEqualFold(FieldRemark, v))
+}
+
+// RemarkContainsFold applies the ContainsFold predicate on the "remark" field.
+func RemarkContainsFold(v string) predicate.Dept {
+	return predicate.Dept(sql.FieldContainsFold(FieldRemark, v))
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.

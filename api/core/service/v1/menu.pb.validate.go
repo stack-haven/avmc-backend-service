@@ -98,8 +98,6 @@ func (m *Menu) validate(all bool) error {
 
 	}
 
-	// no validation rules for Type
-
 	if m.Path != nil {
 		// no validation rules for Path
 	}
@@ -145,12 +143,16 @@ func (m *Menu) validate(all bool) error {
 		// no validation rules for Component
 	}
 
-	if m.Pid != nil {
-		// no validation rules for Pid
+	if m.ParentId != nil {
+		// no validation rules for ParentId
 	}
 
 	if m.Redirect != nil {
 		// no validation rules for Redirect
+	}
+
+	if m.Type != nil {
+		// no validation rules for Type
 	}
 
 	if m.Status != nil {
@@ -476,7 +478,9 @@ func (m *CreateMenuRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for OperatorId
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
 
 	if len(errors) > 0 {
 		return CreateMenuRequestMultiError(errors)
@@ -713,7 +717,9 @@ func (m *UpdateMenuRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for OperatorId
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
 
 	if len(errors) > 0 {
 		return UpdateMenuRequestMultiError(errors)
@@ -921,7 +927,9 @@ func (m *DeleteMenuRequest) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for OperatorId
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
 
 	if len(errors) > 0 {
 		return DeleteMenuRequestMultiError(errors)
@@ -1635,8 +1643,8 @@ func (m *ListMenuTreeRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.Pid != nil {
-		// no validation rules for Pid
+	if m.ParentId != nil {
+		// no validation rules for ParentId
 	}
 
 	if len(errors) > 0 {
@@ -2278,3 +2286,211 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ExistMenuByNameResponseValidationError{}
+
+// Validate checks the field values on UpdateMenuByStatusRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateMenuByStatusRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateMenuByStatusRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateMenuByStatusRequestMultiError, or nil if none found.
+func (m *UpdateMenuByStatusRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateMenuByStatusRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Status
+
+	if len(errors) > 0 {
+		return UpdateMenuByStatusRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateMenuByStatusRequestMultiError is an error wrapping multiple validation
+// errors returned by UpdateMenuByStatusRequest.ValidateAll() if the
+// designated constraints aren't met.
+type UpdateMenuByStatusRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateMenuByStatusRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateMenuByStatusRequestMultiError) AllErrors() []error { return m }
+
+// UpdateMenuByStatusRequestValidationError is the validation error returned by
+// UpdateMenuByStatusRequest.Validate if the designated constraints aren't met.
+type UpdateMenuByStatusRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateMenuByStatusRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateMenuByStatusRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateMenuByStatusRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateMenuByStatusRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateMenuByStatusRequestValidationError) ErrorName() string {
+	return "UpdateMenuByStatusRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateMenuByStatusRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateMenuByStatusRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateMenuByStatusRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateMenuByStatusRequestValidationError{}
+
+// Validate checks the field values on UpdateMenuByStatusResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateMenuByStatusResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateMenuByStatusResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateMenuByStatusResponseMultiError, or nil if none found.
+func (m *UpdateMenuByStatusResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateMenuByStatusResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return UpdateMenuByStatusResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateMenuByStatusResponseMultiError is an error wrapping multiple
+// validation errors returned by UpdateMenuByStatusResponse.ValidateAll() if
+// the designated constraints aren't met.
+type UpdateMenuByStatusResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateMenuByStatusResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateMenuByStatusResponseMultiError) AllErrors() []error { return m }
+
+// UpdateMenuByStatusResponseValidationError is the validation error returned
+// by UpdateMenuByStatusResponse.Validate if the designated constraints aren't met.
+type UpdateMenuByStatusResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateMenuByStatusResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateMenuByStatusResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateMenuByStatusResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateMenuByStatusResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateMenuByStatusResponseValidationError) ErrorName() string {
+	return "UpdateMenuByStatusResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateMenuByStatusResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateMenuByStatusResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateMenuByStatusResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateMenuByStatusResponseValidationError{}

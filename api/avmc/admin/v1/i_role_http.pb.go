@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
@@ -23,21 +22,27 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationRoleServiceCreateRole = "/avmc.admin.v1.RoleService/CreateRole"
 const OperationRoleServiceDeleteRole = "/avmc.admin.v1.RoleService/DeleteRole"
+const OperationRoleServiceExistRoleByName = "/avmc.admin.v1.RoleService/ExistRoleByName"
 const OperationRoleServiceGetRole = "/avmc.admin.v1.RoleService/GetRole"
 const OperationRoleServiceListRole = "/avmc.admin.v1.RoleService/ListRole"
 const OperationRoleServiceUpdateRole = "/avmc.admin.v1.RoleService/UpdateRole"
+const OperationRoleServiceUpdateRoleByStatus = "/avmc.admin.v1.RoleService/UpdateRoleByStatus"
 
 type RoleServiceHTTPServer interface {
 	// CreateRole 创建角色
 	CreateRole(context.Context, *v1.CreateRoleRequest) (*v1.CreateRoleResponse, error)
 	// DeleteRole 删除角色
 	DeleteRole(context.Context, *v1.DeleteRoleRequest) (*v1.DeleteRoleResponse, error)
+	// ExistRoleByName 判断角色名是否存在
+	ExistRoleByName(context.Context, *v1.ExistRoleByNameRequest) (*v1.ExistRoleByNameResponse, error)
 	// GetRole 获取角色数据
 	GetRole(context.Context, *v1.GetRoleRequest) (*v1.Role, error)
 	// ListRole 获取角色列表
-	ListRole(context.Context, *pagination.PagingRequest) (*v1.ListRoleResponse, error)
+	ListRole(context.Context, *v1.ListRoleRequest) (*v1.ListRoleResponse, error)
 	// UpdateRole 更新角色
 	UpdateRole(context.Context, *v1.UpdateRoleRequest) (*v1.UpdateRoleResponse, error)
+	// UpdateRoleByStatus 更新角色状态
+	UpdateRoleByStatus(context.Context, *v1.UpdateRoleByStatusRequest) (*v1.UpdateRoleByStatusResponse, error)
 }
 
 func RegisterRoleServiceHTTPServer(s *http.Server, srv RoleServiceHTTPServer) {
@@ -47,17 +52,20 @@ func RegisterRoleServiceHTTPServer(s *http.Server, srv RoleServiceHTTPServer) {
 	r.POST("/admin/v1/roles", _RoleService_CreateRole0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/roles/{id}", _RoleService_UpdateRole0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/roles/{id}", _RoleService_DeleteRole0_HTTP_Handler(srv))
+	r.POST("/admin/v1/roles/name-exists", _RoleService_ExistRoleByName0_HTTP_Handler(srv))
+	r.GET("/admin/v1/roles/name-exists/{id}", _RoleService_ExistRoleByName1_HTTP_Handler(srv))
+	r.PUT("/admin/v1/roles/status-update/{id}", _RoleService_UpdateRoleByStatus0_HTTP_Handler(srv))
 }
 
 func _RoleService_ListRole0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in pagination.PagingRequest
+		var in v1.ListRoleRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationRoleServiceListRole)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListRole(ctx, req.(*pagination.PagingRequest))
+			return srv.ListRole(ctx, req.(*v1.ListRoleRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -159,12 +167,83 @@ func _RoleService_DeleteRole0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx h
 	}
 }
 
+func _RoleService_ExistRoleByName0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ExistRoleByNameRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoleServiceExistRoleByName)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExistRoleByName(ctx, req.(*v1.ExistRoleByNameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ExistRoleByNameResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _RoleService_ExistRoleByName1_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ExistRoleByNameRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoleServiceExistRoleByName)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ExistRoleByName(ctx, req.(*v1.ExistRoleByNameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ExistRoleByNameResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _RoleService_UpdateRoleByStatus0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UpdateRoleByStatusRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoleServiceUpdateRoleByStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateRoleByStatus(ctx, req.(*v1.UpdateRoleByStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UpdateRoleByStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type RoleServiceHTTPClient interface {
 	CreateRole(ctx context.Context, req *v1.CreateRoleRequest, opts ...http.CallOption) (rsp *v1.CreateRoleResponse, err error)
 	DeleteRole(ctx context.Context, req *v1.DeleteRoleRequest, opts ...http.CallOption) (rsp *v1.DeleteRoleResponse, err error)
+	ExistRoleByName(ctx context.Context, req *v1.ExistRoleByNameRequest, opts ...http.CallOption) (rsp *v1.ExistRoleByNameResponse, err error)
 	GetRole(ctx context.Context, req *v1.GetRoleRequest, opts ...http.CallOption) (rsp *v1.Role, err error)
-	ListRole(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListRoleResponse, err error)
+	ListRole(ctx context.Context, req *v1.ListRoleRequest, opts ...http.CallOption) (rsp *v1.ListRoleResponse, err error)
 	UpdateRole(ctx context.Context, req *v1.UpdateRoleRequest, opts ...http.CallOption) (rsp *v1.UpdateRoleResponse, err error)
+	UpdateRoleByStatus(ctx context.Context, req *v1.UpdateRoleByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdateRoleByStatusResponse, err error)
 }
 
 type RoleServiceHTTPClientImpl struct {
@@ -201,6 +280,19 @@ func (c *RoleServiceHTTPClientImpl) DeleteRole(ctx context.Context, in *v1.Delet
 	return &out, nil
 }
 
+func (c *RoleServiceHTTPClientImpl) ExistRoleByName(ctx context.Context, in *v1.ExistRoleByNameRequest, opts ...http.CallOption) (*v1.ExistRoleByNameResponse, error) {
+	var out v1.ExistRoleByNameResponse
+	pattern := "/admin/v1/roles/name-exists/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationRoleServiceExistRoleByName))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *RoleServiceHTTPClientImpl) GetRole(ctx context.Context, in *v1.GetRoleRequest, opts ...http.CallOption) (*v1.Role, error) {
 	var out v1.Role
 	pattern := "/admin/v1/roles/{id}"
@@ -214,7 +306,7 @@ func (c *RoleServiceHTTPClientImpl) GetRole(ctx context.Context, in *v1.GetRoleR
 	return &out, nil
 }
 
-func (c *RoleServiceHTTPClientImpl) ListRole(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListRoleResponse, error) {
+func (c *RoleServiceHTTPClientImpl) ListRole(ctx context.Context, in *v1.ListRoleRequest, opts ...http.CallOption) (*v1.ListRoleResponse, error) {
 	var out v1.ListRoleResponse
 	pattern := "/admin/v1/roles"
 	path := binding.EncodeURL(pattern, in, true)
@@ -234,6 +326,19 @@ func (c *RoleServiceHTTPClientImpl) UpdateRole(ctx context.Context, in *v1.Updat
 	opts = append(opts, http.Operation(OperationRoleServiceUpdateRole))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in.Role, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *RoleServiceHTTPClientImpl) UpdateRoleByStatus(ctx context.Context, in *v1.UpdateRoleByStatusRequest, opts ...http.CallOption) (*v1.UpdateRoleByStatusResponse, error) {
+	var out v1.UpdateRoleByStatusResponse
+	pattern := "/admin/v1/roles/status-update/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationRoleServiceUpdateRoleByStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

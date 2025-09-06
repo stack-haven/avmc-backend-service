@@ -1,7 +1,7 @@
 package convert
 
 import (
-	"errors"
+	"fmt"
 )
 
 // Pid 定义支持的父 ID 类型
@@ -10,47 +10,86 @@ type Pid interface {
 }
 
 // TreeData 定义树节点数据接口
-type TreeData[T Pid] interface {
+type TreeItem[T Pid] interface {
 	GetId() T
 	GetParentId() T
 }
 
-// ToTree 将扁平数据转换为树形结构
-// source: 原始数据切片
-// pid: 根节点的父 ID
-// addChildren: 用于为节点添加子节点的函数
-func ToTree[T TreeData[I], I Pid](source []T, pid I, addChildren func(T, ...T) error) ([]T, error) {
-	result := make([]T, 0)
-	// 缓存所有节点，方便快速查找
-	nodeMap := make(map[I]T)
-	for _, item := range source {
-		id := item.GetId()
-		nodeMap[id] = item
+// ToTree：一次遍历挂子节点，O(n)
+func ToTree[T TreeItem[I], I Pid](
+	source []T,
+	rootPid I,
+	addChildren func(T, ...T) error,
+) ([]T, error) {
+	nodeMap := make(map[I]T, len(source))
+	for i := range source {
+		// 存指针，避免拷贝
+		node := source[i]
+		id := node.GetId() // 注意：对 *T 先解引用再调用
+		nodeMap[id] = node
 	}
 
-	for _, item := range source {
-		parentId := item.GetParentId()
-		if parentId == pid {
-			result = append(result, item)
-		} else if parent, exists := nodeMap[parentId]; exists {
-			if err := addChildren(parent, item); err != nil {
-				return nil, errors.New("failed to add child to parent: " + err.Error())
+	var roots []T
+	for i := range source {
+		node := source[i]
+		pid := node.GetParentId()
+		if pid == rootPid {
+			roots = append(roots, node)
+			continue
+		}
+		if parent, ok := nodeMap[pid]; ok {
+			if err := addChildren(parent, node); err != nil {
+				return nil, fmt.Errorf("failed to add child: %w", err)
+			}
+		}
+	}
+	return roots, nil
+}
+
+// ToTreeWith 将扁平化的切片数据转换为树形结构。
+// - T: 节点类型（任意 struct）
+// - I: 节点 ID 类型（约束为 Pid）
+//
+// 参数说明：
+//
+//	source     : 原始节点切片（扁平数据）
+//	rootPid    : 根节点的父 ID（通常为 0 或 -1）
+//	idOf       : 获取节点 ID 的函数
+//	parentOf   : 获取节点父 ID 的函数
+//	addChildren: 将子节点追加到父节点的函数
+//
+// 返回：
+//
+//	[]*T       : 树的根节点切片（可能有多棵树）
+//	error      : 错误信息
+func ToTreeWith[T any, I Pid](source []*T, rootPid I, idOf func(*T) I, parentOf func(*T) I, addChildren func(*T, ...*T) error,
+) ([]*T, error) {
+	// 缓存 id -> 节点指针，方便 O(1) 查找
+	nodeMap := make(map[I]*T, len(source))
+	for i := range source {
+		node := &source[i]
+		nodeMap[idOf(*node)] = *node
+	}
+
+	// 存放最终的根节点
+	roots := make([]*T, 0, len(source))
+
+	// 挂接子节点
+	for i := range source {
+		node := &source[i]
+		pid := parentOf(*node)
+		if pid == rootPid {
+			// 根节点
+			roots = append(roots, *node)
+			continue
+		}
+		// 找到父节点，挂到父节点下
+		if parent, ok := nodeMap[pid]; ok {
+			if err := addChildren(parent, *node); err != nil {
+				return nil, fmt.Errorf("failed to add child: %w", err)
 			}
 		}
 	}
 
-	// 递归处理子节点
-	for _, item := range result {
-		children, err := ToTree(source, item.GetId(), addChildren)
-		if err != nil {
-			return nil, err
-		}
-		if len(children) > 0 {
-			if err := addChildren(item, children...); err != nil {
-				return nil, errors.New("failed to add children to node: " + err.Error())
-			}
-		}
-	}
-
-	return result, nil
+	return roots, nil
 }

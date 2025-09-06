@@ -561,6 +561,34 @@ func ErrorUserSocialLoginFailed(format string, args ...interface{}) *errors.Erro
 	return errors.New(400, ErrorReason_USER_SOCIAL_LOGIN_FAILED.String(), fmt.Sprintf(format, args...))
 }
 
+// 用户状态不能为空
+func IsUserStatusCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_USER_STATUS_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 用户状态不能为空
+func ErrorUserStatusCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_USER_STATUS_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 用户状态无效
+func IsUserStatusInvalid(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_USER_STATUS_INVALID.String() && e.Code == 400
+}
+
+// 用户状态无效
+func ErrorUserStatusInvalid(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_USER_STATUS_INVALID.String(), fmt.Sprintf(format, args...))
+}
+
 // =======================================
 // 角色管理错误 (300-399)
 // =======================================
@@ -665,6 +693,34 @@ func ErrorRolePermissionInvalid(format string, args ...interface{}) *errors.Erro
 	return errors.New(400, ErrorReason_ROLE_PERMISSION_INVALID.String(), fmt.Sprintf(format, args...))
 }
 
+// 角色状态不能为空
+func IsRoleStatusCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_STATUS_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 角色状态不能为空
+func ErrorRoleStatusCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_STATUS_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 角色状态无效
+func IsRoleStatusInvalid(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ROLE_STATUS_INVALID.String() && e.Code == 400
+}
+
+// 角色状态无效
+func ErrorRoleStatusInvalid(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ROLE_STATUS_INVALID.String(), fmt.Sprintf(format, args...))
+}
+
 // =======================================
 // 岗位管理错误 (400-499)
 // =======================================
@@ -739,6 +795,34 @@ func IsPostDescriptionCannotBeEmpty(err error) bool {
 // 岗位描述不能为空
 func ErrorPostDescriptionCannotBeEmpty(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_POST_DESCRIPTION_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 岗位状态不能为空
+func IsPostStatusCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_STATUS_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 岗位状态不能为空
+func ErrorPostStatusCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_POST_STATUS_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 岗位状态无效
+func IsPostStatusInvalid(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_POST_STATUS_INVALID.String() && e.Code == 400
+}
+
+// 岗位状态无效
+func ErrorPostStatusInvalid(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_POST_STATUS_INVALID.String(), fmt.Sprintf(format, args...))
 }
 
 // =======================================
@@ -961,6 +1045,20 @@ func IsDeptCannotDeleteWithUsers(err error) bool {
 // 无法删除包含用户的部门
 func ErrorDeptCannotDeleteWithUsers(format string, args ...interface{}) *errors.Error {
 	return errors.New(403, ErrorReason_DEPT_CANNOT_DELETE_WITH_USERS.String(), fmt.Sprintf(format, args...))
+}
+
+// 部门名称已存在
+func IsDeptNameAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DEPT_NAME_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 部门名称已存在
+func ErrorDeptNameAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_DEPT_NAME_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
 }
 
 // =======================================

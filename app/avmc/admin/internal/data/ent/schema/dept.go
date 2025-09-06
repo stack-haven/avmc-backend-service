@@ -31,7 +31,10 @@ func (Dept) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").Comment("名称").MaxLen(128).Nillable(),
 		field.Uint32("parent_id").Comment("父级ID").Default(0).Optional().Nillable(),
+		field.Uint32("leader_id").Comment("负责人ID").Default(0).Optional().Nillable(),
 		field.Ints("ancestors").Comment("祖级列表").Default([]int{}).Optional(),
+		field.Int32("sort").Comment("排序").Default(10).Nillable(),
+		field.String("remark").Comment("备注").MaxLen(255).Default("").Optional().Nillable(),
 	}
 }
 

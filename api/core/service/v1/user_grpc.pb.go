@@ -20,15 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_CreateUser_FullMethodName     = "/core.service.v1.UserService/CreateUser"
-	UserService_UpdateUser_FullMethodName     = "/core.service.v1.UserService/UpdateUser"
-	UserService_DeleteUser_FullMethodName     = "/core.service.v1.UserService/DeleteUser"
-	UserService_GetUser_FullMethodName        = "/core.service.v1.UserService/GetUser"
-	UserService_ListUser_FullMethodName       = "/core.service.v1.UserService/ListUser"
-	UserService_GetUserByName_FullMethodName  = "/core.service.v1.UserService/GetUserByName"
-	UserService_GetUserByPhone_FullMethodName = "/core.service.v1.UserService/GetUserByPhone"
-	UserService_VerifyPassword_FullMethodName = "/core.service.v1.UserService/VerifyPassword"
-	UserService_UserExists_FullMethodName     = "/core.service.v1.UserService/UserExists"
+	UserService_CreateUser_FullMethodName         = "/core.service.v1.UserService/CreateUser"
+	UserService_UpdateUser_FullMethodName         = "/core.service.v1.UserService/UpdateUser"
+	UserService_DeleteUser_FullMethodName         = "/core.service.v1.UserService/DeleteUser"
+	UserService_GetUser_FullMethodName            = "/core.service.v1.UserService/GetUser"
+	UserService_ListUser_FullMethodName           = "/core.service.v1.UserService/ListUser"
+	UserService_GetUserByName_FullMethodName      = "/core.service.v1.UserService/GetUserByName"
+	UserService_GetUserByPhone_FullMethodName     = "/core.service.v1.UserService/GetUserByPhone"
+	UserService_VerifyPassword_FullMethodName     = "/core.service.v1.UserService/VerifyPassword"
+	UserService_UserExists_FullMethodName         = "/core.service.v1.UserService/UserExists"
+	UserService_UpdateUserByStatus_FullMethodName = "/core.service.v1.UserService/UpdateUserByStatus"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -53,6 +54,8 @@ type UserServiceClient interface {
 	VerifyPassword(ctx context.Context, in *VerifyPasswordRequest, opts ...grpc.CallOption) (*VerifyPasswordResponse, error)
 	// 用户是否存在
 	UserExists(ctx context.Context, in *UserExistsRequest, opts ...grpc.CallOption) (*UserExistsResponse, error)
+	// 更新用户状态
+	UpdateUserByStatus(ctx context.Context, in *UpdateUserByStatusRequest, opts ...grpc.CallOption) (*UpdateUserByStatusResponse, error)
 }
 
 type userServiceClient struct {
@@ -153,6 +156,16 @@ func (c *userServiceClient) UserExists(ctx context.Context, in *UserExistsReques
 	return out, nil
 }
 
+func (c *userServiceClient) UpdateUserByStatus(ctx context.Context, in *UpdateUserByStatusRequest, opts ...grpc.CallOption) (*UpdateUserByStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserByStatusResponse)
+	err := c.cc.Invoke(ctx, UserService_UpdateUserByStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -175,6 +188,8 @@ type UserServiceServer interface {
 	VerifyPassword(context.Context, *VerifyPasswordRequest) (*VerifyPasswordResponse, error)
 	// 用户是否存在
 	UserExists(context.Context, *UserExistsRequest) (*UserExistsResponse, error)
+	// 更新用户状态
+	UpdateUserByStatus(context.Context, *UpdateUserByStatusRequest) (*UpdateUserByStatusResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -211,6 +226,9 @@ func (UnimplementedUserServiceServer) VerifyPassword(context.Context, *VerifyPas
 }
 func (UnimplementedUserServiceServer) UserExists(context.Context, *UserExistsRequest) (*UserExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserExists not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateUserByStatus(context.Context, *UpdateUserByStatusRequest) (*UpdateUserByStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserByStatus not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -395,6 +413,24 @@ func _UserService_UserExists_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UpdateUserByStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserByStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateUserByStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateUserByStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateUserByStatus(ctx, req.(*UpdateUserByStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -437,6 +473,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserExists",
 			Handler:    _UserService_UserExists_Handler,
+		},
+		{
+			MethodName: "UpdateUserByStatus",
+			Handler:    _UserService_UpdateUserByStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

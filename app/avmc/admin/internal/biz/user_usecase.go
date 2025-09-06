@@ -1,6 +1,7 @@
 package biz
 
 import (
+	pbEnum "backend-service/api/common/enum"
 	pbPagination "backend-service/api/common/pagination"
 	"context"
 
@@ -87,4 +88,17 @@ func (uc *UserUsecase) ListPage(ctx context.Context, pagination *pbPagination.Pa
 // 返回值：错误信息
 func (uc *UserUsecase) Delete(ctx context.Context, id uint32) error {
 	return uc.repo.Delete(ctx, id)
+}
+
+// UpdateStatus 处理更新用户状态请求
+// 参数：ctx 上下文，id 用户ID，status 用户状态
+// 返回值：更新后的用户信息，错误信息
+func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status pbEnum.Status) (*pbCore.User, error) {
+	uc.log.WithContext(ctx).Infof("UpdateStatus：%v %v", id, status)
+	g, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	g.Status = &status
+	return uc.repo.Update(ctx, g)
 }

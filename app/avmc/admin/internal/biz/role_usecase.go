@@ -3,7 +3,7 @@ package biz
 import (
 	"context"
 
-	pbPagination "backend-service/api/common/pagination"
+	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -20,8 +20,9 @@ type RoleRepo interface {
 	Update(context.Context, *pbCore.Role) (*pbCore.Role, error)
 	FindByID(context.Context, uint32) (*pbCore.Role, error)
 	ListAll(context.Context) ([]*pbCore.Role, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListRoleResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
+	ExistByName(context.Context, *pbCore.ExistRoleByNameRequest) (bool, error)
 }
 
 // RoleUsecase is a Role usecase.
@@ -74,8 +75,8 @@ func (uc *RoleUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListPage 处理角色分页列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：角色列表响应，错误信息
-func (uc *RoleUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListRoleResponse, error) {
-	return uc.repo.ListPage(ctx, pagination)
+func (uc *RoleUsecase) ListPage(ctx context.Context, req *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) {
+	return uc.repo.ListPage(ctx, req)
 }
 
 // Delete 处理删除角色请求
@@ -88,4 +89,25 @@ func (uc *RoleUsecase) Delete(ctx context.Context, id uint32) error {
 		return err
 	}
 	return uc.repo.Delete(ctx, id)
+}
+
+// ExistByName 处理判断菜单名是否存在请求
+// 参数：ctx 上下文，req 判断菜单名是否存在请求
+// 返回值：是否存在，错误信息
+func (uc *RoleUsecase) ExistByName(ctx context.Context, req *pbCore.ExistRoleByNameRequest) (bool, error) {
+	uc.log.WithContext(ctx).Infof("ExistByName：%v", req.GetName())
+	return uc.repo.ExistByName(ctx, req)
+}
+
+// UpdateStatus 处理更新角色状态请求
+// 参数：ctx 上下文，id 角色ID，status 角色状态
+// 返回值：更新后的角色信息，错误信息
+func (uc *RoleUsecase) UpdateStatus(ctx context.Context, id uint32, status pbEnum.Status) (*pbCore.Role, error) {
+	uc.log.WithContext(ctx).Infof("UpdateStatus：%v %v", id, status)
+	g, err := uc.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	g.Status = &status
+	return uc.repo.Update(ctx, g)
 }

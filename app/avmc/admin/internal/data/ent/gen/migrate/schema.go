@@ -18,7 +18,10 @@ var (
 		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Size: 128, Comment: "名称"},
+		{Name: "leader_id", Type: field.TypeUint32, Nullable: true, Comment: "负责人ID", Default: 0},
 		{Name: "ancestors", Type: field.TypeJSON, Nullable: true, Comment: "祖级列表"},
+		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10},
+		{Name: "remark", Type: field.TypeString, Nullable: true, Size: 255, Comment: "备注", Default: ""},
 		{Name: "parent_id", Type: field.TypeUint32, Nullable: true, Comment: "父级ID", Default: 0, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// DeptsTable holds the schema information for the "depts" table.
@@ -30,7 +33,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "depts_depts_children",
-				Columns:    []*schema.Column{DeptsColumns[8]},
+				Columns:    []*schema.Column{DeptsColumns[11]},
 				RefColumns: []*schema.Column{DeptsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -118,6 +121,8 @@ var (
 		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Size: 50, Comment: "名称", Default: ""},
+		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10},
+		{Name: "remark", Type: field.TypeString, Size: 255, Comment: "备注", Default: ""},
 		{Name: "user_posts", Type: field.TypeUint32, Nullable: true, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// PostsTable holds the schema information for the "posts" table.
@@ -129,7 +134,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "posts_users_posts",
-				Columns:    []*schema.Column{PostsColumns[7]},
+				Columns:    []*schema.Column{PostsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -1315,3 +1315,211 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ListPostResponseValidationError{}
+
+// Validate checks the field values on UpdatePostByStatusRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdatePostByStatusRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdatePostByStatusRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdatePostByStatusRequestMultiError, or nil if none found.
+func (m *UpdatePostByStatusRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdatePostByStatusRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Status
+
+	if len(errors) > 0 {
+		return UpdatePostByStatusRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdatePostByStatusRequestMultiError is an error wrapping multiple validation
+// errors returned by UpdatePostByStatusRequest.ValidateAll() if the
+// designated constraints aren't met.
+type UpdatePostByStatusRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdatePostByStatusRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdatePostByStatusRequestMultiError) AllErrors() []error { return m }
+
+// UpdatePostByStatusRequestValidationError is the validation error returned by
+// UpdatePostByStatusRequest.Validate if the designated constraints aren't met.
+type UpdatePostByStatusRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdatePostByStatusRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdatePostByStatusRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdatePostByStatusRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdatePostByStatusRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdatePostByStatusRequestValidationError) ErrorName() string {
+	return "UpdatePostByStatusRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdatePostByStatusRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdatePostByStatusRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdatePostByStatusRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdatePostByStatusRequestValidationError{}
+
+// Validate checks the field values on UpdatePostByStatusResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdatePostByStatusResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdatePostByStatusResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdatePostByStatusResponseMultiError, or nil if none found.
+func (m *UpdatePostByStatusResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdatePostByStatusResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return UpdatePostByStatusResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdatePostByStatusResponseMultiError is an error wrapping multiple
+// validation errors returned by UpdatePostByStatusResponse.ValidateAll() if
+// the designated constraints aren't met.
+type UpdatePostByStatusResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdatePostByStatusResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdatePostByStatusResponseMultiError) AllErrors() []error { return m }
+
+// UpdatePostByStatusResponseValidationError is the validation error returned
+// by UpdatePostByStatusResponse.Validate if the designated constraints aren't met.
+type UpdatePostByStatusResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdatePostByStatusResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdatePostByStatusResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdatePostByStatusResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdatePostByStatusResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdatePostByStatusResponseValidationError) ErrorName() string {
+	return "UpdatePostByStatusResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdatePostByStatusResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdatePostByStatusResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdatePostByStatusResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdatePostByStatusResponseValidationError{}

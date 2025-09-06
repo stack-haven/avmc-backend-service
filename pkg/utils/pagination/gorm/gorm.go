@@ -1,7 +1,8 @@
 package gorm
 
 import (
-	"github.com/beiduoke/go-scaffold/pkg/util/pagination"
+	"backend-service/pkg/utils/pagination"
+
 	"github.com/iancoleman/strcase"
 )
 

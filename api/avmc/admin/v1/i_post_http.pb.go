@@ -26,6 +26,7 @@ const OperationPostServiceDeletePost = "/avmc.admin.v1.PostService/DeletePost"
 const OperationPostServiceGetPost = "/avmc.admin.v1.PostService/GetPost"
 const OperationPostServiceListPost = "/avmc.admin.v1.PostService/ListPost"
 const OperationPostServiceUpdatePost = "/avmc.admin.v1.PostService/UpdatePost"
+const OperationPostServiceUpdatePostByStatus = "/avmc.admin.v1.PostService/UpdatePostByStatus"
 
 type PostServiceHTTPServer interface {
 	// CreatePost 创建岗位
@@ -38,6 +39,8 @@ type PostServiceHTTPServer interface {
 	ListPost(context.Context, *pagination.PagingRequest) (*v1.ListPostResponse, error)
 	// UpdatePost 更新岗位
 	UpdatePost(context.Context, *v1.UpdatePostRequest) (*v1.UpdatePostResponse, error)
+	// UpdatePostByStatus 更新岗位状态
+	UpdatePostByStatus(context.Context, *v1.UpdatePostByStatusRequest) (*v1.UpdatePostByStatusResponse, error)
 }
 
 func RegisterPostServiceHTTPServer(s *http.Server, srv PostServiceHTTPServer) {
@@ -47,6 +50,7 @@ func RegisterPostServiceHTTPServer(s *http.Server, srv PostServiceHTTPServer) {
 	r.POST("/admin/v1/posts", _PostService_CreatePost0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/posts/{id}", _PostService_UpdatePost0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/posts/{id}", _PostService_DeletePost0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/posts/status-update/{id}", _PostService_UpdatePostByStatus0_HTTP_Handler(srv))
 }
 
 func _PostService_ListPost0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx http.Context) error {
@@ -159,12 +163,38 @@ func _PostService_DeletePost0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx h
 	}
 }
 
+func _PostService_UpdatePostByStatus0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UpdatePostByStatusRequest
+		if err := ctx.Bind(&in.Status); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPostServiceUpdatePostByStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdatePostByStatus(ctx, req.(*v1.UpdatePostByStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UpdatePostByStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PostServiceHTTPClient interface {
 	CreatePost(ctx context.Context, req *v1.CreatePostRequest, opts ...http.CallOption) (rsp *v1.CreatePostResponse, err error)
 	DeletePost(ctx context.Context, req *v1.DeletePostRequest, opts ...http.CallOption) (rsp *v1.DeletePostResponse, err error)
 	GetPost(ctx context.Context, req *v1.GetPostRequest, opts ...http.CallOption) (rsp *v1.Post, err error)
 	ListPost(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListPostResponse, err error)
 	UpdatePost(ctx context.Context, req *v1.UpdatePostRequest, opts ...http.CallOption) (rsp *v1.UpdatePostResponse, err error)
+	UpdatePostByStatus(ctx context.Context, req *v1.UpdatePostByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdatePostByStatusResponse, err error)
 }
 
 type PostServiceHTTPClientImpl struct {
@@ -234,6 +264,19 @@ func (c *PostServiceHTTPClientImpl) UpdatePost(ctx context.Context, in *v1.Updat
 	opts = append(opts, http.Operation(OperationPostServiceUpdatePost))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in.Post, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PostServiceHTTPClientImpl) UpdatePostByStatus(ctx context.Context, in *v1.UpdatePostByStatusRequest, opts ...http.CallOption) (*v1.UpdatePostByStatusResponse, error) {
+	var out v1.UpdatePostByStatusResponse
+	pattern := "/admin/v1/posts/status-update/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPostServiceUpdatePostByStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in.Status, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

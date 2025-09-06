@@ -29,8 +29,14 @@ const (
 	FieldName = "name"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
+	// FieldLeaderID holds the string denoting the leader_id field in the database.
+	FieldLeaderID = "leader_id"
 	// FieldAncestors holds the string denoting the ancestors field in the database.
 	FieldAncestors = "ancestors"
+	// FieldSort holds the string denoting the sort field in the database.
+	FieldSort = "sort"
+	// FieldRemark holds the string denoting the remark field in the database.
+	FieldRemark = "remark"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -57,7 +63,10 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldName,
 	FieldParentID,
+	FieldLeaderID,
 	FieldAncestors,
+	FieldSort,
+	FieldRemark,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -96,8 +105,16 @@ var (
 	NameValidator func(string) error
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID uint32
+	// DefaultLeaderID holds the default value on creation for the "leader_id" field.
+	DefaultLeaderID uint32
 	// DefaultAncestors holds the default value on creation for the "ancestors" field.
 	DefaultAncestors []int
+	// DefaultSort holds the default value on creation for the "sort" field.
+	DefaultSort int32
+	// DefaultRemark holds the default value on creation for the "remark" field.
+	DefaultRemark string
+	// RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	RemarkValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -143,6 +160,21 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByParentID orders the results by the parent_id field.
 func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+}
+
+// ByLeaderID orders the results by the leader_id field.
+func ByLeaderID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLeaderID, opts...).ToFunc()
+}
+
+// BySort orders the results by the sort field.
+func BySort(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSort, opts...).ToFunc()
+}
+
+// ByRemark orders the results by the remark field.
+func ByRemark(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemark, opts...).ToFunc()
 }
 
 // ByParentField orders the results by parent field.

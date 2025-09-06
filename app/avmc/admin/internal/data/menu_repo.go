@@ -39,11 +39,11 @@ func (r *menuRepo) toProto(res *gen.Menu) *pbCore.Menu {
 	return &pbCore.Menu{
 		Id:        res.ID,
 		Name:      res.Name,
-		Pid:       res.ParentID,
+		ParentId:  res.ParentID,
 		Path:      res.Path,
 		Component: res.Component,
 		Redirect:  res.Redirect,
-		Type:      res.Type,
+		Type:      convert.EmptyToNil(pbCore.MenuType(*res.Type)),
 		AuthCode:  res.AuthCode,
 		Meta: &pbCore.MenuMeta{
 			Title:              res.Title,
@@ -52,8 +52,8 @@ func (r *menuRepo) toProto(res *gen.Menu) *pbCore.Menu {
 			AffixTab:           res.AffixTab,
 			AffixTabOrder:      res.AffixTabOrder,
 			Badge:              res.Badge,
-			BadgeType:          res.BadgeType,
-			BadgeVariants:      res.BadgeVariants,
+			BadgeType:          convert.EmptyToNil(pbCore.BadgeType(*res.BadgeType)),
+			BadgeVariants:      convert.EmptyToNil(pbCore.BadgeVariants(*res.BadgeVariants)),
 			HideChildrenInMenu: res.HideChildrenInMenu,
 			HideInBreadcrumb:   res.HideInBreadcrumb,
 			HideInMenu:         res.HideInMenu,
@@ -68,7 +68,7 @@ func (r *menuRepo) toProto(res *gen.Menu) *pbCore.Menu {
 			Order:              res.Sort,
 			Query:              res.Query,
 		},
-		Status:    (*enum.Status)(res.Status),
+		Status:    convert.EmptyToNil(enum.Status(*res.Status)),
 		CreatedAt: convert.TimeValueToString(&res.CreatedAt, time.DateTime),
 		UpdatedAt: convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
 	}
@@ -79,22 +79,24 @@ func (r *menuRepo) toEnt(g *pbCore.Menu) *gen.Menu {
 	return &gen.Menu{
 		ID:        g.GetId(),
 		Name:      g.Name,
-		ParentID:  g.Pid,
+		ParentID:  g.ParentId,
 		Path:      g.Path,
 		Component: g.Component,
 		Redirect:  g.Redirect,
-		Type:      g.Type,
+		Type:      convert.ToPointer(int32(g.GetType())),
 		AuthCode:  g.AuthCode,
-		Status:    (*int32)(g.Status),
+		Status:    convert.ToPointer(int32(g.GetStatus())),
 		// Meta 相关信息
-		Title:              g.Meta.Title,
-		ActiveIcon:         g.Meta.ActiveIcon,
-		ActivePath:         g.Meta.ActivePath,
-		AffixTab:           g.Meta.AffixTab,
-		AffixTabOrder:      g.Meta.AffixTabOrder,
-		Badge:              g.Meta.Badge,
-		BadgeType:          g.Meta.BadgeType,
-		BadgeVariants:      g.Meta.BadgeVariants,
+		Title:         g.Meta.Title,
+		ActiveIcon:    g.Meta.ActiveIcon,
+		ActivePath:    g.Meta.ActivePath,
+		AffixTab:      g.Meta.AffixTab,
+		AffixTabOrder: g.Meta.AffixTabOrder,
+		Badge:         g.Meta.Badge,
+		// BadgeType:          g.Meta.BadgeType,
+		// BadgeVariants:      g.Meta.BadgeVariants,
+		BadgeType:          convert.EmptyToNil(int32(g.Meta.GetBadgeType())),
+		BadgeVariants:      convert.EmptyToNil(int32(g.Meta.GetBadgeVariants())),
 		HideChildrenInMenu: g.Meta.HideChildrenInMenu,
 		HideInBreadcrumb:   g.Meta.HideInBreadcrumb,
 		HideInMenu:         g.Meta.HideInMenu,
@@ -134,7 +136,7 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 		SetNillablePath(entMenu.Path).
 		SetNillableComponent(entMenu.Component).
 		SetNillableRedirect(entMenu.Redirect).
-		SetNillableType(&entMenu.Type).
+		SetNillableType(entMenu.Type).
 		SetNillableStatus(entMenu.Status).
 		SetNillableAuthCode(entMenu.AuthCode).
 		SetNillableActiveIcon(entMenu.ActiveIcon).
@@ -173,7 +175,7 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 	entMenu := r.toEnt(g)
 	builder := r.data.DB(ctx).Menu.UpdateOneID(g.GetId())
 	exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
-		Id:   &g.Id,
+		Id:   convert.ToPointer(g.GetId()),
 		Name: entMenu.Name,
 	})
 	if exist {
@@ -188,7 +190,7 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 		SetNillablePath(entMenu.Path).
 		SetNillableComponent(entMenu.Component).
 		SetNillableRedirect(entMenu.Redirect).
-		SetNillableType(&entMenu.Type).
+		SetNillableType(entMenu.Type).
 		SetNillableStatus(entMenu.Status).
 		SetNillableAuthCode(entMenu.AuthCode).
 		SetNillableActiveIcon(entMenu.ActiveIcon).
@@ -241,6 +243,8 @@ func (r *menuRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Menu, error
 // 返回值：错误信息
 func (r *menuRepo) Delete(ctx context.Context, id uint32) error {
 	r.log.Infof("删除菜单，菜单ID：%d", id)
+	// ctx = mixins.SkipSoftDelete(ctx)
+	// r.data.DB(ctx).Menu.UpdateOneID(id).SetDeletedAt()
 	err := r.data.DB(ctx).Menu.DeleteOneID(id).Exec(ctx)
 	if err != nil {
 		r.log.Errorf("删除菜单失败，菜单ID：%d，错误：%v", id, err)
@@ -348,10 +352,10 @@ func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 func (r *menuRepo) ExistByPath(ctx context.Context, req *pbCore.ExistMenuByPathRequest) (bool, error) {
 	r.log.Infof("判断菜单路径是否存在，菜单路径：%s", req.GetPath())
 	builder := r.data.DB(ctx).Menu.Query()
-	if req.GetId() > 0 {
+	if req.GetId() != 0 {
 		builder = builder.Where(menu.Not(menu.IDEQ(req.GetId())))
 	}
-	_, err := builder.Select(menu.FieldID).Where(menu.PathContains(req.GetPath())).Only(ctx)
+	_, err := builder.Select(menu.FieldID).Where(menu.Path(req.GetPath())).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return false, nil
@@ -368,10 +372,10 @@ func (r *menuRepo) ExistByPath(ctx context.Context, req *pbCore.ExistMenuByPathR
 func (r *menuRepo) ExistByName(ctx context.Context, req *pbCore.ExistMenuByNameRequest) (bool, error) {
 	r.log.Infof("判断菜单名称是否存在，菜单名称：%s", req.GetName())
 	builder := r.data.DB(ctx).Menu.Query()
-	if req.GetId() > 0 {
-		builder = builder.Where(menu.Not(menu.IDEQ(req.GetId())))
+	if req.GetId() != 0 {
+		builder = builder.Where(menu.IDNotIn(req.GetId()))
 	}
-	_, err := builder.Select(menu.FieldID).Where(menu.NameContains(req.GetName())).Only(ctx)
+	_, err := builder.Select(menu.FieldID).Where(menu.Name(req.GetName())).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return false, nil

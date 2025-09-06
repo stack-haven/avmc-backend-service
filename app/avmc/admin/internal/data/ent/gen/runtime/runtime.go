@@ -69,10 +69,24 @@ func init() {
 	deptDescParentID := deptFields[1].Descriptor()
 	// dept.DefaultParentID holds the default value on creation for the parent_id field.
 	dept.DefaultParentID = deptDescParentID.Default.(uint32)
+	// deptDescLeaderID is the schema descriptor for leader_id field.
+	deptDescLeaderID := deptFields[2].Descriptor()
+	// dept.DefaultLeaderID holds the default value on creation for the leader_id field.
+	dept.DefaultLeaderID = deptDescLeaderID.Default.(uint32)
 	// deptDescAncestors is the schema descriptor for ancestors field.
-	deptDescAncestors := deptFields[2].Descriptor()
+	deptDescAncestors := deptFields[3].Descriptor()
 	// dept.DefaultAncestors holds the default value on creation for the ancestors field.
 	dept.DefaultAncestors = deptDescAncestors.Default.([]int)
+	// deptDescSort is the schema descriptor for sort field.
+	deptDescSort := deptFields[4].Descriptor()
+	// dept.DefaultSort holds the default value on creation for the sort field.
+	dept.DefaultSort = deptDescSort.Default.(int32)
+	// deptDescRemark is the schema descriptor for remark field.
+	deptDescRemark := deptFields[5].Descriptor()
+	// dept.DefaultRemark holds the default value on creation for the remark field.
+	dept.DefaultRemark = deptDescRemark.Default.(string)
+	// dept.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	dept.RemarkValidator = deptDescRemark.Validators[0].(func(string) error)
 	// deptDescID is the schema descriptor for id field.
 	deptDescID := deptMixinFields0[0].Descriptor()
 	// dept.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -309,6 +323,16 @@ func init() {
 	post.DefaultName = postDescName.Default.(string)
 	// post.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	post.NameValidator = postDescName.Validators[0].(func(string) error)
+	// postDescSort is the schema descriptor for sort field.
+	postDescSort := postFields[1].Descriptor()
+	// post.DefaultSort holds the default value on creation for the sort field.
+	post.DefaultSort = postDescSort.Default.(int32)
+	// postDescRemark is the schema descriptor for remark field.
+	postDescRemark := postFields[2].Descriptor()
+	// post.DefaultRemark holds the default value on creation for the remark field.
+	post.DefaultRemark = postDescRemark.Default.(string)
+	// post.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	post.RemarkValidator = postDescRemark.Validators[0].(func(string) error)
 	// postDescID is the schema descriptor for id field.
 	postDescID := postMixinFields0[0].Descriptor()
 	// post.IDValidator is a validator for the "id" field. It is called by the builders before save.

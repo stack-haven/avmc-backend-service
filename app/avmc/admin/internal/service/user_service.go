@@ -109,3 +109,21 @@ func (s *UserServiceService) DeleteUser(ctx context.Context, req *pbCore.DeleteU
 	}
 	return &pbCore.DeleteUserResponse{}, nil
 }
+
+// UpdateUserByStatus 处理更新用户状态请求
+// 参数：ctx 上下文，req 更新用户状态请求
+// 返回值：更新用户状态响应，错误信息
+func (s *UserServiceService) UpdateUserByStatus(ctx context.Context, req *pbCore.UpdateUserByStatusRequest) (*pbCore.UpdateUserByStatusResponse, error) {
+	if req.GetId() == 0 {
+		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
+	}
+	if req.GetStatus() == 0 {
+		return nil, pb.ErrorUserStatusCannotBeEmpty("用户状态不能为空")
+	}
+	s.log.Infof("更新用户状态，用户ID：%v，用户状态：%v", req.GetId(), req.GetStatus())
+	_, err := s.uuc.UpdateStatus(ctx, req.GetId(), req.GetStatus())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.UpdateUserByStatusResponse{}, nil
+}

@@ -29,7 +29,11 @@ type Post struct {
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 名称
-	Name         *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
+	// 排序
+	Sort *int32 `json:"sort,omitempty"`
+	// 备注
+	Remark       *string `json:"remark,omitempty"`
 	user_posts   *uint32
 	selectValues sql.SelectValues
 }
@@ -39,9 +43,9 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case post.FieldID, post.FieldStatus, post.FieldDomainID:
+		case post.FieldID, post.FieldStatus, post.FieldDomainID, post.FieldSort:
 			values[i] = new(sql.NullInt64)
-		case post.FieldName:
+		case post.FieldName, post.FieldRemark:
 			values[i] = new(sql.NullString)
 		case post.FieldCreatedAt, post.FieldUpdatedAt, post.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -107,6 +111,20 @@ func (_m *Post) assignValues(columns []string, values []any) error {
 				_m.Name = new(string)
 				*_m.Name = value.String
 			}
+		case post.FieldSort:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field sort", values[i])
+			} else if value.Valid {
+				_m.Sort = new(int32)
+				*_m.Sort = int32(value.Int64)
+			}
+		case post.FieldRemark:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field remark", values[i])
+			} else if value.Valid {
+				_m.Remark = new(string)
+				*_m.Remark = value.String
+			}
 		case post.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_posts", value)
@@ -171,6 +189,16 @@ func (_m *Post) String() string {
 	builder.WriteString(", ")
 	if v := _m.Name; v != nil {
 		builder.WriteString("name=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.Sort; v != nil {
+		builder.WriteString("sort=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.Remark; v != nil {
+		builder.WriteString("remark=")
 		builder.WriteString(*v)
 	}
 	builder.WriteByte(')')

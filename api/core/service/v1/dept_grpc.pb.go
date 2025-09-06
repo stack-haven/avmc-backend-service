@@ -20,11 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DeptService_CreateDept_FullMethodName = "/core.service.v1.DeptService/CreateDept"
-	DeptService_UpdateDept_FullMethodName = "/core.service.v1.DeptService/UpdateDept"
-	DeptService_DeleteDept_FullMethodName = "/core.service.v1.DeptService/DeleteDept"
-	DeptService_GetDept_FullMethodName    = "/core.service.v1.DeptService/GetDept"
-	DeptService_ListDept_FullMethodName   = "/core.service.v1.DeptService/ListDept"
+	DeptService_CreateDept_FullMethodName         = "/core.service.v1.DeptService/CreateDept"
+	DeptService_UpdateDept_FullMethodName         = "/core.service.v1.DeptService/UpdateDept"
+	DeptService_DeleteDept_FullMethodName         = "/core.service.v1.DeptService/DeleteDept"
+	DeptService_GetDept_FullMethodName            = "/core.service.v1.DeptService/GetDept"
+	DeptService_ListDept_FullMethodName           = "/core.service.v1.DeptService/ListDept"
+	DeptService_ListDeptTree_FullMethodName       = "/core.service.v1.DeptService/ListDeptTree"
+	DeptService_UpdateDeptByStatus_FullMethodName = "/core.service.v1.DeptService/UpdateDeptByStatus"
 )
 
 // DeptServiceClient is the client API for DeptService service.
@@ -41,6 +43,10 @@ type DeptServiceClient interface {
 	GetDept(ctx context.Context, in *GetDeptRequest, opts ...grpc.CallOption) (*GetDeptResponse, error)
 	// 分页查询部门
 	ListDept(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListDeptResponse, error)
+	// 查询部门树形列表
+	ListDeptTree(ctx context.Context, in *ListDeptTreeRequest, opts ...grpc.CallOption) (*ListDeptTreeResponse, error)
+	// 更新部门状态
+	UpdateDeptByStatus(ctx context.Context, in *UpdateDeptByStatusRequest, opts ...grpc.CallOption) (*UpdateDeptByStatusResponse, error)
 }
 
 type deptServiceClient struct {
@@ -101,6 +107,26 @@ func (c *deptServiceClient) ListDept(ctx context.Context, in *pagination.PagingR
 	return out, nil
 }
 
+func (c *deptServiceClient) ListDeptTree(ctx context.Context, in *ListDeptTreeRequest, opts ...grpc.CallOption) (*ListDeptTreeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeptTreeResponse)
+	err := c.cc.Invoke(ctx, DeptService_ListDeptTree_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deptServiceClient) UpdateDeptByStatus(ctx context.Context, in *UpdateDeptByStatusRequest, opts ...grpc.CallOption) (*UpdateDeptByStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDeptByStatusResponse)
+	err := c.cc.Invoke(ctx, DeptService_UpdateDeptByStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DeptServiceServer is the server API for DeptService service.
 // All implementations must embed UnimplementedDeptServiceServer
 // for forward compatibility.
@@ -115,6 +141,10 @@ type DeptServiceServer interface {
 	GetDept(context.Context, *GetDeptRequest) (*GetDeptResponse, error)
 	// 分页查询部门
 	ListDept(context.Context, *pagination.PagingRequest) (*ListDeptResponse, error)
+	// 查询部门树形列表
+	ListDeptTree(context.Context, *ListDeptTreeRequest) (*ListDeptTreeResponse, error)
+	// 更新部门状态
+	UpdateDeptByStatus(context.Context, *UpdateDeptByStatusRequest) (*UpdateDeptByStatusResponse, error)
 	mustEmbedUnimplementedDeptServiceServer()
 }
 
@@ -139,6 +169,12 @@ func (UnimplementedDeptServiceServer) GetDept(context.Context, *GetDeptRequest) 
 }
 func (UnimplementedDeptServiceServer) ListDept(context.Context, *pagination.PagingRequest) (*ListDeptResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDept not implemented")
+}
+func (UnimplementedDeptServiceServer) ListDeptTree(context.Context, *ListDeptTreeRequest) (*ListDeptTreeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDeptTree not implemented")
+}
+func (UnimplementedDeptServiceServer) UpdateDeptByStatus(context.Context, *UpdateDeptByStatusRequest) (*UpdateDeptByStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDeptByStatus not implemented")
 }
 func (UnimplementedDeptServiceServer) mustEmbedUnimplementedDeptServiceServer() {}
 func (UnimplementedDeptServiceServer) testEmbeddedByValue()                     {}
@@ -251,6 +287,42 @@ func _DeptService_ListDept_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeptService_ListDeptTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeptTreeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeptServiceServer).ListDeptTree(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeptService_ListDeptTree_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeptServiceServer).ListDeptTree(ctx, req.(*ListDeptTreeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeptService_UpdateDeptByStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeptByStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeptServiceServer).UpdateDeptByStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeptService_UpdateDeptByStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeptServiceServer).UpdateDeptByStatus(ctx, req.(*UpdateDeptByStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DeptService_ServiceDesc is the grpc.ServiceDesc for DeptService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -277,6 +349,14 @@ var DeptService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDept",
 			Handler:    _DeptService_ListDept_Handler,
+		},
+		{
+			MethodName: "ListDeptTree",
+			Handler:    _DeptService_ListDeptTree_Handler,
+		},
+		{
+			MethodName: "UpdateDeptByStatus",
+			Handler:    _DeptService_UpdateDeptByStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

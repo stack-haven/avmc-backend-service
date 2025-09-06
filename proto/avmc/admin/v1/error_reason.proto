@@ -100,6 +100,10 @@ enum ErrorReason {
   USER_INVALID_PHONE_FORMAT = 215 [(errors.code) = 400];
   // 用户社交登录失败
   USER_SOCIAL_LOGIN_FAILED = 216 [(errors.code) = 400];
+  // 用户状态不能为空
+  USER_STATUS_CANNOT_BE_EMPTY = 217 [(errors.code) = 400];
+  // 用户状态无效
+  USER_STATUS_INVALID = 218 [(errors.code) = 400];
 
   // =======================================
   // 角色管理错误 (300-399)
@@ -118,6 +122,10 @@ enum ErrorReason {
   ROLE_DESCRIPTION_CANNOT_BE_EMPTY = 305 [(errors.code) = 400];
   // 角色权限设置无效
   ROLE_PERMISSION_INVALID = 306 [(errors.code) = 400];
+  // 角色状态不能为空
+  ROLE_STATUS_CANNOT_BE_EMPTY = 307 [(errors.code) = 400];
+  // 角色状态无效
+  ROLE_STATUS_INVALID = 308 [(errors.code) = 400];
 
   // =======================================
   // 岗位管理错误 (400-499)
@@ -132,6 +140,10 @@ enum ErrorReason {
   POST_NAME_CANNOT_BE_EMPTY = 403 [(errors.code) = 400];
   // 岗位描述不能为空
   POST_DESCRIPTION_CANNOT_BE_EMPTY = 404 [(errors.code) = 400];
+  // 岗位状态不能为空
+  POST_STATUS_CANNOT_BE_EMPTY = 405 [(errors.code) = 400];
+  // 岗位状态无效
+  POST_STATUS_INVALID = 406 [(errors.code) = 400];
 
   // =======================================
   // 菜单管理错误 (500-599)
@@ -170,6 +182,8 @@ enum ErrorReason {
   DEPT_CANNOT_DELETE_WITH_CHILDREN = 604 [(errors.code) = 403];
   // 无法删除包含用户的部门
   DEPT_CANNOT_DELETE_WITH_USERS = 605 [(errors.code) = 403];
+  // 部门名称已存在
+  DEPT_NAME_ALREADY_EXISTS = 606 [(errors.code) = 400];
 
   // =======================================
   // 数据层错误 (700-799)

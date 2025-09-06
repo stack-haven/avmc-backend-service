@@ -49,8 +49,13 @@ type DeptMutation struct {
 	adddomain_id    *int32
 	deleted_at      *time.Time
 	name            *string
+	leader_id       *uint32
+	addleader_id    *int32
 	ancestors       *[]int
 	appendancestors []int
+	sort            *int32
+	addsort         *int32
+	remark          *string
 	clearedFields   map[string]struct{}
 	parent          *uint32
 	clearedparent   bool
@@ -484,6 +489,76 @@ func (m *DeptMutation) ResetParentID() {
 	delete(m.clearedFields, dept.FieldParentID)
 }
 
+// SetLeaderID sets the "leader_id" field.
+func (m *DeptMutation) SetLeaderID(u uint32) {
+	m.leader_id = &u
+	m.addleader_id = nil
+}
+
+// LeaderID returns the value of the "leader_id" field in the mutation.
+func (m *DeptMutation) LeaderID() (r uint32, exists bool) {
+	v := m.leader_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLeaderID returns the old "leader_id" field's value of the Dept entity.
+// If the Dept object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeptMutation) OldLeaderID(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLeaderID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLeaderID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLeaderID: %w", err)
+	}
+	return oldValue.LeaderID, nil
+}
+
+// AddLeaderID adds u to the "leader_id" field.
+func (m *DeptMutation) AddLeaderID(u int32) {
+	if m.addleader_id != nil {
+		*m.addleader_id += u
+	} else {
+		m.addleader_id = &u
+	}
+}
+
+// AddedLeaderID returns the value that was added to the "leader_id" field in this mutation.
+func (m *DeptMutation) AddedLeaderID() (r int32, exists bool) {
+	v := m.addleader_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLeaderID clears the value of the "leader_id" field.
+func (m *DeptMutation) ClearLeaderID() {
+	m.leader_id = nil
+	m.addleader_id = nil
+	m.clearedFields[dept.FieldLeaderID] = struct{}{}
+}
+
+// LeaderIDCleared returns if the "leader_id" field was cleared in this mutation.
+func (m *DeptMutation) LeaderIDCleared() bool {
+	_, ok := m.clearedFields[dept.FieldLeaderID]
+	return ok
+}
+
+// ResetLeaderID resets all changes to the "leader_id" field.
+func (m *DeptMutation) ResetLeaderID() {
+	m.leader_id = nil
+	m.addleader_id = nil
+	delete(m.clearedFields, dept.FieldLeaderID)
+}
+
 // SetAncestors sets the "ancestors" field.
 func (m *DeptMutation) SetAncestors(i []int) {
 	m.ancestors = &i
@@ -547,6 +622,111 @@ func (m *DeptMutation) ResetAncestors() {
 	m.ancestors = nil
 	m.appendancestors = nil
 	delete(m.clearedFields, dept.FieldAncestors)
+}
+
+// SetSort sets the "sort" field.
+func (m *DeptMutation) SetSort(i int32) {
+	m.sort = &i
+	m.addsort = nil
+}
+
+// Sort returns the value of the "sort" field in the mutation.
+func (m *DeptMutation) Sort() (r int32, exists bool) {
+	v := m.sort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSort returns the old "sort" field's value of the Dept entity.
+// If the Dept object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeptMutation) OldSort(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSort: %w", err)
+	}
+	return oldValue.Sort, nil
+}
+
+// AddSort adds i to the "sort" field.
+func (m *DeptMutation) AddSort(i int32) {
+	if m.addsort != nil {
+		*m.addsort += i
+	} else {
+		m.addsort = &i
+	}
+}
+
+// AddedSort returns the value that was added to the "sort" field in this mutation.
+func (m *DeptMutation) AddedSort() (r int32, exists bool) {
+	v := m.addsort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSort resets all changes to the "sort" field.
+func (m *DeptMutation) ResetSort() {
+	m.sort = nil
+	m.addsort = nil
+}
+
+// SetRemark sets the "remark" field.
+func (m *DeptMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *DeptMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the Dept entity.
+// If the Dept object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeptMutation) OldRemark(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (m *DeptMutation) ClearRemark() {
+	m.remark = nil
+	m.clearedFields[dept.FieldRemark] = struct{}{}
+}
+
+// RemarkCleared returns if the "remark" field was cleared in this mutation.
+func (m *DeptMutation) RemarkCleared() bool {
+	_, ok := m.clearedFields[dept.FieldRemark]
+	return ok
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *DeptMutation) ResetRemark() {
+	m.remark = nil
+	delete(m.clearedFields, dept.FieldRemark)
 }
 
 // ClearParent clears the "parent" edge to the Dept entity.
@@ -664,7 +844,7 @@ func (m *DeptMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DeptMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, dept.FieldCreatedAt)
 	}
@@ -686,8 +866,17 @@ func (m *DeptMutation) Fields() []string {
 	if m.parent != nil {
 		fields = append(fields, dept.FieldParentID)
 	}
+	if m.leader_id != nil {
+		fields = append(fields, dept.FieldLeaderID)
+	}
 	if m.ancestors != nil {
 		fields = append(fields, dept.FieldAncestors)
+	}
+	if m.sort != nil {
+		fields = append(fields, dept.FieldSort)
+	}
+	if m.remark != nil {
+		fields = append(fields, dept.FieldRemark)
 	}
 	return fields
 }
@@ -711,8 +900,14 @@ func (m *DeptMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case dept.FieldParentID:
 		return m.ParentID()
+	case dept.FieldLeaderID:
+		return m.LeaderID()
 	case dept.FieldAncestors:
 		return m.Ancestors()
+	case dept.FieldSort:
+		return m.Sort()
+	case dept.FieldRemark:
+		return m.Remark()
 	}
 	return nil, false
 }
@@ -736,8 +931,14 @@ func (m *DeptMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case dept.FieldParentID:
 		return m.OldParentID(ctx)
+	case dept.FieldLeaderID:
+		return m.OldLeaderID(ctx)
 	case dept.FieldAncestors:
 		return m.OldAncestors(ctx)
+	case dept.FieldSort:
+		return m.OldSort(ctx)
+	case dept.FieldRemark:
+		return m.OldRemark(ctx)
 	}
 	return nil, fmt.Errorf("unknown Dept field %s", name)
 }
@@ -796,12 +997,33 @@ func (m *DeptMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetParentID(v)
 		return nil
+	case dept.FieldLeaderID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLeaderID(v)
+		return nil
 	case dept.FieldAncestors:
 		v, ok := value.([]int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAncestors(v)
+		return nil
+	case dept.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSort(v)
+		return nil
+	case dept.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Dept field %s", name)
@@ -817,6 +1039,12 @@ func (m *DeptMutation) AddedFields() []string {
 	if m.adddomain_id != nil {
 		fields = append(fields, dept.FieldDomainID)
 	}
+	if m.addleader_id != nil {
+		fields = append(fields, dept.FieldLeaderID)
+	}
+	if m.addsort != nil {
+		fields = append(fields, dept.FieldSort)
+	}
 	return fields
 }
 
@@ -829,6 +1057,10 @@ func (m *DeptMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStatus()
 	case dept.FieldDomainID:
 		return m.AddedDomainID()
+	case dept.FieldLeaderID:
+		return m.AddedLeaderID()
+	case dept.FieldSort:
+		return m.AddedSort()
 	}
 	return nil, false
 }
@@ -852,6 +1084,20 @@ func (m *DeptMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddDomainID(v)
 		return nil
+	case dept.FieldLeaderID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLeaderID(v)
+		return nil
+	case dept.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSort(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Dept numeric field %s", name)
 }
@@ -866,8 +1112,14 @@ func (m *DeptMutation) ClearedFields() []string {
 	if m.FieldCleared(dept.FieldParentID) {
 		fields = append(fields, dept.FieldParentID)
 	}
+	if m.FieldCleared(dept.FieldLeaderID) {
+		fields = append(fields, dept.FieldLeaderID)
+	}
 	if m.FieldCleared(dept.FieldAncestors) {
 		fields = append(fields, dept.FieldAncestors)
+	}
+	if m.FieldCleared(dept.FieldRemark) {
+		fields = append(fields, dept.FieldRemark)
 	}
 	return fields
 }
@@ -889,8 +1141,14 @@ func (m *DeptMutation) ClearField(name string) error {
 	case dept.FieldParentID:
 		m.ClearParentID()
 		return nil
+	case dept.FieldLeaderID:
+		m.ClearLeaderID()
+		return nil
 	case dept.FieldAncestors:
 		m.ClearAncestors()
+		return nil
+	case dept.FieldRemark:
+		m.ClearRemark()
 		return nil
 	}
 	return fmt.Errorf("unknown Dept nullable field %s", name)
@@ -921,8 +1179,17 @@ func (m *DeptMutation) ResetField(name string) error {
 	case dept.FieldParentID:
 		m.ResetParentID()
 		return nil
+	case dept.FieldLeaderID:
+		m.ResetLeaderID()
+		return nil
 	case dept.FieldAncestors:
 		m.ResetAncestors()
+		return nil
+	case dept.FieldSort:
+		m.ResetSort()
+		return nil
+	case dept.FieldRemark:
+		m.ResetRemark()
 		return nil
 	}
 	return fmt.Errorf("unknown Dept field %s", name)
@@ -1469,7 +1736,7 @@ func (m *MenuMutation) GetType() (r int32, exists bool) {
 // OldType returns the old "type" field's value of the Menu entity.
 // If the Menu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuMutation) OldType(ctx context.Context) (v int32, err error) {
+func (m *MenuMutation) OldType(ctx context.Context) (v *int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
@@ -3560,6 +3827,9 @@ type PostMutation struct {
 	adddomain_id  *int32
 	deleted_at    *time.Time
 	name          *string
+	sort          *int32
+	addsort       *int32
+	remark        *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Post, error)
@@ -3939,6 +4209,98 @@ func (m *PostMutation) ResetName() {
 	m.name = nil
 }
 
+// SetSort sets the "sort" field.
+func (m *PostMutation) SetSort(i int32) {
+	m.sort = &i
+	m.addsort = nil
+}
+
+// Sort returns the value of the "sort" field in the mutation.
+func (m *PostMutation) Sort() (r int32, exists bool) {
+	v := m.sort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSort returns the old "sort" field's value of the Post entity.
+// If the Post object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PostMutation) OldSort(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSort: %w", err)
+	}
+	return oldValue.Sort, nil
+}
+
+// AddSort adds i to the "sort" field.
+func (m *PostMutation) AddSort(i int32) {
+	if m.addsort != nil {
+		*m.addsort += i
+	} else {
+		m.addsort = &i
+	}
+}
+
+// AddedSort returns the value that was added to the "sort" field in this mutation.
+func (m *PostMutation) AddedSort() (r int32, exists bool) {
+	v := m.addsort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSort resets all changes to the "sort" field.
+func (m *PostMutation) ResetSort() {
+	m.sort = nil
+	m.addsort = nil
+}
+
+// SetRemark sets the "remark" field.
+func (m *PostMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *PostMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the Post entity.
+// If the Post object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PostMutation) OldRemark(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *PostMutation) ResetRemark() {
+	m.remark = nil
+}
+
 // Where appends a list predicates to the PostMutation builder.
 func (m *PostMutation) Where(ps ...predicate.Post) {
 	m.predicates = append(m.predicates, ps...)
@@ -3973,7 +4335,7 @@ func (m *PostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PostMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, post.FieldCreatedAt)
 	}
@@ -3991,6 +4353,12 @@ func (m *PostMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, post.FieldName)
+	}
+	if m.sort != nil {
+		fields = append(fields, post.FieldSort)
+	}
+	if m.remark != nil {
+		fields = append(fields, post.FieldRemark)
 	}
 	return fields
 }
@@ -4012,6 +4380,10 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case post.FieldName:
 		return m.Name()
+	case post.FieldSort:
+		return m.Sort()
+	case post.FieldRemark:
+		return m.Remark()
 	}
 	return nil, false
 }
@@ -4033,6 +4405,10 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldDeletedAt(ctx)
 	case post.FieldName:
 		return m.OldName(ctx)
+	case post.FieldSort:
+		return m.OldSort(ctx)
+	case post.FieldRemark:
+		return m.OldRemark(ctx)
 	}
 	return nil, fmt.Errorf("unknown Post field %s", name)
 }
@@ -4084,6 +4460,20 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case post.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSort(v)
+		return nil
+	case post.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Post field %s", name)
 }
@@ -4098,6 +4488,9 @@ func (m *PostMutation) AddedFields() []string {
 	if m.adddomain_id != nil {
 		fields = append(fields, post.FieldDomainID)
 	}
+	if m.addsort != nil {
+		fields = append(fields, post.FieldSort)
+	}
 	return fields
 }
 
@@ -4110,6 +4503,8 @@ func (m *PostMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStatus()
 	case post.FieldDomainID:
 		return m.AddedDomainID()
+	case post.FieldSort:
+		return m.AddedSort()
 	}
 	return nil, false
 }
@@ -4132,6 +4527,13 @@ func (m *PostMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDomainID(v)
+		return nil
+	case post.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSort(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Post numeric field %s", name)
@@ -4186,6 +4588,12 @@ func (m *PostMutation) ResetField(name string) error {
 		return nil
 	case post.FieldName:
 		m.ResetName()
+		return nil
+	case post.FieldSort:
+		m.ResetSort()
+		return nil
+	case post.FieldRemark:
+		m.ResetRemark()
 		return nil
 	}
 	return fmt.Errorf("unknown Post field %s", name)
