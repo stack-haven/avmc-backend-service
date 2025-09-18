@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
@@ -37,9 +36,9 @@ type UserServiceHTTPServer interface {
 	// GetUser 获取用户数据
 	GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error)
 	// ListUser 获取用户列表
-	ListUser(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
+	ListUser(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error)
 	// ListUserSimple 获取用户简单列表
-	ListUserSimple(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
+	ListUserSimple(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error)
 	// UpdateUser 更新用户
 	UpdateUser(context.Context, *v1.UpdateUserRequest) (*v1.UpdateUserResponse, error)
 	// UpdateUserByStatus 更新用户状态
@@ -59,13 +58,13 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 
 func _UserService_ListUserSimple0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in pagination.PagingRequest
+		var in v1.ListUserRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationUserServiceListUserSimple)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListUserSimple(ctx, req.(*pagination.PagingRequest))
+			return srv.ListUserSimple(ctx, req.(*v1.ListUserRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -78,13 +77,13 @@ func _UserService_ListUserSimple0_HTTP_Handler(srv UserServiceHTTPServer) func(c
 
 func _UserService_ListUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in pagination.PagingRequest
+		var in v1.ListUserRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationUserServiceListUser)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListUser(ctx, req.(*pagination.PagingRequest))
+			return srv.ListUser(ctx, req.(*v1.ListUserRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -215,8 +214,8 @@ type UserServiceHTTPClient interface {
 	CreateUser(ctx context.Context, req *v1.CreateUserRequest, opts ...http.CallOption) (rsp *v1.CreateUserResponse, err error)
 	DeleteUser(ctx context.Context, req *v1.DeleteUserRequest, opts ...http.CallOption) (rsp *v1.DeleteUserResponse, err error)
 	GetUser(ctx context.Context, req *v1.GetUserRequest, opts ...http.CallOption) (rsp *v1.User, err error)
-	ListUser(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
-	ListUserSimple(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
+	ListUser(ctx context.Context, req *v1.ListUserRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
+	ListUserSimple(ctx context.Context, req *v1.ListUserRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
 	UpdateUser(ctx context.Context, req *v1.UpdateUserRequest, opts ...http.CallOption) (rsp *v1.UpdateUserResponse, err error)
 	UpdateUserByStatus(ctx context.Context, req *v1.UpdateUserByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdateUserByStatusResponse, err error)
 }
@@ -268,7 +267,7 @@ func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *v1.GetUserR
 	return &out, nil
 }
 
-func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
+func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *v1.ListUserRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
 	var out v1.ListUserResponse
 	pattern := "/admin/v1/users"
 	path := binding.EncodeURL(pattern, in, true)
@@ -281,7 +280,7 @@ func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *pagination
 	return &out, nil
 }
 
-func (c *UserServiceHTTPClientImpl) ListUserSimple(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
+func (c *UserServiceHTTPClientImpl) ListUserSimple(ctx context.Context, in *v1.ListUserRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
 	var out v1.ListUserResponse
 	pattern := "/admin/v1/users/simple"
 	path := binding.EncodeURL(pattern, in, true)

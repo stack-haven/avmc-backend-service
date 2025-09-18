@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	grpc "google.golang.org/grpc"
@@ -45,7 +44,7 @@ type MenuServiceClient interface {
 	// 获取菜单树
 	ListMenuTree(ctx context.Context, in *v1.ListMenuTreeRequest, opts ...grpc.CallOption) (*v1.ListMenuTreeResponse, error)
 	// 获取菜单列表
-	ListMenu(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListMenuResponse, error)
+	ListMenu(ctx context.Context, in *v1.ListMenuRequest, opts ...grpc.CallOption) (*v1.ListMenuResponse, error)
 	// 获取菜单数据
 	GetMenu(ctx context.Context, in *v1.GetMenuRequest, opts ...grpc.CallOption) (*v1.Menu, error)
 	// 创建菜单
@@ -90,7 +89,7 @@ func (c *menuServiceClient) ListMenuTree(ctx context.Context, in *v1.ListMenuTre
 	return out, nil
 }
 
-func (c *menuServiceClient) ListMenu(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListMenuResponse, error) {
+func (c *menuServiceClient) ListMenu(ctx context.Context, in *v1.ListMenuRequest, opts ...grpc.CallOption) (*v1.ListMenuResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListMenuResponse)
 	err := c.cc.Invoke(ctx, MenuService_ListMenu_FullMethodName, in, out, cOpts...)
@@ -181,7 +180,7 @@ type MenuServiceServer interface {
 	// 获取菜单树
 	ListMenuTree(context.Context, *v1.ListMenuTreeRequest) (*v1.ListMenuTreeResponse, error)
 	// 获取菜单列表
-	ListMenu(context.Context, *pagination.PagingRequest) (*v1.ListMenuResponse, error)
+	ListMenu(context.Context, *v1.ListMenuRequest) (*v1.ListMenuResponse, error)
 	// 获取菜单数据
 	GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error)
 	// 创建菜单
@@ -212,7 +211,7 @@ func (UnimplementedMenuServiceServer) ListMenuAll(context.Context, *emptypb.Empt
 func (UnimplementedMenuServiceServer) ListMenuTree(context.Context, *v1.ListMenuTreeRequest) (*v1.ListMenuTreeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMenuTree not implemented")
 }
-func (UnimplementedMenuServiceServer) ListMenu(context.Context, *pagination.PagingRequest) (*v1.ListMenuResponse, error) {
+func (UnimplementedMenuServiceServer) ListMenu(context.Context, *v1.ListMenuRequest) (*v1.ListMenuResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMenu not implemented")
 }
 func (UnimplementedMenuServiceServer) GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error) {
@@ -294,7 +293,7 @@ func _MenuService_ListMenuTree_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _MenuService_ListMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(v1.ListMenuRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -306,7 +305,7 @@ func _MenuService_ListMenu_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: MenuService_ListMenu_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MenuServiceServer).ListMenu(ctx, req.(*pagination.PagingRequest))
+		return srv.(MenuServiceServer).ListMenu(ctx, req.(*v1.ListMenuRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

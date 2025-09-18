@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pb "backend-service/api/avmc/admin/v1"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 
@@ -32,7 +31,7 @@ func NewMenuServiceService(muc *biz.MenuUsecase, logger log.Logger) *MenuService
 // ListMenu 处理菜单列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：菜单列表响应，错误信息
-func (s *MenuServiceService) ListMenu(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) {
+func (s *MenuServiceService) ListMenu(ctx context.Context, req *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) {
 	s.log.Infof("查询菜单列表分页，分页请求：%v", req)
 	return s.muc.ListPage(ctx, req)
 }

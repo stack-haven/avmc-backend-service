@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	grpc "google.golang.org/grpc"
@@ -37,9 +36,9 @@ const (
 // 用户管理服务
 type UserServiceClient interface {
 	// 获取用户简单列表
-	ListUserSimple(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error)
+	ListUserSimple(ctx context.Context, in *v1.ListUserRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error)
 	// 获取用户列表
-	ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error)
+	ListUser(ctx context.Context, in *v1.ListUserRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error)
 	// 获取用户数据
 	GetUser(ctx context.Context, in *v1.GetUserRequest, opts ...grpc.CallOption) (*v1.User, error)
 	// 创建用户
@@ -60,7 +59,7 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) ListUserSimple(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error) {
+func (c *userServiceClient) ListUserSimple(ctx context.Context, in *v1.ListUserRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListUserResponse)
 	err := c.cc.Invoke(ctx, UserService_ListUserSimple_FullMethodName, in, out, cOpts...)
@@ -70,7 +69,7 @@ func (c *userServiceClient) ListUserSimple(ctx context.Context, in *pagination.P
 	return out, nil
 }
 
-func (c *userServiceClient) ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error) {
+func (c *userServiceClient) ListUser(ctx context.Context, in *v1.ListUserRequest, opts ...grpc.CallOption) (*v1.ListUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListUserResponse)
 	err := c.cc.Invoke(ctx, UserService_ListUser_FullMethodName, in, out, cOpts...)
@@ -137,9 +136,9 @@ func (c *userServiceClient) UpdateUserByStatus(ctx context.Context, in *v1.Updat
 // 用户管理服务
 type UserServiceServer interface {
 	// 获取用户简单列表
-	ListUserSimple(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
+	ListUserSimple(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error)
 	// 获取用户列表
-	ListUser(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error)
+	ListUser(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error)
 	// 获取用户数据
 	GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error)
 	// 创建用户
@@ -160,10 +159,10 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) ListUserSimple(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error) {
+func (UnimplementedUserServiceServer) ListUserSimple(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUserSimple not implemented")
 }
-func (UnimplementedUserServiceServer) ListUser(context.Context, *pagination.PagingRequest) (*v1.ListUserResponse, error) {
+func (UnimplementedUserServiceServer) ListUser(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error) {
@@ -203,7 +202,7 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 }
 
 func _UserService_ListUserSimple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(v1.ListUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -215,13 +214,13 @@ func _UserService_ListUserSimple_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: UserService_ListUserSimple_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ListUserSimple(ctx, req.(*pagination.PagingRequest))
+		return srv.(UserServiceServer).ListUserSimple(ctx, req.(*v1.ListUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_ListUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(v1.ListUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -233,7 +232,7 @@ func _UserService_ListUser_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: UserService_ListUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ListUser(ctx, req.(*pagination.PagingRequest))
+		return srv.(UserServiceServer).ListUser(ctx, req.(*v1.ListUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

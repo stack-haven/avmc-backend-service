@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
@@ -37,7 +36,7 @@ type DeptServiceHTTPServer interface {
 	// GetDept 获取部门数据
 	GetDept(context.Context, *v1.GetDeptRequest) (*v1.Dept, error)
 	// ListDept 获取部门列表
-	ListDept(context.Context, *pagination.PagingRequest) (*v1.ListDeptResponse, error)
+	ListDept(context.Context, *v1.ListDeptRequest) (*v1.ListDeptResponse, error)
 	// ListDeptTree 获取部门树
 	ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error)
 	// UpdateDept 更新部门
@@ -60,13 +59,13 @@ func RegisterDeptServiceHTTPServer(s *http.Server, srv DeptServiceHTTPServer) {
 
 func _DeptService_ListDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in pagination.PagingRequest
+		var in v1.ListDeptRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationDeptServiceListDept)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListDept(ctx, req.(*pagination.PagingRequest))
+			return srv.ListDept(ctx, req.(*v1.ListDeptRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -238,7 +237,7 @@ type DeptServiceHTTPClient interface {
 	CreateDept(ctx context.Context, req *v1.CreateDeptRequest, opts ...http.CallOption) (rsp *v1.CreateDeptResponse, err error)
 	DeleteDept(ctx context.Context, req *v1.DeleteDeptRequest, opts ...http.CallOption) (rsp *v1.DeleteDeptResponse, err error)
 	GetDept(ctx context.Context, req *v1.GetDeptRequest, opts ...http.CallOption) (rsp *v1.Dept, err error)
-	ListDept(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListDeptResponse, err error)
+	ListDept(ctx context.Context, req *v1.ListDeptRequest, opts ...http.CallOption) (rsp *v1.ListDeptResponse, err error)
 	ListDeptTree(ctx context.Context, req *v1.ListDeptTreeRequest, opts ...http.CallOption) (rsp *v1.ListDeptTreeResponse, err error)
 	UpdateDept(ctx context.Context, req *v1.UpdateDeptRequest, opts ...http.CallOption) (rsp *v1.UpdateDeptResponse, err error)
 	UpdateDeptByStatus(ctx context.Context, req *v1.UpdateDeptByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdateDeptByStatusResponse, err error)
@@ -291,7 +290,7 @@ func (c *DeptServiceHTTPClientImpl) GetDept(ctx context.Context, in *v1.GetDeptR
 	return &out, nil
 }
 
-func (c *DeptServiceHTTPClientImpl) ListDept(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListDeptResponse, error) {
+func (c *DeptServiceHTTPClientImpl) ListDept(ctx context.Context, in *v1.ListDeptRequest, opts ...http.CallOption) (*v1.ListDeptResponse, error) {
 	var out v1.ListDeptResponse
 	pattern := "/admin/v1/depts"
 	path := binding.EncodeURL(pattern, in, true)

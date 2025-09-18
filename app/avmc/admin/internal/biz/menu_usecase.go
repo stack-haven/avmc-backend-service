@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/utils/convert"
 
@@ -21,7 +20,7 @@ type MenuRepo interface {
 	Update(context.Context, *pbCore.Menu) (*pbCore.Menu, error)
 	FindByID(context.Context, uint32) (*pbCore.Menu, error)
 	ListAll(context.Context) ([]*pbCore.Menu, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, *pbCore.ExistMenuByNameRequest) (bool, error)
 	ExistByPath(context.Context, *pbCore.ExistMenuByPathRequest) (bool, error)
@@ -78,8 +77,8 @@ func (uc *MenuUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListPage 处理获取菜单分页列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：菜单列表响应，错误信息
-func (uc *MenuUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) {
-	return uc.repo.ListPage(ctx, pagination)
+func (uc *MenuUsecase) ListPage(ctx context.Context, req *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) {
+	return uc.repo.ListPage(ctx, req)
 }
 
 // ListTree 处理获取菜单树形列表请求

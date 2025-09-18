@@ -1102,6 +1102,30 @@ func (m *ListPostRequest) validate(all bool) error {
 
 	var errors []error
 
+	if m.Page != nil {
+		// no validation rules for Page
+	}
+
+	if m.PageSize != nil {
+		// no validation rules for PageSize
+	}
+
+	if m.NoPaging != nil {
+		// no validation rules for NoPaging
+	}
+
+	if m.Name != nil {
+		// no validation rules for Name
+	}
+
+	if m.Status != nil {
+		// no validation rules for Status
+	}
+
+	if m.Remark != nil {
+		// no validation rules for Remark
+	}
+
 	if len(errors) > 0 {
 		return ListPostRequestMultiError(errors)
 	}

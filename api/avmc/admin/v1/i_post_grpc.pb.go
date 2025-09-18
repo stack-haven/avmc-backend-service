@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	grpc "google.golang.org/grpc"
@@ -36,7 +35,7 @@ const (
 // 岗位管理服务
 type PostServiceClient interface {
 	// 获取岗位列表
-	ListPost(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListPostResponse, error)
+	ListPost(ctx context.Context, in *v1.ListPostRequest, opts ...grpc.CallOption) (*v1.ListPostResponse, error)
 	// 获取岗位数据
 	GetPost(ctx context.Context, in *v1.GetPostRequest, opts ...grpc.CallOption) (*v1.Post, error)
 	// 创建岗位
@@ -57,7 +56,7 @@ func NewPostServiceClient(cc grpc.ClientConnInterface) PostServiceClient {
 	return &postServiceClient{cc}
 }
 
-func (c *postServiceClient) ListPost(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListPostResponse, error) {
+func (c *postServiceClient) ListPost(ctx context.Context, in *v1.ListPostRequest, opts ...grpc.CallOption) (*v1.ListPostResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListPostResponse)
 	err := c.cc.Invoke(ctx, PostService_ListPost_FullMethodName, in, out, cOpts...)
@@ -124,7 +123,7 @@ func (c *postServiceClient) UpdatePostByStatus(ctx context.Context, in *v1.Updat
 // 岗位管理服务
 type PostServiceServer interface {
 	// 获取岗位列表
-	ListPost(context.Context, *pagination.PagingRequest) (*v1.ListPostResponse, error)
+	ListPost(context.Context, *v1.ListPostRequest) (*v1.ListPostResponse, error)
 	// 获取岗位数据
 	GetPost(context.Context, *v1.GetPostRequest) (*v1.Post, error)
 	// 创建岗位
@@ -145,7 +144,7 @@ type PostServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPostServiceServer struct{}
 
-func (UnimplementedPostServiceServer) ListPost(context.Context, *pagination.PagingRequest) (*v1.ListPostResponse, error) {
+func (UnimplementedPostServiceServer) ListPost(context.Context, *v1.ListPostRequest) (*v1.ListPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPost not implemented")
 }
 func (UnimplementedPostServiceServer) GetPost(context.Context, *v1.GetPostRequest) (*v1.Post, error) {
@@ -185,7 +184,7 @@ func RegisterPostServiceServer(s grpc.ServiceRegistrar, srv PostServiceServer) {
 }
 
 func _PostService_ListPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(v1.ListPostRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -197,7 +196,7 @@ func _PostService_ListPost_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: PostService_ListPost_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).ListPost(ctx, req.(*pagination.PagingRequest))
+		return srv.(PostServiceServer).ListPost(ctx, req.(*v1.ListPostRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

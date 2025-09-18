@@ -2,7 +2,6 @@ package biz
 
 import (
 	pbEnum "backend-service/api/common/enum"
-	pbPagination "backend-service/api/common/pagination"
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
@@ -19,8 +18,8 @@ type UserRepo interface {
 	ListByName(context.Context, string) ([]*pbCore.User, error)
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
-	ListPageSimple(context.Context, *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error)
+	ListPage(context.Context, *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error)
+	ListPageSimple(context.Context, *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error)
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, string) (uint32, error)
 	ExistByPhone(context.Context, string) (uint32, error)
@@ -72,15 +71,15 @@ func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User
 // ListPageSimple 处理分页用户简单列表请求
 // 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
 // 返回值：用户列表响应，错误信息
-func (uc *UserUsecase) ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
-	return uc.repo.ListPageSimple(ctx, pagination)
+func (uc *UserUsecase) ListPageSimple(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
+	return uc.repo.ListPageSimple(ctx, req)
 }
 
 // ListPage 处理分页用户列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：用户列表响应，错误信息
-func (uc *UserUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
-	return uc.repo.ListPage(ctx, pagination)
+func (uc *UserUsecase) ListPage(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
+	return uc.repo.ListPage(ctx, req)
 }
 
 // Delete 处理删除用户请求

@@ -9,7 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
@@ -294,8 +293,8 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 // ListPageSimple 查询用户简单列表分页
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：用户列表响应，错误信息
-func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
-	r.log.Infof("查询用户简单列表分页，分页请求：%v", pagination)
+func (r *userRepo) ListPageSimple(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
+	r.log.Infof("查询用户简单列表分页，分页请求：%v", req)
 	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Where().Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
@@ -304,12 +303,12 @@ func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.
 	res, err := r.data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
 		Where().
-		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
-		Limit(int(pagination.GetPageSize())).
+		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
+		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询用户简单列表分页失败，分页请求：%v，错误：%v", pagination, err)
+		r.log.Errorf("查询用户简单列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
 	return &pbCore.ListUserResponse{
@@ -319,10 +318,10 @@ func (r *userRepo) ListPageSimple(ctx context.Context, pagination *pbPagination.
 }
 
 // ListPage 查询用户列表分页
-// 参数：ctx 上下文，pagination 分页请求
+// 参数：ctx 上下文，req 分页请求
 // 返回值：用户列表响应，错误信息
-func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
-	r.log.Infof("查询用户列表分页，分页请求：%v", pagination)
+func (r *userRepo) ListPage(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
+	r.log.Infof("查询用户列表分页，分页请求：%v", req)
 	count, err := r.data.DB(ctx).User.Query().Select(user.FieldID).Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有用户列表失败，错误：%v", err)
@@ -343,12 +342,12 @@ func (r *userRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			user.FieldCreatedAt,
 			user.FieldUpdatedAt,
 		).
-		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
-		Limit(int(pagination.GetPageSize())).
+		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
+		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询用户列表分页失败，分页请求：%v，错误：%v", pagination, err)
+		r.log.Errorf("查询用户列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
 	return &pbCore.ListUserResponse{

@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	grpc "google.golang.org/grpc"
@@ -37,7 +36,7 @@ const (
 // 部门管理服务
 type DeptServiceClient interface {
 	// 获取部门列表
-	ListDept(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListDeptResponse, error)
+	ListDept(ctx context.Context, in *v1.ListDeptRequest, opts ...grpc.CallOption) (*v1.ListDeptResponse, error)
 	// 获取部门树
 	ListDeptTree(ctx context.Context, in *v1.ListDeptTreeRequest, opts ...grpc.CallOption) (*v1.ListDeptTreeResponse, error)
 	// 获取部门数据
@@ -60,7 +59,7 @@ func NewDeptServiceClient(cc grpc.ClientConnInterface) DeptServiceClient {
 	return &deptServiceClient{cc}
 }
 
-func (c *deptServiceClient) ListDept(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*v1.ListDeptResponse, error) {
+func (c *deptServiceClient) ListDept(ctx context.Context, in *v1.ListDeptRequest, opts ...grpc.CallOption) (*v1.ListDeptResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListDeptResponse)
 	err := c.cc.Invoke(ctx, DeptService_ListDept_FullMethodName, in, out, cOpts...)
@@ -137,7 +136,7 @@ func (c *deptServiceClient) UpdateDeptByStatus(ctx context.Context, in *v1.Updat
 // 部门管理服务
 type DeptServiceServer interface {
 	// 获取部门列表
-	ListDept(context.Context, *pagination.PagingRequest) (*v1.ListDeptResponse, error)
+	ListDept(context.Context, *v1.ListDeptRequest) (*v1.ListDeptResponse, error)
 	// 获取部门树
 	ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error)
 	// 获取部门数据
@@ -160,7 +159,7 @@ type DeptServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDeptServiceServer struct{}
 
-func (UnimplementedDeptServiceServer) ListDept(context.Context, *pagination.PagingRequest) (*v1.ListDeptResponse, error) {
+func (UnimplementedDeptServiceServer) ListDept(context.Context, *v1.ListDeptRequest) (*v1.ListDeptResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDept not implemented")
 }
 func (UnimplementedDeptServiceServer) ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error) {
@@ -203,7 +202,7 @@ func RegisterDeptServiceServer(s grpc.ServiceRegistrar, srv DeptServiceServer) {
 }
 
 func _DeptService_ListDept_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(v1.ListDeptRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -215,7 +214,7 @@ func _DeptService_ListDept_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: DeptService_ListDept_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeptServiceServer).ListDept(ctx, req.(*pagination.PagingRequest))
+		return srv.(DeptServiceServer).ListDept(ctx, req.(*v1.ListDeptRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

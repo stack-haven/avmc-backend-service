@@ -9,7 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
@@ -302,10 +301,10 @@ func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
 }
 
 // ListPage 查询菜单列表分页
-// 参数：ctx 上下文，pagination 分页请求
+// 参数：ctx 上下文，req 分页请求
 // 返回值：菜单列表响应，错误信息
-func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListMenuResponse, error) {
-	r.log.Infof("查询菜单列表分页，分页请求：%v", pagination)
+func (r *menuRepo) ListPage(ctx context.Context, req *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) {
+	r.log.Infof("查询菜单列表分页，分页请求：%v", req)
 	count, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID).
 		// Where(menu.DeletedAtIsNil()).
 		Count(ctx)
@@ -329,15 +328,15 @@ func (r *menuRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			menu.FieldCreatedAt,
 			menu.FieldUpdatedAt,
 		).
-		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
-		Limit(int(pagination.GetPageSize())).
+		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
+		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(menu.FieldID)).
 		All(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, nil
 		}
-		r.log.Errorf("查询菜单列表分页失败，分页请求：%v，错误：%v", pagination, err)
+		r.log.Errorf("查询菜单列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
 	return &pbCore.ListMenuResponse{

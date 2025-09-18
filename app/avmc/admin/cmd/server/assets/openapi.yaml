@@ -240,34 +240,31 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: query
-                  in: query
-                  description: 与过滤参数
-                  schema:
-                    type: string
-                - name: or
-                  in: query
-                  description: 或过滤参数
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: 排序条件
-                  schema:
-                    type: array
-                    items:
-                        type: string
                 - name: nopaging
                   in: query
                   description: 是否不分页
                   schema:
                     type: boolean
-                - name: fieldMask
+                - name: name
                   in: query
-                  description: 字段掩码
+                  description: 部门名称
                   schema:
                     type: string
-                    format: field-mask
+                - name: status
+                  in: query
+                  description: 部门状态
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
+                - name: remark
+                  in: query
+                  description: 部门描述
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -487,34 +484,26 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: query
-                  in: query
-                  description: 与过滤参数
-                  schema:
-                    type: string
-                - name: or
-                  in: query
-                  description: 或过滤参数
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: 排序条件
-                  schema:
-                    type: array
-                    items:
-                        type: string
                 - name: nopaging
                   in: query
                   description: 是否不分页
                   schema:
                     type: boolean
-                - name: fieldMask
+                - name: name
                   in: query
-                  description: 字段掩码
+                  description: 菜单名称
                   schema:
                     type: string
-                    format: field-mask
+                - name: status
+                  in: query
+                  description: 菜单状态
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
             responses:
                 "200":
                     description: OK
@@ -853,34 +842,31 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: query
-                  in: query
-                  description: 与过滤参数
-                  schema:
-                    type: string
-                - name: or
-                  in: query
-                  description: 或过滤参数
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: 排序条件
-                  schema:
-                    type: array
-                    items:
-                        type: string
                 - name: nopaging
                   in: query
                   description: 是否不分页
                   schema:
                     type: boolean
-                - name: fieldMask
+                - name: name
                   in: query
-                  description: 字段掩码
+                  description: 岗位名称
                   schema:
                     type: string
-                    format: field-mask
+                - name: status
+                  in: query
+                  description: 岗位状态
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
+                - name: remark
+                  in: query
+                  description: 岗位描述
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -1312,34 +1298,28 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: query
-                  in: query
-                  description: 与过滤参数
-                  schema:
-                    type: string
-                - name: or
-                  in: query
-                  description: 或过滤参数
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: 排序条件
-                  schema:
-                    type: array
-                    items:
-                        type: string
                 - name: nopaging
                   in: query
                   description: 是否不分页
                   schema:
                     type: boolean
-                - name: fieldMask
+                - name: name
                   in: query
-                  description: 字段掩码
                   schema:
                     type: string
-                    format: field-mask
+                - name: remark
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
             responses:
                 "200":
                     description: OK
@@ -1398,34 +1378,28 @@ paths:
                   schema:
                     type: integer
                     format: int32
-                - name: query
-                  in: query
-                  description: 与过滤参数
-                  schema:
-                    type: string
-                - name: or
-                  in: query
-                  description: 或过滤参数
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: 排序条件
-                  schema:
-                    type: array
-                    items:
-                        type: string
                 - name: nopaging
                   in: query
                   description: 是否不分页
                   schema:
                     type: boolean
-                - name: fieldMask
+                - name: name
                   in: query
-                  description: 字段掩码
                   schema:
                     type: string
-                    format: field-mask
+                - name: remark
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
             responses:
                 "200":
                     description: OK

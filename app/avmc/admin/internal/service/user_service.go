@@ -6,7 +6,6 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 
 	pb "backend-service/api/avmc/admin/v1"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 
@@ -34,7 +33,7 @@ func NewUserServiceService(uuc *biz.UserUsecase, logger log.Logger) *UserService
 // ListUserSimple 处理用户简单列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：用户列表响应，错误信息
-func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
+func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
 	s.log.Infof("查询用户简单列表分页，分页请求：%v", req)
 	return s.uuc.ListPageSimple(ctx, req)
 }
@@ -42,7 +41,7 @@ func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbPaginati
 // ListUser 处理用户列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：用户列表响应，错误信息
-func (s *UserServiceService) ListUser(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListUserResponse, error) {
+func (s *UserServiceService) ListUser(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
 	s.log.Infof("查询用户列表分页，分页请求：%v", req)
 	return s.uuc.ListPage(ctx, req)
 }

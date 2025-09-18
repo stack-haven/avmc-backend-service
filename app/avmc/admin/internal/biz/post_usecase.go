@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -20,7 +19,7 @@ type PostRepo interface {
 	Update(context.Context, *pbCore.Post) (*pbCore.Post, error)
 	FindByID(context.Context, uint32) (*pbCore.Post, error)
 	ListAll(context.Context) ([]*pbCore.Post, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListPostResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -77,9 +76,9 @@ func (uc *PostUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListPage 处理分页查询岗位请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：岗位列表响应，错误信息
-func (uc *PostUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListPostResponse, error) {
-	uc.log.WithContext(ctx).Infof("ListPostPage: %v", pagination)
-	return uc.repo.ListPage(ctx, pagination)
+func (uc *PostUsecase) ListPage(ctx context.Context, req *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) {
+	uc.log.WithContext(ctx).Infof("ListPostPage: %v", req)
+	return uc.repo.ListPage(ctx, req)
 }
 
 // Delete 处理删除岗位请求

@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
@@ -45,7 +44,7 @@ type MenuServiceHTTPServer interface {
 	// GetMenu 获取菜单数据
 	GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error)
 	// ListMenu 获取菜单列表
-	ListMenu(context.Context, *pagination.PagingRequest) (*v1.ListMenuResponse, error)
+	ListMenu(context.Context, *v1.ListMenuRequest) (*v1.ListMenuResponse, error)
 	// ListMenuAll 获取所有菜单
 	ListMenuAll(context.Context, *emptypb.Empty) (*v1.ListMenuResponse, error)
 	// ListMenuTree 获取菜单树
@@ -135,13 +134,13 @@ func _MenuService_ListMenuTree1_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx
 
 func _MenuService_ListMenu0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in pagination.PagingRequest
+		var in v1.ListMenuRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationMenuServiceListMenu)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListMenu(ctx, req.(*pagination.PagingRequest))
+			return srv.ListMenu(ctx, req.(*v1.ListMenuRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -362,7 +361,7 @@ type MenuServiceHTTPClient interface {
 	ExistMenuByName(ctx context.Context, req *v1.ExistMenuByNameRequest, opts ...http.CallOption) (rsp *v1.ExistMenuByNameResponse, err error)
 	ExistMenuByPath(ctx context.Context, req *v1.ExistMenuByPathRequest, opts ...http.CallOption) (rsp *v1.ExistMenuByPathResponse, err error)
 	GetMenu(ctx context.Context, req *v1.GetMenuRequest, opts ...http.CallOption) (rsp *v1.Menu, err error)
-	ListMenu(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
+	ListMenu(ctx context.Context, req *v1.ListMenuRequest, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
 	ListMenuAll(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
 	ListMenuTree(ctx context.Context, req *v1.ListMenuTreeRequest, opts ...http.CallOption) (rsp *v1.ListMenuTreeResponse, err error)
 	UpdateMenu(ctx context.Context, req *v1.UpdateMenuRequest, opts ...http.CallOption) (rsp *v1.UpdateMenuResponse, err error)
@@ -442,7 +441,7 @@ func (c *MenuServiceHTTPClientImpl) GetMenu(ctx context.Context, in *v1.GetMenuR
 	return &out, nil
 }
 
-func (c *MenuServiceHTTPClientImpl) ListMenu(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListMenuResponse, error) {
+func (c *MenuServiceHTTPClientImpl) ListMenu(ctx context.Context, in *v1.ListMenuRequest, opts ...http.CallOption) (*v1.ListMenuResponse, error) {
 	var out v1.ListMenuResponse
 	pattern := "/admin/v1/menus"
 	path := binding.EncodeURL(pattern, in, true)

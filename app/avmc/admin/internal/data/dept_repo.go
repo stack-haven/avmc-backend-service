@@ -9,7 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
@@ -196,10 +195,10 @@ func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 }
 
 // ListPage 查询部门列表分页
-// 参数：ctx 上下文，pagination 分页请求
+// 参数：ctx 上下文，req 分页请求
 // 返回值：部门列表响应，错误信息
-func (r *deptRepo) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListDeptResponse, error) {
-	r.log.Infof("查询部门列表分页，分页请求：%v", pagination)
+func (r *deptRepo) ListPage(ctx context.Context, req *pbCore.ListDeptRequest) (*pbCore.ListDeptResponse, error) {
+	r.log.Infof("查询部门列表分页，分页请求：%v", req)
 	count, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID).Where(dept.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
 		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
@@ -217,12 +216,12 @@ func (r *deptRepo) ListPage(ctx context.Context, pagination *pbPagination.Paging
 			dept.FieldCreatedAt,
 			dept.FieldUpdatedAt,
 		).
-		Offset(int((pagination.GetPage() - 1) * pagination.GetPageSize())).
-		Limit(int(pagination.GetPageSize())).
+		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
+		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(dept.FieldID)).
 		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询部门列表分页失败，分页请求：%v，错误：%v", pagination, err)
+		r.log.Errorf("查询部门列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
 	return &pbCore.ListDeptResponse{

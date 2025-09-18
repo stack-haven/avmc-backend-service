@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pb "backend-service/api/avmc/admin/v1"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 
@@ -32,7 +31,7 @@ func NewDeptServiceService(duc *biz.DeptUsecase, logger log.Logger) *DeptService
 // ListDept 处理部门列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：部门列表响应，错误信息
-func (s *DeptServiceService) ListDept(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListDeptResponse, error) {
+func (s *DeptServiceService) ListDept(ctx context.Context, req *pbCore.ListDeptRequest) (*pbCore.ListDeptResponse, error) {
 	s.log.Infof("查询部门列表分页，分页请求：%v", req)
 	return s.duc.ListPage(ctx, req)
 }

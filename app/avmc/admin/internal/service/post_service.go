@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pb "backend-service/api/avmc/admin/v1"
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 
@@ -32,7 +31,7 @@ func NewPostServiceService(puc *biz.PostUsecase, logger log.Logger) *PostService
 // ListPost 处理岗位列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：岗位列表响应，错误信息
-func (s *PostServiceService) ListPost(ctx context.Context, req *pbPagination.PagingRequest) (*pbCore.ListPostResponse, error) {
+func (s *PostServiceService) ListPost(ctx context.Context, req *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) {
 	s.log.Infof("查询岗位列表分页，分页请求：%v", req)
 	return s.puc.ListPage(ctx, req)
 }

@@ -1144,45 +1144,28 @@ func (m *ListDeptRequest) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetPagination()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ListDeptRequestValidationError{
-					field:  "Pagination",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ListDeptRequestValidationError{
-					field:  "Pagination",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetPagination()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ListDeptRequestValidationError{
-				field:  "Pagination",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
+	if m.Page != nil {
+		// no validation rules for Page
+	}
+
+	if m.PageSize != nil {
+		// no validation rules for PageSize
+	}
+
+	if m.NoPaging != nil {
+		// no validation rules for NoPaging
 	}
 
 	if m.Name != nil {
 		// no validation rules for Name
 	}
 
-	if m.State != nil {
-		// no validation rules for State
+	if m.Status != nil {
+		// no validation rules for Status
 	}
 
-	if m.ParentId != nil {
-		// no validation rules for ParentId
+	if m.Remark != nil {
+		// no validation rules for Remark
 	}
 
 	if len(errors) > 0 {

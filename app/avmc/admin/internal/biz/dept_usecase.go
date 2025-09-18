@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 
-	pbPagination "backend-service/api/common/pagination"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/utils/convert"
 
@@ -21,7 +20,7 @@ type DeptRepo interface {
 	Update(context.Context, *pbCore.Dept) (*pbCore.Dept, error)
 	FindByID(context.Context, uint32) (*pbCore.Dept, error)
 	ListAll(context.Context) ([]*pbCore.Dept, error)
-	ListPage(context.Context, *pbPagination.PagingRequest) (*pbCore.ListDeptResponse, error) // 新增的方法用于分页查询
+	ListPage(context.Context, *pbCore.ListDeptRequest) (*pbCore.ListDeptResponse, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -76,8 +75,8 @@ func (uc *DeptUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListPage 处理部门分页列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：部门列表响应，错误信息
-func (uc *DeptUsecase) ListPage(ctx context.Context, pagination *pbPagination.PagingRequest) (*pbCore.ListDeptResponse, error) {
-	return uc.repo.ListPage(ctx, pagination)
+func (uc *DeptUsecase) ListPage(ctx context.Context, req *pbCore.ListDeptRequest) (*pbCore.ListDeptResponse, error) {
+	return uc.repo.ListPage(ctx, req)
 }
 
 // Delete 处理删除部门请求

@@ -24,7 +24,7 @@ service DeptService {
   // 获取部门
   rpc GetDept(GetDeptRequest) returns (GetDeptResponse);
   // 分页查询部门
-  rpc ListDept(pagination.PagingRequest) returns (ListDeptResponse);
+  rpc ListDept(ListDeptRequest) returns (ListDeptResponse);
   // 查询部门树形列表
   rpc ListDeptTree(ListDeptTreeRequest) returns (ListDeptTreeResponse);
   // 更新部门状态
@@ -151,16 +151,36 @@ message GetDeptResponse {
 
 // 分页查询部门请求
 message ListDeptRequest {
-  pagination.PagingRequest pagination = 1 [
-    (buf.validate.field).required = true,
-    (gnostic.openapi.v3.property) = {description: "分页参数"}
+  
+  // 当前页码
+  optional int32 page = 1 [
+    json_name = "page",
+    (buf.validate.field).int32.gt = 0,
+    (gnostic.openapi.v3.property) = {
+      description: "当前页码",
+      default: {number: 1}
+    }
   ];
-  optional string name = 2 [
-    (buf.validate.field).string.max_len = 20,
-    (gnostic.openapi.v3.property) = {description: "部门名称"}
+  // 每页的行数
+  optional int32 page_size = 2 [
+    json_name = "pageSize",
+    (buf.validate.field).int32.gt = 0,
+    (gnostic.openapi.v3.property) = {
+      description: "每一页的行数",
+      default: {number: 10}
+    }
   ];
-  optional int32 state = 3 [(gnostic.openapi.v3.property) = {description: "部门状态"}];
-  optional uint32 parent_id = 4 [(gnostic.openapi.v3.property) = {description: "父部门ID"}];
+  // 是否不分页
+  optional bool no_paging = 3 [
+    json_name = "nopaging",
+    (gnostic.openapi.v3.property) = {description: "是否不分页"}
+  ];
+  // 部门名称
+  optional string name = 4 [(buf.validate.field).string.max_len = 20];
+  // 部门状态
+  optional enum.Status status = 5 [(buf.validate.field).enum.defined_only = true, (gnostic.openapi.v3.property) = {description: "部门状态 0 未知 1 启用 2 禁用"}];
+  // 部门描述
+  optional string remark = 6 [(buf.validate.field).string.max_len = 200, (gnostic.openapi.v3.property) = {description: "部门描述"}];
 }
 
 // 分页查询部门响应

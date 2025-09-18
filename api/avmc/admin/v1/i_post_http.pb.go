@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	v1 "backend-service/api/core/service/v1"
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
@@ -36,7 +35,7 @@ type PostServiceHTTPServer interface {
 	// GetPost 获取岗位数据
 	GetPost(context.Context, *v1.GetPostRequest) (*v1.Post, error)
 	// ListPost 获取岗位列表
-	ListPost(context.Context, *pagination.PagingRequest) (*v1.ListPostResponse, error)
+	ListPost(context.Context, *v1.ListPostRequest) (*v1.ListPostResponse, error)
 	// UpdatePost 更新岗位
 	UpdatePost(context.Context, *v1.UpdatePostRequest) (*v1.UpdatePostResponse, error)
 	// UpdatePostByStatus 更新岗位状态
@@ -55,13 +54,13 @@ func RegisterPostServiceHTTPServer(s *http.Server, srv PostServiceHTTPServer) {
 
 func _PostService_ListPost0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in pagination.PagingRequest
+		var in v1.ListPostRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationPostServiceListPost)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListPost(ctx, req.(*pagination.PagingRequest))
+			return srv.ListPost(ctx, req.(*v1.ListPostRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -192,7 +191,7 @@ type PostServiceHTTPClient interface {
 	CreatePost(ctx context.Context, req *v1.CreatePostRequest, opts ...http.CallOption) (rsp *v1.CreatePostResponse, err error)
 	DeletePost(ctx context.Context, req *v1.DeletePostRequest, opts ...http.CallOption) (rsp *v1.DeletePostResponse, err error)
 	GetPost(ctx context.Context, req *v1.GetPostRequest, opts ...http.CallOption) (rsp *v1.Post, err error)
-	ListPost(ctx context.Context, req *pagination.PagingRequest, opts ...http.CallOption) (rsp *v1.ListPostResponse, err error)
+	ListPost(ctx context.Context, req *v1.ListPostRequest, opts ...http.CallOption) (rsp *v1.ListPostResponse, err error)
 	UpdatePost(ctx context.Context, req *v1.UpdatePostRequest, opts ...http.CallOption) (rsp *v1.UpdatePostResponse, err error)
 	UpdatePostByStatus(ctx context.Context, req *v1.UpdatePostByStatusRequest, opts ...http.CallOption) (rsp *v1.UpdatePostByStatusResponse, err error)
 }
@@ -244,7 +243,7 @@ func (c *PostServiceHTTPClientImpl) GetPost(ctx context.Context, in *v1.GetPostR
 	return &out, nil
 }
 
-func (c *PostServiceHTTPClientImpl) ListPost(ctx context.Context, in *pagination.PagingRequest, opts ...http.CallOption) (*v1.ListPostResponse, error) {
+func (c *PostServiceHTTPClientImpl) ListPost(ctx context.Context, in *v1.ListPostRequest, opts ...http.CallOption) (*v1.ListPostResponse, error) {
 	var out v1.ListPostResponse
 	pattern := "/admin/v1/posts"
 	path := binding.EncodeURL(pattern, in, true)
