@@ -1,0 +1,82 @@
+name: code-analysis
+icon: search
+color: purple
+description: 代码分析相关工具
+author: Kratos Team
+version: 1.0.0
+category: development
+
+commands:
+  - name: gofmt
+    description: 格式化 Go 代码
+    parameters:
+      - name: path
+        type: string
+        default: ./
+        description: 代码路径
+    script:
+      - gofmt -w ${path}
+      - echo "Successfully formatted Go code"
+
+  - name: go-vet
+    description: 检查 Go 代码中的错误
+    parameters:
+      - name: path
+        type: string
+        default: ./
+        description: 代码路径
+    script:
+      - go vet ${path}/...
+      - echo "Successfully checked Go code with vet"
+
+  - name: golangci-lint
+    description: 使用 golangci-lint 进行代码质量检查
+    parameters:
+      - name: path
+        type: string
+        default: ./
+        description: 代码路径
+    script:
+      - if ! command -v golangci-lint &> /dev/null; then
+      -   echo "golangci-lint not found, installing..."
+      -   go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - fi
+      - golangci-lint run ${path}/...
+      - echo "Successfully checked code quality with golangci-lint"
+
+  - name: staticcheck
+    description: 使用 staticcheck 进行静态代码分析
+    parameters:
+      - name: path
+        type: string
+        default: ./
+        description: 代码路径
+    script:
+      - if ! command -v staticcheck &> /dev/null; then
+      -   echo "staticcheck not found, installing..."
+      -   go install honnef.co/go/tools/cmd/staticcheck@latest
+      - fi
+      - staticcheck ${path}/...
+      - echo "Successfully performed static code analysis with staticcheck"
+
+  - name: code-quality
+    description: 运行完整的代码质量检查
+    parameters:
+      - name: path
+        type: string
+        default: ./
+        description: 代码路径
+    script:
+      - echo "Running gofmt..."
+      - gofmt -w ${path}
+      - echo "Running go vet..."
+      - go vet ${path}/...
+      - if command -v golangci-lint &> /dev/null; then
+      -   echo "Running golangci-lint..."
+      -   golangci-lint run ${path}/...
+      - fi
+      - if command -v staticcheck &> /dev/null; then
+      -   echo "Running staticcheck..."
+      -   staticcheck ${path}/...
+      - fi
+      - echo "Successfully completed code quality check"

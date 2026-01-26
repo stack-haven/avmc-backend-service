@@ -1,0 +1,11 @@
+name: simple
+description: 简单的技能示例
+author: Kratos Team
+version: 1.0.0
+category: development
+
+commands:
+  - name: hello
+    description: 打印 Hello World
+    script:
+      - echo "Hello World!"

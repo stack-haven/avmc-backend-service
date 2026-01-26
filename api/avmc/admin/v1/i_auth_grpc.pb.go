@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_LoginPassword_FullMethodName = "/avmc.admin.v1.AuthService/LoginPassword"
-	AuthService_LoginCode_FullMethodName     = "/avmc.admin.v1.AuthService/LoginCode"
-	AuthService_RefreshToken_FullMethodName  = "/avmc.admin.v1.AuthService/RefreshToken"
-	AuthService_Logout_FullMethodName        = "/avmc.admin.v1.AuthService/Logout"
-	AuthService_Profile_FullMethodName       = "/avmc.admin.v1.AuthService/Profile"
-	AuthService_VbenProfile_FullMethodName   = "/avmc.admin.v1.AuthService/VbenProfile"
-	AuthService_Codes_FullMethodName         = "/avmc.admin.v1.AuthService/Codes"
-	AuthService_Menus_FullMethodName         = "/avmc.admin.v1.AuthService/Menus"
+	AuthService_LoginPassword_FullMethodName    = "/avmc.admin.v1.AuthService/LoginPassword"
+	AuthService_LoginByUsername_FullMethodName  = "/avmc.admin.v1.AuthService/LoginByUsername"
+	AuthService_LoginByEmail_FullMethodName     = "/avmc.admin.v1.AuthService/LoginByEmail"
+	AuthService_LoginByPhoneCode_FullMethodName = "/avmc.admin.v1.AuthService/LoginByPhoneCode"
+	AuthService_RefreshToken_FullMethodName     = "/avmc.admin.v1.AuthService/RefreshToken"
+	AuthService_Logout_FullMethodName           = "/avmc.admin.v1.AuthService/Logout"
+	AuthService_Profile_FullMethodName          = "/avmc.admin.v1.AuthService/Profile"
+	AuthService_VbenProfile_FullMethodName      = "/avmc.admin.v1.AuthService/VbenProfile"
+	AuthService_Codes_FullMethodName            = "/avmc.admin.v1.AuthService/Codes"
+	AuthService_Menus_FullMethodName            = "/avmc.admin.v1.AuthService/Menus"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -35,8 +37,14 @@ const (
 //
 // The greeting service definition.
 type AuthServiceClient interface {
-	LoginPassword(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	LoginCode(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// 用户密码登录
+	LoginPassword(ctx context.Context, in *LoginPasswordRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// 用户用户名登录
+	LoginByUsername(ctx context.Context, in *LoginByUsernameRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// 用户邮箱登录
+	LoginByEmail(ctx context.Context, in *LoginByEmailRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// 用户手机验证码登录
+	LoginByPhoneCode(ctx context.Context, in *LoginByPhoneCodeRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
 	// @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
@@ -61,7 +69,7 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) LoginPassword(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+func (c *authServiceClient) LoginPassword(ctx context.Context, in *LoginPasswordRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, AuthService_LoginPassword_FullMethodName, in, out, cOpts...)
@@ -71,10 +79,30 @@ func (c *authServiceClient) LoginPassword(ctx context.Context, in *LoginRequest,
 	return out, nil
 }
 
-func (c *authServiceClient) LoginCode(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+func (c *authServiceClient) LoginByUsername(ctx context.Context, in *LoginByUsernameRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, AuthService_LoginCode_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthService_LoginByUsername_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) LoginByEmail(ctx context.Context, in *LoginByEmailRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_LoginByEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) LoginByPhoneCode(ctx context.Context, in *LoginByPhoneCodeRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_LoginByPhoneCode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,8 +175,14 @@ func (c *authServiceClient) Menus(ctx context.Context, in *MenusRequest, opts ..
 //
 // The greeting service definition.
 type AuthServiceServer interface {
-	LoginPassword(context.Context, *LoginRequest) (*LoginResponse, error)
-	LoginCode(context.Context, *LoginRequest) (*LoginResponse, error)
+	// 用户密码登录
+	LoginPassword(context.Context, *LoginPasswordRequest) (*LoginResponse, error)
+	// 用户用户名登录
+	LoginByUsername(context.Context, *LoginByUsernameRequest) (*LoginResponse, error)
+	// 用户邮箱登录
+	LoginByEmail(context.Context, *LoginByEmailRequest) (*LoginResponse, error)
+	// 用户手机验证码登录
+	LoginByPhoneCode(context.Context, *LoginByPhoneCodeRequest) (*LoginResponse, error)
 	// 刷新令牌
 	// @param RefreshTokenRequest 请求参数，包含刷新令牌
 	// @return RefreshTokenResponse 响应结果，包含新的访问令牌和刷新令牌
@@ -173,11 +207,17 @@ type AuthServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedAuthServiceServer) LoginPassword(context.Context, *LoginRequest) (*LoginResponse, error) {
+func (UnimplementedAuthServiceServer) LoginPassword(context.Context, *LoginPasswordRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginPassword not implemented")
 }
-func (UnimplementedAuthServiceServer) LoginCode(context.Context, *LoginRequest) (*LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LoginCode not implemented")
+func (UnimplementedAuthServiceServer) LoginByUsername(context.Context, *LoginByUsernameRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginByUsername not implemented")
+}
+func (UnimplementedAuthServiceServer) LoginByEmail(context.Context, *LoginByEmailRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginByEmail not implemented")
+}
+func (UnimplementedAuthServiceServer) LoginByPhoneCode(context.Context, *LoginByPhoneCodeRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginByPhoneCode not implemented")
 }
 func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
@@ -219,7 +259,7 @@ func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 }
 
 func _AuthService_LoginPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
+	in := new(LoginPasswordRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -231,25 +271,61 @@ func _AuthService_LoginPassword_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: AuthService_LoginPassword_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).LoginPassword(ctx, req.(*LoginRequest))
+		return srv.(AuthServiceServer).LoginPassword(ctx, req.(*LoginPasswordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_LoginCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginRequest)
+func _AuthService_LoginByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginByUsernameRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).LoginCode(ctx, in)
+		return srv.(AuthServiceServer).LoginByUsername(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_LoginCode_FullMethodName,
+		FullMethod: AuthService_LoginByUsername_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).LoginCode(ctx, req.(*LoginRequest))
+		return srv.(AuthServiceServer).LoginByUsername(ctx, req.(*LoginByUsernameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_LoginByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginByEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LoginByEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LoginByEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LoginByEmail(ctx, req.(*LoginByEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_LoginByPhoneCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginByPhoneCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LoginByPhoneCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LoginByPhoneCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LoginByPhoneCode(ctx, req.(*LoginByPhoneCodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -374,8 +450,16 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_LoginPassword_Handler,
 		},
 		{
-			MethodName: "LoginCode",
-			Handler:    _AuthService_LoginCode_Handler,
+			MethodName: "LoginByUsername",
+			Handler:    _AuthService_LoginByUsername_Handler,
+		},
+		{
+			MethodName: "LoginByEmail",
+			Handler:    _AuthService_LoginByEmail_Handler,
+		},
+		{
+			MethodName: "LoginByPhoneCode",
+			Handler:    _AuthService_LoginByPhoneCode_Handler,
 		},
 		{
 			MethodName: "RefreshToken",

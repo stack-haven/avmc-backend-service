@@ -3,6 +3,7 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/conf"
 	"context"
+	"os"
 
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/intercept"
@@ -73,4 +74,21 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 	)
 
 	return client
+}
+
+// NewEntData .
+func NewEntData(cfg *conf.Data, logger log.Logger) *gen.Client {
+	db, err := gen.Open(cfg.Database.Driver, cfg.Database.Source)
+	if err != nil {
+		log.Fatalf("failed opening connection to database: %v", err)
+	}
+	if os.Getenv("DEPLOY_ENV") == "dev" {
+		// Enable debug mode for detailed logging.
+		db = db.Debug()
+		// Run the auto migration tool.
+		if err = db.Schema.Create(context.Background(), migrate.WithDropIndex(true)); err != nil {
+			log.Fatalf("failed creating schema resources: %v", err)
+		}
+	}
+	return db
 }

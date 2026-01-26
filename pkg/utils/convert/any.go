@@ -14,6 +14,22 @@ func ToAny[T any, D any](source []T, transform func(T) D) []D {
 	return l
 }
 
+// ToValue 将指针类型转换为对应的非指针值，如果为 nil 则返回零值。
+// ptr: 任意类型的指针。
+// 返回值: 指针指向的值，若指针为 nil 则返回该类型的零值。
+// 示例:
+//
+//	str := "hello"
+//	ptr := &str
+//	val := ToValue(ptr) // string: "hello"
+func ToValue[T any](ptr *T) T {
+	if ptr == nil {
+		var zero T
+		return zero
+	}
+	return *ptr
+}
+
 // ToPointer 将任意值转换为对应的指针引用。
 // value: 任意类型的值。
 // 返回值: 指向该值的指针。

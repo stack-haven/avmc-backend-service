@@ -1,0 +1,98 @@
+name: testing
+icon: test-tube
+color: teal
+description: 测试相关工具
+author: Kratos Team
+version: 1.0.0
+category: development
+
+commands:
+  - name: unit-test
+    description: 运行单元测试
+    parameters:
+      - name: package
+        type: string
+        default: ./...
+        description: 测试包路径
+      - name: verbose
+        type: boolean
+        default: true
+        description: 详细输出
+    script:
+      - if [ "${verbose}" = "true" ]; then
+      -   go test -v ${package}
+      - else
+      -   go test ${package}
+      - fi
+      - echo "Successfully run unit tests"
+
+  - name: test-coverage
+    description: 运行测试并生成覆盖率报告
+    parameters:
+      - name: package
+        type: string
+        default: ./...
+        description: 测试包路径
+      - name: output
+        type: string
+        default: coverage.out
+        description: 覆盖率报告文件
+    script:
+      - go test -coverprofile=${output} ${package}
+      - go tool cover -html=${output} -o coverage.html
+      - echo "Successfully generated test coverage report"
+      - echo "Coverage report saved to coverage.html"
+
+  - name: bench-test
+    description: 运行基准测试
+    parameters:
+      - name: package
+        type: string
+        default: ./...
+        description: 测试包路径
+      - name: verbose
+        type: boolean
+        default: true
+        description: 详细输出
+    script:
+      - if [ "${verbose}" = "true" ]; then
+      -   go test -bench=. -benchmem -v ${package}
+      - else
+      -   go test -bench=. -benchmem ${package}
+      - fi
+      - echo "Successfully run benchmark tests"
+
+  - name: integration-test
+    description: 运行集成测试
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+    script:
+      - cd tests
+      - go test -v -tags=integration ./${service}/...
+      - echo "Successfully run integration tests for ${service} service"
+
+  - name: e2e-test
+    description: 运行端到端测试
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+    script:
+      - cd tests
+      - go test -v -tags=e2e ./${service}/...
+      - echo "Successfully run end-to-end tests for ${service} service"
+
+  - name: all-tests
+    description: 运行所有测试
+    script:
+      - echo "Running unit tests..."
+      - go test -v ./...
+      - echo "Running integration tests..."
+      - go test -v -tags=integration ./tests/...
+      - echo "Running end-to-end tests..."
+      - go test -v -tags=e2e ./tests/...
+      - echo "Successfully run all tests"

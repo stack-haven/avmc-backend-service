@@ -1,0 +1,104 @@
+name: project
+icon: package
+color: green
+description: 项目管理相关工具
+author: Kratos Team
+version: 1.0.0
+category: management
+
+commands:
+  - name: init
+    description: 初始化项目依赖
+    script:
+      - make init
+      - echo "Successfully initialized project dependencies"
+
+  - name: build
+    description: 构建项目
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+      - name: output
+        type: string
+        default: ./bin
+        description: 输出目录
+    script:
+      - cd app/avmc/${service}
+      - make build
+      - echo "Successfully built ${service} service"
+
+  - name: run
+    description: 运行服务
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+      - name: config
+        type: string
+        default: ./configs
+        description: 配置文件目录
+    script:
+      - cd app/avmc/${service}
+      - make run
+      - echo "Successfully started ${service} service"
+
+  - name: docker-build
+    description: 构建 Docker 镜像
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+      - name: tag
+        type: string
+        default: latest
+        description: 镜像标签
+    script:
+      - cd app/avmc/${service}
+      - docker build -t avmc-${service}:${tag} .
+      - echo "Successfully built Docker image for ${service} service"
+
+  - name: docker-run
+    description: 运行 Docker 容器
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+      - name: tag
+        type: string
+        default: latest
+        description: 镜像标签
+      - name: port
+        type: string
+        default: 8000:8000
+        description: 端口映射
+    script:
+      - docker run --rm -p ${port} -v $(pwd)/configs:/data/conf avmc-${service}:${tag}
+      - echo "Successfully started Docker container for ${service} service"
+
+  - name: docker-compose-up
+    description: 启动 Docker Compose
+    parameters:
+      - name: services
+        type: string
+        default: ""
+        description: 服务列表 (e.g., admin,api)
+    script:
+      - cd .docker
+      - if [ -z "${services}" ]; then
+      -   docker-compose -f compose/docker-compose.yml up -d
+      - else
+      -   docker-compose -f compose/docker-compose.yml up -d ${services}
+      - fi
+      - echo "Successfully started Docker Compose services"
+
+  - name: docker-compose-down
+    description: 停止 Docker Compose
+    script:
+      - cd .docker
+      - docker-compose -f compose/docker-compose.yml down
+      - echo "Successfully stopped Docker Compose services"

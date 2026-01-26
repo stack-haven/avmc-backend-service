@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	pb "backend-service/api/avmc/admin/v1"
 	"backend-service/app/avmc/admin/internal/biz"
@@ -29,17 +30,41 @@ func NewAuthServiceService(auc *biz.AuthUsecase, uuc *biz.UserUsecase, logger lo
 	}
 }
 
-// Login 处理后台登录请求
+// LoginByPassword 处理后台登录请求
 // 参数：ctx 上下文，req 登录请求
 // 返回值：登录响应，错误信息
-func (s *AuthServiceService) LoginPassword(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (s *AuthServiceService) LoginPassword(ctx context.Context, req *pb.LoginPasswordRequest) (*pb.LoginResponse, error) {
+	var (
+		err  error
+		resp *pb.LoginResponse
+	)
 	loginPassword := req.GetPassword()
-	if loginPassword.GetUsername() == "" || loginPassword.GetPassword() == "" {
+	fmt.Println("loginPassword", loginPassword)
+	// resp, err = s.auc.LoginByUsername(ctx, req.GetUsername(), loginPassword, req.GetDomainId())
+	switch v := req.Identity.(type) {
+	case *pb.LoginPasswordRequest_Username:
+		fmt.Println("loginUsername", v.Username)
+		resp, err = s.auc.LoginByUsername(ctx, v.Username, loginPassword, req.GetDomainId())
+	case *pb.LoginPasswordRequest_Email:
+		fmt.Println("loginEmail", v.Email)
+		resp, err = s.auc.LoginByEmail(ctx, v.Email, loginPassword, req.GetDomainId())
+	default:
+		resp, err = nil, pb.ErrorUserIncorrectPassword("用户名或邮箱为空")
+	}
+	return resp, err
+}
+
+// LoginByUsername 处理后台登录请求
+// 参数：ctx 上下文，req 登录请求
+// 返回值：登录响应，错误信息
+func (s *AuthServiceService) LoginByUsername(ctx context.Context, req *pb.LoginByUsernameRequest) (*pb.LoginResponse, error) {
+	loginUsername := req.GetUsername()
+	if loginUsername == "" || req.GetPassword() == "" {
 		s.log.Errorf("用户名或密码为空")
 		return nil, pb.ErrorUserIncorrectPassword("用户名或密码为空")
 	}
 	// 调用业务逻辑层
-	resp, err := s.auc.Login(ctx, loginPassword.GetUsername(), loginPassword.GetPassword(), req.GetDomainId())
+	resp, err := s.auc.LoginByUsername(ctx, loginUsername, req.GetPassword(), req.GetDomainId())
 	if err != nil {
 		s.log.Errorf("登录失败: %v", err)
 		return nil, err
@@ -48,11 +73,23 @@ func (s *AuthServiceService) LoginPassword(ctx context.Context, req *pb.LoginReq
 	return resp, nil
 }
 
-// Login 处理后台登录请求
+// LoginByEmail 处理后台登录请求
 // 参数：ctx 上下文，req 登录请求
 // 返回值：登录响应，错误信息
-func (s *AuthServiceService) LoginCode(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	return nil, nil
+func (s *AuthServiceService) LoginByEmail(ctx context.Context, req *pb.LoginByEmailRequest) (*pb.LoginResponse, error) {
+	loginEmail := req.GetEmail()
+	if loginEmail == "" || req.GetPassword() == "" {
+		s.log.Errorf("邮箱或密码为空")
+		return nil, pb.ErrorUserIncorrectPassword("邮箱或密码为空")
+	}
+	// 调用业务逻辑层
+	resp, err := s.auc.LoginByEmail(ctx, loginEmail, req.GetPassword(), req.GetDomainId())
+	if err != nil {
+		s.log.Errorf("登录失败: %v", err)
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 // RefreshToken 处理刷新令牌请求

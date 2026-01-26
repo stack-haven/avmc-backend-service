@@ -4,11 +4,12 @@ package avmc.admin.v1;
 
 import "buf/validate/validate.proto";
 import "core/service/v1/auth.proto";
+import "core/service/v1/menu.proto";
 import "core/service/v1/role.proto";
 import "core/service/v1/user.proto";
-import "core/service/v1/menu.proto";
 import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
@@ -57,10 +58,11 @@ option (gnostic.openapi.v3.document) = {
 
 // The greeting service definition.
 service AuthService {
-  rpc LoginPassword(LoginRequest) returns (LoginResponse) {
+  // 用户密码登录
+  rpc LoginPassword(LoginPasswordRequest) returns (LoginResponse) {
     option (google.api.http) = {
       post: "/admin/v1/auth/login/password"
-      body: "password"
+      body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
       // operation_id: "LoginUser"
@@ -69,15 +71,41 @@ service AuthService {
       tags: ["认证服务"]
     };
   }
-
-  rpc LoginCode(LoginRequest) returns (LoginResponse) {
+  // 用户用户名登录
+  rpc LoginByUsername(LoginByUsernameRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/admin/v1/auth/login/code"
-      body: "code"
+      post: "/admin/v1/auth/login/username"
+      body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
       // operation_id: "LoginUser"
-      summary: "用户验证码登录"
+      summary: "用户用户名登录"
+      description: "通过用户名和密码登录认证服务"
+      tags: ["认证服务"]
+    };
+  }
+  // 用户邮箱登录
+  rpc LoginByEmail(LoginByEmailRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/auth/login/email"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      // operation_id: "LoginUser"
+      summary: "用户邮箱登录"
+      description: "通过邮箱和密码登录认证服务"
+      tags: ["认证服务"]
+    };
+  }
+  // 用户手机验证码登录
+  rpc LoginByPhoneCode(LoginByPhoneCodeRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/auth/login/phoneCode"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      // operation_id: "LoginUser"
+      summary: "用户手机验证码登录"
       description: "通过手机号和验证码登录认证服务"
       tags: ["认证服务"]
     };
@@ -226,15 +254,44 @@ message Auth {
   repeated string permissions = 5 [(gnostic.openapi.v3.property) = {description: "权限"}]; // 权限
 }
 
-// 登录密码
-message LoginPassword {
+// 用户后台登陆 - 请求
+message LoginPasswordRequest {
+  string password = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).string = {
+      min_len: 6
+      max_len: 25
+    },
+    (gnostic.openapi.v3.property) = {description: "登录密码"}
+  ]; // 密码
+  oneof identity {
+    string username = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 10
+      },
+      (gnostic.openapi.v3.property) = {description: "登录用户名"}
+    ]; // 用户名;
+    string email = 3 [
+      (buf.validate.field).string.email = true,
+      (gnostic.openapi.v3.property) = {description: "登录邮箱"}
+    ]; // 邮箱;
+  }
+  optional uint32 domain_id = 4 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
+  ]; // 域ID
+}
+
+// 用户后台用户名密码登陆 - 请求
+message LoginByUsernameRequest {
   string username = 1 [
     (buf.validate.field).string = {
       min_len: 1
       max_len: 10
     },
     (gnostic.openapi.v3.property) = {description: "登录用户名"}
-  ]; // 用户名
+  ]; // 用户名;
   string password = 2 [
     (buf.validate.field).string = {
       min_len: 6
@@ -242,35 +299,50 @@ message LoginPassword {
     },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
+  optional uint32 domain_id = 3 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
+  ]; // 域ID
 }
 
-// 登录验证码
-message LoginCode {
+// 用户后台邮箱密码登陆 - 请求
+message LoginByEmailRequest {
+  string email = 1 [
+    (buf.validate.field).string.email = true,
+    (gnostic.openapi.v3.property) = {description: "登录邮箱"}
+  ]; // 邮箱;
+  string password = 2 [
+    (buf.validate.field).string = {
+      min_len: 6
+      max_len: 25
+    },
+    (gnostic.openapi.v3.property) = {description: "登录密码"}
+  ]; // 密码
+  optional uint32 domain_id = 3 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
+  ]; // 域ID
+}
+
+message LoginByPhoneCodeRequest {
   string phone = 1 [
     (buf.validate.field).string = {
       min_len: 1
       max_len: 10
     },
     (gnostic.openapi.v3.property) = {description: "登录手机号"}
-  ]; // 手机号
+  ]; // 手机号;
   string code = 2 [
     (buf.validate.field).string = {
       min_len: 1
-      max_len: 10
+      max_len: 6
     },
     (gnostic.openapi.v3.property) = {description: "登录验证码"}
-  ]; // 验证码
-}
-
-// 用户后台登陆 - 请求
-message LoginRequest {
-  LoginPassword password = 1;
-  LoginCode code = 2;
+  ]; // 验证码;
   optional uint32 domain_id = 3 [
     (buf.validate.field).uint32.gte = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
-  optional GrandType grand_type = 4 [(gnostic.openapi.v3.property) = {description: "授权类型"}]; // 授权类型，一直为：password
 }
 
 // 用户后台登陆 - 回应

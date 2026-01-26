@@ -1,0 +1,78 @@
+name: development-tools
+icon: tools
+color: orange
+description: 开发工具相关配置
+author: Kratos Team
+version: 1.0.0
+category: development
+
+commands:
+  - name: setup-vscode
+    description: 设置 VS Code 配置
+    script:
+      - mkdir -p .vscode
+      - echo "{
+      -   \"go.formatTool\": \"gofmt\",
+      -   \"go.lintTool\": \"golangci-lint\",
+      -   \"go.testFlags\": [\"-v\"],
+      -   \"go.buildFlags\": [\"-v\"],
+      -   \"editor.formatOnSave\": true,
+      -   \"editor.codeActionsOnSave\": {
+      -     \"source.organizeImports\": true
+      -   },
+      -   \"files.eol\": \"\n\",
+      -   \"files.trimTrailingWhitespace\": true
+      - }" > .vscode/settings.json
+      - echo "{
+      -   \"recommendations\": [
+      -     \"golang.go\",
+      -     \"ms-azuretools.vscode-docker\",
+      -     \"redhat.vscode-yaml\",
+      -     \"github.vscode-pull-request-github\"
+      -   ]
+      - }" > .vscode/extensions.json
+      - echo "Successfully set up VS Code configuration"
+
+  - name: setup-gitignore
+    description: 设置 .gitignore 文件
+    script:
+      - echo "# Build outputs\n/bin/\n/build/\n/dist/\n/outputs/\n\n# Dependencies\n/vendor/\n/node_modules/\n\n# IDE\n/.vscode/\n/.idea/\n*.swp\n*.swo\n*~\n\n# OS\n.DS_Store\nThumbs.db\n\n# Environment variables\n.env\n.env.local\n.env.*.local\n\n# Logs\nlogs\n*.log\n\n# Temporary files\n*.tmp\n*.temp\n\n# Coverage\n*.coverprofile\n\n# Docker\n.dockerignore\n\n# Testing\n/testdata/\n\n# Generated files\n*.pb.go\n*.pb.validate.go\n*.pb.gw.go\n*.grpc.pb.go\n*.http.pb.go\n*.errors.pb.go\n\n# Wire generated files\nwire_gen.go\n\n# Swagger\nswagger.json\nswagger.yaml\nopenapi.yaml\n" > .gitignore
+      - echo "Successfully set up .gitignore file"
+
+  - name: install-tools
+    description: 安装常用开发工具
+    script:
+      - echo "Installing development tools..."
+      - go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
+      - go install github.com/google/wire/cmd/wire@latest
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install honnef.co/go/tools/cmd/staticcheck@latest
+      - go install github.com/bufbuild/buf/cmd/buf@latest
+      - go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
+      - go install golang.org/x/tools/cmd/goimports@latest
+      - echo "Successfully installed development tools"
+
+  - name: debug-server
+    description: 启动调试服务器
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+    script:
+      - cd app/avmc/${service}
+      - echo "Starting debug server for ${service} service"
+      - echo "You can attach your debugger to port 2345"
+      - dlv debug --headless --listen=:2345 --api-version=2 ./cmd/server/main.go
+
+  - name: generate-swagger
+    description: 生成 Swagger 文档
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+    script:
+      - cd app/avmc/${service}
+      - make api
+      - echo "Successfully generated Swagger documentation for ${service} service"

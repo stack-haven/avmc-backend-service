@@ -2,6 +2,7 @@ package data
 
 import (
 	"backend-service/app/avmc/admin/internal/biz"
+	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
@@ -36,25 +37,14 @@ func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo
 	}
 }
 
-// Login 处理后台登录数据操作
-// 参数：ctx 上下文，name 用户名，password 密码
-// 返回值：登录响应结构体，错误信息
-func (r *authRepo) Login(ctx context.Context, name, password string, domainId uint32) (*pb.LoginResponse, error) {
-	// 这里实现具体的登录数据操作
-	r.log.Infof("尝试登录数据操作，��户名：%s", name)
-	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword, user.FieldName).Where(user.NameEQ(name), user.DomainIDEQ(domainId)).Only(ctx)
-	if err != nil {
-		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
-		return nil, err
-	}
-	if !crypto.CheckPasswordHash(password, *res.Password) {
-		r.log.Errorf("登录数据操作失败，用户名：%s，密码错误", name)
-		return nil, biz.ErrPasswordIncorrect
-	}
+// LoginResponse 处理登陆统一返回
+// 参数：ctx 上下文，res 用户实体，accessToken 访问令牌，refreshToken 刷新令牌，expires 过期时间
+// 返回值：登录响应结构体
+func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginResponse, error) {
 	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, &pb.Auth{
-		UserId:   res.ID,
-		Username: name,
-		DomainId: domainId,
+		UserId:   u.ID,
+		Username: convert.ToValue(u.Name),
+		DomainId: u.DomainID,
 	})
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
@@ -66,12 +56,48 @@ func (r *authRepo) Login(ctx context.Context, name, password string, domainId ui
 		return &t
 	}(r.atr.authenticator.Options().TokenExpiration), time.RFC3339)
 	return &pb.LoginResponse{
-		Id:           res.ID,
-		Name:         res.Name,
+		Id:           u.ID,
+		Name:         u.Name,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    expires,
 	}, nil
+}
+
+// LoginByUsername 处理后台用户名登录数据操作
+// 参数：ctx 上下文，name 用户名，password 密码
+// 返回值：登录响应结构体，错误信息
+func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, domainId uint32) (*pb.LoginResponse, error) {
+	// 这里实现具体的登录数据操作
+	r.log.Infof("尝试登录数据操作，用户名：%s", name)
+	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword, user.FieldName).Where(user.NameEQ(name), user.DomainIDEQ(domainId)).Only(ctx)
+	if err != nil {
+		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
+		return nil, err
+	}
+	if !crypto.CheckPasswordHash(password, *res.Password) {
+		r.log.Errorf("登录数据操作失败，用户名：%s，密码错误", name)
+		return nil, biz.ErrPasswordIncorrect
+	}
+	return r.LoginResponse(ctx, res)
+}
+
+// LoginByEmail 处理后台邮箱登录数据操作
+// 参数：ctx email 邮箱，password 密码
+// 返回值：登录响应结构体，错误信息
+func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, domainId uint32) (*pb.LoginResponse, error) {
+	// 这里实现具体的登录数据操作
+	r.log.Infof("尝试登录数据操作，邮箱：%s", email)
+	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword, user.FieldName).Where(user.EmailEQ(email), user.DomainIDEQ(domainId)).Only(ctx)
+	if err != nil {
+		r.log.Errorf("登录数据操作失败，邮箱：%s，错误：%v", email, err)
+		return nil, err
+	}
+	if !crypto.CheckPasswordHash(password, *res.Password) {
+		r.log.Errorf("登录数据操作失败，邮箱：%s，密码错误", email)
+		return nil, biz.ErrPasswordIncorrect
+	}
+	return r.LoginResponse(ctx, res)
 }
 
 // RefreshToken 处理刷新令牌数据操作

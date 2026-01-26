@@ -1,0 +1,68 @@
+name: codegen
+icon: code
+color: blue
+description: 代码生成相关工具
+author: Kratos Team
+version: 1.0.0
+category: development
+
+commands:
+  - name: proto-add
+    description: 添加新的 proto 文件
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., auth, user)
+      - name: version
+        type: string
+        default: v1
+        description: API 版本 (e.g., v1, v2)
+      - name: type
+        type: string
+        default: interface
+        description: 文件类型 (interface 或 service)
+    script:
+      - if [ "${type}" = "interface" ]; then
+      -   mkdir -p api/${service}/interface/${version}
+      -   touch api/${service}/interface/${version}/i_${service}.proto
+      -   echo "syntax = \"proto3\";\n\npackage ${service}.interface.${version};\n\noption go_package = \"avmc/api/${service}/interface/${version}\";\n\nimport \"google/api/annotations.proto\";\nimport \"validate/validate.proto\";\n\n// ${service} service\nservice ${service^}Service {\n  // 示例方法\n  rpc Example(ExampleRequest) returns (ExampleResponse) {\n    option (google.api.http) = {\n      get: \"/${version}/${service}/example\"\n    };\n  }\n}\n\n// ExampleRequest 示例请求\nmessage ExampleRequest {\n  string name = 1 [(validate.rules).string.min_len = 1];\n}\n\n// ExampleResponse 示例响应\nmessage ExampleResponse {\n  string message = 1;\n}\n" > api/${service}/interface/${version}/i_${service}.proto
+      - else
+      -   mkdir -p api/${service}/service/${version}
+      -   touch api/${service}/service/${version}/${service}.proto
+      -   echo "syntax = \"proto3\";\n\npackage ${service}.service.${version};\n\noption go_package = \"avmc/api/${service}/service/${version}\";\n\nimport \"google/api/annotations.proto\";\nimport \"validate/validate.proto\";\n\n// ${service} service\nservice ${service^}Service {\n  // 示例方法\n  rpc Example(ExampleRequest) returns (ExampleResponse);\n}\n\n// ExampleRequest 示例请求\nmessage ExampleRequest {\n  string name = 1 [(validate.rules).string.min_len = 1];\n}\n\n// ExampleResponse 示例响应\nmessage ExampleResponse {\n  string message = 1;\n}\n" > api/${service}/service/${version}/${service}.proto
+      - fi
+      - echo "Successfully created proto file: api/${service}/${type}/${version}/i_${service}.proto"
+
+  - name: proto-generate
+    description: 生成 proto 相关代码
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., auth, user)
+      - name: version
+        type: string
+        default: v1
+        description: API 版本 (e.g., v1, v2)
+    script:
+      - make api
+      - echo "Successfully generated proto code for ${service} v${version}"
+
+  - name: wire-generate
+    description: 生成 wire 依赖注入代码
+    parameters:
+      - name: service
+        type: string
+        required: true
+        description: 服务名称 (e.g., admin, api)
+    script:
+      - cd app/avmc/${service}/cmd/server
+      - wire
+      - echo "Successfully generated wire code for ${service} service"
+
+  - name: all-generate
+    description: 生成所有代码
+    script:
+      - make all
+      - echo "Successfully generated all code"
