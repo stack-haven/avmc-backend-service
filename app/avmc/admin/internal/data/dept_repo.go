@@ -33,8 +33,8 @@ func NewDeptRepo(data *Data, logger log.Logger) biz.DeptRepo {
 	}
 }
 
-// toProto 转换gen.Dept为pbCore.Dept
-func (r *deptRepo) toProto(res *gen.Dept) *pbCore.Dept {
+// convertProto 转换gen.Dept为pbCore.Dept
+func (r *deptRepo) convertProto(res *gen.Dept) *pbCore.Dept {
 	return &pbCore.Dept{
 		Id:       res.ID,
 		Name:     res.Name,
@@ -51,8 +51,8 @@ func (r *deptRepo) toProto(res *gen.Dept) *pbCore.Dept {
 	}
 }
 
-// toEnt 转换pbCore.Dept为gen.Dept
-func (r *deptRepo) toEnt(g *pbCore.Dept) *gen.Dept {
+// convertEnt 转换pbCore.Dept为gen.Dept
+func (r *deptRepo) convertEnt(g *pbCore.Dept) *gen.Dept {
 	return &gen.Dept{
 		ID:       g.GetId(),
 		Name:     g.Name,
@@ -72,7 +72,7 @@ func (r *deptRepo) toEnt(g *pbCore.Dept) *gen.Dept {
 // 返回值：部门信息，错误信息
 func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, error) {
 	r.log.Infof("保存部门，部门信息：%v", g)
-	entDept := r.toEnt(g)
+	entDept := r.convertEnt(g)
 	builder := r.data.DB(ctx).Dept.Create()
 
 	id, _ := r.GetDeptExistByName(ctx, *entDept.Name)
@@ -93,7 +93,7 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 		r.log.Errorf("保存部门失败，部门信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // GetDeptExistByName 获取部门名称是否存在
@@ -114,7 +114,7 @@ func (r *deptRepo) GetDeptExistByName(ctx context.Context, name string) (uint32,
 // 返回值：部门信息，错误信息
 func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, error) {
 	r.log.Infof("更新部门，部门信息：%v", g)
-	entDept := r.toEnt(g)
+	entDept := r.convertEnt(g)
 	builder := r.data.DB(ctx).Dept.UpdateOneID(g.GetId())
 	id, _ := r.GetDeptExistByName(ctx, *entDept.Name)
 	if id > 0 && id != g.GetId() {
@@ -135,7 +135,7 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 		r.log.Errorf("更新部门失败，部门信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // FindByID 通过ID查询部门信息
@@ -152,7 +152,7 @@ func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error
 		}
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // Delete 删除部门
@@ -178,7 +178,7 @@ func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept,
 		r.log.Errorf("通过部门名称查询部门失败，部门名称：%s，错误：%v", name, err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListAll 查询所有部门列表
@@ -191,7 +191,7 @@ func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListPage 查询部门列表分页
@@ -225,7 +225,7 @@ func (r *deptRepo) ListPage(ctx context.Context, req *pbCore.ListDeptRequest) (*
 		return nil, err
 	}
 	return &pbCore.ListDeptResponse{
-		Items: convert.SliceToAny(res, r.toProto),
+		Items: convert.SliceToAny(res, r.convertProto),
 		Total: int32(count),
 	}, nil
 }

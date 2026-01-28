@@ -10,6 +10,10 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+	"go.einride.tech/aip/ordering"
+	"go.einride.tech/aip/pagination"
 )
 
 // UserServiceService 用户服务结构体
@@ -33,17 +37,51 @@ func NewUserServiceService(uuc *biz.UserUsecase, logger log.Logger) *UserService
 // ListUserSimple 处理用户简单列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：用户列表响应，错误信息
-func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
+func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
 	s.log.Infof("查询用户简单列表分页，分页请求：%v", req)
-	return s.uuc.ListPageSimple(ctx, req)
-}
+	declarations, err := filtering.NewDeclarations(
+		filtering.DeclareStandardFunctions(),
+		filtering.DeclareIdent("name", filtering.TypeString),
+		filtering.DeclareIdent("email", filtering.TypeString),
+		filtering.DeclareIdent("phone", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	filter, err := filtering.ParseFilter(req, declarations)
+	if err != nil {
+		return nil, err
+	}
 
-// ListUser 处理用户列表请求
-// 参数：ctx 上下文，req 分页请求
-// 返回值：用户列表响应，错误信息
-func (s *UserServiceService) ListUser(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
-	s.log.Infof("查询用户列表分页，分页请求：%v", req)
-	return s.uuc.ListPage(ctx, req)
+	pageToken, err := pagination.ParsePageToken(req)
+	if err != nil {
+		return nil, err
+	}
+	orderBy, err := ordering.ParseOrderBy(req)
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.uuc.CountUsers(ctx, biz.ListFilter(filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := pbCore.ListUsersResponse{
+		Total: count,
+	}
+	resp.Items, err = s.uuc.ListPageSimple(ctx,
+		biz.ListFilter(filter),
+		biz.ListOrderBy(orderBy),
+		biz.ListLimit(int(req.PageSize)),
+		biz.ListOffset(int(pageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= int(req.PageSize) {
+		resp.NextPageToken = pageToken.Next(req).String()
+	}
+	return &resp, nil
 }
 
 // GetUser 处理获取用户详情请求
@@ -82,12 +120,16 @@ func (s *UserServiceService) UpdateUser(ctx context.Context, req *pbCore.UpdateU
 	if req.GetUser() == nil {
 		return nil, pb.ErrorUserInvalidId("用户信息不能为空")
 	}
-	req.User.Id = req.GetId()
 	if req.GetOperatorId() == 0 {
 		// return nil, pb.ErrorUserInvalidOperatorId("操作人ID不能为空")
 	}
+	user, err := s.GetUser(ctx, &pbCore.GetUserRequest{Id: req.GetId()})
+	if err != nil {
+		return nil, err
+	}
+	fieldmask.Update(req.UpdateMask, user, req.User)
 	s.log.Infof("更新用户，用户信息：%v", req.GetUser())
-	_, err := s.uuc.Update(ctx, req.User)
+	_, err = s.uuc.Update(ctx, req.User)
 	if err != nil {
 		return nil, err
 	}
@@ -125,4 +167,54 @@ func (s *UserServiceService) UpdateUserByStatus(ctx context.Context, req *pbCore
 		return nil, err
 	}
 	return &pbCore.UpdateUserByStatusResponse{}, nil
+}
+
+// ListUser 处理用户列表请求
+// 参数：ctx 上下文，req 分页请求
+// 返回值：用户列表响应，错误信息
+func (s *UserServiceService) ListUsers(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
+	s.log.Infof("查询用户列表分页，分页请求：%v", req)
+	declarations, err := filtering.NewDeclarations(
+		filtering.DeclareStandardFunctions(),
+		filtering.DeclareIdent("name", filtering.TypeString),
+		filtering.DeclareIdent("email", filtering.TypeString),
+		filtering.DeclareIdent("phone", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	filter, err := filtering.ParseFilter(req, declarations)
+	if err != nil {
+		return nil, err
+	}
+
+	pageToken, err := pagination.ParsePageToken(req)
+	if err != nil {
+		return nil, err
+	}
+	orderBy, err := ordering.ParseOrderBy(req)
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.uuc.CountUsers(ctx, biz.ListFilter(filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := pbCore.ListUsersResponse{
+		Total: count,
+	}
+	resp.Items, err = s.uuc.ListUsers(ctx,
+		biz.ListFilter(filter),
+		biz.ListOrderBy(orderBy),
+		biz.ListLimit(int(req.PageSize)),
+		biz.ListOffset(int(pageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= int(req.PageSize) {
+		resp.NextPageToken = pageToken.Next(req).String()
+	}
+	return &resp, nil
 }

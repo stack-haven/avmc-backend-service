@@ -217,7 +217,7 @@ func ListRoles(ctx context.Context, req *pagination.PagingRequest) (*pagination.
 
 	// 注意：NewPagingResponse目前只设置了Total字段
 	// 您需要根据具体的protobuf消息类型，正确设置Items字段
-	// resp.Items = convertToProtoItems(roles)
+	// resp.Items = convertconvertProtoItems(roles)
 
 	return resp, nil
 }

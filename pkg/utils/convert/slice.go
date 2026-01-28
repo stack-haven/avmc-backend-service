@@ -20,6 +20,19 @@ func StringToBool(s string) bool {
 	}
 }
 
+// SliceFunc 检查切片中是否包含指定元素。
+// arr: 待检查的切片，元素类型为 T。
+// transform: 转换函数，将 T 类型元素转换为 error 类型。
+// 返回值: 如果转换成功返回 nil，否则返回转换失败的 error。
+func SliceFunc[T comparable](arr []T, transform func(T, int) error) error {
+	for i, v := range arr {
+		if err := transform(v, i); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // SliceContains 检查切片中是否包含指定元素。
 // arr: 待检查的切片，元素类型为 T。
 // target: 要查找的目标元素。

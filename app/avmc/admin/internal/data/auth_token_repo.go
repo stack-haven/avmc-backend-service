@@ -16,6 +16,8 @@ import (
 	v1 "backend-service/api/avmc/admin/v1"
 )
 
+// AuthTokenRepo 认证令牌仓库结构体
+// 包含Redis客户端、日志记录器、认证器、访问令牌和刷新令牌的键前缀
 type authTokenRepo struct {
 	rdb           *redis.Client
 	log           *log.Helper
@@ -25,6 +27,9 @@ type authTokenRepo struct {
 	refreshTokenKeyPrefix string
 }
 
+// NewAuthTokenRepo 创建认证令牌仓库实例
+// 参数：data 数据访问层实例，authenticator 认证器实例，logger 日志记录器实例
+// 返回：*authTokenRepo 认证令牌仓库实例
 func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logger log.Logger) *authTokenRepo {
 	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
@@ -40,6 +45,9 @@ func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logge
 	}
 }
 
+// NewAuthToken 创建认证令牌仓库实例
+// 参数：rdb Redis客户端实例，authenticator 认证器实例，logger 日志记录器实例，accessTokenKeyPrefix 访问令牌键前缀，refreshTokenKeyPrefix 刷新令牌键前缀
+// 返回：*authTokenRepo 认证令牌仓库实例
 func NewAuthToken(
 	rdb *redis.Client,
 	authenticator authnEngine.Authenticator,

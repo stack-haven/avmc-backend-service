@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -45,7 +44,7 @@ type UserServiceClient interface {
 	// 获取用户
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	// 分页查询用户
-	ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
+	ListUser(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	// 查询用户详情
 	GetUserByName(ctx context.Context, in *GetUserByNameRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	// 根据手机号查询用户详情
@@ -106,9 +105,9 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opt
 	return out, nil
 }
 
-func (c *userServiceClient) ListUser(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListUserResponse, error) {
+func (c *userServiceClient) ListUser(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListUserResponse)
+	out := new(ListUsersResponse)
 	err := c.cc.Invoke(ctx, UserService_ListUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -179,7 +178,7 @@ type UserServiceServer interface {
 	// 获取用户
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// 分页查询用户
-	ListUser(context.Context, *pagination.PagingRequest) (*ListUserResponse, error)
+	ListUser(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	// 查询用户详情
 	GetUserByName(context.Context, *GetUserByNameRequest) (*GetUserResponse, error)
 	// 根据手机号查询用户详情
@@ -212,7 +211,7 @@ func (UnimplementedUserServiceServer) DeleteUser(context.Context, *DeleteUserReq
 func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedUserServiceServer) ListUser(context.Context, *pagination.PagingRequest) (*ListUserResponse, error) {
+func (UnimplementedUserServiceServer) ListUser(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserByName(context.Context, *GetUserByNameRequest) (*GetUserResponse, error) {
@@ -324,7 +323,7 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _UserService_ListUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+	in := new(ListUsersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -336,7 +335,7 @@ func _UserService_ListUser_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: UserService_ListUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ListUser(ctx, req.(*pagination.PagingRequest))
+		return srv.(UserServiceServer).ListUser(ctx, req.(*ListUsersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

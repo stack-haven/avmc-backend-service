@@ -33,8 +33,8 @@ func NewPostRepo(data *Data, logger log.Logger) biz.PostRepo {
 	}
 }
 
-// toProto 转换gen.Post为pbCore.Post
-func (r *postRepo) toProto(res *gen.Post) *pbCore.Post {
+// convertProto 转换gen.Post为pbCore.Post
+func (r *postRepo) convertProto(res *gen.Post) *pbCore.Post {
 	return &pbCore.Post{
 		Id:        res.ID,
 		Name:      res.Name,
@@ -46,8 +46,8 @@ func (r *postRepo) toProto(res *gen.Post) *pbCore.Post {
 	}
 }
 
-// toEnt 转换pbCore.Post为gen.Post
-func (r *postRepo) toEnt(g *pbCore.Post) *gen.Post {
+// convertEnt 转换pbCore.Post为gen.Post
+func (r *postRepo) convertEnt(g *pbCore.Post) *gen.Post {
 	return &gen.Post{
 		ID:     g.GetId(),
 		Name:   g.Name,
@@ -62,7 +62,7 @@ func (r *postRepo) toEnt(g *pbCore.Post) *gen.Post {
 // 返回值：岗位信息，错误信息
 func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
 	r.log.Infof("保存岗位，岗位信息：%v", g)
-	entPost := r.toEnt(g)
+	entPost := r.convertEnt(g)
 	builder := r.data.DB(ctx).Post.Create()
 
 	id, _ := r.GetPostExistByName(ctx, *entPost.Name)
@@ -77,7 +77,7 @@ func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, erro
 		r.log.Errorf("保存岗位失败，岗位信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // GetPostExistByName 获取岗位名称是否存在
@@ -98,7 +98,7 @@ func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32,
 // 返回值：岗位信息，错误信息
 func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
 	r.log.Infof("更新岗位，岗位信息：%v", g)
-	entPost := r.toEnt(g)
+	entPost := r.convertEnt(g)
 	builder := r.data.DB(ctx).Post.UpdateOneID(g.GetId())
 	id, _ := r.GetPostExistByName(ctx, *entPost.Name)
 	if id > 0 && id != g.GetId() {
@@ -113,7 +113,7 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 		r.log.Errorf("更新岗位失败，岗位信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // FindByID 通过ID查询岗位信息
@@ -130,7 +130,7 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 		}
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // Delete 删除岗位
@@ -156,7 +156,7 @@ func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post,
 		r.log.Errorf("通过岗位名称查询岗位失败，岗位名称：%s，错误：%v", name, err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListAll 查询所有岗位列表
@@ -169,7 +169,7 @@ func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListPage 查询岗位列表分页
@@ -199,7 +199,7 @@ func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostRequest) (*
 		return nil, err
 	}
 	return &pbCore.ListPostResponse{
-		Items: convert.SliceToAny(res, r.toProto),
+		Items: convert.SliceToAny(res, r.convertProto),
 		Total: int32(count),
 	}, nil
 }

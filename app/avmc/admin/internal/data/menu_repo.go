@@ -33,8 +33,8 @@ func NewMenuRepo(data *Data, logger log.Logger) biz.MenuRepo {
 	}
 }
 
-// toProto 转换gen.Menu为pbCore.Menu
-func (r *menuRepo) toProto(res *gen.Menu) *pbCore.Menu {
+// convertProto 转换gen.Menu为pbCore.Menu
+func (r *menuRepo) convertProto(res *gen.Menu) *pbCore.Menu {
 	return &pbCore.Menu{
 		Id:        res.ID,
 		Name:      res.Name,
@@ -73,8 +73,8 @@ func (r *menuRepo) toProto(res *gen.Menu) *pbCore.Menu {
 	}
 }
 
-// toEnt 转换pbCore.Menu为gen.Menu
-func (r *menuRepo) toEnt(g *pbCore.Menu) *gen.Menu {
+// convertEnt 转换pbCore.Menu为gen.Menu
+func (r *menuRepo) convertEnt(g *pbCore.Menu) *gen.Menu {
 	return &gen.Menu{
 		ID:        g.GetId(),
 		Name:      g.Name,
@@ -117,7 +117,7 @@ func (r *menuRepo) toEnt(g *pbCore.Menu) *gen.Menu {
 // 返回值：菜单信息，错误信息
 func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
 	r.log.Infof("保存菜单，菜单信息：%v", g)
-	entMenu := r.toEnt(g)
+	entMenu := r.convertEnt(g)
 	builder := r.data.DB(ctx).Menu.Create()
 
 	exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
@@ -163,7 +163,7 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 		r.log.Errorf("保存菜单失败，菜单信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // Update 更新菜单信息
@@ -171,7 +171,7 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 // 返回值：菜单信息，错误信息
 func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
 	r.log.Infof("更新菜单，菜单信息：%v", g)
-	entMenu := r.toEnt(g)
+	entMenu := r.convertEnt(g)
 	builder := r.data.DB(ctx).Menu.UpdateOneID(g.GetId())
 	exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
 		Id:   convert.ToPointer(g.GetId()),
@@ -217,7 +217,7 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 		r.log.Errorf("更新菜单失败，菜单信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // FindByID 通过ID查询菜单信息
@@ -234,7 +234,7 @@ func (r *menuRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Menu, error
 		r.log.Errorf("通过ID查询菜单失败，ID：%d，错误：%v", id, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // Delete 删除菜单
@@ -265,7 +265,7 @@ func (r *menuRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Menu,
 		r.log.Errorf("通过菜单名称查询菜单失败，菜单名称：%s，错误：%v", name, err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListAll 查询所有菜单列表
@@ -281,7 +281,7 @@ func (r *menuRepo) ListAllSimple(ctx context.Context) ([]*pbCore.Menu, error) {
 		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListAll 查询所有菜单列表
@@ -297,7 +297,7 @@ func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
 		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.toProto), nil
+	return convert.SliceToAny(res, r.convertProto), nil
 }
 
 // ListPage 查询菜单列表分页
@@ -340,7 +340,7 @@ func (r *menuRepo) ListPage(ctx context.Context, req *pbCore.ListMenuRequest) (*
 		return nil, err
 	}
 	return &pbCore.ListMenuResponse{
-		Items: convert.SliceToAny(res, r.toProto),
+		Items: convert.SliceToAny(res, r.convertProto),
 		Total: int32(count),
 	}, nil
 }

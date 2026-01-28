@@ -15,12 +15,13 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/stretchr/testify v1.11.0
+	go.einride.tech/aip v0.80.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/crypto v0.47.0
 	golang.org/x/oauth2 v0.30.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250811160224-6b04f9b4fc78
+	google.golang.org/genproto/googleapis/api v0.0.0-20251213004720-97cd9d5aeac2
 	google.golang.org/grpc v1.75.0
-	google.golang.org/protobuf v1.36.8
+	google.golang.org/protobuf v1.36.10
 )
 
 require (
@@ -79,6 +80,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-kratos/aegis v0.2.0 // indirect
+	github.com/go-kratos/aip-go/ents v0.0.0-20251213081434-74ffa1fc1588
 	github.com/go-kratos/kratos/contrib/middleware/validate/v2 v2.0.0-20250731084034-f7f150c3f139
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -105,6 +107,6 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250811160224-6b04f9b4fc78 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251124214823-79d6a2a48846 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

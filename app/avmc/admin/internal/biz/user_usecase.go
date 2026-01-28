@@ -17,9 +17,10 @@ type UserRepo interface {
 	FindByID(context.Context, uint32) (*pbCore.User, error)
 	ListByName(context.Context, string) ([]*pbCore.User, error)
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
+	ListUsers(context.Context, ...ListOption) ([]*pbCore.User, error)
+	CountUsers(context.Context, ...ListOption) (int32, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
-	ListPage(context.Context, *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error)
-	ListPageSimple(context.Context, *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error)
+	ListPageSimple(context.Context, ...ListOption) ([]*pbCore.User, error)
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, string) (uint32, error)
 	ExistByPhone(context.Context, string) (uint32, error)
@@ -69,17 +70,14 @@ func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User
 }
 
 // ListPageSimple 处理分页用户简单列表请求
-// 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
+// 参数：ctx 上下文，opts 分页选项
 // 返回值：用户列表响应，错误信息
-func (uc *UserUsecase) ListPageSimple(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
-	return uc.repo.ListPageSimple(ctx, req)
-}
-
-// ListPage 处理分页用户列表请求
-// 参数：ctx 上下文，pagination 分页请求
-// 返回值：用户列表响应，错误信息
-func (uc *UserUsecase) ListPage(ctx context.Context, req *pbCore.ListUserRequest) (*pbCore.ListUserResponse, error) {
-	return uc.repo.ListPage(ctx, req)
+func (uc *UserUsecase) ListPageSimple(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
+	resp, err := uc.repo.ListPageSimple(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 // Delete 处理删除用户请求
@@ -100,4 +98,26 @@ func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status pbEnu
 	}
 	g.Status = &status
 	return uc.repo.Update(ctx, g)
+}
+
+// ListUsers 处理分页用户列表请求
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：用户列表响应，错误信息
+func (uc *UserUsecase) ListUsers(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
+	resp, err := uc.repo.ListUsers(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// CountUsers 处理用户条件查询聚合请求
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：用户数量，错误信息
+func (uc *UserUsecase) CountUsers(ctx context.Context, opts ...ListOption) (int32, error) {
+	resp, err := uc.repo.CountUsers(ctx, opts...)
+	if err != nil {
+		return 0, err
+	}
+	return resp, nil
 }

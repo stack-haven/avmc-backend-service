@@ -23,8 +23,8 @@ const _ = http.SupportPackageIsVersion1
 const OperationUserServiceCreateUser = "/avmc.admin.v1.UserService/CreateUser"
 const OperationUserServiceDeleteUser = "/avmc.admin.v1.UserService/DeleteUser"
 const OperationUserServiceGetUser = "/avmc.admin.v1.UserService/GetUser"
-const OperationUserServiceListUser = "/avmc.admin.v1.UserService/ListUser"
-const OperationUserServiceListUserSimple = "/avmc.admin.v1.UserService/ListUserSimple"
+const OperationUserServiceListUsers = "/avmc.admin.v1.UserService/ListUsers"
+const OperationUserServiceListUsersSimple = "/avmc.admin.v1.UserService/ListUsersSimple"
 const OperationUserServiceUpdateUser = "/avmc.admin.v1.UserService/UpdateUser"
 const OperationUserServiceUpdateUserByStatus = "/avmc.admin.v1.UserService/UpdateUserByStatus"
 
@@ -35,10 +35,10 @@ type UserServiceHTTPServer interface {
 	DeleteUser(context.Context, *v1.DeleteUserRequest) (*v1.DeleteUserResponse, error)
 	// GetUser 获取用户数据
 	GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error)
-	// ListUser 获取用户列表
-	ListUser(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error)
-	// ListUserSimple 获取用户简单列表
-	ListUserSimple(context.Context, *v1.ListUserRequest) (*v1.ListUserResponse, error)
+	// ListUsers 获取用户列表分页
+	ListUsers(context.Context, *v1.ListUsersRequest) (*v1.ListUsersResponse, error)
+	// ListUsersSimple 获取用户简单列表
+	ListUsersSimple(context.Context, *v1.ListUsersRequest) (*v1.ListUsersResponse, error)
 	// UpdateUser 更新用户
 	UpdateUser(context.Context, *v1.UpdateUserRequest) (*v1.UpdateUserResponse, error)
 	// UpdateUserByStatus 更新用户状态
@@ -47,8 +47,8 @@ type UserServiceHTTPServer interface {
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/users/simple", _UserService_ListUserSimple0_HTTP_Handler(srv))
-	r.GET("/admin/v1/users", _UserService_ListUser0_HTTP_Handler(srv))
+	r.GET("/admin/v1/users/simple", _UserService_ListUsersSimple0_HTTP_Handler(srv))
+	r.GET("/admin/v1/users", _UserService_ListUsers0_HTTP_Handler(srv))
 	r.GET("/admin/v1/users/{id}", _UserService_GetUser0_HTTP_Handler(srv))
 	r.POST("/admin/v1/users", _UserService_CreateUser0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}", _UserService_UpdateUser0_HTTP_Handler(srv))
@@ -56,40 +56,40 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r.PUT("/admin/v1/users/status-update/{id}", _UserService_UpdateUserByStatus0_HTTP_Handler(srv))
 }
 
-func _UserService_ListUserSimple0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_ListUsersSimple0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListUserRequest
+		var in v1.ListUsersRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationUserServiceListUserSimple)
+		http.SetOperation(ctx, OperationUserServiceListUsersSimple)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListUserSimple(ctx, req.(*v1.ListUserRequest))
+			return srv.ListUsersSimple(ctx, req.(*v1.ListUsersRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListUserResponse)
+		reply := out.(*v1.ListUsersResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _UserService_ListUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_ListUsers0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListUserRequest
+		var in v1.ListUsersRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationUserServiceListUser)
+		http.SetOperation(ctx, OperationUserServiceListUsers)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListUser(ctx, req.(*v1.ListUserRequest))
+			return srv.ListUsers(ctx, req.(*v1.ListUsersRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListUserResponse)
+		reply := out.(*v1.ListUsersResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -217,10 +217,10 @@ type UserServiceHTTPClient interface {
 	DeleteUser(ctx context.Context, req *v1.DeleteUserRequest, opts ...http.CallOption) (rsp *v1.DeleteUserResponse, err error)
 	// GetUser 获取用户数据
 	GetUser(ctx context.Context, req *v1.GetUserRequest, opts ...http.CallOption) (rsp *v1.User, err error)
-	// ListUser 获取用户列表
-	ListUser(ctx context.Context, req *v1.ListUserRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
-	// ListUserSimple 获取用户简单列表
-	ListUserSimple(ctx context.Context, req *v1.ListUserRequest, opts ...http.CallOption) (rsp *v1.ListUserResponse, err error)
+	// ListUsers 获取用户列表分页
+	ListUsers(ctx context.Context, req *v1.ListUsersRequest, opts ...http.CallOption) (rsp *v1.ListUsersResponse, err error)
+	// ListUsersSimple 获取用户简单列表
+	ListUsersSimple(ctx context.Context, req *v1.ListUsersRequest, opts ...http.CallOption) (rsp *v1.ListUsersResponse, err error)
 	// UpdateUser 更新用户
 	UpdateUser(ctx context.Context, req *v1.UpdateUserRequest, opts ...http.CallOption) (rsp *v1.UpdateUserResponse, err error)
 	// UpdateUserByStatus 更新用户状态
@@ -277,12 +277,12 @@ func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *v1.GetUserR
 	return &out, nil
 }
 
-// ListUser 获取用户列表
-func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *v1.ListUserRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
-	var out v1.ListUserResponse
+// ListUsers 获取用户列表分页
+func (c *UserServiceHTTPClientImpl) ListUsers(ctx context.Context, in *v1.ListUsersRequest, opts ...http.CallOption) (*v1.ListUsersResponse, error) {
+	var out v1.ListUsersResponse
 	pattern := "/admin/v1/users"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationUserServiceListUser))
+	opts = append(opts, http.Operation(OperationUserServiceListUsers))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -291,12 +291,12 @@ func (c *UserServiceHTTPClientImpl) ListUser(ctx context.Context, in *v1.ListUse
 	return &out, nil
 }
 
-// ListUserSimple 获取用户简单列表
-func (c *UserServiceHTTPClientImpl) ListUserSimple(ctx context.Context, in *v1.ListUserRequest, opts ...http.CallOption) (*v1.ListUserResponse, error) {
-	var out v1.ListUserResponse
+// ListUsersSimple 获取用户简单列表
+func (c *UserServiceHTTPClientImpl) ListUsersSimple(ctx context.Context, in *v1.ListUsersRequest, opts ...http.CallOption) (*v1.ListUsersResponse, error) {
+	var out v1.ListUsersResponse
 	pattern := "/admin/v1/users/simple"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationUserServiceListUserSimple))
+	opts = append(opts, http.Operation(OperationUserServiceListUsersSimple))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

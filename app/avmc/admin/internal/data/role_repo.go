@@ -33,8 +33,8 @@ func NewRoleRepo(data *Data, logger log.Logger) biz.RoleRepo {
 	}
 }
 
-// toProto 转换gen.Role为pbCore.Role
-func (r *roleRepo) toProto(res *gen.Role) *pbCore.Role {
+// convertProto 转换gen.Role为pbCore.Role
+func (r *roleRepo) convertProto(res *gen.Role) *pbCore.Role {
 	return &pbCore.Role{
 		Id:                res.ID,
 		Name:              res.Name,
@@ -48,8 +48,8 @@ func (r *roleRepo) toProto(res *gen.Role) *pbCore.Role {
 	}
 }
 
-// toEnt 转换pbCore.Role为gen.Role
-func (r *roleRepo) toEnt(g *pbCore.Role) *gen.Role {
+// convertEnt 转换pbCore.Role为gen.Role
+func (r *roleRepo) convertEnt(g *pbCore.Role) *gen.Role {
 	return &gen.Role{
 		ID:                g.GetId(),
 		Name:              g.Name,
@@ -66,7 +66,7 @@ func (r *roleRepo) toEnt(g *pbCore.Role) *gen.Role {
 // 返回值：角色信息，错误信息
 func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, error) {
 	r.log.Infof("保存角色，角色信息：%v", g)
-	entRole := r.toEnt(g)
+	entRole := r.convertEnt(g)
 	builder := r.data.DB(ctx).Role.Create()
 
 	exist, _ := r.ExistByName(ctx, &pbCore.ExistRoleByNameRequest{
@@ -88,7 +88,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 		r.log.Errorf("保存角色失败，角色信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // Update 更新角色信息
@@ -105,7 +105,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 		return nil, fmt.Errorf("role name already exists")
 	}
 
-	entRole := r.toEnt(g)
+	entRole := r.convertEnt(g)
 	res, err := r.data.DB(ctx).Role.UpdateOneID(g.GetId()).
 		SetName(*entRole.Name).
 		SetNillableDefaultRouter(entRole.DefaultRouter).
@@ -118,7 +118,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 		r.log.Errorf("更新角色失败，角色信息：%v，错误：%v", g, err)
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // FindByID 根据ID查询角色信息
@@ -134,7 +134,7 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 		}
 		return nil, err
 	}
-	return r.toProto(res), nil
+	return r.convertProto(res), nil
 }
 
 // Delete 软删除角色
@@ -163,7 +163,7 @@ func (r *roleRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Role,
 
 	var roles []*pbCore.Role
 	for _, role := range res {
-		roles = append(roles, r.toProto(role))
+		roles = append(roles, r.convertProto(role))
 	}
 	return roles, nil
 }
@@ -181,7 +181,7 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 
 	var roles []*pbCore.Role
 	for _, role := range res {
-		roles = append(roles, r.toProto(role))
+		roles = append(roles, r.convertProto(role))
 	}
 	return roles, nil
 }
@@ -246,7 +246,7 @@ func (r *roleRepo) ListPage(ctx context.Context, req *pbCore.ListRoleRequest) (*
 	}
 	// 转换数据
 	return &pbCore.ListRoleResponse{
-		Items: convert.SliceToAny(res, r.toProto),
+		Items: convert.SliceToAny(res, r.convertProto),
 		Total: int32(count),
 	}, nil
 }

@@ -1326,7 +1326,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListUserResponse'
+                                $ref: '#/components/schemas/ListUsersResponse'
             security:
                 - BearerAuth: []
         post:
@@ -1406,7 +1406,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ListUserResponse'
+                                $ref: '#/components/schemas/ListUsersResponse'
             security:
                 - BearerAuth: []
     /admin/v1/users/status-update/{id}:
@@ -1745,7 +1745,7 @@ components:
                     type: integer
                     format: int32
             description: 分页查询角色响应
-        ListUserResponse:
+        ListUsersResponse:
             type: object
             properties:
                 items:

@@ -14,7 +14,7 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 // 用户管理服务
 service UserService {
   // 获取用户简单列表
-  rpc ListUserSimple(core.service.v1.ListUserRequest) returns (core.service.v1.ListUserResponse) {
+  rpc ListUsersSimple(core.service.v1.ListUsersRequest) returns (core.service.v1.ListUsersResponse) {
     option (google.api.http) = {get: "/admin/v1/users/simple"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取用户简单列表"
@@ -32,12 +32,12 @@ service UserService {
       ]
     };
   }
-  // 获取用户列表
-  rpc ListUser(core.service.v1.ListUserRequest) returns (core.service.v1.ListUserResponse) {
+  // 获取用户列表分页
+  rpc ListUsers(core.service.v1.ListUsersRequest) returns (core.service.v1.ListUsersResponse) {
     option (google.api.http) = {get: "/admin/v1/users"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "获取用户列表"
-      description: "获取用户列表"
+      summary: "获取用户列表分页"
+      description: "获取用户列表分页"
       tags: ["用户管理服务"]
       security: [
         {
