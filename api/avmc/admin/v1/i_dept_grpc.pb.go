@@ -20,8 +20,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DeptService_ListDept_FullMethodName           = "/avmc.admin.v1.DeptService/ListDept"
-	DeptService_ListDeptTree_FullMethodName       = "/avmc.admin.v1.DeptService/ListDeptTree"
+	DeptService_ListDepts_FullMethodName          = "/avmc.admin.v1.DeptService/ListDepts"
+	DeptService_ListDeptsTree_FullMethodName      = "/avmc.admin.v1.DeptService/ListDeptsTree"
 	DeptService_GetDept_FullMethodName            = "/avmc.admin.v1.DeptService/GetDept"
 	DeptService_CreateDept_FullMethodName         = "/avmc.admin.v1.DeptService/CreateDept"
 	DeptService_UpdateDept_FullMethodName         = "/avmc.admin.v1.DeptService/UpdateDept"
@@ -36,9 +36,9 @@ const (
 // 部门管理服务
 type DeptServiceClient interface {
 	// 获取部门列表
-	ListDept(ctx context.Context, in *v1.ListDeptRequest, opts ...grpc.CallOption) (*v1.ListDeptResponse, error)
+	ListDepts(ctx context.Context, in *v1.ListDeptsRequest, opts ...grpc.CallOption) (*v1.ListDeptsResponse, error)
 	// 获取部门树
-	ListDeptTree(ctx context.Context, in *v1.ListDeptTreeRequest, opts ...grpc.CallOption) (*v1.ListDeptTreeResponse, error)
+	ListDeptsTree(ctx context.Context, in *v1.ListDeptsTreeRequest, opts ...grpc.CallOption) (*v1.ListDeptsTreeResponse, error)
 	// 获取部门数据
 	GetDept(ctx context.Context, in *v1.GetDeptRequest, opts ...grpc.CallOption) (*v1.Dept, error)
 	// 创建部门
@@ -59,20 +59,20 @@ func NewDeptServiceClient(cc grpc.ClientConnInterface) DeptServiceClient {
 	return &deptServiceClient{cc}
 }
 
-func (c *deptServiceClient) ListDept(ctx context.Context, in *v1.ListDeptRequest, opts ...grpc.CallOption) (*v1.ListDeptResponse, error) {
+func (c *deptServiceClient) ListDepts(ctx context.Context, in *v1.ListDeptsRequest, opts ...grpc.CallOption) (*v1.ListDeptsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ListDeptResponse)
-	err := c.cc.Invoke(ctx, DeptService_ListDept_FullMethodName, in, out, cOpts...)
+	out := new(v1.ListDeptsResponse)
+	err := c.cc.Invoke(ctx, DeptService_ListDepts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *deptServiceClient) ListDeptTree(ctx context.Context, in *v1.ListDeptTreeRequest, opts ...grpc.CallOption) (*v1.ListDeptTreeResponse, error) {
+func (c *deptServiceClient) ListDeptsTree(ctx context.Context, in *v1.ListDeptsTreeRequest, opts ...grpc.CallOption) (*v1.ListDeptsTreeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ListDeptTreeResponse)
-	err := c.cc.Invoke(ctx, DeptService_ListDeptTree_FullMethodName, in, out, cOpts...)
+	out := new(v1.ListDeptsTreeResponse)
+	err := c.cc.Invoke(ctx, DeptService_ListDeptsTree_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,9 +136,9 @@ func (c *deptServiceClient) UpdateDeptByStatus(ctx context.Context, in *v1.Updat
 // 部门管理服务
 type DeptServiceServer interface {
 	// 获取部门列表
-	ListDept(context.Context, *v1.ListDeptRequest) (*v1.ListDeptResponse, error)
+	ListDepts(context.Context, *v1.ListDeptsRequest) (*v1.ListDeptsResponse, error)
 	// 获取部门树
-	ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error)
+	ListDeptsTree(context.Context, *v1.ListDeptsTreeRequest) (*v1.ListDeptsTreeResponse, error)
 	// 获取部门数据
 	GetDept(context.Context, *v1.GetDeptRequest) (*v1.Dept, error)
 	// 创建部门
@@ -159,11 +159,11 @@ type DeptServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDeptServiceServer struct{}
 
-func (UnimplementedDeptServiceServer) ListDept(context.Context, *v1.ListDeptRequest) (*v1.ListDeptResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListDept not implemented")
+func (UnimplementedDeptServiceServer) ListDepts(context.Context, *v1.ListDeptsRequest) (*v1.ListDeptsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDepts not implemented")
 }
-func (UnimplementedDeptServiceServer) ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListDeptTree not implemented")
+func (UnimplementedDeptServiceServer) ListDeptsTree(context.Context, *v1.ListDeptsTreeRequest) (*v1.ListDeptsTreeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDeptsTree not implemented")
 }
 func (UnimplementedDeptServiceServer) GetDept(context.Context, *v1.GetDeptRequest) (*v1.Dept, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDept not implemented")
@@ -201,38 +201,38 @@ func RegisterDeptServiceServer(s grpc.ServiceRegistrar, srv DeptServiceServer) {
 	s.RegisterService(&DeptService_ServiceDesc, srv)
 }
 
-func _DeptService_ListDept_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ListDeptRequest)
+func _DeptService_ListDepts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListDeptsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeptServiceServer).ListDept(ctx, in)
+		return srv.(DeptServiceServer).ListDepts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DeptService_ListDept_FullMethodName,
+		FullMethod: DeptService_ListDepts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeptServiceServer).ListDept(ctx, req.(*v1.ListDeptRequest))
+		return srv.(DeptServiceServer).ListDepts(ctx, req.(*v1.ListDeptsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DeptService_ListDeptTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ListDeptTreeRequest)
+func _DeptService_ListDeptsTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListDeptsTreeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DeptServiceServer).ListDeptTree(ctx, in)
+		return srv.(DeptServiceServer).ListDeptsTree(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DeptService_ListDeptTree_FullMethodName,
+		FullMethod: DeptService_ListDeptsTree_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeptServiceServer).ListDeptTree(ctx, req.(*v1.ListDeptTreeRequest))
+		return srv.(DeptServiceServer).ListDeptsTree(ctx, req.(*v1.ListDeptsTreeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -335,12 +335,12 @@ var DeptService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DeptServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListDept",
-			Handler:    _DeptService_ListDept_Handler,
+			MethodName: "ListDepts",
+			Handler:    _DeptService_ListDepts_Handler,
 		},
 		{
-			MethodName: "ListDeptTree",
-			Handler:    _DeptService_ListDeptTree_Handler,
+			MethodName: "ListDeptsTree",
+			Handler:    _DeptService_ListDeptsTree_Handler,
 		},
 		{
 			MethodName: "GetDept",

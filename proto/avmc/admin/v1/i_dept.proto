@@ -13,7 +13,7 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 // 部门管理服务
 service DeptService {
   // 获取部门列表
-  rpc ListDept(core.service.v1.ListDeptRequest) returns (core.service.v1.ListDeptResponse) {
+  rpc ListDepts(core.service.v1.ListDeptsRequest) returns (core.service.v1.ListDeptsResponse) {
     option (google.api.http) = {get: "/admin/v1/depts"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取部门列表"
@@ -32,16 +32,12 @@ service DeptService {
     };
   }
 
-
   // 获取部门树
-  rpc ListDeptTree(core.service.v1.ListDeptTreeRequest) returns (core.service.v1.ListDeptTreeResponse) {
+  rpc ListDeptsTree(core.service.v1.ListDeptsTreeRequest) returns (core.service.v1.ListDeptsTreeResponse) {
     option (google.api.http) = {
       get: "/admin/v1/depts/tree/{parent_id}"
       additional_bindings: [
-        {
-          get: "/admin/v1/depts/tree"
-        }
-      ]
+        {get: "/admin/v1/depts/tree"}]
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "获取部门树"

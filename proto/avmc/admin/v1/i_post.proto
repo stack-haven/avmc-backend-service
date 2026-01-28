@@ -13,7 +13,7 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 // 岗位管理服务
 service PostService {
   // 获取岗位列表
-  rpc ListPost(core.service.v1.ListPostRequest) returns (core.service.v1.ListPostResponse) {
+  rpc ListPosts(core.service.v1.ListPostsRequest) returns (core.service.v1.ListPostsResponse) {
     option (google.api.http) = {get: "/admin/v1/posts"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取岗位列表"

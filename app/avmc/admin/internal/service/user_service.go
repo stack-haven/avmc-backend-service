@@ -88,11 +88,11 @@ func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbCore.Lis
 // 参数：ctx 上下文，req 获取用户请求
 // 返回值：用户详情响应，错误信息
 func (s *UserServiceService) GetUser(ctx context.Context, req *pbCore.GetUserRequest) (*pbCore.User, error) {
-	if req.Id == 0 {
+	if req.GetId() == 0 {
 		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
 	}
-	s.log.Infof("获取用户详情，用户ID：%v", req.Id)
-	return s.uuc.Get(ctx, req.Id)
+	s.log.Infof("获取用户详情，用户ID：%v", req.GetId())
+	return s.uuc.Get(ctx, req.GetId())
 }
 
 // CreateUser 处理创建用户请求

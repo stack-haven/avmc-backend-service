@@ -18,8 +18,9 @@ type PostRepo interface {
 	Save(context.Context, *pbCore.Post) (*pbCore.Post, error)
 	Update(context.Context, *pbCore.Post) (*pbCore.Post, error)
 	FindByID(context.Context, uint32) (*pbCore.Post, error)
+	CountPosts(context.Context, ...ListOption) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Post, error)
-	ListPage(context.Context, *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) // 新增的方法用于分页查询
+	ListPosts(context.Context, ...ListOption) ([]*pbCore.Post, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -65,6 +66,17 @@ func (uc *PostUsecase) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post
 	return uc.repo.Update(ctx, g)
 }
 
+// CountPosts 处理岗位条件查询聚合请求
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：岗位数量，错误信息
+func (uc *PostUsecase) CountPosts(ctx context.Context, opts ...ListOption) (int32, error) {
+	resp, err := uc.repo.CountPosts(ctx, opts...)
+	if err != nil {
+		return 0, err
+	}
+	return resp, nil
+}
+
 // ListSimple 处理获取岗位列表请求
 // 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
 // 返回值：岗位列表，错误信息
@@ -73,12 +85,12 @@ func (uc *PostUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-// ListPage 处理分页查询岗位请求
+// ListPost 处理分页查询岗位请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：岗位列表响应，错误信息
-func (uc *PostUsecase) ListPage(ctx context.Context, req *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) {
-	uc.log.WithContext(ctx).Infof("ListPostPage: %v", req)
-	return uc.repo.ListPage(ctx, req)
+func (uc *PostUsecase) ListPosts(ctx context.Context, opts ...ListOption) ([]*pbCore.Post, error) {
+	uc.log.WithContext(ctx).Infof("ListPostPost: %v", opts)
+	return uc.repo.ListPosts(ctx, opts...)
 }
 
 // Delete 处理删除岗位请求

@@ -23,7 +23,7 @@ const (
 	RoleService_UpdateRole_FullMethodName         = "/core.service.v1.RoleService/UpdateRole"
 	RoleService_DeleteRole_FullMethodName         = "/core.service.v1.RoleService/DeleteRole"
 	RoleService_GetRole_FullMethodName            = "/core.service.v1.RoleService/GetRole"
-	RoleService_ListRole_FullMethodName           = "/core.service.v1.RoleService/ListRole"
+	RoleService_ListRoles_FullMethodName          = "/core.service.v1.RoleService/ListRoles"
 	RoleService_ExistRoleByName_FullMethodName    = "/core.service.v1.RoleService/ExistRoleByName"
 	RoleService_UpdateRoleByStatus_FullMethodName = "/core.service.v1.RoleService/UpdateRoleByStatus"
 )
@@ -41,7 +41,7 @@ type RoleServiceClient interface {
 	// 获取角色
 	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*GetRoleResponse, error)
 	// 分页查询角色
-	ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
+	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
 	// 判断角色名是否存在
 	ExistRoleByName(ctx context.Context, in *ExistRoleByNameRequest, opts ...grpc.CallOption) (*ExistRoleByNameResponse, error)
 	// 更新角色状态
@@ -96,10 +96,10 @@ func (c *roleServiceClient) GetRole(ctx context.Context, in *GetRoleRequest, opt
 	return out, nil
 }
 
-func (c *roleServiceClient) ListRole(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error) {
+func (c *roleServiceClient) ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListRoleResponse)
-	err := c.cc.Invoke(ctx, RoleService_ListRole_FullMethodName, in, out, cOpts...)
+	out := new(ListRolesResponse)
+	err := c.cc.Invoke(ctx, RoleService_ListRoles_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ type RoleServiceServer interface {
 	// 获取角色
 	GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error)
 	// 分页查询角色
-	ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error)
+	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	// 判断角色名是否存在
 	ExistRoleByName(context.Context, *ExistRoleByNameRequest) (*ExistRoleByNameResponse, error)
 	// 更新角色状态
@@ -166,8 +166,8 @@ func (UnimplementedRoleServiceServer) DeleteRole(context.Context, *DeleteRoleReq
 func (UnimplementedRoleServiceServer) GetRole(context.Context, *GetRoleRequest) (*GetRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRole not implemented")
 }
-func (UnimplementedRoleServiceServer) ListRole(context.Context, *ListRoleRequest) (*ListRoleResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
+func (UnimplementedRoleServiceServer) ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRoles not implemented")
 }
 func (UnimplementedRoleServiceServer) ExistRoleByName(context.Context, *ExistRoleByNameRequest) (*ExistRoleByNameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExistRoleByName not implemented")
@@ -268,20 +268,20 @@ func _RoleService_GetRole_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRoleRequest)
+func _RoleService_ListRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRolesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RoleServiceServer).ListRole(ctx, in)
+		return srv.(RoleServiceServer).ListRoles(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RoleService_ListRole_FullMethodName,
+		FullMethod: RoleService_ListRoles_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleServiceServer).ListRole(ctx, req.(*ListRoleRequest))
+		return srv.(RoleServiceServer).ListRoles(ctx, req.(*ListRolesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -346,8 +346,8 @@ var RoleService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _RoleService_GetRole_Handler,
 		},
 		{
-			MethodName: "ListRole",
-			Handler:    _RoleService_ListRole_Handler,
+			MethodName: "ListRoles",
+			Handler:    _RoleService_ListRoles_Handler,
 		},
 		{
 			MethodName: "ExistRoleByName",

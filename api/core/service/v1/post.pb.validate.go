@@ -453,6 +453,35 @@ func (m *UpdatePostRequest) validate(all bool) error {
 		}
 	}
 
+	if all {
+		switch v := interface{}(m.GetUpdateMask()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdatePostRequestValidationError{
+					field:  "UpdateMask",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdatePostRequestValidationError{
+					field:  "UpdateMask",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUpdateMask()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdatePostRequestValidationError{
+				field:  "UpdateMask",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if m.OperatorId != nil {
 		// no validation rules for OperatorId
 	}
@@ -1080,35 +1109,33 @@ var _ interface {
 	ErrorName() string
 } = GetPostResponseValidationError{}
 
-// Validate checks the field values on ListPostRequest with the rules defined
+// Validate checks the field values on ListPostsRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
-func (m *ListPostRequest) Validate() error {
+func (m *ListPostsRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on ListPostRequest with the rules
+// ValidateAll checks the field values on ListPostsRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// ListPostRequestMultiError, or nil if none found.
-func (m *ListPostRequest) ValidateAll() error {
+// ListPostsRequestMultiError, or nil if none found.
+func (m *ListPostsRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *ListPostRequest) validate(all bool) error {
+func (m *ListPostsRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if m.Page != nil {
-		// no validation rules for Page
-	}
+	// no validation rules for PageToken
 
-	if m.PageSize != nil {
-		// no validation rules for PageSize
-	}
+	// no validation rules for PageSize
+
+	// no validation rules for Skip
 
 	if m.NoPaging != nil {
 		// no validation rules for NoPaging
@@ -1126,20 +1153,28 @@ func (m *ListPostRequest) validate(all bool) error {
 		// no validation rules for Remark
 	}
 
+	if m.Filter != nil {
+		// no validation rules for Filter
+	}
+
+	if m.OrderBy != nil {
+		// no validation rules for OrderBy
+	}
+
 	if len(errors) > 0 {
-		return ListPostRequestMultiError(errors)
+		return ListPostsRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// ListPostRequestMultiError is an error wrapping multiple validation errors
-// returned by ListPostRequest.ValidateAll() if the designated constraints
+// ListPostsRequestMultiError is an error wrapping multiple validation errors
+// returned by ListPostsRequest.ValidateAll() if the designated constraints
 // aren't met.
-type ListPostRequestMultiError []error
+type ListPostsRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m ListPostRequestMultiError) Error() string {
+func (m ListPostsRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1148,11 +1183,11 @@ func (m ListPostRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m ListPostRequestMultiError) AllErrors() []error { return m }
+func (m ListPostsRequestMultiError) AllErrors() []error { return m }
 
-// ListPostRequestValidationError is the validation error returned by
-// ListPostRequest.Validate if the designated constraints aren't met.
-type ListPostRequestValidationError struct {
+// ListPostsRequestValidationError is the validation error returned by
+// ListPostsRequest.Validate if the designated constraints aren't met.
+type ListPostsRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1160,22 +1195,22 @@ type ListPostRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e ListPostRequestValidationError) Field() string { return e.field }
+func (e ListPostsRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ListPostRequestValidationError) Reason() string { return e.reason }
+func (e ListPostsRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ListPostRequestValidationError) Cause() error { return e.cause }
+func (e ListPostsRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ListPostRequestValidationError) Key() bool { return e.key }
+func (e ListPostsRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ListPostRequestValidationError) ErrorName() string { return "ListPostRequestValidationError" }
+func (e ListPostsRequestValidationError) ErrorName() string { return "ListPostsRequestValidationError" }
 
 // Error satisfies the builtin error interface
-func (e ListPostRequestValidationError) Error() string {
+func (e ListPostsRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1187,14 +1222,14 @@ func (e ListPostRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sListPostRequest.%s: %s%s",
+		"invalid %sListPostsRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ListPostRequestValidationError{}
+var _ error = ListPostsRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1202,24 +1237,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ListPostRequestValidationError{}
+} = ListPostsRequestValidationError{}
 
-// Validate checks the field values on ListPostResponse with the rules defined
+// Validate checks the field values on ListPostsResponse with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
-func (m *ListPostResponse) Validate() error {
+func (m *ListPostsResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on ListPostResponse with the rules
+// ValidateAll checks the field values on ListPostsResponse with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// ListPostResponseMultiError, or nil if none found.
-func (m *ListPostResponse) ValidateAll() error {
+// ListPostsResponseMultiError, or nil if none found.
+func (m *ListPostsResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *ListPostResponse) validate(all bool) error {
+func (m *ListPostsResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1233,7 +1268,7 @@ func (m *ListPostResponse) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListPostResponseValidationError{
+					errors = append(errors, ListPostsResponseValidationError{
 						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1241,7 +1276,7 @@ func (m *ListPostResponse) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, ListPostResponseValidationError{
+					errors = append(errors, ListPostsResponseValidationError{
 						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1250,7 +1285,7 @@ func (m *ListPostResponse) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return ListPostResponseValidationError{
+				return ListPostsResponseValidationError{
 					field:  fmt.Sprintf("Items[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1262,20 +1297,22 @@ func (m *ListPostResponse) validate(all bool) error {
 
 	// no validation rules for Total
 
+	// no validation rules for NextPageToken
+
 	if len(errors) > 0 {
-		return ListPostResponseMultiError(errors)
+		return ListPostsResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// ListPostResponseMultiError is an error wrapping multiple validation errors
-// returned by ListPostResponse.ValidateAll() if the designated constraints
+// ListPostsResponseMultiError is an error wrapping multiple validation errors
+// returned by ListPostsResponse.ValidateAll() if the designated constraints
 // aren't met.
-type ListPostResponseMultiError []error
+type ListPostsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m ListPostResponseMultiError) Error() string {
+func (m ListPostsResponseMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1284,11 +1321,11 @@ func (m ListPostResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m ListPostResponseMultiError) AllErrors() []error { return m }
+func (m ListPostsResponseMultiError) AllErrors() []error { return m }
 
-// ListPostResponseValidationError is the validation error returned by
-// ListPostResponse.Validate if the designated constraints aren't met.
-type ListPostResponseValidationError struct {
+// ListPostsResponseValidationError is the validation error returned by
+// ListPostsResponse.Validate if the designated constraints aren't met.
+type ListPostsResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1296,22 +1333,24 @@ type ListPostResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e ListPostResponseValidationError) Field() string { return e.field }
+func (e ListPostsResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ListPostResponseValidationError) Reason() string { return e.reason }
+func (e ListPostsResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ListPostResponseValidationError) Cause() error { return e.cause }
+func (e ListPostsResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ListPostResponseValidationError) Key() bool { return e.key }
+func (e ListPostsResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ListPostResponseValidationError) ErrorName() string { return "ListPostResponseValidationError" }
+func (e ListPostsResponseValidationError) ErrorName() string {
+	return "ListPostsResponseValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e ListPostResponseValidationError) Error() string {
+func (e ListPostsResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1323,14 +1362,14 @@ func (e ListPostResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sListPostResponse.%s: %s%s",
+		"invalid %sListPostsResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ListPostResponseValidationError{}
+var _ error = ListPostsResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -1338,7 +1377,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ListPostResponseValidationError{}
+} = ListPostsResponseValidationError{}
 
 // Validate checks the field values on UpdatePostByStatusRequest with the rules
 // defined in the proto definition for this message. If any rules are

@@ -13,7 +13,7 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 // 菜单管理服务
 service MenuService {
   // 获取所有菜单
-  rpc ListMenuAll(google.protobuf.Empty) returns (core.service.v1.ListMenuResponse) {
+  rpc ListMenusAll(google.protobuf.Empty) returns (core.service.v1.ListMenusResponse) {
     option (google.api.http) = {get: "/admin/v1/menus/all"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取所有菜单"
@@ -32,14 +32,11 @@ service MenuService {
     };
   }
   // 获取菜单树
-  rpc ListMenuTree(core.service.v1.ListMenuTreeRequest) returns (core.service.v1.ListMenuTreeResponse) {
+  rpc ListMenusTree(core.service.v1.ListMenusTreeRequest) returns (core.service.v1.ListMenusTreeResponse) {
     option (google.api.http) = {
       get: "/admin/v1/menus/tree/{parent_id}"
       additional_bindings: [
-        {
-          get: "/admin/v1/menus/tree"
-        }
-      ]
+        {get: "/admin/v1/menus/tree"}]
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "获取菜单树"
@@ -58,7 +55,7 @@ service MenuService {
     };
   }
   // 获取菜单列表
-  rpc ListMenu(core.service.v1.ListMenuRequest) returns (core.service.v1.ListMenuResponse) {
+  rpc ListMenus(core.service.v1.ListMenusRequest) returns (core.service.v1.ListMenusResponse) {
     option (google.api.http) = {get: "/admin/v1/menus"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取菜单列表"
@@ -217,7 +214,7 @@ service MenuService {
       ]
     };
   }
-  
+
   // 更新菜单状态
   rpc UpdateMenuByStatus(core.service.v1.UpdateMenuByStatusRequest) returns (core.service.v1.UpdateMenuByStatusResponse) {
     option (google.api.http) = {

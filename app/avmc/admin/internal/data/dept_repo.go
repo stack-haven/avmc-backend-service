@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kratos/aip-go/ents"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
@@ -181,6 +182,26 @@ func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept,
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
+// CountDepts 查询部门数量
+// 参数：ctx 上下文，filter 过滤条件
+// 返回值：部门数量，错误信息
+func (r *deptRepo) CountDepts(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	r.log.Infof("查询部门数量，过滤条件：%v", opts)
+	o := biz.ListOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	count, err := r.data.db.Dept.Query().
+		Select(dept.FieldID).
+		Where(ents.ApplyFilter(o.Filter)).
+		Count(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
+		return 0, err
+	}
+	return int32(count), nil
+}
+
 // ListAll 查询所有部门列表
 // 参数：ctx 上下文
 // 返回值：部门列表，错误信息
@@ -194,17 +215,16 @@ func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// ListPage 查询部门列表分页
-// 参数：ctx 上下文，req 分页请求
-// 返回值：部门列表响应，错误信息
-func (r *deptRepo) ListPage(ctx context.Context, req *pbCore.ListDeptRequest) (*pbCore.ListDeptResponse, error) {
-	r.log.Infof("查询部门列表分页，分页请求：%v", req)
-	count, err := r.data.DB(ctx).Dept.Query().Select(dept.FieldID).Where(dept.DeletedAtIsNil()).Count(ctx)
-	if err != nil {
-		r.log.Errorf("查询所有部门列表失败，错误：%v", err)
-		return nil, err
+// ListDepts 查询部门列表
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：部门列表，错误信息
+func (r *deptRepo) ListDepts(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Dept, error) {
+	r.log.Infof("查询部门列表，分页选项：%v", opts)
+	o := biz.ListOptions{Limit: 20}
+	for _, opt := range opts {
+		opt(&o)
 	}
-	res, err := r.data.DB(ctx).Dept.Query().
+	pos, err := r.data.db.Dept.Query().
 		Select(
 			dept.FieldID,
 			dept.FieldName,
@@ -216,16 +236,13 @@ func (r *deptRepo) ListPage(ctx context.Context, req *pbCore.ListDeptRequest) (*
 			dept.FieldCreatedAt,
 			dept.FieldUpdatedAt,
 		).
-		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
-		Limit(int(req.GetPageSize())).
-		Order(gen.Desc(dept.FieldID)).
+		Where(ents.ApplyFilter(o.Filter)).
+		Order(ents.ApplyOrderBy(o.OrderBy)).
+		Offset(o.Offset).
+		Limit(o.Limit).
 		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询部门列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
-	return &pbCore.ListDeptResponse{
-		Items: convert.SliceToAny(res, r.convertProto),
-		Total: int32(count),
-	}, nil
+	return convert.SliceToAny(pos, r.convertProto), nil
 }

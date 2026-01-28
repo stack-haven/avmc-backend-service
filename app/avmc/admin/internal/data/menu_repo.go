@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kratos/aip-go/ents"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
@@ -13,6 +14,7 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -42,7 +44,7 @@ func (r *menuRepo) convertProto(res *gen.Menu) *pbCore.Menu {
 		Path:      res.Path,
 		Component: res.Component,
 		Redirect:  res.Redirect,
-		Type:      convert.EmptyToNil(pbCore.MenuType(*res.Type)),
+		Type:      (*pbCore.MenuType)(res.Type),
 		AuthCode:  res.AuthCode,
 		Meta: &pbCore.MenuMeta{
 			Title:              res.Title,
@@ -51,8 +53,8 @@ func (r *menuRepo) convertProto(res *gen.Menu) *pbCore.Menu {
 			AffixTab:           res.AffixTab,
 			AffixTabOrder:      res.AffixTabOrder,
 			Badge:              res.Badge,
-			BadgeType:          convert.EmptyToNil(pbCore.BadgeType(*res.BadgeType)),
-			BadgeVariants:      convert.EmptyToNil(pbCore.BadgeVariants(*res.BadgeVariants)),
+			BadgeType:          (*pbCore.BadgeType)(res.BadgeType),
+			BadgeVariants:      (*pbCore.BadgeVariants)(res.BadgeVariants),
 			HideChildrenInMenu: res.HideChildrenInMenu,
 			HideInBreadcrumb:   res.HideInBreadcrumb,
 			HideInMenu:         res.HideInMenu,
@@ -284,6 +286,26 @@ func (r *menuRepo) ListAllSimple(ctx context.Context) ([]*pbCore.Menu, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
+// CountMenus 查询菜单数量
+// 参数：ctx 上下文，filter 过滤条件
+// 返回值：菜单数量，错误信息
+func (r *menuRepo) CountMenus(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	r.log.Infof("查询菜单数量，过滤条件：%v", opts)
+	o := biz.ListOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	count, err := r.data.db.Menu.Query().
+		Select(user.FieldID).
+		Where(ents.ApplyFilter(o.Filter)).
+		Count(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
+		return 0, err
+	}
+	return int32(count), nil
+}
+
 // ListAll 查询所有菜单列表
 // 参数：ctx 上下文
 // 返回值：菜单列表，错误信息
@@ -300,22 +322,17 @@ func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// ListPage 查询菜单列表分页
+// ListMenus 查询菜单列表分页
 // 参数：ctx 上下文，req 分页请求
 // 返回值：菜单列表响应，错误信息
-func (r *menuRepo) ListPage(ctx context.Context, req *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) {
-	r.log.Infof("查询菜单列表分页，分页请求：%v", req)
-	count, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID).
-		// Where(menu.DeletedAtIsNil()).
-		Count(ctx)
-	if err != nil {
-		if gen.IsNotFound(err) {
-			return nil, nil
-		}
-		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
-		return nil, err
+func (r *menuRepo) ListMenus(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Menu, error) {
+	r.log.Infof("查询菜单列表分页，分页选项：%v", opts)
+
+	o := biz.ListOptions{Limit: 20}
+	for _, opt := range opts {
+		opt(&o)
 	}
-	res, err := r.data.DB(ctx).Menu.Query().
+	pos, err := r.data.db.Menu.Query().
 		Select(
 			menu.FieldID,
 			menu.FieldName,
@@ -328,21 +345,15 @@ func (r *menuRepo) ListPage(ctx context.Context, req *pbCore.ListMenuRequest) (*
 			menu.FieldCreatedAt,
 			menu.FieldUpdatedAt,
 		).
-		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
-		Limit(int(req.GetPageSize())).
-		Order(gen.Desc(menu.FieldID)).
+		Where(ents.ApplyFilter(o.Filter)).
+		Order(ents.ApplyOrderBy(o.OrderBy)).
+		Offset(o.Offset).
+		Limit(o.Limit).
 		All(ctx)
 	if err != nil {
-		if gen.IsNotFound(err) {
-			return nil, nil
-		}
-		r.log.Errorf("查询菜单列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
-	return &pbCore.ListMenuResponse{
-		Items: convert.SliceToAny(res, r.convertProto),
-		Total: int32(count),
-	}, nil
+	return convert.SliceToAny(pos, r.convertProto), nil
 }
 
 // ExistByPath 判断菜单路径是否存在

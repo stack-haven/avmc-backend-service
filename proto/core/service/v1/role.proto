@@ -7,8 +7,10 @@ import "common/enum/enum.proto";
 import "common/pagination/pagination.proto";
 import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
 
@@ -24,7 +26,7 @@ service RoleService {
   // 获取角色
   rpc GetRole(GetRoleRequest) returns (GetRoleResponse);
   // 分页查询角色
-  rpc ListRole(ListRoleRequest) returns (ListRoleResponse);
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
   // 判断角色名是否存在
   rpc ExistRoleByName(ExistRoleByNameRequest) returns (ExistRoleByNameResponse);
   // 更新角色状态
@@ -119,12 +121,18 @@ message UpdateRoleRequest {
     (gnostic.openapi.v3.property) = {description: "角色ID"}
   ];
   Role role = 2 [
+    (google.api.field_behavior) = REQUIRED,
     (buf.validate.field).required = true,
     (gnostic.openapi.v3.property) = {description: "角色信息"}
   ];
   optional uint32 operator_id = 3 [
     (buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+  // Required. Mask of fields to update.
+  google.protobuf.FieldMask update_mask = 4 [
+    (google.api.field_behavior) = REQUIRED,
+    (gnostic.openapi.v3.property) = {description: "更新字段掩码"}
   ];
 }
 
@@ -160,22 +168,20 @@ message GetRoleResponse {
 }
 
 // 分页查询角色请求
-message ListRoleRequest {
+message ListRolesRequest {
   // 当前页码
-  optional int32 page = 1 [
-    json_name = "page",
-    (buf.validate.field).int32.gt = 0,
+  string page_token = 1 [
+    json_name = "pageToken",
     (gnostic.openapi.v3.property) = {
-      description: "当前页码",
+      description: "当前页码"
       default: {number: 1}
     }
   ];
   // 每页的行数
-  optional int32 page_size = 2 [
+  int32 page_size = 2 [
     json_name = "pageSize",
-    (buf.validate.field).int32.gt = 0,
     (gnostic.openapi.v3.property) = {
-      description: "每一页的行数",
+      description: "每一页的行数"
       default: {number: 10}
     }
   ];
@@ -187,18 +193,48 @@ message ListRoleRequest {
   // 角色名称
   optional string name = 4 [(buf.validate.field).string.max_len = 20];
   // 角色状态
-  optional enum.Status status = 5 [(buf.validate.field).enum.defined_only = true, (gnostic.openapi.v3.property) = {description: "角色状态 0 未知 1 启用 2 禁用"}];
+  optional enum.Status status = 5 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "角色状态 0 未知 1 启用 2 禁用"}
+  ];
   // 角色描述
-  optional string remark = 6 [(buf.validate.field).string.max_len = 200, (gnostic.openapi.v3.property) = {description: "角色描述"}];
+  optional string remark = 6 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "角色描述"}
+  ];
   // 创建时间
   optional string start_created_at = 7 [(gnostic.openapi.v3.property) = {description: "创建时间范围开始"}];
   optional string end_created_at = 8 [(gnostic.openapi.v3.property) = {description: "创建时间范围结束"}];
+
+  // Optional. The standard list filter.
+  // Supported fields:
+  //    * `name` (i.e. `name="John Doe"`)
+  //    * `email` (i.e. `email="admin@go-kratos.dev"`)
+  //    * `phone` (i.e. `phone="+1234567890"`)
+  //    * `create_time` range (i.e. `timestamp>="2025-01-31T11:30:00-04:00"` where
+  //    the timestamp is in RFC 3339 format)
+  //
+  // More detail in [AIP-160](https://google.aip.dev/160).
+  optional string filter = 10 [(gnostic.openapi.v3.property) = {description: "筛选条件"}];
+  // Optional. A comma-separated list of fields to order by, sorted in ascending
+  // order. Use "desc" after a field name for descending. Supported fields:
+  // - `create_time`
+  //
+  // Example: `create_time desc`.
+  optional string order_by = 11 [(gnostic.openapi.v3.property) = {description: "排序字段"}]; // Number of resource to skip in the request.
+  // * A request with no page token and a skip value of 30 returns a single
+  //   page of results starting with the 31st result.
+  // * A request with a page token corresponding to the 51st result (because the
+  //   first 50 results were returned on the first page) and a skip value of 30
+  //   returns a single page of results starting with the 81st result.
+  int32 skip = 12 [(gnostic.openapi.v3.property) = {description: "跳过的行数"}];
 }
 
 // 分页查询角色响应
-message ListRoleResponse {
+message ListRolesResponse {
   repeated Role items = 1;
   int32 total = 2;
+  string next_page_token = 3;
 }
 
 // 判断角色名是否存在请求

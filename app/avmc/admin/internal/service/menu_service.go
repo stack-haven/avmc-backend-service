@@ -8,6 +8,10 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+	"go.einride.tech/aip/ordering"
+	"go.einride.tech/aip/pagination"
 )
 
 // MenuServiceService 菜单服务结构体
@@ -31,16 +35,59 @@ func NewMenuServiceService(muc *biz.MenuUsecase, logger log.Logger) *MenuService
 // ListMenu 处理菜单列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：菜单列表响应，错误信息
-func (s *MenuServiceService) ListMenu(ctx context.Context, req *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) {
+func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenusRequest) (*pbCore.ListMenusResponse, error) {
 	s.log.Infof("查询菜单列表分页，分页请求：%v", req)
-	return s.muc.ListPage(ctx, req)
+
+	declarations, err := filtering.NewDeclarations(
+		filtering.DeclareStandardFunctions(),
+		filtering.DeclareIdent("name", filtering.TypeString),
+		filtering.DeclareIdent("email", filtering.TypeString),
+		filtering.DeclareIdent("phone", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	filter, err := filtering.ParseFilter(req, declarations)
+	if err != nil {
+		return nil, err
+	}
+
+	pageToken, err := pagination.ParsePageToken(req)
+	if err != nil {
+		return nil, err
+	}
+	orderBy, err := ordering.ParseOrderBy(req)
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.muc.CountMenus(ctx, biz.ListFilter(filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := pbCore.ListMenusResponse{
+		Total: count,
+	}
+	resp.Items, err = s.muc.ListMenus(ctx,
+		biz.ListFilter(filter),
+		biz.ListOrderBy(orderBy),
+		biz.ListLimit(int(req.PageSize)),
+		biz.ListOffset(int(pageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= int(req.PageSize) {
+		resp.NextPageToken = pageToken.Next(req).String()
+	}
+	return &resp, nil
 }
 
 // ListMenuTree 处理菜单树形列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：菜单树形列表响应，错误信息
-func (s *MenuServiceService) ListMenuTree(ctx context.Context, req *pbCore.ListMenuTreeRequest) (*pbCore.ListMenuTreeResponse, error) {
-	s.log.Infof("查询菜单列表分页，分页请求：%v", req)
+func (s *MenuServiceService) ListMenusTree(ctx context.Context, req *pbCore.ListMenusTreeRequest) (*pbCore.ListMenusTreeResponse, error) {
+	s.log.Infof("查询菜单树形列表分页，分页请求：%v", req)
 	return s.muc.ListTree(ctx, req.GetParentId())
 }
 
@@ -80,9 +127,14 @@ func (s *MenuServiceService) UpdateMenu(ctx context.Context, req *pbCore.UpdateM
 	if req.GetMenu() == nil {
 		return nil, pb.ErrorMenuInvalidId("菜单信息不能为空")
 	}
+	user, err := s.GetMenu(ctx, &pbCore.GetMenuRequest{Id: req.GetId()})
+	if err != nil {
+		return nil, err
+	}
+	fieldmask.Update(req.UpdateMask, user, req.Menu)
 	s.log.Infof("更新菜单，菜单ID：%v，菜单信息：%v", req.GetId(), req.GetMenu())
 	req.Menu.Id = req.GetId()
-	_, err := s.muc.Update(ctx, req.GetMenu())
+	_, err = s.muc.Update(ctx, req.GetMenu())
 	if err != nil {
 		return nil, err
 	}

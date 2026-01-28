@@ -8,6 +8,10 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+	"go.einride.tech/aip/ordering"
+	"go.einride.tech/aip/pagination"
 )
 
 // RoleServiceService 角色服务结构体
@@ -31,9 +35,50 @@ func NewRoleServiceService(ruc *biz.RoleUsecase, logger log.Logger) *RoleService
 // ListRole 处理角色列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：角色列表响应，错误信息
-func (s *RoleServiceService) ListRole(ctx context.Context, req *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) {
+func (s *RoleServiceService) ListRoles(ctx context.Context, req *pbCore.ListRolesRequest) (*pbCore.ListRolesResponse, error) {
 	s.log.Infof("查询角色列表分页，分页请求：%v", req)
-	return s.ruc.ListPage(ctx, req)
+
+	declarations, err := filtering.NewDeclarations(
+		filtering.DeclareStandardFunctions(),
+		filtering.DeclareIdent("name", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	filter, err := filtering.ParseFilter(req, declarations)
+	if err != nil {
+		return nil, err
+	}
+
+	pageToken, err := pagination.ParsePageToken(req)
+	if err != nil {
+		return nil, err
+	}
+	orderBy, err := ordering.ParseOrderBy(req)
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.ruc.CountRoles(ctx, biz.ListFilter(filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := pbCore.ListRolesResponse{
+		Total: count,
+	}
+	resp.Items, err = s.ruc.ListRoles(ctx,
+		biz.ListFilter(filter),
+		biz.ListOrderBy(orderBy),
+		biz.ListLimit(int(req.PageSize)),
+		biz.ListOffset(int(pageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= int(req.PageSize) {
+		resp.NextPageToken = pageToken.Next(req).String()
+	}
+	return &resp, nil
 }
 
 // GetRole 处理获取角色详情请求
@@ -72,9 +117,14 @@ func (s *RoleServiceService) UpdateRole(ctx context.Context, req *pbCore.UpdateR
 	if req.GetRole() == nil {
 		return nil, pb.ErrorRoleInvalidId("角色信息不能为空")
 	}
+	user, err := s.GetRole(ctx, &pbCore.GetRoleRequest{Id: req.GetId()})
+	if err != nil {
+		return nil, err
+	}
+	fieldmask.Update(req.UpdateMask, user, req.Role)
 	s.log.Infof("更新角色，角色ID：%v，角色信息：%v", req.GetId(), req.GetRole())
 	req.Role.Id = req.GetId()
-	_, err := s.ruc.Update(ctx, req.GetRole())
+	_, err = s.ruc.Update(ctx, req.GetRole())
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +173,7 @@ func (s *RoleServiceService) UpdateRoleByStatus(ctx context.Context, req *pbCore
 	if req.GetStatus() == 0 {
 		return nil, pb.ErrorRoleStatusCannotBeEmpty("角色状态不能为空")
 	}
+
 	s.log.Infof("更新角色状态，角色ID：%v，角色状态：%v", req.GetId(), req.GetStatus())
 	_, err := s.ruc.UpdateStatus(ctx, req.GetId(), req.GetStatus())
 	if err != nil {

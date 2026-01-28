@@ -23,7 +23,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationPostServiceCreatePost = "/avmc.admin.v1.PostService/CreatePost"
 const OperationPostServiceDeletePost = "/avmc.admin.v1.PostService/DeletePost"
 const OperationPostServiceGetPost = "/avmc.admin.v1.PostService/GetPost"
-const OperationPostServiceListPost = "/avmc.admin.v1.PostService/ListPost"
+const OperationPostServiceListPosts = "/avmc.admin.v1.PostService/ListPosts"
 const OperationPostServiceUpdatePost = "/avmc.admin.v1.PostService/UpdatePost"
 const OperationPostServiceUpdatePostByStatus = "/avmc.admin.v1.PostService/UpdatePostByStatus"
 
@@ -34,8 +34,8 @@ type PostServiceHTTPServer interface {
 	DeletePost(context.Context, *v1.DeletePostRequest) (*v1.DeletePostResponse, error)
 	// GetPost 获取岗位数据
 	GetPost(context.Context, *v1.GetPostRequest) (*v1.Post, error)
-	// ListPost 获取岗位列表
-	ListPost(context.Context, *v1.ListPostRequest) (*v1.ListPostResponse, error)
+	// ListPosts 获取岗位列表
+	ListPosts(context.Context, *v1.ListPostsRequest) (*v1.ListPostsResponse, error)
 	// UpdatePost 更新岗位
 	UpdatePost(context.Context, *v1.UpdatePostRequest) (*v1.UpdatePostResponse, error)
 	// UpdatePostByStatus 更新岗位状态
@@ -44,7 +44,7 @@ type PostServiceHTTPServer interface {
 
 func RegisterPostServiceHTTPServer(s *http.Server, srv PostServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/posts", _PostService_ListPost0_HTTP_Handler(srv))
+	r.GET("/admin/v1/posts", _PostService_ListPosts0_HTTP_Handler(srv))
 	r.GET("/admin/v1/posts/{id}", _PostService_GetPost0_HTTP_Handler(srv))
 	r.POST("/admin/v1/posts", _PostService_CreatePost0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/posts/{id}", _PostService_UpdatePost0_HTTP_Handler(srv))
@@ -52,21 +52,21 @@ func RegisterPostServiceHTTPServer(s *http.Server, srv PostServiceHTTPServer) {
 	r.PUT("/admin/v1/posts/status-update/{id}", _PostService_UpdatePostByStatus0_HTTP_Handler(srv))
 }
 
-func _PostService_ListPost0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx http.Context) error {
+func _PostService_ListPosts0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListPostRequest
+		var in v1.ListPostsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationPostServiceListPost)
+		http.SetOperation(ctx, OperationPostServiceListPosts)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListPost(ctx, req.(*v1.ListPostRequest))
+			return srv.ListPosts(ctx, req.(*v1.ListPostsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListPostResponse)
+		reply := out.(*v1.ListPostsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -194,8 +194,8 @@ type PostServiceHTTPClient interface {
 	DeletePost(ctx context.Context, req *v1.DeletePostRequest, opts ...http.CallOption) (rsp *v1.DeletePostResponse, err error)
 	// GetPost 获取岗位数据
 	GetPost(ctx context.Context, req *v1.GetPostRequest, opts ...http.CallOption) (rsp *v1.Post, err error)
-	// ListPost 获取岗位列表
-	ListPost(ctx context.Context, req *v1.ListPostRequest, opts ...http.CallOption) (rsp *v1.ListPostResponse, err error)
+	// ListPosts 获取岗位列表
+	ListPosts(ctx context.Context, req *v1.ListPostsRequest, opts ...http.CallOption) (rsp *v1.ListPostsResponse, err error)
 	// UpdatePost 更新岗位
 	UpdatePost(ctx context.Context, req *v1.UpdatePostRequest, opts ...http.CallOption) (rsp *v1.UpdatePostResponse, err error)
 	// UpdatePostByStatus 更新岗位状态
@@ -252,12 +252,12 @@ func (c *PostServiceHTTPClientImpl) GetPost(ctx context.Context, in *v1.GetPostR
 	return &out, nil
 }
 
-// ListPost 获取岗位列表
-func (c *PostServiceHTTPClientImpl) ListPost(ctx context.Context, in *v1.ListPostRequest, opts ...http.CallOption) (*v1.ListPostResponse, error) {
-	var out v1.ListPostResponse
+// ListPosts 获取岗位列表
+func (c *PostServiceHTTPClientImpl) ListPosts(ctx context.Context, in *v1.ListPostsRequest, opts ...http.CallOption) (*v1.ListPostsResponse, error) {
+	var out v1.ListPostsResponse
 	pattern := "/admin/v1/posts"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationPostServiceListPost))
+	opts = append(opts, http.Operation(OperationPostServiceListPosts))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -8,6 +8,10 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+	"go.einride.tech/aip/ordering"
+	"go.einride.tech/aip/pagination"
 )
 
 // DeptServiceService 部门服务结构体
@@ -31,9 +35,50 @@ func NewDeptServiceService(duc *biz.DeptUsecase, logger log.Logger) *DeptService
 // ListDept 处理部门列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：部门列表响应，错误信息
-func (s *DeptServiceService) ListDept(ctx context.Context, req *pbCore.ListDeptRequest) (*pbCore.ListDeptResponse, error) {
+func (s *DeptServiceService) ListDept(ctx context.Context, req *pbCore.ListDeptsRequest) (*pbCore.ListDeptsResponse, error) {
 	s.log.Infof("查询部门列表分页，分页请求：%v", req)
-	return s.duc.ListPage(ctx, req)
+
+	declarations, err := filtering.NewDeclarations(
+		filtering.DeclareStandardFunctions(),
+		filtering.DeclareIdent("name", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	filter, err := filtering.ParseFilter(req, declarations)
+	if err != nil {
+		return nil, err
+	}
+
+	pageToken, err := pagination.ParsePageToken(req)
+	if err != nil {
+		return nil, err
+	}
+	orderBy, err := ordering.ParseOrderBy(req)
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.duc.CountDepts(ctx, biz.ListFilter(filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := pbCore.ListDeptsResponse{
+		Total: count,
+	}
+	resp.Items, err = s.duc.ListDepts(ctx,
+		biz.ListFilter(filter),
+		biz.ListOrderBy(orderBy),
+		biz.ListLimit(int(req.PageSize)),
+		biz.ListOffset(int(pageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= int(req.PageSize) {
+		resp.NextPageToken = pageToken.Next(req).String()
+	}
+	return &resp, nil
 }
 
 // GetDept 处理获取部门详情请求
@@ -72,9 +117,14 @@ func (s *DeptServiceService) UpdateDept(ctx context.Context, req *pbCore.UpdateD
 	if req.GetDept() == nil {
 		return nil, pb.ErrorDeptInvalidId("部门信息不能为空")
 	}
+	user, err := s.GetDept(ctx, &pbCore.GetDeptRequest{Id: req.GetId()})
+	if err != nil {
+		return nil, err
+	}
+	fieldmask.Update(req.UpdateMask, user, req.Dept)
 	s.log.Infof("更新部门，部门ID：%v，部门信息：%v", req.GetId(), req.GetDept())
 	req.Dept.Id = req.GetId()
-	_, err := s.duc.Update(ctx, req.GetDept())
+	_, err = s.duc.Update(ctx, req.GetDept())
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +149,7 @@ func (s *DeptServiceService) DeleteDept(ctx context.Context, req *pbCore.DeleteD
 // ListDeptTree 处理部门树形列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：部门树形列表响应，错误信息
-func (s *DeptServiceService) ListDeptTree(ctx context.Context, req *pbCore.ListDeptTreeRequest) (*pbCore.ListDeptTreeResponse, error) {
+func (s *DeptServiceService) ListDeptsTree(ctx context.Context, req *pbCore.ListDeptsTreeRequest) (*pbCore.ListDeptsTreeResponse, error) {
 	s.log.Infof("查询部门列表分页，分页请求：%v", req)
-	return s.duc.ListTree(ctx, req.GetParentId())
+	return s.duc.ListDeptsTree(ctx, req.GetParentId())
 }

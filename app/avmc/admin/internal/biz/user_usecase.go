@@ -6,7 +6,6 @@ import (
 
 	pbCore "backend-service/api/core/service/v1"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -52,9 +51,6 @@ func (uc *UserUsecase) Create(ctx context.Context, g *pbCore.User) (*pbCore.User
 // 返回值：用户详情响应，错误信息
 func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("GetUser: %v", id)
-	if id == 0 {
-		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
-	}
 	return uc.repo.FindByID(ctx, id)
 }
 
@@ -62,9 +58,6 @@ func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error)
 // 参数：ctx 上下文，g 用户信息
 // 返回值：更新用户响应，错误信息
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	if g.GetId() == 0 {
-		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
-	}
 	uc.log.WithContext(ctx).Infof("UpdateUser: %v", g.GetId())
 	return uc.repo.Update(ctx, g)
 }
@@ -104,11 +97,7 @@ func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status pbEnu
 // 参数：ctx 上下文，opts 分页选项
 // 返回值：用户列表响应，错误信息
 func (uc *UserUsecase) ListUsers(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
-	resp, err := uc.repo.ListUsers(ctx, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+	return uc.repo.ListUsers(ctx, opts...)
 }
 
 // CountUsers 处理用户条件查询聚合请求

@@ -23,8 +23,8 @@ const _ = http.SupportPackageIsVersion1
 const OperationDeptServiceCreateDept = "/avmc.admin.v1.DeptService/CreateDept"
 const OperationDeptServiceDeleteDept = "/avmc.admin.v1.DeptService/DeleteDept"
 const OperationDeptServiceGetDept = "/avmc.admin.v1.DeptService/GetDept"
-const OperationDeptServiceListDept = "/avmc.admin.v1.DeptService/ListDept"
-const OperationDeptServiceListDeptTree = "/avmc.admin.v1.DeptService/ListDeptTree"
+const OperationDeptServiceListDepts = "/avmc.admin.v1.DeptService/ListDepts"
+const OperationDeptServiceListDeptsTree = "/avmc.admin.v1.DeptService/ListDeptsTree"
 const OperationDeptServiceUpdateDept = "/avmc.admin.v1.DeptService/UpdateDept"
 const OperationDeptServiceUpdateDeptByStatus = "/avmc.admin.v1.DeptService/UpdateDeptByStatus"
 
@@ -35,10 +35,10 @@ type DeptServiceHTTPServer interface {
 	DeleteDept(context.Context, *v1.DeleteDeptRequest) (*v1.DeleteDeptResponse, error)
 	// GetDept 获取部门数据
 	GetDept(context.Context, *v1.GetDeptRequest) (*v1.Dept, error)
-	// ListDept 获取部门列表
-	ListDept(context.Context, *v1.ListDeptRequest) (*v1.ListDeptResponse, error)
-	// ListDeptTree 获取部门树
-	ListDeptTree(context.Context, *v1.ListDeptTreeRequest) (*v1.ListDeptTreeResponse, error)
+	// ListDepts 获取部门列表
+	ListDepts(context.Context, *v1.ListDeptsRequest) (*v1.ListDeptsResponse, error)
+	// ListDeptsTree 获取部门树
+	ListDeptsTree(context.Context, *v1.ListDeptsTreeRequest) (*v1.ListDeptsTreeResponse, error)
 	// UpdateDept 更新部门
 	UpdateDept(context.Context, *v1.UpdateDeptRequest) (*v1.UpdateDeptResponse, error)
 	// UpdateDeptByStatus 更新部门状态
@@ -47,9 +47,9 @@ type DeptServiceHTTPServer interface {
 
 func RegisterDeptServiceHTTPServer(s *http.Server, srv DeptServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/depts", _DeptService_ListDept0_HTTP_Handler(srv))
-	r.GET("/admin/v1/depts/tree", _DeptService_ListDeptTree0_HTTP_Handler(srv))
-	r.GET("/admin/v1/depts/tree/{parent_id}", _DeptService_ListDeptTree1_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts", _DeptService_ListDepts0_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts/tree", _DeptService_ListDeptsTree0_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts/tree/{parent_id}", _DeptService_ListDeptsTree1_HTTP_Handler(srv))
 	r.GET("/admin/v1/depts/{id}", _DeptService_GetDept0_HTTP_Handler(srv))
 	r.POST("/admin/v1/depts", _DeptService_CreateDept0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/depts/{id}", _DeptService_UpdateDept0_HTTP_Handler(srv))
@@ -57,62 +57,62 @@ func RegisterDeptServiceHTTPServer(s *http.Server, srv DeptServiceHTTPServer) {
 	r.PUT("/admin/v1/depts/status-update/{id}", _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv))
 }
 
-func _DeptService_ListDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+func _DeptService_ListDepts0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListDeptRequest
+		var in v1.ListDeptsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDeptServiceListDept)
+		http.SetOperation(ctx, OperationDeptServiceListDepts)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListDept(ctx, req.(*v1.ListDeptRequest))
+			return srv.ListDepts(ctx, req.(*v1.ListDeptsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListDeptResponse)
+		reply := out.(*v1.ListDeptsResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _DeptService_ListDeptTree0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+func _DeptService_ListDeptsTree0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListDeptTreeRequest
+		var in v1.ListDeptsTreeRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDeptServiceListDeptTree)
+		http.SetOperation(ctx, OperationDeptServiceListDeptsTree)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListDeptTree(ctx, req.(*v1.ListDeptTreeRequest))
+			return srv.ListDeptsTree(ctx, req.(*v1.ListDeptsTreeRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListDeptTreeResponse)
+		reply := out.(*v1.ListDeptsTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _DeptService_ListDeptTree1_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+func _DeptService_ListDeptsTree1_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListDeptTreeRequest
+		var in v1.ListDeptsTreeRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDeptServiceListDeptTree)
+		http.SetOperation(ctx, OperationDeptServiceListDeptsTree)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListDeptTree(ctx, req.(*v1.ListDeptTreeRequest))
+			return srv.ListDeptsTree(ctx, req.(*v1.ListDeptsTreeRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListDeptTreeResponse)
+		reply := out.(*v1.ListDeptsTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -240,10 +240,10 @@ type DeptServiceHTTPClient interface {
 	DeleteDept(ctx context.Context, req *v1.DeleteDeptRequest, opts ...http.CallOption) (rsp *v1.DeleteDeptResponse, err error)
 	// GetDept 获取部门数据
 	GetDept(ctx context.Context, req *v1.GetDeptRequest, opts ...http.CallOption) (rsp *v1.Dept, err error)
-	// ListDept 获取部门列表
-	ListDept(ctx context.Context, req *v1.ListDeptRequest, opts ...http.CallOption) (rsp *v1.ListDeptResponse, err error)
-	// ListDeptTree 获取部门树
-	ListDeptTree(ctx context.Context, req *v1.ListDeptTreeRequest, opts ...http.CallOption) (rsp *v1.ListDeptTreeResponse, err error)
+	// ListDepts 获取部门列表
+	ListDepts(ctx context.Context, req *v1.ListDeptsRequest, opts ...http.CallOption) (rsp *v1.ListDeptsResponse, err error)
+	// ListDeptsTree 获取部门树
+	ListDeptsTree(ctx context.Context, req *v1.ListDeptsTreeRequest, opts ...http.CallOption) (rsp *v1.ListDeptsTreeResponse, err error)
 	// UpdateDept 更新部门
 	UpdateDept(ctx context.Context, req *v1.UpdateDeptRequest, opts ...http.CallOption) (rsp *v1.UpdateDeptResponse, err error)
 	// UpdateDeptByStatus 更新部门状态
@@ -300,12 +300,12 @@ func (c *DeptServiceHTTPClientImpl) GetDept(ctx context.Context, in *v1.GetDeptR
 	return &out, nil
 }
 
-// ListDept 获取部门列表
-func (c *DeptServiceHTTPClientImpl) ListDept(ctx context.Context, in *v1.ListDeptRequest, opts ...http.CallOption) (*v1.ListDeptResponse, error) {
-	var out v1.ListDeptResponse
+// ListDepts 获取部门列表
+func (c *DeptServiceHTTPClientImpl) ListDepts(ctx context.Context, in *v1.ListDeptsRequest, opts ...http.CallOption) (*v1.ListDeptsResponse, error) {
+	var out v1.ListDeptsResponse
 	pattern := "/admin/v1/depts"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationDeptServiceListDept))
+	opts = append(opts, http.Operation(OperationDeptServiceListDepts))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -314,12 +314,12 @@ func (c *DeptServiceHTTPClientImpl) ListDept(ctx context.Context, in *v1.ListDep
 	return &out, nil
 }
 
-// ListDeptTree 获取部门树
-func (c *DeptServiceHTTPClientImpl) ListDeptTree(ctx context.Context, in *v1.ListDeptTreeRequest, opts ...http.CallOption) (*v1.ListDeptTreeResponse, error) {
-	var out v1.ListDeptTreeResponse
+// ListDeptsTree 获取部门树
+func (c *DeptServiceHTTPClientImpl) ListDeptsTree(ctx context.Context, in *v1.ListDeptsTreeRequest, opts ...http.CallOption) (*v1.ListDeptsTreeResponse, error) {
+	var out v1.ListDeptsTreeResponse
 	pattern := "/admin/v1/depts/tree/{parent_id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationDeptServiceListDeptTree))
+	opts = append(opts, http.Operation(OperationDeptServiceListDeptsTree))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kratos/aip-go/ents"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
@@ -186,69 +187,56 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 	return roles, nil
 }
 
-// ListPage 分页查询角色
-// 参数：ctx 上下文，pagination 分页请求
+// CountRoles 查询角色数量
+// 参数：ctx 上下文，filter 过滤条件
+// 返回值：角色数量，错误信息
+func (r *roleRepo) CountRoles(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	r.log.Infof("查询角色数量，过滤条件：%v", opts)
+	o := biz.ListOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	count, err := r.data.db.Role.Query().
+		Select(role.FieldID).
+		Where(ents.ApplyFilter(o.Filter)).
+		Count(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有角色列表失败，错误：%v", err)
+		return 0, err
+	}
+	return int32(count), nil
+}
+
+// ListRoles 分页查询角色
+// 参数：ctx 上下文，opts 分页选项
 // 返回值：角色列表响应，错误信息
-func (r *roleRepo) ListPage(ctx context.Context, req *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) {
-	r.log.Infof("分页查询角色，分页请求：%v", req)
-	query := r.data.DB(ctx).Role.Query()
-	if req.GetName() != "" {
-		query = query.Where(role.NameContains(req.GetName()))
+func (r *roleRepo) ListRoles(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Role, error) {
+	r.log.Infof("查询角色列表，分页选项：%v", opts)
+	o := biz.ListOptions{Limit: 20}
+	for _, opt := range opts {
+		opt(&o)
 	}
-	if req.GetStatus() != 0 {
-		query = query.Where(role.Status(int32(req.GetStatus())))
-	}
-	if startTime := convert.StringValueToTime(req.StartCreatedAt, time.DateTime); startTime != nil {
-		query = query.Where(role.CreatedAtGTE(*startTime))
-	}
-	if endTime := convert.StringValueToTime(req.EndCreatedAt, time.DateTime); endTime != nil {
-		query = query.Where(role.CreatedAtLTE(*endTime))
-	}
-
-	// if req.GetStartCreatedAt() != "" && req.GetEndCreatedAt() != "" {
-	// 	startTime := convert.StringValueToTime(req.StartCreatedAt, time.DateTime)
-	// 	endTime := convert.StringValueToTime(req.EndCreatedAt, time.DateTime)
-	// 	// 查询创建时间在指定范围内的角色
-	// 	query = query.Where(role.CreatedAtGTE(*startTime), role.CreatedAtLTE(*endTime))
-	// }
-
-	count, err := query.Count(ctx)
+	pos, err := r.data.db.Role.Query().
+		Select(
+			role.FieldID,
+			role.FieldName,
+			role.FieldDefaultRouter,
+			role.FieldDataScope,
+			role.FieldMenuCheckStrictly,
+			role.FieldDeptCheckStrictly,
+			role.FieldStatus,
+			role.FieldCreatedAt,
+			role.FieldUpdatedAt,
+		).
+		Where(ents.ApplyFilter(o.Filter)).
+		Order(ents.ApplyOrderBy(o.OrderBy)).
+		Offset(o.Offset).
+		Limit(o.Limit).
+		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询角色总数失败，错误：%v", err)
 		return nil, err
 	}
-	if count == 0 {
-		return &pbCore.ListRoleResponse{
-			Items: nil,
-			Total: 0,
-		}, nil
-	}
-	query = query.Select(
-		role.FieldID,
-		role.FieldName,
-		role.FieldDefaultRouter,
-		role.FieldDataScope,
-		role.FieldMenuCheckStrictly,
-		role.FieldDeptCheckStrictly,
-		role.FieldStatus,
-		role.FieldCreatedAt,
-		role.FieldUpdatedAt,
-	).
-		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
-		Limit(int(req.GetPageSize())).
-		Order(gen.Desc(role.FieldID))
-		// query = paging.WithPagination(query, int(req.GetPage()), int(req.GetPageSize())).All(ctx)
-	res, err := query.All(ctx)
-	// 使用类型断言转换为具体的查询类型
-	if err != nil {
-		r.log.Errorf("分页查询角色失败，错误：%v", err)
-		return nil, err
-	}
-	// 转换数据
-	return &pbCore.ListRoleResponse{
-		Items: convert.SliceToAny(res, r.convertProto),
-		Total: int32(count),
-	}, nil
+	return convert.SliceToAny(pos, r.convertProto), nil
 }
 
 // ExistByName 判断角色名称是否存在

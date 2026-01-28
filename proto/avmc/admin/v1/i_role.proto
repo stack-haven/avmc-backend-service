@@ -14,7 +14,7 @@ option go_package = "backend-service/api/avmc/admin/v1;v1";
 // 角色管理服务
 service RoleService {
   // 获取角色列表
-  rpc ListRole(core.service.v1.ListRoleRequest) returns (core.service.v1.ListRoleResponse) {
+  rpc ListRoles(core.service.v1.ListRolesRequest) returns (core.service.v1.ListRolesResponse) {
     option (google.api.http) = {get: "/admin/v1/roles"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取角色列表"
@@ -170,5 +170,4 @@ service RoleService {
       ]
     };
   }
-
 }

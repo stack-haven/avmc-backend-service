@@ -21,9 +21,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MenuService_ListMenuAll_FullMethodName        = "/avmc.admin.v1.MenuService/ListMenuAll"
-	MenuService_ListMenuTree_FullMethodName       = "/avmc.admin.v1.MenuService/ListMenuTree"
-	MenuService_ListMenu_FullMethodName           = "/avmc.admin.v1.MenuService/ListMenu"
+	MenuService_ListMenusAll_FullMethodName       = "/avmc.admin.v1.MenuService/ListMenusAll"
+	MenuService_ListMenusTree_FullMethodName      = "/avmc.admin.v1.MenuService/ListMenusTree"
+	MenuService_ListMenus_FullMethodName          = "/avmc.admin.v1.MenuService/ListMenus"
 	MenuService_GetMenu_FullMethodName            = "/avmc.admin.v1.MenuService/GetMenu"
 	MenuService_CreateMenu_FullMethodName         = "/avmc.admin.v1.MenuService/CreateMenu"
 	MenuService_UpdateMenu_FullMethodName         = "/avmc.admin.v1.MenuService/UpdateMenu"
@@ -40,11 +40,11 @@ const (
 // 菜单管理服务
 type MenuServiceClient interface {
 	// 获取所有菜单
-	ListMenuAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.ListMenuResponse, error)
+	ListMenusAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.ListMenusResponse, error)
 	// 获取菜单树
-	ListMenuTree(ctx context.Context, in *v1.ListMenuTreeRequest, opts ...grpc.CallOption) (*v1.ListMenuTreeResponse, error)
+	ListMenusTree(ctx context.Context, in *v1.ListMenusTreeRequest, opts ...grpc.CallOption) (*v1.ListMenusTreeResponse, error)
 	// 获取菜单列表
-	ListMenu(ctx context.Context, in *v1.ListMenuRequest, opts ...grpc.CallOption) (*v1.ListMenuResponse, error)
+	ListMenus(ctx context.Context, in *v1.ListMenusRequest, opts ...grpc.CallOption) (*v1.ListMenusResponse, error)
 	// 获取菜单数据
 	GetMenu(ctx context.Context, in *v1.GetMenuRequest, opts ...grpc.CallOption) (*v1.Menu, error)
 	// 创建菜单
@@ -69,30 +69,30 @@ func NewMenuServiceClient(cc grpc.ClientConnInterface) MenuServiceClient {
 	return &menuServiceClient{cc}
 }
 
-func (c *menuServiceClient) ListMenuAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.ListMenuResponse, error) {
+func (c *menuServiceClient) ListMenusAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.ListMenusResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ListMenuResponse)
-	err := c.cc.Invoke(ctx, MenuService_ListMenuAll_FullMethodName, in, out, cOpts...)
+	out := new(v1.ListMenusResponse)
+	err := c.cc.Invoke(ctx, MenuService_ListMenusAll_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *menuServiceClient) ListMenuTree(ctx context.Context, in *v1.ListMenuTreeRequest, opts ...grpc.CallOption) (*v1.ListMenuTreeResponse, error) {
+func (c *menuServiceClient) ListMenusTree(ctx context.Context, in *v1.ListMenusTreeRequest, opts ...grpc.CallOption) (*v1.ListMenusTreeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ListMenuTreeResponse)
-	err := c.cc.Invoke(ctx, MenuService_ListMenuTree_FullMethodName, in, out, cOpts...)
+	out := new(v1.ListMenusTreeResponse)
+	err := c.cc.Invoke(ctx, MenuService_ListMenusTree_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *menuServiceClient) ListMenu(ctx context.Context, in *v1.ListMenuRequest, opts ...grpc.CallOption) (*v1.ListMenuResponse, error) {
+func (c *menuServiceClient) ListMenus(ctx context.Context, in *v1.ListMenusRequest, opts ...grpc.CallOption) (*v1.ListMenusResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ListMenuResponse)
-	err := c.cc.Invoke(ctx, MenuService_ListMenu_FullMethodName, in, out, cOpts...)
+	out := new(v1.ListMenusResponse)
+	err := c.cc.Invoke(ctx, MenuService_ListMenus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -176,11 +176,11 @@ func (c *menuServiceClient) UpdateMenuByStatus(ctx context.Context, in *v1.Updat
 // 菜单管理服务
 type MenuServiceServer interface {
 	// 获取所有菜单
-	ListMenuAll(context.Context, *emptypb.Empty) (*v1.ListMenuResponse, error)
+	ListMenusAll(context.Context, *emptypb.Empty) (*v1.ListMenusResponse, error)
 	// 获取菜单树
-	ListMenuTree(context.Context, *v1.ListMenuTreeRequest) (*v1.ListMenuTreeResponse, error)
+	ListMenusTree(context.Context, *v1.ListMenusTreeRequest) (*v1.ListMenusTreeResponse, error)
 	// 获取菜单列表
-	ListMenu(context.Context, *v1.ListMenuRequest) (*v1.ListMenuResponse, error)
+	ListMenus(context.Context, *v1.ListMenusRequest) (*v1.ListMenusResponse, error)
 	// 获取菜单数据
 	GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error)
 	// 创建菜单
@@ -205,14 +205,14 @@ type MenuServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedMenuServiceServer struct{}
 
-func (UnimplementedMenuServiceServer) ListMenuAll(context.Context, *emptypb.Empty) (*v1.ListMenuResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMenuAll not implemented")
+func (UnimplementedMenuServiceServer) ListMenusAll(context.Context, *emptypb.Empty) (*v1.ListMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMenusAll not implemented")
 }
-func (UnimplementedMenuServiceServer) ListMenuTree(context.Context, *v1.ListMenuTreeRequest) (*v1.ListMenuTreeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMenuTree not implemented")
+func (UnimplementedMenuServiceServer) ListMenusTree(context.Context, *v1.ListMenusTreeRequest) (*v1.ListMenusTreeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMenusTree not implemented")
 }
-func (UnimplementedMenuServiceServer) ListMenu(context.Context, *v1.ListMenuRequest) (*v1.ListMenuResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMenu not implemented")
+func (UnimplementedMenuServiceServer) ListMenus(context.Context, *v1.ListMenusRequest) (*v1.ListMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
 }
 func (UnimplementedMenuServiceServer) GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMenu not implemented")
@@ -256,56 +256,56 @@ func RegisterMenuServiceServer(s grpc.ServiceRegistrar, srv MenuServiceServer) {
 	s.RegisterService(&MenuService_ServiceDesc, srv)
 }
 
-func _MenuService_ListMenuAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MenuService_ListMenusAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MenuServiceServer).ListMenuAll(ctx, in)
+		return srv.(MenuServiceServer).ListMenusAll(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MenuService_ListMenuAll_FullMethodName,
+		FullMethod: MenuService_ListMenusAll_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MenuServiceServer).ListMenuAll(ctx, req.(*emptypb.Empty))
+		return srv.(MenuServiceServer).ListMenusAll(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MenuService_ListMenuTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ListMenuTreeRequest)
+func _MenuService_ListMenusTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListMenusTreeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MenuServiceServer).ListMenuTree(ctx, in)
+		return srv.(MenuServiceServer).ListMenusTree(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MenuService_ListMenuTree_FullMethodName,
+		FullMethod: MenuService_ListMenusTree_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MenuServiceServer).ListMenuTree(ctx, req.(*v1.ListMenuTreeRequest))
+		return srv.(MenuServiceServer).ListMenusTree(ctx, req.(*v1.ListMenusTreeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MenuService_ListMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ListMenuRequest)
+func _MenuService_ListMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListMenusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MenuServiceServer).ListMenu(ctx, in)
+		return srv.(MenuServiceServer).ListMenus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MenuService_ListMenu_FullMethodName,
+		FullMethod: MenuService_ListMenus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MenuServiceServer).ListMenu(ctx, req.(*v1.ListMenuRequest))
+		return srv.(MenuServiceServer).ListMenus(ctx, req.(*v1.ListMenusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -444,16 +444,16 @@ var MenuService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MenuServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListMenuAll",
-			Handler:    _MenuService_ListMenuAll_Handler,
+			MethodName: "ListMenusAll",
+			Handler:    _MenuService_ListMenusAll_Handler,
 		},
 		{
-			MethodName: "ListMenuTree",
-			Handler:    _MenuService_ListMenuTree_Handler,
+			MethodName: "ListMenusTree",
+			Handler:    _MenuService_ListMenusTree_Handler,
 		},
 		{
-			MethodName: "ListMenu",
-			Handler:    _MenuService_ListMenu_Handler,
+			MethodName: "ListMenus",
+			Handler:    _MenuService_ListMenus_Handler,
 		},
 		{
 			MethodName: "GetMenu",

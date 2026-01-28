@@ -20,7 +20,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RoleService_ListRole_FullMethodName           = "/avmc.admin.v1.RoleService/ListRole"
+	RoleService_ListRoles_FullMethodName          = "/avmc.admin.v1.RoleService/ListRoles"
 	RoleService_GetRole_FullMethodName            = "/avmc.admin.v1.RoleService/GetRole"
 	RoleService_CreateRole_FullMethodName         = "/avmc.admin.v1.RoleService/CreateRole"
 	RoleService_UpdateRole_FullMethodName         = "/avmc.admin.v1.RoleService/UpdateRole"
@@ -36,7 +36,7 @@ const (
 // 角色管理服务
 type RoleServiceClient interface {
 	// 获取角色列表
-	ListRole(ctx context.Context, in *v1.ListRoleRequest, opts ...grpc.CallOption) (*v1.ListRoleResponse, error)
+	ListRoles(ctx context.Context, in *v1.ListRolesRequest, opts ...grpc.CallOption) (*v1.ListRolesResponse, error)
 	// 获取角色数据
 	GetRole(ctx context.Context, in *v1.GetRoleRequest, opts ...grpc.CallOption) (*v1.Role, error)
 	// 创建角色
@@ -59,10 +59,10 @@ func NewRoleServiceClient(cc grpc.ClientConnInterface) RoleServiceClient {
 	return &roleServiceClient{cc}
 }
 
-func (c *roleServiceClient) ListRole(ctx context.Context, in *v1.ListRoleRequest, opts ...grpc.CallOption) (*v1.ListRoleResponse, error) {
+func (c *roleServiceClient) ListRoles(ctx context.Context, in *v1.ListRolesRequest, opts ...grpc.CallOption) (*v1.ListRolesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.ListRoleResponse)
-	err := c.cc.Invoke(ctx, RoleService_ListRole_FullMethodName, in, out, cOpts...)
+	out := new(v1.ListRolesResponse)
+	err := c.cc.Invoke(ctx, RoleService_ListRoles_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (c *roleServiceClient) UpdateRoleByStatus(ctx context.Context, in *v1.Updat
 // 角色管理服务
 type RoleServiceServer interface {
 	// 获取角色列表
-	ListRole(context.Context, *v1.ListRoleRequest) (*v1.ListRoleResponse, error)
+	ListRoles(context.Context, *v1.ListRolesRequest) (*v1.ListRolesResponse, error)
 	// 获取角色数据
 	GetRole(context.Context, *v1.GetRoleRequest) (*v1.Role, error)
 	// 创建角色
@@ -159,8 +159,8 @@ type RoleServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRoleServiceServer struct{}
 
-func (UnimplementedRoleServiceServer) ListRole(context.Context, *v1.ListRoleRequest) (*v1.ListRoleResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
+func (UnimplementedRoleServiceServer) ListRoles(context.Context, *v1.ListRolesRequest) (*v1.ListRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRoles not implemented")
 }
 func (UnimplementedRoleServiceServer) GetRole(context.Context, *v1.GetRoleRequest) (*v1.Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRole not implemented")
@@ -201,20 +201,20 @@ func RegisterRoleServiceServer(s grpc.ServiceRegistrar, srv RoleServiceServer) {
 	s.RegisterService(&RoleService_ServiceDesc, srv)
 }
 
-func _RoleService_ListRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.ListRoleRequest)
+func _RoleService_ListRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListRolesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RoleServiceServer).ListRole(ctx, in)
+		return srv.(RoleServiceServer).ListRoles(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RoleService_ListRole_FullMethodName,
+		FullMethod: RoleService_ListRoles_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleServiceServer).ListRole(ctx, req.(*v1.ListRoleRequest))
+		return srv.(RoleServiceServer).ListRoles(ctx, req.(*v1.ListRolesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -335,8 +335,8 @@ var RoleService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RoleServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListRole",
-			Handler:    _RoleService_ListRole_Handler,
+			MethodName: "ListRoles",
+			Handler:    _RoleService_ListRoles_Handler,
 		},
 		{
 			MethodName: "GetRole",

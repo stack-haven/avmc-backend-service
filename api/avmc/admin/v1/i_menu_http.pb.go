@@ -26,9 +26,9 @@ const OperationMenuServiceDeleteMenu = "/avmc.admin.v1.MenuService/DeleteMenu"
 const OperationMenuServiceExistMenuByName = "/avmc.admin.v1.MenuService/ExistMenuByName"
 const OperationMenuServiceExistMenuByPath = "/avmc.admin.v1.MenuService/ExistMenuByPath"
 const OperationMenuServiceGetMenu = "/avmc.admin.v1.MenuService/GetMenu"
-const OperationMenuServiceListMenu = "/avmc.admin.v1.MenuService/ListMenu"
-const OperationMenuServiceListMenuAll = "/avmc.admin.v1.MenuService/ListMenuAll"
-const OperationMenuServiceListMenuTree = "/avmc.admin.v1.MenuService/ListMenuTree"
+const OperationMenuServiceListMenus = "/avmc.admin.v1.MenuService/ListMenus"
+const OperationMenuServiceListMenusAll = "/avmc.admin.v1.MenuService/ListMenusAll"
+const OperationMenuServiceListMenusTree = "/avmc.admin.v1.MenuService/ListMenusTree"
 const OperationMenuServiceUpdateMenu = "/avmc.admin.v1.MenuService/UpdateMenu"
 const OperationMenuServiceUpdateMenuByStatus = "/avmc.admin.v1.MenuService/UpdateMenuByStatus"
 
@@ -43,12 +43,12 @@ type MenuServiceHTTPServer interface {
 	ExistMenuByPath(context.Context, *v1.ExistMenuByPathRequest) (*v1.ExistMenuByPathResponse, error)
 	// GetMenu 获取菜单数据
 	GetMenu(context.Context, *v1.GetMenuRequest) (*v1.Menu, error)
-	// ListMenu 获取菜单列表
-	ListMenu(context.Context, *v1.ListMenuRequest) (*v1.ListMenuResponse, error)
-	// ListMenuAll 获取所有菜单
-	ListMenuAll(context.Context, *emptypb.Empty) (*v1.ListMenuResponse, error)
-	// ListMenuTree 获取菜单树
-	ListMenuTree(context.Context, *v1.ListMenuTreeRequest) (*v1.ListMenuTreeResponse, error)
+	// ListMenus 获取菜单列表
+	ListMenus(context.Context, *v1.ListMenusRequest) (*v1.ListMenusResponse, error)
+	// ListMenusAll 获取所有菜单
+	ListMenusAll(context.Context, *emptypb.Empty) (*v1.ListMenusResponse, error)
+	// ListMenusTree 获取菜单树
+	ListMenusTree(context.Context, *v1.ListMenusTreeRequest) (*v1.ListMenusTreeResponse, error)
 	// UpdateMenu 更新菜单
 	UpdateMenu(context.Context, *v1.UpdateMenuRequest) (*v1.UpdateMenuResponse, error)
 	// UpdateMenuByStatus 更新菜单状态
@@ -57,10 +57,10 @@ type MenuServiceHTTPServer interface {
 
 func RegisterMenuServiceHTTPServer(s *http.Server, srv MenuServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/menus/all", _MenuService_ListMenuAll0_HTTP_Handler(srv))
-	r.GET("/admin/v1/menus/tree", _MenuService_ListMenuTree0_HTTP_Handler(srv))
-	r.GET("/admin/v1/menus/tree/{parent_id}", _MenuService_ListMenuTree1_HTTP_Handler(srv))
-	r.GET("/admin/v1/menus", _MenuService_ListMenu0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/all", _MenuService_ListMenusAll0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/tree", _MenuService_ListMenusTree0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus/tree/{parent_id}", _MenuService_ListMenusTree1_HTTP_Handler(srv))
+	r.GET("/admin/v1/menus", _MenuService_ListMenus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/menus/{id}", _MenuService_GetMenu0_HTTP_Handler(srv))
 	r.POST("/admin/v1/menus", _MenuService_CreateMenu0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/menus/{id}", _MenuService_UpdateMenu0_HTTP_Handler(srv))
@@ -72,81 +72,81 @@ func RegisterMenuServiceHTTPServer(s *http.Server, srv MenuServiceHTTPServer) {
 	r.PUT("/admin/v1/menus/status-update/{id}", _MenuService_UpdateMenuByStatus0_HTTP_Handler(srv))
 }
 
-func _MenuService_ListMenuAll0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+func _MenuService_ListMenusAll0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in emptypb.Empty
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMenuServiceListMenuAll)
+		http.SetOperation(ctx, OperationMenuServiceListMenusAll)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListMenuAll(ctx, req.(*emptypb.Empty))
+			return srv.ListMenusAll(ctx, req.(*emptypb.Empty))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListMenuResponse)
+		reply := out.(*v1.ListMenusResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _MenuService_ListMenuTree0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+func _MenuService_ListMenusTree0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListMenuTreeRequest
+		var in v1.ListMenusTreeRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMenuServiceListMenuTree)
+		http.SetOperation(ctx, OperationMenuServiceListMenusTree)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListMenuTree(ctx, req.(*v1.ListMenuTreeRequest))
+			return srv.ListMenusTree(ctx, req.(*v1.ListMenusTreeRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListMenuTreeResponse)
+		reply := out.(*v1.ListMenusTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _MenuService_ListMenuTree1_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+func _MenuService_ListMenusTree1_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListMenuTreeRequest
+		var in v1.ListMenusTreeRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMenuServiceListMenuTree)
+		http.SetOperation(ctx, OperationMenuServiceListMenusTree)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListMenuTree(ctx, req.(*v1.ListMenuTreeRequest))
+			return srv.ListMenusTree(ctx, req.(*v1.ListMenusTreeRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListMenuTreeResponse)
+		reply := out.(*v1.ListMenusTreeResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _MenuService_ListMenu0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
+func _MenuService_ListMenus0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.ListMenuRequest
+		var in v1.ListMenusRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMenuServiceListMenu)
+		http.SetOperation(ctx, OperationMenuServiceListMenus)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListMenu(ctx, req.(*v1.ListMenuRequest))
+			return srv.ListMenus(ctx, req.(*v1.ListMenusRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.ListMenuResponse)
+		reply := out.(*v1.ListMenusResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -366,12 +366,12 @@ type MenuServiceHTTPClient interface {
 	ExistMenuByPath(ctx context.Context, req *v1.ExistMenuByPathRequest, opts ...http.CallOption) (rsp *v1.ExistMenuByPathResponse, err error)
 	// GetMenu 获取菜单数据
 	GetMenu(ctx context.Context, req *v1.GetMenuRequest, opts ...http.CallOption) (rsp *v1.Menu, err error)
-	// ListMenu 获取菜单列表
-	ListMenu(ctx context.Context, req *v1.ListMenuRequest, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
-	// ListMenuAll 获取所有菜单
-	ListMenuAll(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *v1.ListMenuResponse, err error)
-	// ListMenuTree 获取菜单树
-	ListMenuTree(ctx context.Context, req *v1.ListMenuTreeRequest, opts ...http.CallOption) (rsp *v1.ListMenuTreeResponse, err error)
+	// ListMenus 获取菜单列表
+	ListMenus(ctx context.Context, req *v1.ListMenusRequest, opts ...http.CallOption) (rsp *v1.ListMenusResponse, err error)
+	// ListMenusAll 获取所有菜单
+	ListMenusAll(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *v1.ListMenusResponse, err error)
+	// ListMenusTree 获取菜单树
+	ListMenusTree(ctx context.Context, req *v1.ListMenusTreeRequest, opts ...http.CallOption) (rsp *v1.ListMenusTreeResponse, err error)
 	// UpdateMenu 更新菜单
 	UpdateMenu(ctx context.Context, req *v1.UpdateMenuRequest, opts ...http.CallOption) (rsp *v1.UpdateMenuResponse, err error)
 	// UpdateMenuByStatus 更新菜单状态
@@ -456,12 +456,12 @@ func (c *MenuServiceHTTPClientImpl) GetMenu(ctx context.Context, in *v1.GetMenuR
 	return &out, nil
 }
 
-// ListMenu 获取菜单列表
-func (c *MenuServiceHTTPClientImpl) ListMenu(ctx context.Context, in *v1.ListMenuRequest, opts ...http.CallOption) (*v1.ListMenuResponse, error) {
-	var out v1.ListMenuResponse
+// ListMenus 获取菜单列表
+func (c *MenuServiceHTTPClientImpl) ListMenus(ctx context.Context, in *v1.ListMenusRequest, opts ...http.CallOption) (*v1.ListMenusResponse, error) {
+	var out v1.ListMenusResponse
 	pattern := "/admin/v1/menus"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMenuServiceListMenu))
+	opts = append(opts, http.Operation(OperationMenuServiceListMenus))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -470,12 +470,12 @@ func (c *MenuServiceHTTPClientImpl) ListMenu(ctx context.Context, in *v1.ListMen
 	return &out, nil
 }
 
-// ListMenuAll 获取所有菜单
-func (c *MenuServiceHTTPClientImpl) ListMenuAll(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*v1.ListMenuResponse, error) {
-	var out v1.ListMenuResponse
+// ListMenusAll 获取所有菜单
+func (c *MenuServiceHTTPClientImpl) ListMenusAll(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*v1.ListMenusResponse, error) {
+	var out v1.ListMenusResponse
 	pattern := "/admin/v1/menus/all"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMenuServiceListMenuAll))
+	opts = append(opts, http.Operation(OperationMenuServiceListMenusAll))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -484,12 +484,12 @@ func (c *MenuServiceHTTPClientImpl) ListMenuAll(ctx context.Context, in *emptypb
 	return &out, nil
 }
 
-// ListMenuTree 获取菜单树
-func (c *MenuServiceHTTPClientImpl) ListMenuTree(ctx context.Context, in *v1.ListMenuTreeRequest, opts ...http.CallOption) (*v1.ListMenuTreeResponse, error) {
-	var out v1.ListMenuTreeResponse
+// ListMenusTree 获取菜单树
+func (c *MenuServiceHTTPClientImpl) ListMenusTree(ctx context.Context, in *v1.ListMenusTreeRequest, opts ...http.CallOption) (*v1.ListMenusTreeResponse, error) {
+	var out v1.ListMenusTreeResponse
 	pattern := "/admin/v1/menus/tree/{parent_id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMenuServiceListMenuTree))
+	opts = append(opts, http.Operation(OperationMenuServiceListMenusTree))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

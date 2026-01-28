@@ -19,8 +19,9 @@ type RoleRepo interface {
 	Save(context.Context, *pbCore.Role) (*pbCore.Role, error)
 	Update(context.Context, *pbCore.Role) (*pbCore.Role, error)
 	FindByID(context.Context, uint32) (*pbCore.Role, error)
+	CountRoles(context.Context, ...ListOption) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Role, error)
-	ListPage(context.Context, *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) // 新增的方法用于分页查询
+	ListRoles(context.Context, ...ListOption) ([]*pbCore.Role, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, *pbCore.ExistRoleByNameRequest) (bool, error)
 }
@@ -65,6 +66,17 @@ func (uc *RoleUsecase) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role
 	return uc.repo.Update(ctx, g)
 }
 
+// CountRoles 处理角色条件查询聚合请求
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：角色数量，错误信息
+func (uc *RoleUsecase) CountRoles(ctx context.Context, opts ...ListOption) (int32, error) {
+	resp, err := uc.repo.CountRoles(ctx, opts...)
+	if err != nil {
+		return 0, err
+	}
+	return resp, nil
+}
+
 // ListSimple 处理角色简单列表请求
 // 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
 // 返回值：角色列表，错误信息
@@ -72,11 +84,11 @@ func (uc *RoleUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-// ListPage 处理角色分页列表请求
+// ListRoles 处理角色分页列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：角色列表响应，错误信息
-func (uc *RoleUsecase) ListPage(ctx context.Context, req *pbCore.ListRoleRequest) (*pbCore.ListRoleResponse, error) {
-	return uc.repo.ListPage(ctx, req)
+func (uc *RoleUsecase) ListRoles(ctx context.Context, opts ...ListOption) ([]*pbCore.Role, error) {
+	return uc.repo.ListRoles(ctx, opts...)
 }
 
 // Delete 处理删除角色请求

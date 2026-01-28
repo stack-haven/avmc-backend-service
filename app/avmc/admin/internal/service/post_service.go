@@ -8,6 +8,9 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/filtering"
+	"go.einride.tech/aip/ordering"
+	"go.einride.tech/aip/pagination"
 )
 
 // PostServiceService 岗位服务结构体
@@ -31,9 +34,50 @@ func NewPostServiceService(puc *biz.PostUsecase, logger log.Logger) *PostService
 // ListPost 处理岗位列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：岗位列表响应，错误信息
-func (s *PostServiceService) ListPost(ctx context.Context, req *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) {
+func (s *PostServiceService) ListPosts(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
 	s.log.Infof("查询岗位列表分页，分页请求：%v", req)
-	return s.puc.ListPage(ctx, req)
+
+	declarations, err := filtering.NewDeclarations(
+		filtering.DeclareStandardFunctions(),
+		filtering.DeclareIdent("name", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	filter, err := filtering.ParseFilter(req, declarations)
+	if err != nil {
+		return nil, err
+	}
+
+	pageToken, err := pagination.ParsePageToken(req)
+	if err != nil {
+		return nil, err
+	}
+	orderBy, err := ordering.ParseOrderBy(req)
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.puc.CountPosts(ctx, biz.ListFilter(filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := pbCore.ListPostsResponse{
+		Total: count,
+	}
+	resp.Items, err = s.puc.ListPosts(ctx,
+		biz.ListFilter(filter),
+		biz.ListOrderBy(orderBy),
+		biz.ListLimit(int(req.PageSize)),
+		biz.ListOffset(int(pageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= int(req.PageSize) {
+		resp.NextPageToken = pageToken.Next(req).String()
+	}
+	return &resp, nil
 }
 
 // GetPost 处理获取岗位详情请求

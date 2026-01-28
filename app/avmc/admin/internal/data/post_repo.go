@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kratos/aip-go/ents"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
@@ -159,6 +160,26 @@ func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post,
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
+// CountPosts 查询岗位数量
+// 参数：ctx 上下文，filter 过滤条件
+// 返回值：岗位数量，错误信息
+func (r *postRepo) CountPosts(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	r.log.Infof("查询岗位数量，过滤条件：%v", opts)
+	o := biz.ListOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	count, err := r.data.db.Post.Query().
+		Select(post.FieldID).
+		Where(ents.ApplyFilter(o.Filter)).
+		Count(ctx)
+	if err != nil {
+		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
+		return 0, err
+	}
+	return int32(count), nil
+}
+
 // ListAll 查询所有岗位列表
 // 参数：ctx 上下文
 // 返回值：岗位列表，错误信息
@@ -172,10 +193,37 @@ func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
+// ListPosts 查询岗位列表
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：岗位列表，错误信息
+func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Post, error) {
+	r.log.Infof("查询岗位列表，分页选项：%v", opts)
+	o := biz.ListOptions{Limit: 20}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	pos, err := r.data.db.Post.Query().
+		Select(
+			post.FieldID,
+			post.FieldName,
+			post.FieldCreatedAt,
+			post.FieldUpdatedAt,
+		).
+		Where(ents.ApplyFilter(o.Filter)).
+		Order(ents.ApplyOrderBy(o.OrderBy)).
+		Offset(o.Offset).
+		Limit(o.Limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convert.SliceToAny(pos, r.convertProto), nil
+}
+
 // ListPage 查询岗位列表分页
 // 参数：ctx 上下文，req 分页请求
 // 返回值：岗位列表响应，错误信息
-func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostRequest) (*pbCore.ListPostResponse, error) {
+func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
 	r.log.Infof("查询岗位列表分页，分页请求：%v", req)
 	count, err := r.data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
@@ -190,7 +238,7 @@ func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostRequest) (*
 			post.FieldUpdatedAt,
 		).
 		Where().
-		Offset(int((req.GetPage() - 1) * req.GetPageSize())).
+		// Offset(int((req.GetPage() - 1) * req.GetPageSize())).
 		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(post.FieldID)).
 		All(ctx)
@@ -198,7 +246,7 @@ func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostRequest) (*
 		r.log.Errorf("查询岗位列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
-	return &pbCore.ListPostResponse{
+	return &pbCore.ListPostsResponse{
 		Items: convert.SliceToAny(res, r.convertProto),
 		Total: int32(count),
 	}, nil

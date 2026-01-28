@@ -19,8 +19,9 @@ type MenuRepo interface {
 	Save(context.Context, *pbCore.Menu) (*pbCore.Menu, error)
 	Update(context.Context, *pbCore.Menu) (*pbCore.Menu, error)
 	FindByID(context.Context, uint32) (*pbCore.Menu, error)
+	CountMenus(context.Context, ...ListOption) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Menu, error)
-	ListPage(context.Context, *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) // 新增的方法用于分页查询
+	ListMenus(context.Context, ...ListOption) ([]*pbCore.Menu, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, *pbCore.ExistMenuByNameRequest) (bool, error)
 	ExistByPath(context.Context, *pbCore.ExistMenuByPathRequest) (bool, error)
@@ -67,6 +68,17 @@ func (uc *MenuUsecase) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu
 	return uc.repo.Update(ctx, g)
 }
 
+// CountMenus 处理菜单条件查询聚合请求
+// 参数：ctx 上下文，opts 分页选项
+// 返回值：菜单数量，错误信息
+func (uc *MenuUsecase) CountMenus(ctx context.Context, opts ...ListOption) (int32, error) {
+	resp, err := uc.repo.CountMenus(ctx, opts...)
+	if err != nil {
+		return 0, err
+	}
+	return resp, nil
+}
+
 // ListSimple 处理获取菜单简单列表请求
 // 参数：ctx 上下文，pageNum 页码，pageSize 每页数量
 // 返回值：菜单列表，错误信息
@@ -74,17 +86,17 @@ func (uc *MenuUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 	return uc.repo.ListAll(ctx)
 }
 
-// ListPage 处理获取菜单分页列表请求
+// ListMenu 处理获取菜单分页列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：菜单列表响应，错误信息
-func (uc *MenuUsecase) ListPage(ctx context.Context, req *pbCore.ListMenuRequest) (*pbCore.ListMenuResponse, error) {
-	return uc.repo.ListPage(ctx, req)
+func (uc *MenuUsecase) ListMenus(ctx context.Context, opts ...ListOption) ([]*pbCore.Menu, error) {
+	return uc.repo.ListMenus(ctx, opts...)
 }
 
 // ListTree 处理获取菜单树形列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：菜单树形列表响应，错误信息
-func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMenuTreeResponse, error) {
+func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMenusTreeResponse, error) {
 	menus, err := uc.repo.ListAll(ctx)
 	if err != nil {
 		return nil, err
@@ -103,7 +115,7 @@ func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMe
 	if err != nil {
 		return nil, err
 	}
-	return &pbCore.ListMenuTreeResponse{Items: tree}, nil
+	return &pbCore.ListMenusTreeResponse{Items: tree}, nil
 }
 
 // Delete 处理删除菜单请求

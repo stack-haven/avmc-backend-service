@@ -23,7 +23,7 @@ const (
 	PostService_UpdatePost_FullMethodName         = "/core.service.v1.PostService/UpdatePost"
 	PostService_DeletePost_FullMethodName         = "/core.service.v1.PostService/DeletePost"
 	PostService_GetPost_FullMethodName            = "/core.service.v1.PostService/GetPost"
-	PostService_ListPost_FullMethodName           = "/core.service.v1.PostService/ListPost"
+	PostService_ListPosts_FullMethodName          = "/core.service.v1.PostService/ListPosts"
 	PostService_UpdatePostByStatus_FullMethodName = "/core.service.v1.PostService/UpdatePostByStatus"
 )
 
@@ -40,7 +40,7 @@ type PostServiceClient interface {
 	// 获取岗位
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	// 分页查询岗位
-	ListPost(ctx context.Context, in *ListPostRequest, opts ...grpc.CallOption) (*ListPostResponse, error)
+	ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
 	// 更新岗位状态
 	UpdatePostByStatus(ctx context.Context, in *UpdatePostByStatusRequest, opts ...grpc.CallOption) (*UpdatePostByStatusResponse, error)
 }
@@ -93,10 +93,10 @@ func (c *postServiceClient) GetPost(ctx context.Context, in *GetPostRequest, opt
 	return out, nil
 }
 
-func (c *postServiceClient) ListPost(ctx context.Context, in *ListPostRequest, opts ...grpc.CallOption) (*ListPostResponse, error) {
+func (c *postServiceClient) ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListPostResponse)
-	err := c.cc.Invoke(ctx, PostService_ListPost_FullMethodName, in, out, cOpts...)
+	out := new(ListPostsResponse)
+	err := c.cc.Invoke(ctx, PostService_ListPosts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ type PostServiceServer interface {
 	// 获取岗位
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	// 分页查询岗位
-	ListPost(context.Context, *ListPostRequest) (*ListPostResponse, error)
+	ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
 	// 更新岗位状态
 	UpdatePostByStatus(context.Context, *UpdatePostByStatusRequest) (*UpdatePostByStatusResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
@@ -151,8 +151,8 @@ func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostReq
 func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
-func (UnimplementedPostServiceServer) ListPost(context.Context, *ListPostRequest) (*ListPostResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPost not implemented")
+func (UnimplementedPostServiceServer) ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPosts not implemented")
 }
 func (UnimplementedPostServiceServer) UpdatePostByStatus(context.Context, *UpdatePostByStatusRequest) (*UpdatePostByStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePostByStatus not implemented")
@@ -250,20 +250,20 @@ func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostService_ListPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPostRequest)
+func _PostService_ListPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPostsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostServiceServer).ListPost(ctx, in)
+		return srv.(PostServiceServer).ListPosts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PostService_ListPost_FullMethodName,
+		FullMethod: PostService_ListPosts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).ListPost(ctx, req.(*ListPostRequest))
+		return srv.(PostServiceServer).ListPosts(ctx, req.(*ListPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -310,8 +310,8 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostService_GetPost_Handler,
 		},
 		{
-			MethodName: "ListPost",
-			Handler:    _PostService_ListPost_Handler,
+			MethodName: "ListPosts",
+			Handler:    _PostService_ListPosts_Handler,
 		},
 		{
 			MethodName: "UpdatePostByStatus",
