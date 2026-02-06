@@ -16,6 +16,24 @@ import (
 	v1 "backend-service/api/avmc/admin/v1"
 )
 
+type AuthTokenKey struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+type AuthData struct {
+	Key   string
+	Value uint32
+}
+
+type AuthTokenInfo struct {
+	Username    string
+	UserId      uint32
+	DomainId    uint32
+	Roles       []AuthData
+	Permissions []AuthData
+}
+
 // AuthTokenRepo 认证令牌仓库结构体
 // 包含Redis客户端、日志记录器、认证器、访问令牌和刷新令牌的键前缀
 type authTokenRepo struct {
@@ -30,7 +48,7 @@ type authTokenRepo struct {
 // NewAuthTokenRepo 创建认证令牌仓库实例
 // 参数：data 数据访问层实例，authenticator 认证器实例，logger 日志记录器实例
 // 返回：*authTokenRepo 认证令牌仓库实例
-func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logger log.Logger) *authTokenRepo {
+func NewAuthTokenRepo(rdb *redis.Client, authenticator authnEngine.Authenticator, logger log.Logger) *authTokenRepo {
 	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
 		accessTokenKeyPrefix  = "admin_uat_"
@@ -38,7 +56,7 @@ func NewAuthTokenRepo(data *Data, authenticator authnEngine.Authenticator, logge
 	)
 	return &authTokenRepo{
 		log:                   log,
-		rdb:                   data.rdb,
+		rdb:                   rdb,
 		authenticator:         authenticator,
 		accessTokenKeyPrefix:  accessTokenKeyPrefix,
 		refreshTokenKeyPrefix: refreshTokenKeyPrefix,
@@ -167,7 +185,7 @@ func (r *authTokenRepo) createAccessToken(_ string, userId uint32, domanId uint3
 		"scope": "",
 	}
 
-	signedToken, err := r.authenticator.CreateToken(context.Background(), principal)
+	signedToken, err := r.authenticator.CreateToken(context.Background(), principal, r.authenticator.Options().TokenExpiration)
 	if err != nil {
 		return ""
 	}
@@ -183,7 +201,7 @@ func (r *authTokenRepo) createRefreshToken(_ string, userId uint32, domanId uint
 		"dom":         convert.Unit32ToString(domanId),
 		"refresh_exp": time.Now().Add(r.authenticator.Options().RefreshTokenExpiration),
 	}
-	token, err := r.authenticator.CreateToken(context.Background(), authClaims)
+	token, err := r.authenticator.CreateToken(context.Background(), authClaims, r.authenticator.Options().RefreshTokenExpiration)
 	if err != nil {
 		return ""
 	}

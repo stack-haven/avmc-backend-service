@@ -12,6 +12,7 @@ inputs:
   - directory: .
     paths:
       - ./avmc/admin/v1
+      - ./avmc/ai/v1
       - ./core/service/v1
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.5

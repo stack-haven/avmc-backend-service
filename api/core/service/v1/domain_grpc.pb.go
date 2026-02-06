@@ -7,7 +7,6 @@
 package v1
 
 import (
-	pagination "backend-service/api/common/pagination"
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -24,7 +23,7 @@ const (
 	DomainService_UpdateDomain_FullMethodName = "/core.service.v1.DomainService/UpdateDomain"
 	DomainService_DeleteDomain_FullMethodName = "/core.service.v1.DomainService/DeleteDomain"
 	DomainService_GetDomain_FullMethodName    = "/core.service.v1.DomainService/GetDomain"
-	DomainService_ListDomain_FullMethodName   = "/core.service.v1.DomainService/ListDomain"
+	DomainService_ListDomains_FullMethodName  = "/core.service.v1.DomainService/ListDomains"
 )
 
 // DomainServiceClient is the client API for DomainService service.
@@ -40,7 +39,7 @@ type DomainServiceClient interface {
 	// 获取域
 	GetDomain(ctx context.Context, in *GetDomainRequest, opts ...grpc.CallOption) (*GetDomainResponse, error)
 	// 分页查询域
-	ListDomain(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListDomainResponse, error)
+	ListDomains(ctx context.Context, in *ListDomainsRequest, opts ...grpc.CallOption) (*ListDomainsResponse, error)
 }
 
 type domainServiceClient struct {
@@ -91,10 +90,10 @@ func (c *domainServiceClient) GetDomain(ctx context.Context, in *GetDomainReques
 	return out, nil
 }
 
-func (c *domainServiceClient) ListDomain(ctx context.Context, in *pagination.PagingRequest, opts ...grpc.CallOption) (*ListDomainResponse, error) {
+func (c *domainServiceClient) ListDomains(ctx context.Context, in *ListDomainsRequest, opts ...grpc.CallOption) (*ListDomainsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListDomainResponse)
-	err := c.cc.Invoke(ctx, DomainService_ListDomain_FullMethodName, in, out, cOpts...)
+	out := new(ListDomainsResponse)
+	err := c.cc.Invoke(ctx, DomainService_ListDomains_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +113,7 @@ type DomainServiceServer interface {
 	// 获取域
 	GetDomain(context.Context, *GetDomainRequest) (*GetDomainResponse, error)
 	// 分页查询域
-	ListDomain(context.Context, *pagination.PagingRequest) (*ListDomainResponse, error)
+	ListDomains(context.Context, *ListDomainsRequest) (*ListDomainsResponse, error)
 	mustEmbedUnimplementedDomainServiceServer()
 }
 
@@ -137,8 +136,8 @@ func (UnimplementedDomainServiceServer) DeleteDomain(context.Context, *DeleteDom
 func (UnimplementedDomainServiceServer) GetDomain(context.Context, *GetDomainRequest) (*GetDomainResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDomain not implemented")
 }
-func (UnimplementedDomainServiceServer) ListDomain(context.Context, *pagination.PagingRequest) (*ListDomainResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListDomain not implemented")
+func (UnimplementedDomainServiceServer) ListDomains(context.Context, *ListDomainsRequest) (*ListDomainsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDomains not implemented")
 }
 func (UnimplementedDomainServiceServer) mustEmbedUnimplementedDomainServiceServer() {}
 func (UnimplementedDomainServiceServer) testEmbeddedByValue()                       {}
@@ -233,20 +232,20 @@ func _DomainService_GetDomain_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DomainService_ListDomain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(pagination.PagingRequest)
+func _DomainService_ListDomains_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDomainsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DomainServiceServer).ListDomain(ctx, in)
+		return srv.(DomainServiceServer).ListDomains(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DomainService_ListDomain_FullMethodName,
+		FullMethod: DomainService_ListDomains_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DomainServiceServer).ListDomain(ctx, req.(*pagination.PagingRequest))
+		return srv.(DomainServiceServer).ListDomains(ctx, req.(*ListDomainsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -275,8 +274,8 @@ var DomainService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DomainService_GetDomain_Handler,
 		},
 		{
-			MethodName: "ListDomain",
-			Handler:    _DomainService_ListDomain_Handler,
+			MethodName: "ListDomains",
+			Handler:    _DomainService_ListDomains_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

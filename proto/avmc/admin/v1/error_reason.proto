@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package avmc.admin.v1;
+
 import "errors/errors.proto";
 
 option go_package = "backend-service/api/avmc/admin/v1;v1";
@@ -14,12 +15,12 @@ enum ErrorReason {
   option (errors.default_code) = 500;
 
   // =======================================
-   // HTTP标准错误 (0-99)
-   // =======================================
-   // 保留的默认错误值
-   RESERVED_DEFAULT = 0 [(errors.code) = 500];
-   // 客户端请求格式错误，服务器无法理解
-   BAD_REQUEST = 1 [(errors.code) = 400];
+  // HTTP标准错误 (0-99)
+  // =======================================
+  // 保留的默认错误值
+  RESERVED_DEFAULT = 0 [(errors.code) = 500];
+  // 客户端请求格式错误，服务器无法理解
+  BAD_REQUEST = 1 [(errors.code) = 400];
   // 用户未登录，尝试访问需要认证的资源
   NOT_LOGGED_IN = 2 [(errors.code) = 401];
   // 用户没有权限访问请求的资源
@@ -250,4 +251,16 @@ enum ErrorReason {
   THIRD_PARTY_TIMEOUT = 1101 [(errors.code) = 504];
   // 调用第三方服务时未获得授权
   THIRD_PARTY_UNAUTHORIZED = 1102 [(errors.code) = 401];
+
+  // =======================================
+  // Chat服务错误 (1200-1299)
+  // =======================================
+  // 未找到指定的AI对话记录
+  AI_CHAT_NOT_FOUND = 1200 [(errors.code) = 404];
+  // AI对话不存在于系统中
+  AI_CHAT_NOT_EXIST = 1201 [(errors.code) = 404];
+  // 提供的AI对话ID无效，可能格式错误或不存在
+  AI_CHAT_INVALID_ID = 1204 [(errors.code) = 400];
+  // AI对话状态不能为空
+  AI_CHAT_STATUS_CANNOT_BE_EMPTY = 1207 [(errors.code) = 400];
 }

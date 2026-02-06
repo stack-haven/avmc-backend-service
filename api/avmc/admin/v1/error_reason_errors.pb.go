@@ -1412,3 +1412,65 @@ func IsThirdPartyUnauthorized(err error) bool {
 func ErrorThirdPartyUnauthorized(format string, args ...interface{}) *errors.Error {
 	return errors.New(401, ErrorReason_THIRD_PARTY_UNAUTHORIZED.String(), fmt.Sprintf(format, args...))
 }
+
+// =======================================
+// Chat服务错误 (1200-1299)
+// =======================================
+// 未找到指定的AI对话记录
+func IsAiChatNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AI_CHAT_NOT_FOUND.String() && e.Code == 404
+}
+
+// =======================================
+// Chat服务错误 (1200-1299)
+// =======================================
+// 未找到指定的AI对话记录
+func ErrorAiChatNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_AI_CHAT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// AI对话不存在于系统中
+func IsAiChatNotExist(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AI_CHAT_NOT_EXIST.String() && e.Code == 404
+}
+
+// AI对话不存在于系统中
+func ErrorAiChatNotExist(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_AI_CHAT_NOT_EXIST.String(), fmt.Sprintf(format, args...))
+}
+
+// 提供的AI对话ID无效，可能格式错误或不存在
+func IsAiChatInvalidId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AI_CHAT_INVALID_ID.String() && e.Code == 400
+}
+
+// 提供的AI对话ID无效，可能格式错误或不存在
+func ErrorAiChatInvalidId(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_AI_CHAT_INVALID_ID.String(), fmt.Sprintf(format, args...))
+}
+
+// AI对话状态不能为空
+func IsAiChatStatusCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AI_CHAT_STATUS_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// AI对话状态不能为空
+func ErrorAiChatStatusCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_AI_CHAT_STATUS_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}

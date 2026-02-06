@@ -236,7 +236,7 @@ func (a *JWTAuthenticator) ValidateToken(ctx context.Context, tokenString string
 }
 
 // CreateToken 创建新的身份令牌
-func (a *JWTAuthenticator) CreateToken(ctx context.Context, claims authn.AuthClaims) (string, error) {
+func (a *JWTAuthenticator) CreateToken(ctx context.Context, claims authn.AuthClaims, expires time.Duration) (string, error) {
 	// 创建JWT声明
 	jwtClaims := jwt.MapClaims{}
 	for k, v := range claims {
@@ -246,7 +246,7 @@ func (a *JWTAuthenticator) CreateToken(ctx context.Context, claims authn.AuthCla
 	// 设置标准声明
 	now := time.Now()
 	jwtClaims["iat"] = now.Unix()
-	jwtClaims["exp"] = now.Add(a.options.TokenExpiration).Unix()
+	jwtClaims["exp"] = now.Add(expires).Unix()
 
 	if a.options.Issuer != "" {
 		jwtClaims["iss"] = a.options.Issuer
@@ -281,7 +281,7 @@ func (a *JWTAuthenticator) RefreshToken(ctx context.Context, token string) (stri
 	}
 
 	// 创建新令牌
-	return a.CreateToken(ctx, *claims)
+	return a.CreateToken(ctx, *claims, a.options.RefreshTokenExpiration)
 }
 
 // RevokeToken 撤销令牌，使其失效

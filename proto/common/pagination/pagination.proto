@@ -2,72 +2,55 @@ syntax = "proto3";
 
 package pagination;
 
-option go_package = "backend-service/api/common/pagination;pagination";
-
+import "gnostic/openapi/v3/annotations.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/field_mask.proto";
-import "gnostic/openapi/v3/annotations.proto";
 
-// 分页通用请求
+option go_package = "backend-service/api/common/pagination;pagination";
+
 message PagingRequest {
-  // 当前页码
-  optional int32 page = 1 [
-    json_name = "page",
+  // 每页的行数
+  int32 page_size = 1 [
+    json_name = "pageSize",
     (gnostic.openapi.v3.property) = {
-      description: "当前页码",
+      description: "每一页的行数"
+      default: {number: 20}
+    }
+  ];
+  // 当前页码
+  string page_token = 2 [
+    json_name = "pageToken",
+    (gnostic.openapi.v3.property) = {
+      description: "当前页码"
       default: {number: 1}
     }
   ];
-
-  // 每页的行数
-  optional int32 page_size = 2 [
-    json_name = "pageSize",
-    (gnostic.openapi.v3.property) = {
-      description: "每一页的行数",
-      default: {number: 10}
-    }
-  ];
-
-  // 与过滤参数
-  optional string query = 3 [
-    json_name = "query",
-    (gnostic.openapi.v3.property) = {
-      description: "与过滤参数",
-      example: {yaml: "{\"key1\":\"val1\",\"key2\":\"val2\"}"}
-    }
-  ];
-
-  // 或过滤参数
-  optional string or_query = 4 [
-    json_name = "or",
-    (gnostic.openapi.v3.property) = {
-      description: "或过滤参数",
-      example: {yaml: "{\"key1\":\"val1\",\"key2\":\"val2\"}"}
-    }
-  ];
-
-  // 排序条件
-  repeated string order_by = 5 [
-    json_name = "orderBy",
-    (gnostic.openapi.v3.property) = {
-      description: "排序条件，字段名前加'-'为降序，否则为升序。"
-      example: {yaml: "{\"val1\", \"-val2\"}"}
-    }
-  ];
-
+  int32 skip = 3 [(gnostic.openapi.v3.property) = {description: "跳过的行数"}];
+  // Optional. The standard list filter.
+  // Supported fields:
+  //    * `name` (i.e. `name="John Doe"`)
+  //    * `email` (i.e. `email="admin@go-kratos.dev"`)
+  //    * `phone` (i.e. `phone="+1234567890"`)
+  //    * `create_time` range (i.e. `timestamp>="2025-01-31T11:30:00-04:00"` where
+  //    the timestamp is in RFC 3339 format)
+  //
+  // More detail in [AIP-160](https://google.aip.dev/160).
+  optional string filter = 4 [(gnostic.openapi.v3.property) = {description: "筛选条件"}];
+  // Optional. A comma-separated list of fields to order by, sorted in ascending
+  // order. Use "desc" after a field name for descending. Supported fields:
+  // - `create_time`
+  //
+  // Example: `create_time desc`.
+  optional string order_by = 5 [(gnostic.openapi.v3.property) = {description: "排序字段"}]; // Number of resource to skip in the request.
+  // * A request with no page token and a skip value of 30 returns a single
+  //   page of results starting with the 31st result.
+  // * A request with a page token corresponding to the 51st result (because the
+  //   first 50 results were returned on the first page) and a skip value of 30
+  //   returns a single page of results starting with the 81st result.
   // 是否不分页
   optional bool no_paging = 6 [
     json_name = "nopaging",
     (gnostic.openapi.v3.property) = {description: "是否不分页"}
-  ];
-
-  // 字段掩码
-  google.protobuf.FieldMask field_mask = 7 [
-    json_name = "fieldMask",
-    (gnostic.openapi.v3.property) = {
-      description: "字段掩码，如果为空则选中所有字段。",
-      example: {yaml : "id,realName,name"}
-    }
   ];
 }
 
@@ -75,7 +58,8 @@ message PagingRequest {
 message PagingResponse {
   // 总数
   int32 total = 1;
-
   // 分页数据
   repeated google.protobuf.Any items = 2;
+  // 下一页的令牌
+  string next_page_token = 3;
 }

@@ -37,7 +37,7 @@ func NewUserServiceService(uuc *biz.UserUsecase, logger log.Logger) *UserService
 // ListUserSimple 处理用户简单列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：用户列表响应，错误信息
-func (s *UserServiceService) ListUserSimple(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
+func (s *UserServiceService) ListUsersSimple(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
 	s.log.Infof("查询用户简单列表分页，分页请求：%v", req)
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),

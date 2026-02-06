@@ -2,6 +2,7 @@ package authn
 
 import (
 	"context"
+	"time"
 )
 
 var _ Authenticator = (*NoopAuthenticator)(nil)
@@ -44,7 +45,7 @@ func (a *NoopAuthenticator) ValidateToken(ctx context.Context, tokenString strin
 }
 
 // CreateToken 创建新的身份令牌
-func (a *NoopAuthenticator) CreateToken(ctx context.Context, claims AuthClaims) (string, error) {
+func (a *NoopAuthenticator) CreateToken(ctx context.Context, claims AuthClaims, expires time.Duration) (string, error) {
 	return "", nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -232,7 +233,7 @@ func (a *OIDCAuthenticator) ValidateToken(ctx context.Context, tokenString strin
 }
 
 // CreateToken 创建新的访问令牌（不适用于OIDC，需要重定向到提供者）
-func (a *OIDCAuthenticator) CreateToken(ctx context.Context, claims authn.AuthClaims) (string, error) {
+func (a *OIDCAuthenticator) CreateToken(ctx context.Context, claims authn.AuthClaims, expires time.Duration) (string, error) {
 	return "", authn.NewAuthError(authn.ErrCodeUnsupportedTokenType, "direct token creation not supported by OIDC, use authorization code flow instead", nil)
 }
 

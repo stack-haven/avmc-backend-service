@@ -17,6 +17,7 @@ inputs:
   - directory: .
     paths:
       - ./avmc/admin/v1
+      - ./avmc/ai/v1
 
 plugins:
   - plugin: openapi

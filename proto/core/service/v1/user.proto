@@ -27,13 +27,13 @@ service UserService {
   // 删除用户
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   // 获取用户
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUser(GetUserRequest) returns (User);
   // 分页查询用户
-  rpc ListUser(ListUsersRequest) returns (ListUsersResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
   // 查询用户详情
-  rpc GetUserByName(GetUserByNameRequest) returns (GetUserResponse);
+  rpc GetUserByName(GetUserByNameRequest) returns (User);
   // 根据手机号查询用户详情
-  rpc GetUserByPhone(GetUserByPhoneRequest) returns (GetUserResponse);
+  rpc GetUserByPhone(GetUserByPhoneRequest) returns (User);
   // 验证密码
   rpc VerifyPassword(VerifyPasswordRequest) returns (VerifyPasswordResponse);
   // 用户是否存在

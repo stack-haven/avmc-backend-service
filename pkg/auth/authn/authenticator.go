@@ -5,30 +5,21 @@ import (
 	"time"
 )
 
-// Authenticator 定义了身份验证服务的接口
-// 实现此接口的提供者需要支持身份验证、令牌管理等功能
-type Authenticator interface {
-	// Init 初始化认证器
+// TokenManager 定义了令牌管理的接口
+// 实现此接口的提供者需要支持令牌的创建、验证、刷新和撤销功能
+type TokenManager interface {
+	// CreateToken 创建新的身份令牌
 	// ctx: 上下文信息
-	// 返回: 初始化过程中的错误
-	Init(ctx context.Context, opts ...Option) error
-
-	// Authenticate 验证用户身份并返回认证声明
-	// ctx: 上下文信息，可能包含令牌信息
-	// 返回: 认证声明和可能的错误
-	Authenticate(ctx context.Context) (*AuthClaims, error)
+	// claims: 认证声明信息
+	// expiration: 令牌有效期
+	// 返回: 令牌字符串和可能的错误
+	CreateToken(ctx context.Context, claims AuthClaims, expiration time.Duration) (string, error)
 
 	// ValidateToken 验证令牌的有效性
 	// ctx: 上下文信息
 	// token: 待验证的令牌字符串
 	// 返回: 认证声明和可能的错误
 	ValidateToken(ctx context.Context, token string) (*AuthClaims, error)
-
-	// CreateToken 创建新的身份令牌
-	// ctx: 上下文信息
-	// claims: 认证声明信息
-	// 返回: 令牌字符串和可能的错误
-	CreateToken(ctx context.Context, claims AuthClaims) (string, error)
 
 	// RefreshToken 刷新令牌，延长有效期
 	// ctx: 上下文信息
@@ -41,6 +32,21 @@ type Authenticator interface {
 	// token: 待撤销的令牌字符串
 	// 返回: 可能的错误
 	RevokeToken(ctx context.Context, token string) error
+}
+
+// Authenticator 定义了身份验证服务的接口
+// 实现此接口的提供者需要支持身份验证、令牌管理等功能
+type Authenticator interface {
+	TokenManager
+	// Init 初始化认证器
+	// ctx: 上下文信息
+	// 返回: 初始化过程中的错误
+	Init(ctx context.Context, opts ...Option) error
+
+	// Authenticate 验证用户身份并返回认证声明
+	// ctx: 上下文信息，可能包含令牌信息
+	// 返回: 认证声明和可能的错误
+	Authenticate(ctx context.Context) (*AuthClaims, error)
 
 	// Close 关闭认证器，释放资源
 	// 返回: 可能的错误
@@ -95,33 +101,4 @@ type AuthProvider interface {
 	// opts: 配置选项
 	// 返回: 认证器实例和可能的错误
 	NewAuthenticator(ctx context.Context, opts ...Option) (Authenticator, error)
-}
-
-// TokenManager 定义了令牌管理的接口
-// 实现此接口的提供者需要支持令牌的创建、验证、刷新和撤销功能
-type TokenManager interface {
-	// CreateToken 创建新的身份令牌
-	// ctx: 上下文信息
-	// claims: 认证声明信息
-	// expiration: 令牌有效期
-	// 返回: 令牌字符串和可能的错误
-	CreateToken(ctx context.Context, claims AuthClaims, expiration time.Duration) (string, error)
-
-	// ValidateToken 验证令牌的有效性
-	// ctx: 上下文信息
-	// token: 待验证的令牌字符串
-	// 返回: 认证声明和可能的错误
-	ValidateToken(ctx context.Context, token string) (*AuthClaims, error)
-
-	// RefreshToken 刷新令牌，延长有效期
-	// ctx: 上下文信息
-	// token: 待刷新的令牌字符串
-	// 返回: 新的令牌字符串和可能的错误
-	RefreshToken(ctx context.Context, token string) (string, error)
-
-	// RevokeToken 撤销令牌，使其失效
-	// ctx: 上下文信息
-	// token: 待撤销的令牌字符串
-	// 返回: 可能的错误
-	RevokeToken(ctx context.Context, token string) error
 }

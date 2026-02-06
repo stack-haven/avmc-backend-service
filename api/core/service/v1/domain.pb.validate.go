@@ -1084,22 +1084,153 @@ var _ interface {
 	ErrorName() string
 } = GetDomainResponseValidationError{}
 
-// Validate checks the field values on ListDomainResponse with the rules
+// Validate checks the field values on ListDomainsRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *ListDomainResponse) Validate() error {
+func (m *ListDomainsRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on ListDomainResponse with the rules
+// ValidateAll checks the field values on ListDomainsRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// ListDomainResponseMultiError, or nil if none found.
-func (m *ListDomainResponse) ValidateAll() error {
+// ListDomainsRequestMultiError, or nil if none found.
+func (m *ListDomainsRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *ListDomainResponse) validate(all bool) error {
+func (m *ListDomainsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetPaging()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ListDomainsRequestValidationError{
+					field:  "Paging",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ListDomainsRequestValidationError{
+					field:  "Paging",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPaging()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ListDomainsRequestValidationError{
+				field:  "Paging",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ListDomainsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListDomainsRequestMultiError is an error wrapping multiple validation errors
+// returned by ListDomainsRequest.ValidateAll() if the designated constraints
+// aren't met.
+type ListDomainsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListDomainsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListDomainsRequestMultiError) AllErrors() []error { return m }
+
+// ListDomainsRequestValidationError is the validation error returned by
+// ListDomainsRequest.Validate if the designated constraints aren't met.
+type ListDomainsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListDomainsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListDomainsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListDomainsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListDomainsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListDomainsRequestValidationError) ErrorName() string {
+	return "ListDomainsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListDomainsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListDomainsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListDomainsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListDomainsRequestValidationError{}
+
+// Validate checks the field values on ListDomainsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListDomainsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListDomainsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListDomainsResponseMultiError, or nil if none found.
+func (m *ListDomainsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListDomainsResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1113,7 +1244,7 @@ func (m *ListDomainResponse) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, ListDomainResponseValidationError{
+					errors = append(errors, ListDomainsResponseValidationError{
 						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1121,7 +1252,7 @@ func (m *ListDomainResponse) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, ListDomainResponseValidationError{
+					errors = append(errors, ListDomainsResponseValidationError{
 						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1130,7 +1261,7 @@ func (m *ListDomainResponse) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return ListDomainResponseValidationError{
+				return ListDomainsResponseValidationError{
 					field:  fmt.Sprintf("Items[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1143,19 +1274,19 @@ func (m *ListDomainResponse) validate(all bool) error {
 	// no validation rules for Total
 
 	if len(errors) > 0 {
-		return ListDomainResponseMultiError(errors)
+		return ListDomainsResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// ListDomainResponseMultiError is an error wrapping multiple validation errors
-// returned by ListDomainResponse.ValidateAll() if the designated constraints
-// aren't met.
-type ListDomainResponseMultiError []error
+// ListDomainsResponseMultiError is an error wrapping multiple validation
+// errors returned by ListDomainsResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListDomainsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m ListDomainResponseMultiError) Error() string {
+func (m ListDomainsResponseMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1164,11 +1295,11 @@ func (m ListDomainResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m ListDomainResponseMultiError) AllErrors() []error { return m }
+func (m ListDomainsResponseMultiError) AllErrors() []error { return m }
 
-// ListDomainResponseValidationError is the validation error returned by
-// ListDomainResponse.Validate if the designated constraints aren't met.
-type ListDomainResponseValidationError struct {
+// ListDomainsResponseValidationError is the validation error returned by
+// ListDomainsResponse.Validate if the designated constraints aren't met.
+type ListDomainsResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1176,24 +1307,24 @@ type ListDomainResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e ListDomainResponseValidationError) Field() string { return e.field }
+func (e ListDomainsResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e ListDomainResponseValidationError) Reason() string { return e.reason }
+func (e ListDomainsResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e ListDomainResponseValidationError) Cause() error { return e.cause }
+func (e ListDomainsResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e ListDomainResponseValidationError) Key() bool { return e.key }
+func (e ListDomainsResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e ListDomainResponseValidationError) ErrorName() string {
-	return "ListDomainResponseValidationError"
+func (e ListDomainsResponseValidationError) ErrorName() string {
+	return "ListDomainsResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e ListDomainResponseValidationError) Error() string {
+func (e ListDomainsResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1205,14 +1336,14 @@ func (e ListDomainResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sListDomainResponse.%s: %s%s",
+		"invalid %sListDomainsResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = ListDomainResponseValidationError{}
+var _ error = ListDomainsResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -1220,4 +1351,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = ListDomainResponseValidationError{}
+} = ListDomainsResponseValidationError{}
