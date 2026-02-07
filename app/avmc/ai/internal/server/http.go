@@ -20,6 +20,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/handlers"
 
+	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
 )
 
@@ -36,14 +37,16 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 
 // NewMiddleware 创建中间件
 func newHTTPMiddleware(
-	authenticator authnEngine.Authenticator,
 	logger log.Logger,
+	authenticator authnEngine.Authenticator,
+	authorizer authzEngine.Authorizer,
 ) []middleware.Middleware {
 	var ms []middleware.Middleware
 	ms = append(ms, logging.Server(logger))
 	ms = append(ms, selector.Server(
 		authMiddleware.AuthnMiddleware(authenticator),
 		// auth.Server(userToken),
+		authMiddleware.AuthzMiddleware(authorizer),
 	).Match(newHTTPWhiteListMatcher()).Build())
 
 	ms = append(ms, validate.ProtoValidate(), recovery.Recovery())
@@ -52,7 +55,7 @@ func newHTTPMiddleware(
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
-	authenticator authnEngine.Authenticator,
+	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorizer,
 	chat *service.ChatServiceService,
 ) *http.Server {
 	var opts = []http.ServerOption{
@@ -61,7 +64,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 			handlers.AllowedMethods(c.Http.Cors.Methods),
 			handlers.AllowedOrigins(c.Http.Cors.Origins),
 		)),
-		http.Middleware(newHTTPMiddleware(authenticator, logger)...),
+		http.Middleware(newHTTPMiddleware(logger, authenticator, authorizer)...),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))

@@ -7,6 +7,7 @@ import (
 	_ "backend-service/app/avmc/ai/internal/data/ent/gen/runtime"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/go-kratos/kratos/v2/log"
@@ -18,13 +19,22 @@ import (
 
 	// casbinmodel "github.com/casbin/casbin/v2/model"
 
+	"backend-service/pkg/auth"
+	authnEngine "backend-service/pkg/auth/authn"
+	authnJwt "backend-service/pkg/auth/authn/jwt"
+
 	_ "github.com/go-sql-driver/mysql"
+
+	authzEngine "backend-service/pkg/auth/authz"
+	authzCasbin "backend-service/pkg/auth/authz/casbin"
 )
 
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
+	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
+	auth.NewAuthToken,
 	NewChatRepo,
 )
 
@@ -144,4 +154,58 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 		}
 	}
 	return rdb
+}
+
+// NewAuthenticator 创建认证器
+func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) authnEngine.Authenticator {
+	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
+	expires := c.Http.Middleware.Auth.ExpiresTime.AsDuration()
+	// 令牌过期时间默认 7天
+	if expires == 0 {
+		expires = time.Hour * 24 * 7
+	}
+	// 刷新令牌过期时间 = 令牌过期时间 * 10
+	refreshExpires := expires * 10
+	// 使用jwt提供者
+	provider := authnJwt.NewProvider()
+	authenticator, err := provider.NewAuthenticator(
+		context.Background(),
+		authnEngine.WithSigningKey([]byte(c.Http.Middleware.Auth.Key)),
+		authnEngine.WithSigningMethod(c.Http.Middleware.Auth.Method),
+		authnEngine.WithTokenExpiration(expires),
+		authnEngine.WithRefreshTokenExpiration(refreshExpires),
+		authnEngine.WithUserFactory(authSecurity.NewSecurityUser),
+	)
+	if err != nil {
+		l.Fatalf("failed creating authentincator: %s", err.Error())
+		panic(err)
+	}
+	return authenticator
+}
+
+// NewAuthorizer 创建权鉴器
+func NewAuthorizer(cfg *conf.Data, logger log.Logger) authzEngine.Authorizer {
+	l := log.NewHelper(log.With(logger, "module", "authorizer/auth/initialize"))
+	// adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
+	// if err != nil {
+	// 	l.Fatalf("failed creating adapter: %s", err.Error())
+	// 	panic(err)
+	// }
+	// model, err := casbinmodel.NewModelFromString(authzCasbin.DefaultAbacModel)
+	// if err != nil {
+	// 	log.Fatalf("failed casbin model connection %v", err)
+	// }
+
+	provider := authzCasbin.NewProvider()
+	authorizer, err := provider.NewAuthorizer(
+		context.Background(),
+		authzEngine.WithAdapterType(authzEngine.AdapterMySQL),
+		authzEngine.WithAdapterDSN(cfg.Database.Source),
+	)
+
+	if err != nil {
+		l.Fatalf("failed creating authorizer: %s", err.Error())
+		panic(err)
+	}
+	return authorizer
 }

@@ -12,6 +12,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data"
 	"backend-service/app/avmc/admin/internal/server"
 	"backend-service/app/avmc/admin/internal/service"
+	"backend-service/pkg/auth"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -31,10 +32,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
-	authSecurity := data.NewAuthSecurity(logger)
+	authSecurity := auth.NewAuthSecurity(logger)
 	authenticator := data.NewAuthenticator(confServer, logger, authSecurity)
-	authTokenRepo := data.NewAuthTokenRepo(redisClient, authenticator, logger)
-	authRepo := data.NewAuthRepo(dataData, authTokenRepo, logger)
+	authToken := auth.NewAuthToken(redisClient, authenticator, logger)
+	authRepo := data.NewAuthRepo(dataData, authToken, logger)
 	authUsecase := biz.NewAuthUsecase(logger, authRepo)
 	userRepo := data.NewUserRepo(dataData, logger)
 	userUsecase := biz.NewUserUsecase(userRepo, logger)

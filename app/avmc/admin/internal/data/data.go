@@ -19,6 +19,7 @@ import (
 
 	// casbinmodel "github.com/casbin/casbin/v2/model"
 
+	"backend-service/pkg/auth"
 	authnEngine "backend-service/pkg/auth/authn"
 	authnJwt "backend-service/pkg/auth/authn/jwt"
 
@@ -32,8 +33,8 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
-	NewAuthenticator, NewAuthorizer, NewAuthSecurity,
-	NewAuthTokenRepo,
+	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
+	auth.NewAuthToken,
 	NewAuthRepo,
 	NewUserRepo,
 	NewRoleRepo,
@@ -161,7 +162,7 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 }
 
 // NewAuthenticator 创建认证器
-func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *AuthSecurity) authnEngine.Authenticator {
+func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) authnEngine.Authenticator {
 	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
 	expires := c.Http.Middleware.Auth.ExpiresTime.AsDuration()
 	// 令牌过期时间默认 7天

@@ -12,10 +12,12 @@ import (
 	"backend-service/app/avmc/ai/internal/data"
 	"backend-service/app/avmc/ai/internal/server"
 	"backend-service/app/avmc/ai/internal/service"
-
+	"backend-service/pkg/auth"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+)
 
+import (
 	_ "go.uber.org/automaxprocs"
 )
 
@@ -34,7 +36,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	chatUsecase := biz.NewChatUsecase(chatRepo, logger)
 	chatServiceService := service.NewChatServiceService(chatUsecase, logger)
 	grpcServer := server.NewGRPCServer(confServer, chatServiceService, logger)
-	httpServer := server.NewHTTPServer(confServer, logger, chatServiceService)
+	authSecurity := auth.NewAuthSecurity(logger)
+	authenticator := data.NewAuthenticator(confServer, logger, authSecurity)
+	authorizer := data.NewAuthorizer(confData, logger)
+	httpServer := server.NewHTTPServer(confServer, logger, authenticator, authorizer, chatServiceService)
 	sseServer := server.NewSSEServer(confServer, logger, chatServiceService)
 	app := newApp(logger, grpcServer, httpServer, sseServer)
 	return app, func() {

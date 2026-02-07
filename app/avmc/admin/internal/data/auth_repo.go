@@ -4,6 +4,7 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
+	"backend-service/pkg/auth"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 	"context"
@@ -21,14 +22,14 @@ import (
 type authRepo struct {
 	data *Data
 	log  *log.Helper
-	atr  *authTokenRepo
+	atr  *auth.AuthToken
 	ur   *userRepo
 }
 
 // NewAuthRepo 创建新的用户数据仓库实例
 // 参数：logger 日志记录器
 // 返回值：用户数据仓库实例指针
-func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo {
+func NewAuthRepo(data *Data, atr *auth.AuthToken, logger log.Logger) biz.AuthRepo {
 	return &authRepo{
 		data: data,
 		log:  log.NewHelper(logger),
@@ -41,7 +42,7 @@ func NewAuthRepo(data *Data, atr *authTokenRepo, logger log.Logger) biz.AuthRepo
 // 参数：ctx 上下文，res 用户实体，accessToken 访问令牌，refreshToken 刷新令牌，expires 过期时间
 // 返回值：登录响应结构体
 func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginResponse, error) {
-	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, &pb.Auth{
+	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
 		UserId:   u.ID,
 		Username: convert.ToValue(u.Name),
 		DomainId: u.DomainID,
@@ -54,7 +55,7 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 	expires := convert.TimeValueToString(func(exp time.Duration) *time.Time {
 		t := time.Now().Add(exp)
 		return &t
-	}(r.atr.authenticator.Options().TokenExpiration), time.RFC3339)
+	}(r.atr.Authenticator.Options().TokenExpiration), time.RFC3339)
 	return &pb.LoginResponse{
 		Id:           u.ID,
 		Name:         u.Name,
