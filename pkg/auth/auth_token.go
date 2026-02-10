@@ -10,32 +10,33 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/redis/go-redis/v9"
 
-	authnEngine "backend-service/pkg/auth/authn"
+	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/utils/convert"
 )
 
-type AuthTokenKey struct {
-	AccessToken  string
-	RefreshToken string
+type Token struct {
+	AccessToken  string `json:"access_token,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 type AuthData struct {
-	Key   string
-	Value uint32
+	Key   string `json:"key,omitempty"`
+	Value uint32 `json:"value,omitempty"`
 }
 
 type AuthTokenInfo struct {
-	Username    string
-	UserId      uint32
-	DomainId    uint32
-	Roles       []AuthData
-	Permissions []AuthData
+	Token       Token      `json:"token,omitempty"`
+	Username    string     `json:"username,omitempty"`
+	UserId      uint32     `json:"user_id,omitempty"`
+	DomainId    uint32     `json:"domain_id,omitempty"`
+	Roles       []AuthData `json:"roles,omitempty"`
+	Permissions []AuthData `json:"permissions,omitempty"`
 }
 
 // AuthTokenRepo 认证令牌仓库结构体
 // 包含Redis客户端、日志记录器、认证器、访问令牌和刷新令牌的键前缀
 type AuthToken struct {
-	authnEngine.Authenticator
+	authn.Authenticator
 	rdb                   *redis.Client
 	log                   *log.Helper
 	accessTokenKeyPrefix  string
@@ -45,7 +46,11 @@ type AuthToken struct {
 // NewAuthToken 创建认证令牌仓库实例
 // 参数：data 数据访问层实例，authenticator 认证器实例，logger 日志记录器实例
 // 返回：*AuthToken 认证令牌仓库实例
-func NewAuthToken(rdb *redis.Client, authenticator authnEngine.Authenticator, logger log.Logger) *AuthToken {
+func NewAuthToken(
+	rdb *redis.Client,
+	logger log.Logger,
+	authenticator authn.Authenticator,
+) *AuthToken {
 	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
 		accessTokenKeyPrefix  = "admin_uat_"
@@ -64,15 +69,15 @@ func NewAuthToken(rdb *redis.Client, authenticator authnEngine.Authenticator, lo
 // 参数：rdb Redis客户端实例，authenticator 认证器实例，logger 日志记录器实例，accessTokenKeyPrefix 访问令牌键前缀，refreshTokenKeyPrefix 刷新令牌键前缀
 // 返回：*AuthToken 认证令牌仓库实例
 func NewAuthTokenPrefix(
-	authenticator authnEngine.Authenticator,
 	rdb *redis.Client,
 	logger log.Logger,
+	authenticator authn.Authenticator,
 	accessTokenKeyPrefix string,
 	refreshTokenKeyPrefix string,
 ) *AuthToken {
 	return &AuthToken{
 		Authenticator:         authenticator,
-		log:                   log.NewHelper(log.With(logger, "module", "auth-token/cache")),
+		log:                   log.NewHelper(log.With(logger, "module", "auth/token/redis")),
 		rdb:                   rdb,
 		accessTokenKeyPrefix:  accessTokenKeyPrefix,
 		refreshTokenKeyPrefix: refreshTokenKeyPrefix,
@@ -175,7 +180,7 @@ func (r *AuthToken) IsExistRefreshToken(ctx context.Context, userId uint32) bool
 
 // createAccessJwtToken 生成JWT访问令牌
 func (r *AuthToken) createAccessToken(_ string, userId uint32, domanId uint32) string {
-	principal := authnEngine.AuthClaims{
+	principal := authn.AuthClaims{
 		"jti":   "",
 		"sub":   convert.Unit32ToString(userId),
 		"dom":   convert.Unit32ToString(domanId),
@@ -193,7 +198,7 @@ func (r *AuthToken) createAccessToken(_ string, userId uint32, domanId uint32) s
 // createRefreshToken 生成刷新令牌
 func (r *AuthToken) createRefreshToken(_ string, userId uint32, domanId uint32) string {
 	// 刷新令牌信息中包含刷新过期时间
-	authClaims := authnEngine.AuthClaims{
+	authClaims := authn.AuthClaims{
 		"sub":         strconv.FormatUint(uint64(userId), 10),
 		"dom":         convert.Unit32ToString(domanId),
 		"refresh_exp": time.Now().Add(r.Authenticator.Options().RefreshTokenExpiration),

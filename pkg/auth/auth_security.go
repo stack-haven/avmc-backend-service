@@ -11,40 +11,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-// AuthSecurity 认证安全
-type AuthSecurity struct {
-	log *log.Helper
-}
-
-// NewAuthSecurity 创建新的认证安全实例
-func NewAuthSecurity(logger log.Logger) *AuthSecurity {
-	log := log.NewHelper(log.With(logger, "module", "auth/security/init"))
-	return &AuthSecurity{log: log}
-}
-
-// Name 获取提供者名称
-func (p *AuthSecurity) Name() string {
-	return "admin auth security"
-}
-
-// NewSecurityUserCreator 创建新的认证用户创建器
-func (p *AuthSecurity) NewSecurityUserCreator() authn.SecurityUserCreator {
-	return func(authClaims *authn.AuthClaims) authn.SecurityUser {
-		if authClaims == nil {
-			p.log.Error("auth claims creator fail ac == nil")
-		}
-		return &securityUser{options: SecurityUserOptions{log: p.log, authClaims: authClaims}}
-	}
-}
-
-// NewAuthenticator 创建新的认证器实例
-func (p *AuthSecurity) NewSecurityUser(authClaims *authn.AuthClaims) authn.SecurityUser {
-	// 创建认证声明
-	user := new(securityUser)
-	user.options = SecurityUserOptions{log: p.log, authClaims: authClaims}
-	return user
-}
-
 var _ authn.SecurityUser = (*securityUser)(nil)
 
 type SecurityUserOptions struct {
@@ -137,4 +103,38 @@ func (su *securityUser) GetUserID() uint32 {
 // GetDomainID returns the domain id of the token.
 func (su *securityUser) GetDomainID() uint32 {
 	return convert.StringToUnit32(su.domain)
+}
+
+// AuthSecurity 认证安全
+type AuthSecurity struct {
+	log *log.Helper
+}
+
+// NewAuthSecurity 创建新的认证安全实例
+func NewAuthSecurity(logger log.Logger) *AuthSecurity {
+	log := log.NewHelper(log.With(logger, "module", "auth/security/init"))
+	return &AuthSecurity{log: log}
+}
+
+// NewSecurityUserCreator 创建新的认证用户创建器
+func (p *AuthSecurity) NewSecurityUserCreator() authn.SecurityUserCreator {
+	return func(authClaims *authn.AuthClaims) authn.SecurityUser {
+		if authClaims == nil {
+			p.log.Error("auth claims creator fail ac == nil")
+		}
+		return &securityUser{options: SecurityUserOptions{log: p.log, authClaims: authClaims}}
+	}
+}
+
+// NewAuthenticator 创建新的认证器实例
+func (p *AuthSecurity) NewSecurityUser(authClaims *authn.AuthClaims) authn.SecurityUser {
+	// 创建认证声明
+	user := new(securityUser)
+	user.options = SecurityUserOptions{log: p.log, authClaims: authClaims}
+	return user
+}
+
+// Name 获取提供者名称
+func (p *AuthSecurity) Name() string {
+	return "auth security"
 }
