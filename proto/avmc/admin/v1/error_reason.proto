@@ -263,4 +263,20 @@ enum ErrorReason {
   AI_CHAT_INVALID_ID = 1204 [(errors.code) = 400];
   // AI对话状态不能为空
   AI_CHAT_STATUS_CANNOT_BE_EMPTY = 1207 [(errors.code) = 400];
+
+  // =======================================
+  // 项目管理错误 (1300-1399)
+  // =======================================
+  // 项目不存在
+  PROJECT_NOT_FOUND = 1300 [(errors.code) = 404];
+  // 项目ID无效
+  PROJECT_INVALID_ID = 1301 [(errors.code) = 400];
+  // 项目已存在
+  PROJECT_ALREADY_EXISTS = 1302 [(errors.code) = 400];
+  // 项目名称不能为空
+  PROJECT_NAME_CANNOT_BE_EMPTY = 1303 [(errors.code) = 400];
+  // 项目标识已存在
+  PROJECT_CODE_ALREADY_EXISTS = 1304 [(errors.code) = 400];
+  // 项目状态无效
+  PROJECT_STATUS_INVALID = 1305 [(errors.code) = 400];
 }

@@ -11,6 +11,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/post"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/predicate"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/project"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 
@@ -154,6 +155,33 @@ func (f TraversePost) Traverse(ctx context.Context, q gen.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *gen.PostQuery", q)
 }
 
+// The ProjectFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ProjectFunc func(context.Context, *gen.ProjectQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f ProjectFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.ProjectQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.ProjectQuery", q)
+}
+
+// The TraverseProject type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseProject func(context.Context, *gen.ProjectQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseProject) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseProject) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.ProjectQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.ProjectQuery", q)
+}
+
 // The RoleFunc type is an adapter to allow the use of ordinary function as a Querier.
 type RoleFunc func(context.Context, *gen.RoleQuery) (gen.Value, error)
 
@@ -217,6 +245,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.MenuQuery, predicate.Menu, menu.OrderOption]{typ: gen.TypeMenu, tq: q}, nil
 	case *gen.PostQuery:
 		return &query[*gen.PostQuery, predicate.Post, post.OrderOption]{typ: gen.TypePost, tq: q}, nil
+	case *gen.ProjectQuery:
+		return &query[*gen.ProjectQuery, predicate.Project, project.OrderOption]{typ: gen.TypeProject, tq: q}, nil
 	case *gen.RoleQuery:
 		return &query[*gen.RoleQuery, predicate.Role, role.OrderOption]{typ: gen.TypeRole, tq: q}, nil
 	case *gen.UserQuery:

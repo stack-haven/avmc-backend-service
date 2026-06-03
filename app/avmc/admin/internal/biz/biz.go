@@ -14,6 +14,7 @@ var ProviderSet = wire.NewSet(
 	NewPostUsecase,
 	NewMenuUsecase,
 	NewDeptUsecase,
+	NewProjectUsecase,
 )
 
 type Transaction interface {

@@ -43,6 +43,19 @@ func (_m *PostQuery) Page(ctx context.Context, page, size int) ([]*Post, int, er
 	return rs, cnt, nil
 }
 
+func (_m *ProjectQuery) Page(ctx context.Context, page, size int) ([]*Project, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
 func (_m *RoleQuery) Page(ctx context.Context, page, size int) ([]*Role, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {

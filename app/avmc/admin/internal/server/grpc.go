@@ -17,6 +17,8 @@ func NewGRPCServer(c *conf.Server,
 	dept *service.DeptServiceService,
 	menu *service.MenuServiceService,
 	role *service.RoleServiceService,
+	post *service.PostServiceService,
+	project *service.ProjectServiceService,
 	logger log.Logger,
 ) *grpc.Server {
 	var opts = []grpc.ServerOption{
@@ -39,5 +41,7 @@ func NewGRPCServer(c *conf.Server,
 	v1.RegisterDeptServiceServer(srv, dept)
 	v1.RegisterMenuServiceServer(srv, menu)
 	v1.RegisterRoleServiceServer(srv, role)
+	v1.RegisterPostServiceServer(srv, post)
+	v1.RegisterProjectServiceServer(srv, project)
 	return srv
 }

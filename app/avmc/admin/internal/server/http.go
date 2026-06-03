@@ -67,6 +67,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	menu *service.MenuServiceService,
 	role *service.RoleServiceService,
 	post *service.PostServiceService,
+	project *service.ProjectServiceService,
 ) *http.Server {
 	var opts = []http.ServerOption{
 		http.Filter(handlers.CORS(
@@ -93,6 +94,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterMenuServiceHTTPServer(srv, menu)
 	v1.RegisterRoleServiceHTTPServer(srv, role)
 	v1.RegisterPostServiceHTTPServer(srv, post)
+	v1.RegisterProjectServiceHTTPServer(srv, project)
 	if c.GetHttp().GetEnableSwagger() {
 		allFS := nethttp.FS(assets.OpenApiData)
 		// swagger-ui: http://127.0.0.1:8000/docs/swagger-ui

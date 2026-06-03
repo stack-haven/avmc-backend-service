@@ -6,6 +6,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/dept"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/post"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/project"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"context"
@@ -77,11 +78,12 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			dept.Table: dept.ValidColumn,
-			menu.Table: menu.ValidColumn,
-			post.Table: post.ValidColumn,
-			role.Table: role.ValidColumn,
-			user.Table: user.ValidColumn,
+			dept.Table:    dept.ValidColumn,
+			menu.Table:    menu.ValidColumn,
+			post.Table:    post.ValidColumn,
+			project.Table: project.ValidColumn,
+			role.Table:    role.ValidColumn,
+			user.Table:    user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

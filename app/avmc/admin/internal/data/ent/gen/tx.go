@@ -20,6 +20,8 @@ type Tx struct {
 	Menu *MenuClient
 	// Post is the client for interacting with the Post builders.
 	Post *PostClient
+	// Project is the client for interacting with the Project builders.
+	Project *ProjectClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
 	// User is the client for interacting with the User builders.
@@ -158,6 +160,7 @@ func (tx *Tx) init() {
 	tx.Dept = NewDeptClient(tx.config)
 	tx.Menu = NewMenuClient(tx.config)
 	tx.Post = NewPostClient(tx.config)
+	tx.Project = NewProjectClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

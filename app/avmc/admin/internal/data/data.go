@@ -41,6 +41,7 @@ var ProviderSet = wire.NewSet(
 	NewMenuRepo,
 	NewPostRepo,
 	NewDeptRepo,
+	NewProjectRepo,
 )
 
 // Data .

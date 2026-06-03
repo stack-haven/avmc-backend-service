@@ -183,6 +183,30 @@ func (f PostMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) 
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.PostMutation", m)
 }
 
+// The ProjectQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ProjectQueryRuleFunc func(context.Context, *gen.ProjectQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ProjectQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.ProjectQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.ProjectQuery", q)
+}
+
+// The ProjectMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ProjectMutationRuleFunc func(context.Context, *gen.ProjectMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ProjectMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.ProjectMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.ProjectMutation", m)
+}
+
 // The RoleQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type RoleQueryRuleFunc func(context.Context, *gen.RoleQuery) error
@@ -272,6 +296,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.PostQuery:
 		return q.Filter(), nil
+	case *gen.ProjectQuery:
+		return q.Filter(), nil
 	case *gen.RoleQuery:
 		return q.Filter(), nil
 	case *gen.UserQuery:
@@ -288,6 +314,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.MenuMutation:
 		return m.Filter(), nil
 	case *gen.PostMutation:
+		return m.Filter(), nil
+	case *gen.ProjectMutation:
 		return m.Filter(), nil
 	case *gen.RoleMutation:
 		return m.Filter(), nil

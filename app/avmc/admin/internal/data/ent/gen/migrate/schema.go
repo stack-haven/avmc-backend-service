@@ -140,6 +140,48 @@ var (
 			},
 		},
 	}
+	// ProjectsColumns holds the columns for the "projects" table.
+	ProjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 50, Comment: "项目名称"},
+		{Name: "code", Type: field.TypeString, Unique: true, Nullable: true, Size: 50, Comment: "项目标识"},
+		{Name: "owner_id", Type: field.TypeUint32, Nullable: true, Comment: "项目负责人ID"},
+		{Name: "description", Type: field.TypeString, Size: 500, Comment: "项目描述", Default: ""},
+	}
+	// ProjectsTable holds the schema information for the "projects" table.
+	ProjectsTable = &schema.Table{
+		Name:       "projects",
+		Comment:    "项目表",
+		Columns:    ProjectsColumns,
+		PrimaryKey: []*schema.Column{ProjectsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "project_name",
+				Unique:  false,
+				Columns: []*schema.Column{ProjectsColumns[6]},
+			},
+			{
+				Name:    "project_code",
+				Unique:  false,
+				Columns: []*schema.Column{ProjectsColumns[7]},
+			},
+			{
+				Name:    "project_owner_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProjectsColumns[8]},
+			},
+			{
+				Name:    "project_status",
+				Unique:  false,
+				Columns: []*schema.Column{ProjectsColumns[3]},
+			},
+		},
+	}
 	// RolesColumns holds the columns for the "roles" table.
 	RolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -192,6 +234,7 @@ var (
 		{Name: "settings", Type: field.TypeJSON, Nullable: true, Comment: "用户设置，JSON格式"},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true, Comment: "元数据，JSON格式"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 255, Comment: "个人说明"},
+		{Name: "project_members", Type: field.TypeUint32, Nullable: true, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -199,6 +242,14 @@ var (
 		Comment:    "用户表",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_projects_members",
+				Columns:    []*schema.Column{UsersColumns[22]},
+				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_name",
@@ -252,6 +303,7 @@ var (
 		DeptsTable,
 		MenusTable,
 		PostsTable,
+		ProjectsTable,
 		RolesTable,
 		UsersTable,
 		UserRolesTable,
@@ -274,10 +326,15 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	ProjectsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
 	RolesTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	UsersTable.ForeignKeys[0].RefTable = ProjectsTable
 	UsersTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",

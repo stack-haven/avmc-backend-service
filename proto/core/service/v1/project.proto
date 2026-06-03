@@ -1,0 +1,178 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/field_mask.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+
+service ProjectService {
+  // 创建项目
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+  // 更新项目
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
+  // 删除项目
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
+  // 获取项目
+  rpc GetProject(GetProjectRequest) returns (Project);
+  // 分页查询项目
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse);
+  // 更新项目状态
+  rpc UpdateProjectByStatus(UpdateProjectByStatusRequest) returns (UpdateProjectByStatusResponse);
+}
+
+// 项目信息
+message Project {
+  // 项目ID
+  uint32 id = 1;
+  // 项目名称
+  optional string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 50
+    },
+    (gnostic.openapi.v3.property) = {description: "项目名称"}
+  ];
+  // 项目标识
+  optional string code = 3 [
+    (buf.validate.field).string.max_len = 50,
+    (gnostic.openapi.v3.property) = {description: "项目标识"}
+  ];
+  // 项目负责人ID
+  optional uint32 owner_id = 4 [(gnostic.openapi.v3.property) = {description: "项目负责人ID"}];
+  // 项目负责人名称
+  optional string owner_name = 5 [(gnostic.openapi.v3.property) = {description: "项目负责人名称"}];
+  // 项目状态 0 未指定 1 启用 2 禁用
+  optional enum.Status status = 6 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {
+      description: "项目状态"
+      default: {number: 1}
+    }
+  ];
+  // 项目描述
+  optional string description = 7 [
+    (buf.validate.field).string.max_len = 500,
+    (gnostic.openapi.v3.property) = {description: "项目描述"}
+  ];
+  // 项目成员ID
+  repeated uint32 member_ids = 8 [(gnostic.openapi.v3.property) = {description: "项目成员ID"}];
+  // 创建时间
+  optional string created_at = 9 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+  // 更新时间
+  optional string updated_at = 10 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+}
+
+// 创建项目请求
+message CreateProjectRequest {
+  Project project = 1 [(buf.validate.field).required = true];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+// 创建项目响应
+message CreateProjectResponse {}
+
+// 更新项目请求
+message UpdateProjectRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "项目ID"}
+  ];
+  Project project = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "项目信息"}
+  ];
+  optional uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+  // Required. Mask of fields to update.
+  google.protobuf.FieldMask update_mask = 4 [
+    (google.api.field_behavior) = REQUIRED,
+    (gnostic.openapi.v3.property) = {description: "更新字段掩码"}
+  ];
+}
+
+// 更新项目响应
+message UpdateProjectResponse {}
+
+// 删除项目请求
+message DeleteProjectRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "项目ID"}
+  ];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+// 删除项目响应
+message DeleteProjectResponse {}
+
+// 获取项目请求
+message GetProjectRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "项目ID"}
+  ];
+}
+
+// 分页查询项目请求
+message ListProjectsRequest {
+  string page_token = 1 [
+    json_name = "pageToken",
+    (gnostic.openapi.v3.property) = {
+      description: "当前页码"
+      default: {number: 1}
+    }
+  ];
+  int32 page_size = 2 [
+    json_name = "pageSize",
+    (gnostic.openapi.v3.property) = {
+      description: "每一页的行数"
+      default: {number: 10}
+    }
+  ];
+  optional bool no_paging = 3 [
+    json_name = "nopaging",
+    (gnostic.openapi.v3.property) = {description: "是否不分页"}
+  ];
+  optional string name = 4 [(buf.validate.field).string.max_len = 50];
+  optional string code = 5 [(buf.validate.field).string.max_len = 50];
+  optional enum.Status status = 6 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "项目状态 0 未指定 1 启用 2 禁用"}
+  ];
+  optional uint32 owner_id = 7 [(gnostic.openapi.v3.property) = {description: "项目负责人ID"}];
+  optional string filter = 10 [(gnostic.openapi.v3.property) = {description: "筛选条件"}];
+  optional string order_by = 11 [(gnostic.openapi.v3.property) = {description: "排序字段"}];
+  int32 skip = 12 [(gnostic.openapi.v3.property) = {description: "跳过的行数"}];
+}
+
+// 分页查询项目响应
+message ListProjectsResponse {
+  repeated Project items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+// 更新项目状态请求
+message UpdateProjectByStatusRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  int32 status = 2 [
+    (buf.validate.field).int32.gte = 0,
+    (buf.validate.field).int32.lte = 2
+  ];
+}
+
+// 更新项目状态响应
+message UpdateProjectByStatusResponse {}

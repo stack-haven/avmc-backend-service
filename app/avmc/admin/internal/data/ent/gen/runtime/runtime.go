@@ -6,6 +6,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/dept"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/post"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/project"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/app/avmc/admin/internal/data/ent/schema"
@@ -337,6 +338,69 @@ func init() {
 	postDescID := postMixinFields0[0].Descriptor()
 	// post.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	post.IDValidator = postDescID.Validators[0].(func(uint32) error)
+	projectMixin := schema.Project{}.Mixin()
+	projectMixinHooks1 := projectMixin[1].Hooks()
+	project.Hooks[0] = projectMixinHooks1[0]
+	projectMixinInters1 := projectMixin[1].Interceptors()
+	project.Interceptors[0] = projectMixinInters1[0]
+	projectMixinFields0 := projectMixin[0].Fields()
+	_ = projectMixinFields0
+	projectFields := schema.Project{}.Fields()
+	_ = projectFields
+	// projectDescCreatedAt is the schema descriptor for created_at field.
+	projectDescCreatedAt := projectMixinFields0[1].Descriptor()
+	// project.DefaultCreatedAt holds the default value on creation for the created_at field.
+	project.DefaultCreatedAt = projectDescCreatedAt.Default.(func() time.Time)
+	// projectDescUpdatedAt is the schema descriptor for updated_at field.
+	projectDescUpdatedAt := projectMixinFields0[2].Descriptor()
+	// project.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	project.DefaultUpdatedAt = projectDescUpdatedAt.Default.(func() time.Time)
+	// project.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	project.UpdateDefaultUpdatedAt = projectDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// projectDescStatus is the schema descriptor for status field.
+	projectDescStatus := projectMixinFields0[3].Descriptor()
+	// project.DefaultStatus holds the default value on creation for the status field.
+	project.DefaultStatus = projectDescStatus.Default.(int32)
+	// project.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	project.StatusValidator = func() func(int32) error {
+		validators := projectDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// projectDescDomainID is the schema descriptor for domain_id field.
+	projectDescDomainID := projectMixinFields0[4].Descriptor()
+	// project.DefaultDomainID holds the default value on creation for the domain_id field.
+	project.DefaultDomainID = projectDescDomainID.Default.(func() uint32)
+	// project.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
+	project.DomainIDValidator = projectDescDomainID.Validators[0].(func(uint32) error)
+	// projectDescName is the schema descriptor for name field.
+	projectDescName := projectFields[0].Descriptor()
+	// project.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	project.NameValidator = projectDescName.Validators[0].(func(string) error)
+	// projectDescCode is the schema descriptor for code field.
+	projectDescCode := projectFields[1].Descriptor()
+	// project.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	project.CodeValidator = projectDescCode.Validators[0].(func(string) error)
+	// projectDescDescription is the schema descriptor for description field.
+	projectDescDescription := projectFields[3].Descriptor()
+	// project.DefaultDescription holds the default value on creation for the description field.
+	project.DefaultDescription = projectDescDescription.Default.(string)
+	// project.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	project.DescriptionValidator = projectDescDescription.Validators[0].(func(string) error)
+	// projectDescID is the schema descriptor for id field.
+	projectDescID := projectMixinFields0[0].Descriptor()
+	// project.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	project.IDValidator = projectDescID.Validators[0].(func(uint32) error)
 	roleMixin := schema.Role{}.Mixin()
 	roleMixinHooks1 := roleMixin[1].Hooks()
 	role.Hooks[0] = roleMixinHooks1[0]

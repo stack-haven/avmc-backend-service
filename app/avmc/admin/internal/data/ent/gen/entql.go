@@ -7,6 +7,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/post"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/predicate"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/project"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 
@@ -18,7 +19,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 5)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 6)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   dept.Table,
@@ -111,6 +112,28 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   project.Table,
+			Columns: project.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: project.FieldID,
+			},
+		},
+		Type: "Project",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			project.FieldCreatedAt:   {Type: field.TypeTime, Column: project.FieldCreatedAt},
+			project.FieldUpdatedAt:   {Type: field.TypeTime, Column: project.FieldUpdatedAt},
+			project.FieldStatus:      {Type: field.TypeInt32, Column: project.FieldStatus},
+			project.FieldDomainID:    {Type: field.TypeUint32, Column: project.FieldDomainID},
+			project.FieldDeletedAt:   {Type: field.TypeTime, Column: project.FieldDeletedAt},
+			project.FieldName:        {Type: field.TypeString, Column: project.FieldName},
+			project.FieldCode:        {Type: field.TypeString, Column: project.FieldCode},
+			project.FieldOwnerID:     {Type: field.TypeUint32, Column: project.FieldOwnerID},
+			project.FieldDescription: {Type: field.TypeString, Column: project.FieldDescription},
+		},
+	}
+	graph.Nodes[4] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   role.Table,
 			Columns: role.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -132,7 +155,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			role.FieldDeptCheckStrictly: {Type: field.TypeInt32, Column: role.FieldDeptCheckStrictly},
 		},
 	}
-	graph.Nodes[4] = &sqlgraph.Node{
+	graph.Nodes[5] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -213,6 +236,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"Menu",
 		"Menu",
+	)
+	graph.MustAddE(
+		"members",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   project.MembersTable,
+			Columns: []string{project.MembersColumn},
+			Bidi:    false,
+		},
+		"Project",
+		"User",
 	)
 	graph.MustAddE(
 		"users",
@@ -691,6 +726,105 @@ func (f *PostFilter) WhereRemark(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *ProjectQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the ProjectQuery builder.
+func (_q *ProjectQuery) Filter() *ProjectFilter {
+	return &ProjectFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *ProjectMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the ProjectMutation builder.
+func (m *ProjectMutation) Filter() *ProjectFilter {
+	return &ProjectFilter{config: m.config, predicateAdder: m}
+}
+
+// ProjectFilter provides a generic filtering capability at runtime for ProjectQuery.
+type ProjectFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *ProjectFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *ProjectFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(project.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *ProjectFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(project.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *ProjectFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(project.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *ProjectFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(project.FieldStatus))
+}
+
+// WhereDomainID applies the entql uint32 predicate on the domain_id field.
+func (f *ProjectFilter) WhereDomainID(p entql.Uint32P) {
+	f.Where(p.Field(project.FieldDomainID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *ProjectFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(project.FieldDeletedAt))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *ProjectFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(project.FieldName))
+}
+
+// WhereCode applies the entql string predicate on the code field.
+func (f *ProjectFilter) WhereCode(p entql.StringP) {
+	f.Where(p.Field(project.FieldCode))
+}
+
+// WhereOwnerID applies the entql uint32 predicate on the owner_id field.
+func (f *ProjectFilter) WhereOwnerID(p entql.Uint32P) {
+	f.Where(p.Field(project.FieldOwnerID))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *ProjectFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(project.FieldDescription))
+}
+
+// WhereHasMembers applies a predicate to check if query has an edge members.
+func (f *ProjectFilter) WhereHasMembers() {
+	f.Where(entql.HasEdge("members"))
+}
+
+// WhereHasMembersWith applies a predicate to check if query has an edge members with a given conditions (other predicates).
+func (f *ProjectFilter) WhereHasMembersWith(preds ...predicate.User) {
+	f.Where(entql.HasEdgeWith("members", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *RoleQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -719,7 +853,7 @@ type RoleFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RoleFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -823,7 +957,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

@@ -1474,3 +1474,93 @@ func IsAiChatStatusCannotBeEmpty(err error) bool {
 func ErrorAiChatStatusCannotBeEmpty(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_AI_CHAT_STATUS_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
 }
+
+// =======================================
+// 项目管理错误 (1300-1399)
+// =======================================
+// 项目不存在
+func IsProjectNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PROJECT_NOT_FOUND.String() && e.Code == 404
+}
+
+// =======================================
+// 项目管理错误 (1300-1399)
+// =======================================
+// 项目不存在
+func ErrorProjectNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_PROJECT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// 项目ID无效
+func IsProjectInvalidId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PROJECT_INVALID_ID.String() && e.Code == 400
+}
+
+// 项目ID无效
+func ErrorProjectInvalidId(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_PROJECT_INVALID_ID.String(), fmt.Sprintf(format, args...))
+}
+
+// 项目已存在
+func IsProjectAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PROJECT_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 项目已存在
+func ErrorProjectAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_PROJECT_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 项目名称不能为空
+func IsProjectNameCannotBeEmpty(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PROJECT_NAME_CANNOT_BE_EMPTY.String() && e.Code == 400
+}
+
+// 项目名称不能为空
+func ErrorProjectNameCannotBeEmpty(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_PROJECT_NAME_CANNOT_BE_EMPTY.String(), fmt.Sprintf(format, args...))
+}
+
+// 项目标识已存在
+func IsProjectCodeAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PROJECT_CODE_ALREADY_EXISTS.String() && e.Code == 400
+}
+
+// 项目标识已存在
+func ErrorProjectCodeAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_PROJECT_CODE_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 项目状态无效
+func IsProjectStatusInvalid(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_PROJECT_STATUS_INVALID.String() && e.Code == 400
+}
+
+// 项目状态无效
+func ErrorProjectStatusInvalid(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_PROJECT_STATUS_INVALID.String(), fmt.Sprintf(format, args...))
+}
