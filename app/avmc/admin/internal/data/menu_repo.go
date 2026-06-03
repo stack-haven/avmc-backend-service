@@ -14,28 +14,19 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
-	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/utils/convert"
 )
 
 var _ biz.MenuRepo = (*menuRepo)(nil)
 
 type menuRepo struct {
-	data *Data
-	log  *log.Helper
+	BaseRepo
 }
 
-// NewMenuRepo 创建新的菜单仓库实例
-// 参数：data 数据访问层实例，logger 日志记录器
-// 返回值：菜单仓库实例指针
 func NewMenuRepo(data *Data, logger log.Logger) biz.MenuRepo {
-	return &menuRepo{
-		data: data,
-		log:  log.NewHelper(logger),
-	}
+	return &menuRepo{BaseRepo: NewBaseRepo(data, logger)}
 }
 
-// convertProto 转换gen.Menu为pbCore.Menu
 func (r *menuRepo) convertProto(res *gen.Menu) *pbCore.Menu {
 	return &pbCore.Menu{
 		Id:        res.ID,
@@ -75,27 +66,23 @@ func (r *menuRepo) convertProto(res *gen.Menu) *pbCore.Menu {
 	}
 }
 
-// convertEnt 转换pbCore.Menu为gen.Menu
 func (r *menuRepo) convertEnt(g *pbCore.Menu) *gen.Menu {
 	return &gen.Menu{
-		ID:        g.GetId(),
-		Name:      g.Name,
-		ParentID:  g.ParentId,
-		Path:      g.Path,
-		Component: g.Component,
-		Redirect:  g.Redirect,
-		Type:      convert.ToPointer(int32(g.GetType())),
-		AuthCode:  g.AuthCode,
-		Status:    convert.ToPointer(int32(g.GetStatus())),
-		// Meta 相关信息
-		Title:         g.Meta.Title,
-		ActiveIcon:    g.Meta.ActiveIcon,
-		ActivePath:    g.Meta.ActivePath,
-		AffixTab:      g.Meta.AffixTab,
-		AffixTabOrder: g.Meta.AffixTabOrder,
-		Badge:         g.Meta.Badge,
-		// BadgeType:          g.Meta.BadgeType,
-		// BadgeVariants:      g.Meta.BadgeVariants,
+		ID:                 g.GetId(),
+		Name:               g.Name,
+		ParentID:           g.ParentId,
+		Path:               g.Path,
+		Component:          g.Component,
+		Redirect:           g.Redirect,
+		Type:               convert.ToPointer(int32(g.GetType())),
+		AuthCode:           g.AuthCode,
+		Status:             convert.ToPointer(int32(g.GetStatus())),
+		Title:              g.Meta.Title,
+		ActiveIcon:         g.Meta.ActiveIcon,
+		ActivePath:         g.Meta.ActivePath,
+		AffixTab:           g.Meta.AffixTab,
+		AffixTabOrder:      g.Meta.AffixTabOrder,
+		Badge:              g.Meta.Badge,
 		BadgeType:          convert.EmptyToNil(int32(g.Meta.GetBadgeType())),
 		BadgeVariants:      convert.EmptyToNil(int32(g.Meta.GetBadgeVariants())),
 		HideChildrenInMenu: g.Meta.HideChildrenInMenu,
@@ -114,23 +101,18 @@ func (r *menuRepo) convertEnt(g *pbCore.Menu) *gen.Menu {
 	}
 }
 
-// Save 保存菜单信息
-// 参数：ctx 上下文，g 菜单信息
-// 返回值：菜单信息，错误信息
 func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
-	r.log.Infof("保存菜单，菜单信息：%v", g)
+	r.Log.Infof("保存菜单: %v", g.Name)
 	entMenu := r.convertEnt(g)
-	builder := r.data.DB(ctx).Menu.Create()
 
-	exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
+	if exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
 		Name: g.Name,
-	})
-	if exist {
-		r.log.Errorf("菜单名称已存在，菜单信息：%v", g)
+		Id:   &g.Id,
+	}); exist {
 		return nil, fmt.Errorf("menu name already exists")
 	}
 
-	res, err := builder.
+	res, err := r.Data.DB(ctx).Menu.Create().
 		SetName(entMenu.Name).
 		SetNillableTitle(entMenu.Title).
 		SetNillableParentID(entMenu.ParentID).
@@ -162,29 +144,21 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 		SetNillableQuery(entMenu.Query).
 		Save(ctx)
 	if err != nil {
-		r.log.Errorf("保存菜单失败，菜单信息：%v，错误：%v", g, err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
-// Update 更新菜单信息
-// 参数：ctx 上下文，g 菜单信息
-// 返回值：菜单信息，错误信息
 func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
-	r.log.Infof("更新菜单，菜单信息：%v", g)
 	entMenu := r.convertEnt(g)
-	builder := r.data.DB(ctx).Menu.UpdateOneID(g.GetId())
-	exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
-		Id:   convert.ToPointer(g.GetId()),
-		Name: entMenu.Name,
-	})
-	if exist {
-		r.log.Errorf("菜单名称已存在，菜单信息：%v", g)
+	if exist, _ := r.ExistByName(ctx, &pbCore.ExistMenuByNameRequest{
+		Name: g.Name,
+		Id:   &g.Id,
+	}); exist {
 		return nil, fmt.Errorf("menu name already exists")
 	}
 
-	res, err := builder.
+	res, err := r.Data.DB(ctx).Menu.UpdateOneID(g.GetId()).
 		SetName(entMenu.Name).
 		SetNillableTitle(entMenu.Title).
 		SetNillableParentID(entMenu.ParentID).
@@ -216,139 +190,84 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 		SetNillableQuery(entMenu.Query).
 		Save(ctx)
 	if err != nil {
-		r.log.Errorf("更新菜单失败，菜单信息：%v，错误：%v", g, err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
-// FindByID 通过ID查询菜单信息
-// 参数：ctx 上下文，id 菜单ID
-// 返回值：菜单信息，错误信息
 func (r *menuRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Menu, error) {
-	r.log.Infof("通过ID查询菜单，ID：%d", id)
-	res, err := r.data.DB(ctx).Menu.Query().
-		Where(menu.IDEQ(id)).Only(ctx)
+	res, err := r.Data.DB(ctx).Menu.Query().Where(menu.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
-		r.log.Errorf("通过ID查询菜单失败，ID：%d，错误：%v", id, err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
-// Delete 删除菜单
-// 参数：ctx 上下文，id 菜单ID
-// 返回值：错误信息
 func (r *menuRepo) Delete(ctx context.Context, id uint32) error {
-	r.log.Infof("删除菜单，菜单ID：%d", id)
-	// ctx = mixins.SkipSoftDelete(ctx)
-	// r.data.DB(ctx).Menu.UpdateOneID(id).SetDeletedAt()
-	err := r.data.DB(ctx).Menu.DeleteOneID(id).Exec(ctx)
-	if err != nil {
-		r.log.Errorf("删除菜单失败，菜单ID：%d，错误：%v", id, err)
-		return err
-	}
-	return nil
+	return r.Data.DB(ctx).Menu.DeleteOneID(id).Exec(ctx)
 }
 
-// ListByName 通过菜单名称查询菜单列表
-// 参数：ctx 上下文，name 菜单名称
-// 返回值：菜单列表，错误信息
 func (r *menuRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Menu, error) {
-	r.log.Infof("通过菜单名称查询菜单，菜单名称：%s", name)
-	res, err := r.data.DB(ctx).Menu.Query().Where(menu.NameContains(name)).All(ctx)
+	res, err := r.Data.DB(ctx).Menu.Query().Where(menu.NameContains(name)).All(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, nil
 		}
-		r.log.Errorf("通过菜单名称查询菜单失败，菜单名称：%s，错误：%v", name, err)
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// ListAll 查询所有菜单列表
-// 参数：ctx 上下文
-// 返回值：菜单列表，错误信息
 func (r *menuRepo) ListAllSimple(ctx context.Context) ([]*pbCore.Menu, error) {
-	r.log.Infof("查询所有菜单列表")
-	res, err := r.data.DB(ctx).Menu.Query().Select(menu.FieldID, menu.FieldName).Where().Order(gen.Desc(menu.FieldID)).All(ctx)
+	res, err := r.Data.DB(ctx).Menu.Query().Select(menu.FieldID, menu.FieldName).Order(gen.Desc(menu.FieldID)).All(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, nil
 		}
-		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// CountMenus 查询菜单数量
-// 参数：ctx 上下文，filter 过滤条件
-// 返回值：菜单数量，错误信息
 func (r *menuRepo) CountMenus(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	r.log.Infof("查询菜单数量，过滤条件：%v", opts)
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	count, err := r.data.db.Menu.Query().
-		Select(user.FieldID).
+	count, err := r.Data.DB(ctx).Menu.Query().
+		Select(menu.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
-		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return 0, err
 	}
 	return int32(count), nil
 }
 
-// ListAll 查询所有菜单列表
-// 参数：ctx 上下文
-// 返回值：菜单列表，错误信息
 func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
-	r.log.Infof("查询所有菜单列表")
-	res, err := r.data.DB(ctx).Menu.Query().Where().Order(gen.Desc(menu.FieldSort, menu.FieldID)).All(ctx)
+	res, err := r.Data.DB(ctx).Menu.Query().Order(gen.Desc(menu.FieldSort, menu.FieldID)).All(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, nil
 		}
-		r.log.Errorf("查询所有菜单列表失败，错误：%v", err)
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// ListMenus 查询菜单列表分页
-// 参数：ctx 上下文，req 分页请求
-// 返回值：菜单列表响应，错误信息
 func (r *menuRepo) ListMenus(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Menu, error) {
-	r.log.Infof("查询菜单列表分页，分页选项：%v", opts)
-
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	pos, err := r.data.db.Menu.Query().
-		Select(
-			menu.FieldID,
-			menu.FieldName,
-			menu.FieldTitle,
-			menu.FieldParentID,
-			menu.FieldPath,
-			menu.FieldComponent,
-			menu.FieldType,
-			menu.FieldStatus,
-			menu.FieldCreatedAt,
-			menu.FieldUpdatedAt,
-		).
+	pos, err := r.Data.DB(ctx).Menu.Query().
+		Select(menu.FieldID, menu.FieldName, menu.FieldTitle, menu.FieldParentID, menu.FieldPath, menu.FieldComponent, menu.FieldType, menu.FieldStatus, menu.FieldCreatedAt, menu.FieldUpdatedAt).
 		Where(ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
-		Offset(o.Offset).
-		Limit(o.Limit).
+		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -356,12 +275,8 @@ func (r *menuRepo) ListMenus(ctx context.Context, opts ...biz.ListOption) ([]*pb
 	return convert.SliceToAny(pos, r.convertProto), nil
 }
 
-// ExistByPath 判断菜单路径是否存在
-// 参数：ctx 上下文，req 菜单路径请求
-// 返回值：是否存在，错误信息
 func (r *menuRepo) ExistByPath(ctx context.Context, req *pbCore.ExistMenuByPathRequest) (bool, error) {
-	r.log.Infof("判断菜单路径是否存在，菜单路径：%s", req.GetPath())
-	builder := r.data.DB(ctx).Menu.Query()
+	builder := r.Data.DB(ctx).Menu.Query()
 	if req.GetId() != 0 {
 		builder = builder.Where(menu.Not(menu.IDEQ(req.GetId())))
 	}
@@ -370,18 +285,13 @@ func (r *menuRepo) ExistByPath(ctx context.Context, req *pbCore.ExistMenuByPathR
 		if gen.IsNotFound(err) {
 			return false, nil
 		}
-		r.log.Errorf("判断菜单路径是否存在失败，菜单路径：%s，错误：%v", req.GetPath(), err)
 		return false, err
 	}
 	return true, nil
 }
 
-// ExistByName 判断菜单名称是否存在
-// 参数：ctx 上下文，req 菜单名称请求
-// 返回值：是否存在，错误信息
 func (r *menuRepo) ExistByName(ctx context.Context, req *pbCore.ExistMenuByNameRequest) (bool, error) {
-	r.log.Infof("判断菜单名称是否存在，菜单名称：%s", req.GetName())
-	builder := r.data.DB(ctx).Menu.Query()
+	builder := r.Data.DB(ctx).Menu.Query()
 	if req.GetId() != 0 {
 		builder = builder.Where(menu.IDNotIn(req.GetId()))
 	}
@@ -390,7 +300,6 @@ func (r *menuRepo) ExistByName(ctx context.Context, req *pbCore.ExistMenuByNameR
 		if gen.IsNotFound(err) {
 			return false, nil
 		}
-		r.log.Errorf("判断菜单名称是否存在失败，菜单名称：%s，错误：%v", req.GetName(), err)
 		return false, err
 	}
 	return true, nil

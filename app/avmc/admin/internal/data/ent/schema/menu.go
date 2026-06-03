@@ -71,6 +71,8 @@ func (Menu) Edges() []ent.Edge {
 			From("parent").
 			Unique().
 			Field("parent_id"),
+		edge.From("roles", Role.Type).
+			Ref("menus"),
 	}
 }
 

@@ -1,52 +1,68 @@
-# 配置管理 (configs)
+# AVMC Admin Service
 
-## 目录结构
-```
-configs/
-├── config.yaml           # 默认配置
-├── config.dev.yaml       # 开发环境配置
-├── config.test.yaml      # 测试环境配置
-├── config.prod.yaml      # 生产环境配置
-└── templates/            # 配置模板
-    ├── app.yaml          # 应用配置模板
-    ├── database.yaml     # 数据库配置模板
-    ├── middleware.yaml   # 中间件配置模板
-    └── server.yaml       # 服务器配置模板
+Admin 是当前后端主要开发模块。服务使用 Go + Kratos，HTTP 监听 `8000`，gRPC 监听 `9000`。
+
+## Local Run
+
+```bash
+cd app/avmc/admin
+go run ./cmd/server -conf ./configs
 ```
 
-## 配置规范
-1. 配置结构定义
-   - 使用 proto 文件定义配置结构
-   - 配置项必须有明确的类型
-   - 必须提供默认值
+本地默认配置不会自动执行数据库迁移。首次启动或 schema 变更后，先显式执行迁移：
 
-2. 环境配置
-   - 使用环境变量覆盖敏感配置
-   - 区分开发、测试、生产环境
-   - 避免配置文件中包含敏感信息
+```bash
+cd app/avmc/admin
+go run ./cmd/migrate -conf ./configs
+```
 
-3. 配置项命名
-   - 使用小写字母和下划线
-   - 层级结构清晰
-   - 命名具有描述性
+初始化或同步超级管理员 Casbin 策略：
 
-4. 配置验证
-   - 启动时验证配置完整性
-   - 验证配置值的合法性
-   - 提供配置项说明文档
+```bash
+cd app/avmc/admin
+go run ./cmd/policy -conf ./configs -domain 1 -role super_admin -users 1
+```
 
-## 最佳实践
-1. 配置热更新
-   - 支持动态加载配置
-   - 优雅处理配置变更
-   - 记录配置变更日志
+## Production Baseline
 
-2. 配置中心集成
-   - 支持配置中心管理
-   - 实现配置版本控制
-   - 提供配置回滚机制
+生产环境必须通过环境变量覆盖敏感配置，不要提交真实密钥或 DSN。推荐以 `config.prod.example.yaml` 为模板。不要把生产样例放进 `configs/` 目录，因为 `-conf ./configs` 会加载该目录下的配置文件。
 
-3. 安全管理
-   - 加密存储敏感配置
-   - 限制配置文件权限
-   - 审计配置访问日志
+Required overrides:
+
+```bash
+export AVMC_ADMIN_ENV=production
+export AVMC_ADMIN_JWT_KEY='replace-with-strong-secret'
+export AVMC_ADMIN_DB_SOURCE='user:password@tcp(mysql:3306)/avmc_system?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai'
+export AVMC_ADMIN_REDIS_ADDR='redis:6379'
+export AVMC_ADMIN_REDIS_PASSWORD='replace-with-redis-password'
+export AVMC_ADMIN_CORS_ORIGINS='https://admin.example.com'
+export AVMC_ADMIN_ENABLE_SWAGGER=false
+export AVMC_ADMIN_DB_DEBUG=false
+export AVMC_ADMIN_DB_MIGRATE=false
+```
+
+Production startup rejects unsafe defaults:
+
+- JWT key cannot be empty or `some_api_key`.
+- CORS origins cannot include `*`.
+- Swagger must be disabled.
+- Database debug and runtime migration must be disabled.
+
+## Operational Order
+
+1. Deploy config and required environment variables.
+2. Run `go run ./cmd/migrate -conf ./configs` as a controlled release step.
+3. Run `go run ./cmd/policy -conf ./configs -domain <domain> -role super_admin -users <user_ids>`.
+4. Start `go run ./cmd/server -conf ./configs`.
+
+## Quality Gates
+
+```bash
+GOCACHE=/private/tmp/avmc-go-cache go test -timeout 60s ./...
+```
+
+For local smoke testing:
+
+```bash
+curl -I http://127.0.0.1:8000/docs/openapi.yaml
+```

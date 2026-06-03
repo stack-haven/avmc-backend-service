@@ -34,12 +34,13 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	}
 	chatRepo := data.NewChatRepo(dataData, logger)
 	chatUsecase := biz.NewChatUsecase(chatRepo, logger)
-	chatServiceService := service.NewChatServiceService(chatUsecase, logger)
-	grpcServer := server.NewGRPCServer(confServer, chatServiceService, logger)
 	authSecurity := auth.NewAuthSecurity(logger)
 	authenticator := data.NewAuthenticator(confServer, logger, authSecurity)
+	authToken := auth.NewAuthToken(redisClient, logger, authenticator)
+	chatServiceService := service.NewChatServiceService(chatUsecase, authToken, logger)
 	authorizer := data.NewAuthorizer(confData, logger)
-	httpServer := server.NewHTTPServer(confServer, logger, authenticator, authorizer, chatServiceService)
+	grpcServer := server.NewGRPCServer(confServer, chatServiceService, authToken, authorizer, logger)
+	httpServer := server.NewHTTPServer(confServer, logger, authToken, authorizer, chatServiceService)
 	sseServer := server.NewSSEServer(confServer, logger, chatServiceService)
 	app := newApp(logger, grpcServer, httpServer, sseServer)
 	return app, func() {

@@ -14,6 +14,7 @@ import (
 	"github.com/google/wire"
 	redisotel "github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	// entrapper "github.com/casbin/ent-adapter"
 
@@ -126,13 +127,17 @@ func NewSnowflake(logger log.Logger) *snowflake.Node {
 // NewRedisClient 创建Redis客户端
 func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 	l := log.NewHelper(log.With(logger, "module", "redis/data/initialize"))
+	if cfg == nil || cfg.Redis == nil {
+		l.Fatalf("redis config is required")
+		return nil
+	}
 	if rdb = redis.NewClient(&redis.Options{
 		Addr:         cfg.Redis.GetAddr(),
 		Password:     cfg.Redis.GetPassword(),
 		DB:           int(cfg.Redis.GetDb()),
-		DialTimeout:  cfg.Redis.GetDialTimeout().AsDuration(),
-		WriteTimeout: cfg.Redis.GetWriteTimeout().AsDuration(),
-		ReadTimeout:  cfg.Redis.GetReadTimeout().AsDuration(),
+		DialTimeout:  configDuration(cfg.Redis.GetDialTimeout(), time.Second),
+		WriteTimeout: configDuration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
+		ReadTimeout:  configDuration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
 	}); rdb == nil {
 		l.Fatalf("failed opening connection to redis")
 		return nil
@@ -159,7 +164,11 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 // NewAuthenticator 创建认证器
 func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) authnEngine.Authenticator {
 	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
-	expires := c.Http.Middleware.Auth.ExpiresTime.AsDuration()
+	if c == nil || c.Http == nil || c.Http.Middleware == nil || c.Http.Middleware.Auth == nil {
+		l.Fatalf("http auth config is required")
+		return nil
+	}
+	expires := configDuration(c.Http.Middleware.Auth.ExpiresTime, 7*24*time.Hour)
 	// 令牌过期时间默认 7天
 	if expires == 0 {
 		expires = time.Hour * 24 * 7
@@ -181,6 +190,17 @@ func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.Auth
 		panic(err)
 	}
 	return authenticator
+}
+
+func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duration {
+	if d == nil {
+		return fallback
+	}
+	v := d.AsDuration()
+	if v <= 0 {
+		return fallback
+	}
+	return v
 }
 
 // NewAuthorizer 创建权鉴器

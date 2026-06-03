@@ -3,9 +3,9 @@ package data
 import (
 	"backend-service/app/version/service/internal/conf"
 	"context"
+	"time"
 
 	"backend-service/app/version/service/internal/data/ent"
-	"backend-service/app/version/service/internal/data/ent/migrate"
 
 	"github.com/go-kratos/kratos/v2/log"
 	// init mysql driver
@@ -25,11 +25,11 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *ent.Client {
 	{
 		db := drv.DB()
 		// 连接池中最多保留的空闲连接数量
-		db.SetMaxIdleConns(int(cfg.Database.MaxIdleConnections))
+		db.SetMaxIdleConns(databaseMaxIdleConnections(cfg))
 		// 连接池在同一时间打开连接的最大数量
-		db.SetMaxOpenConns(int(cfg.Database.MaxOpenConnections))
+		db.SetMaxOpenConns(databaseMaxOpenConnections(cfg))
 		// 连接可重用的最大时间长度
-		db.SetConnMaxLifetime(cfg.Database.ConnectionMaxLifetime.AsDuration())
+		db.SetConnMaxLifetime(databaseConnectionMaxLifetime(cfg))
 	}
 
 	client := ent.NewClient(
@@ -41,19 +41,6 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *ent.Client {
 
 	if cfg.Database.Debug {
 		client = client.Debug()
-	}
-
-	// 运行数据库迁移工具
-	if cfg.Database.Migrate {
-		if err = client.Schema.Create(
-			context.Background(),
-			migrate.WithForeignKeys(true),
-			migrate.WithDropIndex(true),
-			migrate.WithDropColumn(true),
-			migrate.WithForeignKeys(false),
-		); err != nil {
-			l.Fatalf("failed creating schema resources: %v", err)
-		}
 	}
 
 	return client
@@ -76,4 +63,27 @@ func NewEntClient111(conf *conf.Data_Database, log *log.Helper) (*ent.Client, *s
 		return nil, drv, err
 	}
 	return client, drv, nil
+}
+
+func databaseMaxIdleConnections(cfg *conf.Data) int {
+	if cfg != nil && cfg.Database != nil && cfg.Database.MaxIdleConnections > 0 {
+		return int(cfg.Database.MaxIdleConnections)
+	}
+	return 10
+}
+
+func databaseMaxOpenConnections(cfg *conf.Data) int {
+	if cfg != nil && cfg.Database != nil && cfg.Database.MaxOpenConnections > 0 {
+		return int(cfg.Database.MaxOpenConnections)
+	}
+	return 50
+}
+
+func databaseConnectionMaxLifetime(cfg *conf.Data) time.Duration {
+	if cfg != nil && cfg.Database != nil && cfg.Database.ConnectionMaxLifetime != nil {
+		if d := cfg.Database.ConnectionMaxLifetime.AsDuration(); d > 0 {
+			return d
+		}
+	}
+	return 30 * time.Minute
 }

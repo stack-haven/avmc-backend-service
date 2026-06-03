@@ -20,21 +20,13 @@ import (
 var _ biz.PostRepo = (*postRepo)(nil)
 
 type postRepo struct {
-	data *Data
-	log  *log.Helper
+	BaseRepo
 }
 
-// NewPostRepo 创建新的岗位仓库实例
-// 参数：data 数据访问层实例，logger 日志记录器
-// 返回值：岗位仓库实例指针
 func NewPostRepo(data *Data, logger log.Logger) biz.PostRepo {
-	return &postRepo{
-		data: data,
-		log:  log.NewHelper(logger),
-	}
+	return &postRepo{BaseRepo: NewBaseRepo(data, logger)}
 }
 
-// convertProto 转换gen.Post为pbCore.Post
 func (r *postRepo) convertProto(res *gen.Post) *pbCore.Post {
 	return &pbCore.Post{
 		Id:        res.ID,
@@ -47,7 +39,6 @@ func (r *postRepo) convertProto(res *gen.Post) *pbCore.Post {
 	}
 }
 
-// convertEnt 转换pbCore.Post为gen.Post
 func (r *postRepo) convertEnt(g *pbCore.Post) *gen.Post {
 	return &gen.Post{
 		ID:     g.GetId(),
@@ -58,74 +49,53 @@ func (r *postRepo) convertEnt(g *pbCore.Post) *gen.Post {
 	}
 }
 
-// Save 保存岗位信息
-// 参数：ctx 上下文，g 岗位信息
-// 返回值：岗位信息，错误信息
 func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
-	r.log.Infof("保存岗位，岗位信息：%v", g)
+	r.Log.Infof("保存岗位: %s", g.GetName())
 	entPost := r.convertEnt(g)
-	builder := r.data.DB(ctx).Post.Create()
 
-	id, _ := r.GetPostExistByName(ctx, *entPost.Name)
-	if id > 0 {
-		r.log.Errorf("岗位名称已存在，岗位信息：%v", g)
+	if id, _ := r.GetPostExistByName(ctx, *entPost.Name); id > 0 {
 		return nil, fmt.Errorf("post name already exists")
 	}
 
-	res, err := builder.SetName(*entPost.Name).
+	res, err := r.Data.DB(ctx).Post.Create().
+		SetName(*entPost.Name).
 		Save(ctx)
 	if err != nil {
-		r.log.Errorf("保存岗位失败，岗位信息：%v，错误：%v", g, err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
-// GetPostExistByName 获取岗位名称是否存在
-// 参数：ctx 上下文，name 岗位名称
-// 返回值：岗位ID，错误信息
 func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32, error) {
-	r.log.Infof("获取岗位名称是否存在，岗位名称：%v", name)
-	entPost, err := r.data.DB(ctx).Post.Query().Where(post.Name(name)).Select(post.FieldID).First(ctx)
+	entPost, err := r.Data.DB(ctx).Post.Query().Where(post.Name(name)).Select(post.FieldID).First(ctx)
 	if err != nil {
-		r.log.Errorf("获取岗位名称是否存在失败，岗位名称：%v，错误：%v", name, err)
+		if gen.IsNotFound(err) {
+			return 0, nil
+		}
 		return 0, err
 	}
 	return entPost.ID, nil
 }
 
-// Update 更新岗位信息
-// 参数：ctx 上下文，g 岗位信息
-// 返回值：岗位信息，错误信息
 func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
-	r.log.Infof("更新岗位，岗位信息：%v", g)
 	entPost := r.convertEnt(g)
-	builder := r.data.DB(ctx).Post.UpdateOneID(g.GetId())
 	id, _ := r.GetPostExistByName(ctx, *entPost.Name)
 	if id > 0 && id != g.GetId() {
-		r.log.Errorf("岗位名称已存在，岗位信息：%v", g)
 		return nil, fmt.Errorf("post name already exists")
 	}
 
-	res, err := builder.
+	res, err := r.Data.DB(ctx).Post.UpdateOneID(g.GetId()).
 		SetName(*entPost.Name).
 		Save(ctx)
 	if err != nil {
-		r.log.Errorf("更新岗位失败，岗位信息：%v，错误：%v", g, err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
-// FindByID 通过ID查询岗位信息
-// 参数：ctx 上下文，id 岗位ID
-// 返回值：岗位信息，错误信息
 func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error) {
-	r.log.Infof("通过ID查询岗位，ID：%d", id)
-	res, err := r.data.DB(ctx).Post.Query().
-		Where(post.IDEQ(id)).Only(ctx)
+	res, err := r.Data.DB(ctx).Post.Query().Where(post.IDEQ(id)).Only(ctx)
 	if err != nil {
-		r.log.Errorf("通过ID查询岗位失败，ID：%d，错误：%v", id, err)
 		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
@@ -134,85 +104,53 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 	return r.convertProto(res), nil
 }
 
-// Delete 删除岗位
-// 参数：ctx 上下文，id 岗位ID
-// 返回值：错误信息
 func (r *postRepo) Delete(ctx context.Context, id uint32) error {
-	r.log.Infof("删除岗位，岗位ID：%d", id)
-	err := r.data.DB(ctx).Post.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
-	if err != nil {
-		r.log.Errorf("删除岗位失败，岗位ID：%d，错误：%v", id, err)
-		return err
-	}
-	return nil
+	return r.Data.DB(ctx).Post.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
 }
 
-// ListByName 通过岗位名称查询岗位列表
-// 参数：ctx 上下文，name 岗位名称
-// 返回值：岗位列表，错误信息
 func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post, error) {
-	r.log.Infof("通过岗位名称查询岗位，岗位名称：%s", name)
-	res, err := r.data.DB(ctx).Post.Query().Where(post.NameContains(name)).All(ctx)
+	res, err := r.Data.DB(ctx).Post.Query().Where(post.NameContains(name)).All(ctx)
 	if err != nil {
-		r.log.Errorf("通过岗位名称查询岗位失败，岗位名称：%s，错误：%v", name, err)
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// CountPosts 查询岗位数量
-// 参数：ctx 上下文，filter 过滤条件
-// 返回值：岗位数量，错误信息
 func (r *postRepo) CountPosts(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	r.log.Infof("查询岗位数量，过滤条件：%v", opts)
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	count, err := r.data.db.Post.Query().
+	count, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
-		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
 		return 0, err
 	}
 	return int32(count), nil
 }
 
-// ListAll 查询所有岗位列表
-// 参数：ctx 上下文
-// 返回值：岗位列表，错误信息
 func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
-	r.log.Infof("查询所有岗位列表")
-	res, err := r.data.DB(ctx).Post.Query().Select(post.FieldID, post.FieldName).Where().Order(gen.Desc(post.FieldID)).All(ctx)
+	res, err := r.Data.DB(ctx).Post.Query().
+		Select(post.FieldID, post.FieldName).
+		Order(gen.Desc(post.FieldID)).All(ctx)
 	if err != nil {
-		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-// ListPosts 查询岗位列表
-// 参数：ctx 上下文，opts 分页选项
-// 返回值：岗位列表，错误信息
 func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Post, error) {
-	r.log.Infof("查询岗位列表，分页选项：%v", opts)
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	pos, err := r.data.db.Post.Query().
-		Select(
-			post.FieldID,
-			post.FieldName,
-			post.FieldCreatedAt,
-			post.FieldUpdatedAt,
-		).
+	pos, err := r.Data.DB(ctx).Post.Query().
+		Select(post.FieldID, post.FieldName, post.FieldCreatedAt, post.FieldUpdatedAt).
 		Where(ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
-		Offset(o.Offset).
-		Limit(o.Limit).
+		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -220,30 +158,19 @@ func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pb
 	return convert.SliceToAny(pos, r.convertProto), nil
 }
 
-// ListPage 查询岗位列表分页
-// 参数：ctx 上下文，req 分页请求
-// 返回值：岗位列表响应，错误信息
 func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
-	r.log.Infof("查询岗位列表分页，分页请求：%v", req)
-	count, err := r.data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DeletedAtIsNil()).Count(ctx)
+	r.Log.Infof("查询岗位列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
+	count, err := r.Data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
-		r.log.Errorf("查询所有岗位列表失败，错误：%v", err)
 		return nil, err
 	}
-	res, err := r.data.DB(ctx).Post.Query().
-		Select(
-			post.FieldID,
-			post.FieldName,
-			post.FieldCreatedAt,
-			post.FieldUpdatedAt,
-		).
+	res, err := r.Data.DB(ctx).Post.Query().
+		Select(post.FieldID, post.FieldName, post.FieldCreatedAt, post.FieldUpdatedAt).
 		Where().
-		// Offset(int((req.GetPage() - 1) * req.GetPageSize())).
 		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(post.FieldID)).
 		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询岗位列表分页失败，分页请求：%v，错误：%v", req, err)
 		return nil, err
 	}
 	return &pbCore.ListPostsResponse{

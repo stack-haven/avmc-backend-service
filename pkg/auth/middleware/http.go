@@ -69,7 +69,7 @@ func DefaultHTTPAuthzInfoExtractor(ctx context.Context, req *http.Request) (auth
 	return sub, obj, act, dom, nil
 }
 
-// HTTPAuthnMiddleware 创建HTTP身份验证中间件
+// Deprecated: 使用 AuthnMiddleware 替代，已原生支持 HTTP/gRPC。
 func HTTPAuthnMiddleware(authenticator authn.Authenticator, extractor HTTPAuthExtractor) middleware.Middleware {
 	if extractor == nil {
 		extractor = DefaultHTTPAuthExtractor
@@ -128,7 +128,7 @@ func HTTPAuthnMiddleware(authenticator authn.Authenticator, extractor HTTPAuthEx
 	}
 }
 
-// HTTPAuthzMiddleware 创建HTTP身份鉴权中间件
+// Deprecated: 使用 AuthzMiddleware 替代。
 func HTTPAuthzMiddleware(authorizer authz.Authorizer, extractor HTTPAuthzInfoExtractor) middleware.Middleware {
 	if extractor == nil {
 		extractor = DefaultHTTPAuthzInfoExtractor
@@ -192,7 +192,7 @@ func HTTPAuthzMiddleware(authorizer authz.Authorizer, extractor HTTPAuthzInfoExt
 	}
 }
 
-// HTTPCombinedAuthMiddleware 创建HTTP组合身份验证和身份鉴权中间件
+// Deprecated: 使用 CombinedAuthMiddleware 替代。
 func HTTPCombinedAuthMiddleware(
 	authenticator authn.Authenticator,
 	authorizer authz.Authorizer,
@@ -300,7 +300,7 @@ func HTTPCombinedAuthMiddleware(
 	}
 }
 
-// HTTPSkipAuthPathMiddleware 创建跳过特定路径的HTTP身份验证中间件
+// Deprecated: 使用 SkipAuthPathMiddleware 替代。
 func HTTPSkipAuthPathMiddleware(
 	authenticator authn.Authenticator,
 	skipPaths []string,

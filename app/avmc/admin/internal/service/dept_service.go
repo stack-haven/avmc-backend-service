@@ -36,7 +36,7 @@ func NewDeptServiceService(duc *biz.DeptUsecase, logger log.Logger) *DeptService
 // 参数：ctx 上下文，req 分页请求
 // 返回值：部门列表响应，错误信息
 func (s *DeptServiceService) ListDept(ctx context.Context, req *pbCore.ListDeptsRequest) (*pbCore.ListDeptsResponse, error) {
-	s.log.Infof("查询部门列表分页，分页请求：%v", req)
+	s.log.Infof("查询部门列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -96,10 +96,10 @@ func (s *DeptServiceService) GetDept(ctx context.Context, req *pbCore.GetDeptReq
 // 参数：ctx 上下文，req 创建部门请求
 // 返回值：创建部门响应，错误信息
 func (s *DeptServiceService) CreateDept(ctx context.Context, req *pbCore.CreateDeptRequest) (*pbCore.CreateDeptResponse, error) {
-	s.log.Infof("创建部门，部门信息：%v", req.Dept)
 	if req.GetDept() == nil {
 		return nil, pb.ErrorDeptInvalidId("部门信息不能为空")
 	}
+	s.log.Infof("创建部门，部门名称：%s", req.GetDept().GetName())
 	_, err := s.duc.Create(ctx, req.Dept)
 	if err != nil {
 		return nil, err
@@ -117,14 +117,14 @@ func (s *DeptServiceService) UpdateDept(ctx context.Context, req *pbCore.UpdateD
 	if req.GetDept() == nil {
 		return nil, pb.ErrorDeptInvalidId("部门信息不能为空")
 	}
-	user, err := s.GetDept(ctx, &pbCore.GetDeptRequest{Id: req.GetId()})
+	existing, err := s.GetDept(ctx, &pbCore.GetDeptRequest{Id: req.GetId()})
 	if err != nil {
 		return nil, err
 	}
-	fieldmask.Update(req.UpdateMask, user, req.Dept)
-	s.log.Infof("更新部门，部门ID：%v，部门信息：%v", req.GetId(), req.GetDept())
-	req.Dept.Id = req.GetId()
-	_, err = s.duc.Update(ctx, req.GetDept())
+	fieldmask.Update(req.UpdateMask, existing, req.Dept)
+	s.log.Infof("更新部门，部门ID：%v", req.GetId())
+	existing.Id = req.GetId()
+	_, err = s.duc.Update(ctx, existing)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +150,6 @@ func (s *DeptServiceService) DeleteDept(ctx context.Context, req *pbCore.DeleteD
 // 参数：ctx 上下文，req 分页请求
 // 返回值：部门树形列表响应，错误信息
 func (s *DeptServiceService) ListDeptsTree(ctx context.Context, req *pbCore.ListDeptsTreeRequest) (*pbCore.ListDeptsTreeResponse, error) {
-	s.log.Infof("查询部门列表分页，分页请求：%v", req)
+	s.log.Infof("查询部门树，parent_id=%d", req.GetParentId())
 	return s.duc.ListDeptsTree(ctx, req.GetParentId())
 }

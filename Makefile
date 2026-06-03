@@ -58,6 +58,21 @@ proto:
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
+.PHONY: admin-migrate
+# run admin database migration explicitly
+admin-migrate:
+	cd app/avmc/admin && go run ./cmd/migrate -conf ./configs
+
+.PHONY: ai-migrate
+# run ai database migration explicitly
+ai-migrate:
+	cd app/avmc/ai && go run ./cmd/migrate -conf ./configs
+
+.PHONY: admin-policy
+# seed admin authorization policies explicitly
+admin-policy:
+	cd app/avmc/admin && go run ./cmd/policy -conf ./configs
+
 .PHONY: generate
 # generate
 generate:

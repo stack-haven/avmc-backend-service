@@ -55,8 +55,7 @@ type DeptEdges struct {
 	Children []*Dept `json:"children,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes   [2]bool
-	namedChildren map[string][]*Dept
+	loadedTypes [2]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -282,30 +281,6 @@ func (_m *Dept) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedChildren returns the Children named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *Dept) NamedChildren(name string) ([]*Dept, error) {
-	if _m.Edges.namedChildren == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedChildren[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *Dept) appendNamedChildren(name string, edges ...*Dept) {
-	if _m.Edges.namedChildren == nil {
-		_m.Edges.namedChildren = make(map[string][]*Dept)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedChildren[name] = []*Dept{}
-	} else {
-		_m.Edges.namedChildren[name] = append(_m.Edges.namedChildren[name], edges...)
-	}
 }
 
 // Depts is a parsable slice of Dept.

@@ -135,7 +135,14 @@ func (a *CasbinAuthorizer) Init(ctx context.Context, opts ...authz.Option) error
 				nil,
 			)
 		}
-		adapter, _ = gormadapter.NewAdapter("mysql", a.options.AdapterDSN, true) // Your driver and data source.
+		adapter, err = gormadapter.NewAdapter("mysql", a.options.AdapterDSN, true)
+		if err != nil {
+			return authz.NewAuthzError(
+				authz.ErrCodeInitializationFailed,
+				"failed to create MySQL policy adapter",
+				err,
+			)
+		}
 	default:
 		// 其他适配器类型需要在实际应用中实现
 		return authz.NewAuthzError(

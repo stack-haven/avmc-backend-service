@@ -6,6 +6,8 @@ import (
 
 	pbCore "backend-service/api/core/service/v1"
 
+	"backend-service/pkg/utils/crypto"
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -26,8 +28,7 @@ type UserRepo interface {
 	ExistByEmail(context.Context, string) (uint32, error)
 }
 
-// UserUsecase is a User usecase.
-// 包含用户仓库和日志记录器
+// UserUsecase 用户业务逻辑
 type UserUsecase struct {
 	repo UserRepo
 	log  *log.Helper
@@ -38,75 +39,73 @@ func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
 	return &UserUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-// Create 处理创建用户请求
-// 参数：ctx 上下文，g 用户信息
-// 返回值：创建用户响应，错误信息
+// Create 创建用户 — 业务逻辑：密码哈希、默认值
 func (uc *UserUsecase) Create(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	uc.log.WithContext(ctx).Infof("CreateUser: %v", g.Name)
+	uc.log.WithContext(ctx).Infof("CreateUser: %v", g.GetName())
+
+	// 密码哈希在 biz 层完成（不交给 repo）
+	if g.Password != nil && *g.Password != "" {
+		hash, err := crypto.HashPassword(*g.Password)
+		if err != nil {
+			uc.log.Errorf("密码哈希失败: %v", err)
+			return nil, ErrPasswordHashFailed
+		}
+		g.Password = &hash
+	}
+
 	return uc.repo.Save(ctx, g)
 }
 
-// Get 处理获取用户详情请求
-// 参数：ctx 上下文，id 用户ID
-// 返回值：用户详情响应，错误信息
+// Get 获取用户
 func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("GetUser: %v", id)
 	return uc.repo.FindByID(ctx, id)
 }
 
-// Update 处理更新用户请求
-// 参数：ctx 上下文，g 用户信息
-// 返回值：更新用户响应，错误信息
+// Update 更新用户 — 业务逻辑：密码变更时重哈希
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("UpdateUser: %v", g.GetId())
+
+	if g.Password != nil && *g.Password != "" {
+		hash, err := crypto.HashPassword(*g.Password)
+		if err != nil {
+			uc.log.Errorf("密码哈希失败: %v", err)
+			return nil, ErrPasswordHashFailed
+		}
+		g.Password = &hash
+	}
+
 	return uc.repo.Update(ctx, g)
 }
 
-// ListPageSimple 处理分页用户简单列表请求
-// 参数：ctx 上下文，opts 分页选项
-// 返回值：用户列表响应，错误信息
+// ListPageSimple 用户简单列表分页
 func (uc *UserUsecase) ListPageSimple(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
-	resp, err := uc.repo.ListPageSimple(ctx, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+	return uc.repo.ListPageSimple(ctx, opts...)
 }
 
-// Delete 处理删除用户请求
-// 参数：ctx 上下文，id 用户ID
-// 返回值：错误信息
+// Delete 删除用户
 func (uc *UserUsecase) Delete(ctx context.Context, id uint32) error {
 	return uc.repo.Delete(ctx, id)
 }
 
-// UpdateStatus 处理更新用户状态请求
-// 参数：ctx 上下文，id 用户ID，status 用户状态
-// 返回值：更新后的用户信息，错误信息
-func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status pbEnum.Status) (*pbCore.User, error) {
-	uc.log.WithContext(ctx).Infof("UpdateStatus：%v %v", id, status)
+// UpdateStatus 更新用户状态
+func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status int32) (*pbCore.User, error) {
+	uc.log.WithContext(ctx).Infof("UpdateStatus: %d %d", id, status)
 	g, err := uc.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	g.Status = &status
+	s := pbEnum.Status(status)
+	g.Status = &s
 	return uc.repo.Update(ctx, g)
 }
 
-// ListUsers 处理分页用户列表请求
-// 参数：ctx 上下文，opts 分页选项
-// 返回值：用户列表响应，错误信息
+// ListUsers 用户列表
 func (uc *UserUsecase) ListUsers(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
 	return uc.repo.ListUsers(ctx, opts...)
 }
 
-// CountUsers 处理用户条件查询聚合请求
-// 参数：ctx 上下文，opts 分页选项
-// 返回值：用户数量，错误信息
+// CountUsers 用户计数
 func (uc *UserUsecase) CountUsers(ctx context.Context, opts ...ListOption) (int32, error) {
-	resp, err := uc.repo.CountUsers(ctx, opts...)
-	if err != nil {
-		return 0, err
-	}
-	return resp, nil
+	return uc.repo.CountUsers(ctx, opts...)
 }

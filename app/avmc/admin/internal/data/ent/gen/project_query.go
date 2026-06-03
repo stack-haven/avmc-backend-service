@@ -21,13 +21,12 @@ import (
 // ProjectQuery is the builder for querying Project entities.
 type ProjectQuery struct {
 	config
-	ctx              *QueryContext
-	order            []project.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Project
-	withMembers      *UserQuery
-	modifiers        []func(*sql.Selector)
-	withNamedMembers map[string]*UserQuery
+	ctx         *QueryContext
+	order       []project.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Project
+	withMembers *UserQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -407,13 +406,6 @@ func (_q *ProjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proj
 			return nil, err
 		}
 	}
-	for name, query := range _q.withNamedMembers {
-		if err := _q.loadMembers(ctx, query, nodes,
-			func(n *Project) { n.appendNamedMembers(name) },
-			func(n *Project, e *User) { n.appendNamedMembers(name, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
@@ -566,20 +558,6 @@ func (_q *ProjectQuery) ForShare(opts ...sql.LockOption) *ProjectQuery {
 func (_q *ProjectQuery) Modify(modifiers ...func(s *sql.Selector)) *ProjectSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
-}
-
-// WithNamedMembers tells the query-builder to eager-load the nodes that are connected to the "members"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (_q *ProjectQuery) WithNamedMembers(name string, opts ...func(*UserQuery)) *ProjectQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	if _q.withNamedMembers == nil {
-		_q.withNamedMembers = make(map[string]*UserQuery)
-	}
-	_q.withNamedMembers[name] = query
-	return _q
 }
 
 // ProjectGroupBy is the group-by builder for Project entities.

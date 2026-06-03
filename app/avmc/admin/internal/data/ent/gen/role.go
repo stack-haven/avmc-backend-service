@@ -46,18 +46,28 @@ type Role struct {
 
 // RoleEdges holds the relations/edges for other nodes in the graph.
 type RoleEdges struct {
+	// Menus holds the value of the menus edge.
+	Menus []*Menu `json:"menus,omitempty"`
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-	namedUsers  map[string][]*User
+	loadedTypes [2]bool
+}
+
+// MenusOrErr returns the Menus value or an error if the edge
+// was not loaded in eager-loading.
+func (e RoleEdges) MenusOrErr() ([]*Menu, error) {
+	if e.loadedTypes[0] {
+		return e.Menus, nil
+	}
+	return nil, &NotLoadedError{edge: "menus"}
 }
 
 // UsersOrErr returns the Users value or an error if the edge
 // was not loaded in eager-loading.
 func (e RoleEdges) UsersOrErr() ([]*User, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.Users, nil
 	}
 	return nil, &NotLoadedError{edge: "users"}
@@ -175,6 +185,11 @@ func (_m *Role) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryMenus queries the "menus" edge of the Role entity.
+func (_m *Role) QueryMenus() *MenuQuery {
+	return NewRoleClient(_m.config).QueryMenus(_m)
+}
+
 // QueryUsers queries the "users" edge of the Role entity.
 func (_m *Role) QueryUsers() *UserQuery {
 	return NewRoleClient(_m.config).QueryUsers(_m)
@@ -248,30 +263,6 @@ func (_m *Role) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedUsers returns the Users named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *Role) NamedUsers(name string) ([]*User, error) {
-	if _m.Edges.namedUsers == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedUsers[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *Role) appendNamedUsers(name string, edges ...*User) {
-	if _m.Edges.namedUsers == nil {
-		_m.Edges.namedUsers = make(map[string][]*User)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedUsers[name] = []*User{}
-	} else {
-		_m.Edges.namedUsers[name] = append(_m.Edges.namedUsers[name], edges...)
-	}
 }
 
 // Roles is a parsable slice of Role.

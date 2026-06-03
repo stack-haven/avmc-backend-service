@@ -82,7 +82,7 @@ func DefaultGRPCAuthzInfoExtractor(ctx context.Context, fullMethod string) (auth
 	return sub, obj, act, dom, nil
 }
 
-// GRPCAuthnMiddleware 创建gRPC身份验证中间件
+// Deprecated: 使用 AuthnMiddleware 替代，已原生支持 HTTP/gRPC。
 func GRPCAuthnMiddleware(authenticator authn.Authenticator, extractor GRPCAuthExtractor) middleware.Middleware {
 	if extractor == nil {
 		extractor = DefaultGRPCAuthExtractor
@@ -137,7 +137,7 @@ func GRPCAuthnMiddleware(authenticator authn.Authenticator, extractor GRPCAuthEx
 	}
 }
 
-// GRPCAuthzMiddleware 创建gRPC身份鉴权中间件
+// Deprecated: 使用 AuthzMiddleware 替代。
 func GRPCAuthzMiddleware(authorizer authz.Authorizer, extractor GRPCAuthzInfoExtractor) middleware.Middleware {
 	if extractor == nil {
 		extractor = DefaultGRPCAuthzInfoExtractor
@@ -199,7 +199,7 @@ func GRPCAuthzMiddleware(authorizer authz.Authorizer, extractor GRPCAuthzInfoExt
 	}
 }
 
-// GRPCCombinedAuthMiddleware 创建gRPC组合身份验证和身份鉴权中间件
+// Deprecated: 使用 CombinedAuthMiddleware 替代。
 func GRPCCombinedAuthMiddleware(
 	authenticator authn.Authenticator,
 	authorizer authz.Authorizer,
@@ -306,7 +306,7 @@ func GRPCCombinedAuthMiddleware(
 	}
 }
 
-// GRPCSkipAuthMethodMiddleware 创建跳过特定方法的gRPC身份验证中间件
+// Deprecated: 使用 SkipAuthPathMiddleware 替代。
 func GRPCSkipAuthMethodMiddleware(
 	authenticator authn.Authenticator,
 	skipMethods []string,

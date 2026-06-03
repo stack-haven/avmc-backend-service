@@ -100,8 +100,6 @@ func NewServer(opts ...ServerOption) *Server {
 
 	srv.init(opts...)
 
-	srv.err = srv.listen()
-
 	return srv
 }
 

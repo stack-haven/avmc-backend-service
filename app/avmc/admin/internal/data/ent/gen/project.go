@@ -48,8 +48,7 @@ type ProjectEdges struct {
 	Members []*User `json:"members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes  [1]bool
-	namedMembers map[string][]*User
+	loadedTypes [1]bool
 }
 
 // MembersOrErr returns the Members value or an error if the edge
@@ -231,30 +230,6 @@ func (_m *Project) String() string {
 	}
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedMembers returns the Members named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (_m *Project) NamedMembers(name string) ([]*User, error) {
-	if _m.Edges.namedMembers == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := _m.Edges.namedMembers[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (_m *Project) appendNamedMembers(name string, edges ...*User) {
-	if _m.Edges.namedMembers == nil {
-		_m.Edges.namedMembers = make(map[string][]*User)
-	}
-	if len(edges) == 0 {
-		_m.Edges.namedMembers[name] = []*User{}
-	} else {
-		_m.Edges.namedMembers[name] = append(_m.Edges.namedMembers[name], edges...)
-	}
 }
 
 // Projects is a parsable slice of Project.

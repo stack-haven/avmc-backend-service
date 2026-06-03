@@ -164,6 +164,6 @@ func Test_Trans(t *testing.T) {
 
 	tm := Time(time.Now())
 	tmVal := TimeValue(tm)
-	assert.Equal(t, time.Now(), tmVal)
-	assert.Equal(t, time.Now(), TimeValue(nil))
+	assert.Equal(t, tm.UTC(), tmVal.UTC())
+	assert.True(t, time.Since(TimeValue(nil)) < time.Second)
 }

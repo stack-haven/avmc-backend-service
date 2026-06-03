@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"context"
@@ -167,6 +168,21 @@ func (_c *RoleCreate) SetNillableDeptCheckStrictly(v *int32) *RoleCreate {
 func (_c *RoleCreate) SetID(v uint32) *RoleCreate {
 	_c.mutation.SetID(v)
 	return _c
+}
+
+// AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
+func (_c *RoleCreate) AddMenuIDs(ids ...uint32) *RoleCreate {
+	_c.mutation.AddMenuIDs(ids...)
+	return _c
+}
+
+// AddMenus adds the "menus" edges to the Menu entity.
+func (_c *RoleCreate) AddMenus(v ...*Menu) *RoleCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMenuIDs(ids...)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -395,6 +411,22 @@ func (_c *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DeptCheckStrictly(); ok {
 		_spec.SetField(role.FieldDeptCheckStrictly, field.TypeInt32, value)
 		_node.DeptCheckStrictly = &value
+	}
+	if nodes := _c.mutation.MenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

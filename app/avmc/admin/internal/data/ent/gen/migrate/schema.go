@@ -273,6 +273,31 @@ var (
 			},
 		},
 	}
+	// RoleMenusColumns holds the columns for the "role_menus" table.
+	RoleMenusColumns = []*schema.Column{
+		{Name: "role_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "menu_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// RoleMenusTable holds the schema information for the "role_menus" table.
+	RoleMenusTable = &schema.Table{
+		Name:       "role_menus",
+		Columns:    RoleMenusColumns,
+		PrimaryKey: []*schema.Column{RoleMenusColumns[0], RoleMenusColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "role_menus_role_id",
+				Columns:    []*schema.Column{RoleMenusColumns[0]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "role_menus_menu_id",
+				Columns:    []*schema.Column{RoleMenusColumns[1]},
+				RefColumns: []*schema.Column{MenusColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// UserRolesColumns holds the columns for the "user_roles" table.
 	UserRolesColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -306,6 +331,7 @@ var (
 		ProjectsTable,
 		RolesTable,
 		UsersTable,
+		RoleMenusTable,
 		UserRolesTable,
 	}
 )
@@ -339,6 +365,8 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	RoleMenusTable.ForeignKeys[0].RefTable = RolesTable
+	RoleMenusTable.ForeignKeys[1].RefTable = MenusTable
 	UserRolesTable.ForeignKeys[0].RefTable = UsersTable
 	UserRolesTable.ForeignKeys[1].RefTable = RolesTable
 }

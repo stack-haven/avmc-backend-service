@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
@@ -189,6 +190,21 @@ func (_u *RoleUpdate) AddDeptCheckStrictly(v int32) *RoleUpdate {
 	return _u
 }
 
+// AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
+func (_u *RoleUpdate) AddMenuIDs(ids ...uint32) *RoleUpdate {
+	_u.mutation.AddMenuIDs(ids...)
+	return _u
+}
+
+// AddMenus adds the "menus" edges to the Menu entity.
+func (_u *RoleUpdate) AddMenus(v ...*Menu) *RoleUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMenuIDs(ids...)
+}
+
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_u *RoleUpdate) AddUserIDs(ids ...uint32) *RoleUpdate {
 	_u.mutation.AddUserIDs(ids...)
@@ -207,6 +223,27 @@ func (_u *RoleUpdate) AddUsers(v ...*User) *RoleUpdate {
 // Mutation returns the RoleMutation object of the builder.
 func (_u *RoleUpdate) Mutation() *RoleMutation {
 	return _u.mutation
+}
+
+// ClearMenus clears all "menus" edges to the Menu entity.
+func (_u *RoleUpdate) ClearMenus() *RoleUpdate {
+	_u.mutation.ClearMenus()
+	return _u
+}
+
+// RemoveMenuIDs removes the "menus" edge to Menu entities by IDs.
+func (_u *RoleUpdate) RemoveMenuIDs(ids ...uint32) *RoleUpdate {
+	_u.mutation.RemoveMenuIDs(ids...)
+	return _u
+}
+
+// RemoveMenus removes "menus" edges to Menu entities.
+func (_u *RoleUpdate) RemoveMenus(v ...*Menu) *RoleUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMenuIDs(ids...)
 }
 
 // ClearUsers clears all "users" edges to the User entity.
@@ -359,6 +396,51 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedDeptCheckStrictly(); ok {
 		_spec.AddField(role.FieldDeptCheckStrictly, field.TypeInt32, value)
+	}
+	if _u.mutation.MenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMenusIDs(); len(nodes) > 0 && !_u.mutation.MenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -586,6 +668,21 @@ func (_u *RoleUpdateOne) AddDeptCheckStrictly(v int32) *RoleUpdateOne {
 	return _u
 }
 
+// AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
+func (_u *RoleUpdateOne) AddMenuIDs(ids ...uint32) *RoleUpdateOne {
+	_u.mutation.AddMenuIDs(ids...)
+	return _u
+}
+
+// AddMenus adds the "menus" edges to the Menu entity.
+func (_u *RoleUpdateOne) AddMenus(v ...*Menu) *RoleUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMenuIDs(ids...)
+}
+
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_u *RoleUpdateOne) AddUserIDs(ids ...uint32) *RoleUpdateOne {
 	_u.mutation.AddUserIDs(ids...)
@@ -604,6 +701,27 @@ func (_u *RoleUpdateOne) AddUsers(v ...*User) *RoleUpdateOne {
 // Mutation returns the RoleMutation object of the builder.
 func (_u *RoleUpdateOne) Mutation() *RoleMutation {
 	return _u.mutation
+}
+
+// ClearMenus clears all "menus" edges to the Menu entity.
+func (_u *RoleUpdateOne) ClearMenus() *RoleUpdateOne {
+	_u.mutation.ClearMenus()
+	return _u
+}
+
+// RemoveMenuIDs removes the "menus" edge to Menu entities by IDs.
+func (_u *RoleUpdateOne) RemoveMenuIDs(ids ...uint32) *RoleUpdateOne {
+	_u.mutation.RemoveMenuIDs(ids...)
+	return _u
+}
+
+// RemoveMenus removes "menus" edges to Menu entities.
+func (_u *RoleUpdateOne) RemoveMenus(v ...*Menu) *RoleUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMenuIDs(ids...)
 }
 
 // ClearUsers clears all "users" edges to the User entity.
@@ -786,6 +904,51 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 	}
 	if value, ok := _u.mutation.AddedDeptCheckStrictly(); ok {
 		_spec.AddField(role.FieldDeptCheckStrictly, field.TypeInt32, value)
+	}
+	if _u.mutation.MenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMenusIDs(); len(nodes) > 0 && !_u.mutation.MenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.MenusTable,
+			Columns: role.MenusPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

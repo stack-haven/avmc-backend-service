@@ -35,7 +35,7 @@ func NewPostServiceService(puc *biz.PostUsecase, logger log.Logger) *PostService
 // 参数：ctx 上下文，req 分页请求
 // 返回值：岗位列表响应，错误信息
 func (s *PostServiceService) ListPosts(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
-	s.log.Infof("查询岗位列表分页，分页请求：%v", req)
+	s.log.Infof("查询岗位列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -98,7 +98,7 @@ func (s *PostServiceService) CreatePost(ctx context.Context, req *pbCore.CreateP
 	if req.GetPost() == nil {
 		return nil, pb.ErrorPostInvalidId("岗位信息不能为空")
 	}
-	s.log.Infof("创建岗位，岗位信息：%v", req.Post)
+	s.log.Infof("创建岗位，岗位名称：%s", req.GetPost().GetName())
 	_, err := s.puc.Create(ctx, req.Post)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (s *PostServiceService) UpdatePost(ctx context.Context, req *pbCore.UpdateP
 	if req.GetPost() == nil {
 		return nil, pb.ErrorPostInvalidId("岗位信息不能为空")
 	}
-	s.log.Infof("更新岗位，岗位ID：%v，岗位信息：%v", req.GetId(), req.GetPost())
+	s.log.Infof("更新岗位，岗位ID：%v", req.GetId())
 	req.Post.Id = req.GetId()
 	_, err := s.puc.Update(ctx, req.GetPost())
 	if err != nil {

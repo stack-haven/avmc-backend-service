@@ -36,7 +36,7 @@ func NewMenuServiceService(muc *biz.MenuUsecase, logger log.Logger) *MenuService
 // 参数：ctx 上下文，req 分页请求
 // 返回值：菜单列表响应，错误信息
 func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenusRequest) (*pbCore.ListMenusResponse, error) {
-	s.log.Infof("查询菜单列表分页，分页请求：%v", req)
+	s.log.Infof("查询菜单列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -87,7 +87,7 @@ func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenu
 // 参数：ctx 上下文，req 分页请求
 // 返回值：菜单树形列表响应，错误信息
 func (s *MenuServiceService) ListMenusTree(ctx context.Context, req *pbCore.ListMenusTreeRequest) (*pbCore.ListMenusTreeResponse, error) {
-	s.log.Infof("查询菜单树形列表分页，分页请求：%v", req)
+	s.log.Infof("查询菜单树，parent_id=%d", req.GetParentId())
 	return s.muc.ListTree(ctx, req.GetParentId())
 }
 
@@ -109,7 +109,7 @@ func (s *MenuServiceService) CreateMenu(ctx context.Context, req *pbCore.CreateM
 	if req.GetMenu() == nil {
 		return nil, pb.ErrorMenuInvalidId("菜单信息不能为空")
 	}
-	s.log.Infof("创建菜单，菜单信息：%v", req.Menu)
+	s.log.Infof("创建菜单，菜单名称：%s", req.GetMenu().GetName())
 	_, err := s.muc.Create(ctx, req.Menu)
 	if err != nil {
 		return nil, err
@@ -127,14 +127,14 @@ func (s *MenuServiceService) UpdateMenu(ctx context.Context, req *pbCore.UpdateM
 	if req.GetMenu() == nil {
 		return nil, pb.ErrorMenuInvalidId("菜单信息不能为空")
 	}
-	user, err := s.GetMenu(ctx, &pbCore.GetMenuRequest{Id: req.GetId()})
+	existing, err := s.GetMenu(ctx, &pbCore.GetMenuRequest{Id: req.GetId()})
 	if err != nil {
 		return nil, err
 	}
-	fieldmask.Update(req.UpdateMask, user, req.Menu)
-	s.log.Infof("更新菜单，菜单ID：%v，菜单信息：%v", req.GetId(), req.GetMenu())
-	req.Menu.Id = req.GetId()
-	_, err = s.muc.Update(ctx, req.GetMenu())
+	fieldmask.Update(req.UpdateMask, existing, req.Menu)
+	s.log.Infof("更新菜单，菜单ID：%v", req.GetId())
+	existing.Id = req.GetId()
+	_, err = s.muc.Update(ctx, existing)
 	if err != nil {
 		return nil, err
 	}

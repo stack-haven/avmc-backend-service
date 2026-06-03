@@ -5,12 +5,14 @@ import (
 	"backend-service/app/version/service/internal/conf"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	"backend-service/app/version/service/internal/data/ent"
 
@@ -64,8 +66,7 @@ func (d *Data) DB(ctx context.Context) *ent.Client {
 
 // NewTransaction .
 func NewTransaction(data *Data) biz.Transaction {
-	// return data.db
-	return nil
+	return data
 }
 
 // NewData .
@@ -109,13 +110,17 @@ func NewSnowflake(logger log.Logger) *snowflake.Node {
 // NewRedisClient 创建Redis客户端
 func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 	l := log.NewHelper(log.With(logger, "module", "redis/data/initialize"))
+	if cfg == nil || cfg.Redis == nil {
+		l.Fatalf("redis config is required")
+		return nil
+	}
 	if rdb = redis.NewClient(&redis.Options{
 		Addr:         cfg.Redis.GetAddr(),
 		Password:     cfg.Redis.GetPassword(),
 		DB:           int(cfg.Redis.GetDb()),
-		DialTimeout:  cfg.Redis.GetDialTimeout().AsDuration(),
-		WriteTimeout: cfg.Redis.GetWriteTimeout().AsDuration(),
-		ReadTimeout:  cfg.Redis.GetReadTimeout().AsDuration(),
+		DialTimeout:  configDuration(cfg.Redis.GetDialTimeout(), time.Second),
+		WriteTimeout: configDuration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
+		ReadTimeout:  configDuration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
 	}); rdb == nil {
 		l.Fatalf("failed opening connection to redis")
 		return nil
@@ -137,4 +142,15 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 		}
 	}
 	return rdb
+}
+
+func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duration {
+	if d == nil {
+		return fallback
+	}
+	v := d.AsDuration()
+	if v <= 0 {
+		return fallback
+	}
+	return v
 }

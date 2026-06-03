@@ -7,6 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	khttp "github.com/go-kratos/kratos/v2/transport/http"
 
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/auth/authz"
@@ -89,7 +90,9 @@ func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
 					method := ""
 					switch tr.Kind() {
 					case transport.KindHTTP:
-						method = tr.RequestHeader().Get("X-HTTP-Method")
+						if ht, ok := tr.(khttp.Transporter); ok && ht.Request() != nil {
+							method = ht.Request().Method
+						}
 					case transport.KindGRPC:
 						// 从gRPC方法中提取操作
 						parts := strings.Split(path, "/")
@@ -113,29 +116,30 @@ func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
 			}
 
 			// 执行授权检查
-			if sub != "" && obj != "" && act != "" {
-				allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
-				if err != nil {
-					// 处理授权错误
-					var authzErr *authz.AuthzError
-					if errors.As(err, &authzErr) {
-						switch authzErr.Code {
-						case authz.ErrCodePermissionDenied:
-							return nil, ErrPermissionDenied
-						default:
-							return nil, errors.New(ErrForbidden, "FORBIDDEN", authzErr.Error())
-						}
-					}
-					return nil, ErrPermissionDenied
-				}
-
-				if !allowed {
-					return nil, ErrPermissionDenied
-				}
-
-				// 将授权结果注入上下文
-				ctx = authz.ContextWithAuthzResult(ctx, true)
+			if sub == "" || obj == "" || act == "" {
+				return nil, ErrPermissionDenied
 			}
+			allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+			if err != nil {
+				// 处理授权错误
+				var authzErr *authz.AuthzError
+				if errors.As(err, &authzErr) {
+					switch authzErr.Code {
+					case authz.ErrCodePermissionDenied:
+						return nil, ErrPermissionDenied
+					default:
+						return nil, errors.New(ErrForbidden, "FORBIDDEN", authzErr.Error())
+					}
+				}
+				return nil, ErrPermissionDenied
+			}
+
+			if !allowed {
+				return nil, ErrPermissionDenied
+			}
+
+			// 将授权结果注入上下文
+			ctx = authz.ContextWithAuthzResult(ctx, true)
 
 			// 继续处理请求
 			return handler(ctx, req)
@@ -171,12 +175,6 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 			ctx = authn.ContextWithAuthClaims(ctx, claims)
 
 			// 从请求中提取授权信息
-			var sub authz.Subject
-			var obj authz.Object
-			var act authz.Action
-			var dom authz.Domain
-
-			// 从上下文中提取授权信息
 			sub, obj, act, dom, ok := authz.ExtractAuthzInfo(ctx)
 			if !ok {
 				// 如果上下文中没有授权信息，尝试从请求中提取
@@ -186,7 +184,9 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 					method := ""
 					switch tr.Kind() {
 					case transport.KindHTTP:
-						method = tr.RequestHeader().Get("X-HTTP-Method")
+						if ht, ok := tr.(khttp.Transporter); ok && ht.Request() != nil {
+							method = ht.Request().Method
+						}
 					case transport.KindGRPC:
 						// 从gRPC方法中提取操作
 						parts := strings.Split(path, "/")
@@ -199,34 +199,35 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 					sub = authz.Subject(claims.GetSubject())
 					obj = authz.Object(path)
 					act = authz.Action(method)
-					dom = authz.Domain(claims.GetIssuer())
+					dom = authz.Domain(claims.GetDomain())
 				}
 			}
 
 			// 执行授权检查
-			if sub != "" && obj != "" && act != "" {
-				allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
-				if err != nil {
-					// 处理授权错误
-					var authzErr *authz.AuthzError
-					if errors.As(err, &authzErr) {
-						switch authzErr.Code {
-						case authz.ErrCodePermissionDenied:
-							return nil, ErrPermissionDenied
-						default:
-							return nil, errors.New(ErrForbidden, "FORBIDDEN", authzErr.Error())
-						}
-					}
-					return nil, ErrPermissionDenied
-				}
-
-				if !allowed {
-					return nil, ErrPermissionDenied
-				}
-
-				// 将授权结果注入上下文
-				ctx = authz.ContextWithAuthzResult(ctx, true)
+			if sub == "" || obj == "" || act == "" {
+				return nil, ErrPermissionDenied
 			}
+			allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+			if err != nil {
+				// 处理授权错误
+				var authzErr *authz.AuthzError
+				if errors.As(err, &authzErr) {
+					switch authzErr.Code {
+					case authz.ErrCodePermissionDenied:
+						return nil, ErrPermissionDenied
+					default:
+						return nil, errors.New(ErrForbidden, "FORBIDDEN", authzErr.Error())
+					}
+				}
+				return nil, ErrPermissionDenied
+			}
+
+			if !allowed {
+				return nil, ErrPermissionDenied
+			}
+
+			// 将授权结果注入上下文
+			ctx = authz.ContextWithAuthzResult(ctx, true)
 
 			// 继续处理请求
 			return handler(ctx, req)

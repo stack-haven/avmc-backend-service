@@ -97,6 +97,8 @@ message Role {
   optional string created_at = 10 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
   // 更新时间
   optional string updated_at = 11 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+  // 角色绑定的菜单ID列表
+  repeated uint32 menu_ids = 12 [(gnostic.openapi.v3.property) = {description: "角色绑定的菜单ID列表"}];
 }
 
 // 创建角色请求

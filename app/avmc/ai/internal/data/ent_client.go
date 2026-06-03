@@ -3,7 +3,7 @@ package data
 import (
 	"backend-service/app/avmc/ai/internal/conf"
 	"context"
-	"os"
+	"time"
 
 	"backend-service/app/avmc/ai/internal/data/ent/gen"
 	"backend-service/app/avmc/ai/internal/data/ent/gen/intercept"
@@ -31,11 +31,11 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 	{
 		db := drv.DB()
 		// 连接池中最多保留的空闲连接数量
-		db.SetMaxIdleConns(int(cfg.Database.MaxIdleConnections))
+		db.SetMaxIdleConns(databaseMaxIdleConnections(cfg))
 		// 连接池在同一时间打开连接的最大数量
-		db.SetMaxOpenConns(int(cfg.Database.MaxOpenConnections))
+		db.SetMaxOpenConns(databaseMaxOpenConnections(cfg))
 		// 连接可重用的最大时间长度
-		db.SetConnMaxLifetime(cfg.Database.ConnectionMaxLifetime.AsDuration())
+		db.SetConnMaxLifetime(databaseConnectionMaxLifetime(cfg))
 	}
 
 	client := gen.NewClient(
@@ -49,18 +49,6 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 		client = client.Debug()
 	}
 
-	// 运行数据库迁移工具
-	if cfg.Database.Migrate {
-		if err = client.Schema.Create(
-			context.Background(),
-			migrate.WithForeignKeys(true),
-			migrate.WithDropIndex(true),
-			migrate.WithDropColumn(true),
-			migrate.WithForeignKeys(false),
-		); err != nil {
-			l.Fatalf("failed creating schema resources: %v", err)
-		}
-	}
 	// client.Use()
 	client.Intercept(
 		intercept.Func(func(ctx context.Context, q intercept.Query) error {
@@ -76,19 +64,45 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 	return client
 }
 
+func RunSchemaMigration(ctx context.Context, cfg *conf.Data, logger log.Logger) error {
+	l := log.NewHelper(log.With(logger, "module", "ent/schema/migrate"))
+	client := NewEntClient(cfg, logger)
+	defer func() {
+		if err := client.Close(); err != nil {
+			l.Errorf("failed closing ent client: %v", err)
+		}
+	}()
+	return client.Schema.Create(ctx, migrate.WithForeignKeys(false))
+}
+
 // NewEntData .
 func NewEntData(cfg *conf.Data, logger log.Logger) *gen.Client {
 	db, err := gen.Open(cfg.Database.Driver, cfg.Database.Source)
 	if err != nil {
 		log.Fatalf("failed opening connection to database: %v", err)
 	}
-	if os.Getenv("DEPLOY_ENV") == "dev" {
-		// Enable debug mode for detailed logging.
-		db = db.Debug()
-		// Run the auto migration tool.
-		if err = db.Schema.Create(context.Background(), migrate.WithDropIndex(true)); err != nil {
-			log.Fatalf("failed creating schema resources: %v", err)
+	return db
+}
+
+func databaseMaxIdleConnections(cfg *conf.Data) int {
+	if cfg != nil && cfg.Database != nil && cfg.Database.MaxIdleConnections > 0 {
+		return int(cfg.Database.MaxIdleConnections)
+	}
+	return 10
+}
+
+func databaseMaxOpenConnections(cfg *conf.Data) int {
+	if cfg != nil && cfg.Database != nil && cfg.Database.MaxOpenConnections > 0 {
+		return int(cfg.Database.MaxOpenConnections)
+	}
+	return 50
+}
+
+func databaseConnectionMaxLifetime(cfg *conf.Data) time.Duration {
+	if cfg != nil && cfg.Database != nil && cfg.Database.ConnectionMaxLifetime != nil {
+		if d := cfg.Database.ConnectionMaxLifetime.AsDuration(); d > 0 {
+			return d
 		}
 	}
-	return db
+	return 30 * time.Minute
 }

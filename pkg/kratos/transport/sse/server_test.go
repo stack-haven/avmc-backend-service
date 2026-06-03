@@ -2,9 +2,17 @@ package sse
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 )
+
+func skipIfListenNotPermitted(t *testing.T, err error) {
+	t.Helper()
+	if err != nil && strings.Contains(err.Error(), "operation not permitted") {
+		t.Skipf("listener is not permitted in this environment: %v", err)
+	}
+}
 
 func TestServer_Creation(t *testing.T) {
 	srv := NewServer(
@@ -30,6 +38,7 @@ func TestServer_Endpoint(t *testing.T) {
 
 	endpoint, err := srv.Endpoint()
 	if err != nil {
+		skipIfListenNotPermitted(t, err)
 		t.Fatalf("Server.Endpoint() error: %v", err)
 	}
 

@@ -30,7 +30,7 @@ func NewProjectServiceService(puc *biz.ProjectUsecase, logger log.Logger) *Proje
 
 // ListProjects handles project list requests.
 func (s *ProjectServiceService) ListProjects(ctx context.Context, req *pbCore.ListProjectsRequest) (*pbCore.ListProjectsResponse, error) {
-	s.log.Infof("查询项目列表分页，分页请求：%v", req)
+	s.log.Infof("查询项目列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -93,7 +93,7 @@ func (s *ProjectServiceService) CreateProject(ctx context.Context, req *pbCore.C
 	if req.GetProject().GetName() == "" {
 		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
 	}
-	s.log.Infof("创建项目，项目信息：%v", req.Project)
+	s.log.Infof("创建项目，项目名称：%s", req.GetProject().GetName())
 	_, err := s.puc.Create(ctx, req.Project)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (s *ProjectServiceService) UpdateProject(ctx context.Context, req *pbCore.U
 	if req.GetProject().GetName() == "" {
 		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
 	}
-	s.log.Infof("更新项目，项目ID：%v，项目信息：%v", req.GetId(), req.GetProject())
+	s.log.Infof("更新项目，项目ID：%v", req.GetId())
 	req.Project.Id = req.GetId()
 	_, err := s.puc.Update(ctx, req.GetProject())
 	if err != nil {

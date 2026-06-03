@@ -1349,6 +1349,9 @@ type MenuMutation struct {
 	children               map[uint32]struct{}
 	removedchildren        map[uint32]struct{}
 	clearedchildren        bool
+	roles                  map[uint32]struct{}
+	removedroles           map[uint32]struct{}
+	clearedroles           bool
 	done                   bool
 	oldValue               func(context.Context) (*Menu, error)
 	predicates             []predicate.Menu
@@ -2923,6 +2926,60 @@ func (m *MenuMutation) ResetChildren() {
 	m.removedchildren = nil
 }
 
+// AddRoleIDs adds the "roles" edge to the Role entity by ids.
+func (m *MenuMutation) AddRoleIDs(ids ...uint32) {
+	if m.roles == nil {
+		m.roles = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.roles[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRoles clears the "roles" edge to the Role entity.
+func (m *MenuMutation) ClearRoles() {
+	m.clearedroles = true
+}
+
+// RolesCleared reports if the "roles" edge to the Role entity was cleared.
+func (m *MenuMutation) RolesCleared() bool {
+	return m.clearedroles
+}
+
+// RemoveRoleIDs removes the "roles" edge to the Role entity by IDs.
+func (m *MenuMutation) RemoveRoleIDs(ids ...uint32) {
+	if m.removedroles == nil {
+		m.removedroles = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.roles, ids[i])
+		m.removedroles[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRoles returns the removed IDs of the "roles" edge to the Role entity.
+func (m *MenuMutation) RemovedRolesIDs() (ids []uint32) {
+	for id := range m.removedroles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RolesIDs returns the "roles" edge IDs in the mutation.
+func (m *MenuMutation) RolesIDs() (ids []uint32) {
+	for id := range m.roles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRoles resets all changes to the "roles" edge.
+func (m *MenuMutation) ResetRoles() {
+	m.roles = nil
+	m.clearedroles = false
+	m.removedroles = nil
+}
+
 // Where appends a list predicates to the MenuMutation builder.
 func (m *MenuMutation) Where(ps ...predicate.Menu) {
 	m.predicates = append(m.predicates, ps...)
@@ -3715,12 +3772,15 @@ func (m *MenuMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MenuMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.parent != nil {
 		edges = append(edges, menu.EdgeParent)
 	}
 	if m.children != nil {
 		edges = append(edges, menu.EdgeChildren)
+	}
+	if m.roles != nil {
+		edges = append(edges, menu.EdgeRoles)
 	}
 	return edges
 }
@@ -3739,15 +3799,24 @@ func (m *MenuMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case menu.EdgeRoles:
+		ids := make([]ent.Value, 0, len(m.roles))
+		for id := range m.roles {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MenuMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedchildren != nil {
 		edges = append(edges, menu.EdgeChildren)
+	}
+	if m.removedroles != nil {
+		edges = append(edges, menu.EdgeRoles)
 	}
 	return edges
 }
@@ -3762,18 +3831,27 @@ func (m *MenuMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case menu.EdgeRoles:
+		ids := make([]ent.Value, 0, len(m.removedroles))
+		for id := range m.removedroles {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MenuMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedparent {
 		edges = append(edges, menu.EdgeParent)
 	}
 	if m.clearedchildren {
 		edges = append(edges, menu.EdgeChildren)
+	}
+	if m.clearedroles {
+		edges = append(edges, menu.EdgeRoles)
 	}
 	return edges
 }
@@ -3786,6 +3864,8 @@ func (m *MenuMutation) EdgeCleared(name string) bool {
 		return m.clearedparent
 	case menu.EdgeChildren:
 		return m.clearedchildren
+	case menu.EdgeRoles:
+		return m.clearedroles
 	}
 	return false
 }
@@ -3810,6 +3890,9 @@ func (m *MenuMutation) ResetEdge(name string) error {
 		return nil
 	case menu.EdgeChildren:
 		m.ResetChildren()
+		return nil
+	case menu.EdgeRoles:
+		m.ResetRoles()
 		return nil
 	}
 	return fmt.Errorf("unknown Menu edge %s", name)
@@ -5691,6 +5774,9 @@ type RoleMutation struct {
 	dept_check_strictly    *int32
 	adddept_check_strictly *int32
 	clearedFields          map[string]struct{}
+	menus                  map[uint32]struct{}
+	removedmenus           map[uint32]struct{}
+	clearedmenus           bool
 	users                  map[uint32]struct{}
 	removedusers           map[uint32]struct{}
 	clearedusers           bool
@@ -6276,6 +6362,60 @@ func (m *RoleMutation) ResetDeptCheckStrictly() {
 	m.adddept_check_strictly = nil
 }
 
+// AddMenuIDs adds the "menus" edge to the Menu entity by ids.
+func (m *RoleMutation) AddMenuIDs(ids ...uint32) {
+	if m.menus == nil {
+		m.menus = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.menus[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMenus clears the "menus" edge to the Menu entity.
+func (m *RoleMutation) ClearMenus() {
+	m.clearedmenus = true
+}
+
+// MenusCleared reports if the "menus" edge to the Menu entity was cleared.
+func (m *RoleMutation) MenusCleared() bool {
+	return m.clearedmenus
+}
+
+// RemoveMenuIDs removes the "menus" edge to the Menu entity by IDs.
+func (m *RoleMutation) RemoveMenuIDs(ids ...uint32) {
+	if m.removedmenus == nil {
+		m.removedmenus = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.menus, ids[i])
+		m.removedmenus[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMenus returns the removed IDs of the "menus" edge to the Menu entity.
+func (m *RoleMutation) RemovedMenusIDs() (ids []uint32) {
+	for id := range m.removedmenus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MenusIDs returns the "menus" edge IDs in the mutation.
+func (m *RoleMutation) MenusIDs() (ids []uint32) {
+	for id := range m.menus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMenus resets all changes to the "menus" edge.
+func (m *RoleMutation) ResetMenus() {
+	m.menus = nil
+	m.clearedmenus = false
+	m.removedmenus = nil
+}
+
 // AddUserIDs adds the "users" edge to the User entity by ids.
 func (m *RoleMutation) AddUserIDs(ids ...uint32) {
 	if m.users == nil {
@@ -6688,7 +6828,10 @@ func (m *RoleMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RoleMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.menus != nil {
+		edges = append(edges, role.EdgeMenus)
+	}
 	if m.users != nil {
 		edges = append(edges, role.EdgeUsers)
 	}
@@ -6699,6 +6842,12 @@ func (m *RoleMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *RoleMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case role.EdgeMenus:
+		ids := make([]ent.Value, 0, len(m.menus))
+		for id := range m.menus {
+			ids = append(ids, id)
+		}
+		return ids
 	case role.EdgeUsers:
 		ids := make([]ent.Value, 0, len(m.users))
 		for id := range m.users {
@@ -6711,7 +6860,10 @@ func (m *RoleMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RoleMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedmenus != nil {
+		edges = append(edges, role.EdgeMenus)
+	}
 	if m.removedusers != nil {
 		edges = append(edges, role.EdgeUsers)
 	}
@@ -6722,6 +6874,12 @@ func (m *RoleMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *RoleMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case role.EdgeMenus:
+		ids := make([]ent.Value, 0, len(m.removedmenus))
+		for id := range m.removedmenus {
+			ids = append(ids, id)
+		}
+		return ids
 	case role.EdgeUsers:
 		ids := make([]ent.Value, 0, len(m.removedusers))
 		for id := range m.removedusers {
@@ -6734,7 +6892,10 @@ func (m *RoleMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RoleMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.clearedmenus {
+		edges = append(edges, role.EdgeMenus)
+	}
 	if m.clearedusers {
 		edges = append(edges, role.EdgeUsers)
 	}
@@ -6745,6 +6906,8 @@ func (m *RoleMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *RoleMutation) EdgeCleared(name string) bool {
 	switch name {
+	case role.EdgeMenus:
+		return m.clearedmenus
 	case role.EdgeUsers:
 		return m.clearedusers
 	}
@@ -6763,6 +6926,9 @@ func (m *RoleMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *RoleMutation) ResetEdge(name string) error {
 	switch name {
+	case role.EdgeMenus:
+		m.ResetMenus()
+		return nil
 	case role.EdgeUsers:
 		m.ResetUsers()
 		return nil

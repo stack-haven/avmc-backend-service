@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -10,6 +11,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func skipIfNetworkNotPermitted(t *testing.T, err error) {
+	t.Helper()
+	if err != nil && strings.Contains(err.Error(), "operation not permitted") {
+		t.Skipf("network is not permitted in this environment: %v", err)
+	}
+}
 
 // TestSSEChatStreamCreation 测试 SSE 聊天的流创建功能
 func TestSSEChatStreamCreation(t *testing.T) {
@@ -55,14 +63,19 @@ func TestSSEServerStartAndStop(t *testing.T) {
 		sse.WithAddress(":0"),
 	)
 
-	// 启动服务器（非阻塞）
+	errCh := make(chan error, 1)
 	go func() {
-		err := server.Start(context.Background())
-		assert.NoError(t, err)
+		errCh <- server.Start(context.Background())
 	}()
 
 	// 等待服务器启动
 	time.Sleep(100 * time.Millisecond)
+	select {
+	case err := <-errCh:
+		skipIfNetworkNotPermitted(t, err)
+		assert.NoError(t, err)
+	default:
+	}
 
 	// 停止服务器
 	err := server.Stop(context.Background())
@@ -99,7 +112,10 @@ func TestSSEStreamSubscription(t *testing.T) {
 
 	// 发送请求
 	resp, err := client.Do(req)
-	assert.NoError(t, err)
+	skipIfNetworkNotPermitted(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
 	defer resp.Body.Close()
 
 	// 验证响应状态码

@@ -74,7 +74,7 @@ func (r *chatRepo) ExistByName(ctx context.Context, name string) (uint32, error)
 // 参数：ctx 上下文，g 对话信息
 // 返回值：对话信息，错误信息
 func (r *chatRepo) Save(ctx context.Context, g *pb.Chat) (*pb.Chat, error) {
-	r.log.Infof("保存对话，对话信息：%v", g)
+	r.log.Infof("保存对话，对话名称：%s", g.GetName())
 	entChat := r.convertEnt(g)
 	builder := r.data.DB(ctx).Chat.Create()
 
@@ -82,7 +82,7 @@ func (r *chatRepo) Save(ctx context.Context, g *pb.Chat) (*pb.Chat, error) {
 		SetNillableStatus(entChat.Status).
 		Save(ctx)
 	if err != nil {
-		r.log.Errorf("保存对话失败，对话信息：%v，错误：%v", g, err)
+		r.log.Errorf("保存对话失败，对话名称：%s，错误：%v", g.GetName(), err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
@@ -92,13 +92,13 @@ func (r *chatRepo) Save(ctx context.Context, g *pb.Chat) (*pb.Chat, error) {
 // 参数：ctx 上下文，g 对话信息
 // 返回值：对话信息，错误信息
 func (r *chatRepo) Update(ctx context.Context, g *pb.Chat) (*pb.Chat, error) {
-	r.log.Infof("更新对话，对话信息：%v", g)
+	r.log.Infof("更新对话，对话ID：%d", g.GetId())
 	entChat := r.convertEnt(g)
 	builder := r.data.DB(ctx).Chat.UpdateOneID(g.GetId())
 	if g.Name != nil {
 		id, _ := r.ExistByName(ctx, *entChat.Name)
 		if id > 0 && id != g.GetId() {
-			r.log.Errorf("对话名已存在，对话信息：%v", g)
+			r.log.Errorf("对话名已存在，对话ID：%d", g.GetId())
 			return nil, fmt.Errorf("chat name already exists")
 		}
 		builder = builder.SetName(*entChat.Name)
@@ -108,7 +108,7 @@ func (r *chatRepo) Update(ctx context.Context, g *pb.Chat) (*pb.Chat, error) {
 		SetNillableStatus(entChat.Status).
 		Save(ctx)
 	if err != nil {
-		r.log.Errorf("更新对话失败，对话信息：%v，错误：%v", g, err)
+		r.log.Errorf("更新对话失败，对话ID：%d，错误：%v", g.GetId(), err)
 		return nil, err
 	}
 	return r.convertProto(res), nil
@@ -122,7 +122,6 @@ func (r *chatRepo) FindByID(ctx context.Context, id uint32) (*pb.Chat, error) {
 	res, err := r.data.DB(ctx).Chat.Query().
 		// Select(chat.FieldID, chat.FieldName, chat.FieldEmail, chat.FieldNickname, chat.FieldRealname, chat.FieldGender, chat.FieldAvatar, chat.FieldDescription, chat.FieldPhone, chat.FieldStatus, chat.FieldBirthday, chat.FieldCreatedAt, chat.FieldUpdatedAt).
 		Where(chat.IDEQ(id)).Only(ctx)
-	fmt.Printf("%v", res)
 	if err != nil {
 		r.log.Errorf("通过ID查询对话失败，ID：%d，错误：%v", id, err)
 		if gen.IsNotFound(err) {
@@ -181,11 +180,11 @@ func (r *chatRepo) ListAll(ctx context.Context) ([]*pb.Chat, error) {
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：对话列表响应，错误信息
 func (r *chatRepo) ListPageSimple(ctx context.Context, opts ...biz.ListOption) ([]*pb.Chat, error) {
-	r.log.Infof("查询对话简单列表分页，分页请求：%v", opts)
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
+	r.log.Infof("查询对话简单列表分页，limit=%d offset=%d", o.Limit, o.Offset)
 	res, err := r.data.DB(ctx).Chat.Query().
 		Select(chat.FieldID, chat.FieldName).
 		Where(ents.ApplyFilter(o.Filter)).
@@ -218,11 +217,11 @@ func (r *chatRepo) Delete(ctx context.Context, id uint32) error {
 // 参数：ctx 上下文，filter 过滤条件
 // 返回值：对话数量，错误信息
 func (r *chatRepo) CountChats(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	r.log.Infof("查询对话数量，过滤条件：%v", opts)
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
+	r.log.Infof("查询对话数量")
 	count, err := r.data.db.Chat.Query().
 		Select(chat.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
@@ -238,11 +237,11 @@ func (r *chatRepo) CountChats(ctx context.Context, opts ...biz.ListOption) (int3
 // 参数：ctx 上下文，opts 分页选项
 // 返回值：对话列表，错误信息
 func (r *chatRepo) ListChats(ctx context.Context, opts ...biz.ListOption) ([]*pb.Chat, error) {
-	r.log.Infof("查询对话列表，分页选项：%v", opts)
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
+	r.log.Infof("查询对话列表，limit=%d offset=%d", o.Limit, o.Offset)
 	pos, err := r.data.db.Chat.Query().
 		Select(
 			chat.FieldID,

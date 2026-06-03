@@ -20,16 +20,11 @@ import (
 var _ biz.ProjectRepo = (*projectRepo)(nil)
 
 type projectRepo struct {
-	data *Data
-	log  *log.Helper
+	BaseRepo
 }
 
-// NewProjectRepo creates a project repo.
 func NewProjectRepo(data *Data, logger log.Logger) biz.ProjectRepo {
-	return &projectRepo{
-		data: data,
-		log:  log.NewHelper(logger),
-	}
+	return &projectRepo{BaseRepo: NewBaseRepo(data, logger)}
 }
 
 func (r *projectRepo) convertProto(ctx context.Context, res *gen.Project) *pbCore.Project {
@@ -61,16 +56,15 @@ func (r *projectRepo) getOwnerName(ctx context.Context, ownerID *uint32) *string
 	if ownerID == nil || *ownerID == 0 {
 		return nil
 	}
-	res, err := r.data.DB(ctx).User.Get(ctx, *ownerID)
+	res, err := r.Data.DB(ctx).User.Get(ctx, *ownerID)
 	if err != nil {
 		return nil
 	}
 	return res.Name
 }
 
-// Save saves project data.
 func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Project, error) {
-	r.log.Infof("保存项目，项目信息：%v", g)
+	r.Log.Infof("保存项目: %s", g.GetName())
 	if id, _ := r.GetProjectExistByName(ctx, g.GetName()); id > 0 {
 		return nil, fmt.Errorf("project name already exists")
 	}
@@ -80,7 +74,7 @@ func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Proj
 		}
 	}
 
-	builder := r.data.DB(ctx).Project.Create().
+	builder := r.Data.DB(ctx).Project.Create().
 		SetName(g.GetName()).
 		SetNillableCode(convert.EmptyToNil(g.GetCode())).
 		SetNillableOwnerID(convert.EmptyToNil(g.GetOwnerId())).
@@ -93,15 +87,13 @@ func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Proj
 
 	res, err := builder.Save(ctx)
 	if err != nil {
-		r.log.Errorf("保存项目失败，项目信息：%v，错误：%v", g, err)
 		return nil, err
 	}
 	return r.FindByID(ctx, res.ID)
 }
 
-// GetProjectExistByName checks project name existence.
 func (r *projectRepo) GetProjectExistByName(ctx context.Context, name string) (uint32, error) {
-	entProject, err := r.data.DB(ctx).Project.Query().Where(project.Name(name)).Select(project.FieldID).First(ctx)
+	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Name(name)).Select(project.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -111,9 +103,8 @@ func (r *projectRepo) GetProjectExistByName(ctx context.Context, name string) (u
 	return entProject.ID, nil
 }
 
-// GetProjectExistByCode checks project code existence.
 func (r *projectRepo) GetProjectExistByCode(ctx context.Context, code string) (uint32, error) {
-	entProject, err := r.data.DB(ctx).Project.Query().Where(project.Code(code)).Select(project.FieldID).First(ctx)
+	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Code(code)).Select(project.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -123,9 +114,8 @@ func (r *projectRepo) GetProjectExistByCode(ctx context.Context, code string) (u
 	return entProject.ID, nil
 }
 
-// Update updates project data.
 func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Project, error) {
-	r.log.Infof("更新项目，项目信息：%v", g)
+	r.Log.Infof("更新项目: %d", g.GetId())
 	if id, _ := r.GetProjectExistByName(ctx, g.GetName()); id > 0 && id != g.GetId() {
 		return nil, fmt.Errorf("project name already exists")
 	}
@@ -135,7 +125,7 @@ func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Pr
 		}
 	}
 
-	builder := r.data.DB(ctx).Project.UpdateOneID(g.GetId()).
+	builder := r.Data.DB(ctx).Project.UpdateOneID(g.GetId()).
 		SetName(g.GetName()).
 		SetNillableStatus(convert.EmptyToNil(int32(g.GetStatus()))).
 		SetDescription(g.GetDescription()).
@@ -157,27 +147,22 @@ func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Pr
 
 	res, err := builder.Save(ctx)
 	if err != nil {
-		r.log.Errorf("更新项目失败，项目信息：%v，错误：%v", g, err)
 		return nil, err
 	}
 	return r.FindByID(ctx, res.ID)
 }
 
-// UpdateStatus updates project status.
 func (r *projectRepo) UpdateStatus(ctx context.Context, id uint32, status int32) error {
-	r.log.Infof("更新项目状态，项目ID：%d，状态：%d", id, status)
-	return r.data.DB(ctx).Project.UpdateOneID(id).SetStatus(status).Exec(ctx)
+	r.Log.Infof("更新项目状态 ID: %d, status: %d", id, status)
+	return r.Data.DB(ctx).Project.UpdateOneID(id).SetStatus(status).Exec(ctx)
 }
 
-// FindByID finds project by id.
 func (r *projectRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Project, error) {
-	r.log.Infof("通过ID查询项目，ID：%d", id)
-	res, err := r.data.DB(ctx).Project.Query().
+	res, err := r.Data.DB(ctx).Project.Query().
 		Where(project.IDEQ(id)).
 		WithMembers().
 		Only(ctx)
 	if err != nil {
-		r.log.Errorf("通过ID查询项目失败，ID：%d，错误：%v", id, err)
 		if gen.IsNotFound(err) {
 			return nil, errors.New("查询数据不存在")
 		}
@@ -186,61 +171,38 @@ func (r *projectRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Project,
 	return r.convertProto(ctx, res), nil
 }
 
-// Delete soft-deletes project.
 func (r *projectRepo) Delete(ctx context.Context, id uint32) error {
-	r.log.Infof("删除项目，项目ID：%d", id)
-	err := r.data.DB(ctx).Project.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
-	if err != nil {
-		r.log.Errorf("删除项目失败，项目ID：%d，错误：%v", id, err)
-		return err
-	}
-	return nil
+	return r.Data.DB(ctx).Project.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
 }
 
-// CountProjects counts projects.
 func (r *projectRepo) CountProjects(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	r.log.Infof("查询项目数量，过滤条件：%v", opts)
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	count, err := r.data.DB(ctx).Project.Query().
+	count, err := r.Data.DB(ctx).Project.Query().
 		Select(project.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
-		r.log.Errorf("查询项目数量失败，错误：%v", err)
 		return 0, err
 	}
 	return int32(count), nil
 }
 
-// ListProjects lists projects.
 func (r *projectRepo) ListProjects(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Project, error) {
-	r.log.Infof("查询项目列表，分页选项：%v", opts)
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
-	res, err := r.data.DB(ctx).Project.Query().
-		Select(
-			project.FieldID,
-			project.FieldName,
-			project.FieldCode,
-			project.FieldOwnerID,
-			project.FieldStatus,
-			project.FieldDescription,
-			project.FieldCreatedAt,
-			project.FieldUpdatedAt,
-		).
+	res, err := r.Data.DB(ctx).Project.Query().
+		Select(project.FieldID, project.FieldName, project.FieldCode, project.FieldOwnerID, project.FieldStatus, project.FieldDescription, project.FieldCreatedAt, project.FieldUpdatedAt).
 		Where(ents.ApplyFilter(o.Filter)).
 		WithMembers().
 		Order(ents.ApplyOrderBy(o.OrderBy)).
-		Offset(o.Offset).
-		Limit(o.Limit).
+		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
 	if err != nil {
-		r.log.Errorf("查询项目列表失败，错误：%v", err)
 		return nil, err
 	}
 	return convert.SliceToAny(res, func(item *gen.Project) *pbCore.Project {

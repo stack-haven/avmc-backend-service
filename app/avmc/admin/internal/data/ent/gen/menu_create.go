@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"context"
 	"errors"
 	"fmt"
@@ -496,6 +497,21 @@ func (_c *MenuCreate) AddChildren(v ...*Menu) *MenuCreate {
 	return _c.AddChildIDs(ids...)
 }
 
+// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
+func (_c *MenuCreate) AddRoleIDs(ids ...uint32) *MenuCreate {
+	_c.mutation.AddRoleIDs(ids...)
+	return _c
+}
+
+// AddRoles adds the "roles" edges to the Role entity.
+func (_c *MenuCreate) AddRoles(v ...*Role) *MenuCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddRoleIDs(ids...)
+}
+
 // Mutation returns the MenuMutation object of the builder.
 func (_c *MenuCreate) Mutation() *MenuMutation {
 	return _c.mutation
@@ -951,6 +967,22 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.RolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.RolesTable,
+			Columns: menu.RolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

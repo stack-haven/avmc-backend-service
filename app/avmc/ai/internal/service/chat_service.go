@@ -10,6 +10,7 @@ import (
 
 	pb "backend-service/api/avmc/ai/v1"
 	"backend-service/app/avmc/ai/internal/biz"
+	"backend-service/pkg/auth"
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/kratos/transport/sse"
 
@@ -26,11 +27,12 @@ import (
 // 包含业务用例和日志记录器
 type ChatServiceService struct {
 	pb.UnimplementedChatServiceServer
-	ucc        *biz.ChatUsecase
-	sse        *sse.Server
-	log        *log.Helper
-	wsUpgrader websocket.Upgrader
-	router     *mux.Router
+	ucc           *biz.ChatUsecase
+	sse           *sse.Server
+	authenticator *auth.AuthToken
+	log           *log.Helper
+	wsUpgrader    websocket.Upgrader
+	router        *mux.Router
 }
 
 // RegisterRoutes 注册路由
@@ -41,12 +43,11 @@ func (s *ChatServiceService) RegisterRoutes() *mux.Router {
 }
 
 // NewChatServiceService 创建新的对话服务实例
-// 参数：ucc 业务用例实例，logger 日志记录器
-// 返回值：对话服务实例指针
-func NewChatServiceService(ucc *biz.ChatUsecase, logger log.Logger) *ChatServiceService {
+func NewChatServiceService(ucc *biz.ChatUsecase, authenticator *auth.AuthToken, logger log.Logger) *ChatServiceService {
 	return &ChatServiceService{
-		ucc: ucc,
-		log: log.NewHelper(logger),
+		ucc:           ucc,
+		authenticator: authenticator,
+		log:           log.NewHelper(logger),
 		wsUpgrader: websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
@@ -70,10 +71,10 @@ func (s *ChatServiceService) PublishSSEData(businessType string, streamID string
 	switch businessType {
 	case "chat":
 		// 聊天业务逻辑
-		s.log.Infof("Publishing chat SSE data: %v to stream: %s", data, streamID)
+		s.log.Infof("Publishing chat SSE data to stream: %s", streamID)
 	case "ai":
 		// AI 业务逻辑
-		s.log.Infof("Publishing AI SSE data: %v to stream: %s", data, streamID)
+		s.log.Infof("Publishing AI SSE data to stream: %s", streamID)
 	default:
 		s.log.Warnf("Unknown business type: %s", businessType)
 	}
@@ -86,7 +87,7 @@ func (s *ChatServiceService) PublishSSEData(businessType string, streamID string
 // 参数：ctx 上下文，req 分页请求
 // 返回值：对话列表响应，错误信息
 func (s *ChatServiceService) ListChatsSimple(ctx context.Context, req *pb.ListChatsRequest) (*pb.ListChatsResponse, error) {
-	s.log.Infof("查询对话简单列表分页，分页请求：%v", req)
+	s.log.Infof("查询对话简单列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
 		filtering.DeclareIdent("name", filtering.TypeString),
@@ -148,7 +149,7 @@ func (s *ChatServiceService) CreateChat(ctx context.Context, req *pb.CreateChatR
 	if req.GetChat() == nil {
 		return nil, pb.ErrorChatInvalidId("对话信息不能为空")
 	}
-	s.log.Infof("创建对话，对话信息：%v", req.Chat)
+	s.log.Infof("创建对话，对话名称：%s", req.GetChat().GetName())
 	_, err := s.ucc.Create(ctx, req.Chat)
 	if err != nil {
 		return nil, err
@@ -170,13 +171,14 @@ func (s *ChatServiceService) UpdateChat(ctx context.Context, req *pb.UpdateChatR
 	if req.GetOperatorId() == 0 {
 		// return nil, pb.ErrorChatInvalidOperatorId("操作人ID不能为空")
 	}
-	user, err := s.GetChat(ctx, &pb.GetChatRequest{Id: req.GetId()})
+	existing, err := s.GetChat(ctx, &pb.GetChatRequest{Id: req.GetId()})
 	if err != nil {
 		return nil, err
 	}
-	fieldmask.Update(req.UpdateMask, user, req.Chat)
-	s.log.Infof("更新对话，对话信息：%v", req.GetChat())
-	_, err = s.ucc.Update(ctx, req.Chat)
+	fieldmask.Update(req.UpdateMask, existing, req.Chat)
+	s.log.Infof("更新对话，对话ID：%v", req.GetId())
+	existing.Id = req.GetId()
+	_, err = s.ucc.Update(ctx, existing)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +222,7 @@ func (s *ChatServiceService) UpdateChatByStatus(ctx context.Context, req *pb.Upd
 // 参数：ctx 上下文，req 分页请求
 // 返回值：对话列表响应，错误信息
 func (s *ChatServiceService) ListChats(ctx context.Context, req *pb.ListChatsRequest) (*pb.ListChatsResponse, error) {
-	s.log.Infof("查询对话列表分页，分页请求：%v", req)
+	s.log.Infof("查询对话列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
 		filtering.DeclareIdent("name", filtering.TypeString),
@@ -273,9 +275,9 @@ func (s *ChatServiceService) StreamChat(ctx context.Context, req *pb.StreamChatR
 	if req.GetMessage() == "" {
 		return nil, errors.New(1001, "消息内容不能为空", "message content is required")
 	}
-	s.log.Infof("处理 AI 聊天流式请求，消息内容：%v", req.GetMessage())
+	s.log.Infof("处理 AI 聊天流式请求，chat_id=%d", req.GetChatId())
 	// 生成唯一的流ID
-	streamID := sse.StreamID(req.GetMessage() + "_" + fmt.Sprintf("%d", time.Now().UnixNano()))
+	streamID := sse.StreamID(fmt.Sprintf("chat_%d_%d", req.GetChatId(), time.Now().UnixNano()))
 	// 异步处理AI响应并通过SSE发送
 	go func() {
 		// 模拟AI响应
@@ -296,16 +298,41 @@ func (s *ChatServiceService) StreamChat(ctx context.Context, req *pb.StreamChatR
 	return &pb.StreamChatResponse{StreamId: string(streamID)}, nil
 }
 
+// authenticateRequest 显式验证 HTTP 请求中的 Token（用于绕过 Kratos 中间件的 SSE/WS 端点）
+func (s *ChatServiceService) authenticateRequest(r *http.Request) (context.Context, error) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		// 也尝试从 query 参数获取
+		token = r.URL.Query().Get("token")
+	}
+	if token == "" {
+		return nil, errors.New(401, "UNAUTHORIZED", "missing token")
+	}
+
+	// 支持 Bearer scheme
+	const bearerPrefix = "Bearer "
+	if len(token) > len(bearerPrefix) && token[:len(bearerPrefix)] == bearerPrefix {
+		token = token[len(bearerPrefix):]
+	}
+
+	claims, err := s.authenticator.ValidateToken(r.Context(), token)
+	if err != nil {
+		return nil, errors.New(401, "UNAUTHORIZED", "invalid token")
+	}
+
+	ctx := authn.ContextWithAuthClaims(r.Context(), claims)
+	return ctx, nil
+}
+
 // WebsocketHandler 处理 WebSocket 连接
-// 参数：w HTTP 响应写入器，r HTTP 请求
 func (s *ChatServiceService) WebsocketHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	uid := authn.GetAuthUserID(ctx)
-	if uid == 0 {
-		// 如果获取不到用户ID，说明 Token 无效或未经过中间件
+	ctx, err := s.authenticateRequest(r)
+	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	uid := authn.GetAuthUserID(ctx)
+	s.log.Infof("websocket authenticated user: %d", uid)
 	c, err := s.wsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		s.log.Infof("upgrade:", err)
@@ -335,20 +362,19 @@ func (s *ChatServiceService) WebsocketHandler(w http.ResponseWriter, r *http.Req
 }
 
 // SSEHandler 处理 SSE 连接
-// 参数：w HTTP 响应写入器，r HTTP 请求
 func (s *ChatServiceService) SSEHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, err := s.authenticateRequest(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("X-Accel-Buffering", "no")          // 禁用 Nginx 缓存
 	w.Header().Set("Access-Control-Allow-Origin", "*") // 视情况开启跨域
-	ctx := r.Context()
 	uid := authn.GetAuthUserID(ctx)
-	if uid == 0 {
-		// 如果获取不到用户ID，说明 Token 无效或未经过中间件
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	s.log.Infof("sse authenticated user: %d", uid)
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)

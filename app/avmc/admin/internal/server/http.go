@@ -18,7 +18,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/handlers"
 
-	authnEngine "backend-service/pkg/auth/authn"
+	"backend-service/pkg/auth"
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
@@ -43,7 +43,7 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 // NewMiddleware 创建中间件
 func newHTTPMiddleware(
 	logger log.Logger,
-	authenticator authnEngine.Authenticator,
+	authenticator *auth.AuthToken,
 	authorizer authzEngine.Authorizer,
 ) []middleware.Middleware {
 	var ms []middleware.Middleware
@@ -60,7 +60,7 @@ func newHTTPMiddleware(
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
-	authenticator authnEngine.Authenticator, authorizer authzEngine.Authorizer,
+	authenticator *auth.AuthToken, authorizer authzEngine.Authorizer,
 	auth *service.AuthServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,

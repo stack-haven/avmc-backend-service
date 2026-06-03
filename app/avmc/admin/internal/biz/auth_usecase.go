@@ -5,7 +5,6 @@ import (
 	"backend-service/pkg/auth/authn"
 	"context"
 	"errors"
-	"fmt"
 
 	pbCore "backend-service/api/core/service/v1"
 
@@ -29,6 +28,8 @@ type AuthRepo interface {
 	Logout(context.Context, uint32) error
 	// RefreshToken 刷新令牌
 	RefreshToken(context.Context, string) (*v1.RefreshTokenResponse, error)
+	// Register 注册用户
+	Register(context.Context, string, string) error
 	// Profile 获取用户简介信息
 	Profile(context.Context, uint32) (*v1.ProfileResponse, error)
 	// Codes 获取用户权限码
@@ -76,8 +77,7 @@ func (uc *AuthUsecase) LoginByEmail(ctx context.Context, email, password string,
 // 参数：ctx 上下文，refreshToken 刷新令牌
 // 返回值：刷新令牌响应结构体，错误信息
 func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*v1.RefreshTokenResponse, error) {
-	// 这里实现具体的刷新令牌业务逻辑
-	uc.log.Infof("尝试刷新令牌，刷新令牌：%s", refreshToken)
+	uc.log.Infof("尝试刷新令牌")
 	return uc.repo.RefreshToken(ctx, refreshToken)
 }
 
@@ -97,7 +97,7 @@ func (uc *AuthUsecase) Logout(ctx context.Context) error {
 func (uc *AuthUsecase) Register(ctx context.Context, name, password string) error {
 	// 这里实现具体的注册业务逻辑
 	uc.log.Infof("尝试注册，用户名：%s", name)
-	return nil
+	return uc.repo.Register(ctx, name, password)
 }
 
 // Profile 处理登录用户简介信息业务逻辑
@@ -155,6 +155,6 @@ func (uc *AuthUsecase) Menus(ctx context.Context) ([]*pbCore.Menu, error) {
 		uc.log.Errorf("获取登录用户菜单失败: %v", err)
 		return nil, err
 	}
-	fmt.Println(menus)
-	return []*pbCore.Menu{}, nil
+	uc.log.Infof("获取登录用户菜单成功, 数量: %d", len(menus))
+	return menus, nil
 }
