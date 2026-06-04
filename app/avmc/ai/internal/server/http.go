@@ -8,13 +8,14 @@ import (
 	"context"
 
 	nethttp "net/http"
+	"time"
 
 	"backend-service/pkg/auth"
 
 	"github.com/go-kratos/kratos/contrib/middleware/validate/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/middleware/logging"
+	"github.com/go-kratos/kratos/v2/middleware/ratelimit"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -22,6 +23,8 @@ import (
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	pkgHealth "backend-service/pkg/health"
+	"backend-service/pkg/middleware/safelogging"
 )
 
 // NewWhiteListMatcher 创建jwt白名单
@@ -37,12 +40,16 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 
 // NewMiddleware 创建中间件
 func newHTTPMiddleware(
+	cfg *conf.Middleware,
 	logger log.Logger,
 	authenticator *auth.AuthToken,
 	authorizer authzEngine.Authorizer,
 ) []middleware.Middleware {
 	var ms []middleware.Middleware
-	ms = append(ms, logging.Server(logger))
+	ms = append(ms, safelogging.Server(logger))
+	if cfg != nil && cfg.Limiter != nil {
+		ms = append(ms, ratelimit.Server())
+	}
 	ms = append(ms, selector.Server(
 		authMiddleware.AuthnMiddleware(authenticator),
 		// auth.Server(userToken),
@@ -56,6 +63,7 @@ func newHTTPMiddleware(
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
 	authenticator *auth.AuthToken, authorizer authzEngine.Authorizer,
+	checker pkgHealth.Checker,
 	chat *service.ChatServiceService,
 ) *http.Server {
 	var opts = []http.ServerOption{
@@ -64,7 +72,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 			handlers.AllowedMethods(c.Http.Cors.Methods),
 			handlers.AllowedOrigins(c.Http.Cors.Origins),
 		)),
-		http.Middleware(newHTTPMiddleware(logger, authenticator, authorizer)...),
+		http.Middleware(newHTTPMiddleware(c.Http.Middleware, logger, authenticator, authorizer)...),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
@@ -77,6 +85,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	}
 
 	srv := http.NewServer(opts...)
+	pkgHealth.RegisterHTTP(srv, checker, 2*time.Second)
 	v1.RegisterChatServiceHTTPServer(srv, chat)
 	if c.GetHttp().GetEnableSwagger() {
 		allFS := nethttp.FS(assets.OpenApiData)

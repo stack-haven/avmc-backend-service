@@ -16,11 +16,27 @@ cd app/avmc/admin
 go run ./cmd/migrate -conf ./configs
 ```
 
+从旧版随机 `domain_id` 数据模型升级时，必须先把既有 Admin 租户数据归入明确的数据域。该操作会先检查域内唯一约束冲突，并在单事务中完成归域；发现冲突时不会修改任何数据：
+
+```bash
+cd app/avmc/admin
+go run ./cmd/migrate -conf ./configs -legacy-domain 1
+```
+
+迁移命令会删除已被 schema 替代的旧索引，用域内复合唯一索引替换原有全局唯一索引。生产执行前必须完成数据库备份。
+
 初始化或同步超级管理员 Casbin 策略：
 
 ```bash
 cd app/avmc/admin
 go run ./cmd/policy -conf ./configs -domain 1 -role super_admin -users 1
+```
+
+为本地空数据库写入可重复执行的 Admin mock 数据：
+
+```bash
+cd app/avmc/admin
+go run ./cmd/mock -conf ./configs
 ```
 
 ## Production Baseline

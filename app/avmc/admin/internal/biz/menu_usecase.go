@@ -45,7 +45,7 @@ func NewMenuUsecase(repo MenuRepo, logger log.Logger) *MenuUsecase {
 // 参数：ctx 上下文，g 菜单信息
 // 返回值：创建后的菜单信息，错误信息
 func (uc *MenuUsecase) Create(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
-	uc.log.WithContext(ctx).Infof("CreateMenu: %v", g.Name)
+	uc.log.WithContext(ctx).Infof("CreateMenu: %v", g.GetName())
 	return uc.repo.Save(ctx, g)
 }
 
@@ -60,7 +60,7 @@ func (uc *MenuUsecase) Get(ctx context.Context, id uint32) (*pbCore.Menu, error)
 // 参数：ctx 上下文，g 菜单信息
 // 返回值：更新后的菜单信息，错误信息
 func (uc *MenuUsecase) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, error) {
-	uc.log.WithContext(ctx).Infof("UpdateMenu: %v", g.Name)
+	uc.log.WithContext(ctx).Infof("UpdateMenu: %v", g.GetName())
 	_, err := uc.repo.FindByID(ctx, g.GetId())
 	if err != nil {
 		return nil, err

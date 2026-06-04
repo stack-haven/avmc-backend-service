@@ -7,7 +7,6 @@ import (
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"go.einride.tech/aip/fieldmask"
 	"go.einride.tech/aip/filtering"
@@ -33,6 +32,8 @@ func NewUserServiceService(uuc *biz.UserUsecase, logger log.Logger) *UserService
 // ListUsersSimple 用户简单列表
 func (s *UserServiceService) ListUsersSimple(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
 	s.log.Infof("查询用户简单列表，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
+	pageSize := biz.NormalizePageSize(req.GetPageSize())
+	req.PageSize = int32(pageSize)
 	filter, pageToken, orderBy, err := s.parseAIPParams(req)
 	if err != nil {
 		return nil, err
@@ -44,12 +45,12 @@ func (s *UserServiceService) ListUsersSimple(ctx context.Context, req *pbCore.Li
 	resp := pbCore.ListUsersResponse{Total: count}
 	resp.Items, err = s.uuc.ListPageSimple(ctx,
 		biz.ListFilter(filter), biz.ListOrderBy(orderBy),
-		biz.ListLimit(int(req.PageSize)), biz.ListOffset(int(pageToken.Offset)),
+		biz.ListLimit(pageSize), biz.ListOffset(int(pageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= int(req.PageSize) {
+	if len(resp.Items) >= pageSize {
 		resp.NextPageToken = pageToken.Next(req).String()
 	}
 	return &resp, nil
@@ -86,7 +87,7 @@ func (s *UserServiceService) parseAIPParams(req *pbCore.ListUsersRequest) (filte
 // GetUser 获取用户详情
 func (s *UserServiceService) GetUser(ctx context.Context, req *pbCore.GetUserRequest) (*pbCore.User, error) {
 	if req.GetId() == 0 {
-		return nil, errors.New(1001, "用户ID不能为空", "user id is required")
+		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
 	}
 	s.log.Infof("获取用户详情 ID: %d", req.GetId())
 	return s.uuc.Get(ctx, req.GetId())
@@ -97,7 +98,7 @@ func (s *UserServiceService) CreateUser(ctx context.Context, req *pbCore.CreateU
 	if req.GetUser() == nil {
 		return nil, pb.ErrorUserInvalidId("用户信息不能为空")
 	}
-	s.log.Infof("创建用户: %v", req.GetUser().GetName())
+	s.log.Infof("创建用户")
 	_, err := s.uuc.Create(ctx, req.GetUser())
 	if err != nil {
 		return nil, err
@@ -156,6 +157,8 @@ func (s *UserServiceService) UpdateUserByStatus(ctx context.Context, req *pbCore
 // ListUsers 用户完整列表
 func (s *UserServiceService) ListUsers(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
 	s.log.Infof("查询用户列表，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
+	pageSize := biz.NormalizePageSize(req.GetPageSize())
+	req.PageSize = int32(pageSize)
 	filter, pageToken, orderBy, err := s.parseAIPParams(req)
 	if err != nil {
 		return nil, err
@@ -167,12 +170,12 @@ func (s *UserServiceService) ListUsers(ctx context.Context, req *pbCore.ListUser
 	resp := pbCore.ListUsersResponse{Total: count}
 	resp.Items, err = s.uuc.ListUsers(ctx,
 		biz.ListFilter(filter), biz.ListOrderBy(orderBy),
-		biz.ListLimit(int(req.PageSize)), biz.ListOffset(int(pageToken.Offset)),
+		biz.ListLimit(pageSize), biz.ListOffset(int(pageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= int(req.PageSize) {
+	if len(resp.Items) >= pageSize {
 		resp.NextPageToken = pageToken.Next(req).String()
 	}
 	return &resp, nil

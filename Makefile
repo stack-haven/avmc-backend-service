@@ -58,6 +58,23 @@ proto:
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
+.PHONY: fmt-check
+# verify Go source formatting
+fmt-check:
+	@test -z "$$(gofmt -l $$(find . -name '*.go' -not -path './vendor/*'))" || \
+		(echo "Go files must be formatted with gofmt:"; gofmt -l $$(find . -name '*.go' -not -path './vendor/*'); exit 1)
+
+.PHONY: check
+# run the required local quality gate
+check: fmt-check
+	go vet ./...
+	go test -timeout 90s ./...
+
+.PHONY: race
+# run race detection for security and infrastructure packages
+race:
+	go test -race -timeout 180s ./pkg/auth/... ./pkg/health/... ./pkg/middleware/safelogging/...
+
 .PHONY: admin-migrate
 # run admin database migration explicitly
 admin-migrate:

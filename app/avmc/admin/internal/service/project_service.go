@@ -31,6 +31,8 @@ func NewProjectServiceService(puc *biz.ProjectUsecase, logger log.Logger) *Proje
 // ListProjects handles project list requests.
 func (s *ProjectServiceService) ListProjects(ctx context.Context, req *pbCore.ListProjectsRequest) (*pbCore.ListProjectsResponse, error) {
 	s.log.Infof("查询项目列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
+	pageSize := biz.NormalizePageSize(req.GetPageSize())
+	req.PageSize = int32(pageSize)
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -64,13 +66,13 @@ func (s *ProjectServiceService) ListProjects(ctx context.Context, req *pbCore.Li
 	resp.Items, err = s.puc.ListProjects(ctx,
 		biz.ListFilter(filter),
 		biz.ListOrderBy(orderBy),
-		biz.ListLimit(int(req.PageSize)),
+		biz.ListLimit(pageSize),
 		biz.ListOffset(int(pageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= int(req.PageSize) {
+	if len(resp.Items) >= pageSize {
 		resp.NextPageToken = pageToken.Next(req).String()
 	}
 	return &resp, nil

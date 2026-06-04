@@ -1,0 +1,25 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+    middleware:
+      limiter:
+        name: "bbr"
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+    middleware:
+      limiter:
+        name: "bbr"
+data:
+  database:
+    driver: mysql
+    source: version_service:replace-me@tcp(mysql:3306)/version?parseTime=True&loc=UTC
+    debug: false
+    migrate: false
+  redis:
+    addr: redis:6379
+    password: replace-me
+    dial_timeout: 1s
+    read_timeout: 0.2s
+    write_timeout: 0.2s

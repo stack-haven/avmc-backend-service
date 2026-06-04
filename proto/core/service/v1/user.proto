@@ -64,15 +64,15 @@ message User {
   uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "用户ID"}];
   optional string name = 2 [
     (buf.validate.field).string = {
-      min_len: 1
-      max_len: 20
+      min_len: 3
+      max_len: 32
     },
     (gnostic.openapi.v3.property) = {description: "用户名"}
   ];
   optional string password = 3 [
     (buf.validate.field).string = {
-      min_len: 6
-      max_len: 28
+      min_len: 12
+      max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "密码"}
   ];
@@ -257,15 +257,15 @@ message ListUsersResponse {
 message VerifyPasswordRequest {
   string name = 1 [
     (buf.validate.field).string = {
-      min_len: 2
-      max_len: 10
+      min_len: 3
+      max_len: 32
     },
     (gnostic.openapi.v3.property) = {description: "用户名"}
   ];
   string password = 2 [
     (buf.validate.field).string = {
-      min_len: 6
-      max_len: 18
+      min_len: 12
+      max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "密码"}
   ];

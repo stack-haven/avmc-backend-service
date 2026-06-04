@@ -6,6 +6,7 @@ import (
 	"backend-service/app/avmc/ai/internal/data/ent/gen"
 	_ "backend-service/app/avmc/ai/internal/data/ent/gen/runtime"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -28,12 +29,14 @@ import (
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authzCasbin "backend-service/pkg/auth/authz/casbin"
+	pkgHealth "backend-service/pkg/health"
 )
 
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
+	NewHealthChecker,
 	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
 	auth.NewAuthToken,
 	NewChatRepo,
@@ -111,6 +114,19 @@ func (d *Data) DB(ctx context.Context) *gen.Client {
 		return tx.Client()
 	}
 	return d.db
+}
+
+func NewHealthChecker(data *Data) pkgHealth.Checker {
+	return pkgHealth.CheckFunc(func(ctx context.Context) error {
+		var errs []error
+		if _, err := data.db.Chat.Query().Limit(1).Count(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("database: %w", err))
+		}
+		if err := data.rdb.Ping(ctx).Err(); err != nil {
+			errs = append(errs, fmt.Errorf("redis: %w", err))
+		}
+		return errors.Join(errs...)
+	})
 }
 
 // NewSnowflake 生成雪花算法id

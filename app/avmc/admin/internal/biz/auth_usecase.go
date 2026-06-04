@@ -4,18 +4,10 @@ import (
 	v1 "backend-service/api/avmc/admin/v1"
 	"backend-service/pkg/auth/authn"
 	"context"
-	"errors"
 
 	pbCore "backend-service/api/core/service/v1"
 
 	"github.com/go-kratos/kratos/v2/log"
-)
-
-// 预定义错误
-var (
-	// ErrUnknown 未知错误
-	ErrUnknown           = errors.New("unknown authentication error")
-	ErrPasswordIncorrect = errors.New("auth failed: incorrect password")
 )
 
 // UserRepo is a Greater repo.
@@ -59,8 +51,7 @@ func NewAuthUsecase(logger log.Logger, repo AuthRepo) *AuthUsecase {
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
 func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password string, domainID uint32) (*v1.LoginResponse, error) {
-	// 这里实现具体的登录业务逻辑
-	uc.log.Infof("尝试登录，用户名：%s", name)
+	uc.log.Infof("尝试用户名登录，domain_id=%d", domainID)
 	return uc.repo.LoginByUsername(ctx, name, password, domainID)
 }
 
@@ -68,8 +59,7 @@ func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password strin
 // 参数：ctx 上下文，email 邮箱，password 密码
 // 返回值：登录响应结构体，错误信息
 func (uc *AuthUsecase) LoginByEmail(ctx context.Context, email, password string, domainID uint32) (*v1.LoginResponse, error) {
-	// 这里实现具体的登录业务逻辑
-	uc.log.Infof("尝试登录，邮箱：%s", email)
+	uc.log.Infof("尝试邮箱登录，domain_id=%d", domainID)
 	return uc.repo.LoginByEmail(ctx, email, password, domainID)
 }
 
@@ -95,8 +85,7 @@ func (uc *AuthUsecase) Logout(ctx context.Context) error {
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：错误信息
 func (uc *AuthUsecase) Register(ctx context.Context, name, password string) error {
-	// 这里实现具体的注册业务逻辑
-	uc.log.Infof("尝试注册，用户名：%s", name)
+	uc.log.Infof("尝试注册")
 	return uc.repo.Register(ctx, name, password)
 }
 
@@ -125,7 +114,7 @@ func (uc *AuthUsecase) VbenProfile(ctx context.Context) (*v1.VbenProfileResponse
 	return &v1.VbenProfileResponse{
 		UserId:   profile.User.Id,
 		Username: profile.User.Name,
-		RealName: profile.User.Nickname,
+		RealName: profile.User.Realname,
 		Desc:     profile.User.Description,
 		Avatar:   profile.User.Avatar,
 		Role:     profile.Role,

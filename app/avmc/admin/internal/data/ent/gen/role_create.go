@@ -72,14 +72,6 @@ func (_c *RoleCreate) SetDomainID(v uint32) *RoleCreate {
 	return _c
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_c *RoleCreate) SetNillableDomainID(v *uint32) *RoleCreate {
-	if v != nil {
-		_c.SetDomainID(*v)
-	}
-	return _c
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *RoleCreate) SetDeletedAt(v time.Time) *RoleCreate {
 	_c.mutation.SetDeletedAt(v)
@@ -254,13 +246,6 @@ func (_c *RoleCreate) defaults() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := role.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		if role.DefaultDomainID == nil {
-			return fmt.Errorf("gen: uninitialized role.DefaultDomainID (forgotten import gen/runtime?)")
-		}
-		v := role.DefaultDomainID()
-		_c.mutation.SetDomainID(v)
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		v := role.DefaultName

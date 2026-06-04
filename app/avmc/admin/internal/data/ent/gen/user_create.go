@@ -72,14 +72,6 @@ func (_c *UserCreate) SetDomainID(v uint32) *UserCreate {
 	return _c
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDomainID(v *uint32) *UserCreate {
-	if v != nil {
-		_c.SetDomainID(*v)
-	}
-	return _c
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *UserCreate) SetDeletedAt(v time.Time) *UserCreate {
 	_c.mutation.SetDeletedAt(v)
@@ -376,13 +368,6 @@ func (_c *UserCreate) defaults() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := user.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		if user.DefaultDomainID == nil {
-			return fmt.Errorf("gen: uninitialized user.DefaultDomainID (forgotten import gen/runtime?)")
-		}
-		v := user.DefaultDomainID()
-		_c.mutation.SetDomainID(v)
 	}
 	if _, ok := _c.mutation.Gender(); !ok {
 		v := user.DefaultGender

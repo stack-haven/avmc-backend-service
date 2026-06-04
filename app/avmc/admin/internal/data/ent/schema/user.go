@@ -32,12 +32,12 @@ func (User) Annotations() []schema.Annotation {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique().MinLen(3).MaxLen(32).Match(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)).Nillable().Comment("用户名，唯一"),
+		field.String("name").MinLen(3).MaxLen(32).Match(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)).Nillable().Comment("用户名，域内唯一"),
 		field.String("password").Sensitive().MinLen(6).MaxLen(100).Nillable().Comment("密码哈希"),
 		field.String("realname").Optional().MaxLen(50).Nillable().Comment("用户真实姓名"),
 		field.String("nickname").Optional().MaxLen(50).Nillable().Comment("用户昵称"),
-		field.String("email").Optional().Unique().MaxLen(100).Match(regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)).Nillable().Comment("电子邮箱，唯一"),
-		field.String("phone").Optional().Unique().MaxLen(20).Nillable().Comment("手机号码，唯一"),
+		field.String("email").Optional().MaxLen(100).Match(regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)).Nillable().Comment("电子邮箱，域内唯一"),
+		field.String("phone").Optional().MaxLen(20).Nillable().Comment("手机号码，域内唯一"),
 		field.String("avatar").Optional().MaxLen(255).Nillable().Comment("头像URL"),
 		field.Time("birthday").Optional().SchemaType(map[string]string{dialect.MySQL: "date"}).Nillable().Comment("生日"),
 		field.Int32("gender").Max(5).Min(0).Default(0).SchemaType(map[string]string{dialect.MySQL: "tinyint", dialect.Postgres: "tinyint(2)"}).Nillable().Comment("性别：0=未知 1=男 2=女"),
@@ -70,9 +70,9 @@ func (User) Mixin() []ent.Mixin {
 // Indexes of the User.
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name"),
-		index.Fields("phone"),
+		index.Fields("domain_id", "name").Unique(),
+		index.Fields("domain_id", "phone").Unique(),
 		index.Fields("status"),
-		index.Fields("email"),
+		index.Fields("domain_id", "email").Unique(),
 	}
 }

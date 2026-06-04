@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Post holds the schema definition for the Post entity.
@@ -50,6 +51,6 @@ func (Post) Mixin() []ent.Mixin {
 // Indexes of the Post.
 func (Post) Indexes() []ent.Index {
 	return []ent.Index{
-		// index.Fields("phone", "authority").Unique(),
+		index.Fields("domain_id", "name").Unique(),
 	}
 }

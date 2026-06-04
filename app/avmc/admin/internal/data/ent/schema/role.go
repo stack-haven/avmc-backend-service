@@ -60,6 +60,6 @@ func (Role) Mixin() []ent.Mixin {
 func (Role) Indexes() []ent.Index {
 	return []ent.Index{
 		// index.Fields("phone", "authority").Unique(),
-		index.Fields("name"),
+		index.Fields("domain_id", "name").Unique(),
 	}
 }

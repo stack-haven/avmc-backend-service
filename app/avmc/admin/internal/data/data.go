@@ -6,6 +6,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	_ "backend-service/app/avmc/admin/internal/data/ent/gen/runtime"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -23,9 +24,11 @@ import (
 	"backend-service/pkg/auth"
 	authnEngine "backend-service/pkg/auth/authn"
 	authnJwt "backend-service/pkg/auth/authn/jwt"
+	"backend-service/pkg/auth/loginattempt"
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authzCasbin "backend-service/pkg/auth/authz/casbin"
+	pkgHealth "backend-service/pkg/health"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -34,6 +37,8 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
+	NewHealthChecker,
+	NewLoginAttemptGuard,
 	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
 	auth.NewAuthToken,
 	NewAuthRepo,
@@ -117,6 +122,27 @@ func (d *Data) DB(ctx context.Context) *gen.Client {
 		return tx.Client()
 	}
 	return d.db
+}
+
+func NewHealthChecker(data *Data) pkgHealth.Checker {
+	return pkgHealth.CheckFunc(func(ctx context.Context) error {
+		var errs []error
+		if _, err := data.db.User.Query().Limit(1).Count(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("database: %w", err))
+		}
+		if err := data.rdb.Ping(ctx).Err(); err != nil {
+			errs = append(errs, fmt.Errorf("redis: %w", err))
+		}
+		return errors.Join(errs...)
+	})
+}
+
+func NewLoginAttemptGuard(rdb *redis.Client) (loginattempt.Guard, error) {
+	opts, err := loginattempt.OptionsFromEnv("AVMC_ADMIN_LOGIN")
+	if err != nil {
+		return nil, err
+	}
+	return loginattempt.NewRedisGuard(rdb, opts), nil
 }
 
 // NewSnowflake 生成雪花算法id

@@ -28,9 +28,9 @@ type Project struct {
 	DomainID uint32 `json:"domain_id,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// 项目名称
+	// 项目名称，域内唯一
 	Name string `json:"name,omitempty"`
-	// 项目标识
+	// 项目标识，域内唯一
 	Code *string `json:"code,omitempty"`
 	// 项目负责人ID
 	OwnerID *uint32 `json:"owner_id,omitempty"`

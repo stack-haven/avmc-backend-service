@@ -1,3 +1,7 @@
+# Login protection is configured with:
+# AVMC_ADMIN_LOGIN_MAX_ATTEMPTS=5
+# AVMC_ADMIN_LOGIN_WINDOW=15m
+# AVMC_ADMIN_LOGIN_LOCKOUT=15m
 server:
   http:
     addr: 0.0.0.0:8000

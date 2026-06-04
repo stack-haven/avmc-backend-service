@@ -22,6 +22,8 @@ server:
       origins:
         - "*"
     middleware:
+      limiter:
+        name: "bbr"
       auth:
         method: "HS256"
         key: "some_api_key"
@@ -29,6 +31,9 @@ server:
   grpc:
     addr: 0.0.0.0:9001
     timeout: 1s
+    middleware:
+      limiter:
+        name: "bbr"
 data:
   database:
     driver: mysql

@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Dept holds the schema definition for the Dept entity.
@@ -59,6 +60,6 @@ func (Dept) Mixin() []ent.Mixin {
 // Indexes of the Dept.
 func (Dept) Indexes() []ent.Index {
 	return []ent.Index{
-		// index.Fields("phone", "authority").Unique(),
+		index.Fields("domain_id", "name").Unique(),
 	}
 }

@@ -15,16 +15,6 @@ type ctxKey string
 // 上下文类型枚举
 type ContextType int
 
-// 常量定义
-const (
-	// HeaderAuthorize 认证头名称
-	HeaderAuthorize = "Authorization"
-	// BearerWord Bearer认证方案前缀
-	BearerWord = "Bearer"
-	// BasicWord Basic认证方案前缀
-	BasicWord = "Basic"
-)
-
 // 上下文类型常量
 const (
 	// ContextTypeGrpc gRPC上下文类型
@@ -33,6 +23,16 @@ const (
 	ContextTypeKratosMetaData
 	// ContextTypeHTTP HTTP上下文类型
 	ContextTypeHTTP
+)
+
+// 常量定义
+const (
+	// HeaderAuthorize 认证头名称
+	HeaderAuthorize = "Authorization"
+	// BearerWord Bearer认证方案前缀
+	BearerWord = "Bearer"
+	// BasicWord Basic认证方案前缀
+	BasicWord = "Basic"
 )
 
 // 上下文键常量

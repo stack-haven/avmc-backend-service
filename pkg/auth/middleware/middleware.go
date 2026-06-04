@@ -58,9 +58,16 @@ func AuthnMiddleware(authenticator authn.Authenticator) middleware.Middleware {
 			}
 
 			// 将认证声明注入上下文
+			if claims == nil {
+				return nil, ErrInvalidToken
+			}
 			ctx = authn.ContextWithAuthClaims(ctx, claims)
 			// 使用认证器选项中的用户工厂创建用户对象
-			securityUser := authenticator.Options().UserFactory(claims)
+			userFactory := authenticator.Options().UserFactory
+			if userFactory == nil {
+				return nil, ErrInvalidToken
+			}
+			securityUser := userFactory(claims)
 			if securityUser != nil {
 				if err := securityUser.ParseFromContext(ctx); err != nil {
 					return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", err.Error())
@@ -172,7 +179,22 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 			}
 
 			// 将认证声明注入上下文
+			if claims == nil {
+				return nil, ErrInvalidToken
+			}
 			ctx = authn.ContextWithAuthClaims(ctx, claims)
+			userFactory := authenticator.Options().UserFactory
+			if userFactory == nil {
+				return nil, ErrInvalidToken
+			}
+			securityUser := userFactory(claims)
+			if securityUser == nil {
+				return nil, ErrInvalidToken
+			}
+			if err := securityUser.ParseFromContext(ctx); err != nil {
+				return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", err.Error())
+			}
+			ctx = authn.ContextWithAuthUser(ctx, securityUser)
 
 			// 从请求中提取授权信息
 			sub, obj, act, dom, ok := authz.ExtractAuthzInfo(ctx)
@@ -271,6 +293,9 @@ func SkipAuthPathMiddleware(authenticator authn.Authenticator, skipPaths []strin
 			}
 
 			// 将认证声明注入上下文
+			if claims == nil {
+				return nil, ErrInvalidToken
+			}
 			ctx = authn.ContextWithAuthClaims(ctx, claims)
 
 			// 继续处理请求
@@ -293,7 +318,9 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 					method := ""
 					switch tr.Kind() {
 					case transport.KindHTTP:
-						method = tr.RequestHeader().Get("X-HTTP-Method")
+						if ht, ok := tr.(khttp.Transporter); ok && ht.Request() != nil {
+							method = ht.Request().Method
+						}
 					case transport.KindGRPC:
 						// 从gRPC方法中提取操作
 						parts := strings.Split(path, "/")
@@ -312,8 +339,12 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 					sub = authz.Subject(claims.GetSubject())
 					obj = authz.Object(path)
 					act = authz.Action(method)
-					dom = authz.Domain(claims.GetIssuer())
+					dom = authz.Domain(claims.GetDomain())
 				}
+			}
+
+			if sub == "" || obj == "" || act == "" {
+				return nil, ErrPermissionDenied
 			}
 
 			// 检查用户角色
@@ -324,7 +355,7 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 						for _, skipRole := range skipRoles {
 							if string(role) == skipRole {
 								// 跳过身份鉴权，直接处理请求
-								return handler(ctx, req)
+								return handler(authz.ContextWithAuthzResult(ctx, true), req)
 							}
 						}
 					}
@@ -332,29 +363,27 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 			}
 
 			// 执行授权检查
-			if sub != "" && obj != "" && act != "" {
-				allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
-				if err != nil {
-					// 处理授权错误
-					var authzErr *authz.AuthzError
-					if errors.As(err, &authzErr) {
-						switch authzErr.Code {
-						case authz.ErrCodePermissionDenied:
-							return nil, ErrPermissionDenied
-						default:
-							return nil, errors.New(ErrForbidden, "FORBIDDEN", authzErr.Error())
-						}
+			allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+			if err != nil {
+				// 处理授权错误
+				var authzErr *authz.AuthzError
+				if errors.As(err, &authzErr) {
+					switch authzErr.Code {
+					case authz.ErrCodePermissionDenied:
+						return nil, ErrPermissionDenied
+					default:
+						return nil, errors.New(ErrForbidden, "FORBIDDEN", authzErr.Error())
 					}
-					return nil, ErrPermissionDenied
 				}
-
-				if !allowed {
-					return nil, ErrPermissionDenied
-				}
-
-				// 将授权结果注入上下文
-				ctx = authz.ContextWithAuthzResult(ctx, true)
+				return nil, ErrPermissionDenied
 			}
+
+			if !allowed {
+				return nil, ErrPermissionDenied
+			}
+
+			// 将授权结果注入上下文
+			ctx = authz.ContextWithAuthzResult(ctx, true)
 
 			// 继续处理请求
 			return handler(ctx, req)

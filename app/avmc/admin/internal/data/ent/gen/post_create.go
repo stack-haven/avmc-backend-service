@@ -70,14 +70,6 @@ func (_c *PostCreate) SetDomainID(v uint32) *PostCreate {
 	return _c
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_c *PostCreate) SetNillableDomainID(v *uint32) *PostCreate {
-	if v != nil {
-		_c.SetDomainID(*v)
-	}
-	return _c
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *PostCreate) SetDeletedAt(v time.Time) *PostCreate {
 	_c.mutation.SetDeletedAt(v)
@@ -194,13 +186,6 @@ func (_c *PostCreate) defaults() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := post.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		if post.DefaultDomainID == nil {
-			return fmt.Errorf("gen: uninitialized post.DefaultDomainID (forgotten import gen/runtime?)")
-		}
-		v := post.DefaultDomainID()
-		_c.mutation.SetDomainID(v)
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		v := post.DefaultName

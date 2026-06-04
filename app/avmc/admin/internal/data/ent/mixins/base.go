@@ -3,9 +3,8 @@ package mixins
 import (
 	pkgMixin "backend-service/pkg/entgo/mixin"
 
-	"entgo.io/ent/schema/mixin"
-
 	"entgo.io/ent"
+	"entgo.io/ent/schema/mixin"
 )
 
 var _ ent.Mixin = (*BaseMixin)(nil)
@@ -18,6 +17,10 @@ func (BaseMixin) Fields() []ent.Field {
 	fields = append(fields, pkgMixin.CreatedAt{}.Fields()...)
 	fields = append(fields, pkgMixin.UpdatedAt{}.Fields()...)
 	fields = append(fields, pkgMixin.Status{}.Fields()...)
-	fields = append(fields, pkgMixin.DomainID{}.Fields()...)
+	fields = append(fields, DomainID{}.Fields()...)
 	return fields
+}
+
+func (BaseMixin) Indexes() []ent.Index {
+	return DomainID{}.Indexes()
 }

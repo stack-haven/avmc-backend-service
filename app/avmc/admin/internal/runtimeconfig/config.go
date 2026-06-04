@@ -59,6 +59,9 @@ func Validate(bc *conf.Bootstrap) error {
 	if strings.TrimSpace(bc.Server.Http.Addr) == "" {
 		return ConfigError("AVMC_ADMIN_HTTP_ADDR must not be empty")
 	}
+	if bc.Server.Http.Cors == nil {
+		return ConfigError("server.http.cors config is required")
+	}
 	if bc.Server.Grpc == nil {
 		return ConfigError("server.grpc config is required")
 	}
@@ -94,14 +97,24 @@ func Validate(bc *conf.Bootstrap) error {
 		return ConfigError("AVMC_ADMIN_REDIS_ADDR must not be empty")
 	}
 	if IsProduction() {
+		if len(key) < 32 || strings.Contains(strings.ToLower(key), "replace-with") {
+			return ConfigError("AVMC_ADMIN_JWT_KEY must be at least 32 bytes and must not be a placeholder in production")
+		}
+		if unsafeProductionDatabaseSource(bc.Data.Database.Source) {
+			return ConfigError("AVMC_ADMIN_DB_SOURCE must not use root credentials or placeholders in production")
+		}
+		if strings.TrimSpace(bc.Data.Redis.Password) == "" || strings.Contains(strings.ToLower(bc.Data.Redis.Password), "replace-with") {
+			return ConfigError("AVMC_ADMIN_REDIS_PASSWORD must not be empty or a placeholder in production")
+		}
+		if len(bc.Server.Http.Cors.Origins) == 0 {
+			return ConfigError("AVMC_ADMIN_CORS_ORIGINS must not be empty in production")
+		}
 		if bc.Server.Http.EnableSwagger {
 			return ConfigError("AVMC_ADMIN_ENABLE_SWAGGER must be false in production")
 		}
-		if bc.Server.Http.Cors != nil {
-			for _, origin := range bc.Server.Http.Cors.Origins {
-				if strings.TrimSpace(origin) == "*" {
-					return ConfigError("AVMC_ADMIN_CORS_ORIGINS must not include * in production")
-				}
+		for _, origin := range bc.Server.Http.Cors.Origins {
+			if strings.TrimSpace(origin) == "*" {
+				return ConfigError("AVMC_ADMIN_CORS_ORIGINS must not include * in production")
 			}
 		}
 		if bc.Data.Database.Debug {
@@ -112,6 +125,13 @@ func Validate(bc *conf.Bootstrap) error {
 		}
 	}
 	return nil
+}
+
+func unsafeProductionDatabaseSource(source string) bool {
+	source = strings.ToLower(strings.TrimSpace(source))
+	return strings.HasPrefix(source, "root:") ||
+		strings.HasPrefix(source, "root@") ||
+		strings.Contains(source, "replace-with")
 }
 
 func IsProduction() bool {

@@ -36,3 +36,4 @@ bin/
 .idea/
 *.swp
 __debug_*
+server

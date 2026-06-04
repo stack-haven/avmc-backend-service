@@ -72,7 +72,13 @@ func RunSchemaMigration(ctx context.Context, cfg *conf.Data, logger log.Logger) 
 			l.Errorf("failed closing ent client: %v", err)
 		}
 	}()
-	return client.Schema.Create(ctx, migrate.WithForeignKeys(false))
+	return client.Schema.Create(
+		ctx,
+		migrate.WithForeignKeys(false),
+		// Migrations are only run through cmd/migrate, so replacing obsolete
+		// global unique indexes with tenant-scoped indexes is explicit.
+		migrate.WithDropIndex(true),
+	)
 }
 
 // NewEntData .

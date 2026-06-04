@@ -163,6 +163,8 @@ func (m *LoginPasswordRequest) validate(all bool) error {
 
 	// no validation rules for Password
 
+	// no validation rules for DomainId
+
 	switch v := m.Identity.(type) {
 	case *LoginPasswordRequest_Username:
 		if v == nil {
@@ -190,10 +192,6 @@ func (m *LoginPasswordRequest) validate(all bool) error {
 		// no validation rules for Email
 	default:
 		_ = v // ensures v is used
-	}
-
-	if m.DomainId != nil {
-		// no validation rules for DomainId
 	}
 
 	if len(errors) > 0 {
@@ -302,9 +300,7 @@ func (m *LoginByUsernameRequest) validate(all bool) error {
 
 	// no validation rules for Password
 
-	if m.DomainId != nil {
-		// no validation rules for DomainId
-	}
+	// no validation rules for DomainId
 
 	if len(errors) > 0 {
 		return LoginByUsernameRequestMultiError(errors)
@@ -412,9 +408,7 @@ func (m *LoginByEmailRequest) validate(all bool) error {
 
 	// no validation rules for Password
 
-	if m.DomainId != nil {
-		// no validation rules for DomainId
-	}
+	// no validation rules for DomainId
 
 	if len(errors) > 0 {
 		return LoginByEmailRequestMultiError(errors)
@@ -522,9 +516,7 @@ func (m *LoginByPhoneCodeRequest) validate(all bool) error {
 
 	// no validation rules for Code
 
-	if m.DomainId != nil {
-		// no validation rules for DomainId
-	}
+	// no validation rules for DomainId
 
 	if len(errors) > 0 {
 		return LoginByPhoneCodeRequestMultiError(errors)

@@ -37,6 +37,8 @@ func NewMenuServiceService(muc *biz.MenuUsecase, logger log.Logger) *MenuService
 // 返回值：菜单列表响应，错误信息
 func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenusRequest) (*pbCore.ListMenusResponse, error) {
 	s.log.Infof("查询菜单列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
+	pageSize := biz.NormalizePageSize(req.GetPageSize())
+	req.PageSize = int32(pageSize)
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -71,13 +73,13 @@ func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenu
 	resp.Items, err = s.muc.ListMenus(ctx,
 		biz.ListFilter(filter),
 		biz.ListOrderBy(orderBy),
-		biz.ListLimit(int(req.PageSize)),
+		biz.ListLimit(pageSize),
 		biz.ListOffset(int(pageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= int(req.PageSize) {
+	if len(resp.Items) >= pageSize {
 		resp.NextPageToken = pageToken.Next(req).String()
 	}
 	return &resp, nil

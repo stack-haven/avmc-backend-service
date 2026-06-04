@@ -4,6 +4,7 @@ import (
 	"backend-service/app/version/service/internal/biz"
 	"backend-service/app/version/service/internal/conf"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,13 +16,14 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	"backend-service/app/version/service/internal/data/ent"
+	pkgHealth "backend-service/pkg/health"
 
 	// init mysql driver
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewEntClient, NewRedisClient, NewSnowflake, NewTransaction, NewReleaseRepo)
+var ProviderSet = wire.NewSet(NewData, NewEntClient, NewRedisClient, NewSnowflake, NewTransaction, NewHealthChecker, NewReleaseRepo)
 
 // Data .
 type Data struct {
@@ -62,6 +64,19 @@ func (d *Data) DB(ctx context.Context) *ent.Client {
 		return tx.Client()
 	}
 	return d.db
+}
+
+func NewHealthChecker(data *Data) pkgHealth.Checker {
+	return pkgHealth.CheckFunc(func(ctx context.Context) error {
+		var errs []error
+		if _, err := data.db.Release.Query().Limit(1).Count(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("database: %w", err))
+		}
+		if err := data.rdb.Ping(ctx).Err(); err != nil {
+			errs = append(errs, fmt.Errorf("redis: %w", err))
+		}
+		return errors.Join(errs...)
+	})
 }
 
 // NewTransaction .

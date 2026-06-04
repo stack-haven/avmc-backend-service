@@ -7,9 +7,11 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/loginattempt"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 	"context"
+	"errors"
 	"sort"
 	"time"
 
@@ -24,23 +26,25 @@ import (
 // AuthRepo 数据仓库结构体
 // 包含日志记录器
 type authRepo struct {
-	data *Data
-	log  *log.Helper
-	atr  *auth.AuthToken
-	ur   *userRepo
-	mr   *menuRepo
+	data  *Data
+	log   *log.Helper
+	atr   *auth.AuthToken
+	ur    *userRepo
+	mr    *menuRepo
+	guard loginattempt.Guard
 }
 
 // NewAuthRepo 创建新的用户数据仓库实例
 // 参数：logger 日志记录器
 // 返回值：用户数据仓库实例指针
-func NewAuthRepo(data *Data, atr *auth.AuthToken, logger log.Logger) biz.AuthRepo {
+func NewAuthRepo(data *Data, atr *auth.AuthToken, guard loginattempt.Guard, logger log.Logger) biz.AuthRepo {
 	return &authRepo{
-		data: data,
-		log:  log.NewHelper(logger),
-		atr:  atr,
-		ur:   NewUserRepo(data, logger).(*userRepo),
-		mr:   NewMenuRepo(data, logger).(*menuRepo),
+		data:  data,
+		log:   log.NewHelper(logger),
+		atr:   atr,
+		ur:    NewUserRepo(data, logger).(*userRepo),
+		mr:    NewMenuRepo(data, logger).(*menuRepo),
+		guard: guard,
 	}
 }
 
@@ -75,21 +79,31 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
 func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, domainId uint32) (*pb.LoginResponse, error) {
-	// 这里实现具体的登录数据操作
-	r.log.Infof("尝试登录数据操作，用户名：%s", name)
-	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword, user.FieldName, user.FieldDomainID).Where(user.NameEQ(name), user.DomainIDEQ(domainId)).Only(ctx)
+	if err := r.checkLogin(ctx, "username", name, domainId); err != nil {
+		return nil, err
+	}
+	res, err := r.data.DB(ctx).User.Query().
+		Select(user.FieldPassword, user.FieldName, user.FieldDomainID).
+		Where(
+			user.NameEQ(name),
+			user.DomainIDEQ(domainId),
+			user.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
+		).
+		Only(ctx)
 	if err != nil {
-		r.log.Errorf("登录数据操作失败，用户名：%s，错误：%v", name, err)
+		if gen.IsNotFound(err) {
+			return nil, r.loginFailed(ctx, "username", name, domainId)
+		}
+		r.log.Errorf("用户名登录查询失败，domain_id=%d，错误：%v", domainId, err)
 		return nil, err
 	}
 	if res.Password == nil {
-		r.log.Errorf("登录数据操作失败，用户名：%s，密码未设置", name)
-		return nil, biz.ErrPasswordIncorrect
+		return nil, r.loginFailed(ctx, "username", name, domainId)
 	}
 	if !crypto.CheckPasswordHash(password, *res.Password) {
-		r.log.Errorf("登录数据操作失败，用户名：%s，密码错误", name)
-		return nil, biz.ErrPasswordIncorrect
+		return nil, r.loginFailed(ctx, "username", name, domainId)
 	}
+	r.loginSucceeded(ctx, "username", name, domainId)
 	return r.LoginResponse(ctx, res)
 }
 
@@ -97,22 +111,68 @@ func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, d
 // 参数：ctx email 邮箱，password 密码
 // 返回值：登录响应结构体，错误信息
 func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, domainId uint32) (*pb.LoginResponse, error) {
-	// 这里实现具体的登录数据操作
-	r.log.Infof("尝试登录数据操作，邮箱：%s", email)
-	res, err := r.data.DB(ctx).User.Query().Select(user.FieldPassword, user.FieldName, user.FieldDomainID).Where(user.EmailEQ(email), user.DomainIDEQ(domainId)).Only(ctx)
+	if err := r.checkLogin(ctx, "email", email, domainId); err != nil {
+		return nil, err
+	}
+	res, err := r.data.DB(ctx).User.Query().
+		Select(user.FieldPassword, user.FieldName, user.FieldDomainID).
+		Where(
+			user.EmailEQ(email),
+			user.DomainIDEQ(domainId),
+			user.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
+		).
+		Only(ctx)
 	if err != nil {
-		r.log.Errorf("登录数据操作失败，邮箱：%s，错误：%v", email, err)
+		if gen.IsNotFound(err) {
+			return nil, r.loginFailed(ctx, "email", email, domainId)
+		}
+		r.log.Errorf("邮箱登录查询失败，domain_id=%d，错误：%v", domainId, err)
 		return nil, err
 	}
 	if res.Password == nil {
-		r.log.Errorf("登录数据操作失败，邮箱：%s，密码未设置", email)
-		return nil, biz.ErrPasswordIncorrect
+		return nil, r.loginFailed(ctx, "email", email, domainId)
 	}
 	if !crypto.CheckPasswordHash(password, *res.Password) {
-		r.log.Errorf("登录数据操作失败，邮箱：%s，密码错误", email)
-		return nil, biz.ErrPasswordIncorrect
+		return nil, r.loginFailed(ctx, "email", email, domainId)
 	}
+	r.loginSucceeded(ctx, "email", email, domainId)
 	return r.LoginResponse(ctx, res)
+}
+
+func (r *authRepo) checkLogin(ctx context.Context, scope, identity string, domainID uint32) error {
+	if r.guard == nil {
+		return nil
+	}
+	err := r.guard.Check(ctx, scope, identity, domainID)
+	if errors.Is(err, loginattempt.ErrLocked) {
+		return pb.ErrorUserTooManyLoginAttempts("登录失败次数过多，请稍后重试")
+	}
+	if err != nil {
+		r.log.Warnf("登录保护检查失败，domain_id=%d，错误：%v", domainID, err)
+	}
+	return nil
+}
+
+func (r *authRepo) loginFailed(ctx context.Context, scope, identity string, domainID uint32) error {
+	if r.guard != nil {
+		err := r.guard.Failure(ctx, scope, identity, domainID)
+		if errors.Is(err, loginattempt.ErrLocked) {
+			return pb.ErrorUserTooManyLoginAttempts("登录失败次数过多，请稍后重试")
+		}
+		if err != nil {
+			r.log.Warnf("记录登录失败次数失败，domain_id=%d，错误：%v", domainID, err)
+		}
+	}
+	return pb.ErrorUserIncorrectPassword("用户名或密码错误")
+}
+
+func (r *authRepo) loginSucceeded(ctx context.Context, scope, identity string, domainID uint32) {
+	if r.guard == nil {
+		return
+	}
+	if err := r.guard.Success(ctx, scope, identity, domainID); err != nil {
+		r.log.Warnf("重置登录失败次数失败，domain_id=%d，错误：%v", domainID, err)
+	}
 }
 
 // RefreshToken 处理刷新令牌数据操作
@@ -129,16 +189,23 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 	if userID == 0 {
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌主体无效")
 	}
+	if domainID == 0 {
+		return nil, pb.ErrorAuthInvalidToken("刷新令牌域无效")
+	}
 	res, err := r.data.DB(ctx).User.Query().
 		Select(user.FieldName, user.FieldDomainID).
-		Where(user.IDEQ(userID)).
+		Where(
+			user.IDEQ(userID),
+			user.DomainIDEQ(domainID),
+			user.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
+		).
 		Only(ctx)
 	if err != nil {
 		r.log.Errorf("刷新令牌用户查询失败，用户ID：%d，错误：%v", userID, err)
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorAuthInvalidToken("刷新令牌用户无效")
+		}
 		return nil, err
-	}
-	if domainID != 0 && res.DomainID != domainID {
-		return nil, pb.ErrorAuthInvalidToken("刷新令牌域无效")
 	}
 	accessToken, newRefreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
 		UserId:   userID,
@@ -168,15 +235,21 @@ func (r *authRepo) Logout(ctx context.Context, userId uint32) error {
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：错误信息
 func (r *authRepo) Register(ctx context.Context, name, password string) error {
-	// 这里实现具体的注册数据操作
-	r.log.Infof("尝试注册数据操作，用户名：%s", name)
+	if err := biz.ValidatePassword(password); err != nil {
+		return err
+	}
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return err
+	}
+	r.log.Infof("尝试注册数据操作")
 	hashPassword, err := crypto.HashPassword(password)
 	if err != nil {
 		return err
 	}
-	_, err = r.data.DB(ctx).User.Create().SetName(name).SetPassword(hashPassword).Save(ctx)
+	_, err = r.data.DB(ctx).User.Create().SetDomainID(domainID).SetName(name).SetPassword(hashPassword).Save(ctx)
 	if err != nil {
-		r.log.Errorf("注册数据操作失败，用户名：%s，错误：%v", name, err)
+		r.log.Errorf("注册数据操作失败：%v", err)
 		return err
 	}
 	return nil
@@ -242,9 +315,13 @@ func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, er
 }
 
 func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	u, err := r.data.DB(ctx).User.Query().
 		Select(user.FieldDomainID).
-		Where(user.IDEQ(userId)).
+		Where(user.IDEQ(userId), user.DomainIDEQ(domainID)).
 		Only(ctx)
 	if err != nil {
 		r.log.Errorf("查询用户域失败，用户ID：%d，错误：%v", userId, err)

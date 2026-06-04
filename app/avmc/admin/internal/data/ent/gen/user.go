@@ -29,7 +29,7 @@ type User struct {
 	DomainID uint32 `json:"domain_id,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// 用户名，唯一
+	// 用户名，域内唯一
 	Name *string `json:"name,omitempty"`
 	// 密码哈希
 	Password *string `json:"-"`
@@ -37,9 +37,9 @@ type User struct {
 	Realname *string `json:"realname,omitempty"`
 	// 用户昵称
 	Nickname *string `json:"nickname,omitempty"`
-	// 电子邮箱，唯一
+	// 电子邮箱，域内唯一
 	Email *string `json:"email,omitempty"`
-	// 手机号码，唯一
+	// 手机号码，域内唯一
 	Phone *string `json:"phone,omitempty"`
 	// 头像URL
 	Avatar *string `json:"avatar,omitempty"`

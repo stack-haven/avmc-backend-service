@@ -1,10 +1,10 @@
 package data
 
 import (
+	pb "backend-service/api/avmc/admin/v1"
 	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
@@ -74,10 +74,18 @@ func (r *userRepo) protoToEnt(g *pbCore.User) *gen.User {
 
 // Save 保存用户
 func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	r.Log.Infof("保存用户: %s", g.GetName())
+	if g == nil || g.Name == nil || g.Password == nil {
+		return nil, pb.ErrorBadRequest("用户名和密码不能为空")
+	}
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	r.Log.Infof("保存用户")
 	ent := r.protoToEnt(g)
 
 	res, err := r.Data.DB(ctx).User.Create().
+		SetDomainID(domainID).
 		SetName(*ent.Name).
 		SetPassword(*ent.Password).
 		SetNillableEmail(ent.Email).
@@ -94,7 +102,7 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 		r.Log.Errorf("保存用户失败: %v", err)
 		// 唯一约束冲突友好提示
 		if gen.IsConstraintError(err) {
-			return nil, fmt.Errorf("用户已存在 (用户名/邮箱/手机号重复)")
+			return nil, pb.ErrorUserAlreadyExists("用户名、邮箱或手机号已存在")
 		}
 		return nil, err
 	}
@@ -103,9 +111,16 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 
 // Update 更新用户
 func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
+	if g == nil || g.GetId() == 0 {
+		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
+	}
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	r.Log.Infof("更新用户 ID: %d", g.GetId())
 	ent := r.protoToEnt(g)
-	builder := r.Data.DB(ctx).User.UpdateOneID(g.GetId())
+	builder := r.Data.DB(ctx).User.UpdateOneID(g.GetId()).Where(user.DomainIDEQ(domainID))
 
 	if g.Password != nil {
 		builder = builder.SetPassword(*g.Password)
@@ -126,7 +141,10 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	if err != nil {
 		r.Log.Errorf("更新用户失败: %v", err)
 		if gen.IsConstraintError(err) {
-			return nil, fmt.Errorf("用户名/邮箱/手机号已被使用")
+			return nil, pb.ErrorUserAlreadyExists("用户名、邮箱或手机号已被使用")
+		}
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorUserNotFound("用户不存在")
 		}
 		return nil, err
 	}
@@ -136,6 +154,10 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 // FindByID 通过 ID 查询 — 显式 Select 排除 password、deleted_at 等敏感/非必要字段
 func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error) {
 	r.Log.Infof("查询用户 ID: %d", id)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(
 			user.FieldID, user.FieldName,
@@ -146,12 +168,12 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 			user.FieldStatus, user.FieldDomainID,
 			user.FieldCreatedAt, user.FieldUpdatedAt,
 		).
-		Where(user.IDEQ(id)).
+		Where(user.IDEQ(id), user.DomainIDEQ(domainID)).
 		Only(ctx)
 	if err != nil {
 		r.Log.Errorf("查询用户失败 ID: %d, err: %v", id, err)
 		if gen.IsNotFound(err) {
-			return nil, fmt.Errorf("用户不存在")
+			return nil, pb.ErrorUserNotFound("用户不存在")
 		}
 		return nil, err
 	}
@@ -160,9 +182,13 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 
 // ListByName 按用户名模糊查询
 func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
-		Where(user.NameContains(name)).
+		Where(user.NameContains(name), user.DomainIDEQ(domainID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -172,8 +198,12 @@ func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User,
 
 // ListByPhone 按手机号查询
 func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.User, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).User.Query().
-		Where(user.PhoneEQ(phone)).
+		Where(user.PhoneEQ(phone), user.DomainIDEQ(domainID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -183,8 +213,13 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 
 // ListAll 查询所有用户
 func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
+		Where(user.DomainIDEQ(domainID)).
 		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
@@ -195,13 +230,17 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 
 // ListPageSimple 用户简单列表分页
 func (r *userRepo) ListPageSimple(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.User, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
-		Where(ents.ApplyFilter(o.Filter)).
+		Where(user.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		Order(gen.Desc(user.FieldID)).
@@ -214,6 +253,10 @@ func (r *userRepo) ListPageSimple(ctx context.Context, opts ...biz.ListOption) (
 
 // ListUsers 用户完整列表分页
 func (r *userRepo) ListUsers(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.User, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
@@ -226,7 +269,7 @@ func (r *userRepo) ListUsers(ctx context.Context, opts ...biz.ListOption) ([]*pb
 			user.FieldStatus, user.FieldDomainID,
 			user.FieldCreatedAt, user.FieldUpdatedAt,
 		).
-		Where(ents.ApplyFilter(o.Filter)).
+		Where(user.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
@@ -238,13 +281,17 @@ func (r *userRepo) ListUsers(ctx context.Context, opts ...biz.ListOption) ([]*pb
 
 // CountUsers 用户计数
 func (r *userRepo) CountUsers(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID).
-		Where(ents.ApplyFilter(o.Filter)).
+		Where(user.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -254,15 +301,28 @@ func (r *userRepo) CountUsers(ctx context.Context, opts ...biz.ListOption) (int3
 
 // Delete 软删除
 func (r *userRepo) Delete(ctx context.Context, id uint32) error {
-	return r.Data.DB(ctx).User.UpdateOneID(id).
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return err
+	}
+	err = r.Data.DB(ctx).User.UpdateOneID(id).
+		Where(user.DomainIDEQ(domainID)).
 		SetDeletedAt(time.Now()).
 		Exec(ctx)
+	if gen.IsNotFound(err) {
+		return pb.ErrorUserNotFound("用户不存在")
+	}
+	return err
 }
 
 // ExistByName 检查用户名是否存在
 func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	entUser, err := r.Data.DB(ctx).User.Query().
-		Where(user.Name(name)).
+		Where(user.Name(name), user.DomainIDEQ(domainID)).
 		Select(user.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
@@ -275,8 +335,12 @@ func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error)
 
 // ExistByPhone 检查手机号是否存在
 func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	entUser, err := r.Data.DB(ctx).User.Query().
-		Where(user.Phone(phone)).
+		Where(user.Phone(phone), user.DomainIDEQ(domainID)).
 		Select(user.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
@@ -289,8 +353,12 @@ func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, erro
 
 // ExistByEmail 检查邮箱是否存在
 func (r *userRepo) ExistByEmail(ctx context.Context, email string) (uint32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	entUser, err := r.Data.DB(ctx).User.Query().
-		Where(user.Email(email)).
+		Where(user.Email(email), user.DomainIDEQ(domainID)).
 		Select(user.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {

@@ -58,8 +58,6 @@ func init() {
 	}()
 	// deptDescDomainID is the schema descriptor for domain_id field.
 	deptDescDomainID := deptMixinFields0[4].Descriptor()
-	// dept.DefaultDomainID holds the default value on creation for the domain_id field.
-	dept.DefaultDomainID = deptDescDomainID.Default.(func() uint32)
 	// dept.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
 	dept.DomainIDValidator = deptDescDomainID.Validators[0].(func(uint32) error)
 	// deptDescName is the schema descriptor for name field.
@@ -314,8 +312,6 @@ func init() {
 	}()
 	// postDescDomainID is the schema descriptor for domain_id field.
 	postDescDomainID := postMixinFields0[4].Descriptor()
-	// post.DefaultDomainID holds the default value on creation for the domain_id field.
-	post.DefaultDomainID = postDescDomainID.Default.(func() uint32)
 	// post.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
 	post.DomainIDValidator = postDescDomainID.Validators[0].(func(uint32) error)
 	// postDescName is the schema descriptor for name field.
@@ -379,8 +375,6 @@ func init() {
 	}()
 	// projectDescDomainID is the schema descriptor for domain_id field.
 	projectDescDomainID := projectMixinFields0[4].Descriptor()
-	// project.DefaultDomainID holds the default value on creation for the domain_id field.
-	project.DefaultDomainID = projectDescDomainID.Default.(func() uint32)
 	// project.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
 	project.DomainIDValidator = projectDescDomainID.Validators[0].(func(uint32) error)
 	// projectDescName is the schema descriptor for name field.
@@ -442,8 +436,6 @@ func init() {
 	}()
 	// roleDescDomainID is the schema descriptor for domain_id field.
 	roleDescDomainID := roleMixinFields0[4].Descriptor()
-	// role.DefaultDomainID holds the default value on creation for the domain_id field.
-	role.DefaultDomainID = roleDescDomainID.Default.(func() uint32)
 	// role.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
 	role.DomainIDValidator = roleDescDomainID.Validators[0].(func(uint32) error)
 	// roleDescName is the schema descriptor for name field.
@@ -515,8 +507,6 @@ func init() {
 	}()
 	// userDescDomainID is the schema descriptor for domain_id field.
 	userDescDomainID := userMixinFields0[4].Descriptor()
-	// user.DefaultDomainID holds the default value on creation for the domain_id field.
-	user.DefaultDomainID = userDescDomainID.Default.(func() uint32)
 	// user.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
 	user.DomainIDValidator = userDescDomainID.Validators[0].(func(uint32) error)
 	// userDescName is the schema descriptor for name field.

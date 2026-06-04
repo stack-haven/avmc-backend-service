@@ -260,15 +260,15 @@ message LoginPasswordRequest {
     (google.api.field_behavior) = REQUIRED,
     (buf.validate.field).string = {
       min_len: 6
-      max_len: 25
+      max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
   oneof identity {
     string username = 2 [
       (buf.validate.field).string = {
-        min_len: 1
-        max_len: 10
+        min_len: 3
+        max_len: 32
       },
       (gnostic.openapi.v3.property) = {description: "登录用户名"}
     ]; // 用户名;
@@ -277,8 +277,9 @@ message LoginPasswordRequest {
       (gnostic.openapi.v3.property) = {description: "登录邮箱"}
     ]; // 邮箱;
   }
-  optional uint32 domain_id = 4 [
-    (buf.validate.field).uint32.gte = 0,
+  uint32 domain_id = 4 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
 }
@@ -287,20 +288,21 @@ message LoginPasswordRequest {
 message LoginByUsernameRequest {
   string username = 1 [
     (buf.validate.field).string = {
-      min_len: 1
-      max_len: 10
+      min_len: 3
+      max_len: 32
     },
     (gnostic.openapi.v3.property) = {description: "登录用户名"}
   ]; // 用户名;
   string password = 2 [
     (buf.validate.field).string = {
       min_len: 6
-      max_len: 25
+      max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
-  optional uint32 domain_id = 3 [
-    (buf.validate.field).uint32.gte = 0,
+  uint32 domain_id = 3 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
 }
@@ -314,12 +316,13 @@ message LoginByEmailRequest {
   string password = 2 [
     (buf.validate.field).string = {
       min_len: 6
-      max_len: 25
+      max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
-  optional uint32 domain_id = 3 [
-    (buf.validate.field).uint32.gte = 0,
+  uint32 domain_id = 3 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
 }
@@ -339,8 +342,9 @@ message LoginByPhoneCodeRequest {
     },
     (gnostic.openapi.v3.property) = {description: "登录验证码"}
   ]; // 验证码;
-  optional uint32 domain_id = 3 [
-    (buf.validate.field).uint32.gte = 0,
+  uint32 domain_id = 3 [
+    (google.api.field_behavior) = REQUIRED,
+    (buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "租户/域ID"}
   ]; // 域ID
 }

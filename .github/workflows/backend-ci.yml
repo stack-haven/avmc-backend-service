@@ -1,0 +1,57 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run quality gate
+        run: make check
+
+      - name: Run focused race detection
+        run: make race
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - ./app/avmc/admin/cmd/server
+          - ./app/avmc/ai/cmd/server
+          - ./app/version/service/cmd/server
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build service image
+        run: docker build --build-arg SERVICE_PACKAGE=${{ matrix.service }} .

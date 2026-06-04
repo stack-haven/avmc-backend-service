@@ -42,7 +42,7 @@ func NewPostUsecase(repo PostRepo, logger log.Logger) *PostUsecase {
 // 参数：ctx 上下文，g 岗位信息
 // 返回值：创建后的岗位信息，错误信息
 func (uc *PostUsecase) Create(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
-	uc.log.WithContext(ctx).Infof("CreatePost: %v", g.Name)
+	uc.log.WithContext(ctx).Infof("CreatePost: %v", g.GetName())
 	return uc.repo.Save(ctx, g)
 }
 
@@ -58,7 +58,7 @@ func (uc *PostUsecase) Get(ctx context.Context, id uint32) (*pbCore.Post, error)
 // 参数：ctx 上下文，g 岗位信息
 // 返回值：更新后的岗位信息，错误信息
 func (uc *PostUsecase) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
-	uc.log.WithContext(ctx).Infof("UpdatePost: %v", g.Id)
+	uc.log.WithContext(ctx).Infof("UpdatePost: %v", g.GetId())
 	_, err := uc.repo.FindByID(ctx, g.GetId())
 	if err != nil {
 		return nil, err

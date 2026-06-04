@@ -27,9 +27,6 @@ func StringValueToTime(t *string, layout string) *time.Time {
 		p, err := time.Parse(layout, *t)
 		if err != nil {
 			return nil
-			// 可考虑使用更规范的日志记录方式，这里暂时注释掉日志输出
-			// log.Println(err)
-			return nil
 		}
 		if p.IsZero() {
 			return nil

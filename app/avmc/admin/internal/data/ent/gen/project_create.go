@@ -71,14 +71,6 @@ func (_c *ProjectCreate) SetDomainID(v uint32) *ProjectCreate {
 	return _c
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_c *ProjectCreate) SetNillableDomainID(v *uint32) *ProjectCreate {
-	if v != nil {
-		_c.SetDomainID(*v)
-	}
-	return _c
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *ProjectCreate) SetDeletedAt(v time.Time) *ProjectCreate {
 	_c.mutation.SetDeletedAt(v)
@@ -216,13 +208,6 @@ func (_c *ProjectCreate) defaults() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := project.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		if project.DefaultDomainID == nil {
-			return fmt.Errorf("gen: uninitialized project.DefaultDomainID (forgotten import gen/runtime?)")
-		}
-		v := project.DefaultDomainID()
-		_c.mutation.SetDomainID(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := project.DefaultDescription

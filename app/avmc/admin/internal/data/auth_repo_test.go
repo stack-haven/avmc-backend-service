@@ -2,16 +2,140 @@ package data
 
 import (
 	"context"
+	"errors"
 	"io"
 	"testing"
 
+	pb "backend-service/api/avmc/admin/v1"
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/auth/loginattempt"
+	"backend-service/pkg/utils/crypto"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
+type fakeLoginAttemptGuard struct {
+	checkErr   error
+	failureErr error
+	successErr error
+	checks     int
+	failures   int
+	successes  int
+}
+
+func (g *fakeLoginAttemptGuard) Check(context.Context, string, string, uint32) error {
+	g.checks++
+	return g.checkErr
+}
+
+func (g *fakeLoginAttemptGuard) Failure(context.Context, string, string, uint32) error {
+	g.failures++
+	return g.failureErr
+}
+
+func (g *fakeLoginAttemptGuard) Success(context.Context, string, string, uint32) error {
+	g.successes++
+	return g.successErr
+}
+
+func TestAuthRepoLoginRejectsDisabledAndUnknownUsersIdentically(t *testing.T) {
 	ctx := context.Background()
+	client := newTestClient(t)
+	defer client.Close()
+
+	password, err := crypto.HashPassword("secret1")
+	if err != nil {
+		t.Fatalf("hash password: %v", err)
+	}
+	client.User.Create().
+		SetName("disabled-user").
+		SetEmail("disabled@example.com").
+		SetPassword(password).
+		SetStatus(2).
+		SetDomainID(1).
+		SaveX(ctx)
+
+	repo := &authRepo{
+		data: &Data{db: client},
+		log:  log.NewHelper(log.NewStdLogger(io.Discard)),
+	}
+	tests := []struct {
+		name  string
+		login func() error
+	}{
+		{
+			name: "disabled username",
+			login: func() error {
+				_, err := repo.LoginByUsername(ctx, "disabled-user", "secret1", 1)
+				return err
+			},
+		},
+		{
+			name: "unknown username",
+			login: func() error {
+				_, err := repo.LoginByUsername(ctx, "unknown-user", "secret1", 1)
+				return err
+			},
+		},
+		{
+			name: "disabled email",
+			login: func() error {
+				_, err := repo.LoginByEmail(ctx, "disabled@example.com", "secret1", 1)
+				return err
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.login(); !pb.IsUserIncorrectPassword(err) {
+				t.Fatalf("error = %v, want generic auth failure", err)
+			}
+		})
+	}
+}
+
+func TestAuthRepoLoginAttemptProtection(t *testing.T) {
+	t.Parallel()
+
+	logger := log.NewHelper(log.NewStdLogger(io.Discard))
+	t.Run("locked before database lookup", func(t *testing.T) {
+		guard := &fakeLoginAttemptGuard{checkErr: loginattempt.ErrLocked}
+		repo := &authRepo{data: &Data{}, log: logger, guard: guard}
+
+		_, err := repo.LoginByUsername(context.Background(), "admin", "secret", 1)
+		if !pb.IsUserTooManyLoginAttempts(err) {
+			t.Fatalf("error = %v, want too many login attempts", err)
+		}
+		if guard.checks != 1 || guard.failures != 0 {
+			t.Fatalf("guard calls = checks:%d failures:%d", guard.checks, guard.failures)
+		}
+	})
+
+	t.Run("threshold failure returns lock error", func(t *testing.T) {
+		guard := &fakeLoginAttemptGuard{failureErr: loginattempt.ErrLocked}
+		repo := &authRepo{log: logger, guard: guard}
+
+		err := repo.loginFailed(context.Background(), "username", "admin", 1)
+		if !pb.IsUserTooManyLoginAttempts(err) {
+			t.Fatalf("error = %v, want too many login attempts", err)
+		}
+	})
+
+	t.Run("guard outage fails open", func(t *testing.T) {
+		guard := &fakeLoginAttemptGuard{checkErr: errors.New("redis unavailable"), failureErr: errors.New("redis unavailable")}
+		repo := &authRepo{log: logger, guard: guard}
+
+		if err := repo.checkLogin(context.Background(), "username", "admin", 1); err != nil {
+			t.Fatalf("checkLogin error = %v, want fail-open", err)
+		}
+		if err := repo.loginFailed(context.Background(), "username", "admin", 1); !pb.IsUserIncorrectPassword(err) {
+			t.Fatalf("loginFailed error = %v, want generic auth failure", err)
+		}
+	})
+}
+
+func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
+	ctx := tenantContext(1)
 	client := newTestClient(t)
 	defer client.Close()
 
@@ -102,5 +226,8 @@ func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
 	}
 	if len(menus[0].Children) != 1 || menus[0].Children[0].GetId() != child.ID {
 		t.Fatalf("children = %#v, want child %d", menus[0].Children, child.ID)
+	}
+	if _, err := repo.Codes(tenantContext(2), user.ID); err == nil {
+		t.Fatal("cross-domain codes error = nil")
 	}
 }

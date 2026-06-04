@@ -38,6 +38,18 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "dept_domain_id",
+				Unique:  false,
+				Columns: []*schema.Column{DeptsColumns[4]},
+			},
+			{
+				Name:    "dept_domain_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{DeptsColumns[4], DeptsColumns[6]},
+			},
+		},
 	}
 	// MenusColumns holds the columns for the "menus" table.
 	MenusColumns = []*schema.Column{
@@ -97,7 +109,7 @@ var (
 			},
 			{
 				Name:    "menu_name",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{MenusColumns[5]},
 			},
 			{
@@ -139,6 +151,18 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "post_domain_id",
+				Unique:  false,
+				Columns: []*schema.Column{PostsColumns[4]},
+			},
+			{
+				Name:    "post_domain_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{PostsColumns[4], PostsColumns[6]},
+			},
+		},
 	}
 	// ProjectsColumns holds the columns for the "projects" table.
 	ProjectsColumns = []*schema.Column{
@@ -148,8 +172,8 @@ var (
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
-		{Name: "name", Type: field.TypeString, Unique: true, Size: 50, Comment: "项目名称"},
-		{Name: "code", Type: field.TypeString, Unique: true, Nullable: true, Size: 50, Comment: "项目标识"},
+		{Name: "name", Type: field.TypeString, Size: 50, Comment: "项目名称，域内唯一"},
+		{Name: "code", Type: field.TypeString, Nullable: true, Size: 50, Comment: "项目标识，域内唯一"},
 		{Name: "owner_id", Type: field.TypeUint32, Nullable: true, Comment: "项目负责人ID"},
 		{Name: "description", Type: field.TypeString, Size: 500, Comment: "项目描述", Default: ""},
 	}
@@ -161,14 +185,19 @@ var (
 		PrimaryKey: []*schema.Column{ProjectsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "project_name",
+				Name:    "project_domain_id",
 				Unique:  false,
-				Columns: []*schema.Column{ProjectsColumns[6]},
+				Columns: []*schema.Column{ProjectsColumns[4]},
 			},
 			{
-				Name:    "project_code",
-				Unique:  false,
-				Columns: []*schema.Column{ProjectsColumns[7]},
+				Name:    "project_domain_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{ProjectsColumns[4], ProjectsColumns[6]},
+			},
+			{
+				Name:    "project_domain_id_code",
+				Unique:  true,
+				Columns: []*schema.Column{ProjectsColumns[4], ProjectsColumns[7]},
 			},
 			{
 				Name:    "project_owner_id",
@@ -204,9 +233,14 @@ var (
 		PrimaryKey: []*schema.Column{RolesColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "role_name",
+				Name:    "role_domain_id",
 				Unique:  false,
-				Columns: []*schema.Column{RolesColumns[6]},
+				Columns: []*schema.Column{RolesColumns[4]},
+			},
+			{
+				Name:    "role_domain_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{RolesColumns[4], RolesColumns[6]},
 			},
 		},
 	}
@@ -218,12 +252,12 @@ var (
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
-		{Name: "name", Type: field.TypeString, Unique: true, Size: 32, Comment: "用户名，唯一"},
+		{Name: "name", Type: field.TypeString, Size: 32, Comment: "用户名，域内唯一"},
 		{Name: "password", Type: field.TypeString, Size: 100, Comment: "密码哈希"},
 		{Name: "realname", Type: field.TypeString, Nullable: true, Size: 50, Comment: "用户真实姓名"},
 		{Name: "nickname", Type: field.TypeString, Nullable: true, Size: 50, Comment: "用户昵称"},
-		{Name: "email", Type: field.TypeString, Unique: true, Nullable: true, Size: 100, Comment: "电子邮箱，唯一"},
-		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true, Size: 20, Comment: "手机号码，唯一"},
+		{Name: "email", Type: field.TypeString, Nullable: true, Size: 100, Comment: "电子邮箱，域内唯一"},
+		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 20, Comment: "手机号码，域内唯一"},
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 255, Comment: "头像URL"},
 		{Name: "birthday", Type: field.TypeTime, Nullable: true, Comment: "生日", SchemaType: map[string]string{"mysql": "date"}},
 		{Name: "gender", Type: field.TypeInt32, Comment: "性别：0=未知 1=男 2=女", Default: 0, SchemaType: map[string]string{"mysql": "tinyint", "postgres": "tinyint(2)"}},
@@ -252,14 +286,19 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "user_name",
+				Name:    "user_domain_id",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[6]},
+				Columns: []*schema.Column{UsersColumns[4]},
 			},
 			{
-				Name:    "user_phone",
-				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[11]},
+				Name:    "user_domain_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[6]},
+			},
+			{
+				Name:    "user_domain_id_phone",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[11]},
 			},
 			{
 				Name:    "user_status",
@@ -267,9 +306,9 @@ var (
 				Columns: []*schema.Column{UsersColumns[3]},
 			},
 			{
-				Name:    "user_email",
-				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[10]},
+				Name:    "user_domain_id_email",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[10]},
 			},
 		},
 	}

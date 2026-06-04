@@ -32,11 +32,13 @@ func NewDeptServiceService(duc *biz.DeptUsecase, logger log.Logger) *DeptService
 	}
 }
 
-// ListDept 处理部门列表请求
+// ListDepts 处理部门列表请求
 // 参数：ctx 上下文，req 分页请求
 // 返回值：部门列表响应，错误信息
-func (s *DeptServiceService) ListDept(ctx context.Context, req *pbCore.ListDeptsRequest) (*pbCore.ListDeptsResponse, error) {
+func (s *DeptServiceService) ListDepts(ctx context.Context, req *pbCore.ListDeptsRequest) (*pbCore.ListDeptsResponse, error) {
 	s.log.Infof("查询部门列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
+	pageSize := biz.NormalizePageSize(req.GetPageSize())
+	req.PageSize = int32(pageSize)
 
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -69,13 +71,13 @@ func (s *DeptServiceService) ListDept(ctx context.Context, req *pbCore.ListDepts
 	resp.Items, err = s.duc.ListDepts(ctx,
 		biz.ListFilter(filter),
 		biz.ListOrderBy(orderBy),
-		biz.ListLimit(int(req.PageSize)),
+		biz.ListLimit(pageSize),
 		biz.ListOffset(int(pageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= int(req.PageSize) {
+	if len(resp.Items) >= pageSize {
 		resp.NextPageToken = pageToken.Next(req).String()
 	}
 	return &resp, nil

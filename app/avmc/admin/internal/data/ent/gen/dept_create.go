@@ -70,14 +70,6 @@ func (_c *DeptCreate) SetDomainID(v uint32) *DeptCreate {
 	return _c
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_c *DeptCreate) SetNillableDomainID(v *uint32) *DeptCreate {
-	if v != nil {
-		_c.SetDomainID(*v)
-	}
-	return _c
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *DeptCreate) SetDeletedAt(v time.Time) *DeptCreate {
 	_c.mutation.SetDeletedAt(v)
@@ -240,13 +232,6 @@ func (_c *DeptCreate) defaults() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := dept.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		if dept.DefaultDomainID == nil {
-			return fmt.Errorf("gen: uninitialized dept.DefaultDomainID (forgotten import gen/runtime?)")
-		}
-		v := dept.DefaultDomainID()
-		_c.mutation.SetDomainID(v)
 	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		v := dept.DefaultParentID

@@ -43,7 +43,7 @@ func NewDeptUsecase(repo DeptRepo, logger log.Logger) *DeptUsecase {
 // 参数：ctx 上下文，g 部门信息
 // 返回值：创建后的部门信息，错误信息
 func (uc *DeptUsecase) Create(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, error) {
-	uc.log.WithContext(ctx).Infof("CreateDept: %v", g.Name)
+	uc.log.WithContext(ctx).Infof("CreateDept: %v", g.GetName())
 	return uc.repo.Save(ctx, g)
 }
 
@@ -58,7 +58,7 @@ func (uc *DeptUsecase) Get(ctx context.Context, id uint32) (*pbCore.Dept, error)
 // 参数：ctx 上下文，g 部门信息
 // 返回值：更新后的部门信息，错误信息
 func (uc *DeptUsecase) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, error) {
-	uc.log.WithContext(ctx).Infof("UpdateDept: %v", g.Name)
+	uc.log.WithContext(ctx).Infof("UpdateDept: %v", g.GetName())
 	_, err := uc.repo.FindByID(ctx, g.GetId())
 	if err != nil {
 		return nil, err

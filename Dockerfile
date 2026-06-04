@@ -1,24 +1,26 @@
-FROM golang:1.19 AS builder
+FROM golang:1.24.6-bookworm AS builder
 
-COPY . /src
 WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
 
-RUN GOPROXY=https://goproxy.cn make build
+ARG SERVICE_PACKAGE=./app/avmc/admin/cmd/server
+ARG VERSION=dev
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -trimpath \
+    -ldflags="-s -w -X main.Version=${VERSION}" \
+    -o /out/server \
+    "${SERVICE_PACKAGE}"
 
-FROM debian:stable-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates  \
-        netbase \
-        && rm -rf /var/lib/apt/lists/ \
-        && apt-get autoremove -y && apt-get autoclean -y
-
-COPY --from=builder /src/bin /app
+FROM gcr.io/distroless/static-debian12:nonroot
 
 WORKDIR /app
+COPY --from=builder --chown=nonroot:nonroot /out/server /app/server
 
-EXPOSE 8000
-EXPOSE 9000
-VOLUME /data/conf
+EXPOSE 8000 9000
+VOLUME ["/data/conf"]
 
-CMD ["./server", "-conf", "/data/conf"]
+USER nonroot:nonroot
+ENTRYPOINT ["/app/server"]
+CMD ["-conf", "/data/conf"]

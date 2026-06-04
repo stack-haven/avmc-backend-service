@@ -1,36 +1,25 @@
-############################
-# STEP 1 build optimized executable binary
-############################
+FROM golang:1.24.6-bookworm AS builder
 
-FROM golang:1.18 AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
 
-COPY . /src
+ARG SERVICE_PACKAGE
+ARG VERSION=dev
+RUN test -n "${SERVICE_PACKAGE}" && \
+    CGO_ENABLED=0 GOOS=linux go build \
+    -trimpath \
+    -ldflags="-s -w -X main.Version=${VERSION}" \
+    -o /out/server \
+    "${SERVICE_PACKAGE}"
 
-WORKDIR /src/app/${APP_RELATIVE_PATH}
-
-RUN GOPROXY=https://goproxy.cn make build
-
-############################
-# STEP 2 build a small image
-############################
-
-FROM debian:stable-slim
-
-ARG APP_RELATIVE_PATH
-
-RUN apt update && \
-    apt install -y --no-install-recommends ca-certificates netbase && \
-    rm -rf /var/lib/apt/lists/ && \
-    apt autoremove -y && \
-    apt autoclean -y
-
-COPY --from=builder /src/app/${APP_RELATIVE_PATH}/bin /app
+FROM gcr.io/distroless/static-debian12:nonroot
 
 WORKDIR /app
+COPY --from=builder --chown=nonroot:nonroot /out/server /app/server
 
-EXPOSE ${GRPC_PORT} ${REST_PORT}
-VOLUME /data/conf
-
+VOLUME ["/data/conf"]
 USER nonroot:nonroot
-
-CMD ["./server", "-conf", "/data/conf"]
+ENTRYPOINT ["/app/server"]
+CMD ["-conf", "/data/conf"]

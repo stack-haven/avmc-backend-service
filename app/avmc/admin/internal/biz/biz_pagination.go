@@ -5,6 +5,11 @@ import (
 	"go.einride.tech/aip/ordering"
 )
 
+const (
+	DefaultPageSize = 20
+	MaxPageSize     = 100
+)
+
 // ListOption 列表查询选项函数
 type ListOption func(*ListOptions)
 
@@ -33,6 +38,9 @@ func ListOrderBy(orderBy ordering.OrderBy) ListOption {
 // ListOffset 设置偏移量
 func ListOffset(offset int) ListOption {
 	return func(o *ListOptions) {
+		if offset < 0 {
+			offset = 0
+		}
 		o.Offset = offset
 	}
 }
@@ -41,10 +49,23 @@ func ListOffset(offset int) ListOption {
 func ListLimit(limit int) ListOption {
 	return func(o *ListOptions) {
 		if limit <= 0 {
-			limit = 20
+			limit = DefaultPageSize
+		}
+		if limit > MaxPageSize {
+			limit = MaxPageSize
 		}
 		o.Limit = limit
 	}
+}
+
+func NormalizePageSize(size int32) int {
+	if size <= 0 {
+		return DefaultPageSize
+	}
+	if size > MaxPageSize {
+		return MaxPageSize
+	}
+	return int(size)
 }
 
 // DefualtOrderBy 默认分页排序

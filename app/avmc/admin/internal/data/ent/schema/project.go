@@ -30,8 +30,8 @@ func (Project) Annotations() []schema.Annotation {
 // Fields of the Project.
 func (Project) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Comment("项目名称").MaxLen(50).Unique(),
-		field.String("code").Comment("项目标识").MaxLen(50).Optional().Nillable().Unique(),
+		field.String("name").Comment("项目名称，域内唯一").MaxLen(50),
+		field.String("code").Comment("项目标识，域内唯一").MaxLen(50).Optional().Nillable(),
 		field.Uint32("owner_id").Comment("项目负责人ID").Optional().Nillable(),
 		field.String("description").Comment("项目描述").MaxLen(500).Default("").Nillable(),
 	}
@@ -55,8 +55,8 @@ func (Project) Mixin() []ent.Mixin {
 // Indexes of the Project.
 func (Project) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name"),
-		index.Fields("code"),
+		index.Fields("domain_id", "name").Unique(),
+		index.Fields("domain_id", "code").Unique(),
 		index.Fields("owner_id"),
 		index.Fields("status"),
 	}

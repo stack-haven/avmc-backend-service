@@ -60,7 +60,7 @@ func DefaultHTTPAuthzInfoExtractor(ctx context.Context, req *http.Request) (auth
 
 	// 提取主体和域
 	sub := authz.Subject(claims.GetSubject())
-	dom := authz.Domain(claims.GetIssuer())
+	dom := authz.Domain(claims.GetDomain())
 
 	// 从请求中提取对象和操作
 	obj := authz.Object(req.URL.Path)
@@ -159,7 +159,10 @@ func HTTPAuthzMiddleware(authorizer authz.Authorizer, extractor HTTPAuthzInfoExt
 						}
 
 						// 执行授权检查
-						if sub != "" && obj != "" && act != "" {
+						if sub == "" || obj == "" || act == "" {
+							return nil, ErrPermissionDenied
+						}
+						{
 							allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
 							if err != nil {
 								// 处理授权错误
@@ -267,7 +270,10 @@ func HTTPCombinedAuthMiddleware(
 						}
 
 						// 执行授权检查
-						if sub != "" && obj != "" && act != "" {
+						if sub == "" || obj == "" || act == "" {
+							return nil, ErrPermissionDenied
+						}
+						{
 							allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
 							if err != nil {
 								// 处理授权错误

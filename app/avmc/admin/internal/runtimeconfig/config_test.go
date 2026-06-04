@@ -20,6 +20,22 @@ func TestValidateRejectsUnsafeProductionDefaults(t *testing.T) {
 	}
 }
 
+func TestValidateAcceptsSafeProductionConfig(t *testing.T) {
+	t.Setenv("AVMC_ADMIN_ENV", "production")
+	bc := bootstrapConfig()
+	bc.Server.Http.Middleware.Auth.Key = "0123456789abcdef0123456789abcdef"
+	bc.Server.Http.EnableSwagger = false
+	bc.Server.Http.Cors.Origins = []string{"https://admin.example.com"}
+	bc.Data.Database.Source = "admin:secret@tcp(db:3306)/admin"
+	bc.Data.Database.Debug = false
+	bc.Data.Database.Migrate = false
+	bc.Data.Redis.Password = "redis-secret"
+
+	if err := Validate(bc); err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
 func TestApplyEnvOverrides(t *testing.T) {
 	t.Setenv("AVMC_ADMIN_HTTP_ADDR", "127.0.0.1:18000")
 	t.Setenv("AVMC_ADMIN_GRPC_ADDR", "127.0.0.1:19000")
@@ -63,6 +79,15 @@ func TestValidateRejectsMissingRequiredConfig(t *testing.T) {
 	}{
 		{name: "nil bootstrap", cfg: nil, want: "bootstrap config is required"},
 		{name: "missing server", cfg: &conf.Bootstrap{}, want: "server config is required"},
+		{
+			name: "missing cors",
+			cfg: func() *conf.Bootstrap {
+				bc := bootstrapConfig()
+				bc.Server.Http.Cors = nil
+				return bc
+			}(),
+			want: "server.http.cors",
+		},
 		{
 			name: "missing database source",
 			cfg: func() *conf.Bootstrap {

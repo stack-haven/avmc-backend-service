@@ -2,13 +2,13 @@ package data
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
 	"github.com/go-kratos/kratos/v2/log"
 
+	pb "backend-service/api/avmc/admin/v1"
 	"backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
@@ -28,11 +28,15 @@ func NewPostRepo(data *Data, logger log.Logger) biz.PostRepo {
 }
 
 func (r *postRepo) convertProto(res *gen.Post) *pbCore.Post {
+	status := enum.Status(0)
+	if res.Status != nil {
+		status = enum.Status(*res.Status)
+	}
 	return &pbCore.Post{
 		Id:        res.ID,
 		Name:      res.Name,
 		Sort:      res.Sort,
-		Status:    convert.EmptyToNil(enum.Status(*res.Status)),
+		Status:    convert.EmptyToNil(status),
 		Remark:    res.Remark,
 		CreatedAt: convert.TimeValueToString(&res.CreatedAt, time.DateTime),
 		UpdatedAt: convert.TimeValueToString(&res.UpdatedAt, time.DateTime),
@@ -50,24 +54,49 @@ func (r *postRepo) convertEnt(g *pbCore.Post) *gen.Post {
 }
 
 func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
+	if g == nil || g.GetName() == "" {
+		return nil, pb.ErrorPostNameCannotBeEmpty("岗位名称不能为空")
+	}
 	r.Log.Infof("保存岗位: %s", g.GetName())
 	entPost := r.convertEnt(g)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	if id, _ := r.GetPostExistByName(ctx, *entPost.Name); id > 0 {
-		return nil, fmt.Errorf("post name already exists")
+	id, err := r.GetPostExistByName(ctx, *entPost.Name)
+	if err != nil {
+		return nil, fmt.Errorf("checking post name uniqueness: %w", err)
+	}
+	if id > 0 {
+		return nil, pb.ErrorPostAlreadyExists("岗位名称已存在")
 	}
 
 	res, err := r.Data.DB(ctx).Post.Create().
+		SetDomainID(domainID).
 		SetName(*entPost.Name).
+		SetNillableSort(entPost.Sort).
+		SetNillableStatus(entPost.Status).
+		SetNillableRemark(entPost.Remark).
 		Save(ctx)
 	if err != nil {
+		if gen.IsConstraintError(err) {
+			return nil, pb.ErrorPostAlreadyExists("岗位名称已存在")
+		}
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorPostNotFound("岗位不存在")
+		}
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
 func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32, error) {
-	entPost, err := r.Data.DB(ctx).Post.Query().Where(post.Name(name)).Select(post.FieldID).First(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
+	entPost, err := r.Data.DB(ctx).Post.Query().Where(post.Name(name), post.DomainIDEQ(domainID)).Select(post.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -78,26 +107,47 @@ func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32,
 }
 
 func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, error) {
+	if g == nil || g.GetId() == 0 || g.GetName() == "" {
+		return nil, pb.ErrorPostInvalidId("岗位ID和名称不能为空")
+	}
 	entPost := r.convertEnt(g)
-	id, _ := r.GetPostExistByName(ctx, *entPost.Name)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	id, err := r.GetPostExistByName(ctx, *entPost.Name)
+	if err != nil {
+		return nil, fmt.Errorf("checking post name uniqueness: %w", err)
+	}
 	if id > 0 && id != g.GetId() {
-		return nil, fmt.Errorf("post name already exists")
+		return nil, pb.ErrorPostAlreadyExists("岗位名称已存在")
 	}
 
 	res, err := r.Data.DB(ctx).Post.UpdateOneID(g.GetId()).
+		Where(post.DomainIDEQ(domainID)).
 		SetName(*entPost.Name).
+		SetNillableSort(entPost.Sort).
+		SetNillableStatus(entPost.Status).
+		SetNillableRemark(entPost.Remark).
 		Save(ctx)
 	if err != nil {
+		if gen.IsConstraintError(err) {
+			return nil, pb.ErrorPostAlreadyExists("岗位名称已存在")
+		}
 		return nil, err
 	}
 	return r.convertProto(res), nil
 }
 
 func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error) {
-	res, err := r.Data.DB(ctx).Post.Query().Where(post.IDEQ(id)).Only(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := r.Data.DB(ctx).Post.Query().Where(post.IDEQ(id), post.DomainIDEQ(domainID)).Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
-			return nil, errors.New("查询数据不存在")
+			return nil, pb.ErrorPostNotFound("岗位不存在")
 		}
 		return nil, err
 	}
@@ -105,11 +155,23 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 }
 
 func (r *postRepo) Delete(ctx context.Context, id uint32) error {
-	return r.Data.DB(ctx).Post.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return err
+	}
+	err = r.Data.DB(ctx).Post.UpdateOneID(id).Where(post.DomainIDEQ(domainID)).SetDeletedAt(time.Now()).Exec(ctx)
+	if gen.IsNotFound(err) {
+		return pb.ErrorPostNotFound("岗位不存在")
+	}
+	return err
 }
 
 func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post, error) {
-	res, err := r.Data.DB(ctx).Post.Query().Where(post.NameContains(name)).All(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := r.Data.DB(ctx).Post.Query().Where(post.NameContains(name), post.DomainIDEQ(domainID)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -117,13 +179,17 @@ func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post,
 }
 
 func (r *postRepo) CountPosts(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID).
-		Where(ents.ApplyFilter(o.Filter)).
+		Where(post.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -132,8 +198,13 @@ func (r *postRepo) CountPosts(ctx context.Context, opts ...biz.ListOption) (int3
 }
 
 func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID, post.FieldName).
+		Where(post.DomainIDEQ(domainID)).
 		Order(gen.Desc(post.FieldID)).All(ctx)
 	if err != nil {
 		return nil, err
@@ -142,13 +213,17 @@ func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 }
 
 func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Post, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	pos, err := r.Data.DB(ctx).Post.Query().
-		Select(post.FieldID, post.FieldName, post.FieldCreatedAt, post.FieldUpdatedAt).
-		Where(ents.ApplyFilter(o.Filter)).
+		Select(post.FieldID, post.FieldName, post.FieldSort, post.FieldStatus, post.FieldRemark, post.FieldCreatedAt, post.FieldUpdatedAt).
+		Where(post.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
@@ -160,13 +235,17 @@ func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pb
 
 func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
 	r.Log.Infof("查询岗位列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
-	count, err := r.Data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DeletedAtIsNil()).Count(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	count, err := r.Data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DomainIDEQ(domainID), post.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Post.Query().
-		Select(post.FieldID, post.FieldName, post.FieldCreatedAt, post.FieldUpdatedAt).
-		Where().
+		Select(post.FieldID, post.FieldName, post.FieldSort, post.FieldStatus, post.FieldRemark, post.FieldCreatedAt, post.FieldUpdatedAt).
+		Where(post.DomainIDEQ(domainID)).
 		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(post.FieldID)).
 		All(ctx)

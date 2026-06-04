@@ -97,8 +97,6 @@ var (
 	DefaultStatus int32
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int32) error
-	// DefaultDomainID holds the default value on creation for the "domain_id" field.
-	DefaultDomainID func() uint32
 	// DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
 	DomainIDValidator func(uint32) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.

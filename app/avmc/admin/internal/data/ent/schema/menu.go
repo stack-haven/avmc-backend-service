@@ -90,7 +90,7 @@ func (Menu) Mixin() []ent.Mixin {
 // Indexes of the Menu.
 func (Menu) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name"),
+		index.Fields("name").Unique(),
 		index.Fields("status"),
 		index.Fields("parent_id"),
 	}

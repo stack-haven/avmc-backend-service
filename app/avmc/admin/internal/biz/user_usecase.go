@@ -1,6 +1,7 @@
 package biz
 
 import (
+	pb "backend-service/api/avmc/admin/v1"
 	pbEnum "backend-service/api/common/enum"
 	"context"
 
@@ -41,17 +42,23 @@ func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
 
 // Create 创建用户 — 业务逻辑：密码哈希、默认值
 func (uc *UserUsecase) Create(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
-	uc.log.WithContext(ctx).Infof("CreateUser: %v", g.GetName())
-
-	// 密码哈希在 biz 层完成（不交给 repo）
-	if g.Password != nil && *g.Password != "" {
-		hash, err := crypto.HashPassword(*g.Password)
-		if err != nil {
-			uc.log.Errorf("密码哈希失败: %v", err)
-			return nil, ErrPasswordHashFailed
-		}
-		g.Password = &hash
+	if g == nil || g.Name == nil || *g.Name == "" {
+		return nil, pb.ErrorUserInvalidId("用户名不能为空")
 	}
+	if g.Password == nil || *g.Password == "" {
+		return nil, pb.ErrorUserIncorrectPassword("密码不能为空")
+	}
+	uc.log.WithContext(ctx).Infof("CreateUser")
+
+	if err := ValidatePassword(*g.Password); err != nil {
+		return nil, err
+	}
+	hash, err := crypto.HashPassword(*g.Password)
+	if err != nil {
+		uc.log.Errorf("密码哈希失败: %v", err)
+		return nil, ErrPasswordHashFailed
+	}
+	g.Password = &hash
 
 	return uc.repo.Save(ctx, g)
 }
@@ -66,7 +73,10 @@ func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error)
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("UpdateUser: %v", g.GetId())
 
-	if g.Password != nil && *g.Password != "" {
+	if g.Password != nil {
+		if err := ValidatePassword(*g.Password); err != nil {
+			return nil, err
+		}
 		hash, err := crypto.HashPassword(*g.Password)
 		if err != nil {
 			uc.log.Errorf("密码哈希失败: %v", err)

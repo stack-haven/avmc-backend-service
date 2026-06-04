@@ -67,7 +67,7 @@ func DefaultGRPCAuthzInfoExtractor(ctx context.Context, fullMethod string) (auth
 
 	// 提取主体和域
 	sub := authz.Subject(claims.GetSubject())
-	dom := authz.Domain(claims.GetIssuer())
+	dom := authz.Domain(claims.GetDomain())
 
 	// 从请求方法中提取对象和操作
 	obj := authz.Object(fullMethod)
@@ -167,7 +167,10 @@ func GRPCAuthzMiddleware(authorizer authz.Authorizer, extractor GRPCAuthzInfoExt
 					}
 
 					// 执行授权检查
-					if sub != "" && obj != "" && act != "" {
+					if sub == "" || obj == "" || act == "" {
+						return nil, ErrPermissionDenied
+					}
+					{
 						allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
 						if err != nil {
 							// 处理授权错误
@@ -274,7 +277,10 @@ func GRPCCombinedAuthMiddleware(
 					}
 
 					// 执行授权检查
-					if sub != "" && obj != "" && act != "" {
+					if sub == "" || obj == "" || act == "" {
+						return nil, ErrPermissionDenied
+					}
+					{
 						allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
 						if err != nil {
 							// 处理授权错误

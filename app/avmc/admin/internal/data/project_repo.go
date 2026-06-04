@@ -2,18 +2,19 @@ package data
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
 	"github.com/go-kratos/kratos/v2/log"
 
+	pb "backend-service/api/avmc/admin/v1"
 	"backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/project"
+	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -27,10 +28,14 @@ func NewProjectRepo(data *Data, logger log.Logger) biz.ProjectRepo {
 	return &projectRepo{BaseRepo: NewBaseRepo(data, logger)}
 }
 
-func (r *projectRepo) convertProto(ctx context.Context, res *gen.Project) *pbCore.Project {
+func (r *projectRepo) convertProto(res *gen.Project, ownerNames map[uint32]*string) *pbCore.Project {
 	status := enum.Status(0)
 	if res.Status != nil {
 		status = enum.Status(*res.Status)
+	}
+	var ownerName *string
+	if res.OwnerID != nil {
+		ownerName = ownerNames[*res.OwnerID]
 	}
 	memberIds := make([]uint32, 0)
 	if members, err := res.Edges.MembersOrErr(); err == nil {
@@ -43,7 +48,7 @@ func (r *projectRepo) convertProto(ctx context.Context, res *gen.Project) *pbCor
 		Name:        convert.EmptyToNil(res.Name),
 		Code:        res.Code,
 		OwnerId:     res.OwnerID,
-		OwnerName:   r.getOwnerName(ctx, res.OwnerID),
+		OwnerName:   ownerName,
 		Status:      convert.EmptyToNil(status),
 		Description: res.Description,
 		MemberIds:   memberIds,
@@ -52,29 +57,96 @@ func (r *projectRepo) convertProto(ctx context.Context, res *gen.Project) *pbCor
 	}
 }
 
-func (r *projectRepo) getOwnerName(ctx context.Context, ownerID *uint32) *string {
-	if ownerID == nil || *ownerID == 0 {
-		return nil
+func (r *projectRepo) getOwnerNames(ctx context.Context, domainID uint32, projects []*gen.Project) (map[uint32]*string, error) {
+	ownerIDs := make([]uint32, 0, len(projects))
+	seen := make(map[uint32]struct{}, len(projects))
+	for _, item := range projects {
+		if item.OwnerID == nil || *item.OwnerID == 0 {
+			continue
+		}
+		if _, ok := seen[*item.OwnerID]; ok {
+			continue
+		}
+		seen[*item.OwnerID] = struct{}{}
+		ownerIDs = append(ownerIDs, *item.OwnerID)
 	}
-	res, err := r.Data.DB(ctx).User.Get(ctx, *ownerID)
+	if len(ownerIDs) == 0 {
+		return map[uint32]*string{}, nil
+	}
+
+	owners, err := r.Data.DB(ctx).User.Query().
+		Where(user.IDIn(ownerIDs...), user.DomainIDEQ(domainID)).
+		Select(user.FieldID, user.FieldName).
+		All(ctx)
 	if err != nil {
+		return nil, err
+	}
+	ownerNames := make(map[uint32]*string, len(owners))
+	for _, owner := range owners {
+		ownerNames[owner.ID] = owner.Name
+	}
+	return ownerNames, nil
+}
+
+func (r *projectRepo) validateUsersInDomain(ctx context.Context, domainID uint32, ownerID uint32, memberIDs []uint32) error {
+	ids := make([]uint32, 0, len(memberIDs)+1)
+	seen := make(map[uint32]struct{}, len(memberIDs)+1)
+	for _, id := range append(memberIDs, ownerID) {
+		if id == 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
 		return nil
 	}
-	return res.Name
+	count, err := r.Data.DB(ctx).User.Query().
+		Where(user.IDIn(ids...), user.DomainIDEQ(domainID)).
+		Count(ctx)
+	if err != nil {
+		return err
+	}
+	if count != len(ids) {
+		return pb.ErrorBadRequest("项目负责人或成员不存在或不属于当前域")
+	}
+	return nil
 }
 
 func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Project, error) {
+	if g == nil || g.GetName() == "" {
+		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
+	}
 	r.Log.Infof("保存项目: %s", g.GetName())
-	if id, _ := r.GetProjectExistByName(ctx, g.GetName()); id > 0 {
-		return nil, fmt.Errorf("project name already exists")
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.validateUsersInDomain(ctx, domainID, g.GetOwnerId(), g.GetMemberIds()); err != nil {
+		return nil, err
+	}
+	id, err := r.GetProjectExistByName(ctx, g.GetName())
+	if err != nil {
+		return nil, fmt.Errorf("checking project name uniqueness: %w", err)
+	}
+	if id > 0 {
+		return nil, pb.ErrorProjectAlreadyExists("项目名称已存在")
 	}
 	if g.GetCode() != "" {
-		if id, _ := r.GetProjectExistByCode(ctx, g.GetCode()); id > 0 {
-			return nil, fmt.Errorf("project code already exists")
+		id, err = r.GetProjectExistByCode(ctx, g.GetCode())
+		if err != nil {
+			return nil, fmt.Errorf("checking project code uniqueness: %w", err)
+		}
+		if id > 0 {
+			return nil, pb.ErrorProjectCodeAlreadyExists("项目编码已存在")
 		}
 	}
 
 	builder := r.Data.DB(ctx).Project.Create().
+		SetDomainID(domainID).
 		SetName(g.GetName()).
 		SetNillableCode(convert.EmptyToNil(g.GetCode())).
 		SetNillableOwnerID(convert.EmptyToNil(g.GetOwnerId())).
@@ -87,13 +159,20 @@ func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Proj
 
 	res, err := builder.Save(ctx)
 	if err != nil {
+		if gen.IsConstraintError(err) {
+			return nil, pb.ErrorProjectAlreadyExists("项目名称或编码已存在")
+		}
 		return nil, err
 	}
 	return r.FindByID(ctx, res.ID)
 }
 
 func (r *projectRepo) GetProjectExistByName(ctx context.Context, name string) (uint32, error) {
-	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Name(name)).Select(project.FieldID).First(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
+	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Name(name), project.DomainIDEQ(domainID)).Select(project.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -104,7 +183,11 @@ func (r *projectRepo) GetProjectExistByName(ctx context.Context, name string) (u
 }
 
 func (r *projectRepo) GetProjectExistByCode(ctx context.Context, code string) (uint32, error) {
-	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Code(code)).Select(project.FieldID).First(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
+	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Code(code), project.DomainIDEQ(domainID)).Select(project.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -115,17 +198,36 @@ func (r *projectRepo) GetProjectExistByCode(ctx context.Context, code string) (u
 }
 
 func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Project, error) {
+	if g == nil || g.GetId() == 0 || g.GetName() == "" {
+		return nil, pb.ErrorProjectInvalidId("项目ID和名称不能为空")
+	}
 	r.Log.Infof("更新项目: %d", g.GetId())
-	if id, _ := r.GetProjectExistByName(ctx, g.GetName()); id > 0 && id != g.GetId() {
-		return nil, fmt.Errorf("project name already exists")
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.validateUsersInDomain(ctx, domainID, g.GetOwnerId(), g.GetMemberIds()); err != nil {
+		return nil, err
+	}
+	id, err := r.GetProjectExistByName(ctx, g.GetName())
+	if err != nil {
+		return nil, fmt.Errorf("checking project name uniqueness: %w", err)
+	}
+	if id > 0 && id != g.GetId() {
+		return nil, pb.ErrorProjectAlreadyExists("项目名称已存在")
 	}
 	if g.GetCode() != "" {
-		if id, _ := r.GetProjectExistByCode(ctx, g.GetCode()); id > 0 && id != g.GetId() {
-			return nil, fmt.Errorf("project code already exists")
+		id, err = r.GetProjectExistByCode(ctx, g.GetCode())
+		if err != nil {
+			return nil, fmt.Errorf("checking project code uniqueness: %w", err)
+		}
+		if id > 0 && id != g.GetId() {
+			return nil, pb.ErrorProjectCodeAlreadyExists("项目编码已存在")
 		}
 	}
 
 	builder := r.Data.DB(ctx).Project.UpdateOneID(g.GetId()).
+		Where(project.DomainIDEQ(domainID)).
 		SetName(g.GetName()).
 		SetNillableStatus(convert.EmptyToNil(int32(g.GetStatus()))).
 		SetDescription(g.GetDescription()).
@@ -147,6 +249,12 @@ func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Pr
 
 	res, err := builder.Save(ctx)
 	if err != nil {
+		if gen.IsConstraintError(err) {
+			return nil, pb.ErrorProjectAlreadyExists("项目名称或编码已存在")
+		}
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorProjectNotFound("项目不存在")
+		}
 		return nil, err
 	}
 	return r.FindByID(ctx, res.ID)
@@ -154,35 +262,65 @@ func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Pr
 
 func (r *projectRepo) UpdateStatus(ctx context.Context, id uint32, status int32) error {
 	r.Log.Infof("更新项目状态 ID: %d, status: %d", id, status)
-	return r.Data.DB(ctx).Project.UpdateOneID(id).SetStatus(status).Exec(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return err
+	}
+	err = r.Data.DB(ctx).Project.UpdateOneID(id).Where(project.DomainIDEQ(domainID)).SetStatus(status).Exec(ctx)
+	if gen.IsNotFound(err) {
+		return pb.ErrorProjectNotFound("项目不存在")
+	}
+	return err
 }
 
 func (r *projectRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Project, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).Project.Query().
-		Where(project.IDEQ(id)).
-		WithMembers().
+		Where(project.IDEQ(id), project.DomainIDEQ(domainID)).
+		WithMembers(func(q *gen.UserQuery) {
+			q.Where(user.DomainIDEQ(domainID))
+		}).
 		Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
-			return nil, errors.New("查询数据不存在")
+			return nil, pb.ErrorProjectNotFound("项目不存在")
 		}
 		return nil, err
 	}
-	return r.convertProto(ctx, res), nil
+	ownerNames, err := r.getOwnerNames(ctx, domainID, []*gen.Project{res})
+	if err != nil {
+		return nil, err
+	}
+	return r.convertProto(res, ownerNames), nil
 }
 
 func (r *projectRepo) Delete(ctx context.Context, id uint32) error {
-	return r.Data.DB(ctx).Project.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return err
+	}
+	err = r.Data.DB(ctx).Project.UpdateOneID(id).Where(project.DomainIDEQ(domainID)).SetDeletedAt(time.Now()).Exec(ctx)
+	if gen.IsNotFound(err) {
+		return pb.ErrorProjectNotFound("项目不存在")
+	}
+	return err
 }
 
 func (r *projectRepo) CountProjects(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).Project.Query().
 		Select(project.FieldID).
-		Where(ents.ApplyFilter(o.Filter)).
+		Where(project.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -191,21 +329,31 @@ func (r *projectRepo) CountProjects(ctx context.Context, opts ...biz.ListOption)
 }
 
 func (r *projectRepo) ListProjects(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Project, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	res, err := r.Data.DB(ctx).Project.Query().
 		Select(project.FieldID, project.FieldName, project.FieldCode, project.FieldOwnerID, project.FieldStatus, project.FieldDescription, project.FieldCreatedAt, project.FieldUpdatedAt).
-		Where(ents.ApplyFilter(o.Filter)).
-		WithMembers().
+		Where(project.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		WithMembers(func(q *gen.UserQuery) {
+			q.Where(user.DomainIDEQ(domainID))
+		}).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
+	ownerNames, err := r.getOwnerNames(ctx, domainID, res)
+	if err != nil {
+		return nil, err
+	}
 	return convert.SliceToAny(res, func(item *gen.Project) *pbCore.Project {
-		return r.convertProto(ctx, item)
+		return r.convertProto(item, ownerNames)
 	}), nil
 }

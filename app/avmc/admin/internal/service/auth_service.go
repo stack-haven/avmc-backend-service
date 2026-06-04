@@ -41,10 +41,8 @@ func (s *AuthServiceService) LoginPassword(ctx context.Context, req *pb.LoginPas
 	// resp, err = s.auc.LoginByUsername(ctx, req.GetUsername(), loginPassword, req.GetDomainId())
 	switch v := req.Identity.(type) {
 	case *pb.LoginPasswordRequest_Username:
-		s.log.Infof("用户名登录: %s", v.Username)
 		resp, err = s.auc.LoginByUsername(ctx, v.Username, loginPassword, req.GetDomainId())
 	case *pb.LoginPasswordRequest_Email:
-		s.log.Infof("邮箱登录: %s", v.Email)
 		resp, err = s.auc.LoginByEmail(ctx, v.Email, loginPassword, req.GetDomainId())
 	default:
 		resp, err = nil, pb.ErrorUserIncorrectPassword("用户名或邮箱为空")
@@ -64,7 +62,7 @@ func (s *AuthServiceService) LoginByUsername(ctx context.Context, req *pb.LoginB
 	// 调用业务逻辑层
 	resp, err := s.auc.LoginByUsername(ctx, loginUsername, req.GetPassword(), req.GetDomainId())
 	if err != nil {
-		s.log.Errorf("登录失败: %v", err)
+		s.log.Warnf("登录失败: %v", err)
 		return nil, err
 	}
 
@@ -83,7 +81,7 @@ func (s *AuthServiceService) LoginByEmail(ctx context.Context, req *pb.LoginByEm
 	// 调用业务逻辑层
 	resp, err := s.auc.LoginByEmail(ctx, loginEmail, req.GetPassword(), req.GetDomainId())
 	if err != nil {
-		s.log.Errorf("登录失败: %v", err)
+		s.log.Warnf("登录失败: %v", err)
 		return nil, err
 	}
 

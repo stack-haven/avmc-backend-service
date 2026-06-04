@@ -1,10 +1,10 @@
 package data
 
 import (
+	pb "backend-service/api/avmc/admin/v1"
 	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
@@ -26,6 +26,32 @@ type roleRepo struct {
 // NewRoleRepo 创建角色仓库
 func NewRoleRepo(data *Data, logger log.Logger) biz.RoleRepo {
 	return &roleRepo{BaseRepo: NewBaseRepo(data, logger)}
+}
+
+func (r *roleRepo) validateMenuIDs(ctx context.Context, menuIDs []uint32) error {
+	ids := make([]uint32, 0, len(menuIDs))
+	seen := make(map[uint32]struct{}, len(menuIDs))
+	for _, id := range menuIDs {
+		if id == 0 {
+			return pb.ErrorRolePermissionInvalid("菜单ID不能为空")
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	count, err := r.Data.DB(ctx).Menu.Query().Where(menu.IDIn(ids...)).Count(ctx)
+	if err != nil {
+		return err
+	}
+	if count != len(ids) {
+		return pb.ErrorRolePermissionInvalid("存在无效菜单ID")
+	}
+	return nil
 }
 
 // entToProto 将 ent.Role 转换为 pbCore.Role
@@ -69,8 +95,18 @@ func (r *roleRepo) protoToEnt(g *pbCore.Role) *gen.Role {
 
 // Save 保存角色
 func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, error) {
+	if g == nil || g.GetName() == "" {
+		return nil, pb.ErrorRoleNameCannotBeEmpty("角色名称不能为空")
+	}
 	r.Log.Infof("保存角色: %s", g.GetName())
 	ent := r.protoToEnt(g)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
+		return nil, err
+	}
 
 	tx, err := r.Data.DB(ctx).Tx(ctx)
 	if err != nil {
@@ -79,6 +115,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	defer rollback(tx, r.Log)
 
 	builder := tx.Role.Create().
+		SetDomainID(domainID).
 		SetName(g.GetName()).
 		SetNillableDefaultRouter(ent.DefaultRouter).
 		SetNillableDataScope(ent.DataScope).
@@ -92,7 +129,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	if err != nil {
 		r.Log.Errorf("保存角色失败: %v", err)
 		if gen.IsConstraintError(err) {
-			return nil, fmt.Errorf("角色名称已存在")
+			return nil, pb.ErrorRoleAlreadyExists("角色名称已存在")
 		}
 		return nil, err
 	}
@@ -104,8 +141,20 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 
 // Update 更新角色
 func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, error) {
+	if g == nil || g.GetId() == 0 || g.GetName() == "" {
+		return nil, pb.ErrorRoleInvalidId("角色ID和名称不能为空")
+	}
 	r.Log.Infof("更新角色 ID: %d", g.GetId())
 	ent := r.protoToEnt(g)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if g.MenuIds != nil {
+		if err := r.validateMenuIDs(ctx, g.MenuIds); err != nil {
+			return nil, err
+		}
+	}
 
 	tx, err := r.Data.DB(ctx).Tx(ctx)
 	if err != nil {
@@ -114,6 +163,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	defer rollback(tx, r.Log)
 
 	builder := tx.Role.UpdateOneID(g.GetId()).
+		Where(role.DomainIDEQ(domainID)).
 		SetName(g.GetName()).
 		SetNillableDefaultRouter(ent.DefaultRouter).
 		SetNillableDataScope(ent.DataScope).
@@ -130,7 +180,10 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	if err != nil {
 		r.Log.Errorf("更新角色失败: %v", err)
 		if gen.IsConstraintError(err) {
-			return nil, fmt.Errorf("角色名称已存在")
+			return nil, pb.ErrorRoleAlreadyExists("角色名称已存在")
+		}
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorRoleNotFound("角色不存在")
 		}
 		return nil, err
 	}
@@ -143,6 +196,10 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 // FindByID 根据 ID 查询
 func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error) {
 	r.Log.Infof("查询角色 ID: %d", id)
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).Role.Query().
 		Select(
 			role.FieldID, role.FieldName,
@@ -154,12 +211,12 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
 		}).
-		Where(role.ID(id)).
+		Where(role.ID(id), role.DomainIDEQ(domainID)).
 		First(ctx)
 	if err != nil {
 		r.Log.Errorf("查询角色失败 ID: %d, err: %v", id, err)
 		if gen.IsNotFound(err) {
-			return nil, fmt.Errorf("角色不存在")
+			return nil, pb.ErrorRoleNotFound("角色不存在")
 		}
 		return nil, err
 	}
@@ -168,15 +225,32 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 
 // Delete 软删除
 func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
-	return r.Data.DB(ctx).Role.UpdateOneID(id).
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return err
+	}
+	err = r.Data.DB(ctx).Role.UpdateOneID(id).
+		Where(role.DomainIDEQ(domainID)).
 		SetDeletedAt(time.Now()).
 		Exec(ctx)
+	if gen.IsNotFound(err) {
+		return pb.ErrorRoleNotFound("角色不存在")
+	}
+	return err
 }
 
 // ListAll 查询所有角色
 func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res, err := r.Data.DB(ctx).Role.Query().
 		Select(role.FieldID, role.FieldName, role.FieldStatus).
+		WithMenus(func(q *gen.MenuQuery) {
+			q.Select(menu.FieldID)
+		}).
+		Where(role.DomainIDEQ(domainID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -186,13 +260,17 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 
 // CountRoles 角色计数
 func (r *roleRepo) CountRoles(ctx context.Context, opts ...biz.ListOption) (int32, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return 0, err
+	}
 	o := biz.ListOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).Role.Query().
 		Select(role.FieldID).
-		Where(ents.ApplyFilter(o.Filter)).
+		Where(role.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -202,6 +280,10 @@ func (r *roleRepo) CountRoles(ctx context.Context, opts ...biz.ListOption) (int3
 
 // ListRoles 分页查询角色
 func (r *roleRepo) ListRoles(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Role, error) {
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	o := biz.ListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
@@ -214,7 +296,10 @@ func (r *roleRepo) ListRoles(ctx context.Context, opts ...biz.ListOption) ([]*pb
 			role.FieldStatus,
 			role.FieldCreatedAt, role.FieldUpdatedAt,
 		).
-		Where(ents.ApplyFilter(o.Filter)).
+		WithMenus(func(q *gen.MenuQuery) {
+			q.Select(menu.FieldID)
+		}).
+		Where(role.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
@@ -229,11 +314,15 @@ func (r *roleRepo) ExistByName(ctx context.Context, name string, excludeID uint3
 	if name == "" {
 		return false, nil
 	}
-	builder := r.Data.DB(ctx).Role.Query()
+	domainID, err := requireDomainID(ctx)
+	if err != nil {
+		return false, err
+	}
+	builder := r.Data.DB(ctx).Role.Query().Where(role.DomainIDEQ(domainID))
 	if excludeID != 0 {
 		builder = builder.Where(role.IDNotIn(excludeID))
 	}
-	_, err := builder.Select(role.FieldID).Where(role.Name(name)).First(ctx)
+	_, err = builder.Select(role.FieldID).Where(role.Name(name)).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return false, nil

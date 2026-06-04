@@ -6,6 +6,7 @@ import (
 	"io"
 	"testing"
 
+	pb "backend-service/api/avmc/admin/v1"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/enttest"
@@ -18,7 +19,7 @@ import (
 )
 
 func TestRoleRepoSaveAndUpdateMenuIDs(t *testing.T) {
-	ctx := context.Background()
+	ctx := tenantContext(1)
 	client := newTestClient(t)
 	defer client.Close()
 
@@ -56,6 +57,55 @@ func TestRoleRepoSaveAndUpdateMenuIDs(t *testing.T) {
 		t.Fatalf("update role: %v", err)
 	}
 	assertRoleMenuIDs(t, client, role.GetId(), nil)
+}
+
+func TestRoleRepoEnforcesDomainIsolation(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+
+	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	first, err := repo.Save(tenantContext(1), &pbCore.Role{Name: ptr("operator")})
+	if err != nil {
+		t.Fatalf("save domain one role: %v", err)
+	}
+	if _, err := repo.Save(tenantContext(2), &pbCore.Role{Name: ptr("operator")}); err != nil {
+		t.Fatalf("save same role name in domain two: %v", err)
+	}
+	if _, err := repo.FindByID(tenantContext(2), first.GetId()); !pb.IsRoleNotFound(err) {
+		t.Fatalf("cross-domain FindByID() error = %v", err)
+	}
+}
+
+func TestRoleRepoRejectsInvalidMenuIDs(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+
+	if _, err := repo.Save(tenantContext(1), &pbCore.Role{
+		Name:    ptr("operator"),
+		MenuIds: []uint32{999},
+	}); !pb.IsRolePermissionInvalid(err) {
+		t.Fatalf("invalid menu IDs error = %v", err)
+	}
+}
+
+func TestRoleRepoListReturnsMenuIDs(t *testing.T) {
+	ctx := tenantContext(1)
+	client := newTestClient(t)
+	defer client.Close()
+	menuItem := client.Menu.Create().SetName("listed-menu").SetTitle("Listed").SaveX(ctx)
+	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	if _, err := repo.Save(ctx, &pbCore.Role{Name: ptr("listed-role"), MenuIds: []uint32{menuItem.ID}}); err != nil {
+		t.Fatalf("save role: %v", err)
+	}
+
+	roles, err := repo.ListRoles(ctx)
+	if err != nil {
+		t.Fatalf("list roles: %v", err)
+	}
+	if len(roles) != 1 || len(roles[0].GetMenuIds()) != 1 || roles[0].GetMenuIds()[0] != menuItem.ID {
+		t.Fatalf("roles = %#v", roles)
+	}
 }
 
 func newTestClient(t *testing.T) *gen.Client {
