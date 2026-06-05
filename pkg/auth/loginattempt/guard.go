@@ -92,11 +92,11 @@ func NewRedisGuard(client *redis.Client, opts Options) *RedisGuard {
 	}
 }
 
-func (g *RedisGuard) Check(ctx context.Context, scope, identity string, domainID uint32) error {
+func (g *RedisGuard) Check(ctx context.Context, scope, identity string, tenantID uint32) error {
 	if g == nil || g.client == nil {
 		return errors.New("login attempt guard is unavailable")
 	}
-	locked, err := g.client.Exists(ctx, g.lockKey(scope, identity, domainID)).Result()
+	locked, err := g.client.Exists(ctx, g.lockKey(scope, identity, tenantID)).Result()
 	if err != nil {
 		return fmt.Errorf("checking login lock: %w", err)
 	}
@@ -106,14 +106,14 @@ func (g *RedisGuard) Check(ctx context.Context, scope, identity string, domainID
 	return nil
 }
 
-func (g *RedisGuard) Failure(ctx context.Context, scope, identity string, domainID uint32) error {
+func (g *RedisGuard) Failure(ctx context.Context, scope, identity string, tenantID uint32) error {
 	if g == nil || g.client == nil {
 		return errors.New("login attempt guard is unavailable")
 	}
 	result, err := recordFailureScript.Run(
 		ctx,
 		g.client,
-		[]string{g.attemptKey(scope, identity, domainID), g.lockKey(scope, identity, domainID)},
+		[]string{g.attemptKey(scope, identity, tenantID), g.lockKey(scope, identity, tenantID)},
 		g.maxAttempts,
 		g.window.Milliseconds(),
 		g.lockout.Milliseconds(),
@@ -127,27 +127,27 @@ func (g *RedisGuard) Failure(ctx context.Context, scope, identity string, domain
 	return nil
 }
 
-func (g *RedisGuard) Success(ctx context.Context, scope, identity string, domainID uint32) error {
+func (g *RedisGuard) Success(ctx context.Context, scope, identity string, tenantID uint32) error {
 	if g == nil || g.client == nil {
 		return errors.New("login attempt guard is unavailable")
 	}
-	if err := g.client.Del(ctx, g.attemptKey(scope, identity, domainID), g.lockKey(scope, identity, domainID)).Err(); err != nil {
+	if err := g.client.Del(ctx, g.attemptKey(scope, identity, tenantID), g.lockKey(scope, identity, tenantID)).Err(); err != nil {
 		return fmt.Errorf("resetting login failures: %w", err)
 	}
 	return nil
 }
 
-func (g *RedisGuard) attemptKey(scope, identity string, domainID uint32) string {
-	return g.key("attempt", scope, identity, domainID)
+func (g *RedisGuard) attemptKey(scope, identity string, tenantID uint32) string {
+	return g.key("attempt", scope, identity, tenantID)
 }
 
-func (g *RedisGuard) lockKey(scope, identity string, domainID uint32) string {
-	return g.key("lock", scope, identity, domainID)
+func (g *RedisGuard) lockKey(scope, identity string, tenantID uint32) string {
+	return g.key("lock", scope, identity, tenantID)
 }
 
-func (g *RedisGuard) key(kind, scope, identity string, domainID uint32) string {
+func (g *RedisGuard) key(kind, scope, identity string, tenantID uint32) string {
 	sum := sha256.Sum256([]byte(strings.ToLower(strings.TrimSpace(identity))))
-	return fmt.Sprintf("%s:%s:%s:%d:%s", g.prefix, kind, scope, domainID, hex.EncodeToString(sum[:]))
+	return fmt.Sprintf("%s:%s:%s:%d:%s", g.prefix, kind, scope, tenantID, hex.EncodeToString(sum[:]))
 }
 
 var recordFailureScript = redis.NewScript(`

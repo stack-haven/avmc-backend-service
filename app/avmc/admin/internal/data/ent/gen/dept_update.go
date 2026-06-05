@@ -57,24 +57,24 @@ func (_u *DeptUpdate) AddStatus(v int32) *DeptUpdate {
 	return _u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_u *DeptUpdate) SetDomainID(v uint32) *DeptUpdate {
-	_u.mutation.ResetDomainID()
-	_u.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_u *DeptUpdate) SetTenantID(v uint32) *DeptUpdate {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
 	return _u
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_u *DeptUpdate) SetNillableDomainID(v *uint32) *DeptUpdate {
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *DeptUpdate) SetNillableTenantID(v *uint32) *DeptUpdate {
 	if v != nil {
-		_u.SetDomainID(*v)
+		_u.SetTenantID(*v)
 	}
 	return _u
 }
 
-// AddDomainID adds value to the "domain_id" field.
-func (_u *DeptUpdate) AddDomainID(v int32) *DeptUpdate {
-	_u.mutation.AddDomainID(v)
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *DeptUpdate) AddTenantID(v int32) *DeptUpdate {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -319,9 +319,9 @@ func (_u *DeptUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Dept.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.DomainID(); ok {
-		if err := dept.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Dept.domain_id": %w`, err)}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := dept.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Dept.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Name(); ok {
@@ -364,11 +364,11 @@ func (_u *DeptUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(dept.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.DomainID(); ok {
-		_spec.SetField(dept.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(dept.FieldTenantID, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.AddedDomainID(); ok {
-		_spec.AddField(dept.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(dept.FieldTenantID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)
@@ -534,24 +534,24 @@ func (_u *DeptUpdateOne) AddStatus(v int32) *DeptUpdateOne {
 	return _u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_u *DeptUpdateOne) SetDomainID(v uint32) *DeptUpdateOne {
-	_u.mutation.ResetDomainID()
-	_u.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_u *DeptUpdateOne) SetTenantID(v uint32) *DeptUpdateOne {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
 	return _u
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_u *DeptUpdateOne) SetNillableDomainID(v *uint32) *DeptUpdateOne {
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *DeptUpdateOne) SetNillableTenantID(v *uint32) *DeptUpdateOne {
 	if v != nil {
-		_u.SetDomainID(*v)
+		_u.SetTenantID(*v)
 	}
 	return _u
 }
 
-// AddDomainID adds value to the "domain_id" field.
-func (_u *DeptUpdateOne) AddDomainID(v int32) *DeptUpdateOne {
-	_u.mutation.AddDomainID(v)
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *DeptUpdateOne) AddTenantID(v int32) *DeptUpdateOne {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -809,9 +809,9 @@ func (_u *DeptUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Dept.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.DomainID(); ok {
-		if err := dept.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Dept.domain_id": %w`, err)}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := dept.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Dept.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Name(); ok {
@@ -871,11 +871,11 @@ func (_u *DeptUpdateOne) sqlSave(ctx context.Context) (_node *Dept, err error) {
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(dept.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.DomainID(); ok {
-		_spec.SetField(dept.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(dept.FieldTenantID, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.AddedDomainID(); ok {
-		_spec.AddField(dept.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(dept.FieldTenantID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(dept.FieldDeletedAt, field.TypeTime, value)

@@ -67,20 +67,20 @@ func ProtectedOperations() []Operation {
 	}
 }
 
-func PoliciesForRole(role authz.Subject, domain authz.Domain) []authz.Policy {
+func PoliciesForRole(role authz.Subject, tenant authz.Tenant) []authz.Policy {
 	ops := ProtectedOperations()
 	policies := make([]authz.Policy, 0, len(ops)*2)
 	for _, op := range ops {
 		policies = append(policies,
-			authz.Policy{Subject: role, Object: op.Object, Action: op.HTTPAction, Domain: domain, Effect: authz.EffectAllow},
-			authz.Policy{Subject: role, Object: op.Object, Action: op.GRPCAction, Domain: domain, Effect: authz.EffectAllow},
+			authz.Policy{Subject: role, Object: op.Object, Action: op.HTTPAction, Tenant: tenant, Effect: authz.EffectAllow},
+			authz.Policy{Subject: role, Object: op.Object, Action: op.GRPCAction, Tenant: tenant, Effect: authz.EffectAllow},
 		)
 	}
 	return policies
 }
 
-func SyncSuperAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, domain authz.Domain, users []authz.Subject) error {
-	for _, policy := range PoliciesForRole(role, domain) {
+func SyncSuperAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject) error {
+	for _, policy := range PoliciesForRole(role, tenant) {
 		if _, err := authorizer.AddPolicy(ctx, policy); err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func SyncSuperAdmin(ctx context.Context, authorizer authz.Authorizer, role authz
 		if user == "" {
 			continue
 		}
-		if _, err := authorizer.AddRoleForUser(ctx, user, role, domain); err != nil {
+		if _, err := authorizer.AddRoleForUser(ctx, user, role, tenant); err != nil {
 			return err
 		}
 	}

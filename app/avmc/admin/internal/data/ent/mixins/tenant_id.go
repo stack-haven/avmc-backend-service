@@ -8,18 +8,18 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-var _ ent.Mixin = (*DomainID)(nil)
+var _ ent.Mixin = (*TenantID)(nil)
 
-type DomainID struct {
+type TenantID struct {
 	mixin.Schema
 }
 
-func (DomainID) Fields() []ent.Field {
+func (TenantID) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("domain_id").
-			Comment("域ID").
+		field.Uint32("tenant_id").
+			Comment("租户ID").
 			Positive().
-			StructTag(`json:"domain_id,omitempty"`).
+			StructTag(`json:"tenant_id,omitempty"`).
 			SchemaType(map[string]string{
 				dialect.MySQL:    "bigint",
 				dialect.Postgres: "bigint",
@@ -27,8 +27,8 @@ func (DomainID) Fields() []ent.Field {
 	}
 }
 
-func (DomainID) Indexes() []ent.Index {
+func (TenantID) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("domain_id"),
+		index.Fields("tenant_id"),
 	}
 }

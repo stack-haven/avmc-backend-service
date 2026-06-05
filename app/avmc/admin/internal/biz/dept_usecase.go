@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -19,9 +20,9 @@ type DeptRepo interface {
 	Save(context.Context, *pbCore.Dept) (*pbCore.Dept, error)
 	Update(context.Context, *pbCore.Dept) (*pbCore.Dept, error)
 	FindByID(context.Context, uint32) (*pbCore.Dept, error)
-	CountDepts(context.Context, ...ListOption) (int32, error)
+	CountDepts(context.Context, ...listing.Option) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Dept, error)
-	ListDepts(context.Context, ...ListOption) ([]*pbCore.Dept, error) // 新增的方法用于分页查询部门
+	ListDepts(context.Context, ...listing.Option) ([]*pbCore.Dept, error) // 新增的方法用于分页查询部门
 	Delete(context.Context, uint32) error
 }
 
@@ -69,7 +70,7 @@ func (uc *DeptUsecase) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept
 // CountDepts 处理用户条件查询聚合请求
 // 参数：ctx 上下文，opts 分页选项
 // 返回值：用户数量，错误信息
-func (uc *DeptUsecase) CountDepts(ctx context.Context, opts ...ListOption) (int32, error) {
+func (uc *DeptUsecase) CountDepts(ctx context.Context, opts ...listing.Option) (int32, error) {
 	resp, err := uc.repo.CountDepts(ctx, opts...)
 	if err != nil {
 		return 0, err
@@ -87,7 +88,7 @@ func (uc *DeptUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListDepts 处理部门分页列表请求
 // 参数：ctx 上下文，opts 分页选项
 // 返回值：部门列表响应，错误信息
-func (uc *DeptUsecase) ListDepts(ctx context.Context, opts ...ListOption) ([]*pbCore.Dept, error) {
+func (uc *DeptUsecase) ListDepts(ctx context.Context, opts ...listing.Option) ([]*pbCore.Dept, error) {
 	return uc.repo.ListDepts(ctx, opts...)
 }
 

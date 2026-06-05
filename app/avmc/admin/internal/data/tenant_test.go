@@ -10,7 +10,7 @@ import (
 
 type testSecurityUser struct {
 	subject string
-	domain  string
+	tenant  string
 }
 
 func (u testSecurityUser) Name() string                           { return "test" }
@@ -18,22 +18,22 @@ func (u testSecurityUser) ParseFromContext(context.Context) error { return nil }
 func (u testSecurityUser) GetSubject() string                     { return u.subject }
 func (u testSecurityUser) GetObject() string                      { return "" }
 func (u testSecurityUser) GetAction() string                      { return "" }
-func (u testSecurityUser) GetDomain() string                      { return u.domain }
+func (u testSecurityUser) GetTenant() string                      { return u.tenant }
 
-func tenantContext(domainID uint32) context.Context {
+func tenantContext(tenantID uint32) context.Context {
 	return authn.ContextWithAuthUser(context.Background(), testSecurityUser{
 		subject: "1",
-		domain:  strconv.FormatUint(uint64(domainID), 10),
+		tenant:  strconv.FormatUint(uint64(tenantID), 10),
 	})
 }
 
-func TestRequireDomainID(t *testing.T) {
+func TestRequireTenantID(t *testing.T) {
 	t.Parallel()
 
-	if _, err := requireDomainID(context.Background()); err == nil {
-		t.Fatal("requireDomainID() error = nil without authenticated domain")
+	if _, err := requireTenantID(context.Background()); err == nil {
+		t.Fatal("requireTenantID() error = nil without authenticated tenant")
 	}
-	if got, err := requireDomainID(tenantContext(7)); err != nil || got != 7 {
-		t.Fatalf("requireDomainID() = %d, %v; want 7, nil", got, err)
+	if got, err := requireTenantID(tenantContext(7)); err != nil || got != 7 {
+		t.Fatalf("requireTenantID() = %d, %v; want 7, nil", got, err)
 	}
 }

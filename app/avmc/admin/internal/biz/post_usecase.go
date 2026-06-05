@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -18,9 +19,9 @@ type PostRepo interface {
 	Save(context.Context, *pbCore.Post) (*pbCore.Post, error)
 	Update(context.Context, *pbCore.Post) (*pbCore.Post, error)
 	FindByID(context.Context, uint32) (*pbCore.Post, error)
-	CountPosts(context.Context, ...ListOption) (int32, error)
+	CountPosts(context.Context, ...listing.Option) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Post, error)
-	ListPosts(context.Context, ...ListOption) ([]*pbCore.Post, error) // 新增的方法用于分页查询
+	ListPosts(context.Context, ...listing.Option) ([]*pbCore.Post, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 }
 
@@ -69,7 +70,7 @@ func (uc *PostUsecase) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post
 // CountPosts 处理岗位条件查询聚合请求
 // 参数：ctx 上下文，opts 分页选项
 // 返回值：岗位数量，错误信息
-func (uc *PostUsecase) CountPosts(ctx context.Context, opts ...ListOption) (int32, error) {
+func (uc *PostUsecase) CountPosts(ctx context.Context, opts ...listing.Option) (int32, error) {
 	resp, err := uc.repo.CountPosts(ctx, opts...)
 	if err != nil {
 		return 0, err
@@ -88,8 +89,8 @@ func (uc *PostUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListPost 处理分页查询岗位请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：岗位列表响应，错误信息
-func (uc *PostUsecase) ListPosts(ctx context.Context, opts ...ListOption) ([]*pbCore.Post, error) {
-	uc.log.WithContext(ctx).Infof("ListPostPost: %v", opts)
+func (uc *PostUsecase) ListPosts(ctx context.Context, opts ...listing.Option) ([]*pbCore.Post, error) {
+	uc.log.WithContext(ctx).Infof("ListPosts")
 	return uc.repo.ListPosts(ctx, opts...)
 }
 

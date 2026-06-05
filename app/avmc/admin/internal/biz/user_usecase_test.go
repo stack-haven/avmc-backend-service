@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -33,12 +34,12 @@ func (*stubUserRepo) ListByName(context.Context, string) ([]*pbCore.User, error)
 func (*stubUserRepo) ListByPhone(context.Context, string) ([]*pbCore.User, error) {
 	return nil, nil
 }
-func (*stubUserRepo) ListUsers(context.Context, ...ListOption) ([]*pbCore.User, error) {
+func (*stubUserRepo) ListUsers(context.Context, ...listing.Option) ([]*pbCore.User, error) {
 	return nil, nil
 }
-func (*stubUserRepo) CountUsers(context.Context, ...ListOption) (int32, error) { return 0, nil }
-func (*stubUserRepo) ListAll(context.Context) ([]*pbCore.User, error)          { return nil, nil }
-func (*stubUserRepo) ListPageSimple(context.Context, ...ListOption) ([]*pbCore.User, error) {
+func (*stubUserRepo) CountUsers(context.Context, ...listing.Option) (int32, error) { return 0, nil }
+func (*stubUserRepo) ListAll(context.Context) ([]*pbCore.User, error)              { return nil, nil }
+func (*stubUserRepo) ListPageSimple(context.Context, ...listing.Option) ([]*pbCore.User, error) {
 	return nil, nil
 }
 func (*stubUserRepo) Delete(context.Context, uint32) error                 { return nil }

@@ -21,41 +21,41 @@ func TestUserRepoSaveRejectsMissingRequiredFieldsWithoutPanic(t *testing.T) {
 	}
 }
 
-func TestUserRepoEnforcesDomainIsolation(t *testing.T) {
+func TestUserRepoEnforcesTenantIsolation(t *testing.T) {
 	client := newTestClient(t)
 	defer client.Close()
 
 	repo := NewUserRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
-	domainOne := tenantContext(1)
-	domainTwo := tenantContext(2)
+	tenantOne := tenantContext(1)
+	tenantTwo := tenantContext(2)
 
-	first, err := repo.Save(domainOne, &pbCore.User{
+	first, err := repo.Save(tenantOne, &pbCore.User{
 		Name:     ptr("same-name"),
 		Password: ptr("hashed-password"),
 	})
 	if err != nil {
-		t.Fatalf("save domain one user: %v", err)
+		t.Fatalf("save tenant one user: %v", err)
 	}
-	if _, err := repo.Save(domainTwo, &pbCore.User{
+	if _, err := repo.Save(tenantTwo, &pbCore.User{
 		Name:     ptr("same-name"),
 		Password: ptr("hashed-password"),
 	}); err != nil {
-		t.Fatalf("save same name in domain two: %v", err)
+		t.Fatalf("save same name in tenant two: %v", err)
 	}
 
 	stored := client.User.GetX(context.Background(), first.GetId())
-	if stored.DomainID != 1 {
-		t.Fatalf("stored domain_id = %d, want 1", stored.DomainID)
+	if stored.TenantID != 1 {
+		t.Fatalf("stored tenant_id = %d, want 1", stored.TenantID)
 	}
-	if _, err := repo.FindByID(domainTwo, first.GetId()); !pb.IsUserNotFound(err) {
-		t.Fatalf("FindByID() cross-domain error = %v", err)
+	if _, err := repo.FindByID(tenantTwo, first.GetId()); !pb.IsUserNotFound(err) {
+		t.Fatalf("FindByID() cross-tenant error = %v", err)
 	}
-	users, err := repo.ListUsers(domainOne)
+	users, err := repo.ListUsers(tenantOne)
 	if err != nil {
-		t.Fatalf("list domain one users: %v", err)
+		t.Fatalf("list tenant one users: %v", err)
 	}
 	if len(users) != 1 || users[0].GetId() != first.GetId() {
-		t.Fatalf("domain one users = %#v", users)
+		t.Fatalf("tenant one users = %#v", users)
 	}
 	if got := client.User.Query().Where(user.Name("same-name")).CountX(context.Background()); got != 2 {
 		t.Fatalf("same-name users = %d, want 2", got)

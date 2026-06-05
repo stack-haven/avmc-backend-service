@@ -37,8 +37,8 @@ const (
 	ErrCodeGetAllObjectsFailed
 	// ErrCodeGetAllActionsFailed 获取所有操作失败
 	ErrCodeGetAllActionsFailed
-	// ErrCodeGetAllDomainsFailed 获取所有域失败
-	ErrCodeGetAllDomainsFailed
+	// ErrCodeGetAllTenantsFailed 获取所有租户失败
+	ErrCodeGetAllTenantsFailed
 	// ErrCodeGetAllRolesFailed 获取所有角色失败
 	ErrCodeGetAllRolesFailed
 	// ErrCodeGetRolesForUserFailed 获取用户角色失败
@@ -59,8 +59,8 @@ const (
 	ErrCodeInvalidObject
 	// ErrCodeInvalidAction 无效操作
 	ErrCodeInvalidAction
-	// ErrCodeInvalidDomain 无效域
-	ErrCodeInvalidDomain
+	// ErrCodeInvalidTenant 无效租户
+	ErrCodeInvalidTenant
 	// ErrCodeInvalidPolicy 无效策略
 	ErrCodeInvalidPolicy
 	// ErrCodeInvalidRole 无效角色
@@ -99,8 +99,8 @@ var (
 	ErrGetAllObjectsFailed = errors.New("get all objects failed")
 	// ErrGetAllActionsFailed 获取所有操作失败
 	ErrGetAllActionsFailed = errors.New("get all actions failed")
-	// ErrGetAllDomainsFailed 获取所有域失败
-	ErrGetAllDomainsFailed = errors.New("get all domains failed")
+	// ErrGetAllTenantsFailed 获取所有租户失败
+	ErrGetAllTenantsFailed = errors.New("get all tenants failed")
 	// ErrGetAllRolesFailed 获取所有角色失败
 	ErrGetAllRolesFailed = errors.New("get all roles failed")
 	// ErrGetRolesForUserFailed 获取用户角色失败
@@ -119,8 +119,8 @@ var (
 	ErrInvalidObject = errors.New("invalid object")
 	// ErrInvalidAction 无效操作
 	ErrInvalidAction = errors.New("invalid action")
-	// ErrInvalidDomain 无效域
-	ErrInvalidDomain = errors.New("invalid domain")
+	// ErrInvalidTenant 无效租户
+	ErrInvalidTenant = errors.New("invalid tenant")
 	// ErrInvalidPolicy 无效策略
 	ErrInvalidPolicy = errors.New("invalid policy")
 	// ErrInvalidRole 无效角色

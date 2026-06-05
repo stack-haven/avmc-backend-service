@@ -55,7 +55,7 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
 		UserId:   u.ID,
 		Username: convert.ToValue(u.Name),
-		DomainId: u.DomainID,
+		TenantID: u.TenantID,
 	})
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
@@ -78,100 +78,100 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 // LoginByUsername 处理后台用户名登录数据操作
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
-func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, domainId uint32) (*pb.LoginResponse, error) {
-	if err := r.checkLogin(ctx, "username", name, domainId); err != nil {
+func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (*pb.LoginResponse, error) {
+	if err := r.checkLogin(ctx, "username", name, tenantID); err != nil {
 		return nil, err
 	}
 	res, err := r.data.DB(ctx).User.Query().
-		Select(user.FieldPassword, user.FieldName, user.FieldDomainID).
+		Select(user.FieldPassword, user.FieldName, user.FieldTenantID).
 		Where(
 			user.NameEQ(name),
-			user.DomainIDEQ(domainId),
+			user.TenantIDEQ(tenantID),
 			user.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
 		).
 		Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
-			return nil, r.loginFailed(ctx, "username", name, domainId)
+			return nil, r.loginFailed(ctx, "username", name, tenantID)
 		}
-		r.log.Errorf("用户名登录查询失败，domain_id=%d，错误：%v", domainId, err)
+		r.log.Errorf("用户名登录查询失败，tenant_id=%d，错误：%v", tenantID, err)
 		return nil, err
 	}
 	if res.Password == nil {
-		return nil, r.loginFailed(ctx, "username", name, domainId)
+		return nil, r.loginFailed(ctx, "username", name, tenantID)
 	}
 	if !crypto.CheckPasswordHash(password, *res.Password) {
-		return nil, r.loginFailed(ctx, "username", name, domainId)
+		return nil, r.loginFailed(ctx, "username", name, tenantID)
 	}
-	r.loginSucceeded(ctx, "username", name, domainId)
+	r.loginSucceeded(ctx, "username", name, tenantID)
 	return r.LoginResponse(ctx, res)
 }
 
 // LoginByEmail 处理后台邮箱登录数据操作
 // 参数：ctx email 邮箱，password 密码
 // 返回值：登录响应结构体，错误信息
-func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, domainId uint32) (*pb.LoginResponse, error) {
-	if err := r.checkLogin(ctx, "email", email, domainId); err != nil {
+func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*pb.LoginResponse, error) {
+	if err := r.checkLogin(ctx, "email", email, tenantID); err != nil {
 		return nil, err
 	}
 	res, err := r.data.DB(ctx).User.Query().
-		Select(user.FieldPassword, user.FieldName, user.FieldDomainID).
+		Select(user.FieldPassword, user.FieldName, user.FieldTenantID).
 		Where(
 			user.EmailEQ(email),
-			user.DomainIDEQ(domainId),
+			user.TenantIDEQ(tenantID),
 			user.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
 		).
 		Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
-			return nil, r.loginFailed(ctx, "email", email, domainId)
+			return nil, r.loginFailed(ctx, "email", email, tenantID)
 		}
-		r.log.Errorf("邮箱登录查询失败，domain_id=%d，错误：%v", domainId, err)
+		r.log.Errorf("邮箱登录查询失败，tenant_id=%d，错误：%v", tenantID, err)
 		return nil, err
 	}
 	if res.Password == nil {
-		return nil, r.loginFailed(ctx, "email", email, domainId)
+		return nil, r.loginFailed(ctx, "email", email, tenantID)
 	}
 	if !crypto.CheckPasswordHash(password, *res.Password) {
-		return nil, r.loginFailed(ctx, "email", email, domainId)
+		return nil, r.loginFailed(ctx, "email", email, tenantID)
 	}
-	r.loginSucceeded(ctx, "email", email, domainId)
+	r.loginSucceeded(ctx, "email", email, tenantID)
 	return r.LoginResponse(ctx, res)
 }
 
-func (r *authRepo) checkLogin(ctx context.Context, scope, identity string, domainID uint32) error {
+func (r *authRepo) checkLogin(ctx context.Context, scope, identity string, tenantID uint32) error {
 	if r.guard == nil {
 		return nil
 	}
-	err := r.guard.Check(ctx, scope, identity, domainID)
+	err := r.guard.Check(ctx, scope, identity, tenantID)
 	if errors.Is(err, loginattempt.ErrLocked) {
 		return pb.ErrorUserTooManyLoginAttempts("登录失败次数过多，请稍后重试")
 	}
 	if err != nil {
-		r.log.Warnf("登录保护检查失败，domain_id=%d，错误：%v", domainID, err)
+		r.log.Warnf("登录保护检查失败，tenant_id=%d，错误：%v", tenantID, err)
 	}
 	return nil
 }
 
-func (r *authRepo) loginFailed(ctx context.Context, scope, identity string, domainID uint32) error {
+func (r *authRepo) loginFailed(ctx context.Context, scope, identity string, tenantID uint32) error {
 	if r.guard != nil {
-		err := r.guard.Failure(ctx, scope, identity, domainID)
+		err := r.guard.Failure(ctx, scope, identity, tenantID)
 		if errors.Is(err, loginattempt.ErrLocked) {
 			return pb.ErrorUserTooManyLoginAttempts("登录失败次数过多，请稍后重试")
 		}
 		if err != nil {
-			r.log.Warnf("记录登录失败次数失败，domain_id=%d，错误：%v", domainID, err)
+			r.log.Warnf("记录登录失败次数失败，tenant_id=%d，错误：%v", tenantID, err)
 		}
 	}
 	return pb.ErrorUserIncorrectPassword("用户名或密码错误")
 }
 
-func (r *authRepo) loginSucceeded(ctx context.Context, scope, identity string, domainID uint32) {
+func (r *authRepo) loginSucceeded(ctx context.Context, scope, identity string, tenantID uint32) {
 	if r.guard == nil {
 		return
 	}
-	if err := r.guard.Success(ctx, scope, identity, domainID); err != nil {
-		r.log.Warnf("重置登录失败次数失败，domain_id=%d，错误：%v", domainID, err)
+	if err := r.guard.Success(ctx, scope, identity, tenantID); err != nil {
+		r.log.Warnf("重置登录失败次数失败，tenant_id=%d，错误：%v", tenantID, err)
 	}
 }
 
@@ -185,18 +185,18 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌无效")
 	}
 	userID := convert.StringToUnit32(claims.GetSubject())
-	domainID := convert.StringToUnit32(claims.GetDomain())
+	tenantID := convert.StringToUnit32(claims.GetTenant())
 	if userID == 0 {
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌主体无效")
 	}
-	if domainID == 0 {
+	if tenantID == 0 {
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌域无效")
 	}
 	res, err := r.data.DB(ctx).User.Query().
-		Select(user.FieldName, user.FieldDomainID).
+		Select(user.FieldName, user.FieldTenantID).
 		Where(
 			user.IDEQ(userID),
-			user.DomainIDEQ(domainID),
+			user.TenantIDEQ(tenantID),
 			user.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
 		).
 		Only(ctx)
@@ -210,7 +210,7 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 	accessToken, newRefreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
 		UserId:   userID,
 		Username: convert.ToValue(res.Name),
-		DomainId: res.DomainID,
+		TenantID: res.TenantID,
 	})
 	if err != nil {
 		r.log.Errorf("刷新令牌重新签发失败，用户ID：%d，错误：%v", userID, err)
@@ -238,7 +238,7 @@ func (r *authRepo) Register(ctx context.Context, name, password string) error {
 	if err := biz.ValidatePassword(password); err != nil {
 		return err
 	}
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func (r *authRepo) Register(ctx context.Context, name, password string) error {
 	if err != nil {
 		return err
 	}
-	_, err = r.data.DB(ctx).User.Create().SetDomainID(domainID).SetName(name).SetPassword(hashPassword).Save(ctx)
+	_, err = r.data.DB(ctx).User.Create().SetTenantID(tenantID).SetName(name).SetPassword(hashPassword).Save(ctx)
 	if err != nil {
 		r.log.Errorf("注册数据操作失败：%v", err)
 		return err
@@ -315,13 +315,13 @@ func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, er
 }
 
 func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	u, err := r.data.DB(ctx).User.Query().
-		Select(user.FieldDomainID).
-		Where(user.IDEQ(userId), user.DomainIDEQ(domainID)).
+		Select(user.FieldTenantID).
+		Where(user.IDEQ(userId), user.TenantIDEQ(tenantID)).
 		Only(ctx)
 	if err != nil {
 		r.log.Errorf("查询用户域失败，用户ID：%d，错误：%v", userId, err)
@@ -332,7 +332,7 @@ func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, e
 		QueryRoles().
 		Where(
 			role.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
-			role.DomainIDEQ(u.DomainID),
+			role.TenantIDEQ(u.TenantID),
 		).
 		QueryMenus().
 		Where(menu.StatusEQ(int32(enum.Status_STATUS_ENABLED))).

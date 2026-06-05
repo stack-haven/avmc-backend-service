@@ -17,10 +17,10 @@ func (BaseMixin) Fields() []ent.Field {
 	fields = append(fields, pkgMixin.CreatedAt{}.Fields()...)
 	fields = append(fields, pkgMixin.UpdatedAt{}.Fields()...)
 	fields = append(fields, pkgMixin.Status{}.Fields()...)
-	fields = append(fields, DomainID{}.Fields()...)
+	fields = append(fields, TenantID{}.Fields()...)
 	return fields
 }
 
 func (BaseMixin) Indexes() []ent.Index {
-	return DomainID{}.Indexes()
+	return TenantID{}.Indexes()
 }

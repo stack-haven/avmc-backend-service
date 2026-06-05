@@ -63,7 +63,7 @@ func TestAuthnMiddlewareInjectsClaimsAndUser(t *testing.T) {
 		claims: claims,
 		opts: authn.Options{
 			UserFactory: func(*authn.AuthClaims) authn.SecurityUser {
-				return &testSecurityUser{subject: "7", domain: "3"}
+				return &testSecurityUser{subject: "7", tenant: "3"}
 			},
 		},
 	}
@@ -73,7 +73,7 @@ func TestAuthnMiddlewareInjectsClaimsAndUser(t *testing.T) {
 			t.Fatal("claims were not injected")
 		}
 		gotUser, ok := authn.AuthUserFromContext(ctx)
-		if !ok || gotUser.GetSubject() != "7" || gotUser.GetDomain() != "3" {
+		if !ok || gotUser.GetSubject() != "7" || gotUser.GetTenant() != "3" {
 			t.Fatal("security user was not injected")
 		}
 		return "ok", nil
@@ -88,7 +88,7 @@ func TestAuthnMiddlewareInjectsClaimsAndUser(t *testing.T) {
 	}
 }
 
-func TestAuthzMiddlewareUsesHTTPMethodAndTokenDomain(t *testing.T) {
+func TestAuthzMiddlewareUsesHTTPMethodAndTokenTenant(t *testing.T) {
 	authorizer := &testAuthorizer{allowed: true}
 	handler := AuthzMiddleware(authorizer)(func(ctx context.Context, _ interface{}) (interface{}, error) {
 		allowed, ok := authz.AuthzResultFromContext(ctx)
@@ -109,8 +109,8 @@ func TestAuthzMiddlewareUsesHTTPMethodAndTokenDomain(t *testing.T) {
 	if authorizer.action != authz.Action(nethttp.MethodPut) {
 		t.Fatalf("action = %q", authorizer.action)
 	}
-	if authorizer.domain != "3" {
-		t.Fatalf("domain = %q", authorizer.domain)
+	if authorizer.tenant != "3" {
+		t.Fatalf("tenant = %q", authorizer.tenant)
 	}
 }
 
@@ -120,7 +120,7 @@ func TestCombinedAuthMiddlewareInjectsUserAndAuthorizes(t *testing.T) {
 		claims: claims,
 		opts: authn.Options{
 			UserFactory: func(*authn.AuthClaims) authn.SecurityUser {
-				return &testSecurityUser{subject: "7", domain: "3"}
+				return &testSecurityUser{subject: "7", tenant: "3"}
 			},
 		},
 	}
@@ -140,8 +140,8 @@ func TestCombinedAuthMiddlewareInjectsUserAndAuthorizes(t *testing.T) {
 	if _, err := handler(testHTTPContext(nethttp.MethodPost), nil); err != nil {
 		t.Fatalf("combined middleware: %v", err)
 	}
-	if authorizer.action != authz.Action(nethttp.MethodPost) || authorizer.domain != "3" {
-		t.Fatalf("enforce action/domain = %q/%q", authorizer.action, authorizer.domain)
+	if authorizer.action != authz.Action(nethttp.MethodPost) || authorizer.tenant != "3" {
+		t.Fatalf("enforce action/tenant = %q/%q", authorizer.action, authorizer.tenant)
 	}
 }
 
@@ -178,8 +178,8 @@ func TestSkipAuthRoleMiddlewareUsesHTTPMethodAndFailsClosed(t *testing.T) {
 	if authorizer.action != authz.Action(nethttp.MethodDelete) {
 		t.Fatalf("action = %q", authorizer.action)
 	}
-	if authorizer.domain != "3" {
-		t.Fatalf("domain = %q", authorizer.domain)
+	if authorizer.tenant != "3" {
+		t.Fatalf("tenant = %q", authorizer.tenant)
 	}
 }
 
@@ -219,7 +219,7 @@ func (a *testAuthenticator) Options() authn.Options {
 
 type testSecurityUser struct {
 	subject string
-	domain  string
+	tenant  string
 }
 
 func (u *testSecurityUser) Name() string                           { return "test" }
@@ -227,7 +227,7 @@ func (u *testSecurityUser) ParseFromContext(context.Context) error { return nil 
 func (u *testSecurityUser) GetSubject() string                     { return u.subject }
 func (u *testSecurityUser) GetObject() string                      { return "" }
 func (u *testSecurityUser) GetAction() string                      { return "" }
-func (u *testSecurityUser) GetDomain() string                      { return u.domain }
+func (u *testSecurityUser) GetTenant() string                      { return u.tenant }
 
 type testAuthorizer struct {
 	authz.Authorizer
@@ -237,19 +237,19 @@ type testAuthorizer struct {
 	subject  authz.Subject
 	object   authz.Object
 	action   authz.Action
-	domain   authz.Domain
+	tenant   authz.Tenant
 }
 
-func (a *testAuthorizer) Enforce(_ context.Context, sub authz.Subject, obj authz.Object, act authz.Action, dom authz.Domain) (bool, error) {
+func (a *testAuthorizer) Enforce(_ context.Context, sub authz.Subject, obj authz.Object, act authz.Action, tenant authz.Tenant) (bool, error) {
 	a.enforced = true
 	a.subject = sub
 	a.object = obj
 	a.action = act
-	a.domain = dom
+	a.tenant = tenant
 	return a.allowed, nil
 }
 
-func (a *testAuthorizer) GetRolesForUser(context.Context, authz.Subject, authz.Domain) ([]authz.Subject, error) {
+func (a *testAuthorizer) GetRolesForUser(context.Context, authz.Subject, authz.Tenant) ([]authz.Subject, error) {
 	return a.roles, nil
 }
 
@@ -268,7 +268,7 @@ func (t *testTransport) Request() *nethttp.Request       { return t.request }
 func (t *testTransport) PathTemplate() string            { return t.operation }
 
 func testClaims() *authn.AuthClaims {
-	claims := authn.AuthClaims{"sub": "7", "dom": "3", "iss": "not-domain"}
+	claims := authn.AuthClaims{"sub": "7", "tenant": "3", "iss": "not-tenant"}
 	return &claims
 }
 

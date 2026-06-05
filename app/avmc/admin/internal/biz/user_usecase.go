@@ -7,6 +7,7 @@ import (
 
 	pbCore "backend-service/api/core/service/v1"
 
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/crypto"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -19,10 +20,10 @@ type UserRepo interface {
 	FindByID(context.Context, uint32) (*pbCore.User, error)
 	ListByName(context.Context, string) ([]*pbCore.User, error)
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
-	ListUsers(context.Context, ...ListOption) ([]*pbCore.User, error)
-	CountUsers(context.Context, ...ListOption) (int32, error)
+	ListUsers(context.Context, ...listing.Option) ([]*pbCore.User, error)
+	CountUsers(context.Context, ...listing.Option) (int32, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
-	ListPageSimple(context.Context, ...ListOption) ([]*pbCore.User, error)
+	ListPageSimple(context.Context, ...listing.Option) ([]*pbCore.User, error)
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, string) (uint32, error)
 	ExistByPhone(context.Context, string) (uint32, error)
@@ -89,7 +90,7 @@ func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User
 }
 
 // ListPageSimple 用户简单列表分页
-func (uc *UserUsecase) ListPageSimple(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
+func (uc *UserUsecase) ListPageSimple(ctx context.Context, opts ...listing.Option) ([]*pbCore.User, error) {
 	return uc.repo.ListPageSimple(ctx, opts...)
 }
 
@@ -111,11 +112,11 @@ func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status int32
 }
 
 // ListUsers 用户列表
-func (uc *UserUsecase) ListUsers(ctx context.Context, opts ...ListOption) ([]*pbCore.User, error) {
+func (uc *UserUsecase) ListUsers(ctx context.Context, opts ...listing.Option) ([]*pbCore.User, error) {
 	return uc.repo.ListUsers(ctx, opts...)
 }
 
 // CountUsers 用户计数
-func (uc *UserUsecase) CountUsers(ctx context.Context, opts ...ListOption) (int32, error) {
+func (uc *UserUsecase) CountUsers(ctx context.Context, opts ...listing.Option) (int32, error) {
 	return uc.repo.CountUsers(ctx, opts...)
 }

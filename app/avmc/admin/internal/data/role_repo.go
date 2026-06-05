@@ -14,6 +14,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/role"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -100,7 +101,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	}
 	r.Log.Infof("保存角色: %s", g.GetName())
 	ent := r.protoToEnt(g)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	defer rollback(tx, r.Log)
 
 	builder := tx.Role.Create().
-		SetDomainID(domainID).
+		SetTenantID(tenantID).
 		SetName(g.GetName()).
 		SetNillableDefaultRouter(ent.DefaultRouter).
 		SetNillableDataScope(ent.DataScope).
@@ -146,7 +147,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	}
 	r.Log.Infof("更新角色 ID: %d", g.GetId())
 	ent := r.protoToEnt(g)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	defer rollback(tx, r.Log)
 
 	builder := tx.Role.UpdateOneID(g.GetId()).
-		Where(role.DomainIDEQ(domainID)).
+		Where(role.TenantIDEQ(tenantID)).
 		SetName(g.GetName()).
 		SetNillableDefaultRouter(ent.DefaultRouter).
 		SetNillableDataScope(ent.DataScope).
@@ -196,7 +197,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 // FindByID 根据 ID 查询
 func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error) {
 	r.Log.Infof("查询角色 ID: %d", id)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +212,7 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
 		}).
-		Where(role.ID(id), role.DomainIDEQ(domainID)).
+		Where(role.ID(id), role.TenantIDEQ(tenantID)).
 		First(ctx)
 	if err != nil {
 		r.Log.Errorf("查询角色失败 ID: %d, err: %v", id, err)
@@ -225,12 +226,12 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 
 // Delete 软删除
 func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return err
 	}
 	err = r.Data.DB(ctx).Role.UpdateOneID(id).
-		Where(role.DomainIDEQ(domainID)).
+		Where(role.TenantIDEQ(tenantID)).
 		SetDeletedAt(time.Now()).
 		Exec(ctx)
 	if gen.IsNotFound(err) {
@@ -241,7 +242,7 @@ func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 
 // ListAll 查询所有角色
 func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +251,7 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
 		}).
-		Where(role.DomainIDEQ(domainID)).
+		Where(role.TenantIDEQ(tenantID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -259,18 +260,18 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 }
 
 // CountRoles 角色计数
-func (r *roleRepo) CountRoles(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *roleRepo) CountRoles(ctx context.Context, opts ...listing.Option) (int32, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	o := biz.ListOptions{}
+	o := listing.Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).Role.Query().
 		Select(role.FieldID).
-		Where(role.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(role.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -279,12 +280,12 @@ func (r *roleRepo) CountRoles(ctx context.Context, opts ...biz.ListOption) (int3
 }
 
 // ListRoles 分页查询角色
-func (r *roleRepo) ListRoles(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Role, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *roleRepo) ListRoles(ctx context.Context, opts ...listing.Option) ([]*pbCore.Role, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	o := biz.ListOptions{Limit: 20}
+	o := listing.Options{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -299,7 +300,7 @@ func (r *roleRepo) ListRoles(ctx context.Context, opts ...biz.ListOption) ([]*pb
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
 		}).
-		Where(role.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(role.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
@@ -314,11 +315,11 @@ func (r *roleRepo) ExistByName(ctx context.Context, name string, excludeID uint3
 	if name == "" {
 		return false, nil
 	}
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return false, err
 	}
-	builder := r.Data.DB(ctx).Role.Query().Where(role.DomainIDEQ(domainID))
+	builder := r.Data.DB(ctx).Role.Query().Where(role.TenantIDEQ(tenantID))
 	if excludeID != 0 {
 		builder = builder.Where(role.IDNotIn(excludeID))
 	}

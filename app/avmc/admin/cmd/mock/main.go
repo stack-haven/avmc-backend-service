@@ -30,25 +30,34 @@ func init() {
 
 func main() {
 	flag.Parse()
-	ctx := context.Background()
-	logger := log.NewStdLogger(os.Stdout)
+	if err := run(context.Background(), log.NewStdLogger(os.Stdout)); err != nil {
+		fmt.Fprintf(os.Stderr, "admin mock failed: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(ctx context.Context, logger log.Logger) error {
 	bc, err := runtimeconfig.Load(flagconf)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	if err := data.RunSchemaMigration(ctx, bc.Data, logger); err != nil {
-		panic(err)
+		return err
 	}
-	client := data.NewEntClient(bc.Data, logger)
+	client, err := data.NewEntClient(bc.Data, logger)
+	if err != nil {
+		return err
+	}
 	defer client.Close()
 
 	if err := seed(ctx, client); err != nil {
-		panic(err)
+		return err
 	}
 	if err := verify(ctx, client); err != nil {
-		panic(err)
+		return err
 	}
-	fmt.Printf("admin mock data ready: domains=[1,2] users=[mock_admin,mock_operator,mock_tenant2] password=%s\n", mockPassword)
+	fmt.Printf("admin mock data ready: tenants=[1,2] users=[mock_admin,mock_operator,mock_tenant2] password=%s\n", mockPassword)
+	return nil
 }
 
 func seed(ctx context.Context, client *gen.Client) error {
@@ -115,15 +124,15 @@ func seed(ctx context.Context, client *gen.Client) error {
 	return ensureProject(ctx, client, 2, "mock_tenant2_project", "MOCK-TENANT2", tenantTwo.ID, []uint32{tenantTwo.ID})
 }
 
-func ensureUser(ctx context.Context, client *gen.Client, domainID uint32, name, password, email string) (*gen.User, error) {
-	item, err := client.User.Query().Where(user.DomainIDEQ(domainID), user.Name(name)).Only(ctx)
+func ensureUser(ctx context.Context, client *gen.Client, tenantID uint32, name, password, email string) (*gen.User, error) {
+	item, err := client.User.Query().Where(user.TenantIDEQ(tenantID), user.Name(name)).Only(ctx)
 	if err == nil {
 		return item, nil
 	}
 	if !gen.IsNotFound(err) {
 		return nil, err
 	}
-	return client.User.Create().SetDomainID(domainID).SetName(name).SetPassword(password).SetEmail(email).SetStatus(1).Save(ctx)
+	return client.User.Create().SetTenantID(tenantID).SetName(name).SetPassword(password).SetEmail(email).SetStatus(1).Save(ctx)
 }
 
 func ensureMenu(ctx context.Context, client *gen.Client, name, path string, parentID uint32) (*gen.Menu, error) {
@@ -141,10 +150,10 @@ func ensureMenu(ctx context.Context, client *gen.Client, name, path string, pare
 	return builder.Save(ctx)
 }
 
-func ensureRole(ctx context.Context, client *gen.Client, domainID uint32, name string, menuIDs []uint32) error {
-	item, err := client.Role.Query().Where(role.DomainIDEQ(domainID), role.Name(name)).Only(ctx)
+func ensureRole(ctx context.Context, client *gen.Client, tenantID uint32, name string, menuIDs []uint32) error {
+	item, err := client.Role.Query().Where(role.TenantIDEQ(tenantID), role.Name(name)).Only(ctx)
 	if gen.IsNotFound(err) {
-		_, err = client.Role.Create().SetDomainID(domainID).SetName(name).SetStatus(1).AddMenuIDs(menuIDs...).Save(ctx)
+		_, err = client.Role.Create().SetTenantID(tenantID).SetName(name).SetStatus(1).AddMenuIDs(menuIDs...).Save(ctx)
 		return err
 	}
 	if err != nil {
@@ -154,34 +163,34 @@ func ensureRole(ctx context.Context, client *gen.Client, domainID uint32, name s
 	return err
 }
 
-func ensurePost(ctx context.Context, client *gen.Client, domainID uint32, name string) error {
-	exists, err := client.Post.Query().Where(post.DomainIDEQ(domainID), post.Name(name)).Exist(ctx)
+func ensurePost(ctx context.Context, client *gen.Client, tenantID uint32, name string) error {
+	exists, err := client.Post.Query().Where(post.TenantIDEQ(tenantID), post.Name(name)).Exist(ctx)
 	if err != nil || exists {
 		return err
 	}
-	_, err = client.Post.Create().SetDomainID(domainID).SetName(name).SetStatus(1).SetSort(10).SetRemark("mock data").Save(ctx)
+	_, err = client.Post.Create().SetTenantID(tenantID).SetName(name).SetStatus(1).SetSort(10).SetRemark("mock data").Save(ctx)
 	return err
 }
 
-func ensureDept(ctx context.Context, client *gen.Client, domainID uint32, name string, parentID, leaderID uint32) (*gen.Dept, error) {
-	item, err := client.Dept.Query().Where(dept.DomainIDEQ(domainID), dept.Name(name)).Only(ctx)
+func ensureDept(ctx context.Context, client *gen.Client, tenantID uint32, name string, parentID, leaderID uint32) (*gen.Dept, error) {
+	item, err := client.Dept.Query().Where(dept.TenantIDEQ(tenantID), dept.Name(name)).Only(ctx)
 	if err == nil {
 		return item, nil
 	}
 	if !gen.IsNotFound(err) {
 		return nil, err
 	}
-	builder := client.Dept.Create().SetDomainID(domainID).SetName(name).SetStatus(1).SetLeaderID(leaderID)
+	builder := client.Dept.Create().SetTenantID(tenantID).SetName(name).SetStatus(1).SetLeaderID(leaderID)
 	if parentID > 0 {
 		builder.SetParentID(parentID).SetAncestors([]int{int(parentID)})
 	}
 	return builder.Save(ctx)
 }
 
-func ensureProject(ctx context.Context, client *gen.Client, domainID uint32, name, code string, ownerID uint32, memberIDs []uint32) error {
-	item, err := client.Project.Query().Where(project.DomainIDEQ(domainID), project.Name(name)).Only(ctx)
+func ensureProject(ctx context.Context, client *gen.Client, tenantID uint32, name, code string, ownerID uint32, memberIDs []uint32) error {
+	item, err := client.Project.Query().Where(project.TenantIDEQ(tenantID), project.Name(name)).Only(ctx)
 	if gen.IsNotFound(err) {
-		_, err = client.Project.Create().SetDomainID(domainID).SetName(name).SetCode(code).SetOwnerID(ownerID).SetStatus(1).SetDescription("mock data").AddMemberIDs(memberIDs...).Save(ctx)
+		_, err = client.Project.Create().SetTenantID(tenantID).SetName(name).SetCode(code).SetOwnerID(ownerID).SetStatus(1).SetDescription("mock data").AddMemberIDs(memberIDs...).Save(ctx)
 		return err
 	}
 	if err != nil {
@@ -194,26 +203,52 @@ func ensureProject(ctx context.Context, client *gen.Client, domainID uint32, nam
 func verify(ctx context.Context, client *gen.Client) error {
 	checks := []struct {
 		name  string
-		count int
+		count func(context.Context) (int, error)
 		min   int
 	}{
-		{"domain 1 users", client.User.Query().Where(user.DomainIDEQ(1)).CountX(ctx), 2},
-		{"domain 2 users", client.User.Query().Where(user.DomainIDEQ(2)).CountX(ctx), 1},
-		{"menus", client.Menu.Query().Where(menu.NameHasPrefix("mock_")).CountX(ctx), 3},
-		{"domain 1 roles", client.Role.Query().Where(role.DomainIDEQ(1)).CountX(ctx), 2},
-		{"domain 2 roles", client.Role.Query().Where(role.DomainIDEQ(2)).CountX(ctx), 1},
-		{"domain 1 posts", client.Post.Query().Where(post.DomainIDEQ(1)).CountX(ctx), 2},
-		{"domain 2 posts", client.Post.Query().Where(post.DomainIDEQ(2)).CountX(ctx), 1},
-		{"domain 1 departments", client.Dept.Query().Where(dept.DomainIDEQ(1)).CountX(ctx), 2},
-		{"domain 2 departments", client.Dept.Query().Where(dept.DomainIDEQ(2)).CountX(ctx), 1},
-		{"domain 1 projects", client.Project.Query().Where(project.DomainIDEQ(1)).CountX(ctx), 1},
-		{"domain 2 projects", client.Project.Query().Where(project.DomainIDEQ(2)).CountX(ctx), 1},
+		{"tenant 1 users", func(ctx context.Context) (int, error) {
+			return client.User.Query().Where(user.TenantIDEQ(1)).Count(ctx)
+		}, 2},
+		{"tenant 2 users", func(ctx context.Context) (int, error) {
+			return client.User.Query().Where(user.TenantIDEQ(2)).Count(ctx)
+		}, 1},
+		{"menus", func(ctx context.Context) (int, error) {
+			return client.Menu.Query().Where(menu.NameHasPrefix("mock_")).Count(ctx)
+		}, 3},
+		{"tenant 1 roles", func(ctx context.Context) (int, error) {
+			return client.Role.Query().Where(role.TenantIDEQ(1)).Count(ctx)
+		}, 2},
+		{"tenant 2 roles", func(ctx context.Context) (int, error) {
+			return client.Role.Query().Where(role.TenantIDEQ(2)).Count(ctx)
+		}, 1},
+		{"tenant 1 posts", func(ctx context.Context) (int, error) {
+			return client.Post.Query().Where(post.TenantIDEQ(1)).Count(ctx)
+		}, 2},
+		{"tenant 2 posts", func(ctx context.Context) (int, error) {
+			return client.Post.Query().Where(post.TenantIDEQ(2)).Count(ctx)
+		}, 1},
+		{"tenant 1 departments", func(ctx context.Context) (int, error) {
+			return client.Dept.Query().Where(dept.TenantIDEQ(1)).Count(ctx)
+		}, 2},
+		{"tenant 2 departments", func(ctx context.Context) (int, error) {
+			return client.Dept.Query().Where(dept.TenantIDEQ(2)).Count(ctx)
+		}, 1},
+		{"tenant 1 projects", func(ctx context.Context) (int, error) {
+			return client.Project.Query().Where(project.TenantIDEQ(1)).Count(ctx)
+		}, 1},
+		{"tenant 2 projects", func(ctx context.Context) (int, error) {
+			return client.Project.Query().Where(project.TenantIDEQ(2)).Count(ctx)
+		}, 1},
 	}
 	for _, check := range checks {
-		if check.count < check.min {
-			return fmt.Errorf("%s count=%d, want >=%d", check.name, check.count, check.min)
+		count, err := check.count(ctx)
+		if err != nil {
+			return fmt.Errorf("checking %s: %w", check.name, err)
 		}
-		fmt.Printf("verified %-22s count=%d\n", check.name, check.count)
+		if count < check.min {
+			return fmt.Errorf("%s count=%d, want >=%d", check.name, count, check.min)
+		}
+		fmt.Printf("verified %-22s count=%d\n", check.name, count)
 	}
 	return nil
 }

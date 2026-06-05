@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -19,9 +20,9 @@ type MenuRepo interface {
 	Save(context.Context, *pbCore.Menu) (*pbCore.Menu, error)
 	Update(context.Context, *pbCore.Menu) (*pbCore.Menu, error)
 	FindByID(context.Context, uint32) (*pbCore.Menu, error)
-	CountMenus(context.Context, ...ListOption) (int32, error)
+	CountMenus(context.Context, ...listing.Option) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Menu, error)
-	ListMenus(context.Context, ...ListOption) ([]*pbCore.Menu, error) // 新增的方法用于分页查询
+	ListMenus(context.Context, ...listing.Option) ([]*pbCore.Menu, error) // 新增的方法用于分页查询
 	Delete(context.Context, uint32) error
 	ExistByName(context.Context, *pbCore.ExistMenuByNameRequest) (bool, error)
 	ExistByPath(context.Context, *pbCore.ExistMenuByPathRequest) (bool, error)
@@ -71,7 +72,7 @@ func (uc *MenuUsecase) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu
 // CountMenus 处理菜单条件查询聚合请求
 // 参数：ctx 上下文，opts 分页选项
 // 返回值：菜单数量，错误信息
-func (uc *MenuUsecase) CountMenus(ctx context.Context, opts ...ListOption) (int32, error) {
+func (uc *MenuUsecase) CountMenus(ctx context.Context, opts ...listing.Option) (int32, error) {
 	resp, err := uc.repo.CountMenus(ctx, opts...)
 	if err != nil {
 		return 0, err
@@ -89,7 +90,7 @@ func (uc *MenuUsecase) ListSimple(ctx context.Context, pageNum, pageSize int64) 
 // ListMenu 处理获取菜单分页列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：菜单列表响应，错误信息
-func (uc *MenuUsecase) ListMenus(ctx context.Context, opts ...ListOption) ([]*pbCore.Menu, error) {
+func (uc *MenuUsecase) ListMenus(ctx context.Context, opts ...listing.Option) ([]*pbCore.Menu, error) {
 	return uc.repo.ListMenus(ctx, opts...)
 }
 

@@ -146,59 +146,52 @@ func NewLoginAttemptGuard(rdb *redis.Client) (loginattempt.Guard, error) {
 }
 
 // NewSnowflake 生成雪花算法id
-func NewSnowflake(logger log.Logger) *snowflake.Node {
+func NewSnowflake(logger log.Logger) (*snowflake.Node, error) {
 	l := log.NewHelper(log.With(logger, "module", "snowflake/data/initialize"))
 	sf, err := snowflake.NewNode(1)
 	if err != nil {
-		l.Fatal("snowflake no init")
+		return nil, fmt.Errorf("creating snowflake node: %w", err)
 	}
 	l.Infof("init snowflake ID：%s", sf.Generate())
-	return sf
+	return sf, nil
 }
 
 // NewRedisClient 创建Redis客户端
-func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
+func NewRedisClient(cfg *conf.Data, logger log.Logger) (*redis.Client, error) {
 	l := log.NewHelper(log.With(logger, "module", "redis/data/initialize"))
 	if cfg == nil || cfg.Redis == nil {
-		l.Fatalf("redis config is required")
-		return nil
+		return nil, fmt.Errorf("redis config is required")
 	}
-	if rdb = redis.NewClient(&redis.Options{
+	rdb := redis.NewClient(&redis.Options{
 		Addr:         cfg.Redis.GetAddr(),
 		Password:     cfg.Redis.GetPassword(),
 		DB:           int(cfg.Redis.GetDb()),
 		DialTimeout:  configDuration(cfg.Redis.GetDialTimeout(), time.Second),
 		WriteTimeout: configDuration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
 		ReadTimeout:  configDuration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
-	}); rdb == nil {
-		l.Fatalf("failed opening connection to redis")
-		return nil
-	}
+	})
 
 	// open tracing instrumentation.
 	if cfg.Redis.GetEnableTracing() {
 		if err := redisotel.InstrumentTracing(rdb); err != nil {
-			l.Fatalf("failed open tracing: %s", err.Error())
-			panic(err)
+			return nil, fmt.Errorf("opening redis tracing: %w", err)
 		}
 	}
 
 	// open metrics instrumentation.
 	if cfg.Redis.GetEnableMetrics() {
 		if err := redisotel.InstrumentMetrics(rdb); err != nil {
-			l.Fatalf("failed open metrics: %s", err.Error())
-			panic(err)
+			return nil, fmt.Errorf("opening redis metrics: %w", err)
 		}
 	}
-	return rdb
+	l.Infof("initialized redis client: addr=%s db=%d", cfg.Redis.GetAddr(), cfg.Redis.GetDb())
+	return rdb, nil
 }
 
 // NewAuthenticator 创建认证器
-func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) authnEngine.Authenticator {
-	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
+func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) (authnEngine.Authenticator, error) {
 	if c == nil || c.Http == nil || c.Http.Middleware == nil || c.Http.Middleware.Auth == nil {
-		l.Fatalf("http auth config is required")
-		return nil
+		return nil, fmt.Errorf("http auth config is required")
 	}
 	expires := configDuration(c.Http.Middleware.Auth.ExpiresTime, 7*24*time.Hour)
 	// 令牌过期时间默认 7天
@@ -218,10 +211,9 @@ func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.Auth
 		authnEngine.WithUserFactory(authSecurity.NewSecurityUser),
 	)
 	if err != nil {
-		l.Fatalf("failed creating authentincator: %s", err.Error())
-		panic(err)
+		return nil, fmt.Errorf("creating authenticator: %w", err)
 	}
-	return authenticator
+	return authenticator, nil
 }
 
 func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duration {
@@ -236,8 +228,7 @@ func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duratio
 }
 
 // NewAuthorizer 创建权鉴器
-func NewAuthorizer(cfg *conf.Data, logger log.Logger) authzEngine.Authorizer {
-	l := log.NewHelper(log.With(logger, "module", "authorizer/auth/initialize"))
+func NewAuthorizer(cfg *conf.Data, logger log.Logger) (authzEngine.Authorizer, error) {
 	// adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
 	// if err != nil {
 	// 	l.Fatalf("failed creating adapter: %s", err.Error())
@@ -248,6 +239,9 @@ func NewAuthorizer(cfg *conf.Data, logger log.Logger) authzEngine.Authorizer {
 	// 	log.Fatalf("failed casbin model connection %v", err)
 	// }
 
+	if cfg == nil || cfg.Database == nil {
+		return nil, fmt.Errorf("database config is required")
+	}
 	provider := authzCasbin.NewProvider()
 	authorizer, err := provider.NewAuthorizer(
 		context.Background(),
@@ -256,8 +250,7 @@ func NewAuthorizer(cfg *conf.Data, logger log.Logger) authzEngine.Authorizer {
 	)
 
 	if err != nil {
-		l.Fatalf("failed creating authorizer: %s", err.Error())
-		panic(err)
+		return nil, fmt.Errorf("creating authorizer: %w", err)
 	}
-	return authorizer
+	return authorizer, nil
 }

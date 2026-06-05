@@ -14,6 +14,7 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/post"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -59,7 +60,7 @@ func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, erro
 	}
 	r.Log.Infof("保存岗位: %s", g.GetName())
 	entPost := r.convertEnt(g)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, erro
 	}
 
 	res, err := r.Data.DB(ctx).Post.Create().
-		SetDomainID(domainID).
+		SetTenantID(tenantID).
 		SetName(*entPost.Name).
 		SetNillableSort(entPost.Sort).
 		SetNillableStatus(entPost.Status).
@@ -92,11 +93,11 @@ func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, erro
 }
 
 func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	entPost, err := r.Data.DB(ctx).Post.Query().Where(post.Name(name), post.DomainIDEQ(domainID)).Select(post.FieldID).First(ctx)
+	entPost, err := r.Data.DB(ctx).Post.Query().Where(post.Name(name), post.TenantIDEQ(tenantID)).Select(post.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -111,7 +112,7 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 		return nil, pb.ErrorPostInvalidId("岗位ID和名称不能为空")
 	}
 	entPost := r.convertEnt(g)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +125,7 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 	}
 
 	res, err := r.Data.DB(ctx).Post.UpdateOneID(g.GetId()).
-		Where(post.DomainIDEQ(domainID)).
+		Where(post.TenantIDEQ(tenantID)).
 		SetName(*entPost.Name).
 		SetNillableSort(entPost.Sort).
 		SetNillableStatus(entPost.Status).
@@ -140,11 +141,11 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 }
 
 func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).Post.Query().Where(post.IDEQ(id), post.DomainIDEQ(domainID)).Only(ctx)
+	res, err := r.Data.DB(ctx).Post.Query().Where(post.IDEQ(id), post.TenantIDEQ(tenantID)).Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, pb.ErrorPostNotFound("岗位不存在")
@@ -155,11 +156,11 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 }
 
 func (r *postRepo) Delete(ctx context.Context, id uint32) error {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return err
 	}
-	err = r.Data.DB(ctx).Post.UpdateOneID(id).Where(post.DomainIDEQ(domainID)).SetDeletedAt(time.Now()).Exec(ctx)
+	err = r.Data.DB(ctx).Post.UpdateOneID(id).Where(post.TenantIDEQ(tenantID)).SetDeletedAt(time.Now()).Exec(ctx)
 	if gen.IsNotFound(err) {
 		return pb.ErrorPostNotFound("岗位不存在")
 	}
@@ -167,29 +168,29 @@ func (r *postRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).Post.Query().Where(post.NameContains(name), post.DomainIDEQ(domainID)).All(ctx)
+	res, err := r.Data.DB(ctx).Post.Query().Where(post.NameContains(name), post.TenantIDEQ(tenantID)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-func (r *postRepo) CountPosts(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *postRepo) CountPosts(ctx context.Context, opts ...listing.Option) (int32, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	o := biz.ListOptions{}
+	o := listing.Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID).
-		Where(post.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(post.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -198,13 +199,13 @@ func (r *postRepo) CountPosts(ctx context.Context, opts ...biz.ListOption) (int3
 }
 
 func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID, post.FieldName).
-		Where(post.DomainIDEQ(domainID)).
+		Where(post.TenantIDEQ(tenantID)).
 		Order(gen.Desc(post.FieldID)).All(ctx)
 	if err != nil {
 		return nil, err
@@ -212,18 +213,18 @@ func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Post, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *postRepo) ListPosts(ctx context.Context, opts ...listing.Option) ([]*pbCore.Post, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	o := biz.ListOptions{Limit: 20}
+	o := listing.Options{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	pos, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID, post.FieldName, post.FieldSort, post.FieldStatus, post.FieldRemark, post.FieldCreatedAt, post.FieldUpdatedAt).
-		Where(post.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(post.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
@@ -235,17 +236,17 @@ func (r *postRepo) ListPosts(ctx context.Context, opts ...biz.ListOption) ([]*pb
 
 func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
 	r.Log.Infof("查询岗位列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	count, err := r.Data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DomainIDEQ(domainID), post.DeletedAtIsNil()).Count(ctx)
+	count, err := r.Data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.TenantIDEQ(tenantID), post.DeletedAtIsNil()).Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Post.Query().
 		Select(post.FieldID, post.FieldName, post.FieldSort, post.FieldStatus, post.FieldRemark, post.FieldCreatedAt, post.FieldUpdatedAt).
-		Where(post.DomainIDEQ(domainID)).
+		Where(post.TenantIDEQ(tenantID)).
 		Limit(int(req.GetPageSize())).
 		Order(gen.Desc(post.FieldID)).
 		All(ctx)

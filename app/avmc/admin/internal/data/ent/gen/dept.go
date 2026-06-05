@@ -25,8 +25,8 @@ type Dept struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 状态：0=未知 1=启用 2=禁用
 	Status *int32 `json:"status,omitempty"`
-	// 域ID
-	DomainID uint32 `json:"domain_id,omitempty"`
+	// 租户ID
+	TenantID uint32 `json:"tenant_id,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 名称
@@ -85,7 +85,7 @@ func (*Dept) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case dept.FieldAncestors:
 			values[i] = new([]byte)
-		case dept.FieldID, dept.FieldStatus, dept.FieldDomainID, dept.FieldParentID, dept.FieldLeaderID, dept.FieldSort:
+		case dept.FieldID, dept.FieldStatus, dept.FieldTenantID, dept.FieldParentID, dept.FieldLeaderID, dept.FieldSort:
 			values[i] = new(sql.NullInt64)
 		case dept.FieldName, dept.FieldRemark:
 			values[i] = new(sql.NullString)
@@ -131,11 +131,11 @@ func (_m *Dept) assignValues(columns []string, values []any) error {
 				_m.Status = new(int32)
 				*_m.Status = int32(value.Int64)
 			}
-		case dept.FieldDomainID:
+		case dept.FieldTenantID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field domain_id", values[i])
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
-				_m.DomainID = uint32(value.Int64)
+				_m.TenantID = uint32(value.Int64)
 			}
 		case dept.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -244,8 +244,8 @@ func (_m *Dept) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("domain_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.DomainID))
+	builder.WriteString("tenant_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
 	builder.WriteString(", ")
 	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")

@@ -38,10 +38,10 @@ func createJWTAuthenticator() authn.Authenticator {
 func createCasbinAuthorizer() authz.Authorizer {
 	mod := `
 	[request_definition]
-	r = sub, obj, act, dom
+	r = sub, obj, act, tenant
 	
 	[policy_definition]
-	p = sub, obj, act, dom
+	p = sub, obj, act, tenant
 	
 	[role_definition]
 	g = _, _, _
@@ -50,7 +50,7 @@ func createCasbinAuthorizer() authz.Authorizer {
 	e = some(where (p.eft == allow))
 	
 	[matchers]
-	m = g(r.sub, p.sub, r.dom) && r.obj == p.obj && r.act == p.act && r.dom == p.dom
+	m = g(r.sub, p.sub, r.tenant) && r.obj == p.obj && r.act == p.act && r.tenant == p.tenant
 	`
 	// 配置Casbin授权选项
 	options := []authz.Option{
@@ -68,9 +68,9 @@ func createCasbinAuthorizer() authz.Authorizer {
 
 	// 添加策略
 	ctx := context.Background()
-	authorizer.AddPolicy(ctx, authz.Policy{Subject: "user1", Object: "/api/resource", Action: "GET", Domain: "example-service", Effect: "allow"})
+	authorizer.AddPolicy(ctx, authz.Policy{Subject: "user1", Object: "/api/resource", Action: "GET", Tenant: "example-service", Effect: "allow"})
 	authorizer.AddRoleForUser(ctx, "user2", "admin", "example-service")
-	authorizer.AddPolicy(ctx, authz.Policy{Subject: "admin", Object: "/api/admin", Action: "*", Domain: "example-service", Effect: "allow"})
+	authorizer.AddPolicy(ctx, authz.Policy{Subject: "admin", Object: "/api/admin", Action: "*", Tenant: "example-service", Effect: "allow"})
 
 	return authorizer
 }
@@ -211,22 +211,22 @@ func configureHTTPServerWithCustomExtractors() *http.Server {
 	}
 
 	// 自定义HTTP授权信息提取器
-	customAuthzExtractor := func(ctx context.Context, req *http.Request) (authz.Subject, authz.Object, authz.Action, authz.Domain, error) {
-		// 从认证声明中提取主体和域
+	customAuthzExtractor := func(ctx context.Context, req *http.Request) (authz.Subject, authz.Object, authz.Action, authz.Tenant, error) {
+		// 从认证声明中提取主体和租户
 		claims, ok := authn.AuthClaimsFromContext(ctx)
 		if !ok || claims == nil {
 			return "", "", "", "", authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid or missing auth claims", nil)
 		}
 
-		// 提取主体和域
+		// 提取主体和租户
 		sub := authz.Subject(claims.GetSubject())
-		dom := authz.Domain(claims.GetIssuer())
+		tenant := authz.Tenant(claims.GetIssuer())
 
 		// 从自定义头中提取对象和操作
 		obj := authz.Object(req.Header.Get("X-Resource"))
 		act := authz.Action(req.Header.Get("X-Action"))
 
-		return sub, obj, act, dom, nil
+		return sub, obj, act, tenant, nil
 	}
 
 	// 创建HTTP服务器

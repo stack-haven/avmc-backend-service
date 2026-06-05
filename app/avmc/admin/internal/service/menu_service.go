@@ -6,12 +6,11 @@ import (
 	pb "backend-service/api/avmc/admin/v1"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
+	"backend-service/pkg/aip/listing"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"go.einride.tech/aip/fieldmask"
 	"go.einride.tech/aip/filtering"
-	"go.einride.tech/aip/ordering"
-	"go.einride.tech/aip/pagination"
 )
 
 // MenuServiceService 菜单服务结构体
@@ -37,33 +36,18 @@ func NewMenuServiceService(muc *biz.MenuUsecase, logger log.Logger) *MenuService
 // 返回值：菜单列表响应，错误信息
 func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenusRequest) (*pbCore.ListMenusResponse, error) {
 	s.log.Infof("查询菜单列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
-	pageSize := biz.NormalizePageSize(req.GetPageSize())
-	req.PageSize = int32(pageSize)
-
-	declarations, err := filtering.NewDeclarations(
-		filtering.DeclareStandardFunctions(),
+	params, err := listing.ParseParams(
+		req,
 		filtering.DeclareIdent("name", filtering.TypeString),
-		filtering.DeclareIdent("email", filtering.TypeString),
-		filtering.DeclareIdent("phone", filtering.TypeString),
+		filtering.DeclareIdent("path", filtering.TypeString),
+		filtering.DeclareIdent("status", filtering.TypeInt),
 		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
 	)
 	if err != nil {
 		return nil, err
 	}
-	filter, err := filtering.ParseFilter(req, declarations)
-	if err != nil {
-		return nil, err
-	}
-
-	pageToken, err := pagination.ParsePageToken(req)
-	if err != nil {
-		return nil, err
-	}
-	orderBy, err := ordering.ParseOrderBy(req)
-	if err != nil {
-		return nil, err
-	}
-	count, err := s.muc.CountMenus(ctx, biz.ListFilter(filter))
+	req.PageSize = int32(params.PageSize)
+	count, err := s.muc.CountMenus(ctx, listing.FilterOption(params.Filter))
 	if err != nil {
 		return nil, err
 	}
@@ -71,16 +55,16 @@ func (s *MenuServiceService) ListMenus(ctx context.Context, req *pbCore.ListMenu
 		Total: count,
 	}
 	resp.Items, err = s.muc.ListMenus(ctx,
-		biz.ListFilter(filter),
-		biz.ListOrderBy(orderBy),
-		biz.ListLimit(pageSize),
-		biz.ListOffset(int(pageToken.Offset)),
+		listing.FilterOption(params.Filter),
+		listing.OrderByOption(params.OrderBy),
+		listing.LimitOption(params.PageSize),
+		listing.OffsetOption(int(params.PageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= pageSize {
-		resp.NextPageToken = pageToken.Next(req).String()
+	if len(resp.Items) >= params.PageSize {
+		resp.NextPageToken = params.PageToken.Next(req).String()
 	}
 	return &resp, nil
 }

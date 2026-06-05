@@ -25,15 +25,28 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	client := data.NewEntClient(confData, logger)
-	redisClient := data.NewRedisClient(confData, logger)
-	node := data.NewSnowflake(logger)
+	client, err := data.NewEntClient(confData, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	redisClient, err := data.NewRedisClient(confData, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	node, err := data.NewSnowflake(logger)
+	if err != nil {
+		return nil, nil, err
+	}
 	dataData, cleanup, err := data.NewData(confData, client, redisClient, node, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 	authSecurity := auth.NewAuthSecurity(logger)
-	authenticator := data.NewAuthenticator(confServer, logger, authSecurity)
+	authenticator, err := data.NewAuthenticator(confServer, logger, authSecurity)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	authToken := auth.NewAuthToken(redisClient, logger, authenticator)
 	guard, err := data.NewLoginAttemptGuard(redisClient)
 	if err != nil {
@@ -61,7 +74,11 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	projectRepo := data.NewProjectRepo(dataData, logger)
 	projectUsecase := biz.NewProjectUsecase(projectRepo, logger)
 	projectServiceService := service.NewProjectServiceService(projectUsecase, logger)
-	authorizer := data.NewAuthorizer(confData, logger)
+	authorizer, err := data.NewAuthorizer(confData, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	grpcServer := server.NewGRPCServer(confServer, authServiceService, userServiceService, deptServiceService, menuServiceService, roleServiceService, postServiceService, projectServiceService, authToken, authorizer, logger)
 	checker := data.NewHealthChecker(dataData)
 	httpServer := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, authServiceService, userServiceService, deptServiceService, menuServiceService, roleServiceService, postServiceService, projectServiceService)

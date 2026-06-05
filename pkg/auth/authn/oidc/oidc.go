@@ -431,10 +431,10 @@ func (u *OIDCUser) GetEmail() string {
 	return u.email
 }
 
-// GetDomain 获取用户域
-func (u *OIDCUser) GetDomain() string {
-	// 从claims中获取domain，如果不存在则返回空字符串
-	return getStringClaim(u.claims, "domain", "")
+// GetTenant 获取用户租户
+func (u *OIDCUser) GetTenant() string {
+	// 从claims中获取tenant，如果不存在则返回空字符串
+	return getStringClaim(u.claims, "tenant", "")
 }
 
 // GetObject 获取对象标识

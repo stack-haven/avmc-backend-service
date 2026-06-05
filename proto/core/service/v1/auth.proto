@@ -54,7 +54,7 @@ message RegisterRequest {
   }
   // 请求体
   Auth auth = 1 [(validate.rules).message = {required: true}];
-  string domain = 2 [(validate.rules).string = {
+  string tenant = 2 [(validate.rules).string = {
     min_len: 1
     max_len: 20
   }];

@@ -88,7 +88,7 @@ func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			// 从上下文中提取授权信息
-			sub, obj, act, dom, ok := authz.ExtractAuthzInfo(ctx)
+			sub, obj, act, tenant, ok := authz.ExtractAuthzInfo(ctx)
 			if !ok {
 				// 如果上下文中没有授权信息，尝试从请求中提取
 				if tr, ok := transport.FromServerContext(ctx); ok {
@@ -118,7 +118,7 @@ func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
 					sub = authz.Subject(claims.GetSubject())
 					obj = authz.Object(path)
 					act = authz.Action(method)
-					dom = authz.Domain(claims.GetDomain())
+					tenant = authz.Tenant(claims.GetTenant())
 				}
 			}
 
@@ -126,7 +126,7 @@ func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
 			if sub == "" || obj == "" || act == "" {
 				return nil, ErrPermissionDenied
 			}
-			allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+			allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 			if err != nil {
 				// 处理授权错误
 				var authzErr *authz.AuthzError
@@ -197,7 +197,7 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 			ctx = authn.ContextWithAuthUser(ctx, securityUser)
 
 			// 从请求中提取授权信息
-			sub, obj, act, dom, ok := authz.ExtractAuthzInfo(ctx)
+			sub, obj, act, tenant, ok := authz.ExtractAuthzInfo(ctx)
 			if !ok {
 				// 如果上下文中没有授权信息，尝试从请求中提取
 				if tr, ok := transport.FromServerContext(ctx); ok {
@@ -221,7 +221,7 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 					sub = authz.Subject(claims.GetSubject())
 					obj = authz.Object(path)
 					act = authz.Action(method)
-					dom = authz.Domain(claims.GetDomain())
+					tenant = authz.Tenant(claims.GetTenant())
 				}
 			}
 
@@ -229,7 +229,7 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 			if sub == "" || obj == "" || act == "" {
 				return nil, ErrPermissionDenied
 			}
-			allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+			allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 			if err != nil {
 				// 处理授权错误
 				var authzErr *authz.AuthzError
@@ -309,7 +309,7 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			// 从上下文中提取授权信息
-			sub, obj, act, dom, ok := authz.ExtractAuthzInfo(ctx)
+			sub, obj, act, tenant, ok := authz.ExtractAuthzInfo(ctx)
 			if !ok {
 				// 如果上下文中没有授权信息，尝试从请求中提取
 				if tr, ok := transport.FromServerContext(ctx); ok {
@@ -339,7 +339,7 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 					sub = authz.Subject(claims.GetSubject())
 					obj = authz.Object(path)
 					act = authz.Action(method)
-					dom = authz.Domain(claims.GetDomain())
+					tenant = authz.Tenant(claims.GetTenant())
 				}
 			}
 
@@ -348,8 +348,8 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 			}
 
 			// 检查用户角色
-			if sub != "" && dom != "" {
-				roles, err := authorizer.GetRolesForUser(ctx, sub, dom)
+			if sub != "" && tenant != "" {
+				roles, err := authorizer.GetRolesForUser(ctx, sub, tenant)
 				if err == nil {
 					for _, role := range roles {
 						for _, skipRole := range skipRoles {
@@ -363,7 +363,7 @@ func SkipAuthRoleMiddleware(authorizer authz.Authorizer, skipRoles []string) mid
 			}
 
 			// 执行授权检查
-			allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+			allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 			if err != nil {
 				// 处理授权错误
 				var authzErr *authz.AuthzError

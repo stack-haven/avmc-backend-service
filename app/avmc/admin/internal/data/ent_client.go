@@ -3,6 +3,7 @@ package data
 import (
 	"backend-service/app/avmc/admin/internal/conf"
 	"context"
+	"fmt"
 	"time"
 
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
@@ -21,12 +22,14 @@ import (
 )
 
 // NewEntClient .
-func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
+func NewEntClient(cfg *conf.Data, logger log.Logger) (*gen.Client, error) {
 	l := log.NewHelper(log.With(logger, "module", "ent/data/initialize"))
+	if cfg == nil || cfg.Database == nil {
+		return nil, fmt.Errorf("database config is required")
+	}
 	drv, err := sql.Open(cfg.Database.Driver, cfg.Database.Source)
 	if err != nil {
-		l.Fatalf("failed opening connection to %s: %v", cfg.Database.Driver, err)
-		return nil
+		return nil, fmt.Errorf("opening connection to %s: %w", cfg.Database.Driver, err)
 	}
 	{
 		db := drv.DB()
@@ -48,6 +51,7 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 	if cfg.Database.Debug {
 		client = client.Debug()
 	}
+	l.Infof("initialized ent client: driver=%s", cfg.Database.Driver)
 
 	// client.Use()
 	client.Intercept(
@@ -61,12 +65,15 @@ func NewEntClient(cfg *conf.Data, logger log.Logger) *gen.Client {
 		}),
 	)
 
-	return client
+	return client, nil
 }
 
 func RunSchemaMigration(ctx context.Context, cfg *conf.Data, logger log.Logger) error {
 	l := log.NewHelper(log.With(logger, "module", "ent/schema/migrate"))
-	client := NewEntClient(cfg, logger)
+	client, err := NewEntClient(cfg, logger)
+	if err != nil {
+		return err
+	}
 	defer func() {
 		if err := client.Close(); err != nil {
 			l.Errorf("failed closing ent client: %v", err)
@@ -75,19 +82,23 @@ func RunSchemaMigration(ctx context.Context, cfg *conf.Data, logger log.Logger) 
 	return client.Schema.Create(
 		ctx,
 		migrate.WithForeignKeys(false),
-		// Migrations are only run through cmd/migrate, so replacing obsolete
-		// global unique indexes with tenant-scoped indexes is explicit.
+		// Migrations are explicit for Admin while the product is unreleased, so
+		// obsolete pre-tenant columns/indexes can be removed instead of kept.
 		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
 	)
 }
 
 // NewEntData .
-func NewEntData(cfg *conf.Data, logger log.Logger) *gen.Client {
+func NewEntData(cfg *conf.Data, logger log.Logger) (*gen.Client, error) {
+	if cfg == nil || cfg.Database == nil {
+		return nil, fmt.Errorf("database config is required")
+	}
 	db, err := gen.Open(cfg.Database.Driver, cfg.Database.Source)
 	if err != nil {
-		log.Fatalf("failed opening connection to database: %v", err)
+		return nil, fmt.Errorf("opening connection to database: %w", err)
 	}
-	return db
+	return db, nil
 }
 
 func databaseMaxIdleConnections(cfg *conf.Data) int {

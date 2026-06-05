@@ -41,7 +41,7 @@ type securityUser struct {
 	// 方法
 	action string
 	// 域/租户
-	domain string
+	tenant string
 }
 
 // GetID returns the security Name.
@@ -71,7 +71,7 @@ func (su *securityUser) ParseFromContext(ctx context.Context) error {
 	if su.subject == "" {
 		return errors.New("subject is empty")
 	}
-	su.domain = su.options.authClaims.GetDomain()
+	su.tenant = su.options.authClaims.GetTenant()
 	return nil
 }
 
@@ -90,9 +90,9 @@ func (su *securityUser) GetSubject() string {
 	return su.subject
 }
 
-// GetDomain returns the domain of the token.
-func (su *securityUser) GetDomain() string {
-	return su.domain
+// GetTenant returns the tenant of the token.
+func (su *securityUser) GetTenant() string {
+	return su.tenant
 }
 
 // GetUserID returns the user id of the token.
@@ -100,9 +100,9 @@ func (su *securityUser) GetUserID() uint32 {
 	return convert.StringToUnit32(su.subject)
 }
 
-// GetDomainID returns the domain id of the token.
-func (su *securityUser) GetDomainID() uint32 {
-	return convert.StringToUnit32(su.domain)
+// GetTenantID returns the tenant id of the token.
+func (su *securityUser) GetTenantID() uint32 {
+	return convert.StringToUnit32(su.tenant)
 }
 
 // AuthSecurity 认证安全

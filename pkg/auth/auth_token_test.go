@@ -22,7 +22,7 @@ func TestAuthTokenValidatesOnlyCurrentStoredToken(t *testing.T) {
 	access, refresh, err := token.GenerateToken(ctx, AuthTokenInfo{
 		UserId:   42,
 		Username: "tester",
-		DomainId: 1,
+		TenantID: 1,
 	})
 	if err != nil {
 		t.Fatalf("generate token: %v", err)
@@ -42,7 +42,7 @@ func TestAuthTokenValidatesOnlyCurrentStoredToken(t *testing.T) {
 	replacement, err := token.GenerateAccessToken(ctx, AuthTokenInfo{
 		UserId:   42,
 		Username: "tester",
-		DomainId: 1,
+		TenantID: 1,
 	})
 	if err != nil {
 		t.Fatalf("generate replacement access token: %v", err)
@@ -65,7 +65,7 @@ func TestAuthTokenRemoveRevokesAccessAndRefreshTokens(t *testing.T) {
 	access, refresh, err := token.GenerateToken(ctx, AuthTokenInfo{
 		UserId:   7,
 		Username: "tester",
-		DomainId: 2,
+		TenantID: 2,
 	})
 	if err != nil {
 		t.Fatalf("generate token: %v", err)

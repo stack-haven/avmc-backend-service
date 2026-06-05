@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -14,8 +15,8 @@ type ProjectRepo interface {
 	Update(context.Context, *pbCore.Project) (*pbCore.Project, error)
 	UpdateStatus(context.Context, uint32, int32) error
 	FindByID(context.Context, uint32) (*pbCore.Project, error)
-	CountProjects(context.Context, ...ListOption) (int32, error)
-	ListProjects(context.Context, ...ListOption) ([]*pbCore.Project, error)
+	CountProjects(context.Context, ...listing.Option) (int32, error)
+	ListProjects(context.Context, ...listing.Option) ([]*pbCore.Project, error)
 	Delete(context.Context, uint32) error
 }
 
@@ -63,13 +64,13 @@ func (uc *ProjectUsecase) UpdateStatus(ctx context.Context, id uint32, status in
 }
 
 // CountProjects counts projects by list options.
-func (uc *ProjectUsecase) CountProjects(ctx context.Context, opts ...ListOption) (int32, error) {
+func (uc *ProjectUsecase) CountProjects(ctx context.Context, opts ...listing.Option) (int32, error) {
 	return uc.repo.CountProjects(ctx, opts...)
 }
 
 // ListProjects lists projects by list options.
-func (uc *ProjectUsecase) ListProjects(ctx context.Context, opts ...ListOption) ([]*pbCore.Project, error) {
-	uc.log.WithContext(ctx).Infof("ListProjects: %v", opts)
+func (uc *ProjectUsecase) ListProjects(ctx context.Context, opts ...listing.Option) ([]*pbCore.Project, error) {
+	uc.log.WithContext(ctx).Infof("ListProjects")
 	return uc.repo.ListProjects(ctx, opts...)
 }
 

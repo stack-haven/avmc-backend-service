@@ -15,6 +15,7 @@ import (
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/dept"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -60,7 +61,7 @@ func (r *deptRepo) convertEnt(g *pbCore.Dept) *gen.Dept {
 	}
 }
 
-func (r *deptRepo) resolveAncestors(ctx context.Context, domainID, deptID, parentID uint32) ([]int, error) {
+func (r *deptRepo) resolveAncestors(ctx context.Context, tenantID, deptID, parentID uint32) ([]int, error) {
 	if parentID == 0 {
 		return []int{}, nil
 	}
@@ -68,7 +69,7 @@ func (r *deptRepo) resolveAncestors(ctx context.Context, domainID, deptID, paren
 		return nil, pb.ErrorBadRequest("部门不能以自身作为上级部门")
 	}
 	parent, err := r.Data.DB(ctx).Dept.Query().
-		Where(dept.IDEQ(parentID), dept.DomainIDEQ(domainID)).
+		Where(dept.IDEQ(parentID), dept.TenantIDEQ(tenantID)).
 		Select(dept.FieldID, dept.FieldAncestors).
 		Only(ctx)
 	if err != nil {
@@ -86,12 +87,12 @@ func (r *deptRepo) resolveAncestors(ctx context.Context, domainID, deptID, paren
 	return append(ancestors, int(parent.ID)), nil
 }
 
-func (r *deptRepo) validateLeader(ctx context.Context, domainID, leaderID uint32) error {
+func (r *deptRepo) validateLeader(ctx context.Context, tenantID, leaderID uint32) error {
 	if leaderID == 0 {
 		return nil
 	}
 	exists, err := r.Data.DB(ctx).User.Query().
-		Where(user.IDEQ(leaderID), user.DomainIDEQ(domainID)).
+		Where(user.IDEQ(leaderID), user.TenantIDEQ(tenantID)).
 		Exist(ctx)
 	if err != nil {
 		return err
@@ -108,15 +109,15 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 	}
 	r.Log.Infof("保存部门: %s", g.GetName())
 	entDept := r.convertEnt(g)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ancestors, err := r.resolveAncestors(ctx, domainID, 0, g.GetParentId())
+	ancestors, err := r.resolveAncestors(ctx, tenantID, 0, g.GetParentId())
 	if err != nil {
 		return nil, err
 	}
-	if err := r.validateLeader(ctx, domainID, g.GetLeaderId()); err != nil {
+	if err := r.validateLeader(ctx, tenantID, g.GetLeaderId()); err != nil {
 		return nil, err
 	}
 	entDept.Ancestors = ancestors
@@ -130,7 +131,7 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 	}
 
 	res, err := r.Data.DB(ctx).Dept.Create().
-		SetDomainID(domainID).
+		SetTenantID(tenantID).
 		SetName(*entDept.Name).
 		SetNillableParentID(entDept.ParentID).
 		SetNillableLeaderID(entDept.LeaderID).
@@ -149,11 +150,11 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 }
 
 func (r *deptRepo) GetDeptExistByName(ctx context.Context, name string) (uint32, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	entDept, err := r.Data.DB(ctx).Dept.Query().Where(dept.Name(name), dept.DomainIDEQ(domainID)).Select(dept.FieldID).First(ctx)
+	entDept, err := r.Data.DB(ctx).Dept.Query().Where(dept.Name(name), dept.TenantIDEQ(tenantID)).Select(dept.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return 0, nil
@@ -168,15 +169,15 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 		return nil, pb.ErrorDeptInvalidId("部门ID和名称不能为空")
 	}
 	entDept := r.convertEnt(g)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ancestors, err := r.resolveAncestors(ctx, domainID, g.GetId(), g.GetParentId())
+	ancestors, err := r.resolveAncestors(ctx, tenantID, g.GetId(), g.GetParentId())
 	if err != nil {
 		return nil, err
 	}
-	if err := r.validateLeader(ctx, domainID, g.GetLeaderId()); err != nil {
+	if err := r.validateLeader(ctx, tenantID, g.GetLeaderId()); err != nil {
 		return nil, err
 	}
 	entDept.Ancestors = ancestors
@@ -189,7 +190,7 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 	}
 
 	res, err := r.Data.DB(ctx).Dept.UpdateOneID(g.GetId()).
-		Where(dept.DomainIDEQ(domainID)).
+		Where(dept.TenantIDEQ(tenantID)).
 		SetName(*entDept.Name).
 		SetNillableParentID(entDept.ParentID).
 		SetNillableLeaderID(entDept.LeaderID).
@@ -211,12 +212,12 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 }
 
 func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Dept.Query().
-		Where(dept.IDEQ(id), dept.DomainIDEQ(domainID)).Only(ctx)
+		Where(dept.IDEQ(id), dept.TenantIDEQ(tenantID)).Only(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, pb.ErrorDeptNotFound("部门不存在")
@@ -227,12 +228,12 @@ func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error
 }
 
 func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return err
 	}
 	hasChildren, err := r.Data.DB(ctx).Dept.Query().
-		Where(dept.ParentIDEQ(id), dept.DomainIDEQ(domainID)).
+		Where(dept.ParentIDEQ(id), dept.TenantIDEQ(tenantID)).
 		Exist(ctx)
 	if err != nil {
 		return err
@@ -240,7 +241,7 @@ func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
 	if hasChildren {
 		return pb.ErrorDeptCannotDeleteWithChildren("存在下级部门，无法删除")
 	}
-	err = r.Data.DB(ctx).Dept.UpdateOneID(id).Where(dept.DomainIDEQ(domainID)).SetDeletedAt(time.Now()).Exec(ctx)
+	err = r.Data.DB(ctx).Dept.UpdateOneID(id).Where(dept.TenantIDEQ(tenantID)).SetDeletedAt(time.Now()).Exec(ctx)
 	if gen.IsNotFound(err) {
 		return pb.ErrorDeptNotFound("部门不存在")
 	}
@@ -248,29 +249,29 @@ func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).Dept.Query().Where(dept.NameContains(name), dept.DomainIDEQ(domainID)).All(ctx)
+	res, err := r.Data.DB(ctx).Dept.Query().Where(dept.NameContains(name), dept.TenantIDEQ(tenantID)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-func (r *deptRepo) CountDepts(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *deptRepo) CountDepts(ctx context.Context, opts ...listing.Option) (int32, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	o := biz.ListOptions{}
+	o := listing.Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).Dept.Query().
 		Select(dept.FieldID).
-		Where(dept.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(dept.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -279,13 +280,13 @@ func (r *deptRepo) CountDepts(ctx context.Context, opts ...biz.ListOption) (int3
 }
 
 func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Dept.Query().
 		Select(dept.FieldID, dept.FieldName, dept.FieldParentID, dept.FieldStatus, dept.FieldRemark, dept.FieldLeaderID, dept.FieldSort, dept.FieldAncestors).
-		Where(dept.DomainIDEQ(domainID)).
+		Where(dept.TenantIDEQ(tenantID)).
 		Order(gen.Desc(dept.FieldID)).All(ctx)
 	if err != nil {
 		return nil, err
@@ -293,18 +294,18 @@ func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-func (r *deptRepo) ListDepts(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Dept, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *deptRepo) ListDepts(ctx context.Context, opts ...listing.Option) ([]*pbCore.Dept, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	o := biz.ListOptions{Limit: 20}
+	o := listing.Options{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	pos, err := r.Data.DB(ctx).Dept.Query().
 		Select(dept.FieldID, dept.FieldName, dept.FieldParentID, dept.FieldStatus, dept.FieldRemark, dept.FieldLeaderID, dept.FieldSort, dept.FieldAncestors, dept.FieldCreatedAt, dept.FieldUpdatedAt).
-		Where(dept.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(dept.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)

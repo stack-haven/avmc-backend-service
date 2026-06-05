@@ -18,18 +18,18 @@ func TestSyncSuperAdminAllowsHTTPAndGRPCActions(t *testing.T) {
 	}
 
 	role := authz.Subject("super_admin")
-	domain := authz.Domain("1")
-	if err := SyncSuperAdmin(ctx, authorizer, role, domain, []authz.Subject{"1"}); err != nil {
+	tenant := authz.Tenant("1")
+	if err := SyncSuperAdmin(ctx, authorizer, role, tenant, []authz.Subject{"1"}); err != nil {
 		t.Fatalf("sync policies: %v", err)
 	}
 
-	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationUserServiceListUsers), "GET", domain); err != nil || !ok {
+	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationUserServiceListUsers), "GET", tenant); err != nil || !ok {
 		t.Fatalf("http enforce = %v, %v", ok, err)
 	}
-	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationUserServiceListUsers), "ListUsers", domain); err != nil || !ok {
+	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationUserServiceListUsers), "ListUsers", tenant); err != nil || !ok {
 		t.Fatalf("grpc enforce = %v, %v", ok, err)
 	}
-	if ok, err := authorizer.Enforce(ctx, "2", authz.Object(v1.OperationUserServiceListUsers), "GET", domain); err == nil || ok {
+	if ok, err := authorizer.Enforce(ctx, "2", authz.Object(v1.OperationUserServiceListUsers), "GET", tenant); err == nil || ok {
 		t.Fatalf("unexpected access for user without role: %v, %v", ok, err)
 	}
 }

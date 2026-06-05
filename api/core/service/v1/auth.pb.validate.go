@@ -97,9 +97,9 @@ func (m *RegisterRequest) validate(all bool) error {
 		}
 	}
 
-	if l := utf8.RuneCountInString(m.GetDomain()); l < 1 || l > 20 {
+	if l := utf8.RuneCountInString(m.GetTenant()); l < 1 || l > 20 {
 		err := RegisterRequestValidationError{
-			field:  "Domain",
+			field:  "Tenant",
 			reason: "value length must be between 1 and 20 runes, inclusive",
 		}
 		if !all {

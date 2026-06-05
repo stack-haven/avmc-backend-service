@@ -2,6 +2,7 @@ package biz
 
 import (
 	pbEnum "backend-service/api/common/enum"
+	"backend-service/pkg/aip/listing"
 	"context"
 
 	pbCore "backend-service/api/core/service/v1"
@@ -14,9 +15,9 @@ type RoleRepo interface {
 	Save(context.Context, *pbCore.Role) (*pbCore.Role, error)
 	Update(context.Context, *pbCore.Role) (*pbCore.Role, error)
 	FindByID(context.Context, uint32) (*pbCore.Role, error)
-	CountRoles(context.Context, ...ListOption) (int32, error)
+	CountRoles(context.Context, ...listing.Option) (int32, error)
 	ListAll(context.Context) ([]*pbCore.Role, error)
-	ListRoles(context.Context, ...ListOption) ([]*pbCore.Role, error)
+	ListRoles(context.Context, ...listing.Option) ([]*pbCore.Role, error)
 	Delete(context.Context, uint32) error
 	ExistByName(ctx context.Context, name string, excludeID uint32) (bool, error)
 }
@@ -53,7 +54,7 @@ func (uc *RoleUsecase) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role
 }
 
 // CountRoles 角色计数
-func (uc *RoleUsecase) CountRoles(ctx context.Context, opts ...ListOption) (int32, error) {
+func (uc *RoleUsecase) CountRoles(ctx context.Context, opts ...listing.Option) (int32, error) {
 	return uc.repo.CountRoles(ctx, opts...)
 }
 
@@ -63,7 +64,7 @@ func (uc *RoleUsecase) ListSimple(ctx context.Context) ([]*pbCore.Role, error) {
 }
 
 // ListRoles 角色分页列表
-func (uc *RoleUsecase) ListRoles(ctx context.Context, opts ...ListOption) ([]*pbCore.Role, error) {
+func (uc *RoleUsecase) ListRoles(ctx context.Context, opts ...listing.Option) ([]*pbCore.Role, error) {
 	return uc.repo.ListRoles(ctx, opts...)
 }
 

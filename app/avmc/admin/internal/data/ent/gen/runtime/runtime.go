@@ -56,10 +56,10 @@ func init() {
 			return nil
 		}
 	}()
-	// deptDescDomainID is the schema descriptor for domain_id field.
-	deptDescDomainID := deptMixinFields0[4].Descriptor()
-	// dept.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	dept.DomainIDValidator = deptDescDomainID.Validators[0].(func(uint32) error)
+	// deptDescTenantID is the schema descriptor for tenant_id field.
+	deptDescTenantID := deptMixinFields0[4].Descriptor()
+	// dept.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	dept.TenantIDValidator = deptDescTenantID.Validators[0].(func(uint32) error)
 	// deptDescName is the schema descriptor for name field.
 	deptDescName := deptFields[0].Descriptor()
 	// dept.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -310,10 +310,10 @@ func init() {
 			return nil
 		}
 	}()
-	// postDescDomainID is the schema descriptor for domain_id field.
-	postDescDomainID := postMixinFields0[4].Descriptor()
-	// post.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	post.DomainIDValidator = postDescDomainID.Validators[0].(func(uint32) error)
+	// postDescTenantID is the schema descriptor for tenant_id field.
+	postDescTenantID := postMixinFields0[4].Descriptor()
+	// post.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	post.TenantIDValidator = postDescTenantID.Validators[0].(func(uint32) error)
 	// postDescName is the schema descriptor for name field.
 	postDescName := postFields[0].Descriptor()
 	// post.DefaultName holds the default value on creation for the name field.
@@ -373,10 +373,10 @@ func init() {
 			return nil
 		}
 	}()
-	// projectDescDomainID is the schema descriptor for domain_id field.
-	projectDescDomainID := projectMixinFields0[4].Descriptor()
-	// project.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	project.DomainIDValidator = projectDescDomainID.Validators[0].(func(uint32) error)
+	// projectDescTenantID is the schema descriptor for tenant_id field.
+	projectDescTenantID := projectMixinFields0[4].Descriptor()
+	// project.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	project.TenantIDValidator = projectDescTenantID.Validators[0].(func(uint32) error)
 	// projectDescName is the schema descriptor for name field.
 	projectDescName := projectFields[0].Descriptor()
 	// project.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -434,10 +434,10 @@ func init() {
 			return nil
 		}
 	}()
-	// roleDescDomainID is the schema descriptor for domain_id field.
-	roleDescDomainID := roleMixinFields0[4].Descriptor()
-	// role.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	role.DomainIDValidator = roleDescDomainID.Validators[0].(func(uint32) error)
+	// roleDescTenantID is the schema descriptor for tenant_id field.
+	roleDescTenantID := roleMixinFields0[4].Descriptor()
+	// role.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	role.TenantIDValidator = roleDescTenantID.Validators[0].(func(uint32) error)
 	// roleDescName is the schema descriptor for name field.
 	roleDescName := roleFields[0].Descriptor()
 	// role.DefaultName holds the default value on creation for the name field.
@@ -505,10 +505,10 @@ func init() {
 			return nil
 		}
 	}()
-	// userDescDomainID is the schema descriptor for domain_id field.
-	userDescDomainID := userMixinFields0[4].Descriptor()
-	// user.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	user.DomainIDValidator = userDescDomainID.Validators[0].(func(uint32) error)
+	// userDescTenantID is the schema descriptor for tenant_id field.
+	userDescTenantID := userMixinFields0[4].Descriptor()
+	// user.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	user.TenantIDValidator = userDescTenantID.Validators[0].(func(uint32) error)
 	// userDescName is the schema descriptor for name field.
 	userDescName := userFields[0].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.

@@ -14,6 +14,7 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/menu"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -330,8 +331,8 @@ func (r *menuRepo) ListAllSimple(ctx context.Context) ([]*pbCore.Menu, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-func (r *menuRepo) CountMenus(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	o := biz.ListOptions{}
+func (r *menuRepo) CountMenus(ctx context.Context, opts ...listing.Option) (int32, error) {
+	o := listing.Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -356,8 +357,8 @@ func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
 	return convert.SliceToAny(res, r.convertProto), nil
 }
 
-func (r *menuRepo) ListMenus(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.Menu, error) {
-	o := biz.ListOptions{Limit: 20}
+func (r *menuRepo) ListMenus(ctx context.Context, opts ...listing.Option) ([]*pbCore.Menu, error) {
+	o := listing.Options{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}

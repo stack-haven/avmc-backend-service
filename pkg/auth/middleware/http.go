@@ -47,26 +47,26 @@ func DefaultHTTPAuthExtractor(ctx context.Context, req *http.Request) (string, e
 }
 
 // HTTPAuthzInfoExtractor 定义HTTP请求中提取授权信息的函数类型
-type HTTPAuthzInfoExtractor func(ctx context.Context, req *http.Request) (authz.Subject, authz.Object, authz.Action, authz.Domain, error)
+type HTTPAuthzInfoExtractor func(ctx context.Context, req *http.Request) (authz.Subject, authz.Object, authz.Action, authz.Tenant, error)
 
 // DefaultHTTPAuthzInfoExtractor 默认的HTTP授权信息提取器
 // 从请求路径、方法和认证声明中提取授权信息
-func DefaultHTTPAuthzInfoExtractor(ctx context.Context, req *http.Request) (authz.Subject, authz.Object, authz.Action, authz.Domain, error) {
-	// 从认证声明中提取主体和域
+func DefaultHTTPAuthzInfoExtractor(ctx context.Context, req *http.Request) (authz.Subject, authz.Object, authz.Action, authz.Tenant, error) {
+	// 从认证声明中提取主体和租户
 	claims, ok := authn.AuthClaimsFromContext(ctx)
 	if !ok || claims == nil {
 		return "", "", "", "", authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid or missing auth claims", nil)
 	}
 
-	// 提取主体和域
+	// 提取主体和租户
 	sub := authz.Subject(claims.GetSubject())
-	dom := authz.Domain(claims.GetDomain())
+	tenant := authz.Tenant(claims.GetTenant())
 
 	// 从请求中提取对象和操作
 	obj := authz.Object(req.URL.Path)
 	act := authz.Action(req.Method)
 
-	return sub, obj, act, dom, nil
+	return sub, obj, act, tenant, nil
 }
 
 // Deprecated: 使用 AuthnMiddleware 替代，已原生支持 HTTP/gRPC。
@@ -143,7 +143,7 @@ func HTTPAuthzMiddleware(authorizer authz.Authorizer, extractor HTTPAuthzInfoExt
 					if ok {
 						httpReq := httpCtx.Request()
 						// 提取授权信息
-						sub, obj, act, dom, err := extractor(ctx, httpReq)
+						sub, obj, act, tenant, err := extractor(ctx, httpReq)
 						if err != nil {
 							// 处理提取错误
 							var authErr *authn.AuthError
@@ -163,7 +163,7 @@ func HTTPAuthzMiddleware(authorizer authz.Authorizer, extractor HTTPAuthzInfoExt
 							return nil, ErrPermissionDenied
 						}
 						{
-							allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+							allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 							if err != nil {
 								// 处理授权错误
 								var authzErr *authz.AuthzError
@@ -254,7 +254,7 @@ func HTTPCombinedAuthMiddleware(
 						ctx = authn.ContextWithAuthClaims(ctx, claims)
 
 						// 提取授权信息
-						sub, obj, act, dom, err := authzExtractor(ctx, httpReq)
+						sub, obj, act, tenant, err := authzExtractor(ctx, httpReq)
 						if err != nil {
 							// 处理提取错误
 							var authErr *authn.AuthError
@@ -274,7 +274,7 @@ func HTTPCombinedAuthMiddleware(
 							return nil, ErrPermissionDenied
 						}
 						{
-							allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+							allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 							if err != nil {
 								// 处理授权错误
 								var authzErr *authz.AuthzError

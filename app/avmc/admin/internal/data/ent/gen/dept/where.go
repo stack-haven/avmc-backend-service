@@ -70,9 +70,9 @@ func Status(v int32) predicate.Dept {
 	return predicate.Dept(sql.FieldEQ(FieldStatus, v))
 }
 
-// DomainID applies equality check predicate on the "domain_id" field. It's identical to DomainIDEQ.
-func DomainID(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldEQ(FieldDomainID, v))
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldTenantID, v))
 }
 
 // DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
@@ -225,44 +225,44 @@ func StatusLTE(v int32) predicate.Dept {
 	return predicate.Dept(sql.FieldLTE(FieldStatus, v))
 }
 
-// DomainIDEQ applies the EQ predicate on the "domain_id" field.
-func DomainIDEQ(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldEQ(FieldDomainID, v))
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldEQ(FieldTenantID, v))
 }
 
-// DomainIDNEQ applies the NEQ predicate on the "domain_id" field.
-func DomainIDNEQ(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldNEQ(FieldDomainID, v))
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldNEQ(FieldTenantID, v))
 }
 
-// DomainIDIn applies the In predicate on the "domain_id" field.
-func DomainIDIn(vs ...uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldIn(FieldDomainID, vs...))
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldIn(FieldTenantID, vs...))
 }
 
-// DomainIDNotIn applies the NotIn predicate on the "domain_id" field.
-func DomainIDNotIn(vs ...uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldNotIn(FieldDomainID, vs...))
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
-// DomainIDGT applies the GT predicate on the "domain_id" field.
-func DomainIDGT(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldGT(FieldDomainID, v))
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldGT(FieldTenantID, v))
 }
 
-// DomainIDGTE applies the GTE predicate on the "domain_id" field.
-func DomainIDGTE(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldGTE(FieldDomainID, v))
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldGTE(FieldTenantID, v))
 }
 
-// DomainIDLT applies the LT predicate on the "domain_id" field.
-func DomainIDLT(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldLT(FieldDomainID, v))
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldLT(FieldTenantID, v))
 }
 
-// DomainIDLTE applies the LTE predicate on the "domain_id" field.
-func DomainIDLTE(v uint32) predicate.Dept {
-	return predicate.Dept(sql.FieldLTE(FieldDomainID, v))
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.Dept {
+	return predicate.Dept(sql.FieldLTE(FieldTenantID, v))
 }
 
 // DeletedAtEQ applies the EQ predicate on the "deleted_at" field.

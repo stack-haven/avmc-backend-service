@@ -66,9 +66,9 @@ func (_c *RoleCreate) SetNillableStatus(v *int32) *RoleCreate {
 	return _c
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_c *RoleCreate) SetDomainID(v uint32) *RoleCreate {
-	_c.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_c *RoleCreate) SetTenantID(v uint32) *RoleCreate {
+	_c.mutation.SetTenantID(v)
 	return _c
 }
 
@@ -286,12 +286,12 @@ func (_c *RoleCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Role.status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		return &ValidationError{Name: "domain_id", err: errors.New(`gen: missing required field "Role.domain_id"`)}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`gen: missing required field "Role.tenant_id"`)}
 	}
-	if v, ok := _c.mutation.DomainID(); ok {
-		if err := role.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Role.domain_id": %w`, err)}
+	if v, ok := _c.mutation.TenantID(); ok {
+		if err := role.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Role.tenant_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
@@ -369,9 +369,9 @@ func (_c *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 		_spec.SetField(role.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
 	}
-	if value, ok := _c.mutation.DomainID(); ok {
-		_spec.SetField(role.FieldDomainID, field.TypeUint32, value)
-		_node.DomainID = value
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(role.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(role.FieldDeletedAt, field.TypeTime, value)
@@ -511,21 +511,21 @@ func (u *RoleUpsert) AddStatus(v int32) *RoleUpsert {
 	return u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *RoleUpsert) SetDomainID(v uint32) *RoleUpsert {
-	u.Set(role.FieldDomainID, v)
+// SetTenantID sets the "tenant_id" field.
+func (u *RoleUpsert) SetTenantID(v uint32) *RoleUpsert {
+	u.Set(role.FieldTenantID, v)
 	return u
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *RoleUpsert) UpdateDomainID() *RoleUpsert {
-	u.SetExcluded(role.FieldDomainID)
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *RoleUpsert) UpdateTenantID() *RoleUpsert {
+	u.SetExcluded(role.FieldTenantID)
 	return u
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *RoleUpsert) AddDomainID(v uint32) *RoleUpsert {
-	u.Add(role.FieldDomainID, v)
+// AddTenantID adds v to the "tenant_id" field.
+func (u *RoleUpsert) AddTenantID(v uint32) *RoleUpsert {
+	u.Add(role.FieldTenantID, v)
 	return u
 }
 
@@ -711,24 +711,24 @@ func (u *RoleUpsertOne) UpdateStatus() *RoleUpsertOne {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *RoleUpsertOne) SetDomainID(v uint32) *RoleUpsertOne {
+// SetTenantID sets the "tenant_id" field.
+func (u *RoleUpsertOne) SetTenantID(v uint32) *RoleUpsertOne {
 	return u.Update(func(s *RoleUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *RoleUpsertOne) AddDomainID(v uint32) *RoleUpsertOne {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *RoleUpsertOne) AddTenantID(v uint32) *RoleUpsertOne {
 	return u.Update(func(s *RoleUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *RoleUpsertOne) UpdateDomainID() *RoleUpsertOne {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *RoleUpsertOne) UpdateTenantID() *RoleUpsertOne {
 	return u.Update(func(s *RoleUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 
@@ -1096,24 +1096,24 @@ func (u *RoleUpsertBulk) UpdateStatus() *RoleUpsertBulk {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *RoleUpsertBulk) SetDomainID(v uint32) *RoleUpsertBulk {
+// SetTenantID sets the "tenant_id" field.
+func (u *RoleUpsertBulk) SetTenantID(v uint32) *RoleUpsertBulk {
 	return u.Update(func(s *RoleUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *RoleUpsertBulk) AddDomainID(v uint32) *RoleUpsertBulk {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *RoleUpsertBulk) AddTenantID(v uint32) *RoleUpsertBulk {
 	return u.Update(func(s *RoleUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *RoleUpsertBulk) UpdateDomainID() *RoleUpsertBulk {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *RoleUpsertBulk) UpdateTenantID() *RoleUpsertBulk {
 	return u.Update(func(s *RoleUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 

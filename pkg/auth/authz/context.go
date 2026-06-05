@@ -15,8 +15,8 @@ var (
 	authzObjectContextKey = ctxKey("authz-object")
 	// authzActionContextKey 授权操作上下文键
 	authzActionContextKey = ctxKey("authz-action")
-	// authzDomainContextKey 授权域上下文键
-	authzDomainContextKey = ctxKey("authz-domain")
+	// authzTenantContextKey 授权租户上下文键
+	authzTenantContextKey = ctxKey("authz-tenant")
 	// authzResultContextKey 授权结果上下文键
 	authzResultContextKey = ctxKey("authz-result")
 )
@@ -69,20 +69,20 @@ func ActionFromContext(ctx context.Context) (Action, bool) {
 	return action, ok
 }
 
-// ContextWithDomain 将授权域注入上下文
+// ContextWithTenant 将授权租户注入上下文
 // parent: 父上下文
-// domain: 授权域
+// tenant: 授权租户
 // 返回: 新的上下文
-func ContextWithDomain(parent context.Context, domain Domain) context.Context {
-	return context.WithValue(parent, authzDomainContextKey, domain)
+func ContextWithTenant(parent context.Context, tenant Tenant) context.Context {
+	return context.WithValue(parent, authzTenantContextKey, tenant)
 }
 
-// DomainFromContext 从上下文中提取授权域
+// TenantFromContext 从上下文中提取授权租户
 // ctx: 上下文
-// 返回: 授权域和是否存在的标志
-func DomainFromContext(ctx context.Context) (Domain, bool) {
-	domain, ok := ctx.Value(authzDomainContextKey).(Domain)
-	return domain, ok
+// 返回: 授权租户和是否存在的标志
+func TenantFromContext(ctx context.Context) (Tenant, bool) {
+	tenant, ok := ctx.Value(authzTenantContextKey).(Tenant)
+	return tenant, ok
 }
 
 // ContextWithAuthzResult 将授权结果注入上下文
@@ -103,15 +103,15 @@ func AuthzResultFromContext(ctx context.Context) (bool, bool) {
 
 // ExtractAuthzInfo 从上下文中提取授权信息
 // ctx: 上下文
-// 返回: 主体、对象、操作、域和是否完整的标志
-func ExtractAuthzInfo(ctx context.Context) (Subject, Object, Action, Domain, bool) {
+// 返回: 主体、对象、操作、租户和是否完整的标志
+func ExtractAuthzInfo(ctx context.Context) (Subject, Object, Action, Tenant, bool) {
 	subject, subOk := SubjectFromContext(ctx)
 	object, objOk := ObjectFromContext(ctx)
 	action, actOk := ActionFromContext(ctx)
-	domain, domOk := DomainFromContext(ctx)
+	tenant, tenantOk := TenantFromContext(ctx)
 
 	// 所有信息都必须存在
-	return subject, object, action, domain, subOk && objOk && actOk && domOk
+	return subject, object, action, tenant, subOk && objOk && actOk && tenantOk
 }
 
 // ContextWithAuthzInfo 将授权信息注入上下文
@@ -119,12 +119,12 @@ func ExtractAuthzInfo(ctx context.Context) (Subject, Object, Action, Domain, boo
 // subject: 授权主体
 // object: 授权对象
 // action: 授权操作
-// domain: 授权域
+// tenant: 授权租户
 // 返回: 新的上下文
-func ContextWithAuthzInfo(parent context.Context, subject Subject, object Object, action Action, domain Domain) context.Context {
+func ContextWithAuthzInfo(parent context.Context, subject Subject, object Object, action Action, tenant Tenant) context.Context {
 	ctx := ContextWithSubject(parent, subject)
 	ctx = ContextWithObject(ctx, object)
 	ctx = ContextWithAction(ctx, action)
-	ctx = ContextWithDomain(ctx, domain)
+	ctx = ContextWithTenant(ctx, tenant)
 	return ctx
 }

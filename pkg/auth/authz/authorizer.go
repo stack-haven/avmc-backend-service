@@ -13,8 +13,8 @@ type Object string
 // Action 操作类型，表示对资源执行的操作
 type Action string
 
-// Domain 域类型，表示资源所属的域（如租户、项目等）
-type Domain string
+// Tenant 租户类型，表示资源所属租户范围。
+type Tenant string
 
 // Policy 策略类型，表示授权策略
 type Policy struct {
@@ -24,8 +24,8 @@ type Policy struct {
 	Object Object
 	// Action 操作
 	Action Action
-	// Domain 域
-	Domain Domain
+	// Tenant 租户
+	Tenant Tenant
 	// Effect 效果（允许或拒绝）
 	Effect Effect
 }
@@ -51,18 +51,18 @@ type Authorizer interface {
 	// sub: 主体
 	// obj: 对象
 	// act: 操作
-	// domain: 域
+	// tenant: 租户
 	// 返回: 是否授权和可能的错误
-	Enforce(ctx context.Context, sub Subject, obj Object, act Action, domain Domain) (bool, error)
+	Enforce(ctx context.Context, sub Subject, obj Object, act Action, tenant Tenant) (bool, error)
 
 	// BatchEnforce 批量执行授权检查
 	// ctx: 上下文信息
 	// subjects: 主体列表
 	// objects: 对象列表
 	// actions: 操作列表
-	// domains: 域列表
+	// tenants: 租户列表
 	// 返回: 授权结果列表和可能的错误
-	BatchEnforce(ctx context.Context, subjects []Subject, objects []Object, actions []Action, domains []Domain) ([]bool, error)
+	BatchEnforce(ctx context.Context, subjects []Subject, objects []Object, actions []Action, tenants []Tenant) ([]bool, error)
 
 	// AddPolicy 添加策略
 	// ctx: 上下文信息
@@ -103,10 +103,10 @@ type Authorizer interface {
 	// 返回: 操作列表和可能的错误
 	GetAllActions(ctx context.Context) ([]Action, error)
 
-	// GetAllDomains 获取所有域
+	// GetAllTenants 获取所有租户
 	// ctx: 上下文信息
-	// 返回: 域列表和可能的错误
-	GetAllDomains(ctx context.Context) ([]Domain, error)
+	// 返回: 租户列表和可能的错误
+	GetAllTenants(ctx context.Context) ([]Tenant, error)
 
 	// GetAllRoles 获取所有角色
 	// ctx: 上下文信息
@@ -116,40 +116,40 @@ type Authorizer interface {
 	// GetRolesForUser 获取用户的角色
 	// ctx: 上下文信息
 	// user: 用户
-	// domain: 域
+	// tenant: 租户
 	// 返回: 角色列表和可能的错误
-	GetRolesForUser(ctx context.Context, user Subject, domain Domain) ([]Subject, error)
+	GetRolesForUser(ctx context.Context, user Subject, tenant Tenant) ([]Subject, error)
 
 	// GetUsersForRole 获取角色的用户
 	// ctx: 上下文信息
 	// role: 角色
-	// domain: 域
+	// tenant: 租户
 	// 返回: 用户列表和可能的错误
-	GetUsersForRole(ctx context.Context, role Subject, domain Domain) ([]Subject, error)
+	GetUsersForRole(ctx context.Context, role Subject, tenant Tenant) ([]Subject, error)
 
 	// HasRoleForUser 检查用户是否拥有角色
 	// ctx: 上下文信息
 	// user: 用户
 	// role: 角色
-	// domain: 域
+	// tenant: 租户
 	// 返回: 是否拥有角色和可能的错误
-	HasRoleForUser(ctx context.Context, user Subject, role Subject, domain Domain) (bool, error)
+	HasRoleForUser(ctx context.Context, user Subject, role Subject, tenant Tenant) (bool, error)
 
 	// AddRoleForUser 为用户添加角色
 	// ctx: 上下文信息
 	// user: 用户
 	// role: 角色
-	// domain: 域
+	// tenant: 域
 	// 返回: 是否成功添加和可能的错误
-	AddRoleForUser(ctx context.Context, user Subject, role Subject, domain Domain) (bool, error)
+	AddRoleForUser(ctx context.Context, user Subject, role Subject, tenant Tenant) (bool, error)
 
 	// DeleteRoleForUser 删除用户的角色
 	// ctx: 上下文信息
 	// user: 用户
 	// role: 角色
-	// domain: 域
+	// tenant: 域
 	// 返回: 是否成功删除和可能的错误
-	DeleteRoleForUser(ctx context.Context, user Subject, role Subject, domain Domain) (bool, error)
+	DeleteRoleForUser(ctx context.Context, user Subject, role Subject, tenant Tenant) (bool, error)
 
 	// Name 获取授权器名称
 	// 返回: 授权器名称

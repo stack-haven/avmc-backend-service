@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 
@@ -16,14 +17,14 @@ import (
 
 var (
 	flagconf string
-	domain   string
+	tenant   string
 	role     string
 	users    string
 )
 
 func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf ./configs")
-	flag.StringVar(&domain, "domain", "1", "authorization domain/tenant id")
+	flag.StringVar(&tenant, "tenant", "1", "authorization tenant/tenant id")
 	flag.StringVar(&role, "role", "super_admin", "role subject to seed")
 	flag.StringVar(&users, "users", "1", "comma-separated user ids to bind to role")
 }
@@ -31,28 +32,36 @@ func init() {
 func main() {
 	flag.Parse()
 	logger := log.NewHelper(log.NewStdLogger(os.Stdout))
+	if err := run(context.Background(), logger); err != nil {
+		fmt.Fprintf(os.Stderr, "admin policy sync failed: %v\n", err)
+		os.Exit(1)
+	}
+}
 
+func run(ctx context.Context, logger *log.Helper) error {
 	bc, err := runtimeconfig.Load(flagconf)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	provider := casbin.NewProvider()
 	authorizer, err := provider.NewAuthorizer(
-		context.Background(),
+		ctx,
 		authz.WithAdapterType(authz.AdapterMySQL),
 		authz.WithAdapterDSN(bc.Data.Database.Source),
 	)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer authorizer.Close()
 
 	subjects := parseSubjects(users)
-	if err := authzpolicy.SyncSuperAdmin(context.Background(), authorizer, authz.Subject(role), authz.Domain(domain), subjects); err != nil {
-		panic(err)
+	if err := authzpolicy.SyncSuperAdmin(ctx, authorizer, authz.Subject(role), authz.Tenant(tenant), subjects); err != nil {
+		return err
 	}
-	logger.Infof("synced admin policies: role=%s domain=%s users=%v", role, domain, subjects)
+	logger.Infof("synced admin policies: role=%s tenant=%s users=%v", role, tenant, subjects)
+	logger.Info("restart the admin service or reload Casbin policies before testing newly synced permissions")
+	return nil
 }
 
 func parseSubjects(raw string) []authz.Subject {

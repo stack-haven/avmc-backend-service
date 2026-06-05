@@ -147,19 +147,19 @@ func GetAuthUserID(ctx context.Context) uint32 {
 	return uint32(ut64)
 }
 
-// GetAuthUserDomainID 从上下文中提取认证用户域ID
+// GetAuthUserTenantID 从上下文中提取认证用户租户ID
 // ctx: 上下文
-// 返回: 认证用户域ID和是否存在的标志
-func GetAuthUserDomainID(ctx context.Context) uint32 {
+// 返回: 认证用户租户ID和是否存在的标志
+func GetAuthUserTenantID(ctx context.Context) uint32 {
 	user, ok := ctx.Value(authUserContextKey).(SecurityUser)
 	if !ok {
 		return 0
 	}
-	domainID, err := strconv.ParseUint(user.GetDomain(), 10, 64)
+	tenantID, err := strconv.ParseUint(user.GetTenant(), 10, 64)
 	if err != nil {
 		return 0
 	}
-	return uint32(domainID)
+	return uint32(tenantID)
 }
 
 // GetSubject 获取主体标识
@@ -198,14 +198,13 @@ func (a *AuthClaims) GetID() string {
 	return ""
 }
 
-// GetDomain 获取域
-// 返回: 域字符串
-func (a *AuthClaims) GetDomain() string {
+// GetTenant returns the tenant identifier claim.
+func (a *AuthClaims) GetTenant() string {
 	if a == nil {
 		return ""
 	}
-	if domain, ok := (*a)["dom"].(string); ok {
-		return domain
+	if tenant, ok := (*a)["tenant"].(string); ok {
+		return tenant
 	}
 	return ""
 }

@@ -64,9 +64,9 @@ func (_c *PostCreate) SetNillableStatus(v *int32) *PostCreate {
 	return _c
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_c *PostCreate) SetDomainID(v uint32) *PostCreate {
-	_c.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_c *PostCreate) SetTenantID(v uint32) *PostCreate {
+	_c.mutation.SetTenantID(v)
 	return _c
 }
 
@@ -218,12 +218,12 @@ func (_c *PostCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Post.status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		return &ValidationError{Name: "domain_id", err: errors.New(`gen: missing required field "Post.domain_id"`)}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`gen: missing required field "Post.tenant_id"`)}
 	}
-	if v, ok := _c.mutation.DomainID(); ok {
-		if err := post.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Post.domain_id": %w`, err)}
+	if v, ok := _c.mutation.TenantID(); ok {
+		if err := post.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Post.tenant_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
@@ -295,9 +295,9 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_spec.SetField(post.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
 	}
-	if value, ok := _c.mutation.DomainID(); ok {
-		_spec.SetField(post.FieldDomainID, field.TypeUint32, value)
-		_node.DomainID = value
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(post.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
@@ -397,21 +397,21 @@ func (u *PostUpsert) AddStatus(v int32) *PostUpsert {
 	return u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *PostUpsert) SetDomainID(v uint32) *PostUpsert {
-	u.Set(post.FieldDomainID, v)
+// SetTenantID sets the "tenant_id" field.
+func (u *PostUpsert) SetTenantID(v uint32) *PostUpsert {
+	u.Set(post.FieldTenantID, v)
 	return u
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *PostUpsert) UpdateDomainID() *PostUpsert {
-	u.SetExcluded(post.FieldDomainID)
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *PostUpsert) UpdateTenantID() *PostUpsert {
+	u.SetExcluded(post.FieldTenantID)
 	return u
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *PostUpsert) AddDomainID(v uint32) *PostUpsert {
-	u.Add(post.FieldDomainID, v)
+// AddTenantID adds v to the "tenant_id" field.
+func (u *PostUpsert) AddTenantID(v uint32) *PostUpsert {
+	u.Add(post.FieldTenantID, v)
 	return u
 }
 
@@ -561,24 +561,24 @@ func (u *PostUpsertOne) UpdateStatus() *PostUpsertOne {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *PostUpsertOne) SetDomainID(v uint32) *PostUpsertOne {
+// SetTenantID sets the "tenant_id" field.
+func (u *PostUpsertOne) SetTenantID(v uint32) *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *PostUpsertOne) AddDomainID(v uint32) *PostUpsertOne {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *PostUpsertOne) AddTenantID(v uint32) *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *PostUpsertOne) UpdateDomainID() *PostUpsertOne {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *PostUpsertOne) UpdateTenantID() *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 
@@ -904,24 +904,24 @@ func (u *PostUpsertBulk) UpdateStatus() *PostUpsertBulk {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *PostUpsertBulk) SetDomainID(v uint32) *PostUpsertBulk {
+// SetTenantID sets the "tenant_id" field.
+func (u *PostUpsertBulk) SetTenantID(v uint32) *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *PostUpsertBulk) AddDomainID(v uint32) *PostUpsertBulk {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *PostUpsertBulk) AddTenantID(v uint32) *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *PostUpsertBulk) UpdateDomainID() *PostUpsertBulk {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *PostUpsertBulk) UpdateTenantID() *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 

@@ -6,12 +6,11 @@ import (
 	pb "backend-service/api/avmc/admin/v1"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/avmc/admin/internal/biz"
+	"backend-service/pkg/aip/listing"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"go.einride.tech/aip/fieldmask"
 	"go.einride.tech/aip/filtering"
-	"go.einride.tech/aip/ordering"
-	"go.einride.tech/aip/pagination"
 )
 
 // UserServiceService 用户服务
@@ -32,56 +31,38 @@ func NewUserServiceService(uuc *biz.UserUsecase, logger log.Logger) *UserService
 // ListUsersSimple 用户简单列表
 func (s *UserServiceService) ListUsersSimple(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
 	s.log.Infof("查询用户简单列表，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
-	pageSize := biz.NormalizePageSize(req.GetPageSize())
-	req.PageSize = int32(pageSize)
-	filter, pageToken, orderBy, err := s.parseAIPParams(req)
+	params, err := parseUserListParams(req)
 	if err != nil {
 		return nil, err
 	}
-	count, err := s.uuc.CountUsers(ctx, biz.ListFilter(filter))
+	req.PageSize = int32(params.PageSize)
+	count, err := s.uuc.CountUsers(ctx, listing.FilterOption(params.Filter))
 	if err != nil {
 		return nil, err
 	}
 	resp := pbCore.ListUsersResponse{Total: count}
 	resp.Items, err = s.uuc.ListPageSimple(ctx,
-		biz.ListFilter(filter), biz.ListOrderBy(orderBy),
-		biz.ListLimit(pageSize), biz.ListOffset(int(pageToken.Offset)),
+		listing.FilterOption(params.Filter), listing.OrderByOption(params.OrderBy),
+		listing.LimitOption(params.PageSize), listing.OffsetOption(int(params.PageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= pageSize {
-		resp.NextPageToken = pageToken.Next(req).String()
+	if len(resp.Items) >= params.PageSize {
+		resp.NextPageToken = params.PageToken.Next(req).String()
 	}
 	return &resp, nil
 }
 
-// parseAIPParams 解析 AIP 标准的分页/过滤/排序参数
-func (s *UserServiceService) parseAIPParams(req *pbCore.ListUsersRequest) (filtering.Filter, pagination.PageToken, ordering.OrderBy, error) {
-	declarations, err := filtering.NewDeclarations(
-		filtering.DeclareStandardFunctions(),
+func parseUserListParams(req *pbCore.ListUsersRequest) (listing.Params, error) {
+	return listing.ParseParams(
+		req,
 		filtering.DeclareIdent("name", filtering.TypeString),
 		filtering.DeclareIdent("email", filtering.TypeString),
 		filtering.DeclareIdent("phone", filtering.TypeString),
 		filtering.DeclareIdent("status", filtering.TypeInt),
 		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
 	)
-	if err != nil {
-		return filtering.Filter{}, pagination.PageToken{}, ordering.OrderBy{}, err
-	}
-	filter, err := filtering.ParseFilter(req, declarations)
-	if err != nil {
-		return filtering.Filter{}, pagination.PageToken{}, ordering.OrderBy{}, err
-	}
-	pageToken, err := pagination.ParsePageToken(req)
-	if err != nil {
-		return filtering.Filter{}, pagination.PageToken{}, ordering.OrderBy{}, err
-	}
-	orderBy, err := ordering.ParseOrderBy(req)
-	if err != nil {
-		return filtering.Filter{}, pagination.PageToken{}, ordering.OrderBy{}, err
-	}
-	return filter, pageToken, orderBy, nil
 }
 
 // GetUser 获取用户详情
@@ -157,26 +138,25 @@ func (s *UserServiceService) UpdateUserByStatus(ctx context.Context, req *pbCore
 // ListUsers 用户完整列表
 func (s *UserServiceService) ListUsers(ctx context.Context, req *pbCore.ListUsersRequest) (*pbCore.ListUsersResponse, error) {
 	s.log.Infof("查询用户列表，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
-	pageSize := biz.NormalizePageSize(req.GetPageSize())
-	req.PageSize = int32(pageSize)
-	filter, pageToken, orderBy, err := s.parseAIPParams(req)
+	params, err := parseUserListParams(req)
 	if err != nil {
 		return nil, err
 	}
-	count, err := s.uuc.CountUsers(ctx, biz.ListFilter(filter))
+	req.PageSize = int32(params.PageSize)
+	count, err := s.uuc.CountUsers(ctx, listing.FilterOption(params.Filter))
 	if err != nil {
 		return nil, err
 	}
 	resp := pbCore.ListUsersResponse{Total: count}
 	resp.Items, err = s.uuc.ListUsers(ctx,
-		biz.ListFilter(filter), biz.ListOrderBy(orderBy),
-		biz.ListLimit(pageSize), biz.ListOffset(int(pageToken.Offset)),
+		listing.FilterOption(params.Filter), listing.OrderByOption(params.OrderBy),
+		listing.LimitOption(params.PageSize), listing.OffsetOption(int(params.PageToken.Offset)),
 	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Items) >= pageSize {
-		resp.NextPageToken = pageToken.Next(req).String()
+	if len(resp.Items) >= params.PageSize {
+		resp.NextPageToken = params.PageToken.Next(req).String()
 	}
 	return &resp, nil
 }

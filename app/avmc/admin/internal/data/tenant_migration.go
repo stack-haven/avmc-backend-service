@@ -18,9 +18,9 @@ var tenantUniqueColumns = map[string][]string{
 	"projects": {"name", "code"},
 }
 
-func RunLegacyTenantBackfill(ctx context.Context, cfg *conf.Data, domainID uint32, logger log.Logger) error {
-	if domainID == 0 {
-		return fmt.Errorf("legacy tenant domain ID must be positive")
+func RunLegacyTenantBackfill(ctx context.Context, cfg *conf.Data, tenantID uint32, logger log.Logger) error {
+	if tenantID == 0 {
+		return fmt.Errorf("legacy tenant ID must be positive")
 	}
 	if cfg == nil || cfg.Database == nil {
 		return fmt.Errorf("database config is required")
@@ -31,15 +31,15 @@ func RunLegacyTenantBackfill(ctx context.Context, cfg *conf.Data, domainID uint3
 	}
 	defer db.Close()
 
-	if err := backfillTenantDomain(ctx, db, domainID); err != nil {
+	if err := backfillTenantScope(ctx, db, tenantID); err != nil {
 		return err
 	}
 	log.NewHelper(log.With(logger, "module", "tenant/backfill")).
-		Infof("legacy Admin tenant data assigned to domain_id=%d", domainID)
+		Infof("legacy Admin tenant data assigned to tenant=%d", tenantID)
 	return nil
 }
 
-func backfillTenantDomain(ctx context.Context, db *stdsql.DB, domainID uint32) error {
+func backfillTenantScope(ctx context.Context, db *stdsql.DB, tenantID uint32) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("starting tenant backfill transaction: %w", err)
@@ -65,9 +65,9 @@ func backfillTenantDomain(ctx context.Context, db *stdsql.DB, domainID uint32) e
 	}
 
 	for table := range tenantUniqueColumns {
-		query := fmt.Sprintf("UPDATE `%s` SET `domain_id` = ? WHERE `domain_id` <> ?", table)
-		if _, err := tx.ExecContext(ctx, query, domainID, domainID); err != nil {
-			return fmt.Errorf("backfilling %s domain: %w", table, err)
+		query := fmt.Sprintf("UPDATE `%s` SET `tenant_id` = ? WHERE `tenant_id` <> ?", table)
+		if _, err := tx.ExecContext(ctx, query, tenantID, tenantID); err != nil {
+			return fmt.Errorf("backfilling %s tenant: %w", table, err)
 		}
 	}
 	if err := tx.Commit(); err != nil {

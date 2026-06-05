@@ -60,7 +60,7 @@ func (m *Auth) validate(all bool) error {
 
 	// no validation rules for UserId
 
-	// no validation rules for DomainId
+	// no validation rules for TenantId
 
 	if len(errors) > 0 {
 		return AuthMultiError(errors)
@@ -163,7 +163,7 @@ func (m *LoginPasswordRequest) validate(all bool) error {
 
 	// no validation rules for Password
 
-	// no validation rules for DomainId
+	// no validation rules for TenantId
 
 	switch v := m.Identity.(type) {
 	case *LoginPasswordRequest_Username:
@@ -300,7 +300,7 @@ func (m *LoginByUsernameRequest) validate(all bool) error {
 
 	// no validation rules for Password
 
-	// no validation rules for DomainId
+	// no validation rules for TenantId
 
 	if len(errors) > 0 {
 		return LoginByUsernameRequestMultiError(errors)
@@ -408,7 +408,7 @@ func (m *LoginByEmailRequest) validate(all bool) error {
 
 	// no validation rules for Password
 
-	// no validation rules for DomainId
+	// no validation rules for TenantId
 
 	if len(errors) > 0 {
 		return LoginByEmailRequestMultiError(errors)
@@ -516,7 +516,7 @@ func (m *LoginByPhoneCodeRequest) validate(all bool) error {
 
 	// no validation rules for Code
 
-	// no validation rules for DomainId
+	// no validation rules for TenantId
 
 	if len(errors) > 0 {
 		return LoginByPhoneCodeRequestMultiError(errors)

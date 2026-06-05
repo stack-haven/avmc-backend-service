@@ -13,6 +13,7 @@ import (
 	"backend-service/app/avmc/admin/internal/biz"
 	"backend-service/app/avmc/admin/internal/data/ent/gen"
 	"backend-service/app/avmc/admin/internal/data/ent/gen/user"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -37,13 +38,17 @@ func (r *userRepo) entToProto(e *gen.User) *pbCore.User {
 	if e.Status != nil {
 		status = pbEnum.Status(*e.Status)
 	}
+	gender := pbEnum.Gender(0)
+	if e.Gender != nil {
+		gender = pbEnum.Gender(*e.Gender)
+	}
 	return &pbCore.User{
 		Id:          e.ID,
 		Name:        e.Name,
 		Nickname:    e.Nickname,
 		Realname:    e.Realname,
 		Birthday:    convert.TimeValueToString(e.Birthday, time.DateOnly),
-		Gender:      (*pbEnum.Gender)(e.Gender),
+		Gender:      &gender,
 		Phone:       e.Phone,
 		Email:       e.Email,
 		Avatar:      e.Avatar,
@@ -77,7 +82,7 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	if g == nil || g.Name == nil || g.Password == nil {
 		return nil, pb.ErrorBadRequest("用户名和密码不能为空")
 	}
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +90,7 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	ent := r.protoToEnt(g)
 
 	res, err := r.Data.DB(ctx).User.Create().
-		SetDomainID(domainID).
+		SetTenantID(tenantID).
 		SetName(*ent.Name).
 		SetPassword(*ent.Password).
 		SetNillableEmail(ent.Email).
@@ -114,13 +119,13 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	if g == nil || g.GetId() == 0 {
 		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
 	}
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	r.Log.Infof("更新用户 ID: %d", g.GetId())
 	ent := r.protoToEnt(g)
-	builder := r.Data.DB(ctx).User.UpdateOneID(g.GetId()).Where(user.DomainIDEQ(domainID))
+	builder := r.Data.DB(ctx).User.UpdateOneID(g.GetId()).Where(user.TenantIDEQ(tenantID))
 
 	if g.Password != nil {
 		builder = builder.SetPassword(*g.Password)
@@ -154,7 +159,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 // FindByID 通过 ID 查询 — 显式 Select 排除 password、deleted_at 等敏感/非必要字段
 func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error) {
 	r.Log.Infof("查询用户 ID: %d", id)
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -165,10 +170,10 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 			user.FieldBirthday, user.FieldGender,
 			user.FieldPhone, user.FieldEmail,
 			user.FieldAvatar, user.FieldDescription,
-			user.FieldStatus, user.FieldDomainID,
+			user.FieldStatus, user.FieldTenantID,
 			user.FieldCreatedAt, user.FieldUpdatedAt,
 		).
-		Where(user.IDEQ(id), user.DomainIDEQ(domainID)).
+		Where(user.IDEQ(id), user.TenantIDEQ(tenantID)).
 		Only(ctx)
 	if err != nil {
 		r.Log.Errorf("查询用户失败 ID: %d, err: %v", id, err)
@@ -182,13 +187,13 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 
 // ListByName 按用户名模糊查询
 func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
-		Where(user.NameContains(name), user.DomainIDEQ(domainID)).
+		Where(user.NameContains(name), user.TenantIDEQ(tenantID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -198,12 +203,12 @@ func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User,
 
 // ListByPhone 按手机号查询
 func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.User, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).User.Query().
-		Where(user.PhoneEQ(phone), user.DomainIDEQ(domainID)).
+		Where(user.PhoneEQ(phone), user.TenantIDEQ(tenantID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -213,13 +218,13 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 
 // ListAll 查询所有用户
 func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
-		Where(user.DomainIDEQ(domainID)).
+		Where(user.TenantIDEQ(tenantID)).
 		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
@@ -229,18 +234,18 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 }
 
 // ListPageSimple 用户简单列表分页
-func (r *userRepo) ListPageSimple(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.User, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *userRepo) ListPageSimple(ctx context.Context, opts ...listing.Option) ([]*pbCore.User, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	o := biz.ListOptions{Limit: 20}
+	o := listing.Options{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	res, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID, user.FieldName).
-		Where(user.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(user.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		Order(gen.Desc(user.FieldID)).
@@ -252,12 +257,12 @@ func (r *userRepo) ListPageSimple(ctx context.Context, opts ...biz.ListOption) (
 }
 
 // ListUsers 用户完整列表分页
-func (r *userRepo) ListUsers(ctx context.Context, opts ...biz.ListOption) ([]*pbCore.User, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *userRepo) ListUsers(ctx context.Context, opts ...listing.Option) ([]*pbCore.User, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	o := biz.ListOptions{Limit: 20}
+	o := listing.Options{Limit: 20}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -266,10 +271,10 @@ func (r *userRepo) ListUsers(ctx context.Context, opts ...biz.ListOption) ([]*pb
 			user.FieldID, user.FieldName, user.FieldEmail,
 			user.FieldNickname, user.FieldRealname, user.FieldBirthday,
 			user.FieldGender, user.FieldPhone, user.FieldAvatar,
-			user.FieldStatus, user.FieldDomainID,
+			user.FieldStatus, user.FieldTenantID,
 			user.FieldCreatedAt, user.FieldUpdatedAt,
 		).
-		Where(user.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(user.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
 		All(ctx)
@@ -280,18 +285,18 @@ func (r *userRepo) ListUsers(ctx context.Context, opts ...biz.ListOption) ([]*pb
 }
 
 // CountUsers 用户计数
-func (r *userRepo) CountUsers(ctx context.Context, opts ...biz.ListOption) (int32, error) {
-	domainID, err := requireDomainID(ctx)
+func (r *userRepo) CountUsers(ctx context.Context, opts ...listing.Option) (int32, error) {
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
-	o := biz.ListOptions{}
+	o := listing.Options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
 	count, err := r.Data.DB(ctx).User.Query().
 		Select(user.FieldID).
-		Where(user.DomainIDEQ(domainID), ents.ApplyFilter(o.Filter)).
+		Where(user.TenantIDEQ(tenantID), ents.ApplyFilter(o.Filter)).
 		Count(ctx)
 	if err != nil {
 		return 0, err
@@ -301,12 +306,12 @@ func (r *userRepo) CountUsers(ctx context.Context, opts ...biz.ListOption) (int3
 
 // Delete 软删除
 func (r *userRepo) Delete(ctx context.Context, id uint32) error {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return err
 	}
 	err = r.Data.DB(ctx).User.UpdateOneID(id).
-		Where(user.DomainIDEQ(domainID)).
+		Where(user.TenantIDEQ(tenantID)).
 		SetDeletedAt(time.Now()).
 		Exec(ctx)
 	if gen.IsNotFound(err) {
@@ -317,12 +322,12 @@ func (r *userRepo) Delete(ctx context.Context, id uint32) error {
 
 // ExistByName 检查用户名是否存在
 func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
 	entUser, err := r.Data.DB(ctx).User.Query().
-		Where(user.Name(name), user.DomainIDEQ(domainID)).
+		Where(user.Name(name), user.TenantIDEQ(tenantID)).
 		Select(user.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
@@ -335,12 +340,12 @@ func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error)
 
 // ExistByPhone 检查手机号是否存在
 func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
 	entUser, err := r.Data.DB(ctx).User.Query().
-		Where(user.Phone(phone), user.DomainIDEQ(domainID)).
+		Where(user.Phone(phone), user.TenantIDEQ(tenantID)).
 		Select(user.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
@@ -353,12 +358,12 @@ func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, erro
 
 // ExistByEmail 检查邮箱是否存在
 func (r *userRepo) ExistByEmail(ctx context.Context, email string) (uint32, error) {
-	domainID, err := requireDomainID(ctx)
+	tenantID, err := requireTenantID(ctx)
 	if err != nil {
 		return 0, err
 	}
 	entUser, err := r.Data.DB(ctx).User.Query().
-		Where(user.Email(email), user.DomainIDEQ(domainID)).
+		Where(user.Email(email), user.TenantIDEQ(tenantID)).
 		Select(user.FieldID).First(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {

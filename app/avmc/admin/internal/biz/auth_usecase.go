@@ -13,9 +13,9 @@ import (
 // UserRepo is a Greater repo.
 type AuthRepo interface {
 	// Login 用户名密码登陆
-	LoginByUsername(ctx context.Context, name, password string, domainID uint32) (*v1.LoginResponse, error)
+	LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (*v1.LoginResponse, error)
 	// LoginByEmail 邮箱密码登陆
-	LoginByEmail(ctx context.Context, email, password string, domainID uint32) (*v1.LoginResponse, error)
+	LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*v1.LoginResponse, error)
 	// Logout 登出
 	Logout(context.Context, uint32) error
 	// RefreshToken 刷新令牌
@@ -50,17 +50,17 @@ func NewAuthUsecase(logger log.Logger, repo AuthRepo) *AuthUsecase {
 // LoginByUsername 处理后台用户名登录业务逻辑
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
-func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password string, domainID uint32) (*v1.LoginResponse, error) {
-	uc.log.Infof("尝试用户名登录，domain_id=%d", domainID)
-	return uc.repo.LoginByUsername(ctx, name, password, domainID)
+func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (*v1.LoginResponse, error) {
+	uc.log.Infof("尝试用户名登录，tenant_id=%d", tenantID)
+	return uc.repo.LoginByUsername(ctx, name, password, tenantID)
 }
 
 // LoginByEmail 处理后台邮箱登录业务逻辑
 // 参数：ctx 上下文，email 邮箱，password 密码
 // 返回值：登录响应结构体，错误信息
-func (uc *AuthUsecase) LoginByEmail(ctx context.Context, email, password string, domainID uint32) (*v1.LoginResponse, error) {
-	uc.log.Infof("尝试邮箱登录，domain_id=%d", domainID)
-	return uc.repo.LoginByEmail(ctx, email, password, domainID)
+func (uc *AuthUsecase) LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*v1.LoginResponse, error) {
+	uc.log.Infof("尝试邮箱登录，tenant_id=%d", tenantID)
+	return uc.repo.LoginByEmail(ctx, email, password, tenantID)
 }
 
 // RefreshToken 处理刷新令牌业务逻辑

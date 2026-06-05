@@ -55,8 +55,8 @@ func (Project) Mixin() []ent.Mixin {
 // Indexes of the Project.
 func (Project) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("domain_id", "name").Unique(),
-		index.Fields("domain_id", "code").Unique(),
+		index.Fields("tenant_id", "name").Unique(),
+		index.Fields("tenant_id", "code").Unique(),
 		index.Fields("owner_id"),
 		index.Fields("status"),
 	}

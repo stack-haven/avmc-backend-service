@@ -17,10 +17,10 @@ import (
 // 默认的RBAC模型定义
 const defaultRBACModel = `
 [request_definition]
-r = sub, obj, act, dom
+r = sub, obj, act, tenant
 
 [policy_definition]
-p = sub, obj, act, dom, eft
+p = sub, obj, act, tenant, eft
 
 [role_definition]
 g = _, _, _
@@ -29,7 +29,7 @@ g = _, _, _
 e = some(where (p.eft == allow)) && !some(where (p.eft == deny))
 
 [matchers]
-m = g(r.sub, p.sub, r.dom) && r.obj == p.obj && r.act == p.act && r.dom == p.dom
+m = g(r.sub, p.sub, r.tenant) && r.obj == p.obj && r.act == p.act && r.tenant == p.tenant
 `
 
 var _ authz.Authorizer = (*CasbinAuthorizer)(nil)
@@ -184,7 +184,7 @@ func (a *CasbinAuthorizer) Init(ctx context.Context, opts ...authz.Option) error
 }
 
 // Enforce 执行授权检查
-func (a *CasbinAuthorizer) Enforce(ctx context.Context, sub authz.Subject, obj authz.Object, act authz.Action, domain authz.Domain) (bool, error) {
+func (a *CasbinAuthorizer) Enforce(ctx context.Context, sub authz.Subject, obj authz.Object, act authz.Action, tenant authz.Tenant) (bool, error) {
 	// 检查参数
 	if sub == "" {
 		return false, authz.NewAuthzError(authz.ErrCodeInvalidSubject, "subject is required", nil)
@@ -197,7 +197,7 @@ func (a *CasbinAuthorizer) Enforce(ctx context.Context, sub authz.Subject, obj a
 	}
 
 	// 执行授权检查
-	result, err := a.enforcer.Enforce(string(sub), string(obj), string(act), string(domain))
+	result, err := a.enforcer.Enforce(string(sub), string(obj), string(act), string(tenant))
 	if err != nil {
 		return false, authz.NewAuthzError(authz.ErrCodeEnforceFailed, "enforce check failed", err)
 	}
@@ -206,7 +206,7 @@ func (a *CasbinAuthorizer) Enforce(ctx context.Context, sub authz.Subject, obj a
 	if !result {
 		return false, authz.NewAuthzError(
 			authz.ErrCodePermissionDenied,
-			fmt.Sprintf("permission denied for %s to %s on %s in domain %s", sub, act, obj, domain),
+			fmt.Sprintf("permission denied for %s to %s on %s in tenant %s", sub, act, obj, tenant),
 			nil,
 		)
 	}
@@ -215,12 +215,12 @@ func (a *CasbinAuthorizer) Enforce(ctx context.Context, sub authz.Subject, obj a
 }
 
 // BatchEnforce 批量执行授权检查
-func (a *CasbinAuthorizer) BatchEnforce(ctx context.Context, subjects []authz.Subject, objects []authz.Object, actions []authz.Action, domains []authz.Domain) ([]bool, error) {
+func (a *CasbinAuthorizer) BatchEnforce(ctx context.Context, subjects []authz.Subject, objects []authz.Object, actions []authz.Action, tenants []authz.Tenant) ([]bool, error) {
 	// 检查参数长度一致性
-	if len(subjects) != len(objects) || len(subjects) != len(actions) || len(subjects) != len(domains) {
+	if len(subjects) != len(objects) || len(subjects) != len(actions) || len(subjects) != len(tenants) {
 		return nil, authz.NewAuthzError(
 			authz.ErrCodeBatchEnforceFailed,
-			"subjects, objects, actions, and domains must have the same length",
+			"subjects, objects, actions, and tenants must have the same length",
 			nil,
 		)
 	}
@@ -228,7 +228,7 @@ func (a *CasbinAuthorizer) BatchEnforce(ctx context.Context, subjects []authz.Su
 	// 构建请求
 	requests := make([][]interface{}, len(subjects))
 	for i := range subjects {
-		requests[i] = []interface{}{string(subjects[i]), string(objects[i]), string(actions[i]), string(domains[i])}
+		requests[i] = []interface{}{string(subjects[i]), string(objects[i]), string(actions[i]), string(tenants[i])}
 	}
 
 	// 执行批量授权检查
@@ -259,7 +259,7 @@ func (a *CasbinAuthorizer) AddPolicy(ctx context.Context, policy authz.Policy) (
 		effect = "deny"
 	}
 
-	added, err := a.enforcer.AddPolicy(string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Domain), effect)
+	added, err := a.enforcer.AddPolicy(string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Tenant), effect)
 	if err != nil {
 		return false, authz.NewAuthzError(authz.ErrCodeAddPolicyFailed, "add policy failed", err)
 	}
@@ -286,7 +286,7 @@ func (a *CasbinAuthorizer) RemovePolicy(ctx context.Context, policy authz.Policy
 		effect = "deny"
 	}
 
-	removed, err := a.enforcer.RemovePolicy(string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Domain), effect)
+	removed, err := a.enforcer.RemovePolicy(string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Tenant), effect)
 	if err != nil {
 		return false, authz.NewAuthzError(authz.ErrCodeRemovePolicyFailed, "remove policy failed", err)
 	}
@@ -308,7 +308,7 @@ func (a *CasbinAuthorizer) AddPolicies(ctx context.Context, policies []authz.Pol
 		if policy.Effect == authz.EffectDeny {
 			effect = "deny"
 		}
-		rules[i] = []string{string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Domain), effect}
+		rules[i] = []string{string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Tenant), effect}
 	}
 
 	// 批量添加策略
@@ -334,7 +334,7 @@ func (a *CasbinAuthorizer) RemovePolicies(ctx context.Context, policies []authz.
 		if policy.Effect == authz.EffectDeny {
 			effect = "deny"
 		}
-		rules[i] = []string{string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Domain), effect}
+		rules[i] = []string{string(policy.Subject), string(policy.Object), string(policy.Action), string(policy.Tenant), effect}
 	}
 
 	// 批量移除策略
@@ -388,15 +388,15 @@ func (a *CasbinAuthorizer) GetAllActions(ctx context.Context) ([]authz.Action, e
 	return result, nil
 }
 
-// GetAllDomains 获取所有域
-func (a *CasbinAuthorizer) GetAllDomains(ctx context.Context) ([]authz.Domain, error) {
-	// 获取所有域
-	domains, _ := a.enforcer.GetAllDomains()
+// GetAllTenants 获取所有租户
+func (a *CasbinAuthorizer) GetAllTenants(ctx context.Context) ([]authz.Tenant, error) {
+	// Casbin RBAC-with-domains uses "domain" as its native tenant scope term.
+	tenants, _ := a.enforcer.GetAllDomains()
 
-	// 转换为授权域类型
-	result := make([]authz.Domain, len(domains))
-	for i, dom := range domains {
-		result[i] = authz.Domain(dom)
+	// 转换为授权租户类型
+	result := make([]authz.Tenant, len(tenants))
+	for i, tenant := range tenants {
+		result[i] = authz.Tenant(tenant)
 	}
 
 	return result, nil
@@ -417,9 +417,9 @@ func (a *CasbinAuthorizer) GetAllRoles(ctx context.Context) ([]authz.Subject, er
 }
 
 // GetRolesForUser 获取用户的角色
-func (a *CasbinAuthorizer) GetRolesForUser(ctx context.Context, user authz.Subject, domain authz.Domain) ([]authz.Subject, error) {
+func (a *CasbinAuthorizer) GetRolesForUser(ctx context.Context, user authz.Subject, tenant authz.Tenant) ([]authz.Subject, error) {
 	// 获取用户的角色
-	roles, err := a.enforcer.GetRolesForUser(string(user), string(domain))
+	roles, err := a.enforcer.GetRolesForUser(string(user), string(tenant))
 	if err != nil {
 		return nil, authz.NewAuthzError(authz.ErrCodeGetRolesForUserFailed, "get roles for user failed", err)
 	}
@@ -434,9 +434,9 @@ func (a *CasbinAuthorizer) GetRolesForUser(ctx context.Context, user authz.Subje
 }
 
 // GetUsersForRole 获取角色的用户
-func (a *CasbinAuthorizer) GetUsersForRole(ctx context.Context, role authz.Subject, domain authz.Domain) ([]authz.Subject, error) {
+func (a *CasbinAuthorizer) GetUsersForRole(ctx context.Context, role authz.Subject, tenant authz.Tenant) ([]authz.Subject, error) {
 	// 获取角色的用户
-	users, err := a.enforcer.GetUsersForRole(string(role), string(domain))
+	users, err := a.enforcer.GetUsersForRole(string(role), string(tenant))
 	if err != nil {
 		return nil, authz.NewAuthzError(authz.ErrCodeGetUsersForRoleFailed, "get users for role failed", err)
 	}
@@ -451,9 +451,9 @@ func (a *CasbinAuthorizer) GetUsersForRole(ctx context.Context, role authz.Subje
 }
 
 // HasRoleForUser 检查用户是否拥有角色
-func (a *CasbinAuthorizer) HasRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, domain authz.Domain) (bool, error) {
+func (a *CasbinAuthorizer) HasRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, tenant authz.Tenant) (bool, error) {
 	// 检查用户是否拥有角色
-	has, err := a.enforcer.HasRoleForUser(string(user), string(role), string(domain))
+	has, err := a.enforcer.HasRoleForUser(string(user), string(role), string(tenant))
 	if err != nil {
 		return false, authz.NewAuthzError(authz.ErrCodeHasRoleForUserFailed, "has role for user failed", err)
 	}
@@ -462,9 +462,9 @@ func (a *CasbinAuthorizer) HasRoleForUser(ctx context.Context, user authz.Subjec
 }
 
 // AddRoleForUser 为用户添加角色
-func (a *CasbinAuthorizer) AddRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, domain authz.Domain) (bool, error) {
+func (a *CasbinAuthorizer) AddRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, tenant authz.Tenant) (bool, error) {
 	// 为用户添加角色
-	added, err := a.enforcer.AddRoleForUser(string(user), string(role), string(domain))
+	added, err := a.enforcer.AddRoleForUser(string(user), string(role), string(tenant))
 	if err != nil {
 		return false, authz.NewAuthzError(authz.ErrCodeAddRoleForUserFailed, "add role for user failed", err)
 	}
@@ -473,9 +473,9 @@ func (a *CasbinAuthorizer) AddRoleForUser(ctx context.Context, user authz.Subjec
 }
 
 // DeleteRoleForUser 删除用户的角色
-func (a *CasbinAuthorizer) DeleteRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, domain authz.Domain) (bool, error) {
+func (a *CasbinAuthorizer) DeleteRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, tenant authz.Tenant) (bool, error) {
 	// 删除用户的角色
-	deleted, err := a.enforcer.DeleteRoleForUser(string(user), string(role), string(domain))
+	deleted, err := a.enforcer.DeleteRoleForUser(string(user), string(role), string(tenant))
 	if err != nil {
 		return false, authz.NewAuthzError(authz.ErrCodeDeleteRoleForUserFailed, "delete role for user failed", err)
 	}

@@ -17,17 +17,17 @@ func TestProjectRepoListProjectsLoadsOwnerNames(t *testing.T) {
 	defer client.Close()
 
 	owner := client.User.Create().
-		SetDomainID(1).
+		SetTenantID(1).
 		SetName("project-owner").
 		SetPassword("hashed-password").
 		SaveX(ctx)
 	client.Project.Create().
-		SetDomainID(1).
+		SetTenantID(1).
 		SetName("project-a").
 		SetOwnerID(owner.ID).
 		SaveX(ctx)
 	client.Project.Create().
-		SetDomainID(1).
+		SetTenantID(1).
 		SetName("project-b").
 		SetOwnerID(owner.ID).
 		SaveX(ctx)
@@ -60,43 +60,43 @@ func TestProjectRepoSavePropagatesUniquenessQueryError(t *testing.T) {
 	}
 }
 
-func TestProjectRepoRejectsCrossDomainOwnerAndMember(t *testing.T) {
+func TestProjectRepoRejectsCrossTenantOwnerAndMember(t *testing.T) {
 	ctx := tenantContext(1)
 	client := newTestClient(t)
 	defer client.Close()
 
-	otherDomainUser := client.User.Create().
-		SetDomainID(2).
-		SetName("other-domain-user").
+	otherTenantUser := client.User.Create().
+		SetTenantID(2).
+		SetName("other-tenant-user").
 		SetPassword("hashed-password").
 		SaveX(ctx)
 	repo := NewProjectRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 
 	if _, err := repo.Save(ctx, &pbCore.Project{
-		Name:    ptr("cross-domain-owner"),
-		OwnerId: ptr(otherDomainUser.ID),
+		Name:    ptr("cross-tenant-owner"),
+		OwnerId: ptr(otherTenantUser.ID),
 	}); !pb.IsBadRequest(err) {
-		t.Fatalf("cross-domain owner error = %v", err)
+		t.Fatalf("cross-tenant owner error = %v", err)
 	}
 	if _, err := repo.Save(ctx, &pbCore.Project{
-		Name:      ptr("cross-domain-member"),
-		MemberIds: []uint32{otherDomainUser.ID},
+		Name:      ptr("cross-tenant-member"),
+		MemberIds: []uint32{otherTenantUser.ID},
 	}); !pb.IsBadRequest(err) {
-		t.Fatalf("cross-domain member error = %v", err)
+		t.Fatalf("cross-tenant member error = %v", err)
 	}
 }
 
-func TestProjectRepoReturnsTypedNotFoundAcrossDomains(t *testing.T) {
+func TestProjectRepoReturnsTypedNotFoundAcrossTenants(t *testing.T) {
 	ctx := tenantContext(1)
 	client := newTestClient(t)
 	defer client.Close()
-	project := client.Project.Create().SetDomainID(2).SetName("other-domain-project").SaveX(ctx)
+	project := client.Project.Create().SetTenantID(2).SetName("other-tenant-project").SaveX(ctx)
 	repo := NewProjectRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 
 	if _, err := repo.FindByID(ctx, project.ID); !pb.IsProjectNotFound(err) {
-		t.Fatalf("cross-domain FindByID error = %v", err)
+		t.Fatalf("cross-tenant FindByID error = %v", err)
 	}
 	if err := repo.Delete(ctx, project.ID); !pb.IsProjectNotFound(err) {
-		t.Fatalf("cross-domain Delete error = %v", err)
+		t.Fatalf("cross-tenant Delete error = %v", err)
 	}
 }

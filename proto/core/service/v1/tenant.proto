@@ -6,40 +6,35 @@ import "buf/validate/validate.proto";
 import "common/enum/enum.proto";
 import "common/pagination/pagination.proto";
 import "gnostic/openapi/v3/annotations.proto";
-import "google/api/annotations.proto";
-import "google/protobuf/any.proto";
-import "google/protobuf/empty.proto";
-import "google/protobuf/timestamp.proto";
-import "validate/validate.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
 option java_multiple_files = true;
 option java_package = "core.service.v1";
 
-service DomainService {
-  // 创建域
-  rpc CreateDomain(CreateDomainRequest) returns (CreateDomainResponse);
-  // 更新域
-  rpc UpdateDomain(UpdateDomainRequest) returns (UpdateDomainResponse);
-  // 删除域
-  rpc DeleteDomain(DeleteDomainRequest) returns (DeleteDomainResponse);
-  // 获取域
-  rpc GetDomain(GetDomainRequest) returns (GetDomainResponse);
-  // 分页查询域
-  rpc ListDomains(ListDomainsRequest) returns (ListDomainsResponse);
+service TenantService {
+  // 创建租户
+  rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+  // 更新租户
+  rpc UpdateTenant(UpdateTenantRequest) returns (UpdateTenantResponse);
+  // 删除租户
+  rpc DeleteTenant(DeleteTenantRequest) returns (DeleteTenantResponse);
+  // 获取租户
+  rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
+  // 分页查询租户
+  rpc ListTenants(ListTenantsRequest) returns (ListTenantsResponse);
 }
 
-// 域信息
-message Domain {
-  // 域ID
-  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "域ID"}];
-  // 域名称
+// 租户信息
+message Tenant {
+  // 租户ID
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "租户ID"}];
+  // 租户名称
   optional string name = 2 [
     (buf.validate.field).string = {
       min_len: 1
       max_len: 20
     },
-    (gnostic.openapi.v3.property) = {description: "域名称"}
+    (gnostic.openapi.v3.property) = {description: "租户名称"}
   ];
   // 排序值
   optional int32 sort = 3 [
@@ -52,10 +47,10 @@ message Domain {
       default: {number: 10}
     }
   ];
-  // 域状态 1 激活 2 未激活 3 禁用
+  // 租户状态 1 激活 2 未激活 3 禁用
   optional enum.Status status = 4 [
     (buf.validate.field).enum.defined_only = true,
-    (gnostic.openapi.v3.property) = {description: "域状态 1 激活 2 未激活 3 禁用"}
+    (gnostic.openapi.v3.property) = {description: "租户状态 1 激活 2 未激活 3 禁用"}
   ];
   // 备注信息
   optional string remark = 5 [
@@ -68,11 +63,11 @@ message Domain {
   optional string updated_at = 7 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
 }
 
-// 创建域请求
-message CreateDomainRequest {
-  Domain domain = 1 [
+// 创建租户请求
+message CreateTenantRequest {
+  Tenant tenant = 1 [
     (buf.validate.field).required = true,
-    (gnostic.openapi.v3.property) = {description: "域信息"}
+    (gnostic.openapi.v3.property) = {description: "租户信息"}
   ];
   // 操作人ID
   uint32 operator_id = 2 [
@@ -81,23 +76,23 @@ message CreateDomainRequest {
   ];
 }
 
-// 创建域响应
-message CreateDomainResponse {
-  // 域ID
+// 创建租户响应
+message CreateTenantResponse {
+  // 租户ID
   uint32 id = 1;
-  // 域名称
+  // 租户名称
   string name = 2;
 }
 
-// 更新域请求
-message UpdateDomainRequest {
+// 更新租户请求
+message UpdateTenantRequest {
   uint32 id = 1 [
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "域ID"}
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
   ];
-  Domain domain = 2 [
+  Tenant tenant = 2 [
     (buf.validate.field).required = true,
-    (gnostic.openapi.v3.property) = {description: "域信息"}
+    (gnostic.openapi.v3.property) = {description: "租户信息"}
   ];
   // 操作人ID
   uint32 operator_id = 3 [
@@ -106,18 +101,18 @@ message UpdateDomainRequest {
   ];
 }
 
-// 更新域响应
-message UpdateDomainResponse {
-  // 域ID
+// 更新租户响应
+message UpdateTenantResponse {
+  // 租户ID
   uint32 id = 1;
 }
 
-// 删除域请求
-message DeleteDomainRequest {
-  // 域ID
+// 删除租户请求
+message DeleteTenantRequest {
+  // 租户ID
   uint32 id = 1 [
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "域ID"}
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
   ];
   // 操作人ID
   uint32 operator_id = 2 [
@@ -126,36 +121,36 @@ message DeleteDomainRequest {
   ];
 }
 
-// 删除域响应
-message DeleteDomainResponse {
-  // 域ID
+// 删除租户响应
+message DeleteTenantResponse {
+  // 租户ID
   uint32 id = 1;
 }
 
-// 获取域请求
-message GetDomainRequest {
-  // 域ID
+// 获取租户请求
+message GetTenantRequest {
+  // 租户ID
   uint32 id = 1 [
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "域ID"}
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
   ];
 }
 
-// 获取域响应
-message GetDomainResponse {
-  // 域信息
-  Domain domain = 1;
+// 获取租户响应
+message GetTenantResponse {
+  // 租户信息
+  Tenant tenant = 1;
 }
 
-// 分页查询域请求
-message ListDomainsRequest {
+// 分页查询租户请求
+message ListTenantsRequest {
   pagination.PagingRequest paging = 1 [(gnostic.openapi.v3.property) = {description: "分页查询参数"}];
 }
 
-// 分页查询域响应
-message ListDomainsResponse {
-  // 域列表
-  repeated Domain items = 1;
+// 分页查询租户响应
+message ListTenantsResponse {
+  // 租户列表
+  repeated Tenant items = 1;
   // 总数
   int32 total = 2;
 }

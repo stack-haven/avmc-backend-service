@@ -54,20 +54,20 @@ func DefaultGRPCAuthExtractor(ctx context.Context) (string, error) {
 }
 
 // GRPCAuthzInfoExtractor 定义gRPC请求中提取授权信息的函数类型
-type GRPCAuthzInfoExtractor func(ctx context.Context, fullMethod string) (authz.Subject, authz.Object, authz.Action, authz.Domain, error)
+type GRPCAuthzInfoExtractor func(ctx context.Context, fullMethod string) (authz.Subject, authz.Object, authz.Action, authz.Tenant, error)
 
 // DefaultGRPCAuthzInfoExtractor 默认的gRPC授权信息提取器
 // 从请求方法和认证声明中提取授权信息
-func DefaultGRPCAuthzInfoExtractor(ctx context.Context, fullMethod string) (authz.Subject, authz.Object, authz.Action, authz.Domain, error) {
-	// 从认证声明中提取主体和域
+func DefaultGRPCAuthzInfoExtractor(ctx context.Context, fullMethod string) (authz.Subject, authz.Object, authz.Action, authz.Tenant, error) {
+	// 从认证声明中提取主体和租户
 	claims, ok := authn.AuthClaimsFromContext(ctx)
 	if !ok || claims == nil {
 		return "", "", "", "", authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid or missing auth claims", nil)
 	}
 
-	// 提取主体和域
+	// 提取主体和租户
 	sub := authz.Subject(claims.GetSubject())
-	dom := authz.Domain(claims.GetDomain())
+	tenant := authz.Tenant(claims.GetTenant())
 
 	// 从请求方法中提取对象和操作
 	obj := authz.Object(fullMethod)
@@ -79,7 +79,7 @@ func DefaultGRPCAuthzInfoExtractor(ctx context.Context, fullMethod string) (auth
 		act = authz.Action(parts[len(parts)-1])
 	}
 
-	return sub, obj, act, dom, nil
+	return sub, obj, act, tenant, nil
 }
 
 // Deprecated: 使用 AuthnMiddleware 替代，已原生支持 HTTP/gRPC。
@@ -151,7 +151,7 @@ func GRPCAuthzMiddleware(authorizer authz.Authorizer, extractor GRPCAuthzInfoExt
 					fullMethod := tr.Operation()
 
 					// 提取授权信息
-					sub, obj, act, dom, err := extractor(ctx, fullMethod)
+					sub, obj, act, tenant, err := extractor(ctx, fullMethod)
 					if err != nil {
 						// 处理提取错误
 						var authErr *authn.AuthError
@@ -171,7 +171,7 @@ func GRPCAuthzMiddleware(authorizer authz.Authorizer, extractor GRPCAuthzInfoExt
 						return nil, ErrPermissionDenied
 					}
 					{
-						allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+						allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 						if err != nil {
 							// 处理授权错误
 							var authzErr *authz.AuthzError
@@ -261,7 +261,7 @@ func GRPCCombinedAuthMiddleware(
 					fullMethod := tr.Operation()
 
 					// 提取授权信息
-					sub, obj, act, dom, err := authzExtractor(ctx, fullMethod)
+					sub, obj, act, tenant, err := authzExtractor(ctx, fullMethod)
 					if err != nil {
 						// 处理提取错误
 						var authErr *authn.AuthError
@@ -281,7 +281,7 @@ func GRPCCombinedAuthMiddleware(
 						return nil, ErrPermissionDenied
 					}
 					{
-						allowed, err := authorizer.Enforce(ctx, sub, obj, act, dom)
+						allowed, err := authorizer.Enforce(ctx, sub, obj, act, tenant)
 						if err != nil {
 							// 处理授权错误
 							var authzErr *authz.AuthzError

@@ -58,24 +58,24 @@ func (_u *RoleUpdate) AddStatus(v int32) *RoleUpdate {
 	return _u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_u *RoleUpdate) SetDomainID(v uint32) *RoleUpdate {
-	_u.mutation.ResetDomainID()
-	_u.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_u *RoleUpdate) SetTenantID(v uint32) *RoleUpdate {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
 	return _u
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_u *RoleUpdate) SetNillableDomainID(v *uint32) *RoleUpdate {
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *RoleUpdate) SetNillableTenantID(v *uint32) *RoleUpdate {
 	if v != nil {
-		_u.SetDomainID(*v)
+		_u.SetTenantID(*v)
 	}
 	return _u
 }
 
-// AddDomainID adds value to the "domain_id" field.
-func (_u *RoleUpdate) AddDomainID(v int32) *RoleUpdate {
-	_u.mutation.AddDomainID(v)
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *RoleUpdate) AddTenantID(v int32) *RoleUpdate {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -316,9 +316,9 @@ func (_u *RoleUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Role.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.DomainID(); ok {
-		if err := role.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Role.domain_id": %w`, err)}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := role.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Role.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Name(); ok {
@@ -361,11 +361,11 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(role.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.DomainID(); ok {
-		_spec.SetField(role.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(role.FieldTenantID, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.AddedDomainID(); ok {
-		_spec.AddField(role.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(role.FieldTenantID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(role.FieldDeletedAt, field.TypeTime, value)
@@ -536,24 +536,24 @@ func (_u *RoleUpdateOne) AddStatus(v int32) *RoleUpdateOne {
 	return _u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_u *RoleUpdateOne) SetDomainID(v uint32) *RoleUpdateOne {
-	_u.mutation.ResetDomainID()
-	_u.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_u *RoleUpdateOne) SetTenantID(v uint32) *RoleUpdateOne {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
 	return _u
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_u *RoleUpdateOne) SetNillableDomainID(v *uint32) *RoleUpdateOne {
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *RoleUpdateOne) SetNillableTenantID(v *uint32) *RoleUpdateOne {
 	if v != nil {
-		_u.SetDomainID(*v)
+		_u.SetTenantID(*v)
 	}
 	return _u
 }
 
-// AddDomainID adds value to the "domain_id" field.
-func (_u *RoleUpdateOne) AddDomainID(v int32) *RoleUpdateOne {
-	_u.mutation.AddDomainID(v)
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *RoleUpdateOne) AddTenantID(v int32) *RoleUpdateOne {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -807,9 +807,9 @@ func (_u *RoleUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Role.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.DomainID(); ok {
-		if err := role.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Role.domain_id": %w`, err)}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := role.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Role.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Name(); ok {
@@ -869,11 +869,11 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(role.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.DomainID(); ok {
-		_spec.SetField(role.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(role.FieldTenantID, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.AddedDomainID(); ok {
-		_spec.AddField(role.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(role.FieldTenantID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(role.FieldDeletedAt, field.TypeTime, value)

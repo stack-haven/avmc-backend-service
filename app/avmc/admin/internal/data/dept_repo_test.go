@@ -10,19 +10,19 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-func TestDeptRepoDerivesHierarchyAndRejectsCrossDomainReferences(t *testing.T) {
+func TestDeptRepoDerivesHierarchyAndRejectsCrossTenantReferences(t *testing.T) {
 	client := newTestClient(t)
 	defer client.Close()
 
 	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
-	domainOne := tenantContext(1)
-	domainTwo := tenantContext(2)
+	tenantOne := tenantContext(1)
+	tenantTwo := tenantContext(2)
 
-	parent, err := repo.Save(domainOne, &pbCore.Dept{Name: ptr("parent")})
+	parent, err := repo.Save(tenantOne, &pbCore.Dept{Name: ptr("parent")})
 	if err != nil {
 		t.Fatalf("save parent: %v", err)
 	}
-	child, err := repo.Save(domainOne, &pbCore.Dept{
+	child, err := repo.Save(tenantOne, &pbCore.Dept{
 		Name:      ptr("child"),
 		ParentId:  ptr(parent.GetId()),
 		Ancestors: []uint32{999},
@@ -30,19 +30,19 @@ func TestDeptRepoDerivesHierarchyAndRejectsCrossDomainReferences(t *testing.T) {
 	if err != nil {
 		t.Fatalf("save child: %v", err)
 	}
-	stored := client.Dept.GetX(domainOne, child.GetId())
+	stored := client.Dept.GetX(tenantOne, child.GetId())
 	if len(stored.Ancestors) != 1 || uint32(stored.Ancestors[0]) != parent.GetId() {
 		t.Fatalf("stored ancestors = %v, want [%d]", stored.Ancestors, parent.GetId())
 	}
 
-	if _, err := repo.Save(domainTwo, &pbCore.Dept{
-		Name:     ptr("cross-domain-child"),
+	if _, err := repo.Save(tenantTwo, &pbCore.Dept{
+		Name:     ptr("cross-tenant-child"),
 		ParentId: ptr(parent.GetId()),
 	}); !pb.IsBadRequest(err) {
-		t.Fatalf("cross-domain parent error = %v", err)
+		t.Fatalf("cross-tenant parent error = %v", err)
 	}
-	if _, err := repo.FindByID(domainTwo, parent.GetId()); !pb.IsDeptNotFound(err) {
-		t.Fatalf("cross-domain FindByID error = %v", err)
+	if _, err := repo.FindByID(tenantTwo, parent.GetId()); !pb.IsDeptNotFound(err) {
+		t.Fatalf("cross-tenant FindByID error = %v", err)
 	}
 }
 

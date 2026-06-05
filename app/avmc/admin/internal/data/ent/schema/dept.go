@@ -60,6 +60,6 @@ func (Dept) Mixin() []ent.Mixin {
 // Indexes of the Dept.
 func (Dept) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("domain_id", "name").Unique(),
+		index.Fields("tenant_id", "name").Unique(),
 	}
 }

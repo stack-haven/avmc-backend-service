@@ -51,6 +51,6 @@ func (Post) Mixin() []ent.Mixin {
 // Indexes of the Post.
 func (Post) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("domain_id", "name").Unique(),
+		index.Fields("tenant_id", "name").Unique(),
 	}
 }

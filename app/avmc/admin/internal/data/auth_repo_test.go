@@ -52,7 +52,7 @@ func TestAuthRepoLoginRejectsDisabledAndUnknownUsersIdentically(t *testing.T) {
 		SetEmail("disabled@example.com").
 		SetPassword(password).
 		SetStatus(2).
-		SetDomainID(1).
+		SetTenantID(1).
 		SaveX(ctx)
 
 	repo := &authRepo{
@@ -168,7 +168,7 @@ func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
 		SetMenuCheckStrictly(1).
 		SetDeptCheckStrictly(1).
 		SetStatus(1).
-		SetDomainID(1).
+		SetTenantID(1).
 		AddMenuIDs(child.ID).
 		SaveX(ctx)
 	disabledRole := client.Role.Create().
@@ -178,25 +178,25 @@ func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
 		SetMenuCheckStrictly(1).
 		SetDeptCheckStrictly(1).
 		SetStatus(2).
-		SetDomainID(1).
+		SetTenantID(1).
 		AddMenuIDs(disabledMenu.ID).
 		SaveX(ctx)
-	otherDomainRole := client.Role.Create().
-		SetName("other_domain_role").
+	otherTenantRole := client.Role.Create().
+		SetName("other_tenant_role").
 		SetDefaultRouter("/").
 		SetDataScope(1).
 		SetMenuCheckStrictly(1).
 		SetDeptCheckStrictly(1).
 		SetStatus(1).
-		SetDomainID(2).
+		SetTenantID(2).
 		AddMenuIDs(disabledMenu.ID).
 		SaveX(ctx)
 	user := client.User.Create().
 		SetName("tester").
 		SetPassword("secret1").
 		SetStatus(1).
-		SetDomainID(1).
-		AddRoleIDs(enabledRole.ID, disabledRole.ID, otherDomainRole.ID).
+		SetTenantID(1).
+		AddRoleIDs(enabledRole.ID, disabledRole.ID, otherTenantRole.ID).
 		SaveX(ctx)
 
 	logger := log.NewStdLogger(io.Discard)
@@ -228,6 +228,6 @@ func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
 		t.Fatalf("children = %#v, want child %d", menus[0].Children, child.ID)
 	}
 	if _, err := repo.Codes(tenantContext(2), user.ID); err == nil {
-		t.Fatal("cross-domain codes error = nil")
+		t.Fatal("cross-tenant codes error = nil")
 	}
 }

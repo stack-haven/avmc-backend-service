@@ -249,7 +249,7 @@ enum GrandType {
 message Auth {
   string username = 1 [(gnostic.openapi.v3.property) = {description: "认证名称"}]; // 认证名称
   uint32 user_id = 2 [(gnostic.openapi.v3.property) = {description: "用户ID"}]; // 用户ID
-  uint32 domain_id = 3 [(gnostic.openapi.v3.property) = {description: "域ID"}]; // 域ID
+  uint32 tenant_id = 3 [(gnostic.openapi.v3.property) = {description: "租户ID"}]; // 租户ID
   repeated string roles = 4 [(gnostic.openapi.v3.property) = {description: "角色"}]; // 角色
   repeated string permissions = 5 [(gnostic.openapi.v3.property) = {description: "权限"}]; // 权限
 }
@@ -277,11 +277,11 @@ message LoginPasswordRequest {
       (gnostic.openapi.v3.property) = {description: "登录邮箱"}
     ]; // 邮箱;
   }
-  uint32 domain_id = 4 [
+  uint32 tenant_id = 4 [
     (google.api.field_behavior) = REQUIRED,
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
-  ]; // 域ID
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ]; // 租户ID
 }
 
 // 用户后台用户名密码登陆 - 请求
@@ -300,11 +300,11 @@ message LoginByUsernameRequest {
     },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
-  uint32 domain_id = 3 [
+  uint32 tenant_id = 3 [
     (google.api.field_behavior) = REQUIRED,
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
-  ]; // 域ID
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ]; // 租户ID
 }
 
 // 用户后台邮箱密码登陆 - 请求
@@ -320,11 +320,11 @@ message LoginByEmailRequest {
     },
     (gnostic.openapi.v3.property) = {description: "登录密码"}
   ]; // 密码
-  uint32 domain_id = 3 [
+  uint32 tenant_id = 3 [
     (google.api.field_behavior) = REQUIRED,
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
-  ]; // 域ID
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ]; // 租户ID
 }
 
 message LoginByPhoneCodeRequest {
@@ -342,11 +342,11 @@ message LoginByPhoneCodeRequest {
     },
     (gnostic.openapi.v3.property) = {description: "登录验证码"}
   ]; // 验证码;
-  uint32 domain_id = 3 [
+  uint32 tenant_id = 3 [
     (google.api.field_behavior) = REQUIRED,
     (buf.validate.field).uint32.gt = 0,
-    (gnostic.openapi.v3.property) = {description: "租户/域ID"}
-  ]; // 域ID
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ]; // 租户ID
 }
 
 // 用户后台登陆 - 回应

@@ -59,20 +59,20 @@ func TestRoleRepoSaveAndUpdateMenuIDs(t *testing.T) {
 	assertRoleMenuIDs(t, client, role.GetId(), nil)
 }
 
-func TestRoleRepoEnforcesDomainIsolation(t *testing.T) {
+func TestRoleRepoEnforcesTenantIsolation(t *testing.T) {
 	client := newTestClient(t)
 	defer client.Close()
 
 	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 	first, err := repo.Save(tenantContext(1), &pbCore.Role{Name: ptr("operator")})
 	if err != nil {
-		t.Fatalf("save domain one role: %v", err)
+		t.Fatalf("save tenant one role: %v", err)
 	}
 	if _, err := repo.Save(tenantContext(2), &pbCore.Role{Name: ptr("operator")}); err != nil {
-		t.Fatalf("save same role name in domain two: %v", err)
+		t.Fatalf("save same role name in tenant two: %v", err)
 	}
 	if _, err := repo.FindByID(tenantContext(2), first.GetId()); !pb.IsRoleNotFound(err) {
-		t.Fatalf("cross-domain FindByID() error = %v", err)
+		t.Fatalf("cross-tenant FindByID() error = %v", err)
 	}
 }
 

@@ -70,9 +70,9 @@ func (User) Mixin() []ent.Mixin {
 // Indexes of the User.
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("domain_id", "name").Unique(),
-		index.Fields("domain_id", "phone").Unique(),
+		index.Fields("tenant_id", "name").Unique(),
+		index.Fields("tenant_id", "phone").Unique(),
 		index.Fields("status"),
-		index.Fields("domain_id", "email").Unique(),
+		index.Fields("tenant_id", "email").Unique(),
 	}
 }

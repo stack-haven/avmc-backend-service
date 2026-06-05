@@ -47,8 +47,8 @@ type DeptMutation struct {
 	updated_at      *time.Time
 	status          *int32
 	addstatus       *int32
-	domain_id       *uint32
-	adddomain_id    *int32
+	tenant_id       *uint32
+	addtenant_id    *int32
 	deleted_at      *time.Time
 	name            *string
 	leader_id       *uint32
@@ -301,60 +301,60 @@ func (m *DeptMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *DeptMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *DeptMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *DeptMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *DeptMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the Dept entity.
+// OldTenantID returns the old "tenant_id" field's value of the Dept entity.
 // If the Dept object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeptMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *DeptMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *DeptMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *DeptMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *DeptMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *DeptMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *DeptMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *DeptMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -856,8 +856,8 @@ func (m *DeptMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, dept.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, dept.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, dept.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, dept.FieldDeletedAt)
@@ -894,8 +894,8 @@ func (m *DeptMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case dept.FieldStatus:
 		return m.Status()
-	case dept.FieldDomainID:
-		return m.DomainID()
+	case dept.FieldTenantID:
+		return m.TenantID()
 	case dept.FieldDeletedAt:
 		return m.DeletedAt()
 	case dept.FieldName:
@@ -925,8 +925,8 @@ func (m *DeptMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case dept.FieldStatus:
 		return m.OldStatus(ctx)
-	case dept.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case dept.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case dept.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case dept.FieldName:
@@ -971,12 +971,12 @@ func (m *DeptMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case dept.FieldDomainID:
+	case dept.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case dept.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -1038,8 +1038,8 @@ func (m *DeptMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, dept.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, dept.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, dept.FieldTenantID)
 	}
 	if m.addleader_id != nil {
 		fields = append(fields, dept.FieldLeaderID)
@@ -1057,8 +1057,8 @@ func (m *DeptMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case dept.FieldStatus:
 		return m.AddedStatus()
-	case dept.FieldDomainID:
-		return m.AddedDomainID()
+	case dept.FieldTenantID:
+		return m.AddedTenantID()
 	case dept.FieldLeaderID:
 		return m.AddedLeaderID()
 	case dept.FieldSort:
@@ -1079,12 +1079,12 @@ func (m *DeptMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case dept.FieldDomainID:
+	case dept.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case dept.FieldLeaderID:
 		v, ok := value.(int32)
@@ -1169,8 +1169,8 @@ func (m *DeptMutation) ResetField(name string) error {
 	case dept.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case dept.FieldDomainID:
-		m.ResetDomainID()
+	case dept.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case dept.FieldDeletedAt:
 		m.ResetDeletedAt()
@@ -3908,8 +3908,8 @@ type PostMutation struct {
 	updated_at    *time.Time
 	status        *int32
 	addstatus     *int32
-	domain_id     *uint32
-	adddomain_id  *int32
+	tenant_id     *uint32
+	addtenant_id  *int32
 	deleted_at    *time.Time
 	name          *string
 	sort          *int32
@@ -4153,60 +4153,60 @@ func (m *PostMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *PostMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *PostMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *PostMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *PostMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the Post entity.
+// OldTenantID returns the old "tenant_id" field's value of the Post entity.
 // If the Post object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PostMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *PostMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *PostMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *PostMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *PostMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *PostMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *PostMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *PostMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -4430,8 +4430,8 @@ func (m *PostMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, post.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, post.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, post.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, post.FieldDeletedAt)
@@ -4459,8 +4459,8 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case post.FieldStatus:
 		return m.Status()
-	case post.FieldDomainID:
-		return m.DomainID()
+	case post.FieldTenantID:
+		return m.TenantID()
 	case post.FieldDeletedAt:
 		return m.DeletedAt()
 	case post.FieldName:
@@ -4484,8 +4484,8 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case post.FieldStatus:
 		return m.OldStatus(ctx)
-	case post.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case post.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case post.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case post.FieldName:
@@ -4524,12 +4524,12 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case post.FieldDomainID:
+	case post.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case post.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -4570,8 +4570,8 @@ func (m *PostMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, post.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, post.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, post.FieldTenantID)
 	}
 	if m.addsort != nil {
 		fields = append(fields, post.FieldSort)
@@ -4586,8 +4586,8 @@ func (m *PostMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case post.FieldStatus:
 		return m.AddedStatus()
-	case post.FieldDomainID:
-		return m.AddedDomainID()
+	case post.FieldTenantID:
+		return m.AddedTenantID()
 	case post.FieldSort:
 		return m.AddedSort()
 	}
@@ -4606,12 +4606,12 @@ func (m *PostMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case post.FieldDomainID:
+	case post.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case post.FieldSort:
 		v, ok := value.(int32)
@@ -4665,8 +4665,8 @@ func (m *PostMutation) ResetField(name string) error {
 	case post.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case post.FieldDomainID:
-		m.ResetDomainID()
+	case post.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case post.FieldDeletedAt:
 		m.ResetDeletedAt()
@@ -4742,8 +4742,8 @@ type ProjectMutation struct {
 	updated_at     *time.Time
 	status         *int32
 	addstatus      *int32
-	domain_id      *uint32
-	adddomain_id   *int32
+	tenant_id      *uint32
+	addtenant_id   *int32
 	deleted_at     *time.Time
 	name           *string
 	code           *string
@@ -4991,60 +4991,60 @@ func (m *ProjectMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *ProjectMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *ProjectMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *ProjectMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *ProjectMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the Project entity.
+// OldTenantID returns the old "tenant_id" field's value of the Project entity.
 // If the Project object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *ProjectMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *ProjectMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *ProjectMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *ProjectMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *ProjectMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *ProjectMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *ProjectMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -5385,8 +5385,8 @@ func (m *ProjectMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, project.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, project.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, project.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, project.FieldDeletedAt)
@@ -5417,8 +5417,8 @@ func (m *ProjectMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case project.FieldStatus:
 		return m.Status()
-	case project.FieldDomainID:
-		return m.DomainID()
+	case project.FieldTenantID:
+		return m.TenantID()
 	case project.FieldDeletedAt:
 		return m.DeletedAt()
 	case project.FieldName:
@@ -5444,8 +5444,8 @@ func (m *ProjectMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case project.FieldStatus:
 		return m.OldStatus(ctx)
-	case project.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case project.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case project.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case project.FieldName:
@@ -5486,12 +5486,12 @@ func (m *ProjectMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case project.FieldDomainID:
+	case project.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case project.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -5539,8 +5539,8 @@ func (m *ProjectMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, project.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, project.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, project.FieldTenantID)
 	}
 	if m.addowner_id != nil {
 		fields = append(fields, project.FieldOwnerID)
@@ -5555,8 +5555,8 @@ func (m *ProjectMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case project.FieldStatus:
 		return m.AddedStatus()
-	case project.FieldDomainID:
-		return m.AddedDomainID()
+	case project.FieldTenantID:
+		return m.AddedTenantID()
 	case project.FieldOwnerID:
 		return m.AddedOwnerID()
 	}
@@ -5575,12 +5575,12 @@ func (m *ProjectMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case project.FieldDomainID:
+	case project.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case project.FieldOwnerID:
 		v, ok := value.(int32)
@@ -5646,8 +5646,8 @@ func (m *ProjectMutation) ResetField(name string) error {
 	case project.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case project.FieldDomainID:
-		m.ResetDomainID()
+	case project.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case project.FieldDeletedAt:
 		m.ResetDeletedAt()
@@ -5762,8 +5762,8 @@ type RoleMutation struct {
 	updated_at             *time.Time
 	status                 *int32
 	addstatus              *int32
-	domain_id              *uint32
-	adddomain_id           *int32
+	tenant_id              *uint32
+	addtenant_id           *int32
 	deleted_at             *time.Time
 	name                   *string
 	default_router         *string
@@ -6017,60 +6017,60 @@ func (m *RoleMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *RoleMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *RoleMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *RoleMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *RoleMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the Role entity.
+// OldTenantID returns the old "tenant_id" field's value of the Role entity.
 // If the Role object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *RoleMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *RoleMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *RoleMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *RoleMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *RoleMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *RoleMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *RoleMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -6514,8 +6514,8 @@ func (m *RoleMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, role.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, role.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, role.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, role.FieldDeletedAt)
@@ -6549,8 +6549,8 @@ func (m *RoleMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case role.FieldStatus:
 		return m.Status()
-	case role.FieldDomainID:
-		return m.DomainID()
+	case role.FieldTenantID:
+		return m.TenantID()
 	case role.FieldDeletedAt:
 		return m.DeletedAt()
 	case role.FieldName:
@@ -6578,8 +6578,8 @@ func (m *RoleMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case role.FieldStatus:
 		return m.OldStatus(ctx)
-	case role.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case role.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case role.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case role.FieldName:
@@ -6622,12 +6622,12 @@ func (m *RoleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case role.FieldDomainID:
+	case role.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case role.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -6682,8 +6682,8 @@ func (m *RoleMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, role.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, role.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, role.FieldTenantID)
 	}
 	if m.adddata_scope != nil {
 		fields = append(fields, role.FieldDataScope)
@@ -6704,8 +6704,8 @@ func (m *RoleMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case role.FieldStatus:
 		return m.AddedStatus()
-	case role.FieldDomainID:
-		return m.AddedDomainID()
+	case role.FieldTenantID:
+		return m.AddedTenantID()
 	case role.FieldDataScope:
 		return m.AddedDataScope()
 	case role.FieldMenuCheckStrictly:
@@ -6728,12 +6728,12 @@ func (m *RoleMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case role.FieldDomainID:
+	case role.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case role.FieldDataScope:
 		v, ok := value.(int32)
@@ -6801,8 +6801,8 @@ func (m *RoleMutation) ResetField(name string) error {
 	case role.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case role.FieldDomainID:
-		m.ResetDomainID()
+	case role.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case role.FieldDeletedAt:
 		m.ResetDeletedAt()
@@ -6946,8 +6946,8 @@ type UserMutation struct {
 	updated_at     *time.Time
 	status         *int32
 	addstatus      *int32
-	domain_id      *uint32
-	adddomain_id   *int32
+	tenant_id      *uint32
+	addtenant_id   *int32
 	deleted_at     *time.Time
 	name           *string
 	password       *string
@@ -7214,60 +7214,60 @@ func (m *UserMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *UserMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *UserMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *UserMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *UserMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the User entity.
+// OldTenantID returns the old "tenant_id" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *UserMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *UserMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *UserMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *UserMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *UserMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *UserMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *UserMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -8296,8 +8296,8 @@ func (m *UserMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, user.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, user.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, user.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, user.FieldDeletedAt)
@@ -8364,8 +8364,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case user.FieldStatus:
 		return m.Status()
-	case user.FieldDomainID:
-		return m.DomainID()
+	case user.FieldTenantID:
+		return m.TenantID()
 	case user.FieldDeletedAt:
 		return m.DeletedAt()
 	case user.FieldName:
@@ -8415,8 +8415,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case user.FieldStatus:
 		return m.OldStatus(ctx)
-	case user.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case user.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case user.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case user.FieldName:
@@ -8481,12 +8481,12 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case user.FieldDomainID:
+	case user.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case user.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -8618,8 +8618,8 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, user.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, user.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, user.FieldTenantID)
 	}
 	if m.addgender != nil {
 		fields = append(fields, user.FieldGender)
@@ -8640,8 +8640,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldStatus:
 		return m.AddedStatus()
-	case user.FieldDomainID:
-		return m.AddedDomainID()
+	case user.FieldTenantID:
+		return m.AddedTenantID()
 	case user.FieldGender:
 		return m.AddedGender()
 	case user.FieldAge:
@@ -8664,12 +8664,12 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case user.FieldDomainID:
+	case user.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case user.FieldGender:
 		v, ok := value.(int32)
@@ -8809,8 +8809,8 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case user.FieldDomainID:
-		m.ResetDomainID()
+	case user.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case user.FieldDeletedAt:
 		m.ResetDeletedAt()

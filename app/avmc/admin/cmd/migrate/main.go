@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"math"
 	"os"
 
@@ -14,31 +15,35 @@ import (
 
 var (
 	flagconf     string
-	legacyDomain uint64
+	legacyTenant uint64
 )
 
 func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf ./configs")
-	flag.Uint64Var(&legacyDomain, "legacy-domain", 0, "assign all legacy Admin tenant data to this domain before schema migration")
+	flag.Uint64Var(&legacyTenant, "legacy-tenant", 0, "assign all legacy Admin tenant data to this tenant before schema migration")
 }
 
 func main() {
 	flag.Parse()
 	logger := log.NewStdLogger(os.Stdout)
+	if err := run(context.Background(), logger); err != nil {
+		fmt.Fprintf(os.Stderr, "admin migration failed: %v\n", err)
+		os.Exit(1)
+	}
+}
 
+func run(ctx context.Context, logger log.Logger) error {
 	bc, err := runtimeconfig.Load(flagconf)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	if legacyDomain > 0 {
-		if legacyDomain > math.MaxUint32 {
-			panic("legacy-domain exceeds uint32 range")
+	if legacyTenant > 0 {
+		if legacyTenant > math.MaxUint32 {
+			return fmt.Errorf("legacy-tenant exceeds uint32 range")
 		}
-		if err := data.RunLegacyTenantBackfill(context.Background(), bc.Data, uint32(legacyDomain), logger); err != nil {
-			panic(err)
+		if err := data.RunLegacyTenantBackfill(ctx, bc.Data, uint32(legacyTenant), logger); err != nil {
+			return err
 		}
 	}
-	if err := data.RunSchemaMigration(context.Background(), bc.Data, logger); err != nil {
-		panic(err)
-	}
+	return data.RunSchemaMigration(ctx, bc.Data, logger)
 }

@@ -82,9 +82,9 @@ type SecurityUser interface {
 	// 返回: 操作标识字符串
 	GetAction() string
 
-	// GetDomain 获取域标识（通常是租户或项目ID）
-	// 返回: 域标识字符串
-	GetDomain() string
+	// GetTenant 获取租户标识
+	// 返回: 租户标识字符串
+	GetTenant() string
 }
 
 // SecurityUserCreator 定义了从认证声明创建安全用户的函数类型

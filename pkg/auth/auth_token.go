@@ -31,9 +31,13 @@ type AuthTokenInfo struct {
 	Token       Token      `json:"token,omitempty"`
 	Username    string     `json:"username,omitempty"`
 	UserId      uint32     `json:"user_id,omitempty"`
-	DomainId    uint32     `json:"domain_id,omitempty"`
+	TenantID    uint32     `json:"tenant_id,omitempty"`
 	Roles       []AuthData `json:"roles,omitempty"`
 	Permissions []AuthData `json:"permissions,omitempty"`
+}
+
+func (i AuthTokenInfo) TenantIdentifier() uint32 {
+	return i.TenantID
 }
 
 // AuthTokenRepo 认证令牌仓库结构体
@@ -179,7 +183,8 @@ func (r *AuthToken) ValidateRefreshToken(ctx context.Context, tokenString string
 
 // GenerateToken 创建令牌
 func (r *AuthToken) GenerateToken(ctx context.Context, auth AuthTokenInfo) (accessToken string, refreshToken string, err error) {
-	if accessToken = r.createAccessToken(auth.Username, auth.UserId, auth.DomainId); accessToken == "" {
+	tenantID := auth.TenantIdentifier()
+	if accessToken = r.createAccessToken(auth.Username, auth.UserId, tenantID); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
@@ -187,7 +192,7 @@ func (r *AuthToken) GenerateToken(ctx context.Context, auth AuthTokenInfo) (acce
 		return
 	}
 
-	if refreshToken = r.createRefreshToken(auth.Username, auth.UserId, auth.DomainId); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth.Username, auth.UserId, tenantID); refreshToken == "" {
 		err = errors.New("create refresh token failed")
 		return
 	}
@@ -201,7 +206,7 @@ func (r *AuthToken) GenerateToken(ctx context.Context, auth AuthTokenInfo) (acce
 
 // GenerateAccessToken 创建访问令牌
 func (r *AuthToken) GenerateAccessToken(ctx context.Context, auth AuthTokenInfo) (accessToken string, err error) {
-	if accessToken = r.createAccessToken(auth.Username, auth.UserId, auth.DomainId); accessToken == "" {
+	if accessToken = r.createAccessToken(auth.Username, auth.UserId, auth.TenantIdentifier()); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
@@ -215,7 +220,7 @@ func (r *AuthToken) GenerateAccessToken(ctx context.Context, auth AuthTokenInfo)
 
 // GenerateRefreshToken 创建刷新令牌
 func (r *AuthToken) GenerateRefreshToken(ctx context.Context, auth AuthTokenInfo) (refreshToken string, err error) {
-	if refreshToken = r.createRefreshToken(auth.Username, auth.UserId, auth.DomainId); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth.Username, auth.UserId, auth.TenantIdentifier()); refreshToken == "" {
 		err = errors.New("create refresh token failed")
 		return
 	}
@@ -272,12 +277,12 @@ func (r *AuthToken) IsExistRefreshToken(ctx context.Context, userId uint32) bool
 }
 
 // createAccessJwtToken 生成JWT访问令牌
-func (r *AuthToken) createAccessToken(_ string, userId uint32, domanId uint32) string {
+func (r *AuthToken) createAccessToken(_ string, userId uint32, tenantID uint32) string {
 	principal := authn.AuthClaims{
-		"jti":   tokenID(),
-		"sub":   convert.Unit32ToString(userId),
-		"dom":   convert.Unit32ToString(domanId),
-		"scope": "",
+		"jti":    tokenID(),
+		"sub":    convert.Unit32ToString(userId),
+		"tenant": convert.Unit32ToString(tenantID),
+		"scope":  "",
 	}
 
 	signedToken, err := r.Authenticator.CreateToken(context.Background(), principal, r.Authenticator.Options().TokenExpiration)
@@ -289,12 +294,12 @@ func (r *AuthToken) createAccessToken(_ string, userId uint32, domanId uint32) s
 }
 
 // createRefreshToken 生成刷新令牌
-func (r *AuthToken) createRefreshToken(_ string, userId uint32, domanId uint32) string {
+func (r *AuthToken) createRefreshToken(_ string, userId uint32, tenantID uint32) string {
 	// 刷新令牌信息中包含刷新过期时间
 	authClaims := authn.AuthClaims{
 		"jti":         tokenID(),
 		"sub":         strconv.FormatUint(uint64(userId), 10),
-		"dom":         convert.Unit32ToString(domanId),
+		"tenant":      convert.Unit32ToString(tenantID),
 		"refresh_exp": time.Now().Add(r.Authenticator.Options().RefreshTokenExpiration),
 	}
 	token, err := r.Authenticator.CreateToken(context.Background(), authClaims, r.Authenticator.Options().RefreshTokenExpiration)

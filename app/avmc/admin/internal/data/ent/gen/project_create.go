@@ -65,9 +65,9 @@ func (_c *ProjectCreate) SetNillableStatus(v *int32) *ProjectCreate {
 	return _c
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_c *ProjectCreate) SetDomainID(v uint32) *ProjectCreate {
-	_c.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_c *ProjectCreate) SetTenantID(v uint32) *ProjectCreate {
+	_c.mutation.SetTenantID(v)
 	return _c
 }
 
@@ -232,12 +232,12 @@ func (_c *ProjectCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Project.status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		return &ValidationError{Name: "domain_id", err: errors.New(`gen: missing required field "Project.domain_id"`)}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`gen: missing required field "Project.tenant_id"`)}
 	}
-	if v, ok := _c.mutation.DomainID(); ok {
-		if err := project.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Project.domain_id": %w`, err)}
+	if v, ok := _c.mutation.TenantID(); ok {
+		if err := project.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Project.tenant_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
@@ -311,9 +311,9 @@ func (_c *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 		_spec.SetField(project.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
 	}
-	if value, ok := _c.mutation.DomainID(); ok {
-		_spec.SetField(project.FieldDomainID, field.TypeUint32, value)
-		_node.DomainID = value
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(project.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(project.FieldDeletedAt, field.TypeTime, value)
@@ -433,21 +433,21 @@ func (u *ProjectUpsert) AddStatus(v int32) *ProjectUpsert {
 	return u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *ProjectUpsert) SetDomainID(v uint32) *ProjectUpsert {
-	u.Set(project.FieldDomainID, v)
+// SetTenantID sets the "tenant_id" field.
+func (u *ProjectUpsert) SetTenantID(v uint32) *ProjectUpsert {
+	u.Set(project.FieldTenantID, v)
 	return u
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *ProjectUpsert) UpdateDomainID() *ProjectUpsert {
-	u.SetExcluded(project.FieldDomainID)
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *ProjectUpsert) UpdateTenantID() *ProjectUpsert {
+	u.SetExcluded(project.FieldTenantID)
 	return u
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *ProjectUpsert) AddDomainID(v uint32) *ProjectUpsert {
-	u.Add(project.FieldDomainID, v)
+// AddTenantID adds v to the "tenant_id" field.
+func (u *ProjectUpsert) AddTenantID(v uint32) *ProjectUpsert {
+	u.Add(project.FieldTenantID, v)
 	return u
 }
 
@@ -621,24 +621,24 @@ func (u *ProjectUpsertOne) UpdateStatus() *ProjectUpsertOne {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *ProjectUpsertOne) SetDomainID(v uint32) *ProjectUpsertOne {
+// SetTenantID sets the "tenant_id" field.
+func (u *ProjectUpsertOne) SetTenantID(v uint32) *ProjectUpsertOne {
 	return u.Update(func(s *ProjectUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *ProjectUpsertOne) AddDomainID(v uint32) *ProjectUpsertOne {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *ProjectUpsertOne) AddTenantID(v uint32) *ProjectUpsertOne {
 	return u.Update(func(s *ProjectUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *ProjectUpsertOne) UpdateDomainID() *ProjectUpsertOne {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *ProjectUpsertOne) UpdateTenantID() *ProjectUpsertOne {
 	return u.Update(func(s *ProjectUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 
@@ -992,24 +992,24 @@ func (u *ProjectUpsertBulk) UpdateStatus() *ProjectUpsertBulk {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *ProjectUpsertBulk) SetDomainID(v uint32) *ProjectUpsertBulk {
+// SetTenantID sets the "tenant_id" field.
+func (u *ProjectUpsertBulk) SetTenantID(v uint32) *ProjectUpsertBulk {
 	return u.Update(func(s *ProjectUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *ProjectUpsertBulk) AddDomainID(v uint32) *ProjectUpsertBulk {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *ProjectUpsertBulk) AddTenantID(v uint32) *ProjectUpsertBulk {
 	return u.Update(func(s *ProjectUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *ProjectUpsertBulk) UpdateDomainID() *ProjectUpsertBulk {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *ProjectUpsertBulk) UpdateTenantID() *ProjectUpsertBulk {
 	return u.Update(func(s *ProjectUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 
