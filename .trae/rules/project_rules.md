@@ -9,12 +9,12 @@
 │   ├── Dockerfile             # 主Dockerfile
 │   └── compose                # Docker Compose配置
 ├── api                        # API定义目录
-│   ├── avmc                  # HTTP API接口
+│   ├── platform                  # HTTP API接口
 │   │   ├── admin             # 管理后台API 接口定义
 │   │   └── api               # 开放服务API 接口定义
 │   └── common                # 公共API定义
 ├── app                        # 应用目录（多个微服务）
-│   ├── avmc                    # 开放服务
+│   ├── platform                    # 开放服务
 │   │   ├── admin             # 管理后台服务
 │   ├──      ├──internal                # 内部服务
 │   │        ├── service           # 服务层
@@ -26,7 +26,7 @@
 │   ├── errors               # 错误处理库
 │   └── middleware           # 中间件库
 ├── proto                      # Proto文件目录
-│   ├── avmc                 # http 接口Proto
+│   ├── platform                 # http 接口Proto
 │   │   ├── admin            # 管理后台Proto
 │   │   └── api             # 开放接口服务Proto
 │   ├── common                # 公共Proto

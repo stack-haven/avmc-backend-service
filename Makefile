@@ -52,6 +52,32 @@ proto:
 	@cd proto && \
 	buf generate --template buf.gen.yaml
 
+.PHONY: proto-lint
+# lint protobuf contracts
+proto-lint:
+	@cd proto && buf lint
+
+.PHONY: diff-check
+# verify the working tree has no unstaged generated drift
+diff-check:
+	@git diff --check
+	@git diff --exit-code -- \
+		api \
+		app/platform/admin/cmd/server/assets/openapi.yaml \
+		app/platform/admin/internal/conf \
+		app/platform/admin/internal/data/ent/gen
+
+.PHONY: generate-check
+# regenerate admin template code and verify generated outputs are committed
+generate-check:
+	$(MAKE) proto
+	go generate ./app/platform/admin/internal/data/ent
+	go mod tidy
+	$(MAKE) diff-check
+
+.PHONY: contract-check
+# run strict protobuf and generated-code contract checks
+contract-check: proto-lint generate-check
 
 .PHONY: build
 # build
@@ -69,26 +95,36 @@ fmt-check:
 check: fmt-check
 	go vet ./...
 	go test -timeout 90s ./...
+	git diff --check
 
 .PHONY: race
 # run race detection for security and infrastructure packages
 race:
-	go test -race -timeout 180s ./pkg/auth/... ./pkg/health/... ./pkg/middleware/safelogging/...
+	go test -race -timeout 240s \
+		./pkg/aip/listing \
+		./pkg/auth/... \
+		./pkg/health/... \
+		./pkg/middleware/safelogging/... \
+		./app/platform/admin/internal/authzpolicy \
+		./app/platform/admin/internal/biz \
+		./app/platform/admin/internal/data \
+		./app/platform/admin/internal/server \
+		./app/platform/admin/internal/service
 
 .PHONY: admin-migrate
 # run admin database migration explicitly
 admin-migrate:
-	cd app/avmc/admin && go run ./cmd/migrate -conf ./configs
+	cd app/platform/admin && go run ./cmd/migrate -conf ./configs
 
 .PHONY: ai-migrate
 # run ai database migration explicitly
 ai-migrate:
-	cd app/avmc/ai && go run ./cmd/migrate -conf ./configs
+	cd app/platform/ai && go run ./cmd/migrate -conf ./configs
 
 .PHONY: admin-policy
 # seed admin authorization policies explicitly
 admin-policy:
-	cd app/avmc/admin && go run ./cmd/policy -conf ./configs
+	cd app/platform/admin && go run ./cmd/policy -conf ./configs
 
 .PHONY: generate
 # generate

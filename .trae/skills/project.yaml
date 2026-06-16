@@ -25,7 +25,7 @@ commands:
         default: ./bin
         description: 输出目录
     script:
-      - cd app/avmc/${service}
+      - cd app/platform/${service}
       - make build
       - echo "Successfully built ${service} service"
 
@@ -41,7 +41,7 @@ commands:
         default: ./configs
         description: 配置文件目录
     script:
-      - cd app/avmc/${service}
+      - cd app/platform/${service}
       - make run
       - echo "Successfully started ${service} service"
 
@@ -57,8 +57,8 @@ commands:
         default: latest
         description: 镜像标签
     script:
-      - cd app/avmc/${service}
-      - docker build -t avmc-${service}:${tag} .
+      - cd app/platform/${service}
+      - docker build -t platform-${service}:${tag} .
       - echo "Successfully built Docker image for ${service} service"
 
   - name: docker-run
@@ -77,7 +77,7 @@ commands:
         default: 8000:8000
         description: 端口映射
     script:
-      - docker run --rm -p ${port} -v $(pwd)/configs:/data/conf avmc-${service}:${tag}
+      - docker run --rm -p ${port} -v $(pwd)/configs:/data/conf platform-${service}:${tag}
       - echo "Successfully started Docker container for ${service} service"
 
   - name: docker-compose-up

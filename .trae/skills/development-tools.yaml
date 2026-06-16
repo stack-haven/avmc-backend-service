@@ -60,7 +60,7 @@ commands:
         required: true
         description: 服务名称 (e.g., admin, api)
     script:
-      - cd app/avmc/${service}
+      - cd app/platform/${service}
       - echo "Starting debug server for ${service} service"
       - echo "You can attach your debugger to port 2345"
       - dlv debug --headless --listen=:2345 --api-version=2 ./cmd/server/main.go
@@ -73,6 +73,6 @@ commands:
         required: true
         description: 服务名称 (e.g., admin, api)
     script:
-      - cd app/avmc/${service}
+      - cd app/platform/${service}
       - make api
       - echo "Successfully generated Swagger documentation for ${service} service"

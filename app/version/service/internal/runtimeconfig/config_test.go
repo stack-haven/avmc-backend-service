@@ -8,7 +8,7 @@ import (
 )
 
 func TestValidateProductionRejectsDevelopmentDatabaseCredentials(t *testing.T) {
-	t.Setenv("AVMC_VERSION_ENV", "production")
+	t.Setenv("platform_VERSION_ENV", "production")
 	bc := validBootstrap()
 
 	err := Validate(bc)
@@ -18,7 +18,7 @@ func TestValidateProductionRejectsDevelopmentDatabaseCredentials(t *testing.T) {
 }
 
 func TestValidateProductionAcceptsSafeConfig(t *testing.T) {
-	t.Setenv("AVMC_VERSION_ENV", "production")
+	t.Setenv("platform_VERSION_ENV", "production")
 	bc := validBootstrap()
 	bc.Data.Database.Source = "service:secret@tcp(db:3306)/version?parseTime=True"
 	bc.Data.Redis.Password = "redis-secret"
@@ -29,12 +29,12 @@ func TestValidateProductionAcceptsSafeConfig(t *testing.T) {
 }
 
 func TestApplyEnvOverrides(t *testing.T) {
-	t.Setenv("AVMC_VERSION_HTTP_ADDR", ":18000")
-	t.Setenv("AVMC_VERSION_GRPC_ADDR", ":19000")
-	t.Setenv("AVMC_VERSION_DB_SOURCE", "service:secret@tcp(db:3306)/version")
-	t.Setenv("AVMC_VERSION_DB_DEBUG", "true")
-	t.Setenv("AVMC_VERSION_REDIS_ADDR", "redis:6379")
-	t.Setenv("AVMC_VERSION_REDIS_PASSWORD", "secret")
+	t.Setenv("platform_VERSION_HTTP_ADDR", ":18000")
+	t.Setenv("platform_VERSION_GRPC_ADDR", ":19000")
+	t.Setenv("platform_VERSION_DB_SOURCE", "service:secret@tcp(db:3306)/version")
+	t.Setenv("platform_VERSION_DB_DEBUG", "true")
+	t.Setenv("platform_VERSION_REDIS_ADDR", "redis:6379")
+	t.Setenv("platform_VERSION_REDIS_PASSWORD", "secret")
 	bc := validBootstrap()
 
 	ApplyEnvOverrides(bc)

@@ -4,7 +4,7 @@ include ../../../app.mk
 .PHONY: doc
 doc:
 	@cd ../../../proto && \
-	buf generate --template avmc/admin/v1/buf.openapi.gen.yaml
+	buf generate --template platform/admin/v1/buf.openapi.gen.yaml
 
 
 # generate config
@@ -19,7 +19,7 @@ config:
 .PHONY: config1
 config1:
 	@cd../../../proto && \
-	buf generate --template ../app/avmc/admin/buf.gen.yaml && \
+	buf generate --template ../app/platform/admin/buf.gen.yaml && \
 	sudo mv -f common/conf internal && \
 	rm -rf common
 

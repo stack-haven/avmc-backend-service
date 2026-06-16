@@ -35,6 +35,9 @@ jobs:
       - name: Run quality gate
         run: make check
 
+      - name: Verify generated files
+        run: make generate-check
+
       - name: Run focused race detection
         run: make race
 
@@ -45,8 +48,8 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - ./app/avmc/admin/cmd/server
-          - ./app/avmc/ai/cmd/server
+          - ./app/platform/admin/cmd/server
+          - ./app/platform/ai/cmd/server
           - ./app/version/service/cmd/server
 
     steps:

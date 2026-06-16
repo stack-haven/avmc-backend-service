@@ -5,7 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-ARG SERVICE_PACKAGE=./app/avmc/admin/cmd/server
+ARG SERVICE_PACKAGE=./app/platform/admin/cmd/server
 ARG VERSION=dev
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -trimpath \

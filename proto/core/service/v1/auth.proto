@@ -13,7 +13,7 @@ import "validate/validate.proto";
 option go_package = "backend-service/api/core/service/v1;v1";
 option (gnostic.openapi.v3.document) = {
   info: {
-    title: "AVMC Auth API"
+    title: "platform Auth API"
     description: "SAAS平台管理脚手架系统-认证服务"
     version: "1.0"
     contact: {

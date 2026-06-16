@@ -26,11 +26,11 @@ commands:
       - if [ "${type}" = "interface" ]; then
       -   mkdir -p api/${service}/interface/${version}
       -   touch api/${service}/interface/${version}/i_${service}.proto
-      -   echo "syntax = \"proto3\";\n\npackage ${service}.interface.${version};\n\noption go_package = \"avmc/api/${service}/interface/${version}\";\n\nimport \"google/api/annotations.proto\";\nimport \"validate/validate.proto\";\n\n// ${service} service\nservice ${service^}Service {\n  // 示例方法\n  rpc Example(ExampleRequest) returns (ExampleResponse) {\n    option (google.api.http) = {\n      get: \"/${version}/${service}/example\"\n    };\n  }\n}\n\n// ExampleRequest 示例请求\nmessage ExampleRequest {\n  string name = 1 [(validate.rules).string.min_len = 1];\n}\n\n// ExampleResponse 示例响应\nmessage ExampleResponse {\n  string message = 1;\n}\n" > api/${service}/interface/${version}/i_${service}.proto
+      -   echo "syntax = \"proto3\";\n\npackage ${service}.interface.${version};\n\noption go_package = \"platform/api/${service}/interface/${version}\";\n\nimport \"google/api/annotations.proto\";\nimport \"validate/validate.proto\";\n\n// ${service} service\nservice ${service^}Service {\n  // 示例方法\n  rpc Example(ExampleRequest) returns (ExampleResponse) {\n    option (google.api.http) = {\n      get: \"/${version}/${service}/example\"\n    };\n  }\n}\n\n// ExampleRequest 示例请求\nmessage ExampleRequest {\n  string name = 1 [(validate.rules).string.min_len = 1];\n}\n\n// ExampleResponse 示例响应\nmessage ExampleResponse {\n  string message = 1;\n}\n" > api/${service}/interface/${version}/i_${service}.proto
       - else
       -   mkdir -p api/${service}/service/${version}
       -   touch api/${service}/service/${version}/${service}.proto
-      -   echo "syntax = \"proto3\";\n\npackage ${service}.service.${version};\n\noption go_package = \"avmc/api/${service}/service/${version}\";\n\nimport \"google/api/annotations.proto\";\nimport \"validate/validate.proto\";\n\n// ${service} service\nservice ${service^}Service {\n  // 示例方法\n  rpc Example(ExampleRequest) returns (ExampleResponse);\n}\n\n// ExampleRequest 示例请求\nmessage ExampleRequest {\n  string name = 1 [(validate.rules).string.min_len = 1];\n}\n\n// ExampleResponse 示例响应\nmessage ExampleResponse {\n  string message = 1;\n}\n" > api/${service}/service/${version}/${service}.proto
+      -   echo "syntax = \"proto3\";\n\npackage ${service}.service.${version};\n\noption go_package = \"platform/api/${service}/service/${version}\";\n\nimport \"google/api/annotations.proto\";\nimport \"validate/validate.proto\";\n\n// ${service} service\nservice ${service^}Service {\n  // 示例方法\n  rpc Example(ExampleRequest) returns (ExampleResponse);\n}\n\n// ExampleRequest 示例请求\nmessage ExampleRequest {\n  string name = 1 [(validate.rules).string.min_len = 1];\n}\n\n// ExampleResponse 示例响应\nmessage ExampleResponse {\n  string message = 1;\n}\n" > api/${service}/service/${version}/${service}.proto
       - fi
       - echo "Successfully created proto file: api/${service}/${type}/${version}/i_${service}.proto"
 
@@ -57,7 +57,7 @@ commands:
         required: true
         description: 服务名称 (e.g., admin, api)
     script:
-      - cd app/avmc/${service}/cmd/server
+      - cd app/platform/${service}/cmd/server
       - wire
       - echo "Successfully generated wire code for ${service} service"
 

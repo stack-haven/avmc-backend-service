@@ -58,7 +58,7 @@ func createCasbinAuthorizer() authz.Authorizer {
 		authz.WithModelFormat(authz.ModelFormatFile),
 		authz.WithModelText(mod),
 		authz.WithAdapterType(authz.AdapterMySQL),
-		authz.WithAdapterDSN("root:123456@tcp(localhost:3306)/avmc"),
+		authz.WithAdapterDSN("root:123456@tcp(localhost:3306)/platform"),
 	}
 
 	// 创建Casbin授权提供者

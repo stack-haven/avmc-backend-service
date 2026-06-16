@@ -149,18 +149,18 @@
    ```
 
 3. **在go-kratos框架中实现API服务层**：  
-   生成的代码位于`backend-service/app/avmc/admin/internal/service`目录下，示例代码如下：
+   生成的代码位于`backend-service/app/platform/admin/internal/service`目录下，示例代码如下：
    ```go
    package service
 
    import (
       "context"
 
-      pb "backend-service/api/avmc/admin/v1"
+      pb "backend-service/api/platform/admin/v1"
 
       pbPagination "backend-service/api/common/pagination"
       pbCore "backend-service/api/core/service/v1"
-      "backend-service/app/avmc/admin/internal/biz"
+      "backend-service/app/platform/admin/internal/biz"
 
       "github.com/go-kratos/kratos/v2/log"
    )
@@ -195,7 +195,7 @@
    }
    ```
 4. **在go-kratos中实现业务逻辑的组装层**：  
-   生成的代码位于`backend-service/app/avmc/admin/internal/biz`目录下，示例代码如下：
+   生成的代码位于`backend-service/app/platform/admin/internal/biz`目录下，示例代码如下：
    ```go
    package biz
 
@@ -266,7 +266,7 @@
    }
    ```
 5. **在go-kratos中实现业务数据访问**：  
-   生成的代码位于`backend-service/app/avmc/admin/internal/data`目录下，示例代码如下：
+   生成的代码位于`backend-service/app/platform/admin/internal/data`目录下，示例代码如下：
    ```go
    package data
 
@@ -277,7 +277,7 @@
 
       pbPagination "backend-service/api/common/pagination"
       pbCore "backend-service/api/core/service/v1"
-      "backend-service/app/avmc/admin/internal/biz"
+      "backend-service/app/platform/admin/internal/biz"
    )
 
    type roleRepo struct {
