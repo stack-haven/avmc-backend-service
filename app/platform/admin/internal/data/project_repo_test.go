@@ -87,6 +87,38 @@ func TestProjectRepoRejectsCrossTenantOwnerAndMember(t *testing.T) {
 	}
 }
 
+func TestProjectMembersCanBelongToMultipleProjects(t *testing.T) {
+	ctx := tenantContext(1)
+	client := newTestClient(t)
+	defer client.Close()
+
+	member := client.User.Create().
+		SetTenantID(1).
+		SetName("shared-project-member").
+		SetPassword("hashed-password").
+		SaveX(ctx)
+	first := client.Project.Create().
+		SetTenantID(1).
+		SetName("shared-member-project-a").
+		AddMemberIDs(member.ID).
+		SaveX(ctx)
+	second := client.Project.Create().
+		SetTenantID(1).
+		SetName("shared-member-project-b").
+		AddMemberIDs(member.ID).
+		SaveX(ctx)
+
+	if got := first.QueryMembers().CountX(ctx); got != 1 {
+		t.Fatalf("first project member count = %d, want 1", got)
+	}
+	if got := second.QueryMembers().CountX(ctx); got != 1 {
+		t.Fatalf("second project member count = %d, want 1", got)
+	}
+	if got := member.QueryProjects().CountX(ctx); got != 2 {
+		t.Fatalf("member project count = %d, want 2", got)
+	}
+}
+
 func TestProjectRepoReturnsTypedNotFoundAcrossTenants(t *testing.T) {
 	ctx := tenantContext(1)
 	seedCtx := systemContext()

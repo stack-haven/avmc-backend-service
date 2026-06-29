@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/menu_permission_group.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+// 租户权限服务
+service TenantPermissionService {
+  // 获取租户绑定的菜单权限组
+  rpc GetTenantPermissionGroups(core.service.v1.GetTenantPermissionGroupsRequest) returns (core.service.v1.GetTenantPermissionGroupsResponse) {
+    option (google.api.http) = {get: "/admin/v1/tenants/{tenant_id}/permission-groups"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取租户绑定的菜单权限组"
+      description: "获取租户绑定的菜单权限组"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新租户绑定的菜单权限组
+  rpc UpdateTenantPermissionGroups(core.service.v1.UpdateTenantPermissionGroupsRequest) returns (core.service.v1.UpdateTenantPermissionGroupsResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/tenants/{tenant_id}/permission-groups"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新租户绑定的菜单权限组"
+      description: "更新租户绑定的菜单权限组"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 获取租户最终有效菜单树
+  rpc GetTenantEffectiveMenus(core.service.v1.GetTenantEffectiveMenusRequest) returns (core.service.v1.GetTenantEffectiveMenusResponse) {
+    option (google.api.http) = {get: "/admin/v1/tenants/{tenant_id}/effective-menus"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取租户最终有效菜单树"
+      description: "获取租户最终有效菜单树"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 获取当前登录租户最终有效菜单树
+  rpc GetCurrentTenantEffectiveMenus(core.service.v1.GetCurrentTenantEffectiveMenusRequest) returns (core.service.v1.GetTenantEffectiveMenusResponse) {
+    option (google.api.http) = {get: "/admin/v1/current-tenant/effective-menus"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取当前登录租户最终有效菜单树"
+      description: "获取当前登录租户最终有效菜单树"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+}

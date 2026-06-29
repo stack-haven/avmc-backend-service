@@ -1,0 +1,16 @@
+syntax = "proto3";
+package platform.admin.v1;
+
+import "core/service/v1/operation_log.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service OperationLogService {
+  rpc ListOperationLogs(core.service.v1.ListOperationLogsRequest) returns (core.service.v1.ListOperationLogsResponse) {
+    option (google.api.http) = {get: "/admin/v1/operation-logs"};
+  }
+  rpc GetOperationLog(core.service.v1.GetOperationLogRequest) returns (core.service.v1.OperationLog) {
+    option (google.api.http) = {get: "/admin/v1/operation-logs/{id}"};
+  }
+}

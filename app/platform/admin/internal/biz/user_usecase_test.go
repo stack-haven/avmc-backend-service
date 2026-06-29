@@ -17,6 +17,23 @@ type stubUserRepo struct {
 	updated *pbCore.User
 }
 
+type stubSessionRepo struct {
+	revokedUser uint32
+}
+
+func (*stubSessionRepo) List(context.Context, *pbCore.ListSessionsRequest, string) ([]*pbCore.Session, int32, error) {
+	return nil, 0, nil
+}
+func (*stubSessionRepo) ListMine(context.Context, uint32, string) ([]*pbCore.Session, error) {
+	return nil, nil
+}
+func (*stubSessionRepo) Revoke(context.Context, string) error { return nil }
+func (r *stubSessionRepo) RevokeUser(_ context.Context, id uint32) error {
+	r.revokedUser = id
+	return nil
+}
+func (*stubSessionRepo) RevokeTenant(context.Context, uint32) error { return nil }
+
 func (r *stubUserRepo) Save(_ context.Context, user *pbCore.User) (*pbCore.User, error) {
 	r.saved = user
 	return user, nil
@@ -64,7 +81,7 @@ func TestUserUsecaseCreateRequiresAndHashesStrongPassword(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &stubUserRepo{}
-			uc := NewUserUsecase(repo, log.NewStdLogger(io.Discard))
+			uc := NewUserUsecase(repo, nil, log.NewStdLogger(io.Discard))
 			_, err := uc.Create(context.Background(), tt.user)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("Create() error = %v, wantErr %v", err, tt.wantErr)
@@ -89,13 +106,27 @@ func TestUserUsecaseUpdateRejectsExplicitEmptyPassword(t *testing.T) {
 
 	empty := ""
 	repo := &stubUserRepo{}
-	uc := NewUserUsecase(repo, log.NewStdLogger(io.Discard))
+	uc := NewUserUsecase(repo, nil, log.NewStdLogger(io.Discard))
 
 	if _, err := uc.Update(context.Background(), &pbCore.User{Id: 1, Password: &empty}); err == nil {
 		t.Fatal("Update() error = nil")
 	}
 	if repo.updated != nil {
 		t.Fatal("user with empty password was updated")
+	}
+}
+
+func TestUserUsecasePasswordChangeRevokesAllUserSessions(t *testing.T) {
+	password := "N3w!Password#2026"
+	repo := &stubUserRepo{}
+	sessions := &stubSessionRepo{}
+	uc := NewUserUsecase(repo, sessions, log.NewStdLogger(io.Discard))
+
+	if _, err := uc.Update(context.Background(), &pbCore.User{Id: 42, Password: &password}); err != nil {
+		t.Fatalf("Update() error = %v", err)
+	}
+	if sessions.revokedUser != 42 {
+		t.Fatalf("revoked user = %d, want 42", sessions.revokedUser)
 	}
 }
 

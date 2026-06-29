@@ -56,6 +56,7 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("roles", Role.Type),
 		edge.To("posts", Post.Type),
+		edge.From("projects", Project.Type).Ref("members"),
 	}
 }
 

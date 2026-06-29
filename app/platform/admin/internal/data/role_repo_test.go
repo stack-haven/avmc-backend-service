@@ -35,6 +35,7 @@ func TestRoleRepoSaveAndUpdateMenuIDs(t *testing.T) {
 		SetType(2).
 		SetParentID(parent.ID).
 		SaveX(ctx)
+	seedTenantMenuPermissionGroup(t, client, 1, parent.ID, child.ID)
 
 	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 	role, err := repo.Save(ctx, &pbCore.Role{
@@ -93,6 +94,7 @@ func TestRoleRepoListReturnsMenuIDs(t *testing.T) {
 	client := newTestClient(t)
 	defer client.Close()
 	menuItem := client.Menu.Create().SetName("listed-menu").SetTitle("Listed").SaveX(ctx)
+	seedTenantMenuPermissionGroup(t, client, 1, menuItem.ID)
 	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 	if _, err := repo.Save(ctx, &pbCore.Role{Name: ptr("listed-role"), MenuIds: []uint32{menuItem.ID}}); err != nil {
 		t.Fatalf("save role: %v", err)
@@ -105,6 +107,28 @@ func TestRoleRepoListReturnsMenuIDs(t *testing.T) {
 	if len(roles) != 1 || len(roles[0].GetMenuIds()) != 1 || roles[0].GetMenuIds()[0] != menuItem.ID {
 		t.Fatalf("roles = %#v", roles)
 	}
+}
+
+func seedTenantMenuPermissionGroup(t *testing.T, client *gen.Client, tenantID uint32, menuIDs ...uint32) {
+	t.Helper()
+	ctx := systemContext()
+	client.Tenant.Create().
+		SetID(tenantID).
+		SetName("tenant").
+		SetCode("tenant").
+		SetStatus(1).
+		SaveX(ctx)
+	group := client.MenuPermissionGroup.Create().
+		SetName("tenant-permission-group").
+		SetCode("tenant-permission-group").
+		SetStatus(1).
+		AddMenuIDs(menuIDs...).
+		SaveX(ctx)
+	client.TenantPermissionGroup.Create().
+		SetTenantID(tenantID).
+		SetGroupID(group.ID).
+		SetEnabled(true).
+		SaveX(ctx)
 }
 
 func newTestClient(t *testing.T) *gen.Client {

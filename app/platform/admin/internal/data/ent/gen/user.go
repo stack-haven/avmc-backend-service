@@ -63,9 +63,8 @@ type User struct {
 	Description *string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges           UserEdges `json:"edges"`
-	project_members *uint32
-	selectValues    sql.SelectValues
+	Edges        UserEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -74,9 +73,11 @@ type UserEdges struct {
 	Roles []*Role `json:"roles,omitempty"`
 	// Posts holds the value of the posts edge.
 	Posts []*Post `json:"posts,omitempty"`
+	// Projects holds the value of the projects edge.
+	Projects []*Project `json:"projects,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // RolesOrErr returns the Roles value or an error if the edge
@@ -97,6 +98,15 @@ func (e UserEdges) PostsOrErr() ([]*Post, error) {
 	return nil, &NotLoadedError{edge: "posts"}
 }
 
+// ProjectsOrErr returns the Projects value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ProjectsOrErr() ([]*Project, error) {
+	if e.loadedTypes[2] {
+		return e.Projects, nil
+	}
+	return nil, &NotLoadedError{edge: "projects"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -110,8 +120,6 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldBirthday, user.FieldLastLoginAt:
 			values[i] = new(sql.NullTime)
-		case user.ForeignKeys[0]: // project_members
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -279,13 +287,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				_m.Description = new(string)
 				*_m.Description = value.String
 			}
-		case user.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field project_members", value)
-			} else if value.Valid {
-				_m.project_members = new(uint32)
-				*_m.project_members = uint32(value.Int64)
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -307,6 +308,11 @@ func (_m *User) QueryRoles() *RoleQuery {
 // QueryPosts queries the "posts" edge of the User entity.
 func (_m *User) QueryPosts() *PostQuery {
 	return NewUserClient(_m.config).QueryPosts(_m)
+}
+
+// QueryProjects queries the "projects" edge of the User entity.
+func (_m *User) QueryProjects() *ProjectQuery {
+	return NewUserClient(_m.config).QueryProjects(_m)
 }
 
 // Update returns a builder for updating this User.

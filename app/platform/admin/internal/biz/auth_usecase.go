@@ -17,7 +17,7 @@ type AuthRepo interface {
 	// LoginByEmail 邮箱密码登陆
 	LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*v1.LoginResponse, error)
 	// Logout 登出
-	Logout(context.Context, uint32) error
+	Logout(context.Context, string) error
 	// RefreshToken 刷新令牌
 	RefreshToken(context.Context, string) (*v1.RefreshTokenResponse, error)
 	// Register 注册用户
@@ -75,10 +75,12 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*
 // 参数：ctx 上下文，accessToken 访问令牌
 // 返回值：错误信息
 func (uc *AuthUsecase) Logout(ctx context.Context) error {
-	// 这里实现具体的登出业务逻辑
-	userId := authn.GetAuthUserID(ctx)
+	claims, ok := authn.AuthClaimsFromContext(ctx)
+	if !ok || claims.GetID() == "" {
+		return v1.ErrorAuthInvalidToken("当前会话无效")
+	}
 	uc.log.Infof("尝试登出")
-	return uc.repo.Logout(ctx, userId)
+	return uc.repo.Logout(ctx, claims.GetID())
 }
 
 // Register 处理注册业务逻辑

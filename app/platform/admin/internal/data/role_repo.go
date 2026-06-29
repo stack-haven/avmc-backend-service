@@ -22,11 +22,15 @@ var _ biz.RoleRepo = (*roleRepo)(nil)
 
 type roleRepo struct {
 	BaseRepo
+	mpr *menuPermissionGroupRepo
 }
 
 // NewRoleRepo 创建角色仓库
 func NewRoleRepo(data *Data, logger log.Logger) biz.RoleRepo {
-	return &roleRepo{BaseRepo: NewBaseRepo(data, logger)}
+	return &roleRepo{
+		BaseRepo: NewBaseRepo(data, logger),
+		mpr:      NewMenuPermissionGroupRepo(data, logger).(*menuPermissionGroupRepo),
+	}
 }
 
 func (r *roleRepo) validateMenuIDs(ctx context.Context, menuIDs []uint32) error {
@@ -107,6 +111,9 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
 		return nil, err
 	}
+	if err := r.mpr.ValidateTenantMenuIDs(ctx, g.GetMenuIds()); err != nil {
+		return nil, err
+	}
 
 	tx, err := r.Data.DB(ctx).Tx(ctx)
 	if err != nil {
@@ -150,6 +157,9 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	}
 	if g.MenuIds != nil {
 		if err := r.validateMenuIDs(ctx, g.MenuIds); err != nil {
+			return nil, err
+		}
+		if err := r.mpr.ValidateTenantMenuIDs(ctx, g.MenuIds); err != nil {
 			return nil, err
 		}
 	}

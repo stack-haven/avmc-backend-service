@@ -23,6 +23,21 @@ type fakeLoginAttemptGuard struct {
 	successes  int
 }
 
+type fakeLoginLogRepo struct {
+	events []*pbCore.LoginLog
+}
+
+func (r *fakeLoginLogRepo) Append(_ context.Context, event *pbCore.LoginLog) error {
+	r.events = append(r.events, event)
+	return nil
+}
+func (r *fakeLoginLogRepo) List(context.Context, *pbCore.ListLoginLogsRequest) ([]*pbCore.LoginLog, int32, error) {
+	return nil, 0, nil
+}
+func (r *fakeLoginLogRepo) Get(context.Context, uint64) (*pbCore.LoginLog, error) {
+	return nil, nil
+}
+
 func (g *fakeLoginAttemptGuard) Check(context.Context, string, string, uint32) error {
 	g.checks++
 	return g.checkErr
@@ -47,6 +62,12 @@ func TestAuthRepoLoginRejectsDisabledAndUnknownUsersIdentically(t *testing.T) {
 	if err != nil {
 		t.Fatalf("hash password: %v", err)
 	}
+	client.Tenant.Create().
+		SetID(1).
+		SetName("active-tenant").
+		SetCode("active-tenant").
+		SetStatus(1).
+		SaveX(ctx)
 	client.User.Create().
 		SetName("disabled-user").
 		SetEmail("disabled@example.com").
@@ -94,6 +115,26 @@ func TestAuthRepoLoginRejectsDisabledAndUnknownUsersIdentically(t *testing.T) {
 	}
 }
 
+func TestAuthRepoRejectsDisabledTenantBeforeIssuingToken(t *testing.T) {
+	ctx := systemContext()
+	client := newTestClient(t)
+	defer client.Close()
+
+	client.Tenant.Create().
+		SetID(2).
+		SetName("disabled-tenant").
+		SetCode("disabled-tenant").
+		SetStatus(2).
+		SaveX(ctx)
+	repo := &authRepo{
+		data: &Data{db: client},
+		log:  log.NewHelper(log.NewStdLogger(io.Discard)),
+	}
+	if _, err := repo.LoginByUsername(ctx, "any-user", "secret1", 2); !pb.IsUserIncorrectPassword(err) {
+		t.Fatalf("disabled tenant login error = %v, want generic auth failure", err)
+	}
+}
+
 func TestAuthRepoLoginAttemptProtection(t *testing.T) {
 	t.Parallel()
 
@@ -134,6 +175,29 @@ func TestAuthRepoLoginAttemptProtection(t *testing.T) {
 	})
 }
 
+func TestAuthRepoRecordsLoginSecurityResults(t *testing.T) {
+	logger := log.NewHelper(log.NewStdLogger(io.Discard))
+	loginLogs := &fakeLoginLogRepo{}
+	repo := &authRepo{log: logger, llr: loginLogs}
+
+	repo.recordLogin(context.Background(), "username", "admin", 1, &pb.LoginResponse{Id: 7}, nil)
+	repo.recordLogin(context.Background(), "email", "unknown@example.com", 1, nil, pb.ErrorUserIncorrectPassword("用户名或密码错误"))
+	repo.recordLogin(context.Background(), "username", "locked", 1, nil, pb.ErrorUserTooManyLoginAttempts("登录失败次数过多"))
+
+	if len(loginLogs.events) != 3 {
+		t.Fatalf("login event count = %d, want 3", len(loginLogs.events))
+	}
+	if loginLogs.events[0].GetResult() != "success" || loginLogs.events[0].GetUserId() != 7 {
+		t.Fatalf("success event = %+v", loginLogs.events[0])
+	}
+	if loginLogs.events[1].GetResult() != "failure" || loginLogs.events[1].UserId != nil {
+		t.Fatalf("failure event = %+v", loginLogs.events[1])
+	}
+	if loginLogs.events[2].GetResult() != "locked" {
+		t.Fatalf("locked event = %+v", loginLogs.events[2])
+	}
+}
+
 func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
 	ctx := tenantContext(1)
 	seedCtx := systemContext()
@@ -154,6 +218,7 @@ func TestAuthRepoMenusFiltersDisabledRolesAndAddsAncestors(t *testing.T) {
 		SetParentID(parent.ID).
 		SetAuthCode("system:user:list").
 		SaveX(seedCtx)
+	seedTenantMenuPermissionGroup(t, client, 1, child.ID)
 	disabledMenu := client.Menu.Create().
 		SetName("disabled-role-menu").
 		SetTitle("Disabled Role Menu").

@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"context"
 	"errors"
@@ -512,6 +513,21 @@ func (_c *MenuCreate) AddRoles(v ...*Role) *MenuCreate {
 	return _c.AddRoleIDs(ids...)
 }
 
+// AddPermissionGroupIDs adds the "permission_groups" edge to the MenuPermissionGroup entity by IDs.
+func (_c *MenuCreate) AddPermissionGroupIDs(ids ...uint32) *MenuCreate {
+	_c.mutation.AddPermissionGroupIDs(ids...)
+	return _c
+}
+
+// AddPermissionGroups adds the "permission_groups" edges to the MenuPermissionGroup entity.
+func (_c *MenuCreate) AddPermissionGroups(v ...*MenuPermissionGroup) *MenuCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPermissionGroupIDs(ids...)
+}
+
 // Mutation returns the MenuMutation object of the builder.
 func (_c *MenuCreate) Mutation() *MenuMutation {
 	return _c.mutation
@@ -983,6 +999,22 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PermissionGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupsTable,
+			Columns: menu.PermissionGroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

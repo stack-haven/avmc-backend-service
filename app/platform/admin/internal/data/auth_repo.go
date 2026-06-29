@@ -5,6 +5,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/auth"
@@ -13,15 +14,20 @@ import (
 	"backend-service/pkg/utils/crypto"
 	"context"
 	"errors"
+	"net/http"
 	"sort"
 	"time"
 
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/transport"
+	"go.opentelemetry.io/otel/trace"
 
 	"backend-service/api/common/enum"
 	pb "backend-service/api/platform/admin/v1"
 
 	pbCore "backend-service/api/core/service/v1"
+	iputil "backend-service/pkg/utils/ip"
 )
 
 // AuthRepo 数据仓库结构体
@@ -32,20 +38,24 @@ type authRepo struct {
 	atr   *auth.AuthToken
 	ur    *userRepo
 	mr    *menuRepo
+	mpr   *menuPermissionGroupRepo
 	guard loginattempt.Guard
+	llr   biz.LoginLogRepo
 }
 
 // NewAuthRepo 创建新的用户数据仓库实例
 // 参数：logger 日志记录器
 // 返回值：用户数据仓库实例指针
-func NewAuthRepo(data *Data, atr *auth.AuthToken, guard loginattempt.Guard, logger log.Logger) biz.AuthRepo {
+func NewAuthRepo(data *Data, atr *auth.AuthToken, guard loginattempt.Guard, loginLogs biz.LoginLogRepo, logger log.Logger) biz.AuthRepo {
 	return &authRepo{
 		data:  data,
 		log:   log.NewHelper(logger),
 		atr:   atr,
 		ur:    NewUserRepo(data, logger).(*userRepo),
 		mr:    NewMenuRepo(data, logger).(*menuRepo),
+		mpr:   NewMenuPermissionGroupRepo(data, logger).(*menuPermissionGroupRepo),
 		guard: guard,
+		llr:   loginLogs,
 	}
 }
 
@@ -62,6 +72,10 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
 		return nil, err
 	}
+	claims, err := r.atr.ValidateToken(ctx, accessToken)
+	if err != nil {
+		return nil, err
+	}
 	// 拼装具体过期时间
 	expires := convert.TimeValueToString(func(exp time.Duration) *time.Time {
 		t := time.Now().Add(exp)
@@ -73,14 +87,19 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    expires,
+		SessionId:    claims.GetID(),
 	}, nil
 }
 
 // LoginByUsername 处理后台用户名登录数据操作
 // 参数：ctx 上下文，name 用户名，password 密码
 // 返回值：登录响应结构体，错误信息
-func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (*pb.LoginResponse, error) {
+func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (resp *pb.LoginResponse, err error) {
+	defer func() { r.recordLogin(ctx, "username", name, tenantID, resp, err) }()
 	if err := r.checkLogin(ctx, "username", name, tenantID); err != nil {
+		return nil, err
+	}
+	if err := r.requireActiveTenant(ctx, tenantID); err != nil {
 		return nil, err
 	}
 	ctx = entviewer.NewTenantContext(ctx, tenantID)
@@ -111,8 +130,12 @@ func (r *authRepo) LoginByUsername(ctx context.Context, name, password string, t
 // LoginByEmail 处理后台邮箱登录数据操作
 // 参数：ctx email 邮箱，password 密码
 // 返回值：登录响应结构体，错误信息
-func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*pb.LoginResponse, error) {
+func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (resp *pb.LoginResponse, err error) {
+	defer func() { r.recordLogin(ctx, "email", email, tenantID, resp, err) }()
 	if err := r.checkLogin(ctx, "email", email, tenantID); err != nil {
+		return nil, err
+	}
+	if err := r.requireActiveTenant(ctx, tenantID); err != nil {
 		return nil, err
 	}
 	ctx = entviewer.NewTenantContext(ctx, tenantID)
@@ -138,6 +161,81 @@ func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, ten
 	}
 	r.loginSucceeded(ctx, "email", email, tenantID)
 	return r.LoginResponse(ctx, res)
+}
+
+func (r *authRepo) requireActiveTenant(ctx context.Context, tenantID uint32) error {
+	if tenantID == 0 {
+		return pb.ErrorUserIncorrectPassword("用户名或密码错误")
+	}
+	systemCtx := entviewer.NewSystemContext(ctx)
+	exists, err := r.data.DB(systemCtx).Tenant.Query().
+		Where(
+			tenant.IDEQ(tenantID),
+			tenant.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
+			tenant.LifecycleStatusEQ(int32(pbCore.TenantLifecycleStatus_TENANT_LIFECYCLE_STATUS_ACTIVE)),
+			tenant.Or(tenant.ExpiresAtIsNil(), tenant.ExpiresAtGT(time.Now())),
+			tenant.DeletedAtIsNil(),
+		).
+		Exist(systemCtx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return pb.ErrorUserIncorrectPassword("用户名或密码错误")
+	}
+	return nil
+}
+
+func (r *authRepo) recordLogin(ctx context.Context, loginType, identity string, tenantID uint32, resp *pb.LoginResponse, loginErr error) {
+	if r.llr == nil || tenantID == 0 {
+		return
+	}
+	result := "success"
+	failureReason := ""
+	var userID *uint32
+	sessionID := ""
+	if resp != nil && resp.GetId() > 0 {
+		id := resp.GetId()
+		userID = &id
+		sessionID = resp.GetSessionId()
+	}
+	if loginErr != nil {
+		result = "failure"
+		if pb.IsUserTooManyLoginAttempts(loginErr) {
+			result = "locked"
+		}
+		if serviceErr := kerrors.FromError(loginErr); serviceErr != nil {
+			failureReason = serviceErr.Message
+		}
+	}
+	ip := iputil.FormContext(ctx)
+	userAgent := ""
+	if info, ok := transport.FromServerContext(ctx); ok {
+		userAgent = info.RequestHeader().Get("User-Agent")
+		if carrier, ok := info.(interface{ Request() *http.Request }); ok {
+			if request := carrier.Request(); request != nil {
+				if requestIP, requestErr := iputil.GetIP(request); requestErr == nil {
+					ip = requestIP
+				}
+			}
+		}
+	}
+	traceID := trace.SpanContextFromContext(ctx).TraceID().String()
+	logCtx := entviewer.NewTenantContext(ctx, tenantID)
+	if err := r.llr.Append(logCtx, &pbCore.LoginLog{
+		TenantId:      tenantID,
+		UserId:        userID,
+		Identity:      identity,
+		LoginType:     loginType,
+		Result:        result,
+		FailureReason: &failureReason,
+		Ip:            &ip,
+		UserAgent:     &userAgent,
+		TraceId:       &traceID,
+		SessionId:     &sessionID,
+	}); err != nil {
+		r.log.Errorf("记录登录安全日志失败，tenant_id=%d: %v", tenantID, err)
+	}
 }
 
 func (r *authRepo) checkLogin(ctx context.Context, scope, identity string, tenantID uint32) error {
@@ -194,6 +292,9 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌域无效")
 	}
 	ctx = entviewer.NewTenantContext(ctx, tenantID)
+	if err := r.requireActiveTenant(ctx, tenantID); err != nil {
+		return nil, pb.ErrorAuthInvalidToken("刷新令牌租户无效")
+	}
 	res, err := r.data.DB(ctx).User.Query().
 		Select(user.FieldName, user.FieldTenantID).
 		Where(
@@ -208,11 +309,12 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 		}
 		return nil, err
 	}
-	accessToken, newRefreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
+	sessionID := claims.GetID()
+	accessToken, newRefreshToken, err := r.atr.RotateSessionToken(ctx, auth.AuthTokenInfo{
 		UserId:   userID,
 		Username: convert.ToValue(res.Name),
 		TenantID: res.TenantID,
-	})
+	}, sessionID)
 	if err != nil {
 		r.log.Errorf("刷新令牌重新签发失败，用户ID：%d，错误：%v", userID, err)
 		return nil, err
@@ -220,16 +322,20 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 	return &pb.RefreshTokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
+		SessionId:    sessionID,
 	}, nil
 }
 
 // Logout 处理后台登出数据操作
 // 参数：ctx 上下文
 // 返回值：错误信息
-func (r *authRepo) Logout(ctx context.Context, userId uint32) error {
-	// 这里实现具体的登出数据操作
-	r.log.Infof("尝试登出数据操作，用户ID：%d", userId)
-	return r.atr.RemoveToken(ctx, userId)
+func (r *authRepo) Logout(ctx context.Context, sessionID string) error {
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
+		return err
+	}
+	r.log.Infof("尝试登出会话：%s", sessionID)
+	return r.atr.RevokeSession(ctx, tenantID, sessionID)
 }
 
 // Register 处理注册数据操作
@@ -307,7 +413,7 @@ func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, er
 	if err != nil {
 		return nil, err
 	}
-	menus, err = r.withMenuAncestors(ctx, menus)
+	menus, err = withMenuAncestors(ctx, r.data.DB(ctx), menus)
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +421,8 @@ func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, er
 }
 
 func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
 		return nil, err
 	}
 	if _, err := r.data.DB(ctx).User.Query().
@@ -339,9 +446,23 @@ func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, e
 		r.log.Errorf("查询用户菜单失败，用户ID：%d，错误：%v", userId, err)
 		return nil, err
 	}
+	effectiveIDs, err := r.menuPermissionGroups().GetTenantEffectiveMenuIDs(ctx, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	if len(effectiveIDs) == 0 {
+		return nil, nil
+	}
+	allowed := make(map[uint32]struct{}, len(effectiveIDs))
+	for _, id := range effectiveIDs {
+		allowed[id] = struct{}{}
+	}
 
 	menuMap := make(map[uint32]*gen.Menu, len(menus))
 	for _, m := range menus {
+		if _, ok := allowed[m.ID]; !ok {
+			continue
+		}
 		menuMap[m.ID] = m
 	}
 	ids := make([]uint32, 0, len(menuMap))
@@ -363,92 +484,16 @@ func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, e
 	return result, nil
 }
 
-func (r *authRepo) withMenuAncestors(ctx context.Context, menus []*gen.Menu) ([]*gen.Menu, error) {
-	menuMap := make(map[uint32]*gen.Menu, len(menus))
-	for _, m := range menus {
-		if m != nil {
-			menuMap[m.ID] = m
-		}
+func (r *authRepo) menuPermissionGroups() *menuPermissionGroupRepo {
+	if r.mpr != nil {
+		return r.mpr
 	}
-	for {
-		parentIDs := make([]uint32, 0)
-		seen := make(map[uint32]struct{})
-		for _, m := range menuMap {
-			parentID := convert.ToValue(m.ParentID)
-			if parentID == 0 {
-				continue
-			}
-			if _, ok := menuMap[parentID]; ok {
-				continue
-			}
-			if _, ok := seen[parentID]; ok {
-				continue
-			}
-			seen[parentID] = struct{}{}
-			parentIDs = append(parentIDs, parentID)
-		}
-		if len(parentIDs) == 0 {
-			break
-		}
-		parents, err := r.data.DB(ctx).Menu.Query().
-			Where(
-				menu.IDIn(parentIDs...),
-				menu.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
-			).
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if len(parents) == 0 {
-			break
-		}
-		for _, parent := range parents {
-			menuMap[parent.ID] = parent
-		}
+	if r.mr == nil {
+		r.mr = &menuRepo{BaseRepo: BaseRepo{Data: r.data, Log: r.log}}
 	}
-
-	ids := make([]uint32, 0, len(menuMap))
-	for id := range menuMap {
-		ids = append(ids, id)
+	r.mpr = &menuPermissionGroupRepo{
+		BaseRepo: BaseRepo{Data: r.data, Log: r.log},
+		mr:       r.mr,
 	}
-	sort.Slice(ids, func(i, j int) bool {
-		left, right := menuMap[ids[i]], menuMap[ids[j]]
-		if convert.ToValue(left.Sort) == convert.ToValue(right.Sort) {
-			return left.ID < right.ID
-		}
-		return convert.ToValue(left.Sort) < convert.ToValue(right.Sort)
-	})
-	result := make([]*gen.Menu, 0, len(ids))
-	for _, id := range ids {
-		result = append(result, menuMap[id])
-	}
-	return result, nil
-}
-
-func buildMenuTree(menus []*pbCore.Menu) []*pbCore.Menu {
-	nodes := make(map[uint32]*pbCore.Menu, len(menus))
-	roots := make([]*pbCore.Menu, 0, len(menus))
-	for _, m := range menus {
-		if m == nil || m.GetType() == pbCore.MenuType_MENU_TYPE_BUTTON {
-			continue
-		}
-		m.Children = nil
-		nodes[m.GetId()] = m
-	}
-	for _, m := range menus {
-		if m == nil || m.GetType() == pbCore.MenuType_MENU_TYPE_BUTTON {
-			continue
-		}
-		parentID := m.GetParentId()
-		if parentID == 0 {
-			roots = append(roots, m)
-			continue
-		}
-		if parent, ok := nodes[parentID]; ok {
-			parent.Children = append(parent.Children, m)
-			continue
-		}
-		roots = append(roots, m)
-	}
-	return roots
+	return r.mpr
 }

@@ -209,6 +209,7 @@ func (r *menuRepo) Save(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, erro
 		}
 		return nil, err
 	}
+	r.bumpMenuVersion(ctx)
 	return r.convertProto(res), nil
 }
 
@@ -280,6 +281,7 @@ func (r *menuRepo) Update(ctx context.Context, g *pbCore.Menu) (*pbCore.Menu, er
 		}
 		return nil, err
 	}
+	r.bumpMenuVersion(ctx)
 	return r.convertProto(res), nil
 }
 
@@ -305,6 +307,9 @@ func (r *menuRepo) Delete(ctx context.Context, id uint32) error {
 	err = r.Data.DB(ctx).Menu.DeleteOneID(id).Exec(ctx)
 	if gen.IsNotFound(err) {
 		return pb.ErrorMenuNotFound("菜单不存在")
+	}
+	if err == nil {
+		r.bumpMenuVersion(ctx)
 	}
 	return err
 }

@@ -41,13 +41,19 @@ var ProviderSet = wire.NewSet(
 	NewLoginAttemptGuard,
 	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
 	auth.NewAuthToken,
+	NewTenantRepo,
 	NewAuthRepo,
 	NewUserRepo,
 	NewRoleRepo,
 	NewMenuRepo,
+	NewMenuPermissionGroupRepo,
 	NewPostRepo,
 	NewDeptRepo,
 	NewProjectRepo,
+	NewDictionaryRepo,
+	NewOperationLogRepo,
+	NewLoginLogRepo,
+	NewSessionRepo,
 )
 
 // Data .

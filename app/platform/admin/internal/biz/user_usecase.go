@@ -32,13 +32,14 @@ type UserRepo interface {
 
 // UserUsecase 用户业务逻辑
 type UserUsecase struct {
-	repo UserRepo
-	log  *log.Helper
+	repo     UserRepo
+	sessions SessionRepo
+	log      *log.Helper
 }
 
 // NewUserUsecase new a User usecase.
-func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
-	return &UserUsecase{repo: repo, log: log.NewHelper(logger)}
+func NewUserUsecase(repo UserRepo, sessions SessionRepo, logger log.Logger) *UserUsecase {
+	return &UserUsecase{repo: repo, sessions: sessions, log: log.NewHelper(logger)}
 }
 
 // Create 创建用户 — 业务逻辑：密码哈希、默认值
@@ -74,7 +75,8 @@ func (uc *UserUsecase) Get(ctx context.Context, id uint32) (*pbCore.User, error)
 func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, error) {
 	uc.log.WithContext(ctx).Infof("UpdateUser: %v", g.GetId())
 
-	if g.Password != nil {
+	passwordChanged := g.Password != nil
+	if passwordChanged {
 		if err := ValidatePassword(*g.Password); err != nil {
 			return nil, err
 		}
@@ -86,7 +88,16 @@ func (uc *UserUsecase) Update(ctx context.Context, g *pbCore.User) (*pbCore.User
 		g.Password = &hash
 	}
 
-	return uc.repo.Update(ctx, g)
+	updated, err := uc.repo.Update(ctx, g)
+	if err != nil {
+		return nil, err
+	}
+	if passwordChanged && uc.sessions != nil {
+		if err := uc.sessions.RevokeUser(ctx, g.GetId()); err != nil {
+			return nil, err
+		}
+	}
+	return updated, nil
 }
 
 // ListPageSimple 用户简单列表分页
@@ -96,7 +107,13 @@ func (uc *UserUsecase) ListPageSimple(ctx context.Context, opts ...listing.Optio
 
 // Delete 删除用户
 func (uc *UserUsecase) Delete(ctx context.Context, id uint32) error {
-	return uc.repo.Delete(ctx, id)
+	if err := uc.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+	if uc.sessions != nil {
+		return uc.sessions.RevokeUser(ctx, id)
+	}
+	return nil
 }
 
 // UpdateStatus 更新用户状态
@@ -108,7 +125,16 @@ func (uc *UserUsecase) UpdateStatus(ctx context.Context, id uint32, status int32
 	}
 	s := pbEnum.Status(status)
 	g.Status = &s
-	return uc.repo.Update(ctx, g)
+	updated, err := uc.repo.Update(ctx, g)
+	if err != nil {
+		return nil, err
+	}
+	if status != int32(pbEnum.Status_STATUS_ENABLED) && uc.sessions != nil {
+		if err := uc.sessions.RevokeUser(ctx, id); err != nil {
+			return nil, err
+		}
+	}
+	return updated, nil
 }
 
 // ListUsers 用户列表

@@ -39,6 +39,20 @@ cd app/platform/admin
 go run ./cmd/mock -conf ./configs
 ```
 
+如果本地库来自旧版 Admin schema，先用受控参数清理历史 `mock_` 前缀演示数据并执行迁移：
+
+```bash
+cd app/platform/admin
+go run ./cmd/mock -conf ./configs -reset-legacy-mock -migrate
+```
+
+当前演示账号：
+
+- 租户 1：`admin` / `123456`，完整底座管理权限。
+- 租户 1：`vben` / `123456`，完整底座管理权限。
+- 租户 1：`jack` / `123456`，基础业务权限。
+- 租户 2：`mock_tenant2` / `123456`，基础业务权限。
+
 ## Production Baseline
 
 生产环境必须通过环境变量覆盖敏感配置，不要提交真实密钥或 DSN。推荐以 `config.prod.example.yaml` 为模板。不要把生产样例放进 `configs/` 目录，因为 `-conf ./configs` 会加载该目录下的配置文件。

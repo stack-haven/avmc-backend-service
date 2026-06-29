@@ -9,8 +9,23 @@ import (
 // Dept is the predicate function for dept builders.
 type Dept func(*sql.Selector)
 
+// DictionaryItem is the predicate function for dictionaryitem builders.
+type DictionaryItem func(*sql.Selector)
+
+// DictionaryType is the predicate function for dictionarytype builders.
+type DictionaryType func(*sql.Selector)
+
+// LoginLog is the predicate function for loginlog builders.
+type LoginLog func(*sql.Selector)
+
 // Menu is the predicate function for menu builders.
 type Menu func(*sql.Selector)
+
+// MenuPermissionGroup is the predicate function for menupermissiongroup builders.
+type MenuPermissionGroup func(*sql.Selector)
+
+// OperationLog is the predicate function for operationlog builders.
+type OperationLog func(*sql.Selector)
 
 // Post is the predicate function for post builders.
 type Post func(*sql.Selector)
@@ -20,6 +35,12 @@ type Project func(*sql.Selector)
 
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
+
+// Tenant is the predicate function for tenant builders.
+type Tenant func(*sql.Selector)
+
+// TenantPermissionGroup is the predicate function for tenantpermissiongroup builders.
+type TenantPermissionGroup func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

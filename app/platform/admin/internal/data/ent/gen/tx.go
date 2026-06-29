@@ -16,14 +16,28 @@ type Tx struct {
 	config
 	// Dept is the client for interacting with the Dept builders.
 	Dept *DeptClient
+	// DictionaryItem is the client for interacting with the DictionaryItem builders.
+	DictionaryItem *DictionaryItemClient
+	// DictionaryType is the client for interacting with the DictionaryType builders.
+	DictionaryType *DictionaryTypeClient
+	// LoginLog is the client for interacting with the LoginLog builders.
+	LoginLog *LoginLogClient
 	// Menu is the client for interacting with the Menu builders.
 	Menu *MenuClient
+	// MenuPermissionGroup is the client for interacting with the MenuPermissionGroup builders.
+	MenuPermissionGroup *MenuPermissionGroupClient
+	// OperationLog is the client for interacting with the OperationLog builders.
+	OperationLog *OperationLogClient
 	// Post is the client for interacting with the Post builders.
 	Post *PostClient
 	// Project is the client for interacting with the Project builders.
 	Project *ProjectClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
+	// Tenant is the client for interacting with the Tenant builders.
+	Tenant *TenantClient
+	// TenantPermissionGroup is the client for interacting with the TenantPermissionGroup builders.
+	TenantPermissionGroup *TenantPermissionGroupClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -158,10 +172,17 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Dept = NewDeptClient(tx.config)
+	tx.DictionaryItem = NewDictionaryItemClient(tx.config)
+	tx.DictionaryType = NewDictionaryTypeClient(tx.config)
+	tx.LoginLog = NewLoginLogClient(tx.config)
 	tx.Menu = NewMenuClient(tx.config)
+	tx.MenuPermissionGroup = NewMenuPermissionGroupClient(tx.config)
+	tx.OperationLog = NewOperationLogClient(tx.config)
 	tx.Post = NewPostClient(tx.config)
 	tx.Project = NewProjectClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
+	tx.Tenant = NewTenantClient(tx.config)
+	tx.TenantPermissionGroup = NewTenantPermissionGroupClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

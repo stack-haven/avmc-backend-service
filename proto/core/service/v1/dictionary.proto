@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+
+message DictionaryType {
+  uint32 id = 1;
+  string name = 2 [(buf.validate.field).string = {min_len: 1, max_len: 50}];
+  string code = 3 [(buf.validate.field).string = {min_len: 1, max_len: 50, pattern: "^[A-Za-z][A-Za-z0-9_.-]*$"}];
+  optional enum.Status status = 4 [(buf.validate.field).enum.defined_only = true];
+  optional int32 sort = 5 [(buf.validate.field).int32 = {gte: 0, lte: 9999}];
+  optional string remark = 6 [(buf.validate.field).string.max_len = 255];
+  repeated DictionaryItem items = 7;
+  optional string created_at = 8;
+  optional string updated_at = 9;
+}
+
+message DictionaryItem {
+  uint32 id = 1;
+  uint32 type_id = 2 [(buf.validate.field).uint32.gt = 0];
+  string label = 3 [(buf.validate.field).string = {min_len: 1, max_len: 50}];
+  string value = 4 [(buf.validate.field).string = {min_len: 1, max_len: 100}];
+  optional enum.Status status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional int32 sort = 6 [(buf.validate.field).int32 = {gte: 0, lte: 9999}];
+  optional string color = 7 [(buf.validate.field).string.max_len = 32];
+  optional string remark = 8 [(buf.validate.field).string.max_len = 255];
+  optional string created_at = 9;
+  optional string updated_at = 10;
+}
+
+message ListDictionaryTypesRequest {
+  string page_token = 1;
+  int32 page_size = 2;
+  optional string name = 3;
+  optional string code = 4;
+  optional enum.Status status = 5;
+}
+message ListDictionaryTypesResponse {
+  repeated DictionaryType items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+message GetDictionaryTypeRequest { uint32 id = 1 [(buf.validate.field).uint32.gt = 0]; }
+message CreateDictionaryTypeRequest { DictionaryType dictionary = 1 [(buf.validate.field).required = true]; }
+message UpdateDictionaryTypeRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  DictionaryType dictionary = 2 [(buf.validate.field).required = true];
+}
+message DeleteDictionaryTypeRequest { uint32 id = 1 [(buf.validate.field).uint32.gt = 0]; }
+message ListDictionaryItemsRequest {
+  uint32 type_id = 1 [(buf.validate.field).uint32.gt = 0];
+  optional enum.Status status = 2;
+}
+message ListDictionaryItemsResponse { repeated DictionaryItem items = 1; }
+message CreateDictionaryItemRequest { DictionaryItem item = 1 [(buf.validate.field).required = true]; }
+message UpdateDictionaryItemRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  DictionaryItem item = 2 [(buf.validate.field).required = true];
+}
+message DeleteDictionaryItemRequest { uint32 id = 1 [(buf.validate.field).uint32.gt = 0]; }

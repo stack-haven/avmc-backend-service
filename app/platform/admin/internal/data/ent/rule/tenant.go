@@ -70,6 +70,14 @@ func (tenantRule) EvalMutation(ctx context.Context, m ent.Mutation) error {
 
 func filterTenantQuery(q ent.Query, tenantID uint32) error {
 	switch q := q.(type) {
+	case *gen.DictionaryTypeQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.DictionaryItemQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.OperationLogQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.LoginLogQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	case *gen.DeptQuery:
 		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	case *gen.PostQuery:
@@ -88,6 +96,14 @@ func filterTenantQuery(q ent.Query, tenantID uint32) error {
 
 func filterTenantMutation(m ent.Mutation, tenantID uint32) error {
 	switch m := m.(type) {
+	case *gen.DictionaryTypeMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.DictionaryItemMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.OperationLogMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.LoginLogMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
 	case *gen.DeptMutation:
 		m.WhereP(tenantFieldEQ(tenantID))
 	case *gen.PostMutation:

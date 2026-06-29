@@ -1,0 +1,259 @@
+syntax = "proto3";
+
+package core.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "core/service/v1/menu.proto";
+import "gnostic/openapi/v3/annotations.proto";
+
+option go_package = "backend-service/api/core/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "core.service.v1";
+
+service MenuPermissionGroupService {
+  // 创建菜单权限组
+  rpc CreateMenuPermissionGroup(CreateMenuPermissionGroupRequest) returns (CreateMenuPermissionGroupResponse);
+  // 更新菜单权限组
+  rpc UpdateMenuPermissionGroup(UpdateMenuPermissionGroupRequest) returns (UpdateMenuPermissionGroupResponse);
+  // 删除菜单权限组
+  rpc DeleteMenuPermissionGroup(DeleteMenuPermissionGroupRequest) returns (DeleteMenuPermissionGroupResponse);
+  // 获取菜单权限组
+  rpc GetMenuPermissionGroup(GetMenuPermissionGroupRequest) returns (GetMenuPermissionGroupResponse);
+  // 查询菜单权限组
+  rpc ListMenuPermissionGroups(ListMenuPermissionGroupsRequest) returns (ListMenuPermissionGroupsResponse);
+  // 更新菜单权限组状态
+  rpc UpdateMenuPermissionGroupStatus(UpdateMenuPermissionGroupStatusRequest) returns (UpdateMenuPermissionGroupStatusResponse);
+}
+
+service TenantPermissionService {
+  // 获取租户绑定的菜单权限组
+  rpc GetTenantPermissionGroups(GetTenantPermissionGroupsRequest) returns (GetTenantPermissionGroupsResponse);
+  // 更新租户绑定的菜单权限组
+  rpc UpdateTenantPermissionGroups(UpdateTenantPermissionGroupsRequest) returns (UpdateTenantPermissionGroupsResponse);
+  // 获取租户最终有效菜单树
+  rpc GetTenantEffectiveMenus(GetTenantEffectiveMenusRequest) returns (GetTenantEffectiveMenusResponse);
+  // 获取当前登录租户最终有效菜单树
+  rpc GetCurrentTenantEffectiveMenus(GetCurrentTenantEffectiveMenusRequest) returns (GetTenantEffectiveMenusResponse);
+}
+
+// 菜单权限组
+message MenuPermissionGroup {
+  // 权限组ID
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "权限组ID"}];
+  // 权限组名称
+  optional string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 50
+    },
+    (gnostic.openapi.v3.property) = {description: "权限组名称"}
+  ];
+  // 权限组编码
+  optional string code = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_-]+$"
+    },
+    (gnostic.openapi.v3.property) = {description: "权限组编码"}
+  ];
+  // 权限组状态
+  optional enum.Status status = 4 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "权限组状态"}
+  ];
+  // 是否系统内置
+  optional bool is_system = 5 [(gnostic.openapi.v3.property) = {description: "是否系统内置"}];
+  // 排序值
+  optional int32 sort = 6 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 1000
+    },
+    (gnostic.openapi.v3.property) = {description: "排序值"}
+  ];
+  // 描述
+  optional string description = 7 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "描述"}
+  ];
+  // 备注
+  optional string remark = 8 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "备注"}
+  ];
+  // 绑定的菜单ID列表
+  repeated uint32 menu_ids = 9 [(gnostic.openapi.v3.property) = {description: "绑定的菜单ID列表"}];
+  // 绑定租户数量
+  optional int32 tenant_count = 10 [(gnostic.openapi.v3.property) = {description: "绑定租户数量"}];
+  // 创建时间
+  optional string created_at = 11 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+  // 更新时间
+  optional string updated_at = 12 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+}
+
+message CreateMenuPermissionGroupRequest {
+  MenuPermissionGroup group = 1 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "菜单权限组"}
+  ];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message CreateMenuPermissionGroupResponse {
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "权限组ID"}];
+}
+
+message UpdateMenuPermissionGroupRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "权限组ID"}
+  ];
+  MenuPermissionGroup group = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "菜单权限组"}
+  ];
+  optional uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message UpdateMenuPermissionGroupResponse {}
+
+message DeleteMenuPermissionGroupRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "权限组ID"}
+  ];
+  optional uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message DeleteMenuPermissionGroupResponse {}
+
+message GetMenuPermissionGroupRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "权限组ID"}
+  ];
+}
+
+message GetMenuPermissionGroupResponse {
+  MenuPermissionGroup group = 1 [(gnostic.openapi.v3.property) = {description: "菜单权限组"}];
+}
+
+message ListMenuPermissionGroupsRequest {
+  string page_token = 1 [
+    json_name = "pageToken",
+    (gnostic.openapi.v3.property) = {description: "当前页码"}
+  ];
+  int32 page_size = 2 [
+    json_name = "pageSize",
+    (gnostic.openapi.v3.property) = {description: "每页数量"}
+  ];
+  optional bool no_paging = 3 [
+    json_name = "nopaging",
+    (gnostic.openapi.v3.property) = {description: "是否不分页"}
+  ];
+  optional string name = 4 [(buf.validate.field).string.max_len = 50];
+  optional string code = 5 [(buf.validate.field).string.max_len = 64];
+  optional enum.Status status = 6 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "权限组状态"}
+  ];
+  optional string filter = 10 [(gnostic.openapi.v3.property) = {description: "筛选条件"}];
+  optional string order_by = 11 [(gnostic.openapi.v3.property) = {description: "排序字段"}];
+  int32 skip = 12 [(gnostic.openapi.v3.property) = {description: "跳过的行数"}];
+}
+
+message ListMenuPermissionGroupsResponse {
+  repeated MenuPermissionGroup items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message UpdateMenuPermissionGroupStatusRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "权限组ID"}
+  ];
+  optional enum.Status status = 2 [
+    (buf.validate.field).enum.defined_only = true,
+    (gnostic.openapi.v3.property) = {description: "权限组状态"}
+  ];
+  optional uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message UpdateMenuPermissionGroupStatusResponse {}
+
+message TenantPermissionGroupBinding {
+  uint32 tenant_id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+  uint32 group_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "权限组ID"}
+  ];
+  optional bool enabled = 3 [(gnostic.openapi.v3.property) = {description: "是否启用"}];
+  optional uint32 bound_by = 4 [(gnostic.openapi.v3.property) = {description: "绑定操作人ID"}];
+  optional string bound_at = 5 [(gnostic.openapi.v3.property) = {description: "绑定时间"}];
+}
+
+message GetTenantPermissionGroupsRequest {
+  uint32 tenant_id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+}
+
+message GetTenantPermissionGroupsResponse {
+  repeated MenuPermissionGroup groups = 1 [(gnostic.openapi.v3.property) = {description: "租户绑定的权限组"}];
+  repeated uint32 group_ids = 2 [(gnostic.openapi.v3.property) = {description: "租户绑定的权限组ID"}];
+}
+
+message UpdateTenantPermissionGroupsRequest {
+  uint32 tenant_id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+  repeated uint32 group_ids = 2 [(gnostic.openapi.v3.property) = {description: "权限组ID列表"}];
+  optional uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message UpdateTenantPermissionGroupsResponse {}
+
+message GetTenantEffectiveMenusRequest {
+  uint32 tenant_id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+  optional uint32 parent_id = 2 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "父级ID"}
+  ];
+}
+
+message GetTenantEffectiveMenusResponse {
+  repeated Menu items = 1 [(gnostic.openapi.v3.property) = {description: "租户最终有效菜单树"}];
+}
+
+message GetCurrentTenantEffectiveMenusRequest {
+  optional uint32 parent_id = 1 [
+    (buf.validate.field).uint32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "父级ID"}
+  ];
+}

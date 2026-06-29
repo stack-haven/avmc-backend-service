@@ -1,0 +1,38 @@
+syntax = "proto3";
+package platform.admin.v1;
+
+import "core/service/v1/dictionary.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service DictionaryService {
+  rpc ListDictionaryTypes(core.service.v1.ListDictionaryTypesRequest) returns (core.service.v1.ListDictionaryTypesResponse) {
+    option (google.api.http) = {get: "/admin/v1/dictionaries"};
+  }
+  rpc GetDictionaryType(core.service.v1.GetDictionaryTypeRequest) returns (core.service.v1.DictionaryType) {
+    option (google.api.http) = {get: "/admin/v1/dictionaries/{id}"};
+  }
+  rpc CreateDictionaryType(core.service.v1.CreateDictionaryTypeRequest) returns (core.service.v1.DictionaryType) {
+    option (google.api.http) = {post: "/admin/v1/dictionaries" body: "dictionary"};
+  }
+  rpc UpdateDictionaryType(core.service.v1.UpdateDictionaryTypeRequest) returns (core.service.v1.DictionaryType) {
+    option (google.api.http) = {put: "/admin/v1/dictionaries/{id}" body: "dictionary"};
+  }
+  rpc DeleteDictionaryType(core.service.v1.DeleteDictionaryTypeRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/admin/v1/dictionaries/{id}"};
+  }
+  rpc ListDictionaryItems(core.service.v1.ListDictionaryItemsRequest) returns (core.service.v1.ListDictionaryItemsResponse) {
+    option (google.api.http) = {get: "/admin/v1/dictionary-items"};
+  }
+  rpc CreateDictionaryItem(core.service.v1.CreateDictionaryItemRequest) returns (core.service.v1.DictionaryItem) {
+    option (google.api.http) = {post: "/admin/v1/dictionary-items" body: "item"};
+  }
+  rpc UpdateDictionaryItem(core.service.v1.UpdateDictionaryItemRequest) returns (core.service.v1.DictionaryItem) {
+    option (google.api.http) = {put: "/admin/v1/dictionary-items/{id}" body: "item"};
+  }
+  rpc DeleteDictionaryItem(core.service.v1.DeleteDictionaryItemRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/admin/v1/dictionary-items/{id}"};
+  }
+}

@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/menu_permission_group.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+// 菜单权限组服务
+service MenuPermissionGroupService {
+  // 获取菜单权限组列表
+  rpc ListMenuPermissionGroups(core.service.v1.ListMenuPermissionGroupsRequest) returns (core.service.v1.ListMenuPermissionGroupsResponse) {
+    option (google.api.http) = {get: "/admin/v1/menu-permission-groups"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单权限组列表"
+      description: "获取菜单权限组列表"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 获取菜单权限组
+  rpc GetMenuPermissionGroup(core.service.v1.GetMenuPermissionGroupRequest) returns (core.service.v1.MenuPermissionGroup) {
+    option (google.api.http) = {get: "/admin/v1/menu-permission-groups/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单权限组"
+      description: "获取菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 创建菜单权限组
+  rpc CreateMenuPermissionGroup(core.service.v1.CreateMenuPermissionGroupRequest) returns (core.service.v1.CreateMenuPermissionGroupResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/menu-permission-groups"
+      body: "group"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建菜单权限组"
+      description: "创建菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新菜单权限组
+  rpc UpdateMenuPermissionGroup(core.service.v1.UpdateMenuPermissionGroupRequest) returns (core.service.v1.UpdateMenuPermissionGroupResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/menu-permission-groups/{id}"
+      body: "group"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新菜单权限组"
+      description: "更新菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 删除菜单权限组
+  rpc DeleteMenuPermissionGroup(core.service.v1.DeleteMenuPermissionGroupRequest) returns (core.service.v1.DeleteMenuPermissionGroupResponse) {
+    option (google.api.http) = {delete: "/admin/v1/menu-permission-groups/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除菜单权限组"
+      description: "删除菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新菜单权限组状态
+  rpc UpdateMenuPermissionGroupStatus(core.service.v1.UpdateMenuPermissionGroupStatusRequest) returns (core.service.v1.UpdateMenuPermissionGroupStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/menu-permission-groups/status-update/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新菜单权限组状态"
+      description: "更新菜单权限组状态"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+}

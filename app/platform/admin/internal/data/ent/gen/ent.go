@@ -4,10 +4,17 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
+	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
 	"errors"
@@ -78,12 +85,19 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			dept.Table:    dept.ValidColumn,
-			menu.Table:    menu.ValidColumn,
-			post.Table:    post.ValidColumn,
-			project.Table: project.ValidColumn,
-			role.Table:    role.ValidColumn,
-			user.Table:    user.ValidColumn,
+			dept.Table:                  dept.ValidColumn,
+			dictionaryitem.Table:        dictionaryitem.ValidColumn,
+			dictionarytype.Table:        dictionarytype.ValidColumn,
+			loginlog.Table:              loginlog.ValidColumn,
+			menu.Table:                  menu.ValidColumn,
+			menupermissiongroup.Table:   menupermissiongroup.ValidColumn,
+			operationlog.Table:          operationlog.ValidColumn,
+			post.Table:                  post.ValidColumn,
+			project.Table:               project.ValidColumn,
+			role.Table:                  role.ValidColumn,
+			tenant.Table:                tenant.ValidColumn,
+			tenantpermissiongroup.Table: tenantpermissiongroup.ValidColumn,
+			user.Table:                  user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

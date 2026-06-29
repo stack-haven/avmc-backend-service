@@ -73,6 +73,8 @@ func (Menu) Edges() []ent.Edge {
 			Field("parent_id"),
 		edge.From("roles", Role.Type).
 			Ref("menus"),
+		edge.From("permission_groups", MenuPermissionGroup.Type).
+			Ref("menus"),
 	}
 }
 

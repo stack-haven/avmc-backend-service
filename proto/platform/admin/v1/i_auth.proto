@@ -357,6 +357,7 @@ message LoginResponse {
   string access_token = 4 [(gnostic.openapi.v3.property) = {description: "访问令牌"}]; // 访问令牌
   string refresh_token = 5 [(gnostic.openapi.v3.property) = {description: "刷新令牌"}]; // 刷新令牌
   optional string expires_in = 6 [(gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}]; // 访问令牌过期时间
+  string session_id = 7 [(gnostic.openapi.v3.property) = {description: "当前会话ID"}];
 }
 
 // 请求 - 刷新令牌
@@ -369,6 +370,7 @@ message RefreshTokenResponse {
   string access_token = 1 [(gnostic.openapi.v3.property) = {description: "新的访问令牌"}]; // 新的访问令牌
   string refresh_token = 2 [(gnostic.openapi.v3.property) = {description: "新的刷新令牌"}]; // 新的刷新令牌
   optional string expires_in = 3 [(gnostic.openapi.v3.property) = {description: "访问令牌过期时间"}]; // 访问令牌过期时间
+  string session_id = 4 [(gnostic.openapi.v3.property) = {description: "当前会话ID"}];
 }
 
 // 用户后台登出 - 请求

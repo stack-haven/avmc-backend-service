@@ -1,0 +1,42 @@
+version: v2
+managed:
+  enabled: true
+  disable:
+    - file_option: go_package_prefix
+      module: buf.build/bufbuild/protovalidate
+
+inputs:
+  - directory: .
+    paths:
+      - ./core/service/v1/menu_permission_group.proto
+      - ./core/service/v1/dictionary.proto
+      - ./core/service/v1/operation_log.proto
+      - ./core/service/v1/login_log.proto
+      - ./core/service/v1/session.proto
+      - ./core/service/v1/tenant.proto
+      - ./platform/admin/v1/i_menu_permission_group.proto
+      - ./platform/admin/v1/i_tenant.proto
+      - ./platform/admin/v1/i_tenant_permission.proto
+      - ./platform/admin/v1/i_dictionary.proto
+      - ./platform/admin/v1/i_operation_log.proto
+      - ./platform/admin/v1/i_login_log.proto
+      - ./platform/admin/v1/i_auth.proto
+      - ./platform/admin/v1/i_session.proto
+
+plugins:
+  - local: protoc-gen-go
+    out: ../api
+    opt:
+      - paths=source_relative
+  - local: protoc-gen-go-grpc
+    out: ../api
+    opt:
+      - paths=source_relative
+  - local: protoc-gen-go-http
+    out: ../api
+    opt:
+      - paths=source_relative
+  - local: protoc-gen-go-errors
+    out: ../api
+    opt:
+      - paths=source_relative
