@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"context"
@@ -598,6 +599,21 @@ func (_u *MenuUpdate) AddPermissionGroups(v ...*MenuPermissionGroup) *MenuUpdate
 	return _u.AddPermissionGroupIDs(ids...)
 }
 
+// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the MenuPermissionGroupVersion entity by IDs.
+func (_u *MenuUpdate) AddPermissionGroupVersionIDs(ids ...uint32) *MenuUpdate {
+	_u.mutation.AddPermissionGroupVersionIDs(ids...)
+	return _u
+}
+
+// AddPermissionGroupVersions adds the "permission_group_versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuUpdate) AddPermissionGroupVersions(v ...*MenuPermissionGroupVersion) *MenuUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPermissionGroupVersionIDs(ids...)
+}
+
 // Mutation returns the MenuMutation object of the builder.
 func (_u *MenuUpdate) Mutation() *MenuMutation {
 	return _u.mutation
@@ -670,6 +686,27 @@ func (_u *MenuUpdate) RemovePermissionGroups(v ...*MenuPermissionGroup) *MenuUpd
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePermissionGroupIDs(ids...)
+}
+
+// ClearPermissionGroupVersions clears all "permission_group_versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuUpdate) ClearPermissionGroupVersions() *MenuUpdate {
+	_u.mutation.ClearPermissionGroupVersions()
+	return _u
+}
+
+// RemovePermissionGroupVersionIDs removes the "permission_group_versions" edge to MenuPermissionGroupVersion entities by IDs.
+func (_u *MenuUpdate) RemovePermissionGroupVersionIDs(ids ...uint32) *MenuUpdate {
+	_u.mutation.RemovePermissionGroupVersionIDs(ids...)
+	return _u
+}
+
+// RemovePermissionGroupVersions removes "permission_group_versions" edges to MenuPermissionGroupVersion entities.
+func (_u *MenuUpdate) RemovePermissionGroupVersions(v ...*MenuPermissionGroupVersion) *MenuUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePermissionGroupVersionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1043,6 +1080,51 @@ func (_u *MenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PermissionGroupVersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPermissionGroupVersionsIDs(); len(nodes) > 0 && !_u.mutation.PermissionGroupVersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PermissionGroupVersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -1639,6 +1721,21 @@ func (_u *MenuUpdateOne) AddPermissionGroups(v ...*MenuPermissionGroup) *MenuUpd
 	return _u.AddPermissionGroupIDs(ids...)
 }
 
+// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the MenuPermissionGroupVersion entity by IDs.
+func (_u *MenuUpdateOne) AddPermissionGroupVersionIDs(ids ...uint32) *MenuUpdateOne {
+	_u.mutation.AddPermissionGroupVersionIDs(ids...)
+	return _u
+}
+
+// AddPermissionGroupVersions adds the "permission_group_versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuUpdateOne) AddPermissionGroupVersions(v ...*MenuPermissionGroupVersion) *MenuUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPermissionGroupVersionIDs(ids...)
+}
+
 // Mutation returns the MenuMutation object of the builder.
 func (_u *MenuUpdateOne) Mutation() *MenuMutation {
 	return _u.mutation
@@ -1711,6 +1808,27 @@ func (_u *MenuUpdateOne) RemovePermissionGroups(v ...*MenuPermissionGroup) *Menu
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePermissionGroupIDs(ids...)
+}
+
+// ClearPermissionGroupVersions clears all "permission_group_versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuUpdateOne) ClearPermissionGroupVersions() *MenuUpdateOne {
+	_u.mutation.ClearPermissionGroupVersions()
+	return _u
+}
+
+// RemovePermissionGroupVersionIDs removes the "permission_group_versions" edge to MenuPermissionGroupVersion entities by IDs.
+func (_u *MenuUpdateOne) RemovePermissionGroupVersionIDs(ids ...uint32) *MenuUpdateOne {
+	_u.mutation.RemovePermissionGroupVersionIDs(ids...)
+	return _u
+}
+
+// RemovePermissionGroupVersions removes "permission_group_versions" edges to MenuPermissionGroupVersion entities.
+func (_u *MenuUpdateOne) RemovePermissionGroupVersions(v ...*MenuPermissionGroupVersion) *MenuUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePermissionGroupVersionIDs(ids...)
 }
 
 // Where appends a list predicates to the MenuUpdate builder.
@@ -2114,6 +2232,51 @@ func (_u *MenuUpdateOne) sqlSave(ctx context.Context) (_node *Menu, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PermissionGroupVersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPermissionGroupVersionsIDs(); len(nodes) > 0 && !_u.mutation.PermissionGroupVersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PermissionGroupVersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

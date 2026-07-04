@@ -49,11 +49,12 @@ var tenantAdminUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9_-]{3,32}$`)
 type TenantUsecase struct {
 	repo     TenantRepo
 	sessions SessionRepo
+	policy   TenantAdminPolicy
 	log      *log.Helper
 }
 
-func NewTenantUsecase(repo TenantRepo, sessions SessionRepo, logger log.Logger) *TenantUsecase {
-	return &TenantUsecase{repo: repo, sessions: sessions, log: log.NewHelper(logger)}
+func NewTenantUsecase(repo TenantRepo, sessions SessionRepo, policy TenantAdminPolicy, logger log.Logger) *TenantUsecase {
+	return &TenantUsecase{repo: repo, sessions: sessions, policy: policy, log: log.NewHelper(logger)}
 }
 
 func (uc *TenantUsecase) Create(ctx context.Context, tenant *pbCore.Tenant, admin *pbCore.TenantInitialAdmin, operatorID uint32) (*TenantProvisioningResult, error) {
@@ -89,7 +90,7 @@ func (uc *TenantUsecase) Create(ctx context.Context, tenant *pbCore.Tenant, admi
 		return nil, ErrPasswordHashFailed
 	}
 	uc.log.WithContext(ctx).Infof("CreateTenant: %s", tenant.GetCode())
-	return uc.repo.Provision(ctx, &TenantProvisioning{
+	result, err := uc.repo.Provision(ctx, &TenantProvisioning{
 		Tenant:            tenant,
 		OperatorID:        operatorID,
 		AdminUsername:     admin.GetUsername(),
@@ -97,14 +98,33 @@ func (uc *TenantUsecase) Create(ctx context.Context, tenant *pbCore.Tenant, admi
 		AdminRealname:     admin.GetRealname(),
 		AdminEmail:        admin.GetEmail(),
 	})
+	if err != nil {
+		return nil, err
+	}
+	if uc.policy != nil {
+		if err = uc.policy.SetMembership(ctx, result.Tenant.GetId(), result.AdminUserID, true); err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
 }
 
 func (uc *TenantUsecase) Update(ctx context.Context, tenant *pbCore.Tenant, operatorID uint32) (*pbCore.Tenant, error) {
 	uc.log.WithContext(ctx).Infof("UpdateTenant: %d", tenant.GetId())
-	if _, err := uc.repo.FindByID(ctx, tenant.GetId()); err != nil {
+	current, err := uc.repo.FindByID(ctx, tenant.GetId())
+	if err != nil {
 		return nil, err
 	}
-	return uc.repo.Update(ctx, tenant, operatorID)
+	updated, err := uc.repo.Update(ctx, tenant, operatorID)
+	if err != nil {
+		return nil, err
+	}
+	if tenant.ExpiresAt != nil && current.GetExpiresAt() != updated.GetExpiresAt() && uc.sessions != nil {
+		if err = uc.sessions.RevokeTenant(ctx, tenant.GetId()); err != nil {
+			return nil, err
+		}
+	}
+	return updated, nil
 }
 
 func (uc *TenantUsecase) Get(ctx context.Context, id uint32) (*pbCore.Tenant, error) {

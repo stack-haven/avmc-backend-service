@@ -92,4 +92,11 @@ service TenantPermissionService {
       ]
     };
   }
+
+  rpc UpdateTenantPermissionGroupVersion(core.service.v1.UpdateTenantPermissionGroupVersionRequest) returns (core.service.v1.UpdateTenantPermissionGroupVersionResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version"
+      body: "*"
+    };
+  }
 }

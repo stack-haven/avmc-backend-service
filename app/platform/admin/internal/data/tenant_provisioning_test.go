@@ -102,3 +102,33 @@ func TestTenantRepoProvisionRollsBackOnInitializationFailure(t *testing.T) {
 		t.Fatal("tenant remains after provisioning transaction failure")
 	}
 }
+
+func TestTenantRepoUpdateCannotBypassLifecycle(t *testing.T) {
+	ctx := systemContext()
+	client := newTestClient(t)
+	defer client.Close()
+
+	row := client.Tenant.Create().
+		SetName("Lifecycle Tenant").
+		SetCode("lifecycle-tenant").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SetLifecycleStatus(int32(pbCore.TenantLifecycleStatus_TENANT_LIFECYCLE_STATUS_ACTIVE)).
+		SaveX(ctx)
+	repo := NewTenantRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	disabled := pbEnum.Status_STATUS_DISABLED
+	if _, err := repo.Update(ctx, &pbCore.Tenant{
+		Id:     row.ID,
+		Name:   ptr("Lifecycle Tenant Updated"),
+		Code:   ptr("lifecycle-tenant"),
+		Status: &disabled,
+	}, 0); err != nil {
+		t.Fatalf("update tenant: %v", err)
+	}
+	updated := client.Tenant.GetX(ctx, row.ID)
+	if updated.Status == nil || *updated.Status != int32(pbEnum.Status_STATUS_ENABLED) {
+		t.Fatalf("status changed through general update: %v", updated.Status)
+	}
+	if updated.LifecycleStatus != int32(pbCore.TenantLifecycleStatus_TENANT_LIFECYCLE_STATUS_ACTIVE) {
+		t.Fatalf("lifecycle changed through general update: %d", updated.LifecycleStatus)
+	}
+}

@@ -9,6 +9,64 @@ import (
 )
 
 var (
+	// AsyncTasksColumns holds the columns for the "async_tasks" table.
+	AsyncTasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID，平台任务为空"},
+		{Name: "task_type", Type: field.TypeString, Size: 100, Comment: "已注册任务类型"},
+		{Name: "queue", Type: field.TypeString, Size: 50, Comment: "队列", Default: "default"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态", Default: 1},
+		{Name: "priority", Type: field.TypeInt32, Comment: "优先级，值越大越优先", Default: 0},
+		{Name: "payload", Type: field.TypeString, Size: 2147483647, Comment: "内部任务载荷JSON", Default: "{}"},
+		{Name: "payload_summary", Type: field.TypeString, Size: 500, Comment: "脱敏载荷摘要", Default: ""},
+		{Name: "result_summary", Type: field.TypeString, Size: 1000, Comment: "执行结果摘要", Default: ""},
+		{Name: "last_error", Type: field.TypeString, Size: 2147483647, Comment: "最近一次错误摘要", Default: ""},
+		{Name: "idempotency_key", Type: field.TypeString, Unique: true, Nullable: true, Size: 150, Comment: "幂等键"},
+		{Name: "attempts", Type: field.TypeInt32, Comment: "已执行次数", Default: 0},
+		{Name: "max_attempts", Type: field.TypeInt32, Comment: "最大执行次数", Default: 3},
+		{Name: "scheduled_at", Type: field.TypeTime, Comment: "计划执行时间"},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true, Comment: "最近开始时间"},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true, Comment: "完成时间"},
+		{Name: "lease_owner", Type: field.TypeString, Size: 150, Comment: "租约持有者", Default: ""},
+		{Name: "lease_expires_at", Type: field.TypeTime, Nullable: true, Comment: "租约过期时间"},
+		{Name: "created_by", Type: field.TypeUint32, Nullable: true, Comment: "创建人"},
+	}
+	// AsyncTasksTable holds the schema information for the "async_tasks" table.
+	AsyncTasksTable = &schema.Table{
+		Name:       "async_tasks",
+		Comment:    "统一异步任务表",
+		Columns:    AsyncTasksColumns,
+		PrimaryKey: []*schema.Column{AsyncTasksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "asynctask_id",
+				Unique:  false,
+				Columns: []*schema.Column{AsyncTasksColumns[0]},
+			},
+			{
+				Name:    "asynctask_status_queue_scheduled_at_priority",
+				Unique:  false,
+				Columns: []*schema.Column{AsyncTasksColumns[6], AsyncTasksColumns[5], AsyncTasksColumns[15], AsyncTasksColumns[7]},
+			},
+			{
+				Name:    "asynctask_status_lease_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{AsyncTasksColumns[6], AsyncTasksColumns[19]},
+			},
+			{
+				Name:    "asynctask_tenant_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AsyncTasksColumns[3], AsyncTasksColumns[1]},
+			},
+			{
+				Name:    "asynctask_task_type_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AsyncTasksColumns[4], AsyncTasksColumns[1]},
+			},
+		},
+	}
 	// DeptsColumns holds the columns for the "depts" table.
 	DeptsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -270,6 +328,7 @@ var (
 		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10, SchemaType: map[string]string{"mysql": "int", "postgres": "int"}},
 		{Name: "description", Type: field.TypeString, Size: 255, Comment: "描述", Default: ""},
 		{Name: "remark", Type: field.TypeString, Size: 255, Comment: "备注", Default: ""},
+		{Name: "current_version_id", Type: field.TypeUint32, Nullable: true, Comment: "当前发布版本ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// MenuPermissionGroupsTable holds the schema information for the "menu_permission_groups" table.
 	MenuPermissionGroupsTable = &schema.Table{
@@ -277,6 +336,14 @@ var (
 		Comment:    "菜单权限组表",
 		Columns:    MenuPermissionGroupsColumns,
 		PrimaryKey: []*schema.Column{MenuPermissionGroupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "menu_permission_groups_menu_permission_group_versions_current_version",
+				Columns:    []*schema.Column{MenuPermissionGroupsColumns[11]},
+				RefColumns: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "menupermissiongroup_id",
@@ -297,6 +364,56 @@ var (
 				Name:    "menupermissiongroup_status",
 				Unique:  false,
 				Columns: []*schema.Column{MenuPermissionGroupsColumns[1]},
+			},
+		},
+	}
+	// MenuPermissionGroupVersionsColumns holds the columns for the "menu_permission_group_versions" table.
+	MenuPermissionGroupVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "version", Type: field.TypeInt32, Comment: "套餐内递增版本号"},
+		{Name: "state", Type: field.TypeInt32, Comment: "版本状态：1已发布 2已取代", Default: 1},
+		{Name: "change_summary", Type: field.TypeString, Size: 255, Comment: "变更说明", Default: ""},
+		{Name: "created_by", Type: field.TypeUint32, Nullable: true, Comment: "创建人ID"},
+		{Name: "published_by", Type: field.TypeUint32, Nullable: true, Comment: "发布人ID"},
+		{Name: "effective_at", Type: field.TypeTime, Nullable: true, Comment: "生效时间"},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true, Comment: "发布时间"},
+		{Name: "group_id", Type: field.TypeUint32, Comment: "套餐ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// MenuPermissionGroupVersionsTable holds the schema information for the "menu_permission_group_versions" table.
+	MenuPermissionGroupVersionsTable = &schema.Table{
+		Name:       "menu_permission_group_versions",
+		Comment:    "菜单权限套餐版本表",
+		Columns:    MenuPermissionGroupVersionsColumns,
+		PrimaryKey: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "menu_permission_group_versions_menu_permission_groups_group",
+				Columns:    []*schema.Column{MenuPermissionGroupVersionsColumns[9]},
+				RefColumns: []*schema.Column{MenuPermissionGroupsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "menupermissiongroupversion_id",
+				Unique:  false,
+				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
+			},
+			{
+				Name:    "menupermissiongroupversion_group_id_version",
+				Unique:  true,
+				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[9], MenuPermissionGroupVersionsColumns[2]},
+			},
+			{
+				Name:    "menupermissiongroupversion_group_id_state",
+				Unique:  false,
+				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[9], MenuPermissionGroupVersionsColumns[3]},
+			},
+			{
+				Name:    "menupermissiongroupversion_effective_at",
+				Unique:  false,
+				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[7]},
 			},
 		},
 	}
@@ -360,6 +477,45 @@ var (
 				Name:    "operationlog_trace_id",
 				Unique:  false,
 				Columns: []*schema.Column{OperationLogsColumns[17]},
+			},
+		},
+	}
+	// ParameterDefinitionsColumns holds the columns for the "parameter_definitions" table.
+	ParameterDefinitionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "key", Type: field.TypeString, Size: 100, Comment: "参数键"},
+		{Name: "name", Type: field.TypeString, Size: 100, Comment: "参数名称"},
+		{Name: "value_type", Type: field.TypeInt32, Comment: "值类型：1字符串 2整数 3布尔 4JSON"},
+		{Name: "default_value", Type: field.TypeString, Size: 2147483647, Comment: "平台默认值", Default: ""},
+		{Name: "description", Type: field.TypeString, Size: 500, Comment: "参数说明", Default: ""},
+		{Name: "tenant_overridable", Type: field.TypeBool, Comment: "是否允许租户覆盖", Default: true},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态", Default: 1},
+		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10},
+	}
+	// ParameterDefinitionsTable holds the schema information for the "parameter_definitions" table.
+	ParameterDefinitionsTable = &schema.Table{
+		Name:       "parameter_definitions",
+		Comment:    "平台参数定义表",
+		Columns:    ParameterDefinitionsColumns,
+		PrimaryKey: []*schema.Column{ParameterDefinitionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "parameterdefinition_id",
+				Unique:  false,
+				Columns: []*schema.Column{ParameterDefinitionsColumns[0]},
+			},
+			{
+				Name:    "parameterdefinition_key",
+				Unique:  true,
+				Columns: []*schema.Column{ParameterDefinitionsColumns[4]},
+			},
+			{
+				Name:    "parameterdefinition_status_sort",
+				Unique:  false,
+				Columns: []*schema.Column{ParameterDefinitionsColumns[10], ParameterDefinitionsColumns[11]},
 			},
 		},
 	}
@@ -460,9 +616,10 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Size: 50, Comment: "名称", Default: ""},
 		{Name: "default_router", Type: field.TypeString, Size: 255, Comment: "默认路由", Default: ""},
-		{Name: "data_scope", Type: field.TypeInt32, Comment: "数据范围（0：未指定 1：全部数据权限 2：本人数据权限 3：本部门数据权限 4：本部门及以下数据权限 5：自定部门数据权限 ）", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "data_scope", Type: field.TypeInt32, Comment: "数据范围（1：全部数据权限 2：本人数据权限 3：本部门数据权限 4：本部门及以下数据权限 5：自定部门数据权限）", Default: 2, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "menu_check_strictly", Type: field.TypeInt32, Comment: "菜单树选择项是否关联显示", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "dept_check_strictly", Type: field.TypeInt32, Comment: "部门树选择项是否关联显示", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "is_tenant_admin", Type: field.TypeBool, Comment: "是否租户管理员角色，仅内部流程维护", Default: false},
 	}
 	// RolesTable holds the schema information for the "roles" table.
 	RolesTable = &schema.Table{
@@ -494,6 +651,7 @@ var (
 		{Name: "code", Type: field.TypeString, Size: 64, Comment: "租户编码", Default: ""},
 		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10, SchemaType: map[string]string{"mysql": "int", "postgres": "int"}},
 		{Name: "remark", Type: field.TypeString, Size: 255, Comment: "备注", Default: ""},
+		{Name: "is_platform", Type: field.TypeBool, Comment: "是否为平台控制面租户，仅允许部署初始化流程维护", Default: false},
 		{Name: "lifecycle_status", Type: field.TypeInt32, Comment: "生命周期状态：1待开通 2正常 3暂停 4到期 5注销", Default: 2},
 		{Name: "activated_at", Type: field.TypeTime, Nullable: true, Comment: "激活时间"},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true, Comment: "到期时间"},
@@ -528,14 +686,66 @@ var (
 				Columns: []*schema.Column{TenantsColumns[1]},
 			},
 			{
-				Name:    "tenant_lifecycle_status",
+				Name:    "tenant_is_platform",
 				Unique:  false,
 				Columns: []*schema.Column{TenantsColumns[9]},
 			},
 			{
+				Name:    "tenant_lifecycle_status",
+				Unique:  false,
+				Columns: []*schema.Column{TenantsColumns[10]},
+			},
+			{
 				Name:    "tenant_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[11]},
+				Columns: []*schema.Column{TenantsColumns[12]},
+			},
+		},
+	}
+	// TenantParameterOverridesColumns holds the columns for the "tenant_parameter_overrides" table.
+	TenantParameterOverridesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "value", Type: field.TypeString, Size: 2147483647, Comment: "租户覆盖值", Default: ""},
+		{Name: "updated_by", Type: field.TypeUint32, Nullable: true, Comment: "最后修改人ID"},
+		{Name: "definition_id", Type: field.TypeUint32, Comment: "参数定义ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// TenantParameterOverridesTable holds the schema information for the "tenant_parameter_overrides" table.
+	TenantParameterOverridesTable = &schema.Table{
+		Name:       "tenant_parameter_overrides",
+		Comment:    "租户参数覆盖表",
+		Columns:    TenantParameterOverridesColumns,
+		PrimaryKey: []*schema.Column{TenantParameterOverridesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tenant_parameter_overrides_parameter_definitions_tenant_overrides",
+				Columns:    []*schema.Column{TenantParameterOverridesColumns[6]},
+				RefColumns: []*schema.Column{ParameterDefinitionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "tenantparameteroverride_id",
+				Unique:  false,
+				Columns: []*schema.Column{TenantParameterOverridesColumns[0]},
+			},
+			{
+				Name:    "tenantparameteroverride_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{TenantParameterOverridesColumns[3]},
+			},
+			{
+				Name:    "tenantparameteroverride_tenant_id_definition_id",
+				Unique:  true,
+				Columns: []*schema.Column{TenantParameterOverridesColumns[3], TenantParameterOverridesColumns[6]},
+			},
+			{
+				Name:    "tenantparameteroverride_definition_id",
+				Unique:  false,
+				Columns: []*schema.Column{TenantParameterOverridesColumns[6]},
 			},
 		},
 	}
@@ -546,8 +756,10 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "enabled", Type: field.TypeBool, Comment: "是否启用", Default: true},
 		{Name: "bound_by", Type: field.TypeUint32, Nullable: true, Comment: "绑定操作人ID"},
+		{Name: "auto_upgrade", Type: field.TypeBool, Comment: "是否自动跟随最新版本", Default: true},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 		{Name: "group_id", Type: field.TypeUint32, Comment: "权限组ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "version_id", Type: field.TypeUint32, Nullable: true, Comment: "当前使用的套餐版本ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// TenantPermissionGroupsTable holds the schema information for the "tenant_permission_groups" table.
 	TenantPermissionGroupsTable = &schema.Table{
@@ -558,15 +770,21 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tenant_permission_groups_tenants_tenant",
-				Columns:    []*schema.Column{TenantPermissionGroupsColumns[5]},
+				Columns:    []*schema.Column{TenantPermissionGroupsColumns[6]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "tenant_permission_groups_menu_permission_groups_group",
-				Columns:    []*schema.Column{TenantPermissionGroupsColumns[6]},
+				Columns:    []*schema.Column{TenantPermissionGroupsColumns[7]},
 				RefColumns: []*schema.Column{MenuPermissionGroupsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "tenant_permission_groups_menu_permission_group_versions_version",
+				Columns:    []*schema.Column{TenantPermissionGroupsColumns[8]},
+				RefColumns: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -578,17 +796,22 @@ var (
 			{
 				Name:    "tenantpermissiongroup_tenant_id_group_id",
 				Unique:  true,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[5], TenantPermissionGroupsColumns[6]},
+				Columns: []*schema.Column{TenantPermissionGroupsColumns[6], TenantPermissionGroupsColumns[7]},
 			},
 			{
 				Name:    "tenantpermissiongroup_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[5]},
+				Columns: []*schema.Column{TenantPermissionGroupsColumns[6]},
 			},
 			{
 				Name:    "tenantpermissiongroup_group_id",
 				Unique:  false,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[6]},
+				Columns: []*schema.Column{TenantPermissionGroupsColumns[7]},
+			},
+			{
+				Name:    "tenantpermissiongroup_version_id",
+				Unique:  false,
+				Columns: []*schema.Column{TenantPermissionGroupsColumns[8]},
 			},
 		},
 	}
@@ -616,6 +839,7 @@ var (
 		{Name: "settings", Type: field.TypeJSON, Nullable: true, Comment: "用户设置，JSON格式"},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true, Comment: "元数据，JSON格式"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 255, Comment: "个人说明"},
+		{Name: "dept_id", Type: field.TypeUint32, Nullable: true, Comment: "所属主部门ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -623,6 +847,14 @@ var (
 		Comment:    "用户表",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_depts_users",
+				Columns:    []*schema.Column{UsersColumns[22]},
+				RefColumns: []*schema.Column{DeptsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "user_tenant_id",
@@ -671,6 +903,31 @@ var (
 			{
 				Symbol:     "menu_permission_group_menus_menu_id",
 				Columns:    []*schema.Column{MenuPermissionGroupMenusColumns[1]},
+				RefColumns: []*schema.Column{MenusColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// MenuPermissionGroupVersionMenusColumns holds the columns for the "menu_permission_group_version_menus" table.
+	MenuPermissionGroupVersionMenusColumns = []*schema.Column{
+		{Name: "menu_permission_group_version_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "menu_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// MenuPermissionGroupVersionMenusTable holds the schema information for the "menu_permission_group_version_menus" table.
+	MenuPermissionGroupVersionMenusTable = &schema.Table{
+		Name:       "menu_permission_group_version_menus",
+		Columns:    MenuPermissionGroupVersionMenusColumns,
+		PrimaryKey: []*schema.Column{MenuPermissionGroupVersionMenusColumns[0], MenuPermissionGroupVersionMenusColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "menu_permission_group_version_menus_menu_permission_group_version_id",
+				Columns:    []*schema.Column{MenuPermissionGroupVersionMenusColumns[0]},
+				RefColumns: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "menu_permission_group_version_menus_menu_id",
+				Columns:    []*schema.Column{MenuPermissionGroupVersionMenusColumns[1]},
 				RefColumns: []*schema.Column{MenusColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -726,6 +983,31 @@ var (
 			},
 		},
 	}
+	// RoleDataScopeDeptsColumns holds the columns for the "role_data_scope_depts" table.
+	RoleDataScopeDeptsColumns = []*schema.Column{
+		{Name: "role_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "dept_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// RoleDataScopeDeptsTable holds the schema information for the "role_data_scope_depts" table.
+	RoleDataScopeDeptsTable = &schema.Table{
+		Name:       "role_data_scope_depts",
+		Columns:    RoleDataScopeDeptsColumns,
+		PrimaryKey: []*schema.Column{RoleDataScopeDeptsColumns[0], RoleDataScopeDeptsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "role_data_scope_depts_role_id",
+				Columns:    []*schema.Column{RoleDataScopeDeptsColumns[0]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "role_data_scope_depts_dept_id",
+				Columns:    []*schema.Column{RoleDataScopeDeptsColumns[1]},
+				RefColumns: []*schema.Column{DeptsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// UserRolesColumns holds the columns for the "user_roles" table.
 	UserRolesColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -753,27 +1035,37 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AsyncTasksTable,
 		DeptsTable,
 		DictionaryItemsTable,
 		DictionaryTypesTable,
 		LoginLogsTable,
 		MenusTable,
 		MenuPermissionGroupsTable,
+		MenuPermissionGroupVersionsTable,
 		OperationLogsTable,
+		ParameterDefinitionsTable,
 		PostsTable,
 		ProjectsTable,
 		RolesTable,
 		TenantsTable,
+		TenantParameterOverridesTable,
 		TenantPermissionGroupsTable,
 		UsersTable,
 		MenuPermissionGroupMenusTable,
+		MenuPermissionGroupVersionMenusTable,
 		ProjectMembersTable,
 		RoleMenusTable,
+		RoleDataScopeDeptsTable,
 		UserRolesTable,
 	}
 )
 
 func init() {
+	AsyncTasksTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
 	DeptsTable.ForeignKeys[0].RefTable = DeptsTable
 	DeptsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
@@ -797,11 +1089,21 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	MenuPermissionGroupsTable.ForeignKeys[0].RefTable = MenuPermissionGroupVersionsTable
 	MenuPermissionGroupsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	MenuPermissionGroupVersionsTable.ForeignKeys[0].RefTable = MenuPermissionGroupsTable
+	MenuPermissionGroupVersionsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
 	OperationLogsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	ParameterDefinitionsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
@@ -822,22 +1124,33 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	TenantParameterOverridesTable.ForeignKeys[0].RefTable = ParameterDefinitionsTable
+	TenantParameterOverridesTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
 	TenantPermissionGroupsTable.ForeignKeys[0].RefTable = TenantsTable
 	TenantPermissionGroupsTable.ForeignKeys[1].RefTable = MenuPermissionGroupsTable
+	TenantPermissionGroupsTable.ForeignKeys[2].RefTable = MenuPermissionGroupVersionsTable
 	TenantPermissionGroupsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	UsersTable.ForeignKeys[0].RefTable = DeptsTable
 	UsersTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
 	MenuPermissionGroupMenusTable.ForeignKeys[0].RefTable = MenuPermissionGroupsTable
 	MenuPermissionGroupMenusTable.ForeignKeys[1].RefTable = MenusTable
+	MenuPermissionGroupVersionMenusTable.ForeignKeys[0].RefTable = MenuPermissionGroupVersionsTable
+	MenuPermissionGroupVersionMenusTable.ForeignKeys[1].RefTable = MenusTable
 	ProjectMembersTable.ForeignKeys[0].RefTable = ProjectsTable
 	ProjectMembersTable.ForeignKeys[1].RefTable = UsersTable
 	RoleMenusTable.ForeignKeys[0].RefTable = RolesTable
 	RoleMenusTable.ForeignKeys[1].RefTable = MenusTable
+	RoleDataScopeDeptsTable.ForeignKeys[0].RefTable = RolesTable
+	RoleDataScopeDeptsTable.ForeignKeys[1].RefTable = DeptsTable
 	UserRolesTable.ForeignKeys[0].RefTable = UsersTable
 	UserRolesTable.ForeignKeys[1].RefTable = RolesTable
 }

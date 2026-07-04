@@ -20,12 +20,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MenuPermissionGroupService_ListMenuPermissionGroups_FullMethodName        = "/platform.admin.v1.MenuPermissionGroupService/ListMenuPermissionGroups"
-	MenuPermissionGroupService_GetMenuPermissionGroup_FullMethodName          = "/platform.admin.v1.MenuPermissionGroupService/GetMenuPermissionGroup"
-	MenuPermissionGroupService_CreateMenuPermissionGroup_FullMethodName       = "/platform.admin.v1.MenuPermissionGroupService/CreateMenuPermissionGroup"
-	MenuPermissionGroupService_UpdateMenuPermissionGroup_FullMethodName       = "/platform.admin.v1.MenuPermissionGroupService/UpdateMenuPermissionGroup"
-	MenuPermissionGroupService_DeleteMenuPermissionGroup_FullMethodName       = "/platform.admin.v1.MenuPermissionGroupService/DeleteMenuPermissionGroup"
-	MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_FullMethodName = "/platform.admin.v1.MenuPermissionGroupService/UpdateMenuPermissionGroupStatus"
+	MenuPermissionGroupService_ListMenuPermissionGroups_FullMethodName           = "/platform.admin.v1.MenuPermissionGroupService/ListMenuPermissionGroups"
+	MenuPermissionGroupService_GetMenuPermissionGroup_FullMethodName             = "/platform.admin.v1.MenuPermissionGroupService/GetMenuPermissionGroup"
+	MenuPermissionGroupService_CreateMenuPermissionGroup_FullMethodName          = "/platform.admin.v1.MenuPermissionGroupService/CreateMenuPermissionGroup"
+	MenuPermissionGroupService_UpdateMenuPermissionGroup_FullMethodName          = "/platform.admin.v1.MenuPermissionGroupService/UpdateMenuPermissionGroup"
+	MenuPermissionGroupService_DeleteMenuPermissionGroup_FullMethodName          = "/platform.admin.v1.MenuPermissionGroupService/DeleteMenuPermissionGroup"
+	MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_FullMethodName    = "/platform.admin.v1.MenuPermissionGroupService/UpdateMenuPermissionGroupStatus"
+	MenuPermissionGroupService_ListMenuPermissionGroupVersions_FullMethodName    = "/platform.admin.v1.MenuPermissionGroupService/ListMenuPermissionGroupVersions"
+	MenuPermissionGroupService_PublishMenuPermissionGroupVersion_FullMethodName  = "/platform.admin.v1.MenuPermissionGroupService/PublishMenuPermissionGroupVersion"
+	MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_FullMethodName = "/platform.admin.v1.MenuPermissionGroupService/RollbackMenuPermissionGroupVersion"
 )
 
 // MenuPermissionGroupServiceClient is the client API for MenuPermissionGroupService service.
@@ -46,6 +49,9 @@ type MenuPermissionGroupServiceClient interface {
 	DeleteMenuPermissionGroup(ctx context.Context, in *v1.DeleteMenuPermissionGroupRequest, opts ...grpc.CallOption) (*v1.DeleteMenuPermissionGroupResponse, error)
 	// 更新菜单权限组状态
 	UpdateMenuPermissionGroupStatus(ctx context.Context, in *v1.UpdateMenuPermissionGroupStatusRequest, opts ...grpc.CallOption) (*v1.UpdateMenuPermissionGroupStatusResponse, error)
+	ListMenuPermissionGroupVersions(ctx context.Context, in *v1.ListMenuPermissionGroupVersionsRequest, opts ...grpc.CallOption) (*v1.ListMenuPermissionGroupVersionsResponse, error)
+	PublishMenuPermissionGroupVersion(ctx context.Context, in *v1.PublishMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.PublishMenuPermissionGroupVersionResponse, error)
+	RollbackMenuPermissionGroupVersion(ctx context.Context, in *v1.RollbackMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.RollbackMenuPermissionGroupVersionResponse, error)
 }
 
 type menuPermissionGroupServiceClient struct {
@@ -116,6 +122,36 @@ func (c *menuPermissionGroupServiceClient) UpdateMenuPermissionGroupStatus(ctx c
 	return out, nil
 }
 
+func (c *menuPermissionGroupServiceClient) ListMenuPermissionGroupVersions(ctx context.Context, in *v1.ListMenuPermissionGroupVersionsRequest, opts ...grpc.CallOption) (*v1.ListMenuPermissionGroupVersionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListMenuPermissionGroupVersionsResponse)
+	err := c.cc.Invoke(ctx, MenuPermissionGroupService_ListMenuPermissionGroupVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *menuPermissionGroupServiceClient) PublishMenuPermissionGroupVersion(ctx context.Context, in *v1.PublishMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.PublishMenuPermissionGroupVersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.PublishMenuPermissionGroupVersionResponse)
+	err := c.cc.Invoke(ctx, MenuPermissionGroupService_PublishMenuPermissionGroupVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *menuPermissionGroupServiceClient) RollbackMenuPermissionGroupVersion(ctx context.Context, in *v1.RollbackMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.RollbackMenuPermissionGroupVersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.RollbackMenuPermissionGroupVersionResponse)
+	err := c.cc.Invoke(ctx, MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MenuPermissionGroupServiceServer is the server API for MenuPermissionGroupService service.
 // All implementations must embed UnimplementedMenuPermissionGroupServiceServer
 // for forward compatibility.
@@ -134,6 +170,9 @@ type MenuPermissionGroupServiceServer interface {
 	DeleteMenuPermissionGroup(context.Context, *v1.DeleteMenuPermissionGroupRequest) (*v1.DeleteMenuPermissionGroupResponse, error)
 	// 更新菜单权限组状态
 	UpdateMenuPermissionGroupStatus(context.Context, *v1.UpdateMenuPermissionGroupStatusRequest) (*v1.UpdateMenuPermissionGroupStatusResponse, error)
+	ListMenuPermissionGroupVersions(context.Context, *v1.ListMenuPermissionGroupVersionsRequest) (*v1.ListMenuPermissionGroupVersionsResponse, error)
+	PublishMenuPermissionGroupVersion(context.Context, *v1.PublishMenuPermissionGroupVersionRequest) (*v1.PublishMenuPermissionGroupVersionResponse, error)
+	RollbackMenuPermissionGroupVersion(context.Context, *v1.RollbackMenuPermissionGroupVersionRequest) (*v1.RollbackMenuPermissionGroupVersionResponse, error)
 	mustEmbedUnimplementedMenuPermissionGroupServiceServer()
 }
 
@@ -161,6 +200,15 @@ func (UnimplementedMenuPermissionGroupServiceServer) DeleteMenuPermissionGroup(c
 }
 func (UnimplementedMenuPermissionGroupServiceServer) UpdateMenuPermissionGroupStatus(context.Context, *v1.UpdateMenuPermissionGroupStatusRequest) (*v1.UpdateMenuPermissionGroupStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMenuPermissionGroupStatus not implemented")
+}
+func (UnimplementedMenuPermissionGroupServiceServer) ListMenuPermissionGroupVersions(context.Context, *v1.ListMenuPermissionGroupVersionsRequest) (*v1.ListMenuPermissionGroupVersionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMenuPermissionGroupVersions not implemented")
+}
+func (UnimplementedMenuPermissionGroupServiceServer) PublishMenuPermissionGroupVersion(context.Context, *v1.PublishMenuPermissionGroupVersionRequest) (*v1.PublishMenuPermissionGroupVersionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PublishMenuPermissionGroupVersion not implemented")
+}
+func (UnimplementedMenuPermissionGroupServiceServer) RollbackMenuPermissionGroupVersion(context.Context, *v1.RollbackMenuPermissionGroupVersionRequest) (*v1.RollbackMenuPermissionGroupVersionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RollbackMenuPermissionGroupVersion not implemented")
 }
 func (UnimplementedMenuPermissionGroupServiceServer) mustEmbedUnimplementedMenuPermissionGroupServiceServer() {
 }
@@ -292,6 +340,60 @@ func _MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_Handler(srv int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MenuPermissionGroupService_ListMenuPermissionGroupVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListMenuPermissionGroupVersionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuPermissionGroupServiceServer).ListMenuPermissionGroupVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuPermissionGroupService_ListMenuPermissionGroupVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuPermissionGroupServiceServer).ListMenuPermissionGroupVersions(ctx, req.(*v1.ListMenuPermissionGroupVersionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MenuPermissionGroupService_PublishMenuPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.PublishMenuPermissionGroupVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuPermissionGroupServiceServer).PublishMenuPermissionGroupVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuPermissionGroupService_PublishMenuPermissionGroupVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuPermissionGroupServiceServer).PublishMenuPermissionGroupVersion(ctx, req.(*v1.PublishMenuPermissionGroupVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.RollbackMenuPermissionGroupVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuPermissionGroupServiceServer).RollbackMenuPermissionGroupVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuPermissionGroupServiceServer).RollbackMenuPermissionGroupVersion(ctx, req.(*v1.RollbackMenuPermissionGroupVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MenuPermissionGroupService_ServiceDesc is the grpc.ServiceDesc for MenuPermissionGroupService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -322,6 +424,18 @@ var MenuPermissionGroupService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMenuPermissionGroupStatus",
 			Handler:    _MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_Handler,
+		},
+		{
+			MethodName: "ListMenuPermissionGroupVersions",
+			Handler:    _MenuPermissionGroupService_ListMenuPermissionGroupVersions_Handler,
+		},
+		{
+			MethodName: "PublishMenuPermissionGroupVersion",
+			Handler:    _MenuPermissionGroupService_PublishMenuPermissionGroupVersion_Handler,
+		},
+		{
+			MethodName: "RollbackMenuPermissionGroupVersion",
+			Handler:    _MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

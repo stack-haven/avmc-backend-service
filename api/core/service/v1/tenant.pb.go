@@ -1138,7 +1138,7 @@ const file_core_service_v1_tenant_proto_rawDesc = "" +
 	"\x1ccore/service/v1/tenant.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a+core/service/v1/menu_permission_group.proto\"\xdb\x01\n" +
 	"\x12TenantInitialAdmin\x127\n" +
 	"\busername\x18\x01 \x01(\tB\x1b\xbaH\x18r\x16\x10\x03\x18 2\x10^[a-zA-Z0-9_-]+$R\busername\x12%\n" +
-	"\bpassword\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\b\x18HR\bpassword\x12(\n" +
+	"\bpassword\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\f\x18HR\bpassword\x12(\n" +
 	"\brealname\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x182H\x00R\brealname\x88\x01\x01\x12$\n" +
 	"\x05email\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x18d`\x01H\x01R\x05email\x88\x01\x01B\v\n" +
 	"\t_realnameB\b\n" +

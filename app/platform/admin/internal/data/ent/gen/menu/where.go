@@ -1722,6 +1722,29 @@ func HasPermissionGroupsWith(preds ...predicate.MenuPermissionGroup) predicate.M
 	})
 }
 
+// HasPermissionGroupVersions applies the HasEdge predicate on the "permission_group_versions" edge.
+func HasPermissionGroupVersions() predicate.Menu {
+	return predicate.Menu(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, PermissionGroupVersionsTable, PermissionGroupVersionsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPermissionGroupVersionsWith applies the HasEdge predicate on the "permission_group_versions" edge with a given conditions (other predicates).
+func HasPermissionGroupVersionsWith(preds ...predicate.MenuPermissionGroupVersion) predicate.Menu {
+	return predicate.Menu(func(s *sql.Selector) {
+		step := newPermissionGroupVersionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Menu) predicate.Menu {
 	return predicate.Menu(sql.AndPredicates(predicates...))

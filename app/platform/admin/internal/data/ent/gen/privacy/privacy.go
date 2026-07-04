@@ -111,6 +111,30 @@ func DenyMutationOperationRule(op gen.Op) MutationRule {
 	return OnMutationOperation(rule, op)
 }
 
+// The AsyncTaskQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type AsyncTaskQueryRuleFunc func(context.Context, *gen.AsyncTaskQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f AsyncTaskQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.AsyncTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.AsyncTaskQuery", q)
+}
+
+// The AsyncTaskMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type AsyncTaskMutationRuleFunc func(context.Context, *gen.AsyncTaskMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f AsyncTaskMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.AsyncTaskMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.AsyncTaskMutation", m)
+}
+
 // The DeptQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type DeptQueryRuleFunc func(context.Context, *gen.DeptQuery) error
@@ -255,6 +279,30 @@ func (f MenuPermissionGroupMutationRuleFunc) EvalMutation(ctx context.Context, m
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.MenuPermissionGroupMutation", m)
 }
 
+// The MenuPermissionGroupVersionQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type MenuPermissionGroupVersionQueryRuleFunc func(context.Context, *gen.MenuPermissionGroupVersionQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f MenuPermissionGroupVersionQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.MenuPermissionGroupVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.MenuPermissionGroupVersionQuery", q)
+}
+
+// The MenuPermissionGroupVersionMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type MenuPermissionGroupVersionMutationRuleFunc func(context.Context, *gen.MenuPermissionGroupVersionMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f MenuPermissionGroupVersionMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.MenuPermissionGroupVersionMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.MenuPermissionGroupVersionMutation", m)
+}
+
 // The OperationLogQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type OperationLogQueryRuleFunc func(context.Context, *gen.OperationLogQuery) error
@@ -277,6 +325,30 @@ func (f OperationLogMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mu
 		return f(ctx, m)
 	}
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.OperationLogMutation", m)
+}
+
+// The ParameterDefinitionQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ParameterDefinitionQueryRuleFunc func(context.Context, *gen.ParameterDefinitionQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ParameterDefinitionQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.ParameterDefinitionQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.ParameterDefinitionQuery", q)
+}
+
+// The ParameterDefinitionMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ParameterDefinitionMutationRuleFunc func(context.Context, *gen.ParameterDefinitionMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ParameterDefinitionMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.ParameterDefinitionMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.ParameterDefinitionMutation", m)
 }
 
 // The PostQueryRuleFunc type is an adapter to allow the use of ordinary
@@ -375,6 +447,30 @@ func (f TenantMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantMutation", m)
 }
 
+// The TenantParameterOverrideQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type TenantParameterOverrideQueryRuleFunc func(context.Context, *gen.TenantParameterOverrideQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f TenantParameterOverrideQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantParameterOverrideQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantParameterOverrideQuery", q)
+}
+
+// The TenantParameterOverrideMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type TenantParameterOverrideMutationRuleFunc func(context.Context, *gen.TenantParameterOverrideMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f TenantParameterOverrideMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.TenantParameterOverrideMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantParameterOverrideMutation", m)
+}
+
 // The TenantPermissionGroupQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type TenantPermissionGroupQueryRuleFunc func(context.Context, *gen.TenantPermissionGroupQuery) error
@@ -458,6 +554,8 @@ var _ QueryMutationRule = FilterFunc(nil)
 
 func queryFilter(q gen.Query) (Filter, error) {
 	switch q := q.(type) {
+	case *gen.AsyncTaskQuery:
+		return q.Filter(), nil
 	case *gen.DeptQuery:
 		return q.Filter(), nil
 	case *gen.DictionaryItemQuery:
@@ -470,7 +568,11 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.MenuPermissionGroupQuery:
 		return q.Filter(), nil
+	case *gen.MenuPermissionGroupVersionQuery:
+		return q.Filter(), nil
 	case *gen.OperationLogQuery:
+		return q.Filter(), nil
+	case *gen.ParameterDefinitionQuery:
 		return q.Filter(), nil
 	case *gen.PostQuery:
 		return q.Filter(), nil
@@ -479,6 +581,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 	case *gen.RoleQuery:
 		return q.Filter(), nil
 	case *gen.TenantQuery:
+		return q.Filter(), nil
+	case *gen.TenantParameterOverrideQuery:
 		return q.Filter(), nil
 	case *gen.TenantPermissionGroupQuery:
 		return q.Filter(), nil
@@ -491,6 +595,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 
 func mutationFilter(m gen.Mutation) (Filter, error) {
 	switch m := m.(type) {
+	case *gen.AsyncTaskMutation:
+		return m.Filter(), nil
 	case *gen.DeptMutation:
 		return m.Filter(), nil
 	case *gen.DictionaryItemMutation:
@@ -503,7 +609,11 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 		return m.Filter(), nil
 	case *gen.MenuPermissionGroupMutation:
 		return m.Filter(), nil
+	case *gen.MenuPermissionGroupVersionMutation:
+		return m.Filter(), nil
 	case *gen.OperationLogMutation:
+		return m.Filter(), nil
+	case *gen.ParameterDefinitionMutation:
 		return m.Filter(), nil
 	case *gen.PostMutation:
 		return m.Filter(), nil
@@ -512,6 +622,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.RoleMutation:
 		return m.Filter(), nil
 	case *gen.TenantMutation:
+		return m.Filter(), nil
+	case *gen.TenantParameterOverrideMutation:
 		return m.Filter(), nil
 	case *gen.TenantPermissionGroupMutation:
 		return m.Filter(), nil

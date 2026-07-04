@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/async_task.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service AsyncTaskService {
+  rpc ListAsyncTasks(core.service.v1.ListAsyncTasksRequest) returns (core.service.v1.ListAsyncTasksResponse) {
+    option (google.api.http) = {get: "/admin/v1/async-tasks"};
+  }
+
+  rpc GetAsyncTask(core.service.v1.GetAsyncTaskRequest) returns (core.service.v1.GetAsyncTaskResponse) {
+    option (google.api.http) = {get: "/admin/v1/async-tasks/{id}"};
+  }
+
+  rpc CancelAsyncTask(core.service.v1.CancelAsyncTaskRequest) returns (core.service.v1.CancelAsyncTaskResponse) {
+    option (google.api.http) = {post: "/admin/v1/async-tasks/{id}:cancel" body: "*"};
+  }
+
+  rpc RetryAsyncTask(core.service.v1.RetryAsyncTaskRequest) returns (core.service.v1.RetryAsyncTaskResponse) {
+    option (google.api.http) = {post: "/admin/v1/async-tasks/{id}:retry" body: "*"};
+  }
+}

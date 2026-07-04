@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
@@ -21,13 +22,14 @@ import (
 // TenantPermissionGroupQuery is the builder for querying TenantPermissionGroup entities.
 type TenantPermissionGroupQuery struct {
 	config
-	ctx        *QueryContext
-	order      []tenantpermissiongroup.OrderOption
-	inters     []Interceptor
-	predicates []predicate.TenantPermissionGroup
-	withTenant *TenantQuery
-	withGroup  *MenuPermissionGroupQuery
-	modifiers  []func(*sql.Selector)
+	ctx         *QueryContext
+	order       []tenantpermissiongroup.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.TenantPermissionGroup
+	withTenant  *TenantQuery
+	withGroup   *MenuPermissionGroupQuery
+	withVersion *MenuPermissionGroupVersionQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,6 +103,28 @@ func (_q *TenantPermissionGroupQuery) QueryGroup() *MenuPermissionGroupQuery {
 			sqlgraph.From(tenantpermissiongroup.Table, tenantpermissiongroup.FieldID, selector),
 			sqlgraph.To(menupermissiongroup.Table, menupermissiongroup.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tenantpermissiongroup.GroupTable, tenantpermissiongroup.GroupColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVersion chains the current query on the "version" edge.
+func (_q *TenantPermissionGroupQuery) QueryVersion() *MenuPermissionGroupVersionQuery {
+	query := (&MenuPermissionGroupVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantpermissiongroup.Table, tenantpermissiongroup.FieldID, selector),
+			sqlgraph.To(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tenantpermissiongroup.VersionTable, tenantpermissiongroup.VersionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +319,14 @@ func (_q *TenantPermissionGroupQuery) Clone() *TenantPermissionGroupQuery {
 		return nil
 	}
 	return &TenantPermissionGroupQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]tenantpermissiongroup.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.TenantPermissionGroup{}, _q.predicates...),
-		withTenant: _q.withTenant.Clone(),
-		withGroup:  _q.withGroup.Clone(),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]tenantpermissiongroup.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.TenantPermissionGroup{}, _q.predicates...),
+		withTenant:  _q.withTenant.Clone(),
+		withGroup:   _q.withGroup.Clone(),
+		withVersion: _q.withVersion.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -328,6 +353,17 @@ func (_q *TenantPermissionGroupQuery) WithGroup(opts ...func(*MenuPermissionGrou
 		opt(query)
 	}
 	_q.withGroup = query
+	return _q
+}
+
+// WithVersion tells the query-builder to eager-load the nodes that are connected to
+// the "version" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TenantPermissionGroupQuery) WithVersion(opts ...func(*MenuPermissionGroupVersionQuery)) *TenantPermissionGroupQuery {
+	query := (&MenuPermissionGroupVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVersion = query
 	return _q
 }
 
@@ -409,9 +445,10 @@ func (_q *TenantPermissionGroupQuery) sqlAll(ctx context.Context, hooks ...query
 	var (
 		nodes       = []*TenantPermissionGroup{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withTenant != nil,
 			_q.withGroup != nil,
+			_q.withVersion != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -444,6 +481,12 @@ func (_q *TenantPermissionGroupQuery) sqlAll(ctx context.Context, hooks ...query
 	if query := _q.withGroup; query != nil {
 		if err := _q.loadGroup(ctx, query, nodes, nil,
 			func(n *TenantPermissionGroup, e *MenuPermissionGroup) { n.Edges.Group = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withVersion; query != nil {
+		if err := _q.loadVersion(ctx, query, nodes, nil,
+			func(n *TenantPermissionGroup, e *MenuPermissionGroupVersion) { n.Edges.Version = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -508,6 +551,38 @@ func (_q *TenantPermissionGroupQuery) loadGroup(ctx context.Context, query *Menu
 	}
 	return nil
 }
+func (_q *TenantPermissionGroupQuery) loadVersion(ctx context.Context, query *MenuPermissionGroupVersionQuery, nodes []*TenantPermissionGroup, init func(*TenantPermissionGroup), assign func(*TenantPermissionGroup, *MenuPermissionGroupVersion)) error {
+	ids := make([]uint32, 0, len(nodes))
+	nodeids := make(map[uint32][]*TenantPermissionGroup)
+	for i := range nodes {
+		if nodes[i].VersionID == nil {
+			continue
+		}
+		fk := *nodes[i].VersionID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(menupermissiongroupversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "version_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *TenantPermissionGroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -542,6 +617,9 @@ func (_q *TenantPermissionGroupQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withGroup != nil {
 			_spec.Node.AddColumnOnce(tenantpermissiongroup.FieldGroupID)
+		}
+		if _q.withVersion != nil {
+			_spec.Node.AddColumnOnce(tenantpermissiongroup.FieldVersionID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

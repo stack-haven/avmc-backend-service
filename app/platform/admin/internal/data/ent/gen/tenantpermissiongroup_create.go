@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
@@ -92,6 +93,34 @@ func (_c *TenantPermissionGroupCreate) SetNillableBoundBy(v *uint32) *TenantPerm
 	return _c
 }
 
+// SetVersionID sets the "version_id" field.
+func (_c *TenantPermissionGroupCreate) SetVersionID(v uint32) *TenantPermissionGroupCreate {
+	_c.mutation.SetVersionID(v)
+	return _c
+}
+
+// SetNillableVersionID sets the "version_id" field if the given value is not nil.
+func (_c *TenantPermissionGroupCreate) SetNillableVersionID(v *uint32) *TenantPermissionGroupCreate {
+	if v != nil {
+		_c.SetVersionID(*v)
+	}
+	return _c
+}
+
+// SetAutoUpgrade sets the "auto_upgrade" field.
+func (_c *TenantPermissionGroupCreate) SetAutoUpgrade(v bool) *TenantPermissionGroupCreate {
+	_c.mutation.SetAutoUpgrade(v)
+	return _c
+}
+
+// SetNillableAutoUpgrade sets the "auto_upgrade" field if the given value is not nil.
+func (_c *TenantPermissionGroupCreate) SetNillableAutoUpgrade(v *bool) *TenantPermissionGroupCreate {
+	if v != nil {
+		_c.SetAutoUpgrade(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *TenantPermissionGroupCreate) SetID(v uint32) *TenantPermissionGroupCreate {
 	_c.mutation.SetID(v)
@@ -106,6 +135,11 @@ func (_c *TenantPermissionGroupCreate) SetTenant(v *Tenant) *TenantPermissionGro
 // SetGroup sets the "group" edge to the MenuPermissionGroup entity.
 func (_c *TenantPermissionGroupCreate) SetGroup(v *MenuPermissionGroup) *TenantPermissionGroupCreate {
 	return _c.SetGroupID(v.ID)
+}
+
+// SetVersion sets the "version" edge to the MenuPermissionGroupVersion entity.
+func (_c *TenantPermissionGroupCreate) SetVersion(v *MenuPermissionGroupVersion) *TenantPermissionGroupCreate {
+	return _c.SetVersionID(v.ID)
 }
 
 // Mutation returns the TenantPermissionGroupMutation object of the builder.
@@ -155,6 +189,10 @@ func (_c *TenantPermissionGroupCreate) defaults() {
 		v := tenantpermissiongroup.DefaultEnabled
 		_c.mutation.SetEnabled(v)
 	}
+	if _, ok := _c.mutation.AutoUpgrade(); !ok {
+		v := tenantpermissiongroup.DefaultAutoUpgrade
+		_c.mutation.SetAutoUpgrade(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -183,6 +221,9 @@ func (_c *TenantPermissionGroupCreate) check() error {
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`gen: missing required field "TenantPermissionGroup.enabled"`)}
+	}
+	if _, ok := _c.mutation.AutoUpgrade(); !ok {
+		return &ValidationError{Name: "auto_upgrade", err: errors.New(`gen: missing required field "TenantPermissionGroup.auto_upgrade"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := tenantpermissiongroup.IDValidator(v); err != nil {
@@ -244,6 +285,10 @@ func (_c *TenantPermissionGroupCreate) createSpec() (*TenantPermissionGroup, *sq
 		_spec.SetField(tenantpermissiongroup.FieldBoundBy, field.TypeUint32, value)
 		_node.BoundBy = &value
 	}
+	if value, ok := _c.mutation.AutoUpgrade(); ok {
+		_spec.SetField(tenantpermissiongroup.FieldAutoUpgrade, field.TypeBool, value)
+		_node.AutoUpgrade = value
+	}
 	if nodes := _c.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -276,6 +321,23 @@ func (_c *TenantPermissionGroupCreate) createSpec() (*TenantPermissionGroup, *sq
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.GroupID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.VersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tenantpermissiongroup.VersionTable,
+			Columns: []string{tenantpermissiongroup.VersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.VersionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -399,6 +461,36 @@ func (u *TenantPermissionGroupUpsert) AddBoundBy(v uint32) *TenantPermissionGrou
 // ClearBoundBy clears the value of the "bound_by" field.
 func (u *TenantPermissionGroupUpsert) ClearBoundBy() *TenantPermissionGroupUpsert {
 	u.SetNull(tenantpermissiongroup.FieldBoundBy)
+	return u
+}
+
+// SetVersionID sets the "version_id" field.
+func (u *TenantPermissionGroupUpsert) SetVersionID(v uint32) *TenantPermissionGroupUpsert {
+	u.Set(tenantpermissiongroup.FieldVersionID, v)
+	return u
+}
+
+// UpdateVersionID sets the "version_id" field to the value that was provided on create.
+func (u *TenantPermissionGroupUpsert) UpdateVersionID() *TenantPermissionGroupUpsert {
+	u.SetExcluded(tenantpermissiongroup.FieldVersionID)
+	return u
+}
+
+// ClearVersionID clears the value of the "version_id" field.
+func (u *TenantPermissionGroupUpsert) ClearVersionID() *TenantPermissionGroupUpsert {
+	u.SetNull(tenantpermissiongroup.FieldVersionID)
+	return u
+}
+
+// SetAutoUpgrade sets the "auto_upgrade" field.
+func (u *TenantPermissionGroupUpsert) SetAutoUpgrade(v bool) *TenantPermissionGroupUpsert {
+	u.Set(tenantpermissiongroup.FieldAutoUpgrade, v)
+	return u
+}
+
+// UpdateAutoUpgrade sets the "auto_upgrade" field to the value that was provided on create.
+func (u *TenantPermissionGroupUpsert) UpdateAutoUpgrade() *TenantPermissionGroupUpsert {
+	u.SetExcluded(tenantpermissiongroup.FieldAutoUpgrade)
 	return u
 }
 
@@ -534,6 +626,41 @@ func (u *TenantPermissionGroupUpsertOne) UpdateBoundBy() *TenantPermissionGroupU
 func (u *TenantPermissionGroupUpsertOne) ClearBoundBy() *TenantPermissionGroupUpsertOne {
 	return u.Update(func(s *TenantPermissionGroupUpsert) {
 		s.ClearBoundBy()
+	})
+}
+
+// SetVersionID sets the "version_id" field.
+func (u *TenantPermissionGroupUpsertOne) SetVersionID(v uint32) *TenantPermissionGroupUpsertOne {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.SetVersionID(v)
+	})
+}
+
+// UpdateVersionID sets the "version_id" field to the value that was provided on create.
+func (u *TenantPermissionGroupUpsertOne) UpdateVersionID() *TenantPermissionGroupUpsertOne {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.UpdateVersionID()
+	})
+}
+
+// ClearVersionID clears the value of the "version_id" field.
+func (u *TenantPermissionGroupUpsertOne) ClearVersionID() *TenantPermissionGroupUpsertOne {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.ClearVersionID()
+	})
+}
+
+// SetAutoUpgrade sets the "auto_upgrade" field.
+func (u *TenantPermissionGroupUpsertOne) SetAutoUpgrade(v bool) *TenantPermissionGroupUpsertOne {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.SetAutoUpgrade(v)
+	})
+}
+
+// UpdateAutoUpgrade sets the "auto_upgrade" field to the value that was provided on create.
+func (u *TenantPermissionGroupUpsertOne) UpdateAutoUpgrade() *TenantPermissionGroupUpsertOne {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.UpdateAutoUpgrade()
 	})
 }
 
@@ -835,6 +962,41 @@ func (u *TenantPermissionGroupUpsertBulk) UpdateBoundBy() *TenantPermissionGroup
 func (u *TenantPermissionGroupUpsertBulk) ClearBoundBy() *TenantPermissionGroupUpsertBulk {
 	return u.Update(func(s *TenantPermissionGroupUpsert) {
 		s.ClearBoundBy()
+	})
+}
+
+// SetVersionID sets the "version_id" field.
+func (u *TenantPermissionGroupUpsertBulk) SetVersionID(v uint32) *TenantPermissionGroupUpsertBulk {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.SetVersionID(v)
+	})
+}
+
+// UpdateVersionID sets the "version_id" field to the value that was provided on create.
+func (u *TenantPermissionGroupUpsertBulk) UpdateVersionID() *TenantPermissionGroupUpsertBulk {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.UpdateVersionID()
+	})
+}
+
+// ClearVersionID clears the value of the "version_id" field.
+func (u *TenantPermissionGroupUpsertBulk) ClearVersionID() *TenantPermissionGroupUpsertBulk {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.ClearVersionID()
+	})
+}
+
+// SetAutoUpgrade sets the "auto_upgrade" field.
+func (u *TenantPermissionGroupUpsertBulk) SetAutoUpgrade(v bool) *TenantPermissionGroupUpsertBulk {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.SetAutoUpgrade(v)
+	})
+}
+
+// UpdateAutoUpgrade sets the "auto_upgrade" field to the value that was provided on create.
+func (u *TenantPermissionGroupUpsertBulk) UpdateAutoUpgrade() *TenantPermissionGroupUpsertBulk {
+	return u.Update(func(s *TenantPermissionGroupUpsert) {
+		s.UpdateAutoUpgrade()
 	})
 }
 

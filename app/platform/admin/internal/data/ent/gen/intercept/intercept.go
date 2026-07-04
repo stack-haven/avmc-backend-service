@@ -7,18 +7,22 @@ import (
 	"fmt"
 
 	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
+	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 
@@ -79,6 +83,33 @@ func (f TraverseFunc) Traverse(ctx context.Context, q gen.Query) error {
 		return err
 	}
 	return f(ctx, query)
+}
+
+// The AsyncTaskFunc type is an adapter to allow the use of ordinary function as a Querier.
+type AsyncTaskFunc func(context.Context, *gen.AsyncTaskQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f AsyncTaskFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.AsyncTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.AsyncTaskQuery", q)
+}
+
+// The TraverseAsyncTask type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseAsyncTask func(context.Context, *gen.AsyncTaskQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseAsyncTask) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseAsyncTask) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.AsyncTaskQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.AsyncTaskQuery", q)
 }
 
 // The DeptFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -243,6 +274,33 @@ func (f TraverseMenuPermissionGroup) Traverse(ctx context.Context, q gen.Query) 
 	return fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupQuery", q)
 }
 
+// The MenuPermissionGroupVersionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type MenuPermissionGroupVersionFunc func(context.Context, *gen.MenuPermissionGroupVersionQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f MenuPermissionGroupVersionFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.MenuPermissionGroupVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupVersionQuery", q)
+}
+
+// The TraverseMenuPermissionGroupVersion type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseMenuPermissionGroupVersion func(context.Context, *gen.MenuPermissionGroupVersionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseMenuPermissionGroupVersion) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseMenuPermissionGroupVersion) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.MenuPermissionGroupVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupVersionQuery", q)
+}
+
 // The OperationLogFunc type is an adapter to allow the use of ordinary function as a Querier.
 type OperationLogFunc func(context.Context, *gen.OperationLogQuery) (gen.Value, error)
 
@@ -268,6 +326,33 @@ func (f TraverseOperationLog) Traverse(ctx context.Context, q gen.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *gen.OperationLogQuery", q)
+}
+
+// The ParameterDefinitionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type ParameterDefinitionFunc func(context.Context, *gen.ParameterDefinitionQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f ParameterDefinitionFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.ParameterDefinitionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.ParameterDefinitionQuery", q)
+}
+
+// The TraverseParameterDefinition type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseParameterDefinition func(context.Context, *gen.ParameterDefinitionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseParameterDefinition) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseParameterDefinition) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.ParameterDefinitionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.ParameterDefinitionQuery", q)
 }
 
 // The PostFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -378,6 +463,33 @@ func (f TraverseTenant) Traverse(ctx context.Context, q gen.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *gen.TenantQuery", q)
 }
 
+// The TenantParameterOverrideFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TenantParameterOverrideFunc func(context.Context, *gen.TenantParameterOverrideQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f TenantParameterOverrideFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.TenantParameterOverrideQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantParameterOverrideQuery", q)
+}
+
+// The TraverseTenantParameterOverride type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTenantParameterOverride func(context.Context, *gen.TenantParameterOverrideQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTenantParameterOverride) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTenantParameterOverride) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantParameterOverrideQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.TenantParameterOverrideQuery", q)
+}
+
 // The TenantPermissionGroupFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TenantPermissionGroupFunc func(context.Context, *gen.TenantPermissionGroupQuery) (gen.Value, error)
 
@@ -435,6 +547,8 @@ func (f TraverseUser) Traverse(ctx context.Context, q gen.Query) error {
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q gen.Query) (Query, error) {
 	switch q := q.(type) {
+	case *gen.AsyncTaskQuery:
+		return &query[*gen.AsyncTaskQuery, predicate.AsyncTask, asynctask.OrderOption]{typ: gen.TypeAsyncTask, tq: q}, nil
 	case *gen.DeptQuery:
 		return &query[*gen.DeptQuery, predicate.Dept, dept.OrderOption]{typ: gen.TypeDept, tq: q}, nil
 	case *gen.DictionaryItemQuery:
@@ -447,8 +561,12 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.MenuQuery, predicate.Menu, menu.OrderOption]{typ: gen.TypeMenu, tq: q}, nil
 	case *gen.MenuPermissionGroupQuery:
 		return &query[*gen.MenuPermissionGroupQuery, predicate.MenuPermissionGroup, menupermissiongroup.OrderOption]{typ: gen.TypeMenuPermissionGroup, tq: q}, nil
+	case *gen.MenuPermissionGroupVersionQuery:
+		return &query[*gen.MenuPermissionGroupVersionQuery, predicate.MenuPermissionGroupVersion, menupermissiongroupversion.OrderOption]{typ: gen.TypeMenuPermissionGroupVersion, tq: q}, nil
 	case *gen.OperationLogQuery:
 		return &query[*gen.OperationLogQuery, predicate.OperationLog, operationlog.OrderOption]{typ: gen.TypeOperationLog, tq: q}, nil
+	case *gen.ParameterDefinitionQuery:
+		return &query[*gen.ParameterDefinitionQuery, predicate.ParameterDefinition, parameterdefinition.OrderOption]{typ: gen.TypeParameterDefinition, tq: q}, nil
 	case *gen.PostQuery:
 		return &query[*gen.PostQuery, predicate.Post, post.OrderOption]{typ: gen.TypePost, tq: q}, nil
 	case *gen.ProjectQuery:
@@ -457,6 +575,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.RoleQuery, predicate.Role, role.OrderOption]{typ: gen.TypeRole, tq: q}, nil
 	case *gen.TenantQuery:
 		return &query[*gen.TenantQuery, predicate.Tenant, tenant.OrderOption]{typ: gen.TypeTenant, tq: q}, nil
+	case *gen.TenantParameterOverrideQuery:
+		return &query[*gen.TenantParameterOverrideQuery, predicate.TenantParameterOverride, tenantparameteroverride.OrderOption]{typ: gen.TypeTenantParameterOverride, tq: q}, nil
 	case *gen.TenantPermissionGroupQuery:
 		return &query[*gen.TenantPermissionGroupQuery, predicate.TenantPermissionGroup, tenantpermissiongroup.OrderOption]{typ: gen.TypeTenantPermissionGroup, tq: q}, nil
 	case *gen.UserQuery:

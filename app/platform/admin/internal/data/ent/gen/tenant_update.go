@@ -140,6 +140,20 @@ func (_u *TenantUpdate) SetNillableRemark(v *string) *TenantUpdate {
 	return _u
 }
 
+// SetIsPlatform sets the "is_platform" field.
+func (_u *TenantUpdate) SetIsPlatform(v bool) *TenantUpdate {
+	_u.mutation.SetIsPlatform(v)
+	return _u
+}
+
+// SetNillableIsPlatform sets the "is_platform" field if the given value is not nil.
+func (_u *TenantUpdate) SetNillableIsPlatform(v *bool) *TenantUpdate {
+	if v != nil {
+		_u.SetIsPlatform(*v)
+	}
+	return _u
+}
+
 // SetLifecycleStatus sets the "lifecycle_status" field.
 func (_u *TenantUpdate) SetLifecycleStatus(v int32) *TenantUpdate {
 	_u.mutation.ResetLifecycleStatus()
@@ -397,6 +411,9 @@ func (_u *TenantUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Remark(); ok {
 		_spec.SetField(tenant.FieldRemark, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.IsPlatform(); ok {
+		_spec.SetField(tenant.FieldIsPlatform, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.LifecycleStatus(); ok {
 		_spec.SetField(tenant.FieldLifecycleStatus, field.TypeInt32, value)
 	}
@@ -600,6 +617,20 @@ func (_u *TenantUpdateOne) SetRemark(v string) *TenantUpdateOne {
 func (_u *TenantUpdateOne) SetNillableRemark(v *string) *TenantUpdateOne {
 	if v != nil {
 		_u.SetRemark(*v)
+	}
+	return _u
+}
+
+// SetIsPlatform sets the "is_platform" field.
+func (_u *TenantUpdateOne) SetIsPlatform(v bool) *TenantUpdateOne {
+	_u.mutation.SetIsPlatform(v)
+	return _u
+}
+
+// SetNillableIsPlatform sets the "is_platform" field if the given value is not nil.
+func (_u *TenantUpdateOne) SetNillableIsPlatform(v *bool) *TenantUpdateOne {
+	if v != nil {
+		_u.SetIsPlatform(*v)
 	}
 	return _u
 }
@@ -890,6 +921,9 @@ func (_u *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err erro
 	}
 	if value, ok := _u.mutation.Remark(); ok {
 		_spec.SetField(tenant.FieldRemark, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.IsPlatform(); ok {
+		_spec.SetField(tenant.FieldIsPlatform, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.LifecycleStatus(); ok {
 		_spec.SetField(tenant.FieldLifecycleStatus, field.TypeInt32, value)

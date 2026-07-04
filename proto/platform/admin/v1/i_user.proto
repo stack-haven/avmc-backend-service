@@ -99,7 +99,7 @@ service UserService {
   rpc UpdateUser(core.service.v1.UpdateUserRequest) returns (core.service.v1.UpdateUserResponse) {
     option (google.api.http) = {
       put: "/admin/v1/users/{id}"
-      body: "user"
+      body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "更新用户"

@@ -115,6 +115,9 @@ message User {
   optional string created_at = 12 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
   optional string updated_at = 13 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
   optional string description = 14 [(gnostic.openapi.v3.property) = {description: "个人说明"}]; // 个人说明
+  repeated uint32 role_ids = 15 [(gnostic.openapi.v3.property) = {description: "绑定角色ID列表"}];
+  bool is_tenant_admin = 16 [(gnostic.openapi.v3.property) = {description: "是否租户管理员，只读"}];
+  optional uint32 dept_id = 17 [(gnostic.openapi.v3.property) = {description: "所属主部门ID"}];
 }
 
 message CreateUserRequest {

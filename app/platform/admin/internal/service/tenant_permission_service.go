@@ -35,9 +35,14 @@ func (s *TenantPermissionServiceService) GetTenantPermissionGroups(ctx context.C
 			groupIDs = append(groupIDs, group.GetId())
 		}
 	}
+	bindings, err := s.uc.GetTenantGroupBindings(ctx, req.GetTenantId())
+	if err != nil {
+		return nil, err
+	}
 	return &pbCore.GetTenantPermissionGroupsResponse{
 		Groups:   groups,
 		GroupIds: groupIDs,
+		Bindings: bindings,
 	}, nil
 }
 
@@ -72,4 +77,19 @@ func (s *TenantPermissionServiceService) GetCurrentTenantEffectiveMenus(ctx cont
 		return nil, err
 	}
 	return &pbCore.GetTenantEffectiveMenusResponse{Items: items}, nil
+}
+
+func (s *TenantPermissionServiceService) UpdateTenantPermissionGroupVersion(ctx context.Context, req *pbCore.UpdateTenantPermissionGroupVersionRequest) (*pbCore.UpdateTenantPermissionGroupVersionResponse, error) {
+	binding, err := s.uc.UpdateTenantGroupVersion(
+		ctx,
+		req.GetTenantId(),
+		req.GetGroupId(),
+		req.GetVersionId(),
+		req.GetAutoUpgrade(),
+		req.GetOperatorId(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.UpdateTenantPermissionGroupVersionResponse{Binding: binding}, nil
 }

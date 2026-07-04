@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
@@ -279,6 +280,20 @@ func (_c *UserCreate) SetNillableDescription(v *string) *UserCreate {
 	return _c
 }
 
+// SetDeptID sets the "dept_id" field.
+func (_c *UserCreate) SetDeptID(v uint32) *UserCreate {
+	_c.mutation.SetDeptID(v)
+	return _c
+}
+
+// SetNillableDeptID sets the "dept_id" field if the given value is not nil.
+func (_c *UserCreate) SetNillableDeptID(v *uint32) *UserCreate {
+	if v != nil {
+		_c.SetDeptID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *UserCreate) SetID(v uint32) *UserCreate {
 	_c.mutation.SetID(v)
@@ -313,6 +328,11 @@ func (_c *UserCreate) AddPosts(v ...*Post) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddPostIDs(ids...)
+}
+
+// SetDept sets the "dept" edge to the Dept entity.
+func (_c *UserCreate) SetDept(v *Dept) *UserCreate {
+	return _c.SetDeptID(v.ID)
 }
 
 // AddProjectIDs adds the "projects" edge to the Project entity by IDs.
@@ -647,6 +667,23 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DeptIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.DeptTable,
+			Columns: []string{user.DeptColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DeptID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.ProjectsIDs(); len(nodes) > 0 {
@@ -1062,6 +1099,24 @@ func (u *UserUpsert) UpdateDescription() *UserUpsert {
 // ClearDescription clears the value of the "description" field.
 func (u *UserUpsert) ClearDescription() *UserUpsert {
 	u.SetNull(user.FieldDescription)
+	return u
+}
+
+// SetDeptID sets the "dept_id" field.
+func (u *UserUpsert) SetDeptID(v uint32) *UserUpsert {
+	u.Set(user.FieldDeptID, v)
+	return u
+}
+
+// UpdateDeptID sets the "dept_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateDeptID() *UserUpsert {
+	u.SetExcluded(user.FieldDeptID)
+	return u
+}
+
+// ClearDeptID clears the value of the "dept_id" field.
+func (u *UserUpsert) ClearDeptID() *UserUpsert {
+	u.SetNull(user.FieldDeptID)
 	return u
 }
 
@@ -1519,6 +1574,27 @@ func (u *UserUpsertOne) UpdateDescription() *UserUpsertOne {
 func (u *UserUpsertOne) ClearDescription() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// SetDeptID sets the "dept_id" field.
+func (u *UserUpsertOne) SetDeptID(v uint32) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDeptID(v)
+	})
+}
+
+// UpdateDeptID sets the "dept_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateDeptID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDeptID()
+	})
+}
+
+// ClearDeptID clears the value of the "dept_id" field.
+func (u *UserUpsertOne) ClearDeptID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDeptID()
 	})
 }
 
@@ -2142,6 +2218,27 @@ func (u *UserUpsertBulk) UpdateDescription() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearDescription() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// SetDeptID sets the "dept_id" field.
+func (u *UserUpsertBulk) SetDeptID(v uint32) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDeptID(v)
+	})
+}
+
+// UpdateDeptID sets the "dept_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateDeptID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDeptID()
+	})
+}
+
+// ClearDeptID clears the value of the "dept_id" field.
+func (u *UserUpsertBulk) ClearDeptID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDeptID()
 	})
 }
 

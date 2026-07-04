@@ -4,6 +4,19 @@ package gen
 
 import "context"
 
+func (_m *AsyncTaskQuery) Page(ctx context.Context, page, size int) ([]*AsyncTask, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
 func (_m *DeptQuery) Page(ctx context.Context, page, size int) ([]*Dept, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
@@ -82,7 +95,33 @@ func (_m *MenuPermissionGroupQuery) Page(ctx context.Context, page, size int) ([
 	return rs, cnt, nil
 }
 
+func (_m *MenuPermissionGroupVersionQuery) Page(ctx context.Context, page, size int) ([]*MenuPermissionGroupVersion, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
 func (_m *OperationLogQuery) Page(ctx context.Context, page, size int) ([]*OperationLog, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *ParameterDefinitionQuery) Page(ctx context.Context, page, size int) ([]*ParameterDefinition, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -135,6 +174,19 @@ func (_m *RoleQuery) Page(ctx context.Context, page, size int) ([]*Role, int, er
 }
 
 func (_m *TenantQuery) Page(ctx context.Context, page, size int) ([]*Tenant, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *TenantParameterOverrideQuery) Page(ctx context.Context, page, size int) ([]*TenantParameterOverride, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err

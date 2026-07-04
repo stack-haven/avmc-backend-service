@@ -98,9 +98,11 @@ type MenuEdges struct {
 	Roles []*Role `json:"roles,omitempty"`
 	// PermissionGroups holds the value of the permission_groups edge.
 	PermissionGroups []*MenuPermissionGroup `json:"permission_groups,omitempty"`
+	// PermissionGroupVersions holds the value of the permission_group_versions edge.
+	PermissionGroupVersions []*MenuPermissionGroupVersion `json:"permission_group_versions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -139,6 +141,15 @@ func (e MenuEdges) PermissionGroupsOrErr() ([]*MenuPermissionGroup, error) {
 		return e.PermissionGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "permission_groups"}
+}
+
+// PermissionGroupVersionsOrErr returns the PermissionGroupVersions value or an error if the edge
+// was not loaded in eager-loading.
+func (e MenuEdges) PermissionGroupVersionsOrErr() ([]*MenuPermissionGroupVersion, error) {
+	if e.loadedTypes[4] {
+		return e.PermissionGroupVersions, nil
+	}
+	return nil, &NotLoadedError{edge: "permission_group_versions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -427,6 +438,11 @@ func (_m *Menu) QueryRoles() *RoleQuery {
 // QueryPermissionGroups queries the "permission_groups" edge of the Menu entity.
 func (_m *Menu) QueryPermissionGroups() *MenuPermissionGroupQuery {
 	return NewMenuClient(_m.config).QueryPermissionGroups(_m)
+}
+
+// QueryPermissionGroupVersions queries the "permission_group_versions" edge of the Menu entity.
+func (_m *Menu) QueryPermissionGroupVersions() *MenuPermissionGroupVersionQuery {
+	return NewMenuClient(_m.config).QueryPermissionGroupVersions(_m)
 }
 
 // Update returns a builder for updating this Menu.

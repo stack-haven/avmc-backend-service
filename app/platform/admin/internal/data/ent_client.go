@@ -9,6 +9,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/intercept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/migrate"
+	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 
 	_ "backend-service/app/platform/admin/internal/data/ent/gen/runtime"
 
@@ -79,14 +81,35 @@ func RunSchemaMigration(ctx context.Context, cfg *conf.Data, logger log.Logger) 
 			l.Errorf("failed closing ent client: %v", err)
 		}
 	}()
-	return client.Schema.Create(
+	if err := client.Schema.Create(
 		ctx,
 		migrate.WithForeignKeys(false),
 		// Migrations are explicit for Admin while the product is unreleased, so
 		// obsolete pre-tenant columns/indexes can be removed instead of kept.
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
-	)
+	); err != nil {
+		return err
+	}
+	return backfillTenantAdminRoleMarker(ctx, client, l)
+}
+
+func backfillTenantAdminRoleMarker(ctx context.Context, client *gen.Client, logger *log.Helper) error {
+	systemCtx := entviewer.NewSystemContext(ctx)
+	affected, err := client.Role.Update().
+		Where(
+			role.NameEQ("租户管理员"),
+			role.IsTenantAdminEQ(false),
+		).
+		SetIsTenantAdmin(true).
+		Save(systemCtx)
+	if err != nil {
+		return fmt.Errorf("backfilling tenant admin role marker: %w", err)
+	}
+	if affected > 0 {
+		logger.Infof("backfilled tenant admin role marker: count=%d", affected)
+	}
+	return nil
 }
 
 // NewEntData .

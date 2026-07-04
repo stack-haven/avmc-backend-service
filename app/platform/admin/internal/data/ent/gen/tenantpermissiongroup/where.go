@@ -85,6 +85,16 @@ func BoundBy(v uint32) predicate.TenantPermissionGroup {
 	return predicate.TenantPermissionGroup(sql.FieldEQ(FieldBoundBy, v))
 }
 
+// VersionID applies equality check predicate on the "version_id" field. It's identical to VersionIDEQ.
+func VersionID(v uint32) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldEQ(FieldVersionID, v))
+}
+
+// AutoUpgrade applies equality check predicate on the "auto_upgrade" field. It's identical to AutoUpgradeEQ.
+func AutoUpgrade(v bool) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldEQ(FieldAutoUpgrade, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.TenantPermissionGroup {
 	return predicate.TenantPermissionGroup(sql.FieldEQ(FieldCreatedAt, v))
@@ -265,6 +275,46 @@ func BoundByNotNil() predicate.TenantPermissionGroup {
 	return predicate.TenantPermissionGroup(sql.FieldNotNull(FieldBoundBy))
 }
 
+// VersionIDEQ applies the EQ predicate on the "version_id" field.
+func VersionIDEQ(v uint32) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldEQ(FieldVersionID, v))
+}
+
+// VersionIDNEQ applies the NEQ predicate on the "version_id" field.
+func VersionIDNEQ(v uint32) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldNEQ(FieldVersionID, v))
+}
+
+// VersionIDIn applies the In predicate on the "version_id" field.
+func VersionIDIn(vs ...uint32) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldIn(FieldVersionID, vs...))
+}
+
+// VersionIDNotIn applies the NotIn predicate on the "version_id" field.
+func VersionIDNotIn(vs ...uint32) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldNotIn(FieldVersionID, vs...))
+}
+
+// VersionIDIsNil applies the IsNil predicate on the "version_id" field.
+func VersionIDIsNil() predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldIsNull(FieldVersionID))
+}
+
+// VersionIDNotNil applies the NotNil predicate on the "version_id" field.
+func VersionIDNotNil() predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldNotNull(FieldVersionID))
+}
+
+// AutoUpgradeEQ applies the EQ predicate on the "auto_upgrade" field.
+func AutoUpgradeEQ(v bool) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldEQ(FieldAutoUpgrade, v))
+}
+
+// AutoUpgradeNEQ applies the NEQ predicate on the "auto_upgrade" field.
+func AutoUpgradeNEQ(v bool) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(sql.FieldNEQ(FieldAutoUpgrade, v))
+}
+
 // HasTenant applies the HasEdge predicate on the "tenant" edge.
 func HasTenant() predicate.TenantPermissionGroup {
 	return predicate.TenantPermissionGroup(func(s *sql.Selector) {
@@ -303,6 +353,29 @@ func HasGroup() predicate.TenantPermissionGroup {
 func HasGroupWith(preds ...predicate.MenuPermissionGroup) predicate.TenantPermissionGroup {
 	return predicate.TenantPermissionGroup(func(s *sql.Selector) {
 		step := newGroupStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVersion applies the HasEdge predicate on the "version" edge.
+func HasVersion() predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, VersionTable, VersionColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVersionWith applies the HasEdge predicate on the "version" edge with a given conditions (other predicates).
+func HasVersionWith(preds ...predicate.MenuPermissionGroupVersion) predicate.TenantPermissionGroup {
+	return predicate.TenantPermissionGroup(func(s *sql.Selector) {
+		step := newVersionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

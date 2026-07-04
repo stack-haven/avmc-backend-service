@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
@@ -30,6 +31,7 @@ type UserQuery struct {
 	predicates   []predicate.User
 	withRoles    *RoleQuery
 	withPosts    *PostQuery
+	withDept     *DeptQuery
 	withProjects *ProjectQuery
 	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -105,6 +107,28 @@ func (_q *UserQuery) QueryPosts() *PostQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(post.Table, post.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PostsTable, user.PostsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDept chains the current query on the "dept" edge.
+func (_q *UserQuery) QueryDept() *DeptQuery {
+	query := (&DeptClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(dept.Table, dept.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.DeptTable, user.DeptColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -328,6 +352,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		predicates:   append([]predicate.User{}, _q.predicates...),
 		withRoles:    _q.withRoles.Clone(),
 		withPosts:    _q.withPosts.Clone(),
+		withDept:     _q.withDept.Clone(),
 		withProjects: _q.withProjects.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -355,6 +380,17 @@ func (_q *UserQuery) WithPosts(opts ...func(*PostQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withPosts = query
+	return _q
+}
+
+// WithDept tells the query-builder to eager-load the nodes that are connected to
+// the "dept" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithDept(opts ...func(*DeptQuery)) *UserQuery {
+	query := (&DeptClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDept = query
 	return _q
 }
 
@@ -453,9 +489,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withRoles != nil,
 			_q.withPosts != nil,
+			_q.withDept != nil,
 			_q.withProjects != nil,
 		}
 	)
@@ -491,6 +528,12 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadPosts(ctx, query, nodes,
 			func(n *User) { n.Edges.Posts = []*Post{} },
 			func(n *User, e *Post) { n.Edges.Posts = append(n.Edges.Posts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDept; query != nil {
+		if err := _q.loadDept(ctx, query, nodes, nil,
+			func(n *User, e *Dept) { n.Edges.Dept = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -596,6 +639,38 @@ func (_q *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*U
 	}
 	return nil
 }
+func (_q *UserQuery) loadDept(ctx context.Context, query *DeptQuery, nodes []*User, init func(*User), assign func(*User, *Dept)) error {
+	ids := make([]uint32, 0, len(nodes))
+	nodeids := make(map[uint32][]*User)
+	for i := range nodes {
+		if nodes[i].DeptID == nil {
+			continue
+		}
+		fk := *nodes[i].DeptID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(dept.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "dept_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 func (_q *UserQuery) loadProjects(ctx context.Context, query *ProjectQuery, nodes []*User, init func(*User), assign func(*User, *Project)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uint32]*User)
@@ -685,6 +760,9 @@ func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != user.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withDept != nil {
+			_spec.Node.AddColumnOnce(user.FieldDeptID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

@@ -90,8 +90,8 @@ message Role {
   }];
   // 数据范围
   optional int32 data_scope = 9 [(gnostic.openapi.v3.property) = {
-    description: "数据范围"
-    default: {number: 1}
+    description: "数据范围：1全部 2本人 3本部门 4本部门及下级 5自定义部门"
+    default: {number: 2}
   }];
   // 创建时间
   optional string created_at = 10 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
@@ -99,6 +99,8 @@ message Role {
   optional string updated_at = 11 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
   // 角色绑定的菜单ID列表
   repeated uint32 menu_ids = 12 [(gnostic.openapi.v3.property) = {description: "角色绑定的菜单ID列表"}];
+  bool is_tenant_admin = 13 [(gnostic.openapi.v3.property) = {description: "是否租户管理员角色，只读"}];
+  repeated uint32 dept_ids = 14 [(gnostic.openapi.v3.property) = {description: "自定义数据范围部门ID列表"}];
 }
 
 // 创建角色请求

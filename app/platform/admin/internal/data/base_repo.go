@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"backend-service/app/platform/admin/internal/data/ent/gen"
@@ -14,6 +15,10 @@ import (
 type BaseRepo struct {
 	Data *Data
 	Log  *log.Helper
+}
+
+func isSelectForUpdateUnsupported(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "FOR UPDATE/SHARE not supported")
 }
 
 // NewBaseRepo 创建 BaseRepo

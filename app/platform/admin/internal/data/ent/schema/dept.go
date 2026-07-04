@@ -46,6 +46,9 @@ func (Dept) Edges() []ent.Edge {
 			From("parent").
 			Unique().
 			Field("parent_id"),
+		edge.To("users", User.Type),
+		edge.From("data_scope_roles", Role.Type).
+			Ref("data_scope_depts"),
 	}
 }
 

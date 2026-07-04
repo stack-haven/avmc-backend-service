@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/api/common/enum"
@@ -185,7 +186,12 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 		return nil, pb.ErrorDeptNameAlreadyExists("部门名称已存在")
 	}
 
-	res, err := r.Data.DB(ctx).Dept.UpdateOneID(g.GetId()).
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx, r.Log)
+	res, err := tx.Dept.UpdateOneID(g.GetId()).
 		SetName(*entDept.Name).
 		SetNillableParentID(entDept.ParentID).
 		SetNillableLeaderID(entDept.LeaderID).
@@ -201,6 +207,33 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 		if gen.IsNotFound(err) {
 			return nil, pb.ErrorDeptNotFound("部门不存在")
 		}
+		return nil, err
+	}
+	descendants, err := tx.Dept.Query().
+		Select(dept.FieldID, dept.FieldAncestors).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, child := range descendants {
+		index := -1
+		for i, ancestorID := range child.Ancestors {
+			if uint32(ancestorID) == g.GetId() {
+				index = i
+				break
+			}
+		}
+		if index < 0 {
+			continue
+		}
+		updatedAncestors := append([]int(nil), entDept.Ancestors...)
+		updatedAncestors = append(updatedAncestors, int(g.GetId()))
+		updatedAncestors = append(updatedAncestors, child.Ancestors[index+1:]...)
+		if err = tx.Dept.UpdateOneID(child.ID).SetAncestors(updatedAncestors).Exec(ctx); err != nil {
+			return nil, err
+		}
+	}
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 	return r.convertProto(res), nil
@@ -233,6 +266,18 @@ func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
 	}
 	if hasChildren {
 		return pb.ErrorDeptCannotDeleteWithChildren("存在下级部门，无法删除")
+	}
+	inUse, err := r.Data.DB(ctx).Dept.Query().
+		Where(
+			dept.IDEQ(id),
+			dept.Or(dept.HasUsers(), dept.HasDataScopeRoles()),
+		).
+		Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if inUse {
+		return kerrors.Conflict("DEPT_IN_USE", "部门仍关联用户或角色数据范围，无法删除")
 	}
 	err = r.Data.DB(ctx).Dept.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
 	if gen.IsNotFound(err) {

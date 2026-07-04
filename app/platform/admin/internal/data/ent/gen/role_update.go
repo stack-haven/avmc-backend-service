@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
@@ -190,6 +191,20 @@ func (_u *RoleUpdate) AddDeptCheckStrictly(v int32) *RoleUpdate {
 	return _u
 }
 
+// SetIsTenantAdmin sets the "is_tenant_admin" field.
+func (_u *RoleUpdate) SetIsTenantAdmin(v bool) *RoleUpdate {
+	_u.mutation.SetIsTenantAdmin(v)
+	return _u
+}
+
+// SetNillableIsTenantAdmin sets the "is_tenant_admin" field if the given value is not nil.
+func (_u *RoleUpdate) SetNillableIsTenantAdmin(v *bool) *RoleUpdate {
+	if v != nil {
+		_u.SetIsTenantAdmin(*v)
+	}
+	return _u
+}
+
 // AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
 func (_u *RoleUpdate) AddMenuIDs(ids ...uint32) *RoleUpdate {
 	_u.mutation.AddMenuIDs(ids...)
@@ -203,6 +218,21 @@ func (_u *RoleUpdate) AddMenus(v ...*Menu) *RoleUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddMenuIDs(ids...)
+}
+
+// AddDataScopeDeptIDs adds the "data_scope_depts" edge to the Dept entity by IDs.
+func (_u *RoleUpdate) AddDataScopeDeptIDs(ids ...uint32) *RoleUpdate {
+	_u.mutation.AddDataScopeDeptIDs(ids...)
+	return _u
+}
+
+// AddDataScopeDepts adds the "data_scope_depts" edges to the Dept entity.
+func (_u *RoleUpdate) AddDataScopeDepts(v ...*Dept) *RoleUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDataScopeDeptIDs(ids...)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -244,6 +274,27 @@ func (_u *RoleUpdate) RemoveMenus(v ...*Menu) *RoleUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMenuIDs(ids...)
+}
+
+// ClearDataScopeDepts clears all "data_scope_depts" edges to the Dept entity.
+func (_u *RoleUpdate) ClearDataScopeDepts() *RoleUpdate {
+	_u.mutation.ClearDataScopeDepts()
+	return _u
+}
+
+// RemoveDataScopeDeptIDs removes the "data_scope_depts" edge to Dept entities by IDs.
+func (_u *RoleUpdate) RemoveDataScopeDeptIDs(ids ...uint32) *RoleUpdate {
+	_u.mutation.RemoveDataScopeDeptIDs(ids...)
+	return _u
+}
+
+// RemoveDataScopeDepts removes "data_scope_depts" edges to Dept entities.
+func (_u *RoleUpdate) RemoveDataScopeDepts(v ...*Dept) *RoleUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDataScopeDeptIDs(ids...)
 }
 
 // ClearUsers clears all "users" edges to the User entity.
@@ -397,6 +448,9 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedDeptCheckStrictly(); ok {
 		_spec.AddField(role.FieldDeptCheckStrictly, field.TypeInt32, value)
 	}
+	if value, ok := _u.mutation.IsTenantAdmin(); ok {
+		_spec.SetField(role.FieldIsTenantAdmin, field.TypeBool, value)
+	}
 	if _u.mutation.MenusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -435,6 +489,51 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DataScopeDeptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDataScopeDeptsIDs(); len(nodes) > 0 && !_u.mutation.DataScopeDeptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DataScopeDeptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -668,6 +767,20 @@ func (_u *RoleUpdateOne) AddDeptCheckStrictly(v int32) *RoleUpdateOne {
 	return _u
 }
 
+// SetIsTenantAdmin sets the "is_tenant_admin" field.
+func (_u *RoleUpdateOne) SetIsTenantAdmin(v bool) *RoleUpdateOne {
+	_u.mutation.SetIsTenantAdmin(v)
+	return _u
+}
+
+// SetNillableIsTenantAdmin sets the "is_tenant_admin" field if the given value is not nil.
+func (_u *RoleUpdateOne) SetNillableIsTenantAdmin(v *bool) *RoleUpdateOne {
+	if v != nil {
+		_u.SetIsTenantAdmin(*v)
+	}
+	return _u
+}
+
 // AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
 func (_u *RoleUpdateOne) AddMenuIDs(ids ...uint32) *RoleUpdateOne {
 	_u.mutation.AddMenuIDs(ids...)
@@ -681,6 +794,21 @@ func (_u *RoleUpdateOne) AddMenus(v ...*Menu) *RoleUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddMenuIDs(ids...)
+}
+
+// AddDataScopeDeptIDs adds the "data_scope_depts" edge to the Dept entity by IDs.
+func (_u *RoleUpdateOne) AddDataScopeDeptIDs(ids ...uint32) *RoleUpdateOne {
+	_u.mutation.AddDataScopeDeptIDs(ids...)
+	return _u
+}
+
+// AddDataScopeDepts adds the "data_scope_depts" edges to the Dept entity.
+func (_u *RoleUpdateOne) AddDataScopeDepts(v ...*Dept) *RoleUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDataScopeDeptIDs(ids...)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -722,6 +850,27 @@ func (_u *RoleUpdateOne) RemoveMenus(v ...*Menu) *RoleUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMenuIDs(ids...)
+}
+
+// ClearDataScopeDepts clears all "data_scope_depts" edges to the Dept entity.
+func (_u *RoleUpdateOne) ClearDataScopeDepts() *RoleUpdateOne {
+	_u.mutation.ClearDataScopeDepts()
+	return _u
+}
+
+// RemoveDataScopeDeptIDs removes the "data_scope_depts" edge to Dept entities by IDs.
+func (_u *RoleUpdateOne) RemoveDataScopeDeptIDs(ids ...uint32) *RoleUpdateOne {
+	_u.mutation.RemoveDataScopeDeptIDs(ids...)
+	return _u
+}
+
+// RemoveDataScopeDepts removes "data_scope_depts" edges to Dept entities.
+func (_u *RoleUpdateOne) RemoveDataScopeDepts(v ...*Dept) *RoleUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDataScopeDeptIDs(ids...)
 }
 
 // ClearUsers clears all "users" edges to the User entity.
@@ -905,6 +1054,9 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 	if value, ok := _u.mutation.AddedDeptCheckStrictly(); ok {
 		_spec.AddField(role.FieldDeptCheckStrictly, field.TypeInt32, value)
 	}
+	if value, ok := _u.mutation.IsTenantAdmin(); ok {
+		_spec.SetField(role.FieldIsTenantAdmin, field.TypeBool, value)
+	}
 	if _u.mutation.MenusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -943,6 +1095,51 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DataScopeDeptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDataScopeDeptsIDs(); len(nodes) > 0 && !_u.mutation.DataScopeDeptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DataScopeDeptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

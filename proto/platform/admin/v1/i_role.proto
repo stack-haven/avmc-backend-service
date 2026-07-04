@@ -80,7 +80,7 @@ service RoleService {
   rpc UpdateRole(core.service.v1.UpdateRoleRequest) returns (core.service.v1.UpdateRoleResponse) {
     option (google.api.http) = {
       put: "/admin/v1/roles/{id}"
-      body: "role"
+      body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "更新角色"

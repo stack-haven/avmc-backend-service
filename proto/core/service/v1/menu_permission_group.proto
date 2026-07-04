@@ -24,6 +24,9 @@ service MenuPermissionGroupService {
   rpc ListMenuPermissionGroups(ListMenuPermissionGroupsRequest) returns (ListMenuPermissionGroupsResponse);
   // 更新菜单权限组状态
   rpc UpdateMenuPermissionGroupStatus(UpdateMenuPermissionGroupStatusRequest) returns (UpdateMenuPermissionGroupStatusResponse);
+  rpc ListMenuPermissionGroupVersions(ListMenuPermissionGroupVersionsRequest) returns (ListMenuPermissionGroupVersionsResponse);
+  rpc PublishMenuPermissionGroupVersion(PublishMenuPermissionGroupVersionRequest) returns (PublishMenuPermissionGroupVersionResponse);
+  rpc RollbackMenuPermissionGroupVersion(RollbackMenuPermissionGroupVersionRequest) returns (RollbackMenuPermissionGroupVersionResponse);
 }
 
 service TenantPermissionService {
@@ -35,6 +38,13 @@ service TenantPermissionService {
   rpc GetTenantEffectiveMenus(GetTenantEffectiveMenusRequest) returns (GetTenantEffectiveMenusResponse);
   // 获取当前登录租户最终有效菜单树
   rpc GetCurrentTenantEffectiveMenus(GetCurrentTenantEffectiveMenusRequest) returns (GetTenantEffectiveMenusResponse);
+  rpc UpdateTenantPermissionGroupVersion(UpdateTenantPermissionGroupVersionRequest) returns (UpdateTenantPermissionGroupVersionResponse);
+}
+
+enum MenuPermissionGroupVersionState {
+  MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED = 0;
+  MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED = 1;
+  MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED = 2;
 }
 
 // 菜单权限组
@@ -91,6 +101,22 @@ message MenuPermissionGroup {
   optional string created_at = 11 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
   // 更新时间
   optional string updated_at = 12 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+  optional uint32 current_version_id = 13 [(gnostic.openapi.v3.property) = {description: "当前发布版本ID"}];
+  optional int32 current_version = 14 [(gnostic.openapi.v3.property) = {description: "当前发布版本号"}];
+}
+
+message MenuPermissionGroupVersion {
+  uint32 id = 1;
+  uint32 group_id = 2;
+  int32 version = 3;
+  MenuPermissionGroupVersionState state = 4;
+  repeated uint32 menu_ids = 5;
+  optional string change_summary = 6 [(buf.validate.field).string.max_len = 255];
+  optional uint32 created_by = 7;
+  optional uint32 published_by = 8;
+  optional string effective_at = 9;
+  optional string published_at = 10;
+  optional string created_at = 11;
 }
 
 message CreateMenuPermissionGroupRequest {
@@ -196,6 +222,37 @@ message UpdateMenuPermissionGroupStatusRequest {
 
 message UpdateMenuPermissionGroupStatusResponse {}
 
+message ListMenuPermissionGroupVersionsRequest {
+  uint32 group_id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message ListMenuPermissionGroupVersionsResponse {
+  repeated MenuPermissionGroupVersion items = 1;
+}
+
+message PublishMenuPermissionGroupVersionRequest {
+  uint32 group_id = 1 [(buf.validate.field).uint32.gt = 0];
+  repeated uint32 menu_ids = 2;
+  optional string change_summary = 3 [(buf.validate.field).string.max_len = 255];
+  optional uint32 operator_id = 4 [(buf.validate.field).uint32.gt = 0];
+  optional string effective_at = 5;
+}
+
+message PublishMenuPermissionGroupVersionResponse {
+  MenuPermissionGroupVersion version = 1;
+}
+
+message RollbackMenuPermissionGroupVersionRequest {
+  uint32 group_id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 source_version_id = 2 [(buf.validate.field).uint32.gt = 0];
+  optional string change_summary = 3 [(buf.validate.field).string.max_len = 255];
+  optional uint32 operator_id = 4 [(buf.validate.field).uint32.gt = 0];
+}
+
+message RollbackMenuPermissionGroupVersionResponse {
+  MenuPermissionGroupVersion version = 1;
+}
+
 message TenantPermissionGroupBinding {
   uint32 tenant_id = 1 [
     (buf.validate.field).uint32.gt = 0,
@@ -208,6 +265,9 @@ message TenantPermissionGroupBinding {
   optional bool enabled = 3 [(gnostic.openapi.v3.property) = {description: "是否启用"}];
   optional uint32 bound_by = 4 [(gnostic.openapi.v3.property) = {description: "绑定操作人ID"}];
   optional string bound_at = 5 [(gnostic.openapi.v3.property) = {description: "绑定时间"}];
+  optional uint32 version_id = 6 [(gnostic.openapi.v3.property) = {description: "当前使用版本ID"}];
+  optional int32 version = 7 [(gnostic.openapi.v3.property) = {description: "当前使用版本号"}];
+  optional bool auto_upgrade = 8 [(gnostic.openapi.v3.property) = {description: "是否自动跟随最新版"}];
 }
 
 message GetTenantPermissionGroupsRequest {
@@ -220,6 +280,7 @@ message GetTenantPermissionGroupsRequest {
 message GetTenantPermissionGroupsResponse {
   repeated MenuPermissionGroup groups = 1 [(gnostic.openapi.v3.property) = {description: "租户绑定的权限组"}];
   repeated uint32 group_ids = 2 [(gnostic.openapi.v3.property) = {description: "租户绑定的权限组ID"}];
+  repeated TenantPermissionGroupBinding bindings = 3 [(gnostic.openapi.v3.property) = {description: "租户套餐版本绑定"}];
 }
 
 message UpdateTenantPermissionGroupsRequest {
@@ -235,6 +296,18 @@ message UpdateTenantPermissionGroupsRequest {
 }
 
 message UpdateTenantPermissionGroupsResponse {}
+
+message UpdateTenantPermissionGroupVersionRequest {
+  uint32 tenant_id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 group_id = 2 [(buf.validate.field).uint32.gt = 0];
+  optional uint32 version_id = 3 [(buf.validate.field).uint32.gt = 0];
+  bool auto_upgrade = 4;
+  optional uint32 operator_id = 5 [(buf.validate.field).uint32.gt = 0];
+}
+
+message UpdateTenantPermissionGroupVersionResponse {
+  TenantPermissionGroupBinding binding = 1;
+}
 
 message GetTenantEffectiveMenusRequest {
   uint32 tenant_id = 1 [

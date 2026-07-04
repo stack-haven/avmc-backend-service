@@ -122,6 +122,7 @@ func (r *tenantRepo) Provision(ctx context.Context, input *biz.TenantProvisionin
 	roleBuilder := tx.Role.Create().
 		SetTenantID(tenantRow.ID).
 		SetName("租户管理员").
+		SetIsTenantAdmin(true).
 		SetDataScope(1).
 		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
 		AddMenuIDs(menuIDs...)
@@ -249,7 +250,6 @@ func (r *tenantRepo) Update(ctx context.Context, g *pbCore.Tenant, operatorID ui
 		SetName(g.GetName()).
 		SetCode(g.GetCode()).
 		SetNillableSort(g.Sort).
-		SetNillableStatus((*int32)(g.Status)).
 		SetNillableRemark(g.Remark)
 	if g.ExpiresAt != nil {
 		if g.GetExpiresAt() == "" {
@@ -332,6 +332,7 @@ func (r *tenantRepo) withTenantGroups(query *gen.TenantQuery) *gen.TenantQuery {
 		q.Where(tenantpermissiongroup.EnabledEQ(true)).
 			WithGroup(func(gq *gen.MenuPermissionGroupQuery) {
 				gq.WithMenus(func(mq *gen.MenuQuery) { mq.Select(menu.FieldID) })
+				gq.WithCurrentVersion()
 				gq.WithTenantBindings()
 			})
 	})
@@ -358,20 +359,47 @@ func (r *tenantRepo) validateGroupIDs(ctx context.Context, groupIDs []uint32) er
 }
 
 func (r *tenantRepo) replaceTenantGroups(ctx context.Context, tx *gen.Tx, tenantID uint32, groupIDs []uint32, operatorID uint32) error {
-	if _, err := tx.TenantPermissionGroup.Delete().
+	existing, err := tx.TenantPermissionGroup.Query().
 		Where(tenantpermissiongroup.TenantIDEQ(tenantID)).
-		Exec(ctx); err != nil {
+		All(ctx)
+	if err != nil {
 		return err
 	}
+	byGroup := make(map[uint32]*gen.TenantPermissionGroup, len(existing))
+	for _, item := range existing {
+		byGroup[item.GroupID] = item
+	}
 	for _, groupID := range uniquePositiveIDs(groupIDs) {
+		if item, ok := byGroup[groupID]; ok {
+			builder := tx.TenantPermissionGroup.UpdateOneID(item.ID).SetEnabled(true)
+			if operatorID > 0 {
+				builder.SetBoundBy(operatorID)
+			}
+			if _, err = builder.Save(ctx); err != nil {
+				return err
+			}
+			delete(byGroup, groupID)
+			continue
+		}
+		group, err := tx.MenuPermissionGroup.Get(ctx, groupID)
+		if err != nil {
+			return err
+		}
 		builder := tx.TenantPermissionGroup.Create().
 			SetTenantID(tenantID).
 			SetGroupID(groupID).
-			SetEnabled(true)
+			SetEnabled(true).
+			SetAutoUpgrade(true).
+			SetNillableVersionID(group.CurrentVersionID)
 		if operatorID > 0 {
 			builder.SetBoundBy(operatorID)
 		}
 		if _, err := builder.Save(ctx); err != nil {
+			return err
+		}
+	}
+	for _, item := range byGroup {
+		if err = tx.TenantPermissionGroup.DeleteOneID(item.ID).Exec(ctx); err != nil {
 			return err
 		}
 	}

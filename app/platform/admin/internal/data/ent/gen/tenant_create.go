@@ -135,6 +135,20 @@ func (_c *TenantCreate) SetNillableRemark(v *string) *TenantCreate {
 	return _c
 }
 
+// SetIsPlatform sets the "is_platform" field.
+func (_c *TenantCreate) SetIsPlatform(v bool) *TenantCreate {
+	_c.mutation.SetIsPlatform(v)
+	return _c
+}
+
+// SetNillableIsPlatform sets the "is_platform" field if the given value is not nil.
+func (_c *TenantCreate) SetNillableIsPlatform(v *bool) *TenantCreate {
+	if v != nil {
+		_c.SetIsPlatform(*v)
+	}
+	return _c
+}
+
 // SetLifecycleStatus sets the "lifecycle_status" field.
 func (_c *TenantCreate) SetLifecycleStatus(v int32) *TenantCreate {
 	_c.mutation.SetLifecycleStatus(v)
@@ -297,6 +311,10 @@ func (_c *TenantCreate) defaults() error {
 		v := tenant.DefaultRemark
 		_c.mutation.SetRemark(v)
 	}
+	if _, ok := _c.mutation.IsPlatform(); !ok {
+		v := tenant.DefaultIsPlatform
+		_c.mutation.SetIsPlatform(v)
+	}
 	if _, ok := _c.mutation.LifecycleStatus(); !ok {
 		v := tenant.DefaultLifecycleStatus
 		_c.mutation.SetLifecycleStatus(v)
@@ -346,6 +364,9 @@ func (_c *TenantCreate) check() error {
 		if err := tenant.RemarkValidator(v); err != nil {
 			return &ValidationError{Name: "remark", err: fmt.Errorf(`gen: validator failed for field "Tenant.remark": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.IsPlatform(); !ok {
+		return &ValidationError{Name: "is_platform", err: errors.New(`gen: missing required field "Tenant.is_platform"`)}
 	}
 	if _, ok := _c.mutation.LifecycleStatus(); !ok {
 		return &ValidationError{Name: "lifecycle_status", err: errors.New(`gen: missing required field "Tenant.lifecycle_status"`)}
@@ -419,6 +440,10 @@ func (_c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Remark(); ok {
 		_spec.SetField(tenant.FieldRemark, field.TypeString, value)
 		_node.Remark = &value
+	}
+	if value, ok := _c.mutation.IsPlatform(); ok {
+		_spec.SetField(tenant.FieldIsPlatform, field.TypeBool, value)
+		_node.IsPlatform = value
 	}
 	if value, ok := _c.mutation.LifecycleStatus(); ok {
 		_spec.SetField(tenant.FieldLifecycleStatus, field.TypeInt32, value)
@@ -607,6 +632,18 @@ func (u *TenantUpsert) SetRemark(v string) *TenantUpsert {
 // UpdateRemark sets the "remark" field to the value that was provided on create.
 func (u *TenantUpsert) UpdateRemark() *TenantUpsert {
 	u.SetExcluded(tenant.FieldRemark)
+	return u
+}
+
+// SetIsPlatform sets the "is_platform" field.
+func (u *TenantUpsert) SetIsPlatform(v bool) *TenantUpsert {
+	u.Set(tenant.FieldIsPlatform, v)
+	return u
+}
+
+// UpdateIsPlatform sets the "is_platform" field to the value that was provided on create.
+func (u *TenantUpsert) UpdateIsPlatform() *TenantUpsert {
+	u.SetExcluded(tenant.FieldIsPlatform)
 	return u
 }
 
@@ -867,6 +904,20 @@ func (u *TenantUpsertOne) SetRemark(v string) *TenantUpsertOne {
 func (u *TenantUpsertOne) UpdateRemark() *TenantUpsertOne {
 	return u.Update(func(s *TenantUpsert) {
 		s.UpdateRemark()
+	})
+}
+
+// SetIsPlatform sets the "is_platform" field.
+func (u *TenantUpsertOne) SetIsPlatform(v bool) *TenantUpsertOne {
+	return u.Update(func(s *TenantUpsert) {
+		s.SetIsPlatform(v)
+	})
+}
+
+// UpdateIsPlatform sets the "is_platform" field to the value that was provided on create.
+func (u *TenantUpsertOne) UpdateIsPlatform() *TenantUpsertOne {
+	return u.Update(func(s *TenantUpsert) {
+		s.UpdateIsPlatform()
 	})
 }
 
@@ -1308,6 +1359,20 @@ func (u *TenantUpsertBulk) SetRemark(v string) *TenantUpsertBulk {
 func (u *TenantUpsertBulk) UpdateRemark() *TenantUpsertBulk {
 	return u.Update(func(s *TenantUpsert) {
 		s.UpdateRemark()
+	})
+}
+
+// SetIsPlatform sets the "is_platform" field.
+func (u *TenantUpsertBulk) SetIsPlatform(v bool) *TenantUpsertBulk {
+	return u.Update(func(s *TenantUpsert) {
+		s.SetIsPlatform(v)
+	})
+}
+
+// UpdateIsPlatform sets the "is_platform" field to the value that was provided on create.
+func (u *TenantUpsertBulk) UpdateIsPlatform() *TenantUpsertBulk {
+	return u.Update(func(s *TenantUpsert) {
+		s.UpdateIsPlatform()
 	})
 }
 

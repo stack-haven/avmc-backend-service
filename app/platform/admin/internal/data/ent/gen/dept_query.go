@@ -5,6 +5,8 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
+	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
 	"database/sql/driver"
 	"errors"
@@ -21,13 +23,15 @@ import (
 // DeptQuery is the builder for querying Dept entities.
 type DeptQuery struct {
 	config
-	ctx          *QueryContext
-	order        []dept.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Dept
-	withParent   *DeptQuery
-	withChildren *DeptQuery
-	modifiers    []func(*sql.Selector)
+	ctx                *QueryContext
+	order              []dept.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.Dept
+	withParent         *DeptQuery
+	withChildren       *DeptQuery
+	withUsers          *UserQuery
+	withDataScopeRoles *RoleQuery
+	modifiers          []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,6 +105,50 @@ func (_q *DeptQuery) QueryChildren() *DeptQuery {
 			sqlgraph.From(dept.Table, dept.FieldID, selector),
 			sqlgraph.To(dept.Table, dept.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, dept.ChildrenTable, dept.ChildrenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUsers chains the current query on the "users" edge.
+func (_q *DeptQuery) QueryUsers() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dept.Table, dept.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dept.UsersTable, dept.UsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDataScopeRoles chains the current query on the "data_scope_roles" edge.
+func (_q *DeptQuery) QueryDataScopeRoles() *RoleQuery {
+	query := (&RoleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dept.Table, dept.FieldID, selector),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, dept.DataScopeRolesTable, dept.DataScopeRolesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +343,15 @@ func (_q *DeptQuery) Clone() *DeptQuery {
 		return nil
 	}
 	return &DeptQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]dept.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.Dept{}, _q.predicates...),
-		withParent:   _q.withParent.Clone(),
-		withChildren: _q.withChildren.Clone(),
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]dept.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.Dept{}, _q.predicates...),
+		withParent:         _q.withParent.Clone(),
+		withChildren:       _q.withChildren.Clone(),
+		withUsers:          _q.withUsers.Clone(),
+		withDataScopeRoles: _q.withDataScopeRoles.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -328,6 +378,28 @@ func (_q *DeptQuery) WithChildren(opts ...func(*DeptQuery)) *DeptQuery {
 		opt(query)
 	}
 	_q.withChildren = query
+	return _q
+}
+
+// WithUsers tells the query-builder to eager-load the nodes that are connected to
+// the "users" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DeptQuery) WithUsers(opts ...func(*UserQuery)) *DeptQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUsers = query
+	return _q
+}
+
+// WithDataScopeRoles tells the query-builder to eager-load the nodes that are connected to
+// the "data_scope_roles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DeptQuery) WithDataScopeRoles(opts ...func(*RoleQuery)) *DeptQuery {
+	query := (&RoleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDataScopeRoles = query
 	return _q
 }
 
@@ -415,9 +487,11 @@ func (_q *DeptQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dept, e
 	var (
 		nodes       = []*Dept{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			_q.withParent != nil,
 			_q.withChildren != nil,
+			_q.withUsers != nil,
+			_q.withDataScopeRoles != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -451,6 +525,20 @@ func (_q *DeptQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Dept, e
 		if err := _q.loadChildren(ctx, query, nodes,
 			func(n *Dept) { n.Edges.Children = []*Dept{} },
 			func(n *Dept, e *Dept) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withUsers; query != nil {
+		if err := _q.loadUsers(ctx, query, nodes,
+			func(n *Dept) { n.Edges.Users = []*User{} },
+			func(n *Dept, e *User) { n.Edges.Users = append(n.Edges.Users, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDataScopeRoles; query != nil {
+		if err := _q.loadDataScopeRoles(ctx, query, nodes,
+			func(n *Dept) { n.Edges.DataScopeRoles = []*Role{} },
+			func(n *Dept, e *Role) { n.Edges.DataScopeRoles = append(n.Edges.DataScopeRoles, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -519,6 +607,100 @@ func (_q *DeptQuery) loadChildren(ctx context.Context, query *DeptQuery, nodes [
 			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (_q *DeptQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*Dept, init func(*Dept), assign func(*Dept, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint32]*Dept)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(user.FieldDeptID)
+	}
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(dept.UsersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.DeptID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "dept_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "dept_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *DeptQuery) loadDataScopeRoles(ctx context.Context, query *RoleQuery, nodes []*Dept, init func(*Dept), assign func(*Dept, *Role)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[uint32]*Dept)
+	nids := make(map[uint32]map[*Dept]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(dept.DataScopeRolesTable)
+		s.Join(joinT).On(s.C(role.FieldID), joinT.C(dept.DataScopeRolesPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(dept.DataScopeRolesPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(dept.DataScopeRolesPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := uint32(values[0].(*sql.NullInt64).Int64)
+				inValue := uint32(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Dept]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Role](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "data_scope_roles" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

@@ -106,3 +106,27 @@ func (s *MenuPermissionGroupServiceService) UpdateMenuPermissionGroupStatus(ctx 
 	}
 	return &pbCore.UpdateMenuPermissionGroupStatusResponse{}, nil
 }
+
+func (s *MenuPermissionGroupServiceService) ListMenuPermissionGroupVersions(ctx context.Context, req *pbCore.ListMenuPermissionGroupVersionsRequest) (*pbCore.ListMenuPermissionGroupVersionsResponse, error) {
+	items, err := s.uc.ListVersions(ctx, req.GetGroupId())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ListMenuPermissionGroupVersionsResponse{Items: items}, nil
+}
+
+func (s *MenuPermissionGroupServiceService) PublishMenuPermissionGroupVersion(ctx context.Context, req *pbCore.PublishMenuPermissionGroupVersionRequest) (*pbCore.PublishMenuPermissionGroupVersionResponse, error) {
+	version, err := s.uc.PublishVersion(ctx, req.GetGroupId(), req.GetMenuIds(), req.GetChangeSummary(), req.GetOperatorId(), req.GetEffectiveAt())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.PublishMenuPermissionGroupVersionResponse{Version: version}, nil
+}
+
+func (s *MenuPermissionGroupServiceService) RollbackMenuPermissionGroupVersion(ctx context.Context, req *pbCore.RollbackMenuPermissionGroupVersionRequest) (*pbCore.RollbackMenuPermissionGroupVersionResponse, error) {
+	version, err := s.uc.RollbackVersion(ctx, req.GetGroupId(), req.GetSourceVersionId(), req.GetChangeSummary(), req.GetOperatorId())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.RollbackMenuPermissionGroupVersionResponse{Version: version}, nil
+}

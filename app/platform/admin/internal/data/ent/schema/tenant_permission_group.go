@@ -41,6 +41,8 @@ func (TenantPermissionGroup) Fields() []ent.Field {
 			SchemaType(map[string]string{dialect.MySQL: "bigint", dialect.Postgres: "bigint"}),
 		field.Bool("enabled").Comment("是否启用").Default(true).Nillable(),
 		field.Uint32("bound_by").Comment("绑定操作人ID").Optional().Nillable(),
+		field.Uint32("version_id").Comment("当前使用的套餐版本ID").Optional().Nillable(),
+		field.Bool("auto_upgrade").Comment("是否自动跟随最新版本").Default(true),
 	}
 }
 
@@ -55,6 +57,9 @@ func (TenantPermissionGroup) Edges() []ent.Edge {
 			Field("group_id").
 			Unique().
 			Required(),
+		edge.To("version", MenuPermissionGroupVersion.Type).
+			Field("version_id").
+			Unique(),
 	}
 }
 
@@ -73,5 +78,6 @@ func (TenantPermissionGroup) Indexes() []ent.Index {
 		index.Fields("tenant_id", "group_id").Unique(),
 		index.Fields("tenant_id"),
 		index.Fields("group_id"),
+		index.Fields("version_id"),
 	}
 }

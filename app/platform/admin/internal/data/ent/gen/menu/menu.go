@@ -87,6 +87,8 @@ const (
 	EdgeRoles = "roles"
 	// EdgePermissionGroups holds the string denoting the permission_groups edge name in mutations.
 	EdgePermissionGroups = "permission_groups"
+	// EdgePermissionGroupVersions holds the string denoting the permission_group_versions edge name in mutations.
+	EdgePermissionGroupVersions = "permission_group_versions"
 	// Table holds the table name of the menu in the database.
 	Table = "menus"
 	// ParentTable is the table that holds the parent relation/edge.
@@ -107,6 +109,11 @@ const (
 	// PermissionGroupsInverseTable is the table name for the MenuPermissionGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "menupermissiongroup" package.
 	PermissionGroupsInverseTable = "menu_permission_groups"
+	// PermissionGroupVersionsTable is the table that holds the permission_group_versions relation/edge. The primary key declared below.
+	PermissionGroupVersionsTable = "menu_permission_group_version_menus"
+	// PermissionGroupVersionsInverseTable is the table name for the MenuPermissionGroupVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "menupermissiongroupversion" package.
+	PermissionGroupVersionsInverseTable = "menu_permission_group_versions"
 )
 
 // Columns holds all SQL columns for menu fields.
@@ -153,6 +160,9 @@ var (
 	// PermissionGroupsPrimaryKey and PermissionGroupsColumn2 are the table columns denoting the
 	// primary key for the permission_groups relation (M2M).
 	PermissionGroupsPrimaryKey = []string{"menu_permission_group_id", "menu_id"}
+	// PermissionGroupVersionsPrimaryKey and PermissionGroupVersionsColumn2 are the table columns denoting the
+	// primary key for the permission_group_versions relation (M2M).
+	PermissionGroupVersionsPrimaryKey = []string{"menu_permission_group_version_id", "menu_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -465,6 +475,20 @@ func ByPermissionGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption 
 		sqlgraph.OrderByNeighborTerms(s, newPermissionGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPermissionGroupVersionsCount orders the results by permission_group_versions count.
+func ByPermissionGroupVersionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPermissionGroupVersionsStep(), opts...)
+	}
+}
+
+// ByPermissionGroupVersions orders the results by permission_group_versions terms.
+func ByPermissionGroupVersions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPermissionGroupVersionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newParentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -491,5 +515,12 @@ func newPermissionGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PermissionGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, PermissionGroupsTable, PermissionGroupsPrimaryKey...),
+	)
+}
+func newPermissionGroupVersionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PermissionGroupVersionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, PermissionGroupVersionsTable, PermissionGroupVersionsPrimaryKey...),
 	)
 }

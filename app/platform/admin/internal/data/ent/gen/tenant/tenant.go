@@ -31,6 +31,8 @@ const (
 	FieldSort = "sort"
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
+	// FieldIsPlatform holds the string denoting the is_platform field in the database.
+	FieldIsPlatform = "is_platform"
 	// FieldLifecycleStatus holds the string denoting the lifecycle_status field in the database.
 	FieldLifecycleStatus = "lifecycle_status"
 	// FieldActivatedAt holds the string denoting the activated_at field in the database.
@@ -65,6 +67,7 @@ var Columns = []string{
 	FieldCode,
 	FieldSort,
 	FieldRemark,
+	FieldIsPlatform,
 	FieldLifecycleStatus,
 	FieldActivatedAt,
 	FieldExpiresAt,
@@ -114,6 +117,8 @@ var (
 	DefaultRemark string
 	// RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
 	RemarkValidator func(string) error
+	// DefaultIsPlatform holds the default value on creation for the "is_platform" field.
+	DefaultIsPlatform bool
 	// DefaultLifecycleStatus holds the default value on creation for the "lifecycle_status" field.
 	DefaultLifecycleStatus int32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -166,6 +171,11 @@ func BySort(opts ...sql.OrderTermOption) OrderOption {
 // ByRemark orders the results by the remark field.
 func ByRemark(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRemark, opts...).ToFunc()
+}
+
+// ByIsPlatform orders the results by the is_platform field.
+func ByIsPlatform(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsPlatform, opts...).ToFunc()
 }
 
 // ByLifecycleStatus orders the results by the lifecycle_status field.

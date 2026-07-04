@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"fmt"
 	"strings"
 	"time"
@@ -38,6 +39,8 @@ type MenuPermissionGroup struct {
 	Description *string `json:"description,omitempty"`
 	// 备注
 	Remark *string `json:"remark,omitempty"`
+	// 当前发布版本ID
+	CurrentVersionID *uint32 `json:"current_version_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MenuPermissionGroupQuery when eager-loading is set.
 	Edges        MenuPermissionGroupEdges `json:"edges"`
@@ -48,11 +51,15 @@ type MenuPermissionGroup struct {
 type MenuPermissionGroupEdges struct {
 	// Menus holds the value of the menus edge.
 	Menus []*Menu `json:"menus,omitempty"`
+	// CurrentVersion holds the value of the current_version edge.
+	CurrentVersion *MenuPermissionGroupVersion `json:"current_version,omitempty"`
+	// Versions holds the value of the versions edge.
+	Versions []*MenuPermissionGroupVersion `json:"versions,omitempty"`
 	// TenantBindings holds the value of the tenant_bindings edge.
 	TenantBindings []*TenantPermissionGroup `json:"tenant_bindings,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // MenusOrErr returns the Menus value or an error if the edge
@@ -64,10 +71,30 @@ func (e MenuPermissionGroupEdges) MenusOrErr() ([]*Menu, error) {
 	return nil, &NotLoadedError{edge: "menus"}
 }
 
+// CurrentVersionOrErr returns the CurrentVersion value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MenuPermissionGroupEdges) CurrentVersionOrErr() (*MenuPermissionGroupVersion, error) {
+	if e.CurrentVersion != nil {
+		return e.CurrentVersion, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: menupermissiongroupversion.Label}
+	}
+	return nil, &NotLoadedError{edge: "current_version"}
+}
+
+// VersionsOrErr returns the Versions value or an error if the edge
+// was not loaded in eager-loading.
+func (e MenuPermissionGroupEdges) VersionsOrErr() ([]*MenuPermissionGroupVersion, error) {
+	if e.loadedTypes[2] {
+		return e.Versions, nil
+	}
+	return nil, &NotLoadedError{edge: "versions"}
+}
+
 // TenantBindingsOrErr returns the TenantBindings value or an error if the edge
 // was not loaded in eager-loading.
 func (e MenuPermissionGroupEdges) TenantBindingsOrErr() ([]*TenantPermissionGroup, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[3] {
 		return e.TenantBindings, nil
 	}
 	return nil, &NotLoadedError{edge: "tenant_bindings"}
@@ -80,7 +107,7 @@ func (*MenuPermissionGroup) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menupermissiongroup.FieldIsSystem:
 			values[i] = new(sql.NullBool)
-		case menupermissiongroup.FieldID, menupermissiongroup.FieldStatus, menupermissiongroup.FieldSort:
+		case menupermissiongroup.FieldID, menupermissiongroup.FieldStatus, menupermissiongroup.FieldSort, menupermissiongroup.FieldCurrentVersionID:
 			values[i] = new(sql.NullInt64)
 		case menupermissiongroup.FieldName, menupermissiongroup.FieldCode, menupermissiongroup.FieldDescription, menupermissiongroup.FieldRemark:
 			values[i] = new(sql.NullString)
@@ -173,6 +200,13 @@ func (_m *MenuPermissionGroup) assignValues(columns []string, values []any) erro
 				_m.Remark = new(string)
 				*_m.Remark = value.String
 			}
+		case menupermissiongroup.FieldCurrentVersionID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field current_version_id", values[i])
+			} else if value.Valid {
+				_m.CurrentVersionID = new(uint32)
+				*_m.CurrentVersionID = uint32(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -189,6 +223,16 @@ func (_m *MenuPermissionGroup) Value(name string) (ent.Value, error) {
 // QueryMenus queries the "menus" edge of the MenuPermissionGroup entity.
 func (_m *MenuPermissionGroup) QueryMenus() *MenuQuery {
 	return NewMenuPermissionGroupClient(_m.config).QueryMenus(_m)
+}
+
+// QueryCurrentVersion queries the "current_version" edge of the MenuPermissionGroup entity.
+func (_m *MenuPermissionGroup) QueryCurrentVersion() *MenuPermissionGroupVersionQuery {
+	return NewMenuPermissionGroupClient(_m.config).QueryCurrentVersion(_m)
+}
+
+// QueryVersions queries the "versions" edge of the MenuPermissionGroup entity.
+func (_m *MenuPermissionGroup) QueryVersions() *MenuPermissionGroupVersionQuery {
+	return NewMenuPermissionGroupClient(_m.config).QueryVersions(_m)
 }
 
 // QueryTenantBindings queries the "tenant_bindings" edge of the MenuPermissionGroup entity.
@@ -259,6 +303,11 @@ func (_m *MenuPermissionGroup) String() string {
 	if v := _m.Remark; v != nil {
 		builder.WriteString("remark=")
 		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.CurrentVersionID; v != nil {
+		builder.WriteString("current_version_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')
 	return builder.String()

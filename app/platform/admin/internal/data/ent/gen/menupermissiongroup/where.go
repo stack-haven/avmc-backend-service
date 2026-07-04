@@ -105,6 +105,11 @@ func Remark(v string) predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(sql.FieldEQ(FieldRemark, v))
 }
 
+// CurrentVersionID applies equality check predicate on the "current_version_id" field. It's identical to CurrentVersionIDEQ.
+func CurrentVersionID(v uint32) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldEQ(FieldCurrentVersionID, v))
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v int32) predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(sql.FieldEQ(FieldStatus, v))
@@ -585,6 +590,36 @@ func RemarkContainsFold(v string) predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(sql.FieldContainsFold(FieldRemark, v))
 }
 
+// CurrentVersionIDEQ applies the EQ predicate on the "current_version_id" field.
+func CurrentVersionIDEQ(v uint32) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldEQ(FieldCurrentVersionID, v))
+}
+
+// CurrentVersionIDNEQ applies the NEQ predicate on the "current_version_id" field.
+func CurrentVersionIDNEQ(v uint32) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldNEQ(FieldCurrentVersionID, v))
+}
+
+// CurrentVersionIDIn applies the In predicate on the "current_version_id" field.
+func CurrentVersionIDIn(vs ...uint32) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldIn(FieldCurrentVersionID, vs...))
+}
+
+// CurrentVersionIDNotIn applies the NotIn predicate on the "current_version_id" field.
+func CurrentVersionIDNotIn(vs ...uint32) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldNotIn(FieldCurrentVersionID, vs...))
+}
+
+// CurrentVersionIDIsNil applies the IsNil predicate on the "current_version_id" field.
+func CurrentVersionIDIsNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldIsNull(FieldCurrentVersionID))
+}
+
+// CurrentVersionIDNotNil applies the NotNil predicate on the "current_version_id" field.
+func CurrentVersionIDNotNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldNotNull(FieldCurrentVersionID))
+}
+
 // HasMenus applies the HasEdge predicate on the "menus" edge.
 func HasMenus() predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(func(s *sql.Selector) {
@@ -600,6 +635,52 @@ func HasMenus() predicate.MenuPermissionGroup {
 func HasMenusWith(preds ...predicate.Menu) predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(func(s *sql.Selector) {
 		step := newMenusStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCurrentVersion applies the HasEdge predicate on the "current_version" edge.
+func HasCurrentVersion() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, CurrentVersionTable, CurrentVersionColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCurrentVersionWith applies the HasEdge predicate on the "current_version" edge with a given conditions (other predicates).
+func HasCurrentVersionWith(preds ...predicate.MenuPermissionGroupVersion) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(func(s *sql.Selector) {
+		step := newCurrentVersionStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVersions applies the HasEdge predicate on the "versions" edge.
+func HasVersions() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, VersionsTable, VersionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVersionsWith applies the HasEdge predicate on the "versions" edge with a given conditions (other predicates).
+func HasVersionsWith(preds ...predicate.MenuPermissionGroupVersion) predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(func(s *sql.Selector) {
+		step := newVersionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

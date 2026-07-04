@@ -29,8 +29,119 @@ func TestSyncSuperAdminAllowsHTTPAndGRPCActions(t *testing.T) {
 	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationUserServiceListUsers), "ListUsers", tenant); err != nil || !ok {
 		t.Fatalf("grpc enforce = %v, %v", ok, err)
 	}
+	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationTenantServiceListTenants), "GET", tenant); err == nil || ok {
+		t.Fatalf("tenant admin unexpectedly received platform control access: %v, %v", ok, err)
+	}
 	if ok, err := authorizer.Enforce(ctx, "2", authz.Object(v1.OperationUserServiceListUsers), "GET", tenant); err == nil || ok {
 		t.Fatalf("unexpected access for user without role: %v, %v", ok, err)
+	}
+}
+
+func TestSyncPlatformAdminIncludesControlPlaneOperations(t *testing.T) {
+	ctx := context.Background()
+	provider := casbin.NewProvider()
+	authorizer, err := provider.NewAuthorizer(ctx)
+	if err != nil {
+		t.Fatalf("new authorizer: %v", err)
+	}
+	if err := SyncPlatformAdmin(ctx, authorizer, "platform_admin", "1", []authz.Subject{"1"}); err != nil {
+		t.Fatalf("sync platform policies: %v", err)
+	}
+	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationTenantServiceListTenants), "GET", "1"); err != nil || !ok {
+		t.Fatalf("platform http enforce = %v, %v", ok, err)
+	}
+	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion), "PublishMenuPermissionGroupVersion", "1"); err != nil || !ok {
+		t.Fatalf("platform grpc enforce = %v, %v", ok, err)
+	}
+}
+
+func TestSyncSuperAdminRemovesStalePlatformPolicies(t *testing.T) {
+	ctx := context.Background()
+	provider := casbin.NewProvider()
+	authorizer, err := provider.NewAuthorizer(ctx)
+	if err != nil {
+		t.Fatalf("new authorizer: %v", err)
+	}
+	if err := SyncPlatformAdmin(ctx, authorizer, "super_admin", "2", []authz.Subject{"2"}); err != nil {
+		t.Fatalf("sync platform policies: %v", err)
+	}
+	if err := SyncSuperAdmin(ctx, authorizer, "super_admin", "2", []authz.Subject{"2"}); err != nil {
+		t.Fatalf("downgrade to tenant policies: %v", err)
+	}
+	if ok, err := authorizer.Enforce(ctx, "2", authz.Object(v1.OperationTenantServiceListTenants), "GET", "2"); err == nil || ok {
+		t.Fatalf("stale platform policy remained after tenant sync: %v, %v", ok, err)
+	}
+}
+
+func TestSyncAdminRemovesStaleUserMembership(t *testing.T) {
+	ctx := context.Background()
+	provider := casbin.NewProvider()
+	authorizer, err := provider.NewAuthorizer(ctx)
+	if err != nil {
+		t.Fatalf("new authorizer: %v", err)
+	}
+	if err := SyncSuperAdmin(ctx, authorizer, "super_admin", "1", []authz.Subject{"1", "2"}); err != nil {
+		t.Fatalf("first sync: %v", err)
+	}
+	if err := SyncSuperAdmin(ctx, authorizer, "super_admin", "1", []authz.Subject{"1"}); err != nil {
+		t.Fatalf("second sync: %v", err)
+	}
+	if ok, err := authorizer.Enforce(ctx, "2", authz.Object(v1.OperationUserServiceListUsers), "GET", "1"); err == nil || ok {
+		t.Fatalf("stale user retained admin membership: %v, %v", ok, err)
+	}
+}
+
+func TestSetAdminMembershipGrantsAndRevokesWithoutChangingOtherUsers(t *testing.T) {
+	ctx := context.Background()
+	provider := casbin.NewProvider()
+	authorizer, err := provider.NewAuthorizer(ctx)
+	if err != nil {
+		t.Fatalf("new authorizer: %v", err)
+	}
+	for _, user := range []authz.Subject{"1", "2"} {
+		if err := SetAdminMembership(ctx, authorizer, "1", user, false, true); err != nil {
+			t.Fatalf("grant user %s: %v", user, err)
+		}
+	}
+	if err := SetAdminMembership(ctx, authorizer, "1", "1", false, false); err != nil {
+		t.Fatalf("revoke user 1: %v", err)
+	}
+	if ok, err := authorizer.Enforce(ctx, "1", authz.Object(v1.OperationUserServiceListUsers), "GET", "1"); err == nil || ok {
+		t.Fatalf("revoked user retained access: %v, %v", ok, err)
+	}
+	if ok, err := authorizer.Enforce(ctx, "2", authz.Object(v1.OperationUserServiceListUsers), "GET", "1"); err != nil || !ok {
+		t.Fatalf("other admin lost access: %v, %v", ok, err)
+	}
+}
+
+func TestCurrentTenantMenusRemainTenantOperation(t *testing.T) {
+	if IsPlatformControlOperation(v1.OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus) {
+		t.Fatal("current tenant effective menus must remain available to tenant identities")
+	}
+}
+
+func TestParameterControlPlaneClassification(t *testing.T) {
+	if !IsPlatformControlOperation(v1.OperationParameterServiceListParameterDefinitions) {
+		t.Fatal("parameter definitions must be platform control-plane operations")
+	}
+	if !IsPlatformControlOperation(v1.OperationParameterServiceSetTenantParameter) {
+		t.Fatal("cross-tenant parameter update must be a platform control-plane operation")
+	}
+	if IsPlatformControlOperation(v1.OperationParameterServiceSetCurrentTenantParameter) {
+		t.Fatal("current tenant parameter update must remain a tenant data-plane operation")
+	}
+}
+
+func TestAsyncTaskOperationsRequirePlatformIdentity(t *testing.T) {
+	for _, operation := range []string{
+		v1.OperationAsyncTaskServiceListAsyncTasks,
+		v1.OperationAsyncTaskServiceGetAsyncTask,
+		v1.OperationAsyncTaskServiceCancelAsyncTask,
+		v1.OperationAsyncTaskServiceRetryAsyncTask,
+	} {
+		if !IsPlatformControlOperation(operation) {
+			t.Fatalf("async task operation must be platform control-plane: %s", operation)
+		}
 	}
 }
 

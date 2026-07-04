@@ -26,10 +26,16 @@ const (
 	FieldEnabled = "enabled"
 	// FieldBoundBy holds the string denoting the bound_by field in the database.
 	FieldBoundBy = "bound_by"
+	// FieldVersionID holds the string denoting the version_id field in the database.
+	FieldVersionID = "version_id"
+	// FieldAutoUpgrade holds the string denoting the auto_upgrade field in the database.
+	FieldAutoUpgrade = "auto_upgrade"
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
 	EdgeGroup = "group"
+	// EdgeVersion holds the string denoting the version edge name in mutations.
+	EdgeVersion = "version"
 	// Table holds the table name of the tenantpermissiongroup in the database.
 	Table = "tenant_permission_groups"
 	// TenantTable is the table that holds the tenant relation/edge.
@@ -46,6 +52,13 @@ const (
 	GroupInverseTable = "menu_permission_groups"
 	// GroupColumn is the table column denoting the group relation/edge.
 	GroupColumn = "group_id"
+	// VersionTable is the table that holds the version relation/edge.
+	VersionTable = "tenant_permission_groups"
+	// VersionInverseTable is the table name for the MenuPermissionGroupVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "menupermissiongroupversion" package.
+	VersionInverseTable = "menu_permission_group_versions"
+	// VersionColumn is the table column denoting the version relation/edge.
+	VersionColumn = "version_id"
 )
 
 // Columns holds all SQL columns for tenantpermissiongroup fields.
@@ -57,6 +70,8 @@ var Columns = []string{
 	FieldGroupID,
 	FieldEnabled,
 	FieldBoundBy,
+	FieldVersionID,
+	FieldAutoUpgrade,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -82,6 +97,8 @@ var (
 	GroupIDValidator func(uint32) error
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
 	DefaultEnabled bool
+	// DefaultAutoUpgrade holds the default value on creation for the "auto_upgrade" field.
+	DefaultAutoUpgrade bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -124,6 +141,16 @@ func ByBoundBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBoundBy, opts...).ToFunc()
 }
 
+// ByVersionID orders the results by the version_id field.
+func ByVersionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVersionID, opts...).ToFunc()
+}
+
+// ByAutoUpgrade orders the results by the auto_upgrade field.
+func ByAutoUpgrade(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAutoUpgrade, opts...).ToFunc()
+}
+
 // ByTenantField orders the results by tenant field.
 func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -135,6 +162,13 @@ func ByTenantField(field string, opts ...sql.OrderTermOption) OrderOption {
 func ByGroupField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newGroupStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByVersionField orders the results by version field.
+func ByVersionField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVersionStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newTenantStep() *sqlgraph.Step {
@@ -149,5 +183,12 @@ func newGroupStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GroupInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
+	)
+}
+func newVersionStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VersionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, VersionTable, VersionColumn),
 	)
 }

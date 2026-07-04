@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"encoding/json"
 	"fmt"
@@ -61,6 +62,8 @@ type User struct {
 	Metadata []string `json:"metadata,omitempty"`
 	// 个人说明
 	Description *string `json:"description,omitempty"`
+	// 所属主部门ID
+	DeptID *uint32 `json:"dept_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -73,11 +76,13 @@ type UserEdges struct {
 	Roles []*Role `json:"roles,omitempty"`
 	// Posts holds the value of the posts edge.
 	Posts []*Post `json:"posts,omitempty"`
+	// Dept holds the value of the dept edge.
+	Dept *Dept `json:"dept,omitempty"`
 	// Projects holds the value of the projects edge.
 	Projects []*Project `json:"projects,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // RolesOrErr returns the Roles value or an error if the edge
@@ -98,10 +103,21 @@ func (e UserEdges) PostsOrErr() ([]*Post, error) {
 	return nil, &NotLoadedError{edge: "posts"}
 }
 
+// DeptOrErr returns the Dept value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) DeptOrErr() (*Dept, error) {
+	if e.Dept != nil {
+		return e.Dept, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: dept.Label}
+	}
+	return nil, &NotLoadedError{edge: "dept"}
+}
+
 // ProjectsOrErr returns the Projects value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ProjectsOrErr() ([]*Project, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Projects, nil
 	}
 	return nil, &NotLoadedError{edge: "projects"}
@@ -114,7 +130,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldSettings, user.FieldMetadata:
 			values[i] = new([]byte)
-		case user.FieldID, user.FieldStatus, user.FieldTenantID, user.FieldGender, user.FieldAge, user.FieldLoginCount:
+		case user.FieldID, user.FieldStatus, user.FieldTenantID, user.FieldGender, user.FieldAge, user.FieldLoginCount, user.FieldDeptID:
 			values[i] = new(sql.NullInt64)
 		case user.FieldName, user.FieldPassword, user.FieldRealname, user.FieldNickname, user.FieldEmail, user.FieldPhone, user.FieldAvatar, user.FieldLastLoginIP, user.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -287,6 +303,13 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				_m.Description = new(string)
 				*_m.Description = value.String
 			}
+		case user.FieldDeptID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field dept_id", values[i])
+			} else if value.Valid {
+				_m.DeptID = new(uint32)
+				*_m.DeptID = uint32(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -308,6 +331,11 @@ func (_m *User) QueryRoles() *RoleQuery {
 // QueryPosts queries the "posts" edge of the User entity.
 func (_m *User) QueryPosts() *PostQuery {
 	return NewUserClient(_m.config).QueryPosts(_m)
+}
+
+// QueryDept queries the "dept" edge of the User entity.
+func (_m *User) QueryDept() *DeptQuery {
+	return NewUserClient(_m.config).QueryDept(_m)
 }
 
 // QueryProjects queries the "projects" edge of the User entity.
@@ -428,6 +456,11 @@ func (_m *User) String() string {
 	if v := _m.Description; v != nil {
 		builder.WriteString("description=")
 		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.DeptID; v != nil {
+		builder.WriteString("dept_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')
 	return builder.String()

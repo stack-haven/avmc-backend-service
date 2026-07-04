@@ -23,7 +23,10 @@ const _ = http.SupportPackageIsVersion1
 const OperationMenuPermissionGroupServiceCreateMenuPermissionGroup = "/platform.admin.v1.MenuPermissionGroupService/CreateMenuPermissionGroup"
 const OperationMenuPermissionGroupServiceDeleteMenuPermissionGroup = "/platform.admin.v1.MenuPermissionGroupService/DeleteMenuPermissionGroup"
 const OperationMenuPermissionGroupServiceGetMenuPermissionGroup = "/platform.admin.v1.MenuPermissionGroupService/GetMenuPermissionGroup"
+const OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions = "/platform.admin.v1.MenuPermissionGroupService/ListMenuPermissionGroupVersions"
 const OperationMenuPermissionGroupServiceListMenuPermissionGroups = "/platform.admin.v1.MenuPermissionGroupService/ListMenuPermissionGroups"
+const OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion = "/platform.admin.v1.MenuPermissionGroupService/PublishMenuPermissionGroupVersion"
+const OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion = "/platform.admin.v1.MenuPermissionGroupService/RollbackMenuPermissionGroupVersion"
 const OperationMenuPermissionGroupServiceUpdateMenuPermissionGroup = "/platform.admin.v1.MenuPermissionGroupService/UpdateMenuPermissionGroup"
 const OperationMenuPermissionGroupServiceUpdateMenuPermissionGroupStatus = "/platform.admin.v1.MenuPermissionGroupService/UpdateMenuPermissionGroupStatus"
 
@@ -34,8 +37,11 @@ type MenuPermissionGroupServiceHTTPServer interface {
 	DeleteMenuPermissionGroup(context.Context, *v1.DeleteMenuPermissionGroupRequest) (*v1.DeleteMenuPermissionGroupResponse, error)
 	// GetMenuPermissionGroup 获取菜单权限组
 	GetMenuPermissionGroup(context.Context, *v1.GetMenuPermissionGroupRequest) (*v1.MenuPermissionGroup, error)
+	ListMenuPermissionGroupVersions(context.Context, *v1.ListMenuPermissionGroupVersionsRequest) (*v1.ListMenuPermissionGroupVersionsResponse, error)
 	// ListMenuPermissionGroups 获取菜单权限组列表
 	ListMenuPermissionGroups(context.Context, *v1.ListMenuPermissionGroupsRequest) (*v1.ListMenuPermissionGroupsResponse, error)
+	PublishMenuPermissionGroupVersion(context.Context, *v1.PublishMenuPermissionGroupVersionRequest) (*v1.PublishMenuPermissionGroupVersionResponse, error)
+	RollbackMenuPermissionGroupVersion(context.Context, *v1.RollbackMenuPermissionGroupVersionRequest) (*v1.RollbackMenuPermissionGroupVersionResponse, error)
 	// UpdateMenuPermissionGroup 更新菜单权限组
 	UpdateMenuPermissionGroup(context.Context, *v1.UpdateMenuPermissionGroupRequest) (*v1.UpdateMenuPermissionGroupResponse, error)
 	// UpdateMenuPermissionGroupStatus 更新菜单权限组状态
@@ -50,6 +56,9 @@ func RegisterMenuPermissionGroupServiceHTTPServer(s *http.Server, srv MenuPermis
 	r.PUT("/admin/v1/menu-permission-groups/{id}", _MenuPermissionGroupService_UpdateMenuPermissionGroup0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/menu-permission-groups/{id}", _MenuPermissionGroupService_DeleteMenuPermissionGroup0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/menu-permission-groups/status-update/{id}", _MenuPermissionGroupService_UpdateMenuPermissionGroupStatus0_HTTP_Handler(srv))
+	r.GET("/admin/v1/menu-permission-groups/{group_id}/versions", _MenuPermissionGroupService_ListMenuPermissionGroupVersions0_HTTP_Handler(srv))
+	r.POST("/admin/v1/menu-permission-groups/{group_id}/versions:publish", _MenuPermissionGroupService_PublishMenuPermissionGroupVersion0_HTTP_Handler(srv))
+	r.POST("/admin/v1/menu-permission-groups/{group_id}/versions:rollback", _MenuPermissionGroupService_RollbackMenuPermissionGroupVersion0_HTTP_Handler(srv))
 }
 
 func _MenuPermissionGroupService_ListMenuPermissionGroups0_HTTP_Handler(srv MenuPermissionGroupServiceHTTPServer) func(ctx http.Context) error {
@@ -187,6 +196,78 @@ func _MenuPermissionGroupService_UpdateMenuPermissionGroupStatus0_HTTP_Handler(s
 	}
 }
 
+func _MenuPermissionGroupService_ListMenuPermissionGroupVersions0_HTTP_Handler(srv MenuPermissionGroupServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListMenuPermissionGroupVersionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListMenuPermissionGroupVersions(ctx, req.(*v1.ListMenuPermissionGroupVersionsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListMenuPermissionGroupVersionsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MenuPermissionGroupService_PublishMenuPermissionGroupVersion0_HTTP_Handler(srv MenuPermissionGroupServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.PublishMenuPermissionGroupVersionRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PublishMenuPermissionGroupVersion(ctx, req.(*v1.PublishMenuPermissionGroupVersionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.PublishMenuPermissionGroupVersionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MenuPermissionGroupService_RollbackMenuPermissionGroupVersion0_HTTP_Handler(srv MenuPermissionGroupServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.RollbackMenuPermissionGroupVersionRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RollbackMenuPermissionGroupVersion(ctx, req.(*v1.RollbackMenuPermissionGroupVersionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.RollbackMenuPermissionGroupVersionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type MenuPermissionGroupServiceHTTPClient interface {
 	// CreateMenuPermissionGroup 创建菜单权限组
 	CreateMenuPermissionGroup(ctx context.Context, req *v1.CreateMenuPermissionGroupRequest, opts ...http.CallOption) (rsp *v1.CreateMenuPermissionGroupResponse, err error)
@@ -194,8 +275,11 @@ type MenuPermissionGroupServiceHTTPClient interface {
 	DeleteMenuPermissionGroup(ctx context.Context, req *v1.DeleteMenuPermissionGroupRequest, opts ...http.CallOption) (rsp *v1.DeleteMenuPermissionGroupResponse, err error)
 	// GetMenuPermissionGroup 获取菜单权限组
 	GetMenuPermissionGroup(ctx context.Context, req *v1.GetMenuPermissionGroupRequest, opts ...http.CallOption) (rsp *v1.MenuPermissionGroup, err error)
+	ListMenuPermissionGroupVersions(ctx context.Context, req *v1.ListMenuPermissionGroupVersionsRequest, opts ...http.CallOption) (rsp *v1.ListMenuPermissionGroupVersionsResponse, err error)
 	// ListMenuPermissionGroups 获取菜单权限组列表
 	ListMenuPermissionGroups(ctx context.Context, req *v1.ListMenuPermissionGroupsRequest, opts ...http.CallOption) (rsp *v1.ListMenuPermissionGroupsResponse, err error)
+	PublishMenuPermissionGroupVersion(ctx context.Context, req *v1.PublishMenuPermissionGroupVersionRequest, opts ...http.CallOption) (rsp *v1.PublishMenuPermissionGroupVersionResponse, err error)
+	RollbackMenuPermissionGroupVersion(ctx context.Context, req *v1.RollbackMenuPermissionGroupVersionRequest, opts ...http.CallOption) (rsp *v1.RollbackMenuPermissionGroupVersionResponse, err error)
 	// UpdateMenuPermissionGroup 更新菜单权限组
 	UpdateMenuPermissionGroup(ctx context.Context, req *v1.UpdateMenuPermissionGroupRequest, opts ...http.CallOption) (rsp *v1.UpdateMenuPermissionGroupResponse, err error)
 	// UpdateMenuPermissionGroupStatus 更新菜单权限组状态
@@ -252,6 +336,19 @@ func (c *MenuPermissionGroupServiceHTTPClientImpl) GetMenuPermissionGroup(ctx co
 	return &out, nil
 }
 
+func (c *MenuPermissionGroupServiceHTTPClientImpl) ListMenuPermissionGroupVersions(ctx context.Context, in *v1.ListMenuPermissionGroupVersionsRequest, opts ...http.CallOption) (*v1.ListMenuPermissionGroupVersionsResponse, error) {
+	var out v1.ListMenuPermissionGroupVersionsResponse
+	pattern := "/admin/v1/menu-permission-groups/{group_id}/versions"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ListMenuPermissionGroups 获取菜单权限组列表
 func (c *MenuPermissionGroupServiceHTTPClientImpl) ListMenuPermissionGroups(ctx context.Context, in *v1.ListMenuPermissionGroupsRequest, opts ...http.CallOption) (*v1.ListMenuPermissionGroupsResponse, error) {
 	var out v1.ListMenuPermissionGroupsResponse
@@ -260,6 +357,32 @@ func (c *MenuPermissionGroupServiceHTTPClientImpl) ListMenuPermissionGroups(ctx 
 	opts = append(opts, http.Operation(OperationMenuPermissionGroupServiceListMenuPermissionGroups))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *MenuPermissionGroupServiceHTTPClientImpl) PublishMenuPermissionGroupVersion(ctx context.Context, in *v1.PublishMenuPermissionGroupVersionRequest, opts ...http.CallOption) (*v1.PublishMenuPermissionGroupVersionResponse, error) {
+	var out v1.PublishMenuPermissionGroupVersionResponse
+	pattern := "/admin/v1/menu-permission-groups/{group_id}/versions:publish"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *MenuPermissionGroupServiceHTTPClientImpl) RollbackMenuPermissionGroupVersion(ctx context.Context, in *v1.RollbackMenuPermissionGroupVersionRequest, opts ...http.CallOption) (*v1.RollbackMenuPermissionGroupVersionResponse, error) {
+	var out v1.RollbackMenuPermissionGroupVersionResponse
+	pattern := "/admin/v1/menu-permission-groups/{group_id}/versions:rollback"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

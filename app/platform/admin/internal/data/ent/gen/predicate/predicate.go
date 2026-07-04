@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AsyncTask is the predicate function for asynctask builders.
+type AsyncTask func(*sql.Selector)
+
 // Dept is the predicate function for dept builders.
 type Dept func(*sql.Selector)
 
@@ -24,8 +27,14 @@ type Menu func(*sql.Selector)
 // MenuPermissionGroup is the predicate function for menupermissiongroup builders.
 type MenuPermissionGroup func(*sql.Selector)
 
+// MenuPermissionGroupVersion is the predicate function for menupermissiongroupversion builders.
+type MenuPermissionGroupVersion func(*sql.Selector)
+
 // OperationLog is the predicate function for operationlog builders.
 type OperationLog func(*sql.Selector)
+
+// ParameterDefinition is the predicate function for parameterdefinition builders.
+type ParameterDefinition func(*sql.Selector)
 
 // Post is the predicate function for post builders.
 type Post func(*sql.Selector)
@@ -38,6 +47,9 @@ type Role func(*sql.Selector)
 
 // Tenant is the predicate function for tenant builders.
 type Tenant func(*sql.Selector)
+
+// TenantParameterOverride is the predicate function for tenantparameteroverride builders.
+type TenantParameterOverride func(*sql.Selector)
 
 // TenantPermissionGroup is the predicate function for tenantpermissiongroup builders.
 type TenantPermissionGroup func(*sql.Selector)

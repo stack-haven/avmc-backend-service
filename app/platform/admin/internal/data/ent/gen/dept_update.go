@@ -5,6 +5,8 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
+	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
 	"errors"
 	"fmt"
@@ -238,6 +240,36 @@ func (_u *DeptUpdate) AddChildren(v ...*Dept) *DeptUpdate {
 	return _u.AddChildIDs(ids...)
 }
 
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (_u *DeptUpdate) AddUserIDs(ids ...uint32) *DeptUpdate {
+	_u.mutation.AddUserIDs(ids...)
+	return _u
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (_u *DeptUpdate) AddUsers(v ...*User) *DeptUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddUserIDs(ids...)
+}
+
+// AddDataScopeRoleIDs adds the "data_scope_roles" edge to the Role entity by IDs.
+func (_u *DeptUpdate) AddDataScopeRoleIDs(ids ...uint32) *DeptUpdate {
+	_u.mutation.AddDataScopeRoleIDs(ids...)
+	return _u
+}
+
+// AddDataScopeRoles adds the "data_scope_roles" edges to the Role entity.
+func (_u *DeptUpdate) AddDataScopeRoles(v ...*Role) *DeptUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDataScopeRoleIDs(ids...)
+}
+
 // Mutation returns the DeptMutation object of the builder.
 func (_u *DeptUpdate) Mutation() *DeptMutation {
 	return _u.mutation
@@ -268,6 +300,48 @@ func (_u *DeptUpdate) RemoveChildren(v ...*Dept) *DeptUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
+}
+
+// ClearUsers clears all "users" edges to the User entity.
+func (_u *DeptUpdate) ClearUsers() *DeptUpdate {
+	_u.mutation.ClearUsers()
+	return _u
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (_u *DeptUpdate) RemoveUserIDs(ids ...uint32) *DeptUpdate {
+	_u.mutation.RemoveUserIDs(ids...)
+	return _u
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (_u *DeptUpdate) RemoveUsers(v ...*User) *DeptUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveUserIDs(ids...)
+}
+
+// ClearDataScopeRoles clears all "data_scope_roles" edges to the Role entity.
+func (_u *DeptUpdate) ClearDataScopeRoles() *DeptUpdate {
+	_u.mutation.ClearDataScopeRoles()
+	return _u
+}
+
+// RemoveDataScopeRoleIDs removes the "data_scope_roles" edge to Role entities by IDs.
+func (_u *DeptUpdate) RemoveDataScopeRoleIDs(ids ...uint32) *DeptUpdate {
+	_u.mutation.RemoveDataScopeRoleIDs(ids...)
+	return _u
+}
+
+// RemoveDataScopeRoles removes "data_scope_roles" edges to Role entities.
+func (_u *DeptUpdate) RemoveDataScopeRoles(v ...*Role) *DeptUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDataScopeRoleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -478,6 +552,96 @@ func (_u *DeptUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedUsersIDs(); len(nodes) > 0 && !_u.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DataScopeRolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDataScopeRolesIDs(); len(nodes) > 0 && !_u.mutation.DataScopeRolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DataScopeRolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -715,6 +879,36 @@ func (_u *DeptUpdateOne) AddChildren(v ...*Dept) *DeptUpdateOne {
 	return _u.AddChildIDs(ids...)
 }
 
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (_u *DeptUpdateOne) AddUserIDs(ids ...uint32) *DeptUpdateOne {
+	_u.mutation.AddUserIDs(ids...)
+	return _u
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (_u *DeptUpdateOne) AddUsers(v ...*User) *DeptUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddUserIDs(ids...)
+}
+
+// AddDataScopeRoleIDs adds the "data_scope_roles" edge to the Role entity by IDs.
+func (_u *DeptUpdateOne) AddDataScopeRoleIDs(ids ...uint32) *DeptUpdateOne {
+	_u.mutation.AddDataScopeRoleIDs(ids...)
+	return _u
+}
+
+// AddDataScopeRoles adds the "data_scope_roles" edges to the Role entity.
+func (_u *DeptUpdateOne) AddDataScopeRoles(v ...*Role) *DeptUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDataScopeRoleIDs(ids...)
+}
+
 // Mutation returns the DeptMutation object of the builder.
 func (_u *DeptUpdateOne) Mutation() *DeptMutation {
 	return _u.mutation
@@ -745,6 +939,48 @@ func (_u *DeptUpdateOne) RemoveChildren(v ...*Dept) *DeptUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
+}
+
+// ClearUsers clears all "users" edges to the User entity.
+func (_u *DeptUpdateOne) ClearUsers() *DeptUpdateOne {
+	_u.mutation.ClearUsers()
+	return _u
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (_u *DeptUpdateOne) RemoveUserIDs(ids ...uint32) *DeptUpdateOne {
+	_u.mutation.RemoveUserIDs(ids...)
+	return _u
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (_u *DeptUpdateOne) RemoveUsers(v ...*User) *DeptUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveUserIDs(ids...)
+}
+
+// ClearDataScopeRoles clears all "data_scope_roles" edges to the Role entity.
+func (_u *DeptUpdateOne) ClearDataScopeRoles() *DeptUpdateOne {
+	_u.mutation.ClearDataScopeRoles()
+	return _u
+}
+
+// RemoveDataScopeRoleIDs removes the "data_scope_roles" edge to Role entities by IDs.
+func (_u *DeptUpdateOne) RemoveDataScopeRoleIDs(ids ...uint32) *DeptUpdateOne {
+	_u.mutation.RemoveDataScopeRoleIDs(ids...)
+	return _u
+}
+
+// RemoveDataScopeRoles removes "data_scope_roles" edges to Role entities.
+func (_u *DeptUpdateOne) RemoveDataScopeRoles(v ...*Role) *DeptUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDataScopeRoleIDs(ids...)
 }
 
 // Where appends a list predicates to the DeptUpdate builder.
@@ -985,6 +1221,96 @@ func (_u *DeptUpdateOne) sqlSave(ctx context.Context) (_node *Dept, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedUsersIDs(); len(nodes) > 0 && !_u.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DataScopeRolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDataScopeRolesIDs(); len(nodes) > 0 && !_u.mutation.DataScopeRolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DataScopeRolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

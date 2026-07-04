@@ -32,12 +32,14 @@ type Role struct {
 	Name *string `json:"name,omitempty"`
 	// 默认路由
 	DefaultRouter *string `json:"default_router,omitempty"`
-	// 数据范围（0：未指定 1：全部数据权限 2：本人数据权限 3：本部门数据权限 4：本部门及以下数据权限 5：自定部门数据权限 ）
+	// 数据范围（1：全部数据权限 2：本人数据权限 3：本部门数据权限 4：本部门及以下数据权限 5：自定部门数据权限）
 	DataScope *int32 `json:"data_scope,omitempty"`
 	// 菜单树选择项是否关联显示
 	MenuCheckStrictly *int32 `json:"menu_check_strictly,omitempty"`
 	// 部门树选择项是否关联显示
 	DeptCheckStrictly *int32 `json:"dept_check_strictly,omitempty"`
+	// 是否租户管理员角色，仅内部流程维护
+	IsTenantAdmin bool `json:"is_tenant_admin,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RoleQuery when eager-loading is set.
 	Edges        RoleEdges `json:"edges"`
@@ -48,11 +50,13 @@ type Role struct {
 type RoleEdges struct {
 	// Menus holds the value of the menus edge.
 	Menus []*Menu `json:"menus,omitempty"`
+	// DataScopeDepts holds the value of the data_scope_depts edge.
+	DataScopeDepts []*Dept `json:"data_scope_depts,omitempty"`
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // MenusOrErr returns the Menus value or an error if the edge
@@ -64,10 +68,19 @@ func (e RoleEdges) MenusOrErr() ([]*Menu, error) {
 	return nil, &NotLoadedError{edge: "menus"}
 }
 
+// DataScopeDeptsOrErr returns the DataScopeDepts value or an error if the edge
+// was not loaded in eager-loading.
+func (e RoleEdges) DataScopeDeptsOrErr() ([]*Dept, error) {
+	if e.loadedTypes[1] {
+		return e.DataScopeDepts, nil
+	}
+	return nil, &NotLoadedError{edge: "data_scope_depts"}
+}
+
 // UsersOrErr returns the Users value or an error if the edge
 // was not loaded in eager-loading.
 func (e RoleEdges) UsersOrErr() ([]*User, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Users, nil
 	}
 	return nil, &NotLoadedError{edge: "users"}
@@ -78,6 +91,8 @@ func (*Role) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case role.FieldIsTenantAdmin:
+			values[i] = new(sql.NullBool)
 		case role.FieldID, role.FieldStatus, role.FieldTenantID, role.FieldDataScope, role.FieldMenuCheckStrictly, role.FieldDeptCheckStrictly:
 			values[i] = new(sql.NullInt64)
 		case role.FieldName, role.FieldDefaultRouter:
@@ -172,6 +187,12 @@ func (_m *Role) assignValues(columns []string, values []any) error {
 				_m.DeptCheckStrictly = new(int32)
 				*_m.DeptCheckStrictly = int32(value.Int64)
 			}
+		case role.FieldIsTenantAdmin:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_tenant_admin", values[i])
+			} else if value.Valid {
+				_m.IsTenantAdmin = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -188,6 +209,11 @@ func (_m *Role) Value(name string) (ent.Value, error) {
 // QueryMenus queries the "menus" edge of the Role entity.
 func (_m *Role) QueryMenus() *MenuQuery {
 	return NewRoleClient(_m.config).QueryMenus(_m)
+}
+
+// QueryDataScopeDepts queries the "data_scope_depts" edge of the Role entity.
+func (_m *Role) QueryDataScopeDepts() *DeptQuery {
+	return NewRoleClient(_m.config).QueryDataScopeDepts(_m)
 }
 
 // QueryUsers queries the "users" edge of the Role entity.
@@ -261,6 +287,9 @@ func (_m *Role) String() string {
 		builder.WriteString("dept_check_strictly=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("is_tenant_admin=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsTenantAdmin))
 	builder.WriteByte(')')
 	return builder.String()
 }

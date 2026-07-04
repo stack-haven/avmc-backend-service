@@ -35,8 +35,12 @@ const (
 	FieldMenuCheckStrictly = "menu_check_strictly"
 	// FieldDeptCheckStrictly holds the string denoting the dept_check_strictly field in the database.
 	FieldDeptCheckStrictly = "dept_check_strictly"
+	// FieldIsTenantAdmin holds the string denoting the is_tenant_admin field in the database.
+	FieldIsTenantAdmin = "is_tenant_admin"
 	// EdgeMenus holds the string denoting the menus edge name in mutations.
 	EdgeMenus = "menus"
+	// EdgeDataScopeDepts holds the string denoting the data_scope_depts edge name in mutations.
+	EdgeDataScopeDepts = "data_scope_depts"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
 	// Table holds the table name of the role in the database.
@@ -46,6 +50,11 @@ const (
 	// MenusInverseTable is the table name for the Menu entity.
 	// It exists in this package in order to avoid circular dependency with the "menu" package.
 	MenusInverseTable = "menus"
+	// DataScopeDeptsTable is the table that holds the data_scope_depts relation/edge. The primary key declared below.
+	DataScopeDeptsTable = "role_data_scope_depts"
+	// DataScopeDeptsInverseTable is the table name for the Dept entity.
+	// It exists in this package in order to avoid circular dependency with the "dept" package.
+	DataScopeDeptsInverseTable = "depts"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
 	UsersTable = "user_roles"
 	// UsersInverseTable is the table name for the User entity.
@@ -66,12 +75,16 @@ var Columns = []string{
 	FieldDataScope,
 	FieldMenuCheckStrictly,
 	FieldDeptCheckStrictly,
+	FieldIsTenantAdmin,
 }
 
 var (
 	// MenusPrimaryKey and MenusColumn2 are the table columns denoting the
 	// primary key for the menus relation (M2M).
 	MenusPrimaryKey = []string{"role_id", "menu_id"}
+	// DataScopeDeptsPrimaryKey and DataScopeDeptsColumn2 are the table columns denoting the
+	// primary key for the data_scope_depts relation (M2M).
+	DataScopeDeptsPrimaryKey = []string{"role_id", "dept_id"}
 	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
 	// primary key for the users relation (M2M).
 	UsersPrimaryKey = []string{"user_id", "role_id"}
@@ -122,6 +135,8 @@ var (
 	DefaultMenuCheckStrictly int32
 	// DefaultDeptCheckStrictly holds the default value on creation for the "dept_check_strictly" field.
 	DefaultDeptCheckStrictly int32
+	// DefaultIsTenantAdmin holds the default value on creation for the "is_tenant_admin" field.
+	DefaultIsTenantAdmin bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -184,6 +199,11 @@ func ByDeptCheckStrictly(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeptCheckStrictly, opts...).ToFunc()
 }
 
+// ByIsTenantAdmin orders the results by the is_tenant_admin field.
+func ByIsTenantAdmin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsTenantAdmin, opts...).ToFunc()
+}
+
 // ByMenusCount orders the results by menus count.
 func ByMenusCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -195,6 +215,20 @@ func ByMenusCount(opts ...sql.OrderTermOption) OrderOption {
 func ByMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDataScopeDeptsCount orders the results by data_scope_depts count.
+func ByDataScopeDeptsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDataScopeDeptsStep(), opts...)
+	}
+}
+
+// ByDataScopeDepts orders the results by data_scope_depts terms.
+func ByDataScopeDepts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDataScopeDeptsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -216,6 +250,13 @@ func newMenusStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MenusInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, MenusTable, MenusPrimaryKey...),
+	)
+}
+func newDataScopeDeptsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DataScopeDeptsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, DataScopeDeptsTable, DataScopeDeptsPrimaryKey...),
 	)
 }
 func newUsersStep() *sqlgraph.Step {

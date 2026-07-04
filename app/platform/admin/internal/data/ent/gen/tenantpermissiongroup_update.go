@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
@@ -106,6 +107,40 @@ func (_u *TenantPermissionGroupUpdate) ClearBoundBy() *TenantPermissionGroupUpda
 	return _u
 }
 
+// SetVersionID sets the "version_id" field.
+func (_u *TenantPermissionGroupUpdate) SetVersionID(v uint32) *TenantPermissionGroupUpdate {
+	_u.mutation.SetVersionID(v)
+	return _u
+}
+
+// SetNillableVersionID sets the "version_id" field if the given value is not nil.
+func (_u *TenantPermissionGroupUpdate) SetNillableVersionID(v *uint32) *TenantPermissionGroupUpdate {
+	if v != nil {
+		_u.SetVersionID(*v)
+	}
+	return _u
+}
+
+// ClearVersionID clears the value of the "version_id" field.
+func (_u *TenantPermissionGroupUpdate) ClearVersionID() *TenantPermissionGroupUpdate {
+	_u.mutation.ClearVersionID()
+	return _u
+}
+
+// SetAutoUpgrade sets the "auto_upgrade" field.
+func (_u *TenantPermissionGroupUpdate) SetAutoUpgrade(v bool) *TenantPermissionGroupUpdate {
+	_u.mutation.SetAutoUpgrade(v)
+	return _u
+}
+
+// SetNillableAutoUpgrade sets the "auto_upgrade" field if the given value is not nil.
+func (_u *TenantPermissionGroupUpdate) SetNillableAutoUpgrade(v *bool) *TenantPermissionGroupUpdate {
+	if v != nil {
+		_u.SetAutoUpgrade(*v)
+	}
+	return _u
+}
+
 // SetTenant sets the "tenant" edge to the Tenant entity.
 func (_u *TenantPermissionGroupUpdate) SetTenant(v *Tenant) *TenantPermissionGroupUpdate {
 	return _u.SetTenantID(v.ID)
@@ -114,6 +149,11 @@ func (_u *TenantPermissionGroupUpdate) SetTenant(v *Tenant) *TenantPermissionGro
 // SetGroup sets the "group" edge to the MenuPermissionGroup entity.
 func (_u *TenantPermissionGroupUpdate) SetGroup(v *MenuPermissionGroup) *TenantPermissionGroupUpdate {
 	return _u.SetGroupID(v.ID)
+}
+
+// SetVersion sets the "version" edge to the MenuPermissionGroupVersion entity.
+func (_u *TenantPermissionGroupUpdate) SetVersion(v *MenuPermissionGroupVersion) *TenantPermissionGroupUpdate {
+	return _u.SetVersionID(v.ID)
 }
 
 // Mutation returns the TenantPermissionGroupMutation object of the builder.
@@ -130,6 +170,12 @@ func (_u *TenantPermissionGroupUpdate) ClearTenant() *TenantPermissionGroupUpdat
 // ClearGroup clears the "group" edge to the MenuPermissionGroup entity.
 func (_u *TenantPermissionGroupUpdate) ClearGroup() *TenantPermissionGroupUpdate {
 	_u.mutation.ClearGroup()
+	return _u
+}
+
+// ClearVersion clears the "version" edge to the MenuPermissionGroupVersion entity.
+func (_u *TenantPermissionGroupUpdate) ClearVersion() *TenantPermissionGroupUpdate {
+	_u.mutation.ClearVersion()
 	return _u
 }
 
@@ -223,6 +269,9 @@ func (_u *TenantPermissionGroupUpdate) sqlSave(ctx context.Context) (_node int, 
 	if _u.mutation.BoundByCleared() {
 		_spec.ClearField(tenantpermissiongroup.FieldBoundBy, field.TypeUint32)
 	}
+	if value, ok := _u.mutation.AutoUpgrade(); ok {
+		_spec.SetField(tenantpermissiongroup.FieldAutoUpgrade, field.TypeBool, value)
+	}
 	if _u.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -274,6 +323,35 @@ func (_u *TenantPermissionGroupUpdate) sqlSave(ctx context.Context) (_node int, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.VersionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tenantpermissiongroup.VersionTable,
+			Columns: []string{tenantpermissiongroup.VersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tenantpermissiongroup.VersionTable,
+			Columns: []string{tenantpermissiongroup.VersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -378,6 +456,40 @@ func (_u *TenantPermissionGroupUpdateOne) ClearBoundBy() *TenantPermissionGroupU
 	return _u
 }
 
+// SetVersionID sets the "version_id" field.
+func (_u *TenantPermissionGroupUpdateOne) SetVersionID(v uint32) *TenantPermissionGroupUpdateOne {
+	_u.mutation.SetVersionID(v)
+	return _u
+}
+
+// SetNillableVersionID sets the "version_id" field if the given value is not nil.
+func (_u *TenantPermissionGroupUpdateOne) SetNillableVersionID(v *uint32) *TenantPermissionGroupUpdateOne {
+	if v != nil {
+		_u.SetVersionID(*v)
+	}
+	return _u
+}
+
+// ClearVersionID clears the value of the "version_id" field.
+func (_u *TenantPermissionGroupUpdateOne) ClearVersionID() *TenantPermissionGroupUpdateOne {
+	_u.mutation.ClearVersionID()
+	return _u
+}
+
+// SetAutoUpgrade sets the "auto_upgrade" field.
+func (_u *TenantPermissionGroupUpdateOne) SetAutoUpgrade(v bool) *TenantPermissionGroupUpdateOne {
+	_u.mutation.SetAutoUpgrade(v)
+	return _u
+}
+
+// SetNillableAutoUpgrade sets the "auto_upgrade" field if the given value is not nil.
+func (_u *TenantPermissionGroupUpdateOne) SetNillableAutoUpgrade(v *bool) *TenantPermissionGroupUpdateOne {
+	if v != nil {
+		_u.SetAutoUpgrade(*v)
+	}
+	return _u
+}
+
 // SetTenant sets the "tenant" edge to the Tenant entity.
 func (_u *TenantPermissionGroupUpdateOne) SetTenant(v *Tenant) *TenantPermissionGroupUpdateOne {
 	return _u.SetTenantID(v.ID)
@@ -386,6 +498,11 @@ func (_u *TenantPermissionGroupUpdateOne) SetTenant(v *Tenant) *TenantPermission
 // SetGroup sets the "group" edge to the MenuPermissionGroup entity.
 func (_u *TenantPermissionGroupUpdateOne) SetGroup(v *MenuPermissionGroup) *TenantPermissionGroupUpdateOne {
 	return _u.SetGroupID(v.ID)
+}
+
+// SetVersion sets the "version" edge to the MenuPermissionGroupVersion entity.
+func (_u *TenantPermissionGroupUpdateOne) SetVersion(v *MenuPermissionGroupVersion) *TenantPermissionGroupUpdateOne {
+	return _u.SetVersionID(v.ID)
 }
 
 // Mutation returns the TenantPermissionGroupMutation object of the builder.
@@ -402,6 +519,12 @@ func (_u *TenantPermissionGroupUpdateOne) ClearTenant() *TenantPermissionGroupUp
 // ClearGroup clears the "group" edge to the MenuPermissionGroup entity.
 func (_u *TenantPermissionGroupUpdateOne) ClearGroup() *TenantPermissionGroupUpdateOne {
 	_u.mutation.ClearGroup()
+	return _u
+}
+
+// ClearVersion clears the "version" edge to the MenuPermissionGroupVersion entity.
+func (_u *TenantPermissionGroupUpdateOne) ClearVersion() *TenantPermissionGroupUpdateOne {
+	_u.mutation.ClearVersion()
 	return _u
 }
 
@@ -525,6 +648,9 @@ func (_u *TenantPermissionGroupUpdateOne) sqlSave(ctx context.Context) (_node *T
 	if _u.mutation.BoundByCleared() {
 		_spec.ClearField(tenantpermissiongroup.FieldBoundBy, field.TypeUint32)
 	}
+	if value, ok := _u.mutation.AutoUpgrade(); ok {
+		_spec.SetField(tenantpermissiongroup.FieldAutoUpgrade, field.TypeBool, value)
+	}
 	if _u.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -576,6 +702,35 @@ func (_u *TenantPermissionGroupUpdateOne) sqlSave(ctx context.Context) (_node *T
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.VersionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tenantpermissiongroup.VersionTable,
+			Columns: []string{tenantpermissiongroup.VersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tenantpermissiongroup.VersionTable,
+			Columns: []string{tenantpermissiongroup.VersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

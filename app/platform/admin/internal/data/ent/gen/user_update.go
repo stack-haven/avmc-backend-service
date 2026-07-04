@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
@@ -414,6 +415,26 @@ func (_u *UserUpdate) ClearDescription() *UserUpdate {
 	return _u
 }
 
+// SetDeptID sets the "dept_id" field.
+func (_u *UserUpdate) SetDeptID(v uint32) *UserUpdate {
+	_u.mutation.SetDeptID(v)
+	return _u
+}
+
+// SetNillableDeptID sets the "dept_id" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableDeptID(v *uint32) *UserUpdate {
+	if v != nil {
+		_u.SetDeptID(*v)
+	}
+	return _u
+}
+
+// ClearDeptID clears the value of the "dept_id" field.
+func (_u *UserUpdate) ClearDeptID() *UserUpdate {
+	_u.mutation.ClearDeptID()
+	return _u
+}
+
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
 func (_u *UserUpdate) AddRoleIDs(ids ...uint32) *UserUpdate {
 	_u.mutation.AddRoleIDs(ids...)
@@ -442,6 +463,11 @@ func (_u *UserUpdate) AddPosts(v ...*Post) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddPostIDs(ids...)
+}
+
+// SetDept sets the "dept" edge to the Dept entity.
+func (_u *UserUpdate) SetDept(v *Dept) *UserUpdate {
+	return _u.SetDeptID(v.ID)
 }
 
 // AddProjectIDs adds the "projects" edge to the Project entity by IDs.
@@ -504,6 +530,12 @@ func (_u *UserUpdate) RemovePosts(v ...*Post) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePostIDs(ids...)
+}
+
+// ClearDept clears the "dept" edge to the Dept entity.
+func (_u *UserUpdate) ClearDept() *UserUpdate {
+	_u.mutation.ClearDept()
+	return _u
 }
 
 // ClearProjects clears all "projects" edges to the Project entity.
@@ -864,6 +896,35 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DeptCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.DeptTable,
+			Columns: []string{user.DeptColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DeptIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.DeptTable,
+			Columns: []string{user.DeptColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -1319,6 +1380,26 @@ func (_u *UserUpdateOne) ClearDescription() *UserUpdateOne {
 	return _u
 }
 
+// SetDeptID sets the "dept_id" field.
+func (_u *UserUpdateOne) SetDeptID(v uint32) *UserUpdateOne {
+	_u.mutation.SetDeptID(v)
+	return _u
+}
+
+// SetNillableDeptID sets the "dept_id" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableDeptID(v *uint32) *UserUpdateOne {
+	if v != nil {
+		_u.SetDeptID(*v)
+	}
+	return _u
+}
+
+// ClearDeptID clears the value of the "dept_id" field.
+func (_u *UserUpdateOne) ClearDeptID() *UserUpdateOne {
+	_u.mutation.ClearDeptID()
+	return _u
+}
+
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
 func (_u *UserUpdateOne) AddRoleIDs(ids ...uint32) *UserUpdateOne {
 	_u.mutation.AddRoleIDs(ids...)
@@ -1347,6 +1428,11 @@ func (_u *UserUpdateOne) AddPosts(v ...*Post) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddPostIDs(ids...)
+}
+
+// SetDept sets the "dept" edge to the Dept entity.
+func (_u *UserUpdateOne) SetDept(v *Dept) *UserUpdateOne {
+	return _u.SetDeptID(v.ID)
 }
 
 // AddProjectIDs adds the "projects" edge to the Project entity by IDs.
@@ -1409,6 +1495,12 @@ func (_u *UserUpdateOne) RemovePosts(v ...*Post) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemovePostIDs(ids...)
+}
+
+// ClearDept clears the "dept" edge to the Dept entity.
+func (_u *UserUpdateOne) ClearDept() *UserUpdateOne {
+	_u.mutation.ClearDept()
+	return _u
 }
 
 // ClearProjects clears all "projects" edges to the Project entity.
@@ -1799,6 +1891,35 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DeptCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.DeptTable,
+			Columns: []string{user.DeptColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DeptIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.DeptTable,
+			Columns: []string{user.DeptColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

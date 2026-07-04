@@ -36,6 +36,7 @@ func (Tenant) Fields() []ent.Field {
 		field.String("code").Comment("租户编码").MaxLen(64).Default("").NotEmpty(),
 		field.Int32("sort").Comment("排序").Default(10).SchemaType(map[string]string{dialect.MySQL: "int", dialect.Postgres: "int"}).Nillable(),
 		field.String("remark").Comment("备注").MaxLen(255).Default("").Nillable(),
+		field.Bool("is_platform").Comment("是否为平台控制面租户，仅允许部署初始化流程维护").Default(false),
 		field.Int32("lifecycle_status").Comment("生命周期状态：1待开通 2正常 3暂停 4到期 5注销").Default(2),
 		field.Time("activated_at").Comment("激活时间").Optional().Nillable(),
 		field.Time("expires_at").Comment("到期时间").Optional().Nillable(),
@@ -69,6 +70,7 @@ func (Tenant) Indexes() []ent.Index {
 		index.Fields("name").Unique(),
 		index.Fields("code").Unique(),
 		index.Fields("status"),
+		index.Fields("is_platform"),
 		index.Fields("lifecycle_status"),
 		index.Fields("expires_at"),
 	}

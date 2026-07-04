@@ -35,8 +35,14 @@ const (
 	FieldDescription = "description"
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
+	// FieldCurrentVersionID holds the string denoting the current_version_id field in the database.
+	FieldCurrentVersionID = "current_version_id"
 	// EdgeMenus holds the string denoting the menus edge name in mutations.
 	EdgeMenus = "menus"
+	// EdgeCurrentVersion holds the string denoting the current_version edge name in mutations.
+	EdgeCurrentVersion = "current_version"
+	// EdgeVersions holds the string denoting the versions edge name in mutations.
+	EdgeVersions = "versions"
 	// EdgeTenantBindings holds the string denoting the tenant_bindings edge name in mutations.
 	EdgeTenantBindings = "tenant_bindings"
 	// Table holds the table name of the menupermissiongroup in the database.
@@ -46,6 +52,20 @@ const (
 	// MenusInverseTable is the table name for the Menu entity.
 	// It exists in this package in order to avoid circular dependency with the "menu" package.
 	MenusInverseTable = "menus"
+	// CurrentVersionTable is the table that holds the current_version relation/edge.
+	CurrentVersionTable = "menu_permission_groups"
+	// CurrentVersionInverseTable is the table name for the MenuPermissionGroupVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "menupermissiongroupversion" package.
+	CurrentVersionInverseTable = "menu_permission_group_versions"
+	// CurrentVersionColumn is the table column denoting the current_version relation/edge.
+	CurrentVersionColumn = "current_version_id"
+	// VersionsTable is the table that holds the versions relation/edge.
+	VersionsTable = "menu_permission_group_versions"
+	// VersionsInverseTable is the table name for the MenuPermissionGroupVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "menupermissiongroupversion" package.
+	VersionsInverseTable = "menu_permission_group_versions"
+	// VersionsColumn is the table column denoting the versions relation/edge.
+	VersionsColumn = "group_id"
 	// TenantBindingsTable is the table that holds the tenant_bindings relation/edge.
 	TenantBindingsTable = "tenant_permission_groups"
 	// TenantBindingsInverseTable is the table name for the TenantPermissionGroup entity.
@@ -68,6 +88,7 @@ var Columns = []string{
 	FieldSort,
 	FieldDescription,
 	FieldRemark,
+	FieldCurrentVersionID,
 }
 
 var (
@@ -186,6 +207,11 @@ func ByRemark(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRemark, opts...).ToFunc()
 }
 
+// ByCurrentVersionID orders the results by the current_version_id field.
+func ByCurrentVersionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentVersionID, opts...).ToFunc()
+}
+
 // ByMenusCount orders the results by menus count.
 func ByMenusCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -197,6 +223,27 @@ func ByMenusCount(opts ...sql.OrderTermOption) OrderOption {
 func ByMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCurrentVersionField orders the results by current_version field.
+func ByCurrentVersionField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCurrentVersionStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByVersionsCount orders the results by versions count.
+func ByVersionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVersionsStep(), opts...)
+	}
+}
+
+// ByVersions orders the results by versions terms.
+func ByVersions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVersionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -218,6 +265,20 @@ func newMenusStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MenusInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, MenusTable, MenusPrimaryKey...),
+	)
+}
+func newCurrentVersionStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CurrentVersionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, CurrentVersionTable, CurrentVersionColumn),
+	)
+}
+func newVersionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VersionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, VersionsTable, VersionsColumn),
 	)
 }
 func newTenantBindingsStep() *sqlgraph.Step {

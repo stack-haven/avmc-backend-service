@@ -4,6 +4,7 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"fmt"
@@ -32,6 +33,10 @@ type TenantPermissionGroup struct {
 	Enabled *bool `json:"enabled,omitempty"`
 	// 绑定操作人ID
 	BoundBy *uint32 `json:"bound_by,omitempty"`
+	// 当前使用的套餐版本ID
+	VersionID *uint32 `json:"version_id,omitempty"`
+	// 是否自动跟随最新版本
+	AutoUpgrade bool `json:"auto_upgrade,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TenantPermissionGroupQuery when eager-loading is set.
 	Edges        TenantPermissionGroupEdges `json:"edges"`
@@ -44,9 +49,11 @@ type TenantPermissionGroupEdges struct {
 	Tenant *Tenant `json:"tenant,omitempty"`
 	// Group holds the value of the group edge.
 	Group *MenuPermissionGroup `json:"group,omitempty"`
+	// Version holds the value of the version edge.
+	Version *MenuPermissionGroupVersion `json:"version,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -71,14 +78,25 @@ func (e TenantPermissionGroupEdges) GroupOrErr() (*MenuPermissionGroup, error) {
 	return nil, &NotLoadedError{edge: "group"}
 }
 
+// VersionOrErr returns the Version value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TenantPermissionGroupEdges) VersionOrErr() (*MenuPermissionGroupVersion, error) {
+	if e.Version != nil {
+		return e.Version, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: menupermissiongroupversion.Label}
+	}
+	return nil, &NotLoadedError{edge: "version"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TenantPermissionGroup) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tenantpermissiongroup.FieldEnabled:
+		case tenantpermissiongroup.FieldEnabled, tenantpermissiongroup.FieldAutoUpgrade:
 			values[i] = new(sql.NullBool)
-		case tenantpermissiongroup.FieldID, tenantpermissiongroup.FieldTenantID, tenantpermissiongroup.FieldGroupID, tenantpermissiongroup.FieldBoundBy:
+		case tenantpermissiongroup.FieldID, tenantpermissiongroup.FieldTenantID, tenantpermissiongroup.FieldGroupID, tenantpermissiongroup.FieldBoundBy, tenantpermissiongroup.FieldVersionID:
 			values[i] = new(sql.NullInt64)
 		case tenantpermissiongroup.FieldCreatedAt, tenantpermissiongroup.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -141,6 +159,19 @@ func (_m *TenantPermissionGroup) assignValues(columns []string, values []any) er
 				_m.BoundBy = new(uint32)
 				*_m.BoundBy = uint32(value.Int64)
 			}
+		case tenantpermissiongroup.FieldVersionID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field version_id", values[i])
+			} else if value.Valid {
+				_m.VersionID = new(uint32)
+				*_m.VersionID = uint32(value.Int64)
+			}
+		case tenantpermissiongroup.FieldAutoUpgrade:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field auto_upgrade", values[i])
+			} else if value.Valid {
+				_m.AutoUpgrade = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -162,6 +193,11 @@ func (_m *TenantPermissionGroup) QueryTenant() *TenantQuery {
 // QueryGroup queries the "group" edge of the TenantPermissionGroup entity.
 func (_m *TenantPermissionGroup) QueryGroup() *MenuPermissionGroupQuery {
 	return NewTenantPermissionGroupClient(_m.config).QueryGroup(_m)
+}
+
+// QueryVersion queries the "version" edge of the TenantPermissionGroup entity.
+func (_m *TenantPermissionGroup) QueryVersion() *MenuPermissionGroupVersionQuery {
+	return NewTenantPermissionGroupClient(_m.config).QueryVersion(_m)
 }
 
 // Update returns a builder for updating this TenantPermissionGroup.
@@ -208,6 +244,14 @@ func (_m *TenantPermissionGroup) String() string {
 		builder.WriteString("bound_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	if v := _m.VersionID; v != nil {
+		builder.WriteString("version_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("auto_upgrade=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AutoUpgrade))
 	builder.WriteByte(')')
 	return builder.String()
 }

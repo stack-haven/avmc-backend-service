@@ -75,6 +75,8 @@ func (Menu) Edges() []ent.Edge {
 			Ref("menus"),
 		edge.From("permission_groups", MenuPermissionGroup.Type).
 			Ref("menus"),
+		edge.From("permission_group_versions", MenuPermissionGroupVersion.Type).
+			Ref("menus"),
 	}
 }
 

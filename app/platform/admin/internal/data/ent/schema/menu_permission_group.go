@@ -38,6 +38,7 @@ func (MenuPermissionGroup) Fields() []ent.Field {
 		field.Int32("sort").Comment("排序").Default(10).SchemaType(map[string]string{dialect.MySQL: "int", dialect.Postgres: "int"}).Nillable(),
 		field.String("description").Comment("描述").MaxLen(255).Default("").Nillable(),
 		field.String("remark").Comment("备注").MaxLen(255).Default("").Nillable(),
+		field.Uint32("current_version_id").Comment("当前发布版本ID").Optional().Nillable(),
 	}
 }
 
@@ -45,6 +46,11 @@ func (MenuPermissionGroup) Fields() []ent.Field {
 func (MenuPermissionGroup) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("menus", Menu.Type),
+		edge.To("current_version", MenuPermissionGroupVersion.Type).
+			Field("current_version_id").
+			Unique(),
+		edge.From("versions", MenuPermissionGroupVersion.Type).
+			Ref("group"),
 		edge.From("tenant_bindings", TenantPermissionGroup.Type).
 			Ref("group"),
 	}

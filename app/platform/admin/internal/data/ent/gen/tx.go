@@ -14,6 +14,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AsyncTask is the client for interacting with the AsyncTask builders.
+	AsyncTask *AsyncTaskClient
 	// Dept is the client for interacting with the Dept builders.
 	Dept *DeptClient
 	// DictionaryItem is the client for interacting with the DictionaryItem builders.
@@ -26,8 +28,12 @@ type Tx struct {
 	Menu *MenuClient
 	// MenuPermissionGroup is the client for interacting with the MenuPermissionGroup builders.
 	MenuPermissionGroup *MenuPermissionGroupClient
+	// MenuPermissionGroupVersion is the client for interacting with the MenuPermissionGroupVersion builders.
+	MenuPermissionGroupVersion *MenuPermissionGroupVersionClient
 	// OperationLog is the client for interacting with the OperationLog builders.
 	OperationLog *OperationLogClient
+	// ParameterDefinition is the client for interacting with the ParameterDefinition builders.
+	ParameterDefinition *ParameterDefinitionClient
 	// Post is the client for interacting with the Post builders.
 	Post *PostClient
 	// Project is the client for interacting with the Project builders.
@@ -36,6 +42,8 @@ type Tx struct {
 	Role *RoleClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
+	// TenantParameterOverride is the client for interacting with the TenantParameterOverride builders.
+	TenantParameterOverride *TenantParameterOverrideClient
 	// TenantPermissionGroup is the client for interacting with the TenantPermissionGroup builders.
 	TenantPermissionGroup *TenantPermissionGroupClient
 	// User is the client for interacting with the User builders.
@@ -171,17 +179,21 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AsyncTask = NewAsyncTaskClient(tx.config)
 	tx.Dept = NewDeptClient(tx.config)
 	tx.DictionaryItem = NewDictionaryItemClient(tx.config)
 	tx.DictionaryType = NewDictionaryTypeClient(tx.config)
 	tx.LoginLog = NewLoginLogClient(tx.config)
 	tx.Menu = NewMenuClient(tx.config)
 	tx.MenuPermissionGroup = NewMenuPermissionGroupClient(tx.config)
+	tx.MenuPermissionGroupVersion = NewMenuPermissionGroupVersionClient(tx.config)
 	tx.OperationLog = NewOperationLogClient(tx.config)
+	tx.ParameterDefinition = NewParameterDefinitionClient(tx.config)
 	tx.Post = NewPostClient(tx.config)
 	tx.Project = NewProjectClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)
+	tx.TenantParameterOverride = NewTenantParameterOverrideClient(tx.config)
 	tx.TenantPermissionGroup = NewTenantPermissionGroupClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
@@ -193,7 +205,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Dept.QueryXXX(), the query will be executed
+// applies a query, for example: AsyncTask.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

@@ -25,8 +25,12 @@ func (u testSecurityUser) GetAction() string                      { return "" }
 func (u testSecurityUser) GetTenant() string                      { return u.tenant }
 
 func tenantContext(tenantID uint32) context.Context {
+	return tenantUserContext(tenantID, 1)
+}
+
+func tenantUserContext(tenantID, userID uint32) context.Context {
 	return authn.ContextWithAuthUser(context.Background(), testSecurityUser{
-		subject: "1",
+		subject: strconv.FormatUint(uint64(userID), 10),
 		tenant:  strconv.FormatUint(uint64(tenantID), 10),
 	})
 }

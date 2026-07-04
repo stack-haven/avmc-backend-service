@@ -4,6 +4,8 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
 	"errors"
 	"fmt"
@@ -176,6 +178,36 @@ func (_c *DeptCreate) AddChildren(v ...*Dept) *DeptCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
+}
+
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (_c *DeptCreate) AddUserIDs(ids ...uint32) *DeptCreate {
+	_c.mutation.AddUserIDs(ids...)
+	return _c
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (_c *DeptCreate) AddUsers(v ...*User) *DeptCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddUserIDs(ids...)
+}
+
+// AddDataScopeRoleIDs adds the "data_scope_roles" edge to the Role entity by IDs.
+func (_c *DeptCreate) AddDataScopeRoleIDs(ids ...uint32) *DeptCreate {
+	_c.mutation.AddDataScopeRoleIDs(ids...)
+	return _c
+}
+
+// AddDataScopeRoles adds the "data_scope_roles" edges to the Role entity.
+func (_c *DeptCreate) AddDataScopeRoles(v ...*Role) *DeptCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDataScopeRoleIDs(ids...)
 }
 
 // Mutation returns the DeptMutation object of the builder.
@@ -400,6 +432,38 @@ func (_c *DeptCreate) createSpec() (*Dept, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dept.UsersTable,
+			Columns: []string{dept.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DataScopeRolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   dept.DataScopeRolesTable,
+			Columns: dept.DataScopeRolesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

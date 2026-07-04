@@ -57,10 +57,14 @@ const (
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldDeptID holds the string denoting the dept_id field in the database.
+	FieldDeptID = "dept_id"
 	// EdgeRoles holds the string denoting the roles edge name in mutations.
 	EdgeRoles = "roles"
 	// EdgePosts holds the string denoting the posts edge name in mutations.
 	EdgePosts = "posts"
+	// EdgeDept holds the string denoting the dept edge name in mutations.
+	EdgeDept = "dept"
 	// EdgeProjects holds the string denoting the projects edge name in mutations.
 	EdgeProjects = "projects"
 	// Table holds the table name of the user in the database.
@@ -77,6 +81,13 @@ const (
 	PostsInverseTable = "posts"
 	// PostsColumn is the table column denoting the posts relation/edge.
 	PostsColumn = "user_posts"
+	// DeptTable is the table that holds the dept relation/edge.
+	DeptTable = "users"
+	// DeptInverseTable is the table name for the Dept entity.
+	// It exists in this package in order to avoid circular dependency with the "dept" package.
+	DeptInverseTable = "depts"
+	// DeptColumn is the table column denoting the dept relation/edge.
+	DeptColumn = "dept_id"
 	// ProjectsTable is the table that holds the projects relation/edge. The primary key declared below.
 	ProjectsTable = "project_members"
 	// ProjectsInverseTable is the table name for the Project entity.
@@ -108,6 +119,7 @@ var Columns = []string{
 	FieldSettings,
 	FieldMetadata,
 	FieldDescription,
+	FieldDeptID,
 }
 
 var (
@@ -287,6 +299,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
+// ByDeptID orders the results by the dept_id field.
+func ByDeptID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeptID, opts...).ToFunc()
+}
+
 // ByRolesCount orders the results by roles count.
 func ByRolesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -315,6 +332,13 @@ func ByPosts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByDeptField orders the results by dept field.
+func ByDeptField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDeptStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByProjectsCount orders the results by projects count.
 func ByProjectsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -340,6 +364,13 @@ func newPostsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PostsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PostsTable, PostsColumn),
+	)
+}
+func newDeptStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DeptInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, DeptTable, DeptColumn),
 	)
 }
 func newProjectsStep() *sqlgraph.Step {

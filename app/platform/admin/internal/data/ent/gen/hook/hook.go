@@ -8,6 +8,18 @@ import (
 	"fmt"
 )
 
+// The AsyncTaskFunc type is an adapter to allow the use of ordinary
+// function as AsyncTask mutator.
+type AsyncTaskFunc func(context.Context, *gen.AsyncTaskMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AsyncTaskFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.AsyncTaskMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.AsyncTaskMutation", m)
+}
+
 // The DeptFunc type is an adapter to allow the use of ordinary
 // function as Dept mutator.
 type DeptFunc func(context.Context, *gen.DeptMutation) (gen.Value, error)
@@ -80,6 +92,18 @@ func (f MenuPermissionGroupFunc) Mutate(ctx context.Context, m gen.Mutation) (ge
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.MenuPermissionGroupMutation", m)
 }
 
+// The MenuPermissionGroupVersionFunc type is an adapter to allow the use of ordinary
+// function as MenuPermissionGroupVersion mutator.
+type MenuPermissionGroupVersionFunc func(context.Context, *gen.MenuPermissionGroupVersionMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MenuPermissionGroupVersionFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.MenuPermissionGroupVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.MenuPermissionGroupVersionMutation", m)
+}
+
 // The OperationLogFunc type is an adapter to allow the use of ordinary
 // function as OperationLog mutator.
 type OperationLogFunc func(context.Context, *gen.OperationLogMutation) (gen.Value, error)
@@ -90,6 +114,18 @@ func (f OperationLogFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.OperationLogMutation", m)
+}
+
+// The ParameterDefinitionFunc type is an adapter to allow the use of ordinary
+// function as ParameterDefinition mutator.
+type ParameterDefinitionFunc func(context.Context, *gen.ParameterDefinitionMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ParameterDefinitionFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.ParameterDefinitionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.ParameterDefinitionMutation", m)
 }
 
 // The PostFunc type is an adapter to allow the use of ordinary
@@ -138,6 +174,18 @@ func (f TenantFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantMutation", m)
+}
+
+// The TenantParameterOverrideFunc type is an adapter to allow the use of ordinary
+// function as TenantParameterOverride mutator.
+type TenantParameterOverrideFunc func(context.Context, *gen.TenantParameterOverrideMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TenantParameterOverrideFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.TenantParameterOverrideMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantParameterOverrideMutation", m)
 }
 
 // The TenantPermissionGroupFunc type is an adapter to allow the use of ordinary

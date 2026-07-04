@@ -21,6 +21,9 @@ var ProviderSet = wire.NewSet(
 	NewOperationLogUsecase,
 	NewLoginLogUsecase,
 	NewSessionUsecase,
+	NewParameterUsecase,
+	NewAsyncTaskHandlers,
+	NewAsyncTaskUsecase,
 )
 
 type Transaction interface {

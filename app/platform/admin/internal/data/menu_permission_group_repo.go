@@ -8,15 +8,18 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 	"context"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
+	kratosErrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -57,7 +60,7 @@ func (r *menuPermissionGroupRepo) entToProto(e *gen.MenuPermissionGroup) *pbCore
 	if e.Status != nil {
 		status = pbEnum.Status(*e.Status)
 	}
-	return &pbCore.MenuPermissionGroup{
+	result := &pbCore.MenuPermissionGroup{
 		Id:          e.ID,
 		Name:        convert.ToPointer(e.Name),
 		Code:        convert.ToPointer(e.Code),
@@ -71,6 +74,44 @@ func (r *menuPermissionGroupRepo) entToProto(e *gen.MenuPermissionGroup) *pbCore
 		CreatedAt:   convert.TimeValueToString(&e.CreatedAt, time.DateTime),
 		UpdatedAt:   convert.TimeValueToString(&e.UpdatedAt, time.DateTime),
 	}
+	if current, err := e.Edges.CurrentVersionOrErr(); err == nil {
+		result.CurrentVersionId = &current.ID
+		result.CurrentVersion = &current.Version
+	}
+	return result
+}
+
+func menuPermissionGroupVersionToProto(e *gen.MenuPermissionGroupVersion) *pbCore.MenuPermissionGroupVersion {
+	if e == nil {
+		return nil
+	}
+	return &pbCore.MenuPermissionGroupVersion{
+		Id:            e.ID,
+		GroupId:       e.GroupID,
+		Version:       e.Version,
+		State:         pbCore.MenuPermissionGroupVersionState(e.State),
+		MenuIds:       menuPermissionGroupVersionMenuIDs(e),
+		ChangeSummary: e.ChangeSummary,
+		CreatedBy:     e.CreatedBy,
+		PublishedBy:   e.PublishedBy,
+		EffectiveAt:   convert.TimeValueToString(e.EffectiveAt, time.DateTime),
+		PublishedAt:   convert.TimeValueToString(e.PublishedAt, time.DateTime),
+		CreatedAt:     convert.TimeValueToString(&e.CreatedAt, time.DateTime),
+	}
+}
+
+func menuPermissionGroupVersionMenuIDs(e *gen.MenuPermissionGroupVersion) []uint32 {
+	if e == nil {
+		return nil
+	}
+	ids := make([]uint32, 0, len(e.Edges.Menus))
+	for _, item := range e.Edges.Menus {
+		if item != nil {
+			ids = append(ids, item.ID)
+		}
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
 }
 
 func (r *menuPermissionGroupRepo) Save(ctx context.Context, g *pbCore.MenuPermissionGroup) (*pbCore.MenuPermissionGroup, error) {
@@ -80,7 +121,12 @@ func (r *menuPermissionGroupRepo) Save(ctx context.Context, g *pbCore.MenuPermis
 	if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
 		return nil, err
 	}
-	builder := r.Data.DB(ctx).MenuPermissionGroup.Create().
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx, r.Log)
+	builder := tx.MenuPermissionGroup.Create().
 		SetName(g.GetName()).
 		SetCode(g.GetCode()).
 		SetNillableStatus((*int32)(g.Status)).
@@ -98,6 +144,16 @@ func (r *menuPermissionGroupRepo) Save(ctx context.Context, g *pbCore.MenuPermis
 		}
 		return nil, err
 	}
+	version, err := r.createVersionTx(ctx, tx, res.ID, 1, g.GetMenuIds(), "初始版本", 0)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = tx.MenuPermissionGroup.UpdateOneID(res.ID).SetCurrentVersionID(version.ID).Save(ctx); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	return r.FindByID(ctx, res.ID)
 }
 
@@ -105,24 +161,38 @@ func (r *menuPermissionGroupRepo) Update(ctx context.Context, g *pbCore.MenuPerm
 	if g == nil || g.GetId() == 0 || g.GetName() == "" || g.GetCode() == "" {
 		return nil, pb.ErrorBadRequest("权限组ID、名称和编码不能为空")
 	}
-	if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
+	if g.MenuIds != nil {
+		if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
+			return nil, err
+		}
+	}
+	current, err := r.FindByID(ctx, g.GetId())
+	if err != nil {
 		return nil, err
 	}
-	builder := r.Data.DB(ctx).MenuPermissionGroup.UpdateOneID(g.GetId()).
+	targetMenuIDs := current.GetMenuIds()
+	if g.MenuIds != nil {
+		targetMenuIDs = g.GetMenuIds()
+	}
+	menuChanged := current.GetCurrentVersionId() == 0 ||
+		(g.MenuIds != nil && !sameUint32Set(current.GetMenuIds(), targetMenuIDs))
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx, r.Log)
+	builder := tx.MenuPermissionGroup.UpdateOneID(g.GetId()).
 		SetName(g.GetName()).
 		SetCode(g.GetCode()).
-		SetNillableStatus((*int32)(g.Status)).
 		SetNillableIsSystem(g.IsSystem).
 		SetNillableSort(g.Sort).
 		SetNillableDescription(g.Description).
-		SetNillableRemark(g.Remark).
-		ClearMenus()
-	if len(g.GetMenuIds()) > 0 {
-		builder.AddMenuIDs(uniquePositiveIDs(g.GetMenuIds())...)
-	}
-	affectedTenantIDs, err := r.tenantIDsByGroup(ctx, g.GetId())
-	if err != nil {
-		return nil, err
+		SetNillableRemark(g.Remark)
+	if menuChanged {
+		builder.ClearMenus()
+		if len(targetMenuIDs) > 0 {
+			builder.AddMenuIDs(uniquePositiveIDs(targetMenuIDs)...)
+		}
 	}
 	res, err := builder.Save(ctx)
 	if err != nil {
@@ -134,6 +204,20 @@ func (r *menuPermissionGroupRepo) Update(ctx context.Context, g *pbCore.MenuPerm
 		}
 		return nil, err
 	}
+	var affectedTenantIDs []uint32
+	if menuChanged {
+		version, publishErr := r.publishVersionTx(ctx, tx, g.GetId(), targetMenuIDs, "通过套餐编辑发布", 0)
+		if publishErr != nil {
+			return nil, publishErr
+		}
+		affectedTenantIDs, err = r.advanceAutoUpgradeBindingsTx(ctx, tx, g.GetId(), version.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	r.bumpTenantsPackageVersion(ctx, affectedTenantIDs)
 	return r.FindByID(ctx, res.ID)
 }
@@ -142,6 +226,7 @@ func (r *menuPermissionGroupRepo) FindByID(ctx context.Context, id uint32) (*pbC
 	res, err := r.Data.DB(ctx).MenuPermissionGroup.Query().
 		Where(menupermissiongroup.IDEQ(id)).
 		WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
+		WithCurrentVersion().
 		WithTenantBindings().
 		Only(ctx)
 	if err != nil {
@@ -174,6 +259,7 @@ func (r *menuPermissionGroupRepo) ListMenuPermissionGroups(ctx context.Context, 
 	}
 	res, err := r.Data.DB(ctx).MenuPermissionGroup.Query().
 		WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
+		WithCurrentVersion().
 		WithTenantBindings().
 		Where(ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
@@ -223,6 +309,196 @@ func (r *menuPermissionGroupRepo) UpdateStatus(ctx context.Context, id uint32, s
 	return r.FindByID(ctx, res.ID)
 }
 
+func (r *menuPermissionGroupRepo) ListVersions(ctx context.Context, groupID uint32) ([]*pbCore.MenuPermissionGroupVersion, error) {
+	if groupID == 0 {
+		return nil, pb.ErrorBadRequest("套餐ID不能为空")
+	}
+	exists, err := r.Data.DB(ctx).MenuPermissionGroup.Query().Where(menupermissiongroup.IDEQ(groupID)).Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, pb.ErrorResourceNotFound("套餐不存在")
+	}
+	rows, err := r.Data.DB(ctx).MenuPermissionGroupVersion.Query().
+		Where(menupermissiongroupversion.GroupIDEQ(groupID)).
+		WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
+		Order(gen.Desc(menupermissiongroupversion.FieldVersion)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertSlice(rows, menuPermissionGroupVersionToProto), nil
+}
+
+func (r *menuPermissionGroupRepo) PublishVersion(ctx context.Context, groupID uint32, menuIDs []uint32, summary string, operatorID uint32, effectiveAt string) (*pbCore.MenuPermissionGroupVersion, error) {
+	if err := r.validateMenuIDs(ctx, menuIDs); err != nil {
+		return nil, err
+	}
+	now := time.Now()
+	if effectiveAt != "" {
+		value, err := time.Parse(time.DateTime, effectiveAt)
+		if err != nil {
+			return nil, pb.ErrorBadRequest("生效时间格式必须为 YYYY-MM-DD HH:mm:ss")
+		}
+		if value.After(now.Add(time.Minute)) {
+			return nil, pb.ErrorBadRequest("定时发布将在统一异步任务中心完成后开放")
+		}
+	}
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx, r.Log)
+	if _, err = tx.MenuPermissionGroup.UpdateOneID(groupID).SetUpdatedAt(now).Save(ctx); err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorResourceNotFound("套餐不存在")
+		}
+		return nil, err
+	}
+	version, err := r.publishVersionTx(ctx, tx, groupID, menuIDs, summary, operatorID)
+	if err != nil {
+		return nil, err
+	}
+	affectedTenantIDs, err := r.advanceAutoUpgradeBindingsTx(ctx, tx, groupID, version.ID)
+	if err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	r.bumpTenantsPackageVersion(ctx, affectedTenantIDs)
+	published, err := r.Data.DB(ctx).MenuPermissionGroupVersion.Query().
+		Where(menupermissiongroupversion.IDEQ(version.ID)).
+		WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return menuPermissionGroupVersionToProto(published), nil
+}
+
+func (r *menuPermissionGroupRepo) RollbackVersion(ctx context.Context, groupID, sourceVersionID uint32, summary string, operatorID uint32) (*pbCore.MenuPermissionGroupVersion, error) {
+	source, err := r.Data.DB(ctx).MenuPermissionGroupVersion.Query().
+		Where(
+			menupermissiongroupversion.IDEQ(sourceVersionID),
+			menupermissiongroupversion.GroupIDEQ(groupID),
+		).
+		WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorResourceNotFound("回滚来源版本不存在")
+		}
+		return nil, err
+	}
+	if summary == "" {
+		summary = "回滚至版本 " + strconv.Itoa(int(source.Version))
+	}
+	return r.PublishVersion(ctx, groupID, menuPermissionGroupVersionMenuIDs(source), summary, operatorID, "")
+}
+
+func (r *menuPermissionGroupRepo) createVersionTx(ctx context.Context, tx *gen.Tx, groupID uint32, version int32, menuIDs []uint32, summary string, operatorID uint32) (*gen.MenuPermissionGroupVersion, error) {
+	now := time.Now()
+	builder := tx.MenuPermissionGroupVersion.Create().
+		SetGroupID(groupID).
+		SetVersion(version).
+		SetState(int32(pbCore.MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED)).
+		SetChangeSummary(summary).
+		SetEffectiveAt(now).
+		SetPublishedAt(now)
+	if operatorID > 0 {
+		builder.SetCreatedBy(operatorID).SetPublishedBy(operatorID)
+	}
+	if ids := uniquePositiveIDs(menuIDs); len(ids) > 0 {
+		builder.AddMenuIDs(ids...)
+	}
+	return builder.Save(ctx)
+}
+
+func (r *menuPermissionGroupRepo) publishVersionTx(ctx context.Context, tx *gen.Tx, groupID uint32, menuIDs []uint32, summary string, operatorID uint32) (*gen.MenuPermissionGroupVersion, error) {
+	latest, err := tx.MenuPermissionGroupVersion.Query().
+		Where(menupermissiongroupversion.GroupIDEQ(groupID)).
+		Order(gen.Desc(menupermissiongroupversion.FieldVersion)).
+		First(ctx)
+	nextVersion := int32(1)
+	if err == nil {
+		nextVersion = latest.Version + 1
+	} else if !gen.IsNotFound(err) {
+		return nil, err
+	}
+	if _, err = tx.MenuPermissionGroupVersion.Update().
+		Where(
+			menupermissiongroupversion.GroupIDEQ(groupID),
+			menupermissiongroupversion.StateEQ(int32(pbCore.MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED)),
+		).
+		SetState(int32(pbCore.MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED)).
+		Save(ctx); err != nil {
+		return nil, err
+	}
+	version, err := r.createVersionTx(ctx, tx, groupID, nextVersion, menuIDs, summary, operatorID)
+	if err != nil {
+		if gen.IsConstraintError(err) {
+			return nil, kratosErrors.Conflict("MENU_PERMISSION_GROUP_VERSION_CONFLICT", "套餐版本发布冲突，请重试")
+		}
+		return nil, err
+	}
+	builder := tx.MenuPermissionGroup.UpdateOneID(groupID).
+		SetCurrentVersionID(version.ID).
+		ClearMenus()
+	if ids := uniquePositiveIDs(menuIDs); len(ids) > 0 {
+		builder.AddMenuIDs(ids...)
+	}
+	if _, err = builder.Save(ctx); err != nil {
+		return nil, err
+	}
+	return version, nil
+}
+
+func (r *menuPermissionGroupRepo) advanceAutoUpgradeBindingsTx(ctx context.Context, tx *gen.Tx, groupID, versionID uint32) ([]uint32, error) {
+	bindings, err := tx.TenantPermissionGroup.Query().
+		Where(
+			tenantpermissiongroup.GroupIDEQ(groupID),
+			tenantpermissiongroup.AutoUpgradeEQ(true),
+			tenantpermissiongroup.EnabledEQ(true),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]uint32, 0, len(bindings))
+	bindingIDs := make([]uint32, 0, len(bindings))
+	for _, binding := range bindings {
+		ids = append(ids, binding.TenantID)
+		bindingIDs = append(bindingIDs, binding.ID)
+	}
+	if len(bindingIDs) > 0 {
+		if _, err = tx.TenantPermissionGroup.Update().
+			Where(tenantpermissiongroup.IDIn(bindingIDs...)).
+			SetVersionID(versionID).
+			Save(ctx); err != nil {
+			return nil, err
+		}
+	}
+	return uniquePositiveIDs(ids), nil
+}
+
+func sameUint32Set(left, right []uint32) bool {
+	a := uniquePositiveIDs(left)
+	b := uniquePositiveIDs(right)
+	if len(a) != len(b) {
+		return false
+	}
+	sort.Slice(a, func(i, j int) bool { return a[i] < a[j] })
+	sort.Slice(b, func(i, j int) bool { return b[i] < b[j] })
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func (r *menuPermissionGroupRepo) GetTenantGroups(ctx context.Context, tenantID uint32) ([]*pbCore.MenuPermissionGroup, error) {
 	if tenantID == 0 {
 		return nil, pb.ErrorBadRequest("租户ID不能为空")
@@ -231,6 +507,7 @@ func (r *menuPermissionGroupRepo) GetTenantGroups(ctx context.Context, tenantID 
 		Where(tenantpermissiongroup.TenantIDEQ(tenantID), tenantpermissiongroup.EnabledEQ(true)).
 		WithGroup(func(q *gen.MenuPermissionGroupQuery) {
 			q.WithMenus(func(mq *gen.MenuQuery) { mq.Select(menu.FieldID) })
+			q.WithCurrentVersion()
 			q.WithTenantBindings()
 		}).
 		All(ctx)
@@ -248,6 +525,37 @@ func (r *menuPermissionGroupRepo) GetTenantGroups(ctx context.Context, tenantID 
 	return groups, nil
 }
 
+func (r *menuPermissionGroupRepo) GetTenantGroupBindings(ctx context.Context, tenantID uint32) ([]*pbCore.TenantPermissionGroupBinding, error) {
+	if tenantID == 0 {
+		return nil, pb.ErrorBadRequest("租户ID不能为空")
+	}
+	rows, err := r.Data.DB(ctx).TenantPermissionGroup.Query().
+		Where(tenantpermissiongroup.TenantIDEQ(tenantID), tenantpermissiongroup.EnabledEQ(true)).
+		WithVersion().
+		Order(gen.Asc(tenantpermissiongroup.FieldGroupID)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*pbCore.TenantPermissionGroupBinding, 0, len(rows))
+	for _, row := range rows {
+		item := &pbCore.TenantPermissionGroupBinding{
+			TenantId:    row.TenantID,
+			GroupId:     row.GroupID,
+			Enabled:     row.Enabled,
+			BoundBy:     row.BoundBy,
+			BoundAt:     convert.TimeValueToString(&row.CreatedAt, time.DateTime),
+			VersionId:   row.VersionID,
+			AutoUpgrade: &row.AutoUpgrade,
+		}
+		if version, edgeErr := row.Edges.VersionOrErr(); edgeErr == nil {
+			item.Version = &version.Version
+		}
+		result = append(result, item)
+	}
+	return result, nil
+}
+
 func (r *menuPermissionGroupRepo) UpdateTenantGroups(ctx context.Context, tenantID uint32, groupIDs []uint32, operatorID uint32) error {
 	if tenantID == 0 {
 		return pb.ErrorBadRequest("租户ID不能为空")
@@ -261,7 +569,12 @@ func (r *menuPermissionGroupRepo) UpdateTenantGroups(ctx context.Context, tenant
 	}
 	ids := uniquePositiveIDs(groupIDs)
 	if len(ids) > 0 {
-		count, err := r.Data.DB(ctx).MenuPermissionGroup.Query().Where(menupermissiongroup.IDIn(ids...)).Count(ctx)
+		count, err := r.Data.DB(ctx).MenuPermissionGroup.Query().
+			Where(
+				menupermissiongroup.IDIn(ids...),
+				menupermissiongroup.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED)),
+			).
+			Count(ctx)
 		if err != nil {
 			return err
 		}
@@ -274,20 +587,47 @@ func (r *menuPermissionGroupRepo) UpdateTenantGroups(ctx context.Context, tenant
 		return err
 	}
 	defer rollback(tx, r.Log)
-	if _, err := tx.TenantPermissionGroup.Delete().
+	existing, err := tx.TenantPermissionGroup.Query().
 		Where(tenantpermissiongroup.TenantIDEQ(tenantID)).
-		Exec(ctx); err != nil {
+		All(ctx)
+	if err != nil {
 		return err
 	}
+	byGroup := make(map[uint32]*gen.TenantPermissionGroup, len(existing))
+	for _, item := range existing {
+		byGroup[item.GroupID] = item
+	}
 	for _, id := range ids {
+		if item, ok := byGroup[id]; ok {
+			builder := tx.TenantPermissionGroup.UpdateOneID(item.ID).SetEnabled(true)
+			if operatorID > 0 {
+				builder.SetBoundBy(operatorID)
+			}
+			if _, err = builder.Save(ctx); err != nil {
+				return err
+			}
+			delete(byGroup, id)
+			continue
+		}
+		group, err := tx.MenuPermissionGroup.Get(ctx, id)
+		if err != nil {
+			return err
+		}
 		builder := tx.TenantPermissionGroup.Create().
 			SetTenantID(tenantID).
 			SetGroupID(id).
-			SetEnabled(true)
+			SetEnabled(true).
+			SetAutoUpgrade(true).
+			SetNillableVersionID(group.CurrentVersionID)
 		if operatorID > 0 {
 			builder.SetBoundBy(operatorID)
 		}
 		if _, err := builder.Save(ctx); err != nil {
+			return err
+		}
+	}
+	for _, item := range byGroup {
+		if err = tx.TenantPermissionGroup.DeleteOneID(item.ID).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -314,6 +654,11 @@ func (r *menuPermissionGroupRepo) GetTenantEffectiveMenuIDs(ctx context.Context,
 				mq.Select(menu.FieldID)
 			})
 		}).
+		WithVersion(func(vq *gen.MenuPermissionGroupVersionQuery) {
+			vq.WithMenus(func(mq *gen.MenuQuery) {
+				mq.Where(menu.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED))).Select(menu.FieldID)
+			})
+		}).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -324,7 +669,12 @@ func (r *menuPermissionGroupRepo) GetTenantEffectiveMenuIDs(ctx context.Context,
 		if err != nil {
 			continue
 		}
-		for _, m := range group.Edges.Menus {
+		version, versionErr := binding.Edges.VersionOrErr()
+		menus := group.Edges.Menus
+		if versionErr == nil {
+			menus = version.Edges.Menus
+		}
+		for _, m := range menus {
 			if m != nil {
 				idSet[m.ID] = struct{}{}
 			}
@@ -337,6 +687,73 @@ func (r *menuPermissionGroupRepo) GetTenantEffectiveMenuIDs(ctx context.Context,
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 	r.setTenantEffectiveMenuIDsCache(ctx, tenantID, ids)
 	return ids, nil
+}
+
+func (r *menuPermissionGroupRepo) UpdateTenantGroupVersion(ctx context.Context, tenantID, groupID, versionID uint32, autoUpgrade bool, operatorID uint32) (*pbCore.TenantPermissionGroupBinding, error) {
+	binding, err := r.Data.DB(ctx).TenantPermissionGroup.Query().
+		Where(
+			tenantpermissiongroup.TenantIDEQ(tenantID),
+			tenantpermissiongroup.GroupIDEQ(groupID),
+			tenantpermissiongroup.EnabledEQ(true),
+		).
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorResourceNotFound("租户未绑定该套餐")
+		}
+		return nil, err
+	}
+	if autoUpgrade {
+		group, err := r.Data.DB(ctx).MenuPermissionGroup.Get(ctx, groupID)
+		if err != nil {
+			return nil, err
+		}
+		if group.CurrentVersionID == nil {
+			return nil, pb.ErrorBadRequest("套餐尚无已发布版本")
+		}
+		versionID = *group.CurrentVersionID
+	} else {
+		if versionID == 0 {
+			return nil, pb.ErrorBadRequest("固定版本时必须指定版本ID")
+		}
+		exists, err := r.Data.DB(ctx).MenuPermissionGroupVersion.Query().
+			Where(
+				menupermissiongroupversion.IDEQ(versionID),
+				menupermissiongroupversion.GroupIDEQ(groupID),
+			).
+			Exist(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !exists {
+			return nil, pb.ErrorBadRequest("指定版本不属于该套餐")
+		}
+	}
+	builder := r.Data.DB(ctx).TenantPermissionGroup.UpdateOneID(binding.ID).
+		SetVersionID(versionID).
+		SetAutoUpgrade(autoUpgrade)
+	if operatorID > 0 {
+		builder.SetBoundBy(operatorID)
+	}
+	updated, err := builder.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	r.bumpTenantPackageVersion(ctx, tenantID)
+	version, err := r.Data.DB(ctx).MenuPermissionGroupVersion.Get(ctx, versionID)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.TenantPermissionGroupBinding{
+		TenantId:    updated.TenantID,
+		GroupId:     updated.GroupID,
+		Enabled:     updated.Enabled,
+		BoundBy:     updated.BoundBy,
+		BoundAt:     convert.TimeValueToString(&updated.CreatedAt, time.DateTime),
+		VersionId:   updated.VersionID,
+		Version:     &version.Version,
+		AutoUpgrade: &updated.AutoUpgrade,
+	}, nil
 }
 
 func (r *menuPermissionGroupRepo) tenantIDsByGroup(ctx context.Context, groupID uint32) ([]uint32, error) {

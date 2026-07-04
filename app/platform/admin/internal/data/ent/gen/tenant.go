@@ -34,6 +34,8 @@ type Tenant struct {
 	Sort *int32 `json:"sort,omitempty"`
 	// 备注
 	Remark *string `json:"remark,omitempty"`
+	// 是否为平台控制面租户，仅允许部署初始化流程维护
+	IsPlatform bool `json:"is_platform,omitempty"`
 	// 生命周期状态：1待开通 2正常 3暂停 4到期 5注销
 	LifecycleStatus int32 `json:"lifecycle_status,omitempty"`
 	// 激活时间
@@ -73,6 +75,8 @@ func (*Tenant) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case tenant.FieldIsPlatform:
+			values[i] = new(sql.NullBool)
 		case tenant.FieldID, tenant.FieldStatus, tenant.FieldSort, tenant.FieldLifecycleStatus:
 			values[i] = new(sql.NullInt64)
 		case tenant.FieldName, tenant.FieldCode, tenant.FieldRemark:
@@ -151,6 +155,12 @@ func (_m *Tenant) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Remark = new(string)
 				*_m.Remark = value.String
+			}
+		case tenant.FieldIsPlatform:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_platform", values[i])
+			} else if value.Valid {
+				_m.IsPlatform = value.Bool
 			}
 		case tenant.FieldLifecycleStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -258,6 +268,9 @@ func (_m *Tenant) String() string {
 		builder.WriteString("remark=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("is_platform=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsPlatform))
 	builder.WriteString(", ")
 	builder.WriteString("lifecycle_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.LifecycleStatus))

@@ -6,15 +6,19 @@ import (
 	"strings"
 	"testing"
 
+	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/auth/authn"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/proto"
 )
 
 type stubUserRepo struct {
 	saved   *pbCore.User
 	updated *pbCore.User
+	current *pbCore.User
 }
 
 type stubSessionRepo struct {
@@ -34,6 +38,19 @@ func (r *stubSessionRepo) RevokeUser(_ context.Context, id uint32) error {
 }
 func (*stubSessionRepo) RevokeTenant(context.Context, uint32) error { return nil }
 
+type stubTenantAdminPolicy struct {
+	tenantID uint32
+	userID   uint32
+	enabled  bool
+}
+
+func (p *stubTenantAdminPolicy) SetMembership(_ context.Context, tenantID, userID uint32, enabled bool) error {
+	p.tenantID = tenantID
+	p.userID = userID
+	p.enabled = enabled
+	return nil
+}
+
 func (r *stubUserRepo) Save(_ context.Context, user *pbCore.User) (*pbCore.User, error) {
 	r.saved = user
 	return user, nil
@@ -44,7 +61,12 @@ func (r *stubUserRepo) Update(_ context.Context, user *pbCore.User) (*pbCore.Use
 	return user, nil
 }
 
-func (*stubUserRepo) FindByID(context.Context, uint32) (*pbCore.User, error) { return nil, nil }
+func (r *stubUserRepo) FindByID(context.Context, uint32) (*pbCore.User, error) {
+	if r.current == nil {
+		return nil, nil
+	}
+	return proto.Clone(r.current).(*pbCore.User), nil
+}
 func (*stubUserRepo) ListByName(context.Context, string) ([]*pbCore.User, error) {
 	return nil, nil
 }
@@ -81,7 +103,7 @@ func TestUserUsecaseCreateRequiresAndHashesStrongPassword(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &stubUserRepo{}
-			uc := NewUserUsecase(repo, nil, log.NewStdLogger(io.Discard))
+			uc := NewUserUsecase(repo, nil, nil, log.NewStdLogger(io.Discard))
 			_, err := uc.Create(context.Background(), tt.user)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("Create() error = %v, wantErr %v", err, tt.wantErr)
@@ -106,7 +128,7 @@ func TestUserUsecaseUpdateRejectsExplicitEmptyPassword(t *testing.T) {
 
 	empty := ""
 	repo := &stubUserRepo{}
-	uc := NewUserUsecase(repo, nil, log.NewStdLogger(io.Discard))
+	uc := NewUserUsecase(repo, nil, nil, log.NewStdLogger(io.Discard))
 
 	if _, err := uc.Update(context.Background(), &pbCore.User{Id: 1, Password: &empty}); err == nil {
 		t.Fatal("Update() error = nil")
@@ -120,13 +142,40 @@ func TestUserUsecasePasswordChangeRevokesAllUserSessions(t *testing.T) {
 	password := "N3w!Password#2026"
 	repo := &stubUserRepo{}
 	sessions := &stubSessionRepo{}
-	uc := NewUserUsecase(repo, sessions, log.NewStdLogger(io.Discard))
+	uc := NewUserUsecase(repo, sessions, nil, log.NewStdLogger(io.Discard))
 
 	if _, err := uc.Update(context.Background(), &pbCore.User{Id: 42, Password: &password}); err != nil {
 		t.Fatalf("Update() error = %v", err)
 	}
 	if sessions.revokedUser != 42 {
 		t.Fatalf("revoked user = %d, want 42", sessions.revokedUser)
+	}
+}
+
+func TestUserUsecaseDisablingAdminRevokesSessionAndPolicy(t *testing.T) {
+	enabled := pbEnum.Status_STATUS_ENABLED
+	repo := &stubUserRepo{current: &pbCore.User{
+		Id:            42,
+		Status:        &enabled,
+		IsTenantAdmin: true,
+	}}
+	sessions := &stubSessionRepo{}
+	policy := &stubTenantAdminPolicy{}
+	claims := authn.AuthClaims{"tenant": "7"}
+	ctx := authn.ContextWithAuthClaims(context.Background(), &claims)
+	uc := NewUserUsecase(repo, sessions, policy, log.NewStdLogger(io.Discard))
+
+	if _, err := uc.UpdateStatus(ctx, 42, int32(pbEnum.Status_STATUS_DISABLED)); err != nil {
+		t.Fatalf("UpdateStatus() error = %v", err)
+	}
+	if sessions.revokedUser != 42 {
+		t.Fatalf("revoked user = %d, want 42", sessions.revokedUser)
+	}
+	if repo.updated.GetStatus() != pbEnum.Status_STATUS_DISABLED || !repo.updated.GetIsTenantAdmin() {
+		t.Fatalf("updated user status=%v admin=%v", repo.updated.GetStatus(), repo.updated.GetIsTenantAdmin())
+	}
+	if policy.tenantID != 7 || policy.userID != 42 || policy.enabled {
+		t.Fatalf("policy call = tenant:%d user:%d enabled:%v", policy.tenantID, policy.userID, policy.enabled)
 	}
 }
 

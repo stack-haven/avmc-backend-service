@@ -27,7 +27,7 @@ var File_platform_admin_v1_i_menu_permission_group_proto protoreflect.FileDescri
 
 const file_platform_admin_v1_i_menu_permission_group_proto_rawDesc = "" +
 	"\n" +
-	"/platform/admin/v1/i_menu_permission_group.proto\x12\x11platform.admin.v1\x1a+core/service/v1/menu_permission_group.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto2\x9e\r\n" +
+	"/platform/admin/v1/i_menu_permission_group.proto\x12\x11platform.admin.v1\x1a+core/service/v1/menu_permission_group.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto2\xc3\x12\n" +
 	"\x1aMenuPermissionGroupService\x12\x90\x02\n" +
 	"\x18ListMenuPermissionGroups\x120.core.service.v1.ListMenuPermissionGroupsRequest\x1a1.core.service.v1.ListMenuPermissionGroupsResponse\"\x8e\x01\xbaGc\n" +
 	"\x15菜单权限组服务\x12\x1b获取菜单权限组列表\x1a\x1b获取菜单权限组列表Z\x10\n" +
@@ -58,22 +58,31 @@ const file_platform_admin_v1_i_menu_permission_group_proto_rawDesc = "" +
 	"\x15菜单权限组服务\x12\x1b更新菜单权限组状态\x1a\x1b更新菜单权限组状态Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x028:\x01*\x1a3/admin/v1/menu-permission-groups/status-update/{id}B\xc2\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x028:\x01*\x1a3/admin/v1/menu-permission-groups/status-update/{id}\x12\xd2\x01\n" +
+	"\x1fListMenuPermissionGroupVersions\x127.core.service.v1.ListMenuPermissionGroupVersionsRequest\x1a8.core.service.v1.ListMenuPermissionGroupVersionsResponse\"<\x82\xd3\xe4\x93\x026\x124/admin/v1/menu-permission-groups/{group_id}/versions\x12\xe3\x01\n" +
+	"!PublishMenuPermissionGroupVersion\x129.core.service.v1.PublishMenuPermissionGroupVersionRequest\x1a:.core.service.v1.PublishMenuPermissionGroupVersionResponse\"G\x82\xd3\xe4\x93\x02A:\x01*\"</admin/v1/menu-permission-groups/{group_id}/versions:publish\x12\xe7\x01\n" +
+	"\"RollbackMenuPermissionGroupVersion\x12:.core.service.v1.RollbackMenuPermissionGroupVersionRequest\x1a;.core.service.v1.RollbackMenuPermissionGroupVersionResponse\"H\x82\xd3\xe4\x93\x02B:\x01*\"=/admin/v1/menu-permission-groups/{group_id}/versions:rollbackB\xc2\x01\n" +
 	"\x15com.platform.admin.v1B\x19IMenuPermissionGroupProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 
 var file_platform_admin_v1_i_menu_permission_group_proto_goTypes = []any{
-	(*v1.ListMenuPermissionGroupsRequest)(nil),         // 0: core.service.v1.ListMenuPermissionGroupsRequest
-	(*v1.GetMenuPermissionGroupRequest)(nil),           // 1: core.service.v1.GetMenuPermissionGroupRequest
-	(*v1.CreateMenuPermissionGroupRequest)(nil),        // 2: core.service.v1.CreateMenuPermissionGroupRequest
-	(*v1.UpdateMenuPermissionGroupRequest)(nil),        // 3: core.service.v1.UpdateMenuPermissionGroupRequest
-	(*v1.DeleteMenuPermissionGroupRequest)(nil),        // 4: core.service.v1.DeleteMenuPermissionGroupRequest
-	(*v1.UpdateMenuPermissionGroupStatusRequest)(nil),  // 5: core.service.v1.UpdateMenuPermissionGroupStatusRequest
-	(*v1.ListMenuPermissionGroupsResponse)(nil),        // 6: core.service.v1.ListMenuPermissionGroupsResponse
-	(*v1.MenuPermissionGroup)(nil),                     // 7: core.service.v1.MenuPermissionGroup
-	(*v1.CreateMenuPermissionGroupResponse)(nil),       // 8: core.service.v1.CreateMenuPermissionGroupResponse
-	(*v1.UpdateMenuPermissionGroupResponse)(nil),       // 9: core.service.v1.UpdateMenuPermissionGroupResponse
-	(*v1.DeleteMenuPermissionGroupResponse)(nil),       // 10: core.service.v1.DeleteMenuPermissionGroupResponse
-	(*v1.UpdateMenuPermissionGroupStatusResponse)(nil), // 11: core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	(*v1.ListMenuPermissionGroupsRequest)(nil),            // 0: core.service.v1.ListMenuPermissionGroupsRequest
+	(*v1.GetMenuPermissionGroupRequest)(nil),              // 1: core.service.v1.GetMenuPermissionGroupRequest
+	(*v1.CreateMenuPermissionGroupRequest)(nil),           // 2: core.service.v1.CreateMenuPermissionGroupRequest
+	(*v1.UpdateMenuPermissionGroupRequest)(nil),           // 3: core.service.v1.UpdateMenuPermissionGroupRequest
+	(*v1.DeleteMenuPermissionGroupRequest)(nil),           // 4: core.service.v1.DeleteMenuPermissionGroupRequest
+	(*v1.UpdateMenuPermissionGroupStatusRequest)(nil),     // 5: core.service.v1.UpdateMenuPermissionGroupStatusRequest
+	(*v1.ListMenuPermissionGroupVersionsRequest)(nil),     // 6: core.service.v1.ListMenuPermissionGroupVersionsRequest
+	(*v1.PublishMenuPermissionGroupVersionRequest)(nil),   // 7: core.service.v1.PublishMenuPermissionGroupVersionRequest
+	(*v1.RollbackMenuPermissionGroupVersionRequest)(nil),  // 8: core.service.v1.RollbackMenuPermissionGroupVersionRequest
+	(*v1.ListMenuPermissionGroupsResponse)(nil),           // 9: core.service.v1.ListMenuPermissionGroupsResponse
+	(*v1.MenuPermissionGroup)(nil),                        // 10: core.service.v1.MenuPermissionGroup
+	(*v1.CreateMenuPermissionGroupResponse)(nil),          // 11: core.service.v1.CreateMenuPermissionGroupResponse
+	(*v1.UpdateMenuPermissionGroupResponse)(nil),          // 12: core.service.v1.UpdateMenuPermissionGroupResponse
+	(*v1.DeleteMenuPermissionGroupResponse)(nil),          // 13: core.service.v1.DeleteMenuPermissionGroupResponse
+	(*v1.UpdateMenuPermissionGroupStatusResponse)(nil),    // 14: core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	(*v1.ListMenuPermissionGroupVersionsResponse)(nil),    // 15: core.service.v1.ListMenuPermissionGroupVersionsResponse
+	(*v1.PublishMenuPermissionGroupVersionResponse)(nil),  // 16: core.service.v1.PublishMenuPermissionGroupVersionResponse
+	(*v1.RollbackMenuPermissionGroupVersionResponse)(nil), // 17: core.service.v1.RollbackMenuPermissionGroupVersionResponse
 }
 var file_platform_admin_v1_i_menu_permission_group_proto_depIdxs = []int32{
 	0,  // 0: platform.admin.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
@@ -82,14 +91,20 @@ var file_platform_admin_v1_i_menu_permission_group_proto_depIdxs = []int32{
 	3,  // 3: platform.admin.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
 	4,  // 4: platform.admin.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
 	5,  // 5: platform.admin.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
-	6,  // 6: platform.admin.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
-	7,  // 7: platform.admin.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.MenuPermissionGroup
-	8,  // 8: platform.admin.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
-	9,  // 9: platform.admin.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
-	10, // 10: platform.admin.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
-	11, // 11: platform.admin.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
-	6,  // [6:12] is the sub-list for method output_type
-	0,  // [0:6] is the sub-list for method input_type
+	6,  // 6: platform.admin.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:input_type -> core.service.v1.ListMenuPermissionGroupVersionsRequest
+	7,  // 7: platform.admin.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:input_type -> core.service.v1.PublishMenuPermissionGroupVersionRequest
+	8,  // 8: platform.admin.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:input_type -> core.service.v1.RollbackMenuPermissionGroupVersionRequest
+	9,  // 9: platform.admin.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
+	10, // 10: platform.admin.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.MenuPermissionGroup
+	11, // 11: platform.admin.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
+	12, // 12: platform.admin.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
+	13, // 13: platform.admin.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
+	14, // 14: platform.admin.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	15, // 15: platform.admin.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:output_type -> core.service.v1.ListMenuPermissionGroupVersionsResponse
+	16, // 16: platform.admin.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:output_type -> core.service.v1.PublishMenuPermissionGroupVersionResponse
+	17, // 17: platform.admin.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:output_type -> core.service.v1.RollbackMenuPermissionGroupVersionResponse
+	9,  // [9:18] is the sub-list for method output_type
+	0,  // [0:9] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

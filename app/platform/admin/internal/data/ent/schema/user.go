@@ -48,6 +48,7 @@ func (User) Fields() []ent.Field {
 		field.JSON("settings", []string{}).Optional().Default([]string{}).Comment("用户设置，JSON格式"),
 		field.JSON("metadata", []string{}).Optional().Default([]string{}).Comment("元数据，JSON格式"),
 		field.String("description").Optional().MaxLen(255).Nillable().Comment("个人说明"),
+		field.Uint32("dept_id").Optional().Nillable().Comment("所属主部门ID"),
 	}
 }
 
@@ -56,6 +57,10 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("roles", Role.Type),
 		edge.To("posts", Post.Type),
+		edge.From("dept", Dept.Type).
+			Ref("users").
+			Field("dept_id").
+			Unique(),
 		edge.From("projects", Project.Type).Ref("members"),
 	}
 }

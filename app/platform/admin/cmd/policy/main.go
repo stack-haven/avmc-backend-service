@@ -20,6 +20,7 @@ var (
 	tenant   string
 	role     string
 	users    string
+	platform bool
 )
 
 func init() {
@@ -27,6 +28,7 @@ func init() {
 	flag.StringVar(&tenant, "tenant", "1", "authorization tenant/tenant id")
 	flag.StringVar(&role, "role", "super_admin", "role subject to seed")
 	flag.StringVar(&users, "users", "1", "comma-separated user ids to bind to role")
+	flag.BoolVar(&platform, "platform", false, "seed platform control-plane policies")
 }
 
 func main() {
@@ -56,10 +58,14 @@ func run(ctx context.Context, logger *log.Helper) error {
 	defer authorizer.Close()
 
 	subjects := parseSubjects(users)
-	if err := authzpolicy.SyncSuperAdmin(ctx, authorizer, authz.Subject(role), authz.Tenant(tenant), subjects); err != nil {
+	sync := authzpolicy.SyncSuperAdmin
+	if platform {
+		sync = authzpolicy.SyncPlatformAdmin
+	}
+	if err := sync(ctx, authorizer, authz.Subject(role), authz.Tenant(tenant), subjects); err != nil {
 		return err
 	}
-	logger.Infof("synced admin policies: role=%s tenant=%s users=%v", role, tenant, subjects)
+	logger.Infof("synced admin policies: role=%s tenant=%s platform=%t users=%v", role, tenant, platform, subjects)
 	logger.Info("restart the admin service or reload Casbin policies before testing newly synced permissions")
 	return nil
 }

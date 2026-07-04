@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
@@ -27,6 +28,8 @@ type MenuPermissionGroupQuery struct {
 	inters             []Interceptor
 	predicates         []predicate.MenuPermissionGroup
 	withMenus          *MenuQuery
+	withCurrentVersion *MenuPermissionGroupVersionQuery
+	withVersions       *MenuPermissionGroupVersionQuery
 	withTenantBindings *TenantPermissionGroupQuery
 	modifiers          []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -80,6 +83,50 @@ func (_q *MenuPermissionGroupQuery) QueryMenus() *MenuQuery {
 			sqlgraph.From(menupermissiongroup.Table, menupermissiongroup.FieldID, selector),
 			sqlgraph.To(menu.Table, menu.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, menupermissiongroup.MenusTable, menupermissiongroup.MenusPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCurrentVersion chains the current query on the "current_version" edge.
+func (_q *MenuPermissionGroupQuery) QueryCurrentVersion() *MenuPermissionGroupVersionQuery {
+	query := (&MenuPermissionGroupVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(menupermissiongroup.Table, menupermissiongroup.FieldID, selector),
+			sqlgraph.To(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, menupermissiongroup.CurrentVersionTable, menupermissiongroup.CurrentVersionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVersions chains the current query on the "versions" edge.
+func (_q *MenuPermissionGroupQuery) QueryVersions() *MenuPermissionGroupVersionQuery {
+	query := (&MenuPermissionGroupVersionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(menupermissiongroup.Table, menupermissiongroup.FieldID, selector),
+			sqlgraph.To(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, menupermissiongroup.VersionsTable, menupermissiongroup.VersionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -302,6 +349,8 @@ func (_q *MenuPermissionGroupQuery) Clone() *MenuPermissionGroupQuery {
 		inters:             append([]Interceptor{}, _q.inters...),
 		predicates:         append([]predicate.MenuPermissionGroup{}, _q.predicates...),
 		withMenus:          _q.withMenus.Clone(),
+		withCurrentVersion: _q.withCurrentVersion.Clone(),
+		withVersions:       _q.withVersions.Clone(),
 		withTenantBindings: _q.withTenantBindings.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -318,6 +367,28 @@ func (_q *MenuPermissionGroupQuery) WithMenus(opts ...func(*MenuQuery)) *MenuPer
 		opt(query)
 	}
 	_q.withMenus = query
+	return _q
+}
+
+// WithCurrentVersion tells the query-builder to eager-load the nodes that are connected to
+// the "current_version" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MenuPermissionGroupQuery) WithCurrentVersion(opts ...func(*MenuPermissionGroupVersionQuery)) *MenuPermissionGroupQuery {
+	query := (&MenuPermissionGroupVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCurrentVersion = query
+	return _q
+}
+
+// WithVersions tells the query-builder to eager-load the nodes that are connected to
+// the "versions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MenuPermissionGroupQuery) WithVersions(opts ...func(*MenuPermissionGroupVersionQuery)) *MenuPermissionGroupQuery {
+	query := (&MenuPermissionGroupVersionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withVersions = query
 	return _q
 }
 
@@ -410,8 +481,10 @@ func (_q *MenuPermissionGroupQuery) sqlAll(ctx context.Context, hooks ...queryHo
 	var (
 		nodes       = []*MenuPermissionGroup{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			_q.withMenus != nil,
+			_q.withCurrentVersion != nil,
+			_q.withVersions != nil,
 			_q.withTenantBindings != nil,
 		}
 	)
@@ -440,6 +513,21 @@ func (_q *MenuPermissionGroupQuery) sqlAll(ctx context.Context, hooks ...queryHo
 		if err := _q.loadMenus(ctx, query, nodes,
 			func(n *MenuPermissionGroup) { n.Edges.Menus = []*Menu{} },
 			func(n *MenuPermissionGroup, e *Menu) { n.Edges.Menus = append(n.Edges.Menus, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCurrentVersion; query != nil {
+		if err := _q.loadCurrentVersion(ctx, query, nodes, nil,
+			func(n *MenuPermissionGroup, e *MenuPermissionGroupVersion) { n.Edges.CurrentVersion = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withVersions; query != nil {
+		if err := _q.loadVersions(ctx, query, nodes,
+			func(n *MenuPermissionGroup) { n.Edges.Versions = []*MenuPermissionGroupVersion{} },
+			func(n *MenuPermissionGroup, e *MenuPermissionGroupVersion) {
+				n.Edges.Versions = append(n.Edges.Versions, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -516,6 +604,68 @@ func (_q *MenuPermissionGroupQuery) loadMenus(ctx context.Context, query *MenuQu
 	}
 	return nil
 }
+func (_q *MenuPermissionGroupQuery) loadCurrentVersion(ctx context.Context, query *MenuPermissionGroupVersionQuery, nodes []*MenuPermissionGroup, init func(*MenuPermissionGroup), assign func(*MenuPermissionGroup, *MenuPermissionGroupVersion)) error {
+	ids := make([]uint32, 0, len(nodes))
+	nodeids := make(map[uint32][]*MenuPermissionGroup)
+	for i := range nodes {
+		if nodes[i].CurrentVersionID == nil {
+			continue
+		}
+		fk := *nodes[i].CurrentVersionID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(menupermissiongroupversion.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "current_version_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *MenuPermissionGroupQuery) loadVersions(ctx context.Context, query *MenuPermissionGroupVersionQuery, nodes []*MenuPermissionGroup, init func(*MenuPermissionGroup), assign func(*MenuPermissionGroup, *MenuPermissionGroupVersion)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint32]*MenuPermissionGroup)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(menupermissiongroupversion.FieldGroupID)
+	}
+	query.Where(predicate.MenuPermissionGroupVersion(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(menupermissiongroup.VersionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GroupID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "group_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (_q *MenuPermissionGroupQuery) loadTenantBindings(ctx context.Context, query *TenantPermissionGroupQuery, nodes []*MenuPermissionGroup, init func(*MenuPermissionGroup), assign func(*MenuPermissionGroup, *TenantPermissionGroup)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uint32]*MenuPermissionGroup)
@@ -574,6 +724,9 @@ func (_q *MenuPermissionGroupQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != menupermissiongroup.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withCurrentVersion != nil {
+			_spec.Node.AddColumnOnce(menupermissiongroup.FieldCurrentVersionID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

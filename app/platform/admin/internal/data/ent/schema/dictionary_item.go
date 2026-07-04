@@ -2,6 +2,7 @@ package schema
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/mixins"
+	"backend-service/app/platform/admin/internal/data/ent/rule"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -31,6 +32,9 @@ func (DictionaryItem) Edges() []ent.Edge {
 }
 func (DictionaryItem) Mixin() []ent.Mixin {
 	return []ent.Mixin{mixins.BaseMixin{}, mixins.SoftDeleteMixin{}}
+}
+func (DictionaryItem) Hooks() []ent.Hook {
+	return []ent.Hook{rule.DictionaryItemTenantHook()}
 }
 func (DictionaryItem) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("tenant_id", "type_id", "value").Unique()}

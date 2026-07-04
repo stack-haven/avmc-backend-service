@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"context"
 	"errors"
@@ -528,6 +529,21 @@ func (_c *MenuCreate) AddPermissionGroups(v ...*MenuPermissionGroup) *MenuCreate
 	return _c.AddPermissionGroupIDs(ids...)
 }
 
+// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the MenuPermissionGroupVersion entity by IDs.
+func (_c *MenuCreate) AddPermissionGroupVersionIDs(ids ...uint32) *MenuCreate {
+	_c.mutation.AddPermissionGroupVersionIDs(ids...)
+	return _c
+}
+
+// AddPermissionGroupVersions adds the "permission_group_versions" edges to the MenuPermissionGroupVersion entity.
+func (_c *MenuCreate) AddPermissionGroupVersions(v ...*MenuPermissionGroupVersion) *MenuCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPermissionGroupVersionIDs(ids...)
+}
+
 // Mutation returns the MenuMutation object of the builder.
 func (_c *MenuCreate) Mutation() *MenuMutation {
 	return _c.mutation
@@ -1015,6 +1031,22 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PermissionGroupVersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   menu.PermissionGroupVersionsTable,
+			Columns: menu.PermissionGroupVersionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

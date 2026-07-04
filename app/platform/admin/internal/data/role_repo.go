@@ -8,10 +8,12 @@ import (
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/pkg/aip/listing"
@@ -59,6 +61,28 @@ func (r *roleRepo) validateMenuIDs(ctx context.Context, menuIDs []uint32) error 
 	return nil
 }
 
+func (r *roleRepo) validateDeptIDs(ctx context.Context, deptIDs []uint32) error {
+	ids := uniqueUint32(deptIDs)
+	if len(ids) == 0 {
+		return nil
+	}
+	count, err := r.Data.DB(ctx).Dept.Query().Where(dept.IDIn(ids...)).Count(ctx)
+	if err != nil {
+		return err
+	}
+	if count != len(ids) {
+		return pb.ErrorBadRequest("存在无效或不属于当前租户的部门ID")
+	}
+	return nil
+}
+
+func validateDataScope(scope int32) error {
+	if scope < 1 || scope > 5 {
+		return pb.ErrorBadRequest("数据范围必须是 1 到 5")
+	}
+	return nil
+}
+
 // entToProto 将 ent.Role 转换为 pbCore.Role
 func (r *roleRepo) entToProto(e *gen.Role) *pbCore.Role {
 	if e == nil {
@@ -77,6 +101,8 @@ func (r *roleRepo) entToProto(e *gen.Role) *pbCore.Role {
 		MenuCheckStrictly: e.MenuCheckStrictly,
 		DeptCheckStrictly: e.DeptCheckStrictly,
 		MenuIds:           roleMenuIDs(e),
+		DeptIds:           roleDeptIDs(e),
+		IsTenantAdmin:     e.IsTenantAdmin,
 		CreatedAt:         convert.TimeValueToString(&e.CreatedAt, time.DateTime),
 		UpdatedAt:         convert.TimeValueToString(&e.UpdatedAt, time.DateTime),
 	}
@@ -93,8 +119,10 @@ func (r *roleRepo) protoToEnt(g *pbCore.Role) *gen.Role {
 		MenuCheckStrictly: g.MenuCheckStrictly,
 		DeptCheckStrictly: g.DeptCheckStrictly,
 		Edges: gen.RoleEdges{
-			Menus: roleMenus(g.GetMenuIds()),
+			Menus:          roleMenus(g.GetMenuIds()),
+			DataScopeDepts: roleDepts(g.GetDeptIds()),
 		},
+		IsTenantAdmin: g.GetIsTenantAdmin(),
 	}
 }
 
@@ -108,10 +136,18 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
+	if g.DataScope != nil {
+		if err := validateDataScope(g.GetDataScope()); err != nil {
+			return nil, err
+		}
+	}
 	if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
 		return nil, err
 	}
 	if err := r.mpr.ValidateTenantMenuIDs(ctx, g.GetMenuIds()); err != nil {
+		return nil, err
+	}
+	if err := r.validateDeptIDs(ctx, g.GetDeptIds()); err != nil {
 		return nil, err
 	}
 
@@ -130,6 +166,9 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 		SetNillableStatus(ent.Status)
 	if len(g.GetMenuIds()) > 0 {
 		builder.AddMenuIDs(g.GetMenuIds()...)
+	}
+	if len(g.GetDeptIds()) > 0 {
+		builder.AddDataScopeDeptIDs(uniqueUint32(g.GetDeptIds())...)
 	}
 	res, err := builder.Save(ctx)
 	if err != nil {
@@ -155,11 +194,21 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
+	if g.DataScope != nil {
+		if err := validateDataScope(g.GetDataScope()); err != nil {
+			return nil, err
+		}
+	}
 	if g.MenuIds != nil {
 		if err := r.validateMenuIDs(ctx, g.MenuIds); err != nil {
 			return nil, err
 		}
 		if err := r.mpr.ValidateTenantMenuIDs(ctx, g.MenuIds); err != nil {
+			return nil, err
+		}
+	}
+	if g.DeptIds != nil {
+		if err := r.validateDeptIDs(ctx, g.DeptIds); err != nil {
 			return nil, err
 		}
 	}
@@ -169,6 +218,17 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 		return nil, err
 	}
 	defer rollback(tx, r.Log)
+
+	current, err := findRoleForUpdate(ctx, tx.Client(), g.GetId())
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorRoleNotFound("角色不存在")
+		}
+		return nil, err
+	}
+	if current.IsTenantAdmin {
+		return nil, pb.ErrorBadRequest("租户管理员角色由系统维护，不能编辑或停用")
+	}
 
 	builder := tx.Role.UpdateOneID(g.GetId()).
 		SetName(g.GetName()).
@@ -181,6 +241,12 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 		builder.ClearMenus()
 		if len(g.MenuIds) > 0 {
 			builder.AddMenuIDs(g.MenuIds...)
+		}
+	}
+	if g.DeptIds != nil {
+		builder.ClearDataScopeDepts()
+		if len(g.DeptIds) > 0 {
+			builder.AddDataScopeDeptIDs(uniqueUint32(g.DeptIds)...)
 		}
 	}
 	res, err := builder.Save(ctx)
@@ -211,11 +277,14 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 			role.FieldID, role.FieldName,
 			role.FieldDefaultRouter, role.FieldDataScope,
 			role.FieldMenuCheckStrictly, role.FieldDeptCheckStrictly,
-			role.FieldStatus,
+			role.FieldStatus, role.FieldIsTenantAdmin,
 			role.FieldCreatedAt, role.FieldUpdatedAt,
 		).
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
+		}).
+		WithDataScopeDepts(func(q *gen.DeptQuery) {
+			q.Select(dept.FieldID)
 		}).
 		Where(role.ID(id)).
 		First(ctx)
@@ -234,13 +303,44 @@ func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 	if _, err := requireTenantID(ctx); err != nil {
 		return err
 	}
-	err := r.Data.DB(ctx).Role.UpdateOneID(id).
-		SetDeletedAt(time.Now()).
-		Exec(ctx)
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return err
+	}
+	defer rollback(tx, r.Log)
+	current, err := findRoleForUpdate(ctx, tx.Client(), id)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return pb.ErrorRoleNotFound("角色不存在")
+		}
+		return err
+	}
+	if current.IsTenantAdmin {
+		return pb.ErrorBadRequest("租户管理员角色由系统维护，不能删除")
+	}
+	inUse, err := current.QueryUsers().Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if inUse {
+		return kerrors.Conflict("ROLE_IN_USE", "角色仍关联用户，无法删除")
+	}
+	err = tx.Role.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
 	if gen.IsNotFound(err) {
 		return pb.ErrorRoleNotFound("角色不存在")
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func findRoleForUpdate(ctx context.Context, client *gen.Client, id uint32) (*gen.Role, error) {
+	item, err := client.Role.Query().Where(role.IDEQ(id)).ForUpdate().Only(ctx)
+	if isSelectForUpdateUnsupported(err) {
+		return client.Role.Query().Where(role.IDEQ(id)).Only(ctx)
+	}
+	return item, err
 }
 
 // ListAll 查询所有角色
@@ -249,9 +349,12 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Role.Query().
-		Select(role.FieldID, role.FieldName, role.FieldStatus).
+		Select(role.FieldID, role.FieldName, role.FieldStatus, role.FieldIsTenantAdmin).
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
+		}).
+		WithDataScopeDepts(func(q *gen.DeptQuery) {
+			q.Select(dept.FieldID)
 		}).
 		All(ctx)
 	if err != nil {
@@ -293,11 +396,14 @@ func (r *roleRepo) ListRoles(ctx context.Context, opts ...listing.Option) ([]*pb
 			role.FieldID, role.FieldName,
 			role.FieldDefaultRouter, role.FieldDataScope,
 			role.FieldMenuCheckStrictly, role.FieldDeptCheckStrictly,
-			role.FieldStatus,
+			role.FieldStatus, role.FieldIsTenantAdmin,
 			role.FieldCreatedAt, role.FieldUpdatedAt,
 		).
 		WithMenus(func(q *gen.MenuQuery) {
 			q.Select(menu.FieldID)
+		}).
+		WithDataScopeDepts(func(q *gen.DeptQuery) {
+			q.Select(dept.FieldID)
 		}).
 		Where(ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
@@ -347,6 +453,27 @@ func roleMenuIDs(e *gen.Role) []uint32 {
 	for _, m := range e.Edges.Menus {
 		if m != nil {
 			ids = append(ids, m.ID)
+		}
+	}
+	return ids
+}
+
+func roleDepts(ids []uint32) []*gen.Dept {
+	items := make([]*gen.Dept, 0, len(ids))
+	for _, id := range ids {
+		items = append(items, &gen.Dept{ID: id})
+	}
+	return items
+}
+
+func roleDeptIDs(e *gen.Role) []uint32 {
+	if e == nil || len(e.Edges.DataScopeDepts) == 0 {
+		return nil
+	}
+	ids := make([]uint32, 0, len(e.Edges.DataScopeDepts))
+	for _, item := range e.Edges.DataScopeDepts {
+		if item != nil {
+			ids = append(ids, item.ID)
 		}
 	}
 	return ids

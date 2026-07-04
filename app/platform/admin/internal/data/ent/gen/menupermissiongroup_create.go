@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
 	"errors"
@@ -164,6 +165,20 @@ func (_c *MenuPermissionGroupCreate) SetNillableRemark(v *string) *MenuPermissio
 	return _c
 }
 
+// SetCurrentVersionID sets the "current_version_id" field.
+func (_c *MenuPermissionGroupCreate) SetCurrentVersionID(v uint32) *MenuPermissionGroupCreate {
+	_c.mutation.SetCurrentVersionID(v)
+	return _c
+}
+
+// SetNillableCurrentVersionID sets the "current_version_id" field if the given value is not nil.
+func (_c *MenuPermissionGroupCreate) SetNillableCurrentVersionID(v *uint32) *MenuPermissionGroupCreate {
+	if v != nil {
+		_c.SetCurrentVersionID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *MenuPermissionGroupCreate) SetID(v uint32) *MenuPermissionGroupCreate {
 	_c.mutation.SetID(v)
@@ -183,6 +198,26 @@ func (_c *MenuPermissionGroupCreate) AddMenus(v ...*Menu) *MenuPermissionGroupCr
 		ids[i] = v[i].ID
 	}
 	return _c.AddMenuIDs(ids...)
+}
+
+// SetCurrentVersion sets the "current_version" edge to the MenuPermissionGroupVersion entity.
+func (_c *MenuPermissionGroupCreate) SetCurrentVersion(v *MenuPermissionGroupVersion) *MenuPermissionGroupCreate {
+	return _c.SetCurrentVersionID(v.ID)
+}
+
+// AddVersionIDs adds the "versions" edge to the MenuPermissionGroupVersion entity by IDs.
+func (_c *MenuPermissionGroupCreate) AddVersionIDs(ids ...uint32) *MenuPermissionGroupCreate {
+	_c.mutation.AddVersionIDs(ids...)
+	return _c
+}
+
+// AddVersions adds the "versions" edges to the MenuPermissionGroupVersion entity.
+func (_c *MenuPermissionGroupCreate) AddVersions(v ...*MenuPermissionGroupVersion) *MenuPermissionGroupCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddVersionIDs(ids...)
 }
 
 // AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
@@ -430,6 +465,39 @@ func (_c *MenuPermissionGroupCreate) createSpec() (*MenuPermissionGroup, *sqlgra
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.CurrentVersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   menupermissiongroup.CurrentVersionTable,
+			Columns: []string{menupermissiongroup.CurrentVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.CurrentVersionID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.VersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.TenantBindingsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -621,6 +689,24 @@ func (u *MenuPermissionGroupUpsert) SetRemark(v string) *MenuPermissionGroupUpse
 // UpdateRemark sets the "remark" field to the value that was provided on create.
 func (u *MenuPermissionGroupUpsert) UpdateRemark() *MenuPermissionGroupUpsert {
 	u.SetExcluded(menupermissiongroup.FieldRemark)
+	return u
+}
+
+// SetCurrentVersionID sets the "current_version_id" field.
+func (u *MenuPermissionGroupUpsert) SetCurrentVersionID(v uint32) *MenuPermissionGroupUpsert {
+	u.Set(menupermissiongroup.FieldCurrentVersionID, v)
+	return u
+}
+
+// UpdateCurrentVersionID sets the "current_version_id" field to the value that was provided on create.
+func (u *MenuPermissionGroupUpsert) UpdateCurrentVersionID() *MenuPermissionGroupUpsert {
+	u.SetExcluded(menupermissiongroup.FieldCurrentVersionID)
+	return u
+}
+
+// ClearCurrentVersionID clears the value of the "current_version_id" field.
+func (u *MenuPermissionGroupUpsert) ClearCurrentVersionID() *MenuPermissionGroupUpsert {
+	u.SetNull(menupermissiongroup.FieldCurrentVersionID)
 	return u
 }
 
@@ -819,6 +905,27 @@ func (u *MenuPermissionGroupUpsertOne) SetRemark(v string) *MenuPermissionGroupU
 func (u *MenuPermissionGroupUpsertOne) UpdateRemark() *MenuPermissionGroupUpsertOne {
 	return u.Update(func(s *MenuPermissionGroupUpsert) {
 		s.UpdateRemark()
+	})
+}
+
+// SetCurrentVersionID sets the "current_version_id" field.
+func (u *MenuPermissionGroupUpsertOne) SetCurrentVersionID(v uint32) *MenuPermissionGroupUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupUpsert) {
+		s.SetCurrentVersionID(v)
+	})
+}
+
+// UpdateCurrentVersionID sets the "current_version_id" field to the value that was provided on create.
+func (u *MenuPermissionGroupUpsertOne) UpdateCurrentVersionID() *MenuPermissionGroupUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupUpsert) {
+		s.UpdateCurrentVersionID()
+	})
+}
+
+// ClearCurrentVersionID clears the value of the "current_version_id" field.
+func (u *MenuPermissionGroupUpsertOne) ClearCurrentVersionID() *MenuPermissionGroupUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupUpsert) {
+		s.ClearCurrentVersionID()
 	})
 }
 
@@ -1183,6 +1290,27 @@ func (u *MenuPermissionGroupUpsertBulk) SetRemark(v string) *MenuPermissionGroup
 func (u *MenuPermissionGroupUpsertBulk) UpdateRemark() *MenuPermissionGroupUpsertBulk {
 	return u.Update(func(s *MenuPermissionGroupUpsert) {
 		s.UpdateRemark()
+	})
+}
+
+// SetCurrentVersionID sets the "current_version_id" field.
+func (u *MenuPermissionGroupUpsertBulk) SetCurrentVersionID(v uint32) *MenuPermissionGroupUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupUpsert) {
+		s.SetCurrentVersionID(v)
+	})
+}
+
+// UpdateCurrentVersionID sets the "current_version_id" field to the value that was provided on create.
+func (u *MenuPermissionGroupUpsertBulk) UpdateCurrentVersionID() *MenuPermissionGroupUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupUpsert) {
+		s.UpdateCurrentVersionID()
+	})
+}
+
+// ClearCurrentVersionID clears the value of the "current_version_id" field.
+func (u *MenuPermissionGroupUpsertBulk) ClearCurrentVersionID() *MenuPermissionGroupUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupUpsert) {
+		s.ClearCurrentVersionID()
 	})
 }
 

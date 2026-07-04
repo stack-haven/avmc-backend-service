@@ -32,12 +32,14 @@ type AuthData struct {
 }
 
 type AuthTokenInfo struct {
-	Token       Token      `json:"token,omitempty"`
-	Username    string     `json:"username,omitempty"`
-	UserId      uint32     `json:"user_id,omitempty"`
-	TenantID    uint32     `json:"tenant_id,omitempty"`
-	Roles       []AuthData `json:"roles,omitempty"`
-	Permissions []AuthData `json:"permissions,omitempty"`
+	Token            Token      `json:"token,omitempty"`
+	Username         string     `json:"username,omitempty"`
+	UserId           uint32     `json:"user_id,omitempty"`
+	TenantID         uint32     `json:"tenant_id,omitempty"`
+	PlatformOperator bool       `json:"platform_operator,omitempty"`
+	Roles            []AuthData `json:"roles,omitempty"`
+	Permissions      []AuthData `json:"permissions,omitempty"`
+	TenantExpiresAt  *time.Time `json:"tenant_expires_at,omitempty"`
 }
 
 type Session struct {
@@ -241,12 +243,11 @@ func (r *AuthToken) ValidateRefreshToken(ctx context.Context, tokenString string
 // GenerateToken 创建令牌
 func (r *AuthToken) GenerateToken(ctx context.Context, auth AuthTokenInfo) (accessToken string, refreshToken string, err error) {
 	sessionID := tokenID()
-	tenantID := auth.TenantIdentifier()
-	if accessToken = r.createAccessToken(auth.Username, auth.UserId, tenantID, sessionID); accessToken == "" {
+	if accessToken = r.createAccessToken(auth, sessionID); accessToken == "" {
 		err = errors.New("create access token failed")
 		return
 	}
-	if refreshToken = r.createRefreshToken(auth.Username, auth.UserId, tenantID, sessionID); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth, sessionID); refreshToken == "" {
 		err = errors.New("create refresh token failed")
 		return
 	}
@@ -264,25 +265,27 @@ func (r *AuthToken) RotateSessionToken(ctx context.Context, auth AuthTokenInfo, 
 	if _, err = r.GetSession(ctx, sessionID); err != nil {
 		return "", "", err
 	}
-	if accessToken = r.createAccessToken(auth.Username, auth.UserId, auth.TenantIdentifier(), sessionID); accessToken == "" {
+	if accessToken = r.createAccessToken(auth, sessionID); accessToken == "" {
 		return "", "", errors.New("create access token failed")
 	}
-	if refreshToken = r.createRefreshToken(auth.Username, auth.UserId, auth.TenantIdentifier(), sessionID); refreshToken == "" {
+	if refreshToken = r.createRefreshToken(auth, sessionID); refreshToken == "" {
 		return "", "", errors.New("create refresh token failed")
 	}
-	if err = r.store.Set(ctx, r.sessionAccessKey(sessionID), accessToken, r.Authenticator.Options().TokenExpiration); err != nil {
+	accessExpiration := effectiveTokenExpiration(r.Authenticator.Options().TokenExpiration, auth.TenantExpiresAt)
+	refreshExpiration := effectiveTokenExpiration(r.Authenticator.Options().RefreshTokenExpiration, auth.TenantExpiresAt)
+	if err = r.store.Set(ctx, r.sessionAccessKey(sessionID), accessToken, accessExpiration); err != nil {
 		return "", "", err
 	}
-	if err = r.store.Set(ctx, r.sessionRefreshKey(sessionID), refreshToken, r.Authenticator.Options().RefreshTokenExpiration); err != nil {
+	if err = r.store.Set(ctx, r.sessionRefreshKey(sessionID), refreshToken, refreshExpiration); err != nil {
 		return "", "", err
 	}
 	session, getErr := r.GetSession(ctx, sessionID)
 	if getErr == nil {
 		session.LastActiveAt = time.Now()
-		session.ExpiresAt = time.Now().Add(r.Authenticator.Options().RefreshTokenExpiration)
+		session.ExpiresAt = time.Now().Add(refreshExpiration)
 		err = r.saveSessionMetadata(ctx, session)
 		if err == nil {
-			expiration := r.Authenticator.Options().RefreshTokenExpiration
+			expiration := refreshExpiration
 			_ = r.store.Expire(ctx, r.userSessionsKey(session.UserID), expiration)
 			_ = r.store.Expire(ctx, r.tenantSessionsKey(session.TenantID), expiration)
 		}
@@ -346,16 +349,17 @@ func (r *AuthToken) IsExistRefreshToken(ctx context.Context, userId uint32) bool
 }
 
 // createAccessJwtToken 生成JWT访问令牌
-func (r *AuthToken) createAccessToken(_ string, userId uint32, tenantID uint32, sessionID string) string {
+func (r *AuthToken) createAccessToken(auth AuthTokenInfo, sessionID string) string {
 	principal := authn.AuthClaims{
-		"jti":    sessionID,
-		"sub":    convert.Unit32ToString(userId),
-		"tenant": convert.Unit32ToString(tenantID),
-		"scope":  "",
-		"nonce":  tokenID(),
+		"jti":               sessionID,
+		"sub":               convert.Unit32ToString(auth.UserId),
+		"tenant":            convert.Unit32ToString(auth.TenantIdentifier()),
+		"platform_operator": auth.PlatformOperator,
+		"scope":             "",
+		"nonce":             tokenID(),
 	}
 
-	signedToken, err := r.Authenticator.CreateToken(context.Background(), principal, r.Authenticator.Options().TokenExpiration)
+	signedToken, err := r.Authenticator.CreateToken(context.Background(), principal, effectiveTokenExpiration(r.Authenticator.Options().TokenExpiration, auth.TenantExpiresAt))
 	if err != nil {
 		return ""
 	}
@@ -364,16 +368,18 @@ func (r *AuthToken) createAccessToken(_ string, userId uint32, tenantID uint32, 
 }
 
 // createRefreshToken 生成刷新令牌
-func (r *AuthToken) createRefreshToken(_ string, userId uint32, tenantID uint32, sessionID string) string {
+func (r *AuthToken) createRefreshToken(auth AuthTokenInfo, sessionID string) string {
+	expiration := effectiveTokenExpiration(r.Authenticator.Options().RefreshTokenExpiration, auth.TenantExpiresAt)
 	// 刷新令牌信息中包含刷新过期时间
 	authClaims := authn.AuthClaims{
-		"jti":         sessionID,
-		"sub":         strconv.FormatUint(uint64(userId), 10),
-		"tenant":      convert.Unit32ToString(tenantID),
-		"nonce":       tokenID(),
-		"refresh_exp": time.Now().Add(r.Authenticator.Options().RefreshTokenExpiration),
+		"jti":               sessionID,
+		"sub":               strconv.FormatUint(uint64(auth.UserId), 10),
+		"tenant":            convert.Unit32ToString(auth.TenantIdentifier()),
+		"platform_operator": auth.PlatformOperator,
+		"nonce":             tokenID(),
+		"refresh_exp":       time.Now().Add(expiration),
 	}
-	token, err := r.Authenticator.CreateToken(context.Background(), authClaims, r.Authenticator.Options().RefreshTokenExpiration)
+	token, err := r.Authenticator.CreateToken(context.Background(), authClaims, expiration)
 	if err != nil {
 		return ""
 	}
@@ -382,6 +388,8 @@ func (r *AuthToken) createRefreshToken(_ string, userId uint32, tenantID uint32,
 
 func (r *AuthToken) saveSession(ctx context.Context, auth AuthTokenInfo, sessionID, accessToken, refreshToken string) error {
 	now := time.Now()
+	accessExpiration := effectiveTokenExpiration(r.Authenticator.Options().TokenExpiration, auth.TenantExpiresAt)
+	refreshExpiration := effectiveTokenExpiration(r.Authenticator.Options().RefreshTokenExpiration, auth.TenantExpiresAt)
 	session := &Session{
 		ID:           sessionID,
 		TenantID:     auth.TenantIdentifier(),
@@ -391,12 +399,12 @@ func (r *AuthToken) saveSession(ctx context.Context, auth AuthTokenInfo, session
 		UserAgent:    sessionUserAgent(ctx),
 		CreatedAt:    now,
 		LastActiveAt: now,
-		ExpiresAt:    now.Add(r.Authenticator.Options().RefreshTokenExpiration),
+		ExpiresAt:    now.Add(refreshExpiration),
 	}
-	if err := r.store.Set(ctx, r.sessionAccessKey(sessionID), accessToken, r.Authenticator.Options().TokenExpiration); err != nil {
+	if err := r.store.Set(ctx, r.sessionAccessKey(sessionID), accessToken, accessExpiration); err != nil {
 		return err
 	}
-	if err := r.store.Set(ctx, r.sessionRefreshKey(sessionID), refreshToken, r.Authenticator.Options().RefreshTokenExpiration); err != nil {
+	if err := r.store.Set(ctx, r.sessionRefreshKey(sessionID), refreshToken, refreshExpiration); err != nil {
 		_ = r.store.Del(ctx, r.sessionAccessKey(sessionID))
 		return err
 	}
@@ -415,10 +423,24 @@ func (r *AuthToken) saveSession(ctx context.Context, auth AuthTokenInfo, session
 		_ = r.RevokeSession(ctx, 0, sessionID)
 		return err
 	}
-	expiration := r.Authenticator.Options().RefreshTokenExpiration
+	expiration := refreshExpiration
 	_ = r.store.Expire(ctx, userKey, expiration)
 	_ = r.store.Expire(ctx, tenantKey, expiration)
 	return nil
+}
+
+func effectiveTokenExpiration(defaultExpiration time.Duration, tenantExpiresAt *time.Time) time.Duration {
+	if tenantExpiresAt == nil {
+		return defaultExpiration
+	}
+	remaining := time.Until(*tenantExpiresAt)
+	if remaining <= 0 {
+		return time.Second
+	}
+	if remaining < defaultExpiration {
+		return remaining
+	}
+	return defaultExpiration
 }
 
 func (r *AuthToken) saveSessionMetadata(ctx context.Context, session *Session) error {

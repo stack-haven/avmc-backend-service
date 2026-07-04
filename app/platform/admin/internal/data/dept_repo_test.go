@@ -4,9 +4,11 @@ import (
 	"io"
 	"testing"
 
+	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -85,6 +87,62 @@ func TestDeptRepoProtectsChildrenOnDelete(t *testing.T) {
 	}
 	if err := repo.Delete(ctx, parent.GetId()); !pb.IsDeptCannotDeleteWithChildren(err) {
 		t.Fatalf("Delete(parent) error = %v", err)
+	}
+}
+
+func TestDeptRepoProtectsUserAndRoleReferencesOnDelete(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	ctx := tenantContext(1)
+	userDept, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("user-dept")})
+	roleDept, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("role-dept")})
+	client.User.Create().
+		SetName("dept-user").
+		SetPassword("hashed-password").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SetDeptID(userDept.GetId()).
+		SaveX(ctx)
+	client.Role.Create().
+		SetName("custom-scope").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SetDataScope(5).
+		AddDataScopeDeptIDs(roleDept.GetId()).
+		SaveX(ctx)
+
+	for _, id := range []uint32{userDept.GetId(), roleDept.GetId()} {
+		if err := repo.Delete(ctx, id); !errors.IsConflict(err) {
+			t.Fatalf("Delete(%d) error = %v, want conflict", id, err)
+		}
+	}
+}
+
+func TestDeptRepoMoveRewritesDescendantAncestors(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	ctx := tenantContext(1)
+	rootA, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("root-a")})
+	rootB, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("root-b")})
+	child, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("child"), ParentId: ptr(rootA.GetId())})
+	grandchild, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("grandchild"), ParentId: ptr(child.GetId())})
+
+	if _, err := repo.Update(ctx, &pbCore.Dept{
+		Id:       child.GetId(),
+		Name:     ptr("child"),
+		ParentId: ptr(rootB.GetId()),
+	}); err != nil {
+		t.Fatalf("move child: %v", err)
+	}
+	stored := client.Dept.GetX(ctx, grandchild.GetId())
+	want := []int{int(rootB.GetId()), int(child.GetId())}
+	if len(stored.Ancestors) != len(want) {
+		t.Fatalf("grandchild ancestors = %v, want %v", stored.Ancestors, want)
+	}
+	for i := range want {
+		if stored.Ancestors[i] != want[i] {
+			t.Fatalf("grandchild ancestors = %v, want %v", stored.Ancestors, want)
+		}
 	}
 }
 

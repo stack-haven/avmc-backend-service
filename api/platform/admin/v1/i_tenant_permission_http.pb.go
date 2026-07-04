@@ -23,6 +23,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
 const OperationTenantPermissionServiceGetTenantEffectiveMenus = "/platform.admin.v1.TenantPermissionService/GetTenantEffectiveMenus"
 const OperationTenantPermissionServiceGetTenantPermissionGroups = "/platform.admin.v1.TenantPermissionService/GetTenantPermissionGroups"
+const OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroupVersion"
 const OperationTenantPermissionServiceUpdateTenantPermissionGroups = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroups"
 
 type TenantPermissionServiceHTTPServer interface {
@@ -32,6 +33,7 @@ type TenantPermissionServiceHTTPServer interface {
 	GetTenantEffectiveMenus(context.Context, *v1.GetTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error)
 	// GetTenantPermissionGroups 获取租户绑定的菜单权限组
 	GetTenantPermissionGroups(context.Context, *v1.GetTenantPermissionGroupsRequest) (*v1.GetTenantPermissionGroupsResponse, error)
+	UpdateTenantPermissionGroupVersion(context.Context, *v1.UpdateTenantPermissionGroupVersionRequest) (*v1.UpdateTenantPermissionGroupVersionResponse, error)
 	// UpdateTenantPermissionGroups 更新租户绑定的菜单权限组
 	UpdateTenantPermissionGroups(context.Context, *v1.UpdateTenantPermissionGroupsRequest) (*v1.UpdateTenantPermissionGroupsResponse, error)
 }
@@ -42,6 +44,7 @@ func RegisterTenantPermissionServiceHTTPServer(s *http.Server, srv TenantPermiss
 	r.PUT("/admin/v1/tenants/{tenant_id}/permission-groups", _TenantPermissionService_UpdateTenantPermissionGroups0_HTTP_Handler(srv))
 	r.GET("/admin/v1/tenants/{tenant_id}/effective-menus", _TenantPermissionService_GetTenantEffectiveMenus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/current-tenant/effective-menus", _TenantPermissionService_GetCurrentTenantEffectiveMenus0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version", _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(srv))
 }
 
 func _TenantPermissionService_GetTenantPermissionGroups0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
@@ -132,6 +135,31 @@ func _TenantPermissionService_GetCurrentTenantEffectiveMenus0_HTTP_Handler(srv T
 	}
 }
 
+func _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UpdateTenantPermissionGroupVersionRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateTenantPermissionGroupVersion(ctx, req.(*v1.UpdateTenantPermissionGroupVersionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UpdateTenantPermissionGroupVersionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type TenantPermissionServiceHTTPClient interface {
 	// GetCurrentTenantEffectiveMenus 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(ctx context.Context, req *v1.GetCurrentTenantEffectiveMenusRequest, opts ...http.CallOption) (rsp *v1.GetTenantEffectiveMenusResponse, err error)
@@ -139,6 +167,7 @@ type TenantPermissionServiceHTTPClient interface {
 	GetTenantEffectiveMenus(ctx context.Context, req *v1.GetTenantEffectiveMenusRequest, opts ...http.CallOption) (rsp *v1.GetTenantEffectiveMenusResponse, err error)
 	// GetTenantPermissionGroups 获取租户绑定的菜单权限组
 	GetTenantPermissionGroups(ctx context.Context, req *v1.GetTenantPermissionGroupsRequest, opts ...http.CallOption) (rsp *v1.GetTenantPermissionGroupsResponse, err error)
+	UpdateTenantPermissionGroupVersion(ctx context.Context, req *v1.UpdateTenantPermissionGroupVersionRequest, opts ...http.CallOption) (rsp *v1.UpdateTenantPermissionGroupVersionResponse, err error)
 	// UpdateTenantPermissionGroups 更新租户绑定的菜单权限组
 	UpdateTenantPermissionGroups(ctx context.Context, req *v1.UpdateTenantPermissionGroupsRequest, opts ...http.CallOption) (rsp *v1.UpdateTenantPermissionGroupsResponse, err error)
 }
@@ -187,6 +216,19 @@ func (c *TenantPermissionServiceHTTPClientImpl) GetTenantPermissionGroups(ctx co
 	opts = append(opts, http.Operation(OperationTenantPermissionServiceGetTenantPermissionGroups))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantPermissionServiceHTTPClientImpl) UpdateTenantPermissionGroupVersion(ctx context.Context, in *v1.UpdateTenantPermissionGroupVersionRequest, opts ...http.CallOption) (*v1.UpdateTenantPermissionGroupVersionResponse, error) {
+	var out v1.UpdateTenantPermissionGroupVersionResponse
+	pattern := "/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

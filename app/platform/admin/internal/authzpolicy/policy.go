@@ -58,10 +58,14 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationMenuPermissionGroupServiceListMenuPermissionGroups, "GET"),
 		op(v1.OperationMenuPermissionGroupServiceUpdateMenuPermissionGroup, "PUT"),
 		op(v1.OperationMenuPermissionGroupServiceUpdateMenuPermissionGroupStatus, "PUT"),
+		op(v1.OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions, "GET"),
+		op(v1.OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion, "POST"),
+		op(v1.OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion, "POST"),
 		op(v1.OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus, "GET"),
 		op(v1.OperationTenantPermissionServiceGetTenantEffectiveMenus, "GET"),
 		op(v1.OperationTenantPermissionServiceGetTenantPermissionGroups, "GET"),
 		op(v1.OperationTenantPermissionServiceUpdateTenantPermissionGroups, "PUT"),
+		op(v1.OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion, "PUT"),
 		op(v1.OperationRoleServiceCreateRole, "POST"),
 		op(v1.OperationRoleServiceDeleteRole, "DELETE"),
 		op(v1.OperationRoleServiceExistRoleByName, "POST"),
@@ -97,11 +101,96 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationSessionServiceListSessions, "GET"),
 		op(v1.OperationSessionServiceListMySessions, "GET"),
 		op(v1.OperationSessionServiceRevokeSession, "DELETE"),
+		op(v1.OperationParameterServiceListParameterDefinitions, "GET"),
+		op(v1.OperationParameterServiceGetParameterDefinition, "GET"),
+		op(v1.OperationParameterServiceCreateParameterDefinition, "POST"),
+		op(v1.OperationParameterServiceUpdateParameterDefinition, "PUT"),
+		op(v1.OperationParameterServiceDeleteParameterDefinition, "DELETE"),
+		op(v1.OperationParameterServiceListCurrentTenantParameters, "GET"),
+		op(v1.OperationParameterServiceSetCurrentTenantParameter, "PUT"),
+		op(v1.OperationParameterServiceResetCurrentTenantParameter, "DELETE"),
+		op(v1.OperationParameterServiceListTenantParameters, "GET"),
+		op(v1.OperationParameterServiceSetTenantParameter, "PUT"),
+		op(v1.OperationParameterServiceResetTenantParameter, "DELETE"),
+		op(v1.OperationAsyncTaskServiceListAsyncTasks, "GET"),
+		op(v1.OperationAsyncTaskServiceGetAsyncTask, "GET"),
+		op(v1.OperationAsyncTaskServiceCancelAsyncTask, "POST"),
+		op(v1.OperationAsyncTaskServiceRetryAsyncTask, "POST"),
 	}
 }
 
+// IsPlatformControlOperation identifies operations that manage global platform
+// resources or explicitly target another tenant.
+func IsPlatformControlOperation(operation string) bool {
+	switch operation {
+	case v1.OperationMenuServiceCreateMenu,
+		v1.OperationMenuServiceDeleteMenu,
+		v1.OperationMenuServiceExistMenuByName,
+		v1.OperationMenuServiceExistMenuByPath,
+		v1.OperationMenuServiceGetMenu,
+		v1.OperationMenuServiceListMenus,
+		v1.OperationMenuServiceListMenusAll,
+		v1.OperationMenuServiceListMenusTree,
+		v1.OperationMenuServiceUpdateMenu,
+		v1.OperationMenuServiceUpdateMenuByStatus,
+		v1.OperationTenantServiceCreateTenant,
+		v1.OperationTenantServiceDeleteTenant,
+		v1.OperationTenantServiceGetTenant,
+		v1.OperationTenantServiceListTenants,
+		v1.OperationTenantServiceUpdateTenant,
+		v1.OperationTenantServiceUpdateTenantStatus,
+		v1.OperationTenantServiceUpdateTenantLifecycle,
+		v1.OperationMenuPermissionGroupServiceCreateMenuPermissionGroup,
+		v1.OperationMenuPermissionGroupServiceDeleteMenuPermissionGroup,
+		v1.OperationMenuPermissionGroupServiceGetMenuPermissionGroup,
+		v1.OperationMenuPermissionGroupServiceListMenuPermissionGroups,
+		v1.OperationMenuPermissionGroupServiceUpdateMenuPermissionGroup,
+		v1.OperationMenuPermissionGroupServiceUpdateMenuPermissionGroupStatus,
+		v1.OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions,
+		v1.OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion,
+		v1.OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion,
+		v1.OperationTenantPermissionServiceGetTenantEffectiveMenus,
+		v1.OperationTenantPermissionServiceGetTenantPermissionGroups,
+		v1.OperationTenantPermissionServiceUpdateTenantPermissionGroups,
+		v1.OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion,
+		v1.OperationParameterServiceListParameterDefinitions,
+		v1.OperationParameterServiceGetParameterDefinition,
+		v1.OperationParameterServiceCreateParameterDefinition,
+		v1.OperationParameterServiceUpdateParameterDefinition,
+		v1.OperationParameterServiceDeleteParameterDefinition,
+		v1.OperationParameterServiceListTenantParameters,
+		v1.OperationParameterServiceSetTenantParameter,
+		v1.OperationParameterServiceResetTenantParameter,
+		v1.OperationAsyncTaskServiceListAsyncTasks,
+		v1.OperationAsyncTaskServiceGetAsyncTask,
+		v1.OperationAsyncTaskServiceCancelAsyncTask,
+		v1.OperationAsyncTaskServiceRetryAsyncTask:
+		return true
+	default:
+		return false
+	}
+}
+
+func TenantOperations() []Operation {
+	operations := ProtectedOperations()
+	result := make([]Operation, 0, len(operations))
+	for _, operation := range operations {
+		if !IsPlatformControlOperation(string(operation.Object)) {
+			result = append(result, operation)
+		}
+	}
+	return result
+}
+
 func PoliciesForRole(role authz.Subject, tenant authz.Tenant) []authz.Policy {
-	ops := ProtectedOperations()
+	return policiesForOperations(role, tenant, TenantOperations())
+}
+
+func PoliciesForPlatformRole(role authz.Subject, tenant authz.Tenant) []authz.Policy {
+	return policiesForOperations(role, tenant, ProtectedOperations())
+}
+
+func policiesForOperations(role authz.Subject, tenant authz.Tenant, ops []Operation) []authz.Policy {
 	policies := make([]authz.Policy, 0, len(ops)*2)
 	for _, op := range ops {
 		policies = append(policies,
@@ -113,8 +202,72 @@ func PoliciesForRole(role authz.Subject, tenant authz.Tenant) []authz.Policy {
 }
 
 func SyncSuperAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject) error {
-	for _, policy := range PoliciesForRole(role, tenant) {
+	return syncAdmin(ctx, authorizer, role, tenant, users, PoliciesForRole(role, tenant))
+}
+
+func SyncPlatformAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject) error {
+	return syncAdmin(ctx, authorizer, role, tenant, users, PoliciesForPlatformRole(role, tenant))
+}
+
+func SetAdminMembership(
+	ctx context.Context,
+	authorizer authz.Authorizer,
+	tenant authz.Tenant,
+	user authz.Subject,
+	platform bool,
+	enabled bool,
+) error {
+	role := authz.Subject("super_admin")
+	desired := PoliciesForRole(role, tenant)
+	if platform {
+		desired = PoliciesForPlatformRole(role, tenant)
+	}
+	for _, policy := range PoliciesForPlatformRole(role, tenant) {
+		if _, err := authorizer.RemovePolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	for _, policy := range desired {
 		if _, err := authorizer.AddPolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	if enabled {
+		_, err := authorizer.AddRoleForUser(ctx, user, role, tenant)
+		return err
+	}
+	_, err := authorizer.DeleteRoleForUser(ctx, user, role, tenant)
+	return err
+}
+
+func syncAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject, desired []authz.Policy) error {
+	// Remove the previous complete policy set first so changing a tenant from
+	// platform to business scope cannot leave stale control-plane grants.
+	for _, policy := range PoliciesForPlatformRole(role, tenant) {
+		if _, err := authorizer.RemovePolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	for _, policy := range desired {
+		if _, err := authorizer.AddPolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	desiredUsers := make(map[authz.Subject]struct{}, len(users))
+	for _, user := range users {
+		if user != "" {
+			desiredUsers[user] = struct{}{}
+		}
+	}
+	existingUsers, err := authorizer.GetUsersForRole(ctx, role, tenant)
+	if err != nil {
+		return err
+	}
+	for _, user := range existingUsers {
+		if _, ok := desiredUsers[user]; ok {
+			continue
+		}
+		if _, err := authorizer.DeleteRoleForUser(ctx, user, role, tenant); err != nil {
 			return err
 		}
 	}

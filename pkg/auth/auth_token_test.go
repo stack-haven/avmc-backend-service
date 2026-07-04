@@ -153,6 +153,81 @@ func TestAuthTokenRemoveRevokesAccessAndRefreshTokens(t *testing.T) {
 	}
 }
 
+func TestAuthTokenCapsSessionAtTenantExpiration(t *testing.T) {
+	ctx := context.Background()
+	token := newTestAuthToken(t)
+	tenantExpiresAt := time.Now().Add(2 * time.Minute)
+
+	access, _, err := token.GenerateToken(ctx, AuthTokenInfo{
+		UserId:          9,
+		Username:        "expiring-user",
+		TenantID:        3,
+		TenantExpiresAt: &tenantExpiresAt,
+	})
+	if err != nil {
+		t.Fatalf("generate expiring tenant token: %v", err)
+	}
+	claims, err := token.ValidateToken(ctx, access)
+	if err != nil {
+		t.Fatalf("validate expiring tenant token: %v", err)
+	}
+	session, err := token.GetSession(ctx, claims.GetID())
+	if err != nil {
+		t.Fatalf("get expiring tenant session: %v", err)
+	}
+	if session.ExpiresAt.After(tenantExpiresAt.Add(time.Second)) {
+		t.Fatalf("session expires at %v, after tenant expiration %v", session.ExpiresAt, tenantExpiresAt)
+	}
+	if session.ExpiresAt.Before(tenantExpiresAt.Add(-2 * time.Second)) {
+		t.Fatalf("session expiration was shortened unexpectedly: %v", session.ExpiresAt)
+	}
+}
+
+func TestAuthTokenCarriesPlatformOperatorClaimAcrossRotation(t *testing.T) {
+	ctx := context.Background()
+	token := newTestAuthToken(t)
+	info := AuthTokenInfo{
+		UserId:           10,
+		Username:         "platform-user",
+		TenantID:         1,
+		PlatformOperator: true,
+	}
+	access, refresh, err := token.GenerateToken(ctx, info)
+	if err != nil {
+		t.Fatalf("generate platform token: %v", err)
+	}
+	claims, err := token.ValidateToken(ctx, access)
+	if err != nil || !claims.IsPlatformOperator() {
+		t.Fatalf("platform access claims = %v, %v", claims, err)
+	}
+	refreshClaims, err := token.ValidateRefreshToken(ctx, refresh)
+	if err != nil || !refreshClaims.IsPlatformOperator() {
+		t.Fatalf("platform refresh claims = %v, %v", refreshClaims, err)
+	}
+	rotated, _, err := token.RotateSessionToken(ctx, info, refreshClaims.GetID())
+	if err != nil {
+		t.Fatalf("rotate platform token: %v", err)
+	}
+	rotatedClaims, err := token.ValidateToken(ctx, rotated)
+	if err != nil || !rotatedClaims.IsPlatformOperator() {
+		t.Fatalf("rotated platform claims = %v, %v", rotatedClaims, err)
+	}
+}
+
+func TestEffectiveTokenExpiration(t *testing.T) {
+	future := time.Now().Add(5 * time.Minute)
+	if got := effectiveTokenExpiration(time.Hour, &future); got > 5*time.Minute || got < 4*time.Minute+58*time.Second {
+		t.Fatalf("effective expiration = %v, want about 5m", got)
+	}
+	if got := effectiveTokenExpiration(time.Minute, &future); got != time.Minute {
+		t.Fatalf("effective expiration = %v, want default 1m", got)
+	}
+	past := time.Now().Add(-time.Minute)
+	if got := effectiveTokenExpiration(time.Hour, &past); got != time.Second {
+		t.Fatalf("expired tenant duration = %v, want 1s", got)
+	}
+}
+
 func newTestAuthToken(t *testing.T) *AuthToken {
 	t.Helper()
 	provider := authnJwt.NewProvider()

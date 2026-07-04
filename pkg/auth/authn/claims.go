@@ -162,6 +162,13 @@ func GetAuthUserTenantID(ctx context.Context) uint32 {
 	return uint32(tenantID)
 }
 
+// IsPlatformOperator reports whether the authenticated identity belongs to a
+// trusted platform control-plane tenant.
+func IsPlatformOperator(ctx context.Context) bool {
+	claims, ok := AuthClaimsFromContext(ctx)
+	return ok && claims.IsPlatformOperator()
+}
+
 // GetSubject 获取主体标识
 // 返回: 主体标识字符串
 func (a *AuthClaims) GetSubject() string {
@@ -207,6 +214,15 @@ func (a *AuthClaims) GetTenant() string {
 		return tenant
 	}
 	return ""
+}
+
+// IsPlatformOperator returns the signed platform control-plane claim.
+func (a *AuthClaims) IsPlatformOperator() bool {
+	if a == nil {
+		return false
+	}
+	value, ok := (*a)["platform_operator"].(bool)
+	return ok && value
 }
 
 // GetExpiresAt 获取过期时间

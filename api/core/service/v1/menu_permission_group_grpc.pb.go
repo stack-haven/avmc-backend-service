@@ -19,12 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MenuPermissionGroupService_CreateMenuPermissionGroup_FullMethodName       = "/core.service.v1.MenuPermissionGroupService/CreateMenuPermissionGroup"
-	MenuPermissionGroupService_UpdateMenuPermissionGroup_FullMethodName       = "/core.service.v1.MenuPermissionGroupService/UpdateMenuPermissionGroup"
-	MenuPermissionGroupService_DeleteMenuPermissionGroup_FullMethodName       = "/core.service.v1.MenuPermissionGroupService/DeleteMenuPermissionGroup"
-	MenuPermissionGroupService_GetMenuPermissionGroup_FullMethodName          = "/core.service.v1.MenuPermissionGroupService/GetMenuPermissionGroup"
-	MenuPermissionGroupService_ListMenuPermissionGroups_FullMethodName        = "/core.service.v1.MenuPermissionGroupService/ListMenuPermissionGroups"
-	MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_FullMethodName = "/core.service.v1.MenuPermissionGroupService/UpdateMenuPermissionGroupStatus"
+	MenuPermissionGroupService_CreateMenuPermissionGroup_FullMethodName          = "/core.service.v1.MenuPermissionGroupService/CreateMenuPermissionGroup"
+	MenuPermissionGroupService_UpdateMenuPermissionGroup_FullMethodName          = "/core.service.v1.MenuPermissionGroupService/UpdateMenuPermissionGroup"
+	MenuPermissionGroupService_DeleteMenuPermissionGroup_FullMethodName          = "/core.service.v1.MenuPermissionGroupService/DeleteMenuPermissionGroup"
+	MenuPermissionGroupService_GetMenuPermissionGroup_FullMethodName             = "/core.service.v1.MenuPermissionGroupService/GetMenuPermissionGroup"
+	MenuPermissionGroupService_ListMenuPermissionGroups_FullMethodName           = "/core.service.v1.MenuPermissionGroupService/ListMenuPermissionGroups"
+	MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_FullMethodName    = "/core.service.v1.MenuPermissionGroupService/UpdateMenuPermissionGroupStatus"
+	MenuPermissionGroupService_ListMenuPermissionGroupVersions_FullMethodName    = "/core.service.v1.MenuPermissionGroupService/ListMenuPermissionGroupVersions"
+	MenuPermissionGroupService_PublishMenuPermissionGroupVersion_FullMethodName  = "/core.service.v1.MenuPermissionGroupService/PublishMenuPermissionGroupVersion"
+	MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_FullMethodName = "/core.service.v1.MenuPermissionGroupService/RollbackMenuPermissionGroupVersion"
 )
 
 // MenuPermissionGroupServiceClient is the client API for MenuPermissionGroupService service.
@@ -43,6 +46,9 @@ type MenuPermissionGroupServiceClient interface {
 	ListMenuPermissionGroups(ctx context.Context, in *ListMenuPermissionGroupsRequest, opts ...grpc.CallOption) (*ListMenuPermissionGroupsResponse, error)
 	// 更新菜单权限组状态
 	UpdateMenuPermissionGroupStatus(ctx context.Context, in *UpdateMenuPermissionGroupStatusRequest, opts ...grpc.CallOption) (*UpdateMenuPermissionGroupStatusResponse, error)
+	ListMenuPermissionGroupVersions(ctx context.Context, in *ListMenuPermissionGroupVersionsRequest, opts ...grpc.CallOption) (*ListMenuPermissionGroupVersionsResponse, error)
+	PublishMenuPermissionGroupVersion(ctx context.Context, in *PublishMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*PublishMenuPermissionGroupVersionResponse, error)
+	RollbackMenuPermissionGroupVersion(ctx context.Context, in *RollbackMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*RollbackMenuPermissionGroupVersionResponse, error)
 }
 
 type menuPermissionGroupServiceClient struct {
@@ -113,6 +119,36 @@ func (c *menuPermissionGroupServiceClient) UpdateMenuPermissionGroupStatus(ctx c
 	return out, nil
 }
 
+func (c *menuPermissionGroupServiceClient) ListMenuPermissionGroupVersions(ctx context.Context, in *ListMenuPermissionGroupVersionsRequest, opts ...grpc.CallOption) (*ListMenuPermissionGroupVersionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMenuPermissionGroupVersionsResponse)
+	err := c.cc.Invoke(ctx, MenuPermissionGroupService_ListMenuPermissionGroupVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *menuPermissionGroupServiceClient) PublishMenuPermissionGroupVersion(ctx context.Context, in *PublishMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*PublishMenuPermissionGroupVersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublishMenuPermissionGroupVersionResponse)
+	err := c.cc.Invoke(ctx, MenuPermissionGroupService_PublishMenuPermissionGroupVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *menuPermissionGroupServiceClient) RollbackMenuPermissionGroupVersion(ctx context.Context, in *RollbackMenuPermissionGroupVersionRequest, opts ...grpc.CallOption) (*RollbackMenuPermissionGroupVersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RollbackMenuPermissionGroupVersionResponse)
+	err := c.cc.Invoke(ctx, MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MenuPermissionGroupServiceServer is the server API for MenuPermissionGroupService service.
 // All implementations must embed UnimplementedMenuPermissionGroupServiceServer
 // for forward compatibility.
@@ -129,6 +165,9 @@ type MenuPermissionGroupServiceServer interface {
 	ListMenuPermissionGroups(context.Context, *ListMenuPermissionGroupsRequest) (*ListMenuPermissionGroupsResponse, error)
 	// 更新菜单权限组状态
 	UpdateMenuPermissionGroupStatus(context.Context, *UpdateMenuPermissionGroupStatusRequest) (*UpdateMenuPermissionGroupStatusResponse, error)
+	ListMenuPermissionGroupVersions(context.Context, *ListMenuPermissionGroupVersionsRequest) (*ListMenuPermissionGroupVersionsResponse, error)
+	PublishMenuPermissionGroupVersion(context.Context, *PublishMenuPermissionGroupVersionRequest) (*PublishMenuPermissionGroupVersionResponse, error)
+	RollbackMenuPermissionGroupVersion(context.Context, *RollbackMenuPermissionGroupVersionRequest) (*RollbackMenuPermissionGroupVersionResponse, error)
 	mustEmbedUnimplementedMenuPermissionGroupServiceServer()
 }
 
@@ -156,6 +195,15 @@ func (UnimplementedMenuPermissionGroupServiceServer) ListMenuPermissionGroups(co
 }
 func (UnimplementedMenuPermissionGroupServiceServer) UpdateMenuPermissionGroupStatus(context.Context, *UpdateMenuPermissionGroupStatusRequest) (*UpdateMenuPermissionGroupStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMenuPermissionGroupStatus not implemented")
+}
+func (UnimplementedMenuPermissionGroupServiceServer) ListMenuPermissionGroupVersions(context.Context, *ListMenuPermissionGroupVersionsRequest) (*ListMenuPermissionGroupVersionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMenuPermissionGroupVersions not implemented")
+}
+func (UnimplementedMenuPermissionGroupServiceServer) PublishMenuPermissionGroupVersion(context.Context, *PublishMenuPermissionGroupVersionRequest) (*PublishMenuPermissionGroupVersionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PublishMenuPermissionGroupVersion not implemented")
+}
+func (UnimplementedMenuPermissionGroupServiceServer) RollbackMenuPermissionGroupVersion(context.Context, *RollbackMenuPermissionGroupVersionRequest) (*RollbackMenuPermissionGroupVersionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RollbackMenuPermissionGroupVersion not implemented")
 }
 func (UnimplementedMenuPermissionGroupServiceServer) mustEmbedUnimplementedMenuPermissionGroupServiceServer() {
 }
@@ -287,6 +335,60 @@ func _MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_Handler(srv int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MenuPermissionGroupService_ListMenuPermissionGroupVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMenuPermissionGroupVersionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuPermissionGroupServiceServer).ListMenuPermissionGroupVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuPermissionGroupService_ListMenuPermissionGroupVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuPermissionGroupServiceServer).ListMenuPermissionGroupVersions(ctx, req.(*ListMenuPermissionGroupVersionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MenuPermissionGroupService_PublishMenuPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishMenuPermissionGroupVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuPermissionGroupServiceServer).PublishMenuPermissionGroupVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuPermissionGroupService_PublishMenuPermissionGroupVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuPermissionGroupServiceServer).PublishMenuPermissionGroupVersion(ctx, req.(*PublishMenuPermissionGroupVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RollbackMenuPermissionGroupVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MenuPermissionGroupServiceServer).RollbackMenuPermissionGroupVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MenuPermissionGroupServiceServer).RollbackMenuPermissionGroupVersion(ctx, req.(*RollbackMenuPermissionGroupVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MenuPermissionGroupService_ServiceDesc is the grpc.ServiceDesc for MenuPermissionGroupService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -318,16 +420,29 @@ var MenuPermissionGroupService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "UpdateMenuPermissionGroupStatus",
 			Handler:    _MenuPermissionGroupService_UpdateMenuPermissionGroupStatus_Handler,
 		},
+		{
+			MethodName: "ListMenuPermissionGroupVersions",
+			Handler:    _MenuPermissionGroupService_ListMenuPermissionGroupVersions_Handler,
+		},
+		{
+			MethodName: "PublishMenuPermissionGroupVersion",
+			Handler:    _MenuPermissionGroupService_PublishMenuPermissionGroupVersion_Handler,
+		},
+		{
+			MethodName: "RollbackMenuPermissionGroupVersion",
+			Handler:    _MenuPermissionGroupService_RollbackMenuPermissionGroupVersion_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "core/service/v1/menu_permission_group.proto",
 }
 
 const (
-	TenantPermissionService_GetTenantPermissionGroups_FullMethodName      = "/core.service.v1.TenantPermissionService/GetTenantPermissionGroups"
-	TenantPermissionService_UpdateTenantPermissionGroups_FullMethodName   = "/core.service.v1.TenantPermissionService/UpdateTenantPermissionGroups"
-	TenantPermissionService_GetTenantEffectiveMenus_FullMethodName        = "/core.service.v1.TenantPermissionService/GetTenantEffectiveMenus"
-	TenantPermissionService_GetCurrentTenantEffectiveMenus_FullMethodName = "/core.service.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
+	TenantPermissionService_GetTenantPermissionGroups_FullMethodName          = "/core.service.v1.TenantPermissionService/GetTenantPermissionGroups"
+	TenantPermissionService_UpdateTenantPermissionGroups_FullMethodName       = "/core.service.v1.TenantPermissionService/UpdateTenantPermissionGroups"
+	TenantPermissionService_GetTenantEffectiveMenus_FullMethodName            = "/core.service.v1.TenantPermissionService/GetTenantEffectiveMenus"
+	TenantPermissionService_GetCurrentTenantEffectiveMenus_FullMethodName     = "/core.service.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
+	TenantPermissionService_UpdateTenantPermissionGroupVersion_FullMethodName = "/core.service.v1.TenantPermissionService/UpdateTenantPermissionGroupVersion"
 )
 
 // TenantPermissionServiceClient is the client API for TenantPermissionService service.
@@ -342,6 +457,7 @@ type TenantPermissionServiceClient interface {
 	GetTenantEffectiveMenus(ctx context.Context, in *GetTenantEffectiveMenusRequest, opts ...grpc.CallOption) (*GetTenantEffectiveMenusResponse, error)
 	// 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(ctx context.Context, in *GetCurrentTenantEffectiveMenusRequest, opts ...grpc.CallOption) (*GetTenantEffectiveMenusResponse, error)
+	UpdateTenantPermissionGroupVersion(ctx context.Context, in *UpdateTenantPermissionGroupVersionRequest, opts ...grpc.CallOption) (*UpdateTenantPermissionGroupVersionResponse, error)
 }
 
 type tenantPermissionServiceClient struct {
@@ -392,6 +508,16 @@ func (c *tenantPermissionServiceClient) GetCurrentTenantEffectiveMenus(ctx conte
 	return out, nil
 }
 
+func (c *tenantPermissionServiceClient) UpdateTenantPermissionGroupVersion(ctx context.Context, in *UpdateTenantPermissionGroupVersionRequest, opts ...grpc.CallOption) (*UpdateTenantPermissionGroupVersionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateTenantPermissionGroupVersionResponse)
+	err := c.cc.Invoke(ctx, TenantPermissionService_UpdateTenantPermissionGroupVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TenantPermissionServiceServer is the server API for TenantPermissionService service.
 // All implementations must embed UnimplementedTenantPermissionServiceServer
 // for forward compatibility.
@@ -404,6 +530,7 @@ type TenantPermissionServiceServer interface {
 	GetTenantEffectiveMenus(context.Context, *GetTenantEffectiveMenusRequest) (*GetTenantEffectiveMenusResponse, error)
 	// 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(context.Context, *GetCurrentTenantEffectiveMenusRequest) (*GetTenantEffectiveMenusResponse, error)
+	UpdateTenantPermissionGroupVersion(context.Context, *UpdateTenantPermissionGroupVersionRequest) (*UpdateTenantPermissionGroupVersionResponse, error)
 	mustEmbedUnimplementedTenantPermissionServiceServer()
 }
 
@@ -425,6 +552,9 @@ func (UnimplementedTenantPermissionServiceServer) GetTenantEffectiveMenus(contex
 }
 func (UnimplementedTenantPermissionServiceServer) GetCurrentTenantEffectiveMenus(context.Context, *GetCurrentTenantEffectiveMenusRequest) (*GetTenantEffectiveMenusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentTenantEffectiveMenus not implemented")
+}
+func (UnimplementedTenantPermissionServiceServer) UpdateTenantPermissionGroupVersion(context.Context, *UpdateTenantPermissionGroupVersionRequest) (*UpdateTenantPermissionGroupVersionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTenantPermissionGroupVersion not implemented")
 }
 func (UnimplementedTenantPermissionServiceServer) mustEmbedUnimplementedTenantPermissionServiceServer() {
 }
@@ -520,6 +650,24 @@ func _TenantPermissionService_GetCurrentTenantEffectiveMenus_Handler(srv interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TenantPermissionService_UpdateTenantPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTenantPermissionGroupVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantPermissionServiceServer).UpdateTenantPermissionGroupVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantPermissionService_UpdateTenantPermissionGroupVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantPermissionServiceServer).UpdateTenantPermissionGroupVersion(ctx, req.(*UpdateTenantPermissionGroupVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TenantPermissionService_ServiceDesc is the grpc.ServiceDesc for TenantPermissionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -542,6 +690,10 @@ var TenantPermissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentTenantEffectiveMenus",
 			Handler:    _TenantPermissionService_GetCurrentTenantEffectiveMenus_Handler,
+		},
+		{
+			MethodName: "UpdateTenantPermissionGroupVersion",
+			Handler:    _TenantPermissionService_UpdateTenantPermissionGroupVersion_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

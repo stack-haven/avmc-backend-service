@@ -5,6 +5,7 @@ import (
 	"io"
 	"testing"
 
+	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
@@ -14,6 +15,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 	_ "github.com/glebarez/go-sqlite"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -107,6 +109,59 @@ func TestRoleRepoListReturnsMenuIDs(t *testing.T) {
 	if len(roles) != 1 || len(roles[0].GetMenuIds()) != 1 || roles[0].GetMenuIds()[0] != menuItem.ID {
 		t.Fatalf("roles = %#v", roles)
 	}
+}
+
+func TestRoleRepoProtectsTenantAdminRole(t *testing.T) {
+	ctx := tenantContext(1)
+	client := newTestClient(t)
+	defer client.Close()
+	adminRole := client.Role.Create().
+		SetName("tenant-admin").
+		SetStatus(1).
+		SetIsTenantAdmin(true).
+		SaveX(ctx)
+	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+
+	if _, err := repo.Update(ctx, &pbCore.Role{
+		Id:     adminRole.ID,
+		Name:   ptr("changed-admin"),
+		Status: ptr(pbCoreStatusDisabled()),
+	}); err == nil {
+		t.Fatal("tenant admin role update unexpectedly succeeded")
+	}
+	if err := repo.Delete(ctx, adminRole.ID); err == nil {
+		t.Fatal("tenant admin role delete unexpectedly succeeded")
+	}
+	stored := client.Role.GetX(ctx, adminRole.ID)
+	if !stored.IsTenantAdmin || stored.Name == nil || *stored.Name != "tenant-admin" {
+		t.Fatalf("tenant admin role changed: %+v", stored)
+	}
+}
+
+func TestRoleRepoProtectsRoleAssignedToUsers(t *testing.T) {
+	ctx := tenantContext(1)
+	client := newTestClient(t)
+	defer client.Close()
+	assignedRole := client.Role.Create().
+		SetName("assigned-role").
+		SetStatus(1).
+		SetDataScope(2).
+		SaveX(ctx)
+	client.User.Create().
+		SetName("assigned-user").
+		SetPassword("hashed-password").
+		SetStatus(1).
+		AddRoleIDs(assignedRole.ID).
+		SaveX(ctx)
+	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+
+	if err := repo.Delete(ctx, assignedRole.ID); !errors.IsConflict(err) {
+		t.Fatalf("Delete() error = %v, want conflict", err)
+	}
+}
+
+func pbCoreStatusDisabled() pbEnum.Status {
+	return pbEnum.Status_STATUS_DISABLED
 }
 
 func seedTenantMenuPermissionGroup(t *testing.T, client *gen.Client, tenantID uint32, menuIDs ...uint32) {

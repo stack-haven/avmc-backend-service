@@ -14,6 +14,10 @@ inputs:
       - ./core/service/v1/login_log.proto
       - ./core/service/v1/session.proto
       - ./core/service/v1/tenant.proto
+      - ./core/service/v1/parameter.proto
+      - ./core/service/v1/async_task.proto
+      - ./core/service/v1/user.proto
+      - ./core/service/v1/role.proto
       - ./platform/admin/v1/i_menu_permission_group.proto
       - ./platform/admin/v1/i_tenant.proto
       - ./platform/admin/v1/i_tenant_permission.proto
@@ -22,6 +26,10 @@ inputs:
       - ./platform/admin/v1/i_login_log.proto
       - ./platform/admin/v1/i_auth.proto
       - ./platform/admin/v1/i_session.proto
+      - ./platform/admin/v1/i_parameter.proto
+      - ./platform/admin/v1/i_async_task.proto
+      - ./platform/admin/v1/i_user.proto
+      - ./platform/admin/v1/i_role.proto
 
 plugins:
   - local: protoc-gen-go

@@ -150,6 +150,11 @@ func Description(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDescription, v))
 }
 
+// DeptID applies equality check predicate on the "dept_id" field. It's identical to DeptIDEQ.
+func DeptID(v uint32) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDeptID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
@@ -1265,6 +1270,36 @@ func DescriptionContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldDescription, v))
 }
 
+// DeptIDEQ applies the EQ predicate on the "dept_id" field.
+func DeptIDEQ(v uint32) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDeptID, v))
+}
+
+// DeptIDNEQ applies the NEQ predicate on the "dept_id" field.
+func DeptIDNEQ(v uint32) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldDeptID, v))
+}
+
+// DeptIDIn applies the In predicate on the "dept_id" field.
+func DeptIDIn(vs ...uint32) predicate.User {
+	return predicate.User(sql.FieldIn(FieldDeptID, vs...))
+}
+
+// DeptIDNotIn applies the NotIn predicate on the "dept_id" field.
+func DeptIDNotIn(vs ...uint32) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldDeptID, vs...))
+}
+
+// DeptIDIsNil applies the IsNil predicate on the "dept_id" field.
+func DeptIDIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldDeptID))
+}
+
+// DeptIDNotNil applies the NotNil predicate on the "dept_id" field.
+func DeptIDNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldDeptID))
+}
+
 // HasRoles applies the HasEdge predicate on the "roles" edge.
 func HasRoles() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1303,6 +1338,29 @@ func HasPosts() predicate.User {
 func HasPostsWith(preds ...predicate.Post) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newPostsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDept applies the HasEdge predicate on the "dept" edge.
+func HasDept() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DeptTable, DeptColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDeptWith applies the HasEdge predicate on the "dept" edge with a given conditions (other predicates).
+func HasDeptWith(preds ...predicate.Dept) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newDeptStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

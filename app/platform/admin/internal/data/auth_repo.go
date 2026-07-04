@@ -63,10 +63,16 @@ func NewAuthRepo(data *Data, atr *auth.AuthToken, guard loginattempt.Guard, logi
 // 参数：ctx 上下文，res 用户实体，accessToken 访问令牌，refreshToken 刷新令牌，expires 过期时间
 // 返回值：登录响应结构体
 func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginResponse, error) {
+	activeTenant, err := r.findActiveTenant(ctx, u.TenantID)
+	if err != nil {
+		return nil, err
+	}
 	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
-		UserId:   u.ID,
-		Username: convert.ToValue(u.Name),
-		TenantID: u.TenantID,
+		UserId:           u.ID,
+		Username:         convert.ToValue(u.Name),
+		TenantID:         u.TenantID,
+		PlatformOperator: activeTenant.IsPlatform,
+		TenantExpiresAt:  activeTenant.ExpiresAt,
 	})
 	if err != nil {
 		r.log.Errorf("登录数据操作失败，Token生成错误错误：%v", err)
@@ -80,7 +86,7 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 	expires := convert.TimeValueToString(func(exp time.Duration) *time.Time {
 		t := time.Now().Add(exp)
 		return &t
-	}(r.atr.Authenticator.Options().TokenExpiration), time.RFC3339)
+	}(minTokenExpiration(r.atr.Authenticator.Options().TokenExpiration, activeTenant.ExpiresAt)), time.RFC3339)
 	return &pb.LoginResponse{
 		Id:           u.ID,
 		Name:         u.Name,
@@ -89,6 +95,17 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 		ExpiresIn:    expires,
 		SessionId:    claims.GetID(),
 	}, nil
+}
+
+func minTokenExpiration(defaultExpiration time.Duration, expiresAt *time.Time) time.Duration {
+	if expiresAt == nil {
+		return defaultExpiration
+	}
+	remaining := time.Until(*expiresAt)
+	if remaining > 0 && remaining < defaultExpiration {
+		return remaining
+	}
+	return defaultExpiration
 }
 
 // LoginByUsername 处理后台用户名登录数据操作
@@ -164,11 +181,16 @@ func (r *authRepo) LoginByEmail(ctx context.Context, email, password string, ten
 }
 
 func (r *authRepo) requireActiveTenant(ctx context.Context, tenantID uint32) error {
+	_, err := r.findActiveTenant(ctx, tenantID)
+	return err
+}
+
+func (r *authRepo) findActiveTenant(ctx context.Context, tenantID uint32) (*gen.Tenant, error) {
 	if tenantID == 0 {
-		return pb.ErrorUserIncorrectPassword("用户名或密码错误")
+		return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
 	}
 	systemCtx := entviewer.NewSystemContext(ctx)
-	exists, err := r.data.DB(systemCtx).Tenant.Query().
+	row, err := r.data.DB(systemCtx).Tenant.Query().
 		Where(
 			tenant.IDEQ(tenantID),
 			tenant.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
@@ -176,14 +198,14 @@ func (r *authRepo) requireActiveTenant(ctx context.Context, tenantID uint32) err
 			tenant.Or(tenant.ExpiresAtIsNil(), tenant.ExpiresAtGT(time.Now())),
 			tenant.DeletedAtIsNil(),
 		).
-		Exist(systemCtx)
+		Only(systemCtx)
 	if err != nil {
-		return err
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
+		}
+		return nil, err
 	}
-	if !exists {
-		return pb.ErrorUserIncorrectPassword("用户名或密码错误")
-	}
-	return nil
+	return row, nil
 }
 
 func (r *authRepo) recordLogin(ctx context.Context, loginType, identity string, tenantID uint32, resp *pb.LoginResponse, loginErr error) {
@@ -292,7 +314,8 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌域无效")
 	}
 	ctx = entviewer.NewTenantContext(ctx, tenantID)
-	if err := r.requireActiveTenant(ctx, tenantID); err != nil {
+	activeTenant, err := r.findActiveTenant(ctx, tenantID)
+	if err != nil {
 		return nil, pb.ErrorAuthInvalidToken("刷新令牌租户无效")
 	}
 	res, err := r.data.DB(ctx).User.Query().
@@ -311,9 +334,11 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 	}
 	sessionID := claims.GetID()
 	accessToken, newRefreshToken, err := r.atr.RotateSessionToken(ctx, auth.AuthTokenInfo{
-		UserId:   userID,
-		Username: convert.ToValue(res.Name),
-		TenantID: res.TenantID,
+		UserId:           userID,
+		Username:         convert.ToValue(res.Name),
+		TenantID:         res.TenantID,
+		PlatformOperator: activeTenant.IsPlatform,
+		TenantExpiresAt:  activeTenant.ExpiresAt,
 	}, sessionID)
 	if err != nil {
 		r.log.Errorf("刷新令牌重新签发失败，用户ID：%d，错误：%v", userID, err)
@@ -452,6 +477,27 @@ func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, e
 	}
 	if len(effectiveIDs) == 0 {
 		return nil, nil
+	}
+	isTenantAdmin, err := r.data.DB(ctx).User.Query().
+		Where(
+			user.IDEQ(userId),
+			user.HasRolesWith(
+				role.IsTenantAdminEQ(true),
+				role.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
+			),
+		).
+		Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if isTenantAdmin {
+		return r.data.DB(ctx).Menu.Query().
+			Where(
+				menu.IDIn(effectiveIDs...),
+				menu.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
+			).
+			Order(gen.Asc(menu.FieldSort, menu.FieldID)).
+			All(ctx)
 	}
 	allowed := make(map[uint32]struct{}, len(effectiveIDs))
 	for _, id := range effectiveIDs {

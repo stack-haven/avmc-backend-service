@@ -95,6 +95,11 @@ func Remark(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldEQ(FieldRemark, v))
 }
 
+// IsPlatform applies equality check predicate on the "is_platform" field. It's identical to IsPlatformEQ.
+func IsPlatform(v bool) predicate.Tenant {
+	return predicate.Tenant(sql.FieldEQ(FieldIsPlatform, v))
+}
+
 // LifecycleStatus applies equality check predicate on the "lifecycle_status" field. It's identical to LifecycleStatusEQ.
 func LifecycleStatus(v int32) predicate.Tenant {
 	return predicate.Tenant(sql.FieldEQ(FieldLifecycleStatus, v))
@@ -523,6 +528,16 @@ func RemarkEqualFold(v string) predicate.Tenant {
 // RemarkContainsFold applies the ContainsFold predicate on the "remark" field.
 func RemarkContainsFold(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldContainsFold(FieldRemark, v))
+}
+
+// IsPlatformEQ applies the EQ predicate on the "is_platform" field.
+func IsPlatformEQ(v bool) predicate.Tenant {
+	return predicate.Tenant(sql.FieldEQ(FieldIsPlatform, v))
+}
+
+// IsPlatformNEQ applies the NEQ predicate on the "is_platform" field.
+func IsPlatformNEQ(v bool) predicate.Tenant {
+	return predicate.Tenant(sql.FieldNEQ(FieldIsPlatform, v))
 }
 
 // LifecycleStatusEQ applies the EQ predicate on the "lifecycle_status" field.

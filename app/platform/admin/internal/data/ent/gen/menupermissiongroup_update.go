@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
@@ -169,6 +170,26 @@ func (_u *MenuPermissionGroupUpdate) SetNillableRemark(v *string) *MenuPermissio
 	return _u
 }
 
+// SetCurrentVersionID sets the "current_version_id" field.
+func (_u *MenuPermissionGroupUpdate) SetCurrentVersionID(v uint32) *MenuPermissionGroupUpdate {
+	_u.mutation.SetCurrentVersionID(v)
+	return _u
+}
+
+// SetNillableCurrentVersionID sets the "current_version_id" field if the given value is not nil.
+func (_u *MenuPermissionGroupUpdate) SetNillableCurrentVersionID(v *uint32) *MenuPermissionGroupUpdate {
+	if v != nil {
+		_u.SetCurrentVersionID(*v)
+	}
+	return _u
+}
+
+// ClearCurrentVersionID clears the value of the "current_version_id" field.
+func (_u *MenuPermissionGroupUpdate) ClearCurrentVersionID() *MenuPermissionGroupUpdate {
+	_u.mutation.ClearCurrentVersionID()
+	return _u
+}
+
 // AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
 func (_u *MenuPermissionGroupUpdate) AddMenuIDs(ids ...uint32) *MenuPermissionGroupUpdate {
 	_u.mutation.AddMenuIDs(ids...)
@@ -182,6 +203,26 @@ func (_u *MenuPermissionGroupUpdate) AddMenus(v ...*Menu) *MenuPermissionGroupUp
 		ids[i] = v[i].ID
 	}
 	return _u.AddMenuIDs(ids...)
+}
+
+// SetCurrentVersion sets the "current_version" edge to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdate) SetCurrentVersion(v *MenuPermissionGroupVersion) *MenuPermissionGroupUpdate {
+	return _u.SetCurrentVersionID(v.ID)
+}
+
+// AddVersionIDs adds the "versions" edge to the MenuPermissionGroupVersion entity by IDs.
+func (_u *MenuPermissionGroupUpdate) AddVersionIDs(ids ...uint32) *MenuPermissionGroupUpdate {
+	_u.mutation.AddVersionIDs(ids...)
+	return _u
+}
+
+// AddVersions adds the "versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdate) AddVersions(v ...*MenuPermissionGroupVersion) *MenuPermissionGroupUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddVersionIDs(ids...)
 }
 
 // AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
@@ -223,6 +264,33 @@ func (_u *MenuPermissionGroupUpdate) RemoveMenus(v ...*Menu) *MenuPermissionGrou
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMenuIDs(ids...)
+}
+
+// ClearCurrentVersion clears the "current_version" edge to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdate) ClearCurrentVersion() *MenuPermissionGroupUpdate {
+	_u.mutation.ClearCurrentVersion()
+	return _u
+}
+
+// ClearVersions clears all "versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdate) ClearVersions() *MenuPermissionGroupUpdate {
+	_u.mutation.ClearVersions()
+	return _u
+}
+
+// RemoveVersionIDs removes the "versions" edge to MenuPermissionGroupVersion entities by IDs.
+func (_u *MenuPermissionGroupUpdate) RemoveVersionIDs(ids ...uint32) *MenuPermissionGroupUpdate {
+	_u.mutation.RemoveVersionIDs(ids...)
+	return _u
+}
+
+// RemoveVersions removes "versions" edges to MenuPermissionGroupVersion entities.
+func (_u *MenuPermissionGroupUpdate) RemoveVersions(v ...*MenuPermissionGroupVersion) *MenuPermissionGroupUpdate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveVersionIDs(ids...)
 }
 
 // ClearTenantBindings clears all "tenant_bindings" edges to the TenantPermissionGroup entity.
@@ -410,6 +478,80 @@ func (_u *MenuPermissionGroupUpdate) sqlSave(ctx context.Context) (_node int, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CurrentVersionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   menupermissiongroup.CurrentVersionTable,
+			Columns: []string{menupermissiongroup.CurrentVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CurrentVersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   menupermissiongroup.CurrentVersionTable,
+			Columns: []string{menupermissiongroup.CurrentVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.VersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedVersionsIDs(); len(nodes) > 0 && !_u.mutation.VersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -622,6 +764,26 @@ func (_u *MenuPermissionGroupUpdateOne) SetNillableRemark(v *string) *MenuPermis
 	return _u
 }
 
+// SetCurrentVersionID sets the "current_version_id" field.
+func (_u *MenuPermissionGroupUpdateOne) SetCurrentVersionID(v uint32) *MenuPermissionGroupUpdateOne {
+	_u.mutation.SetCurrentVersionID(v)
+	return _u
+}
+
+// SetNillableCurrentVersionID sets the "current_version_id" field if the given value is not nil.
+func (_u *MenuPermissionGroupUpdateOne) SetNillableCurrentVersionID(v *uint32) *MenuPermissionGroupUpdateOne {
+	if v != nil {
+		_u.SetCurrentVersionID(*v)
+	}
+	return _u
+}
+
+// ClearCurrentVersionID clears the value of the "current_version_id" field.
+func (_u *MenuPermissionGroupUpdateOne) ClearCurrentVersionID() *MenuPermissionGroupUpdateOne {
+	_u.mutation.ClearCurrentVersionID()
+	return _u
+}
+
 // AddMenuIDs adds the "menus" edge to the Menu entity by IDs.
 func (_u *MenuPermissionGroupUpdateOne) AddMenuIDs(ids ...uint32) *MenuPermissionGroupUpdateOne {
 	_u.mutation.AddMenuIDs(ids...)
@@ -635,6 +797,26 @@ func (_u *MenuPermissionGroupUpdateOne) AddMenus(v ...*Menu) *MenuPermissionGrou
 		ids[i] = v[i].ID
 	}
 	return _u.AddMenuIDs(ids...)
+}
+
+// SetCurrentVersion sets the "current_version" edge to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdateOne) SetCurrentVersion(v *MenuPermissionGroupVersion) *MenuPermissionGroupUpdateOne {
+	return _u.SetCurrentVersionID(v.ID)
+}
+
+// AddVersionIDs adds the "versions" edge to the MenuPermissionGroupVersion entity by IDs.
+func (_u *MenuPermissionGroupUpdateOne) AddVersionIDs(ids ...uint32) *MenuPermissionGroupUpdateOne {
+	_u.mutation.AddVersionIDs(ids...)
+	return _u
+}
+
+// AddVersions adds the "versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdateOne) AddVersions(v ...*MenuPermissionGroupVersion) *MenuPermissionGroupUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddVersionIDs(ids...)
 }
 
 // AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
@@ -676,6 +858,33 @@ func (_u *MenuPermissionGroupUpdateOne) RemoveMenus(v ...*Menu) *MenuPermissionG
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMenuIDs(ids...)
+}
+
+// ClearCurrentVersion clears the "current_version" edge to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdateOne) ClearCurrentVersion() *MenuPermissionGroupUpdateOne {
+	_u.mutation.ClearCurrentVersion()
+	return _u
+}
+
+// ClearVersions clears all "versions" edges to the MenuPermissionGroupVersion entity.
+func (_u *MenuPermissionGroupUpdateOne) ClearVersions() *MenuPermissionGroupUpdateOne {
+	_u.mutation.ClearVersions()
+	return _u
+}
+
+// RemoveVersionIDs removes the "versions" edge to MenuPermissionGroupVersion entities by IDs.
+func (_u *MenuPermissionGroupUpdateOne) RemoveVersionIDs(ids ...uint32) *MenuPermissionGroupUpdateOne {
+	_u.mutation.RemoveVersionIDs(ids...)
+	return _u
+}
+
+// RemoveVersions removes "versions" edges to MenuPermissionGroupVersion entities.
+func (_u *MenuPermissionGroupUpdateOne) RemoveVersions(v ...*MenuPermissionGroupVersion) *MenuPermissionGroupUpdateOne {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveVersionIDs(ids...)
 }
 
 // ClearTenantBindings clears all "tenant_bindings" edges to the TenantPermissionGroup entity.
@@ -893,6 +1102,80 @@ func (_u *MenuPermissionGroupUpdateOne) sqlSave(ctx context.Context) (_node *Men
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CurrentVersionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   menupermissiongroup.CurrentVersionTable,
+			Columns: []string{menupermissiongroup.CurrentVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CurrentVersionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   menupermissiongroup.CurrentVersionTable,
+			Columns: []string{menupermissiongroup.CurrentVersionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.VersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedVersionsIDs(); len(nodes) > 0 && !_u.mutation.VersionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.VersionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   menupermissiongroup.VersionsTable,
+			Columns: []string{menupermissiongroup.VersionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

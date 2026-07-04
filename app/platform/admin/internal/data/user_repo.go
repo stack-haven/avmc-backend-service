@@ -8,12 +8,16 @@ import (
 	"time"
 
 	"github.com/go-kratos/aip-go/ents"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -43,19 +47,22 @@ func (r *userRepo) entToProto(e *gen.User) *pbCore.User {
 		gender = pbEnum.Gender(*e.Gender)
 	}
 	return &pbCore.User{
-		Id:          e.ID,
-		Name:        e.Name,
-		Nickname:    e.Nickname,
-		Realname:    e.Realname,
-		Birthday:    convert.TimeValueToString(e.Birthday, time.DateOnly),
-		Gender:      &gender,
-		Phone:       e.Phone,
-		Email:       e.Email,
-		Avatar:      e.Avatar,
-		Description: e.Description,
-		Status:      &status,
-		CreatedAt:   convert.TimeValueToString(&e.CreatedAt, time.DateTime),
-		UpdatedAt:   convert.TimeValueToString(&e.UpdatedAt, time.DateTime),
+		Id:            e.ID,
+		Name:          e.Name,
+		Nickname:      e.Nickname,
+		Realname:      e.Realname,
+		Birthday:      convert.TimeValueToString(e.Birthday, time.DateOnly),
+		Gender:        &gender,
+		Phone:         e.Phone,
+		Email:         e.Email,
+		Avatar:        e.Avatar,
+		Description:   e.Description,
+		Status:        &status,
+		CreatedAt:     convert.TimeValueToString(&e.CreatedAt, time.DateTime),
+		UpdatedAt:     convert.TimeValueToString(&e.UpdatedAt, time.DateTime),
+		RoleIds:       userRoleIDs(e),
+		IsTenantAdmin: userHasTenantAdminRole(e),
+		DeptId:        e.DeptID,
 	}
 }
 
@@ -73,8 +80,96 @@ func (r *userRepo) protoToEnt(g *pbCore.User) *gen.User {
 		Email:       g.Email,
 		Avatar:      g.Avatar,
 		Description: g.Description,
+		DeptID:      g.DeptId,
 		Status:      (*int32)(g.Status),
+		Edges: gen.UserEdges{
+			Roles: roleEntities(g.GetRoleIds()),
+		},
 	}
+}
+
+func roleEntities(ids []uint32) []*gen.Role {
+	items := make([]*gen.Role, 0, len(ids))
+	for _, id := range ids {
+		items = append(items, &gen.Role{ID: id})
+	}
+	return items
+}
+
+func userRoleIDs(item *gen.User) []uint32 {
+	if item == nil || len(item.Edges.Roles) == 0 {
+		return nil
+	}
+	ids := make([]uint32, 0, len(item.Edges.Roles))
+	for _, roleItem := range item.Edges.Roles {
+		if roleItem != nil {
+			ids = append(ids, roleItem.ID)
+		}
+	}
+	return ids
+}
+
+func userHasTenantAdminRole(item *gen.User) bool {
+	if item == nil {
+		return false
+	}
+	for _, roleItem := range item.Edges.Roles {
+		if roleItem != nil && roleItem.IsTenantAdmin && roleItem.Status != nil &&
+			*roleItem.Status == int32(pbEnum.Status_STATUS_ENABLED) {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *userRepo) validateRoleIDs(ctx context.Context, client *gen.Client, roleIDs []uint32) error {
+	ids := uniqueUint32(roleIDs)
+	if len(ids) == 0 {
+		return nil
+	}
+	count, err := client.Role.Query().
+		Where(
+			role.IDIn(ids...),
+			role.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED)),
+		).
+		Count(ctx)
+	if err != nil {
+		return err
+	}
+	if count != len(ids) {
+		return pb.ErrorBadRequest("存在无效、已禁用或不属于当前租户的角色")
+	}
+	return nil
+}
+
+func (r *userRepo) validateDeptID(ctx context.Context, client *gen.Client, deptID uint32) error {
+	if deptID == 0 {
+		return nil
+	}
+	exists, err := client.Dept.Query().Where(dept.IDEQ(deptID)).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return pb.ErrorBadRequest("所属部门无效或不属于当前租户")
+	}
+	return nil
+}
+
+func uniqueUint32(values []uint32) []uint32 {
+	result := make([]uint32, 0, len(values))
+	seen := make(map[uint32]struct{}, len(values))
+	for _, value := range values {
+		if value == 0 {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 // Save 保存用户
@@ -84,8 +179,14 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	}
 	r.Log.Infof("保存用户")
 	ent := r.protoToEnt(g)
+	if err := r.validateRoleIDs(ctx, r.Data.DB(ctx), g.GetRoleIds()); err != nil {
+		return nil, err
+	}
+	if err := r.validateDeptID(ctx, r.Data.DB(ctx), g.GetDeptId()); err != nil {
+		return nil, err
+	}
 
-	res, err := r.Data.DB(ctx).User.Create().
+	builder := r.Data.DB(ctx).User.Create().
 		SetName(*ent.Name).
 		SetPassword(*ent.Password).
 		SetNillableEmail(ent.Email).
@@ -96,14 +197,22 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 		SetNillablePhone(ent.Phone).
 		SetNillableAvatar(ent.Avatar).
 		SetNillableDescription(ent.Description).
-		SetNillableStatus(ent.Status).
-		Save(ctx)
+		SetNillableDeptID(ent.DeptID).
+		SetNillableStatus(ent.Status)
+	if len(g.GetRoleIds()) > 0 {
+		builder.AddRoleIDs(uniqueUint32(g.GetRoleIds())...)
+	}
+	res, err := builder.Save(ctx)
 	if err != nil {
 		r.Log.Errorf("保存用户失败: %v", err)
 		// 唯一约束冲突友好提示
 		if gen.IsConstraintError(err) {
 			return nil, pb.ErrorUserAlreadyExists("用户名、邮箱或手机号已存在")
 		}
+		return nil, err
+	}
+	res, err = r.loadUserWithRoles(ctx, r.Data.DB(ctx), res.ID)
+	if err != nil {
 		return nil, err
 	}
 	return r.entToProto(res), nil
@@ -119,13 +228,34 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	}
 	r.Log.Infof("更新用户 ID: %d", g.GetId())
 	ent := r.protoToEnt(g)
-	builder := r.Data.DB(ctx).User.UpdateOneID(g.GetId())
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollback(tx, r.Log)
+	current, err := findUserForUpdate(ctx, tx.Client(), g.GetId())
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorUserNotFound("用户不存在")
+		}
+		return nil, err
+	}
+	if err = r.validateRoleIDs(ctx, tx.Client(), g.GetRoleIds()); err != nil {
+		return nil, err
+	}
+	if err = r.validateDeptID(ctx, tx.Client(), g.GetDeptId()); err != nil {
+		return nil, err
+	}
+	if err = r.protectLastTenantAdmin(ctx, tx.Client(), current, g.GetRoleIds(), g.Status, false); err != nil {
+		return nil, err
+	}
+	builder := tx.User.UpdateOneID(g.GetId())
 
 	if g.Password != nil {
 		builder = builder.SetPassword(*g.Password)
 	}
 
-	res, err := builder.
+	builder = builder.
 		SetNillableName(ent.Name).
 		SetNillableEmail(ent.Email).
 		SetNillableNickname(ent.Nickname).
@@ -135,8 +265,13 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 		SetNillablePhone(ent.Phone).
 		SetNillableAvatar(ent.Avatar).
 		SetNillableDescription(ent.Description).
+		SetNillableDeptID(ent.DeptID).
 		SetNillableStatus(ent.Status).
-		Save(ctx)
+		ClearRoles()
+	if len(g.GetRoleIds()) > 0 {
+		builder.AddRoleIDs(uniqueUint32(g.GetRoleIds())...)
+	}
+	res, err := builder.Save(ctx)
 	if err != nil {
 		r.Log.Errorf("更新用户失败: %v", err)
 		if gen.IsConstraintError(err) {
@@ -147,7 +282,21 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 		}
 		return nil, err
 	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	res, err = r.loadUserWithRoles(ctx, r.Data.DB(ctx), res.ID)
+	if err != nil {
+		return nil, err
+	}
 	return r.entToProto(res), nil
+}
+
+func (r *userRepo) loadUserWithRoles(ctx context.Context, client *gen.Client, id uint32) (*gen.User, error) {
+	return client.User.Query().
+		Where(user.IDEQ(id)).
+		WithRoles().
+		Only(ctx)
 }
 
 // FindByID 通过 ID 查询 — 显式 Select 排除 password、deleted_at 等敏感/非必要字段
@@ -156,16 +305,21 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Select(
 			user.FieldID, user.FieldName,
 			user.FieldNickname, user.FieldRealname,
 			user.FieldBirthday, user.FieldGender,
 			user.FieldPhone, user.FieldEmail,
 			user.FieldAvatar, user.FieldDescription,
-			user.FieldStatus, user.FieldTenantID,
+			user.FieldStatus, user.FieldTenantID, user.FieldDeptID,
 			user.FieldCreatedAt, user.FieldUpdatedAt,
 		).
+		WithRoles().
 		Where(user.IDEQ(id)).
 		Only(ctx)
 	if err != nil {
@@ -183,8 +337,13 @@ func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User,
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Select(user.FieldID, user.FieldName).
+		WithRoles().
 		Where(user.NameContains(name)).
 		All(ctx)
 	if err != nil {
@@ -198,8 +357,13 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Where(user.PhoneEQ(phone)).
+		WithRoles().
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -212,8 +376,13 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Select(user.FieldID, user.FieldName).
+		WithRoles().
 		Order(gen.Desc(user.FieldID)).
 		All(ctx)
 	if err != nil {
@@ -231,8 +400,13 @@ func (r *userRepo) ListPageSimple(ctx context.Context, opts ...listing.Option) (
 	for _, opt := range opts {
 		opt(&o)
 	}
-	res, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Select(user.FieldID, user.FieldName).
+		WithRoles().
 		Where(ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
@@ -253,14 +427,19 @@ func (r *userRepo) ListUsers(ctx context.Context, opts ...listing.Option) ([]*pb
 	for _, opt := range opts {
 		opt(&o)
 	}
-	res, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Select(
 			user.FieldID, user.FieldName, user.FieldEmail,
 			user.FieldNickname, user.FieldRealname, user.FieldBirthday,
 			user.FieldGender, user.FieldPhone, user.FieldAvatar,
-			user.FieldStatus, user.FieldTenantID,
+			user.FieldStatus, user.FieldTenantID, user.FieldDeptID,
 			user.FieldCreatedAt, user.FieldUpdatedAt,
 		).
+		WithRoles().
 		Where(ents.ApplyFilter(o.Filter)).
 		Order(ents.ApplyOrderBy(o.OrderBy)).
 		Offset(o.Offset).Limit(o.Limit).
@@ -280,7 +459,11 @@ func (r *userRepo) CountUsers(ctx context.Context, opts ...listing.Option) (int3
 	for _, opt := range opts {
 		opt(&o)
 	}
-	count, err := r.Data.DB(ctx).User.Query().
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return 0, err
+	}
+	count, err := query.
 		Select(user.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
 		Count(ctx)
@@ -290,18 +473,174 @@ func (r *userRepo) CountUsers(ctx context.Context, opts ...listing.Option) (int3
 	return int32(count), nil
 }
 
+func (r *userRepo) scopedUserQuery(ctx context.Context) (*gen.UserQuery, error) {
+	query := r.Data.DB(ctx).User.Query()
+	actorID := authn.GetAuthUserID(ctx)
+	if actorID == 0 {
+		return query, nil
+	}
+	actor, err := r.Data.DB(ctx).User.Query().
+		Where(user.IDEQ(actorID)).
+		WithRoles(func(q *gen.RoleQuery) {
+			q.Where(role.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED))).
+				WithDataScopeDepts(func(dq *gen.DeptQuery) {
+					dq.Select(dept.FieldID)
+				})
+		}).
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return query.Where(user.IDEQ(actorID)), nil
+		}
+		return nil, err
+	}
+	deptIDs := make(map[uint32]struct{})
+	all := false
+	includeDescendants := false
+	for _, item := range actor.Edges.Roles {
+		scope := int32(2)
+		if item.DataScope != nil {
+			scope = *item.DataScope
+		}
+		if item.IsTenantAdmin || scope == 1 {
+			all = true
+			break
+		}
+		switch scope {
+		case 3:
+			if actor.DeptID != nil {
+				deptIDs[*actor.DeptID] = struct{}{}
+			}
+		case 4:
+			if actor.DeptID != nil {
+				deptIDs[*actor.DeptID] = struct{}{}
+				includeDescendants = true
+			}
+		case 5:
+			for _, dataDept := range item.Edges.DataScopeDepts {
+				deptIDs[dataDept.ID] = struct{}{}
+			}
+		}
+	}
+	if all {
+		return query, nil
+	}
+	if includeDescendants && actor.DeptID != nil {
+		depts, queryErr := r.Data.DB(ctx).Dept.Query().
+			Select(dept.FieldID, dept.FieldAncestors).
+			All(ctx)
+		if queryErr != nil {
+			return nil, queryErr
+		}
+		for _, item := range depts {
+			for _, ancestor := range item.Ancestors {
+				if uint32(ancestor) == *actor.DeptID {
+					deptIDs[item.ID] = struct{}{}
+					break
+				}
+			}
+		}
+	}
+	ids := make([]uint32, 0, len(deptIDs))
+	for id := range deptIDs {
+		ids = append(ids, id)
+	}
+	if len(ids) == 0 {
+		return query.Where(user.IDEQ(actorID)), nil
+	}
+	return query.Where(user.Or(user.IDEQ(actorID), user.DeptIDIn(ids...))), nil
+}
+
 // Delete 软删除
 func (r *userRepo) Delete(ctx context.Context, id uint32) error {
 	if _, err := requireTenantID(ctx); err != nil {
 		return err
 	}
-	err := r.Data.DB(ctx).User.UpdateOneID(id).
-		SetDeletedAt(time.Now()).
-		Exec(ctx)
+	tx, err := r.Data.DB(ctx).Tx(ctx)
+	if err != nil {
+		return err
+	}
+	defer rollback(tx, r.Log)
+	current, err := findUserForUpdate(ctx, tx.Client(), id)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return pb.ErrorUserNotFound("用户不存在")
+		}
+		return err
+	}
+	if err = r.protectLastTenantAdmin(ctx, tx.Client(), current, nil, nil, true); err != nil {
+		return err
+	}
+	err = tx.User.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
 	if gen.IsNotFound(err) {
 		return pb.ErrorUserNotFound("用户不存在")
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (r *userRepo) protectLastTenantAdmin(
+	ctx context.Context,
+	client *gen.Client,
+	current *gen.User,
+	nextRoleIDs []uint32,
+	nextStatus *pbEnum.Status,
+	deleting bool,
+) error {
+	if current == nil || !userHasTenantAdminRole(current) ||
+		current.Status == nil || *current.Status != int32(pbEnum.Status_STATUS_ENABLED) {
+		return nil
+	}
+	nextIsAdmin := false
+	if !deleting && len(nextRoleIDs) > 0 {
+		exists, err := client.Role.Query().
+			Where(
+				role.IDIn(uniqueUint32(nextRoleIDs)...),
+				role.TenantIDEQ(current.TenantID),
+				role.IsTenantAdminEQ(true),
+			).
+			Exist(ctx)
+		if err != nil {
+			return err
+		}
+		nextIsAdmin = exists
+	}
+	nextEnabled := !deleting && nextStatus != nil &&
+		int32(*nextStatus) == int32(pbEnum.Status_STATUS_ENABLED)
+	if nextIsAdmin && nextEnabled {
+		return nil
+	}
+	adminQuery := client.User.Query().
+		Where(
+			user.TenantIDEQ(current.TenantID),
+			user.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED)),
+			user.HasRolesWith(
+				role.IsTenantAdminEQ(true),
+				role.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED)),
+			),
+		)
+	admins, err := adminQuery.Clone().ForUpdate().All(ctx)
+	if isSelectForUpdateUnsupported(err) {
+		admins, err = adminQuery.All(ctx)
+	}
+	if err != nil {
+		return err
+	}
+	if len(admins) <= 1 {
+		return kerrors.Conflict("LAST_TENANT_ADMIN_REQUIRED", "租户必须保留至少一个已启用的管理员")
+	}
+	return nil
+}
+
+func findUserForUpdate(ctx context.Context, client *gen.Client, id uint32) (*gen.User, error) {
+	query := client.User.Query().Where(user.IDEQ(id)).WithRoles()
+	item, err := query.Clone().ForUpdate().Only(ctx)
+	if isSelectForUpdateUnsupported(err) {
+		return query.Only(ctx)
+	}
+	return item, err
 }
 
 // ExistByName 检查用户名是否存在

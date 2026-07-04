@@ -3,17 +3,21 @@
 package runtime
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
+	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/schema"
@@ -28,6 +32,99 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	asynctaskMixin := schema.AsyncTask{}.Mixin()
+	asynctaskMixinFields0 := asynctaskMixin[0].Fields()
+	_ = asynctaskMixinFields0
+	asynctaskMixinFields1 := asynctaskMixin[1].Fields()
+	_ = asynctaskMixinFields1
+	asynctaskMixinFields2 := asynctaskMixin[2].Fields()
+	_ = asynctaskMixinFields2
+	asynctaskFields := schema.AsyncTask{}.Fields()
+	_ = asynctaskFields
+	// asynctaskDescCreatedAt is the schema descriptor for created_at field.
+	asynctaskDescCreatedAt := asynctaskMixinFields1[0].Descriptor()
+	// asynctask.DefaultCreatedAt holds the default value on creation for the created_at field.
+	asynctask.DefaultCreatedAt = asynctaskDescCreatedAt.Default.(func() time.Time)
+	// asynctaskDescUpdatedAt is the schema descriptor for updated_at field.
+	asynctaskDescUpdatedAt := asynctaskMixinFields2[0].Descriptor()
+	// asynctask.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	asynctask.DefaultUpdatedAt = asynctaskDescUpdatedAt.Default.(func() time.Time)
+	// asynctask.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	asynctask.UpdateDefaultUpdatedAt = asynctaskDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// asynctaskDescTaskType is the schema descriptor for task_type field.
+	asynctaskDescTaskType := asynctaskFields[1].Descriptor()
+	// asynctask.TaskTypeValidator is a validator for the "task_type" field. It is called by the builders before save.
+	asynctask.TaskTypeValidator = func() func(string) error {
+		validators := asynctaskDescTaskType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(task_type string) error {
+			for _, fn := range fns {
+				if err := fn(task_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// asynctaskDescQueue is the schema descriptor for queue field.
+	asynctaskDescQueue := asynctaskFields[2].Descriptor()
+	// asynctask.DefaultQueue holds the default value on creation for the queue field.
+	asynctask.DefaultQueue = asynctaskDescQueue.Default.(string)
+	// asynctask.QueueValidator is a validator for the "queue" field. It is called by the builders before save.
+	asynctask.QueueValidator = asynctaskDescQueue.Validators[0].(func(string) error)
+	// asynctaskDescStatus is the schema descriptor for status field.
+	asynctaskDescStatus := asynctaskFields[3].Descriptor()
+	// asynctask.DefaultStatus holds the default value on creation for the status field.
+	asynctask.DefaultStatus = asynctaskDescStatus.Default.(int32)
+	// asynctaskDescPriority is the schema descriptor for priority field.
+	asynctaskDescPriority := asynctaskFields[4].Descriptor()
+	// asynctask.DefaultPriority holds the default value on creation for the priority field.
+	asynctask.DefaultPriority = asynctaskDescPriority.Default.(int32)
+	// asynctaskDescPayload is the schema descriptor for payload field.
+	asynctaskDescPayload := asynctaskFields[5].Descriptor()
+	// asynctask.DefaultPayload holds the default value on creation for the payload field.
+	asynctask.DefaultPayload = asynctaskDescPayload.Default.(string)
+	// asynctaskDescPayloadSummary is the schema descriptor for payload_summary field.
+	asynctaskDescPayloadSummary := asynctaskFields[6].Descriptor()
+	// asynctask.DefaultPayloadSummary holds the default value on creation for the payload_summary field.
+	asynctask.DefaultPayloadSummary = asynctaskDescPayloadSummary.Default.(string)
+	// asynctask.PayloadSummaryValidator is a validator for the "payload_summary" field. It is called by the builders before save.
+	asynctask.PayloadSummaryValidator = asynctaskDescPayloadSummary.Validators[0].(func(string) error)
+	// asynctaskDescResultSummary is the schema descriptor for result_summary field.
+	asynctaskDescResultSummary := asynctaskFields[7].Descriptor()
+	// asynctask.DefaultResultSummary holds the default value on creation for the result_summary field.
+	asynctask.DefaultResultSummary = asynctaskDescResultSummary.Default.(string)
+	// asynctask.ResultSummaryValidator is a validator for the "result_summary" field. It is called by the builders before save.
+	asynctask.ResultSummaryValidator = asynctaskDescResultSummary.Validators[0].(func(string) error)
+	// asynctaskDescLastError is the schema descriptor for last_error field.
+	asynctaskDescLastError := asynctaskFields[8].Descriptor()
+	// asynctask.DefaultLastError holds the default value on creation for the last_error field.
+	asynctask.DefaultLastError = asynctaskDescLastError.Default.(string)
+	// asynctaskDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	asynctaskDescIdempotencyKey := asynctaskFields[9].Descriptor()
+	// asynctask.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	asynctask.IdempotencyKeyValidator = asynctaskDescIdempotencyKey.Validators[0].(func(string) error)
+	// asynctaskDescAttempts is the schema descriptor for attempts field.
+	asynctaskDescAttempts := asynctaskFields[10].Descriptor()
+	// asynctask.DefaultAttempts holds the default value on creation for the attempts field.
+	asynctask.DefaultAttempts = asynctaskDescAttempts.Default.(int32)
+	// asynctaskDescMaxAttempts is the schema descriptor for max_attempts field.
+	asynctaskDescMaxAttempts := asynctaskFields[11].Descriptor()
+	// asynctask.DefaultMaxAttempts holds the default value on creation for the max_attempts field.
+	asynctask.DefaultMaxAttempts = asynctaskDescMaxAttempts.Default.(int32)
+	// asynctaskDescLeaseOwner is the schema descriptor for lease_owner field.
+	asynctaskDescLeaseOwner := asynctaskFields[15].Descriptor()
+	// asynctask.DefaultLeaseOwner holds the default value on creation for the lease_owner field.
+	asynctask.DefaultLeaseOwner = asynctaskDescLeaseOwner.Default.(string)
+	// asynctask.LeaseOwnerValidator is a validator for the "lease_owner" field. It is called by the builders before save.
+	asynctask.LeaseOwnerValidator = asynctaskDescLeaseOwner.Validators[0].(func(string) error)
+	// asynctaskDescID is the schema descriptor for id field.
+	asynctaskDescID := asynctaskMixinFields0[0].Descriptor()
+	// asynctask.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	asynctask.IDValidator = asynctaskDescID.Validators[0].(func(uint32) error)
 	deptMixin := schema.Dept{}.Mixin()
 	dept.Policy = privacy.NewPolicies(deptMixin[0], schema.Dept{})
 	dept.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -122,8 +219,11 @@ func init() {
 		})
 	}
 	dictionaryitemMixinHooks1 := dictionaryitemMixin[1].Hooks()
+	dictionaryitemHooks := schema.DictionaryItem{}.Hooks()
 
 	dictionaryitem.Hooks[1] = dictionaryitemMixinHooks1[0]
+
+	dictionaryitem.Hooks[2] = dictionaryitemHooks[0]
 	dictionaryitemMixinInters1 := dictionaryitemMixin[1].Interceptors()
 	dictionaryitem.Interceptors[0] = dictionaryitemMixinInters1[0]
 	dictionaryitemMixinFields0 := dictionaryitemMixin[0].Fields()
@@ -633,6 +733,39 @@ func init() {
 	menupermissiongroupDescID := menupermissiongroupMixinFields0[0].Descriptor()
 	// menupermissiongroup.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	menupermissiongroup.IDValidator = menupermissiongroupDescID.Validators[0].(func(uint32) error)
+	menupermissiongroupversionMixin := schema.MenuPermissionGroupVersion{}.Mixin()
+	menupermissiongroupversionMixinFields0 := menupermissiongroupversionMixin[0].Fields()
+	_ = menupermissiongroupversionMixinFields0
+	menupermissiongroupversionMixinFields1 := menupermissiongroupversionMixin[1].Fields()
+	_ = menupermissiongroupversionMixinFields1
+	menupermissiongroupversionFields := schema.MenuPermissionGroupVersion{}.Fields()
+	_ = menupermissiongroupversionFields
+	// menupermissiongroupversionDescCreatedAt is the schema descriptor for created_at field.
+	menupermissiongroupversionDescCreatedAt := menupermissiongroupversionMixinFields1[0].Descriptor()
+	// menupermissiongroupversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	menupermissiongroupversion.DefaultCreatedAt = menupermissiongroupversionDescCreatedAt.Default.(func() time.Time)
+	// menupermissiongroupversionDescGroupID is the schema descriptor for group_id field.
+	menupermissiongroupversionDescGroupID := menupermissiongroupversionFields[0].Descriptor()
+	// menupermissiongroupversion.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	menupermissiongroupversion.GroupIDValidator = menupermissiongroupversionDescGroupID.Validators[0].(func(uint32) error)
+	// menupermissiongroupversionDescVersion is the schema descriptor for version field.
+	menupermissiongroupversionDescVersion := menupermissiongroupversionFields[1].Descriptor()
+	// menupermissiongroupversion.VersionValidator is a validator for the "version" field. It is called by the builders before save.
+	menupermissiongroupversion.VersionValidator = menupermissiongroupversionDescVersion.Validators[0].(func(int32) error)
+	// menupermissiongroupversionDescState is the schema descriptor for state field.
+	menupermissiongroupversionDescState := menupermissiongroupversionFields[2].Descriptor()
+	// menupermissiongroupversion.DefaultState holds the default value on creation for the state field.
+	menupermissiongroupversion.DefaultState = menupermissiongroupversionDescState.Default.(int32)
+	// menupermissiongroupversionDescChangeSummary is the schema descriptor for change_summary field.
+	menupermissiongroupversionDescChangeSummary := menupermissiongroupversionFields[3].Descriptor()
+	// menupermissiongroupversion.DefaultChangeSummary holds the default value on creation for the change_summary field.
+	menupermissiongroupversion.DefaultChangeSummary = menupermissiongroupversionDescChangeSummary.Default.(string)
+	// menupermissiongroupversion.ChangeSummaryValidator is a validator for the "change_summary" field. It is called by the builders before save.
+	menupermissiongroupversion.ChangeSummaryValidator = menupermissiongroupversionDescChangeSummary.Validators[0].(func(string) error)
+	// menupermissiongroupversionDescID is the schema descriptor for id field.
+	menupermissiongroupversionDescID := menupermissiongroupversionMixinFields0[0].Descriptor()
+	// menupermissiongroupversion.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	menupermissiongroupversion.IDValidator = menupermissiongroupversionDescID.Validators[0].(func(uint32) error)
 	operationlogMixin := schema.OperationLog{}.Mixin()
 	operationlog.Policy = privacy.NewPolicies(operationlogMixin[2], schema.OperationLog{})
 	operationlog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -749,6 +882,91 @@ func init() {
 	operationlogDescID := operationlogMixinFields0[0].Descriptor()
 	// operationlog.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	operationlog.IDValidator = operationlogDescID.Validators[0].(func(uint32) error)
+	parameterdefinitionMixin := schema.ParameterDefinition{}.Mixin()
+	parameterdefinitionMixinHooks3 := parameterdefinitionMixin[3].Hooks()
+	parameterdefinition.Hooks[0] = parameterdefinitionMixinHooks3[0]
+	parameterdefinitionMixinInters3 := parameterdefinitionMixin[3].Interceptors()
+	parameterdefinition.Interceptors[0] = parameterdefinitionMixinInters3[0]
+	parameterdefinitionMixinFields0 := parameterdefinitionMixin[0].Fields()
+	_ = parameterdefinitionMixinFields0
+	parameterdefinitionMixinFields1 := parameterdefinitionMixin[1].Fields()
+	_ = parameterdefinitionMixinFields1
+	parameterdefinitionMixinFields2 := parameterdefinitionMixin[2].Fields()
+	_ = parameterdefinitionMixinFields2
+	parameterdefinitionFields := schema.ParameterDefinition{}.Fields()
+	_ = parameterdefinitionFields
+	// parameterdefinitionDescCreatedAt is the schema descriptor for created_at field.
+	parameterdefinitionDescCreatedAt := parameterdefinitionMixinFields1[0].Descriptor()
+	// parameterdefinition.DefaultCreatedAt holds the default value on creation for the created_at field.
+	parameterdefinition.DefaultCreatedAt = parameterdefinitionDescCreatedAt.Default.(func() time.Time)
+	// parameterdefinitionDescUpdatedAt is the schema descriptor for updated_at field.
+	parameterdefinitionDescUpdatedAt := parameterdefinitionMixinFields2[0].Descriptor()
+	// parameterdefinition.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	parameterdefinition.DefaultUpdatedAt = parameterdefinitionDescUpdatedAt.Default.(func() time.Time)
+	// parameterdefinition.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	parameterdefinition.UpdateDefaultUpdatedAt = parameterdefinitionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// parameterdefinitionDescKey is the schema descriptor for key field.
+	parameterdefinitionDescKey := parameterdefinitionFields[0].Descriptor()
+	// parameterdefinition.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	parameterdefinition.KeyValidator = func() func(string) error {
+		validators := parameterdefinitionDescKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(key string) error {
+			for _, fn := range fns {
+				if err := fn(key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// parameterdefinitionDescName is the schema descriptor for name field.
+	parameterdefinitionDescName := parameterdefinitionFields[1].Descriptor()
+	// parameterdefinition.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	parameterdefinition.NameValidator = func() func(string) error {
+		validators := parameterdefinitionDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// parameterdefinitionDescDefaultValue is the schema descriptor for default_value field.
+	parameterdefinitionDescDefaultValue := parameterdefinitionFields[3].Descriptor()
+	// parameterdefinition.DefaultDefaultValue holds the default value on creation for the default_value field.
+	parameterdefinition.DefaultDefaultValue = parameterdefinitionDescDefaultValue.Default.(string)
+	// parameterdefinitionDescDescription is the schema descriptor for description field.
+	parameterdefinitionDescDescription := parameterdefinitionFields[4].Descriptor()
+	// parameterdefinition.DefaultDescription holds the default value on creation for the description field.
+	parameterdefinition.DefaultDescription = parameterdefinitionDescDescription.Default.(string)
+	// parameterdefinition.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	parameterdefinition.DescriptionValidator = parameterdefinitionDescDescription.Validators[0].(func(string) error)
+	// parameterdefinitionDescTenantOverridable is the schema descriptor for tenant_overridable field.
+	parameterdefinitionDescTenantOverridable := parameterdefinitionFields[5].Descriptor()
+	// parameterdefinition.DefaultTenantOverridable holds the default value on creation for the tenant_overridable field.
+	parameterdefinition.DefaultTenantOverridable = parameterdefinitionDescTenantOverridable.Default.(bool)
+	// parameterdefinitionDescStatus is the schema descriptor for status field.
+	parameterdefinitionDescStatus := parameterdefinitionFields[6].Descriptor()
+	// parameterdefinition.DefaultStatus holds the default value on creation for the status field.
+	parameterdefinition.DefaultStatus = parameterdefinitionDescStatus.Default.(int32)
+	// parameterdefinitionDescSort is the schema descriptor for sort field.
+	parameterdefinitionDescSort := parameterdefinitionFields[7].Descriptor()
+	// parameterdefinition.DefaultSort holds the default value on creation for the sort field.
+	parameterdefinition.DefaultSort = parameterdefinitionDescSort.Default.(int32)
+	// parameterdefinitionDescID is the schema descriptor for id field.
+	parameterdefinitionDescID := parameterdefinitionMixinFields0[0].Descriptor()
+	// parameterdefinition.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	parameterdefinition.IDValidator = parameterdefinitionDescID.Validators[0].(func(uint32) error)
 	postMixin := schema.Post{}.Mixin()
 	post.Policy = privacy.NewPolicies(postMixin[0], schema.Post{})
 	post.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -970,6 +1188,10 @@ func init() {
 	roleDescDeptCheckStrictly := roleFields[4].Descriptor()
 	// role.DefaultDeptCheckStrictly holds the default value on creation for the dept_check_strictly field.
 	role.DefaultDeptCheckStrictly = roleDescDeptCheckStrictly.Default.(int32)
+	// roleDescIsTenantAdmin is the schema descriptor for is_tenant_admin field.
+	roleDescIsTenantAdmin := roleFields[5].Descriptor()
+	// role.DefaultIsTenantAdmin holds the default value on creation for the is_tenant_admin field.
+	role.DefaultIsTenantAdmin = roleDescIsTenantAdmin.Default.(bool)
 	// roleDescID is the schema descriptor for id field.
 	roleDescID := roleMixinFields0[0].Descriptor()
 	// role.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -1069,14 +1291,64 @@ func init() {
 	tenant.DefaultRemark = tenantDescRemark.Default.(string)
 	// tenant.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
 	tenant.RemarkValidator = tenantDescRemark.Validators[0].(func(string) error)
+	// tenantDescIsPlatform is the schema descriptor for is_platform field.
+	tenantDescIsPlatform := tenantFields[4].Descriptor()
+	// tenant.DefaultIsPlatform holds the default value on creation for the is_platform field.
+	tenant.DefaultIsPlatform = tenantDescIsPlatform.Default.(bool)
 	// tenantDescLifecycleStatus is the schema descriptor for lifecycle_status field.
-	tenantDescLifecycleStatus := tenantFields[4].Descriptor()
+	tenantDescLifecycleStatus := tenantFields[5].Descriptor()
 	// tenant.DefaultLifecycleStatus holds the default value on creation for the lifecycle_status field.
 	tenant.DefaultLifecycleStatus = tenantDescLifecycleStatus.Default.(int32)
 	// tenantDescID is the schema descriptor for id field.
 	tenantDescID := tenantMixinFields0[0].Descriptor()
 	// tenant.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	tenant.IDValidator = tenantDescID.Validators[0].(func(uint32) error)
+	tenantparameteroverrideMixin := schema.TenantParameterOverride{}.Mixin()
+	tenantparameteroverride.Policy = privacy.NewPolicies(tenantparameteroverrideMixin[3], schema.TenantParameterOverride{})
+	tenantparameteroverride.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := tenantparameteroverride.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	tenantparameteroverrideMixinFields0 := tenantparameteroverrideMixin[0].Fields()
+	_ = tenantparameteroverrideMixinFields0
+	tenantparameteroverrideMixinFields1 := tenantparameteroverrideMixin[1].Fields()
+	_ = tenantparameteroverrideMixinFields1
+	tenantparameteroverrideMixinFields2 := tenantparameteroverrideMixin[2].Fields()
+	_ = tenantparameteroverrideMixinFields2
+	tenantparameteroverrideMixinFields3 := tenantparameteroverrideMixin[3].Fields()
+	_ = tenantparameteroverrideMixinFields3
+	tenantparameteroverrideFields := schema.TenantParameterOverride{}.Fields()
+	_ = tenantparameteroverrideFields
+	// tenantparameteroverrideDescCreatedAt is the schema descriptor for created_at field.
+	tenantparameteroverrideDescCreatedAt := tenantparameteroverrideMixinFields1[0].Descriptor()
+	// tenantparameteroverride.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tenantparameteroverride.DefaultCreatedAt = tenantparameteroverrideDescCreatedAt.Default.(func() time.Time)
+	// tenantparameteroverrideDescUpdatedAt is the schema descriptor for updated_at field.
+	tenantparameteroverrideDescUpdatedAt := tenantparameteroverrideMixinFields2[0].Descriptor()
+	// tenantparameteroverride.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	tenantparameteroverride.DefaultUpdatedAt = tenantparameteroverrideDescUpdatedAt.Default.(func() time.Time)
+	// tenantparameteroverride.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	tenantparameteroverride.UpdateDefaultUpdatedAt = tenantparameteroverrideDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tenantparameteroverrideDescTenantID is the schema descriptor for tenant_id field.
+	tenantparameteroverrideDescTenantID := tenantparameteroverrideMixinFields3[0].Descriptor()
+	// tenantparameteroverride.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	tenantparameteroverride.TenantIDValidator = tenantparameteroverrideDescTenantID.Validators[0].(func(uint32) error)
+	// tenantparameteroverrideDescDefinitionID is the schema descriptor for definition_id field.
+	tenantparameteroverrideDescDefinitionID := tenantparameteroverrideFields[0].Descriptor()
+	// tenantparameteroverride.DefinitionIDValidator is a validator for the "definition_id" field. It is called by the builders before save.
+	tenantparameteroverride.DefinitionIDValidator = tenantparameteroverrideDescDefinitionID.Validators[0].(func(uint32) error)
+	// tenantparameteroverrideDescValue is the schema descriptor for value field.
+	tenantparameteroverrideDescValue := tenantparameteroverrideFields[1].Descriptor()
+	// tenantparameteroverride.DefaultValue holds the default value on creation for the value field.
+	tenantparameteroverride.DefaultValue = tenantparameteroverrideDescValue.Default.(string)
+	// tenantparameteroverrideDescID is the schema descriptor for id field.
+	tenantparameteroverrideDescID := tenantparameteroverrideMixinFields0[0].Descriptor()
+	// tenantparameteroverride.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	tenantparameteroverride.IDValidator = tenantparameteroverrideDescID.Validators[0].(func(uint32) error)
 	tenantpermissiongroupMixin := schema.TenantPermissionGroup{}.Mixin()
 	tenantpermissiongroupMixinFields0 := tenantpermissiongroupMixin[0].Fields()
 	_ = tenantpermissiongroupMixinFields0
@@ -1108,6 +1380,10 @@ func init() {
 	tenantpermissiongroupDescEnabled := tenantpermissiongroupFields[2].Descriptor()
 	// tenantpermissiongroup.DefaultEnabled holds the default value on creation for the enabled field.
 	tenantpermissiongroup.DefaultEnabled = tenantpermissiongroupDescEnabled.Default.(bool)
+	// tenantpermissiongroupDescAutoUpgrade is the schema descriptor for auto_upgrade field.
+	tenantpermissiongroupDescAutoUpgrade := tenantpermissiongroupFields[5].Descriptor()
+	// tenantpermissiongroup.DefaultAutoUpgrade holds the default value on creation for the auto_upgrade field.
+	tenantpermissiongroup.DefaultAutoUpgrade = tenantpermissiongroupDescAutoUpgrade.Default.(bool)
 	// tenantpermissiongroupDescID is the schema descriptor for id field.
 	tenantpermissiongroupDescID := tenantpermissiongroupMixinFields0[0].Descriptor()
 	// tenantpermissiongroup.IDValidator is a validator for the "id" field. It is called by the builders before save.

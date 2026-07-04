@@ -3,6 +3,7 @@
 package gen
 
 import (
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
@@ -156,6 +157,20 @@ func (_c *RoleCreate) SetNillableDeptCheckStrictly(v *int32) *RoleCreate {
 	return _c
 }
 
+// SetIsTenantAdmin sets the "is_tenant_admin" field.
+func (_c *RoleCreate) SetIsTenantAdmin(v bool) *RoleCreate {
+	_c.mutation.SetIsTenantAdmin(v)
+	return _c
+}
+
+// SetNillableIsTenantAdmin sets the "is_tenant_admin" field if the given value is not nil.
+func (_c *RoleCreate) SetNillableIsTenantAdmin(v *bool) *RoleCreate {
+	if v != nil {
+		_c.SetIsTenantAdmin(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *RoleCreate) SetID(v uint32) *RoleCreate {
 	_c.mutation.SetID(v)
@@ -175,6 +190,21 @@ func (_c *RoleCreate) AddMenus(v ...*Menu) *RoleCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddMenuIDs(ids...)
+}
+
+// AddDataScopeDeptIDs adds the "data_scope_depts" edge to the Dept entity by IDs.
+func (_c *RoleCreate) AddDataScopeDeptIDs(ids ...uint32) *RoleCreate {
+	_c.mutation.AddDataScopeDeptIDs(ids...)
+	return _c
+}
+
+// AddDataScopeDepts adds the "data_scope_depts" edges to the Dept entity.
+func (_c *RoleCreate) AddDataScopeDepts(v ...*Dept) *RoleCreate {
+	ids := make([]uint32, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDataScopeDeptIDs(ids...)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -267,6 +297,10 @@ func (_c *RoleCreate) defaults() error {
 		v := role.DefaultDeptCheckStrictly
 		_c.mutation.SetDeptCheckStrictly(v)
 	}
+	if _, ok := _c.mutation.IsTenantAdmin(); !ok {
+		v := role.DefaultIsTenantAdmin
+		_c.mutation.SetIsTenantAdmin(v)
+	}
 	return nil
 }
 
@@ -318,6 +352,9 @@ func (_c *RoleCreate) check() error {
 	}
 	if _, ok := _c.mutation.DeptCheckStrictly(); !ok {
 		return &ValidationError{Name: "dept_check_strictly", err: errors.New(`gen: missing required field "Role.dept_check_strictly"`)}
+	}
+	if _, ok := _c.mutation.IsTenantAdmin(); !ok {
+		return &ValidationError{Name: "is_tenant_admin", err: errors.New(`gen: missing required field "Role.is_tenant_admin"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := role.IDValidator(v); err != nil {
@@ -397,6 +434,10 @@ func (_c *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 		_spec.SetField(role.FieldDeptCheckStrictly, field.TypeInt32, value)
 		_node.DeptCheckStrictly = &value
 	}
+	if value, ok := _c.mutation.IsTenantAdmin(); ok {
+		_spec.SetField(role.FieldIsTenantAdmin, field.TypeBool, value)
+		_node.IsTenantAdmin = value
+	}
 	if nodes := _c.mutation.MenusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -406,6 +447,22 @@ func (_c *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DataScopeDeptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   role.DataScopeDeptsTable,
+			Columns: role.DataScopeDeptsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dept.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -625,6 +682,18 @@ func (u *RoleUpsert) AddDeptCheckStrictly(v int32) *RoleUpsert {
 	return u
 }
 
+// SetIsTenantAdmin sets the "is_tenant_admin" field.
+func (u *RoleUpsert) SetIsTenantAdmin(v bool) *RoleUpsert {
+	u.Set(role.FieldIsTenantAdmin, v)
+	return u
+}
+
+// UpdateIsTenantAdmin sets the "is_tenant_admin" field to the value that was provided on create.
+func (u *RoleUpsert) UpdateIsTenantAdmin() *RoleUpsert {
+	u.SetExcluded(role.FieldIsTenantAdmin)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -841,6 +910,20 @@ func (u *RoleUpsertOne) AddDeptCheckStrictly(v int32) *RoleUpsertOne {
 func (u *RoleUpsertOne) UpdateDeptCheckStrictly() *RoleUpsertOne {
 	return u.Update(func(s *RoleUpsert) {
 		s.UpdateDeptCheckStrictly()
+	})
+}
+
+// SetIsTenantAdmin sets the "is_tenant_admin" field.
+func (u *RoleUpsertOne) SetIsTenantAdmin(v bool) *RoleUpsertOne {
+	return u.Update(func(s *RoleUpsert) {
+		s.SetIsTenantAdmin(v)
+	})
+}
+
+// UpdateIsTenantAdmin sets the "is_tenant_admin" field to the value that was provided on create.
+func (u *RoleUpsertOne) UpdateIsTenantAdmin() *RoleUpsertOne {
+	return u.Update(func(s *RoleUpsert) {
+		s.UpdateIsTenantAdmin()
 	})
 }
 
@@ -1226,6 +1309,20 @@ func (u *RoleUpsertBulk) AddDeptCheckStrictly(v int32) *RoleUpsertBulk {
 func (u *RoleUpsertBulk) UpdateDeptCheckStrictly() *RoleUpsertBulk {
 	return u.Update(func(s *RoleUpsert) {
 		s.UpdateDeptCheckStrictly()
+	})
+}
+
+// SetIsTenantAdmin sets the "is_tenant_admin" field.
+func (u *RoleUpsertBulk) SetIsTenantAdmin(v bool) *RoleUpsertBulk {
+	return u.Update(func(s *RoleUpsert) {
+		s.SetIsTenantAdmin(v)
+	})
+}
+
+// UpdateIsTenantAdmin sets the "is_tenant_admin" field to the value that was provided on create.
+func (u *RoleUpsertBulk) UpdateIsTenantAdmin() *RoleUpsertBulk {
+	return u.Update(func(s *RoleUpsert) {
+		s.UpdateIsTenantAdmin()
 	})
 }
 

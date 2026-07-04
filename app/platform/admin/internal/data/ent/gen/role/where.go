@@ -105,6 +105,11 @@ func DeptCheckStrictly(v int32) predicate.Role {
 	return predicate.Role(sql.FieldEQ(FieldDeptCheckStrictly, v))
 }
 
+// IsTenantAdmin applies equality check predicate on the "is_tenant_admin" field. It's identical to IsTenantAdminEQ.
+func IsTenantAdmin(v bool) predicate.Role {
+	return predicate.Role(sql.FieldEQ(FieldIsTenantAdmin, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Role {
 	return predicate.Role(sql.FieldEQ(FieldCreatedAt, v))
@@ -565,6 +570,16 @@ func DeptCheckStrictlyLTE(v int32) predicate.Role {
 	return predicate.Role(sql.FieldLTE(FieldDeptCheckStrictly, v))
 }
 
+// IsTenantAdminEQ applies the EQ predicate on the "is_tenant_admin" field.
+func IsTenantAdminEQ(v bool) predicate.Role {
+	return predicate.Role(sql.FieldEQ(FieldIsTenantAdmin, v))
+}
+
+// IsTenantAdminNEQ applies the NEQ predicate on the "is_tenant_admin" field.
+func IsTenantAdminNEQ(v bool) predicate.Role {
+	return predicate.Role(sql.FieldNEQ(FieldIsTenantAdmin, v))
+}
+
 // HasMenus applies the HasEdge predicate on the "menus" edge.
 func HasMenus() predicate.Role {
 	return predicate.Role(func(s *sql.Selector) {
@@ -580,6 +595,29 @@ func HasMenus() predicate.Role {
 func HasMenusWith(preds ...predicate.Menu) predicate.Role {
 	return predicate.Role(func(s *sql.Selector) {
 		step := newMenusStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDataScopeDepts applies the HasEdge predicate on the "data_scope_depts" edge.
+func HasDataScopeDepts() predicate.Role {
+	return predicate.Role(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, DataScopeDeptsTable, DataScopeDeptsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDataScopeDeptsWith applies the HasEdge predicate on the "data_scope_depts" edge with a given conditions (other predicates).
+func HasDataScopeDeptsWith(preds ...predicate.Dept) predicate.Role {
+	return predicate.Role(func(s *sql.Selector) {
+		step := newDataScopeDeptsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

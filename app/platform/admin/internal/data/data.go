@@ -54,6 +54,9 @@ var ProviderSet = wire.NewSet(
 	NewOperationLogRepo,
 	NewLoginLogRepo,
 	NewSessionRepo,
+	NewParameterRepo,
+	NewAsyncTaskRepo,
+	NewTenantAdminPolicy,
 )
 
 // Data .

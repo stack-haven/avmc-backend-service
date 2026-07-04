@@ -10,21 +10,26 @@ import (
 	"time"
 
 	pbCore "backend-service/api/core/service/v1"
+	pbAdmin "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/authzpolicy"
 	"backend-service/app/platform/admin/internal/conf"
 	"backend-service/app/platform/admin/internal/data"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
+	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
@@ -152,10 +157,10 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err := ensureTenant(ctx, client, 1, "演示平台租户", "demo-platform", "拥有完整系统管理能力的演示租户"); err != nil {
+	if _, err := ensureTenant(ctx, client, 1, "演示平台租户", "demo-platform", "拥有完整系统管理能力的演示租户", true); err != nil {
 		return nil, err
 	}
-	if _, err := ensureTenant(ctx, client, 2, "演示业务租户", "demo-business", "只开放基础能力的演示租户"); err != nil {
+	if _, err := ensureTenant(ctx, client, 2, "演示业务租户", "demo-business", "只开放基础能力的演示租户", false); err != nil {
 		return nil, err
 	}
 	extraTenants := []struct {
@@ -172,7 +177,7 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		{8, "停用状态演示租户", "demo-disabled", "用于观察停用状态"},
 	}
 	for _, spec := range extraTenants {
-		item, err := ensureTenant(ctx, client, spec.id, spec.name, spec.code, spec.remark)
+		item, err := ensureTenant(ctx, client, spec.id, spec.name, spec.code, spec.remark, false)
 		if err != nil {
 			return nil, err
 		}
@@ -271,6 +276,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	parameterMenu, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemParameter", Title: "参数配置", Path: "/system/parameter", Component: "/system/parameter/list", Icon: "mdi:tune-variant", Type: 2, Sort: 95,
+	}, systemMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	operationLogMenu, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemOperationLog", Title: "操作审计", Path: "/system/operation-log", Component: "/system/operation-log/list", Icon: "mdi:clipboard-text-clock-outline", Type: 2, Sort: 100,
 	}, systemMenu.ID)
@@ -289,15 +300,27 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	asyncTaskMenu, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemAsyncTask", Title: "异步任务", Path: "/system/async-task", Component: "/system/async-task/list", Icon: "mdi:progress-clock", Type: 2, Sort: 130,
+	}, systemMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	userCreateButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemUserCreate", Title: "用户新增", Path: "/system/user:create", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.UserService/CreateUser",
 	}, userMenu.ID)
 	if err != nil {
 		return nil, err
 	}
+	parameterManageButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemParameterManage", Title: "平台参数定义管理", Path: "/system/parameter:manage", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.ParameterService/ListParameterDefinitions",
+	}, parameterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 
-	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, userCreateButton.ID}
-	basicMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, roleMenu.ID, deptMenu.ID, userMenu.ID}
+	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, parameterMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, asyncTaskMenu.ID, userCreateButton.ID, parameterManageButton.ID}
+	basicMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, roleMenu.ID, deptMenu.ID, userMenu.ID, parameterMenu.ID}
 
 	fullGroup, err := ensureMenuPermissionGroup(ctx, client, "演示完整管理权限组", "demo-full-admin", true, fullMenuIDs)
 	if err != nil {
@@ -314,15 +337,19 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		return nil, err
 	}
 
-	superRole, err := ensureRole(ctx, client, 1, "mock_super_admin", fullMenuIDs)
+	superRole, err := ensureRole(ctx, client, 1, "mock_super_admin", fullMenuIDs, true)
 	if err != nil {
 		return nil, err
 	}
-	operatorRole, err := ensureRole(ctx, client, 1, "mock_operator_role", basicMenuIDs)
+	operatorRole, err := ensureRole(ctx, client, 1, "mock_operator_role", basicMenuIDs, false)
 	if err != nil {
 		return nil, err
 	}
-	tenantTwoRole, err := ensureRole(ctx, client, 2, "mock_tenant2_role", basicMenuIDs)
+	tenantTwoRole, err := ensureRole(ctx, client, 2, "mock_tenant2_role", basicMenuIDs, true)
+	if err != nil {
+		return nil, err
+	}
+	tenantTwoMemberRole, err := ensureRole(ctx, client, 2, "mock_tenant2_member_role", basicMenuIDs, false)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +387,7 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err := assignUserRoles(ctx, item, tenantTwoRole.ID); err != nil {
+		if err := assignUserRoles(ctx, item, tenantTwoMemberRole.ID); err != nil {
 			return nil, err
 		}
 	}
@@ -377,10 +404,36 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err := ensureDept(ctx, client, 1, "mock_engineering", rootDept.ID, operator.ID); err != nil {
+	engineeringDept, err := ensureDept(ctx, client, 1, "mock_engineering", rootDept.ID, operator.ID)
+	if err != nil {
 		return nil, err
 	}
-	if _, err := ensureDept(ctx, client, 2, "mock_tenant2_dept", 0, tenantTwo.ID); err != nil {
+	tenantTwoDept, err := ensureDept(ctx, client, 2, "mock_tenant2_dept", 0, tenantTwo.ID)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := admin.Update().SetDeptID(rootDept.ID).Save(ctx); err != nil {
+		return nil, err
+	}
+	if _, err := operator.Update().SetDeptID(engineeringDept.ID).Save(ctx); err != nil {
+		return nil, err
+	}
+	if _, err := jack.Update().SetDeptID(engineeringDept.ID).Save(ctx); err != nil {
+		return nil, err
+	}
+	if _, err := tenantTwo.Update().SetDeptID(tenantTwoDept.ID).Save(ctx); err != nil {
+		return nil, err
+	}
+	if _, err := client.User.Update().
+		Where(user.TenantIDEQ(1), user.NameHasPrefix("mock_member_")).
+		SetDeptID(engineeringDept.ID).
+		Save(ctx); err != nil {
+		return nil, err
+	}
+	if _, err := client.User.Update().
+		Where(user.TenantIDEQ(2), user.NameHasPrefix("mock_tenant2_member_")).
+		SetDeptID(tenantTwoDept.ID).
+		Save(ctx); err != nil {
 		return nil, err
 	}
 	for i, name := range []string{"mock_product", "mock_quality", "mock_operations", "mock_finance", "mock_marketing", "mock_customer_success"} {
@@ -417,6 +470,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err := seedDictionaries(ctx, client); err != nil {
 		return nil, err
 	}
+	if err := seedParameters(ctx, client, admin.ID, tenantTwo.ID); err != nil {
+		return nil, err
+	}
+	if err := seedAsyncTasks(ctx, client, admin.ID); err != nil {
+		return nil, err
+	}
 	if err := seedOperationLogs(ctx, client, admin.ID, tenantTwo.ID); err != nil {
 		return nil, err
 	}
@@ -424,7 +483,7 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		return nil, err
 	}
 	return &mockSeedResult{
-		TenantOneUsers: []uint32{admin.ID, vben.ID, webAdmin.ID, operator.ID, jack.ID},
+		TenantOneUsers: []uint32{admin.ID, vben.ID, webAdmin.ID},
 		TenantTwoUsers: []uint32{tenantTwo.ID},
 	}, nil
 }
@@ -438,10 +497,21 @@ func syncPolicies(ctx context.Context, cfg *conf.Data, logger log.Logger, result
 		return err
 	}
 	defer authorizer.Close()
-	if err := authzpolicy.SyncSuperAdmin(ctx, authorizer, "super_admin", "1", subjectIDs(result.TenantOneUsers)); err != nil {
+	if err := authzpolicy.SyncPlatformAdmin(ctx, authorizer, "super_admin", "1", subjectIDs(result.TenantOneUsers)); err != nil {
 		return err
 	}
-	return authzpolicy.SyncSuperAdmin(ctx, authorizer, "super_admin", "2", subjectIDs(result.TenantTwoUsers))
+	if err := authzpolicy.SyncSuperAdmin(ctx, authorizer, "super_admin", "2", subjectIDs(result.TenantTwoUsers)); err != nil {
+		return err
+	}
+	platformUser := authz.Subject(strconv.FormatUint(uint64(result.TenantOneUsers[0]), 10))
+	if allowed, err := authorizer.Enforce(ctx, platformUser, authz.Object(pbAdmin.OperationTenantServiceListTenants), "GET", "1"); err != nil || !allowed {
+		return fmt.Errorf("platform policy verification failed: allowed=%t err=%v", allowed, err)
+	}
+	tenantUser := authz.Subject(strconv.FormatUint(uint64(result.TenantTwoUsers[0]), 10))
+	if allowed, _ := authorizer.Enforce(ctx, tenantUser, authz.Object(pbAdmin.OperationTenantServiceListTenants), "GET", "2"); allowed {
+		return fmt.Errorf("business tenant unexpectedly has platform control policy")
+	}
+	return nil
 }
 
 func subjectIDs(ids []uint32) []authz.Subject {
@@ -464,6 +534,9 @@ func refreshTenantMenuCacheVersions(ctx context.Context, cfg *conf.Data, logger 
 	if err := rdb.Incr(ctx, "platform:admin:menu:version").Err(); err != nil {
 		return err
 	}
+	if err := rdb.Incr(ctx, "platform:admin:parameter:global_version").Err(); err != nil {
+		return err
+	}
 	for _, tenantID := range tenantIDs {
 		if tenantID == 0 {
 			continue
@@ -472,14 +545,24 @@ func refreshTenantMenuCacheVersions(ctx context.Context, cfg *conf.Data, logger 
 		if err := rdb.Incr(ctx, key).Err(); err != nil {
 			return err
 		}
+		parameterKey := fmt.Sprintf("platform:admin:parameter:tenant:%d:version", tenantID)
+		if err := rdb.Incr(ctx, parameterKey).Err(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func ensureTenant(ctx context.Context, client *gen.Client, id uint32, name, code, remark string) (*gen.Tenant, error) {
+func ensureTenant(ctx context.Context, client *gen.Client, id uint32, name, code, remark string, isPlatform bool) (*gen.Tenant, error) {
 	item, err := client.Tenant.Query().Where(tenant.IDEQ(id)).Only(ctx)
 	if err == nil {
-		return item.Update().SetName(name).SetCode(code).SetStatus(1).SetRemark(remark).Save(ctx)
+		return item.Update().
+			SetName(name).
+			SetCode(code).
+			SetStatus(1).
+			SetRemark(remark).
+			SetIsPlatform(isPlatform).
+			Save(ctx)
 	}
 	if !gen.IsNotFound(err) {
 		return nil, err
@@ -488,6 +571,7 @@ func ensureTenant(ctx context.Context, client *gen.Client, id uint32, name, code
 		SetID(id).
 		SetName(name).
 		SetCode(code).
+		SetIsPlatform(isPlatform).
 		SetStatus(1).
 		SetLifecycleStatus(int32(pbCore.TenantLifecycleStatus_TENANT_LIFECYCLE_STATUS_ACTIVE)).
 		SetActivatedAt(time.Now()).
@@ -546,7 +630,7 @@ func ensureMenu(ctx context.Context, client *gen.Client, spec mockMenuSpec, pare
 func ensureMenuPermissionGroup(ctx context.Context, client *gen.Client, name, code string, system bool, menuIDs []uint32) (*gen.MenuPermissionGroup, error) {
 	item, err := client.MenuPermissionGroup.Query().Where(menupermissiongroup.Code(code)).Only(ctx)
 	if gen.IsNotFound(err) {
-		return client.MenuPermissionGroup.Create().
+		item, err = client.MenuPermissionGroup.Create().
 			SetName(name).
 			SetCode(code).
 			SetStatus(1).
@@ -554,18 +638,90 @@ func ensureMenuPermissionGroup(ctx context.Context, client *gen.Client, name, co
 			SetDescription("mock data").
 			AddMenuIDs(menuIDs...).
 			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	} else {
+		item, err = item.Update().
+			SetName(name).
+			SetStatus(1).
+			SetIsSystem(system).
+			SetDescription("mock data").
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
+	return ensureMenuPermissionGroupVersion(ctx, client, item, menuIDs)
+}
+
+func ensureMenuPermissionGroupVersion(ctx context.Context, client *gen.Client, group *gen.MenuPermissionGroup, menuIDs []uint32) (*gen.MenuPermissionGroup, error) {
+	currentMenus, err := group.QueryMenus().IDs(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return item.Update().
-		SetName(name).
-		SetStatus(1).
-		SetIsSystem(system).
-		SetDescription("mock data").
-		ClearMenus().
+	_, err = group.QueryCurrentVersion().Only(ctx)
+	if err == nil && sameIDs(currentMenus, menuIDs) {
+		return group, nil
+	}
+	if err != nil && !gen.IsNotFound(err) {
+		return nil, err
+	}
+	nextVersion := int32(1)
+	if latest, latestErr := client.MenuPermissionGroupVersion.Query().
+		Where(menupermissiongroupversion.GroupIDEQ(group.ID)).
+		Order(gen.Desc(menupermissiongroupversion.FieldVersion)).
+		First(ctx); latestErr == nil {
+		nextVersion = latest.Version + 1
+	} else if !gen.IsNotFound(latestErr) {
+		return nil, latestErr
+	}
+	tx, err := client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	if _, err = tx.MenuPermissionGroupVersion.Update().
+		Where(menupermissiongroupversion.GroupIDEQ(group.ID)).
+		SetState(int32(pbCore.MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED)).
+		Save(ctx); err != nil {
+		return nil, err
+	}
+	now := time.Now()
+	version, err := tx.MenuPermissionGroupVersion.Create().
+		SetGroupID(group.ID).
+		SetVersion(nextVersion).
+		SetState(int32(pbCore.MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED)).
+		SetChangeSummary("mock data sync").
+		SetEffectiveAt(now).
+		SetPublishedAt(now).
 		AddMenuIDs(menuIDs...).
 		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = tx.MenuPermissionGroup.UpdateOneID(group.ID).
+		SetCurrentVersionID(version.ID).
+		ClearMenus().
+		AddMenuIDs(menuIDs...).
+		Save(ctx); err != nil {
+		return nil, err
+	}
+	if _, err = tx.TenantPermissionGroup.Update().
+		Where(
+			tenantpermissiongroup.GroupIDEQ(group.ID),
+			tenantpermissiongroup.AutoUpgradeEQ(true),
+		).
+		SetVersionID(version.ID).
+		Save(ctx); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return client.MenuPermissionGroup.Get(ctx, group.ID)
 }
 
 func ensureTenantPermissionGroups(ctx context.Context, client *gen.Client, tenantID, operatorID uint32, groupIDs []uint32) error {
@@ -577,6 +733,10 @@ func ensureTenantPermissionGroups(ctx context.Context, client *gen.Client, tenan
 	}
 	keep := make(map[uint32]struct{}, len(groupIDs))
 	for _, groupID := range groupIDs {
+		group, err := client.MenuPermissionGroup.Get(ctx, groupID)
+		if err != nil {
+			return err
+		}
 		keep[groupID] = struct{}{}
 		item, err := client.TenantPermissionGroup.Query().
 			Where(tenantpermissiongroup.TenantIDEQ(tenantID), tenantpermissiongroup.GroupIDEQ(groupID)).
@@ -586,6 +746,8 @@ func ensureTenantPermissionGroups(ctx context.Context, client *gen.Client, tenan
 				SetTenantID(tenantID).
 				SetGroupID(groupID).
 				SetEnabled(true).
+				SetAutoUpgrade(true).
+				SetNillableVersionID(group.CurrentVersionID).
 				SetBoundBy(operatorID).
 				Save(ctx); err != nil {
 				return err
@@ -595,7 +757,12 @@ func ensureTenantPermissionGroups(ctx context.Context, client *gen.Client, tenan
 		if err != nil {
 			return err
 		}
-		if _, err := item.Update().SetEnabled(true).SetBoundBy(operatorID).Save(ctx); err != nil {
+		if _, err := item.Update().
+			SetEnabled(true).
+			SetAutoUpgrade(true).
+			SetNillableVersionID(group.CurrentVersionID).
+			SetBoundBy(operatorID).
+			Save(ctx); err != nil {
 			return err
 		}
 	}
@@ -610,15 +777,35 @@ func ensureTenantPermissionGroups(ctx context.Context, client *gen.Client, tenan
 	return nil
 }
 
-func ensureRole(ctx context.Context, client *gen.Client, tenantID uint32, name string, menuIDs []uint32) (*gen.Role, error) {
+func sameIDs(left, right []uint32) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	seen := make(map[uint32]struct{}, len(left))
+	for _, id := range left {
+		seen[id] = struct{}{}
+	}
+	for _, id := range right {
+		if _, ok := seen[id]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func ensureRole(ctx context.Context, client *gen.Client, tenantID uint32, name string, menuIDs []uint32, isTenantAdmin bool) (*gen.Role, error) {
+	dataScope := int32(4)
+	if isTenantAdmin {
+		dataScope = 1
+	}
 	item, err := client.Role.Query().Where(role.TenantIDEQ(tenantID), role.Name(name)).Only(ctx)
 	if gen.IsNotFound(err) {
-		return client.Role.Create().SetTenantID(tenantID).SetName(name).SetStatus(1).AddMenuIDs(menuIDs...).Save(ctx)
+		return client.Role.Create().SetTenantID(tenantID).SetName(name).SetStatus(1).SetDataScope(dataScope).SetIsTenantAdmin(isTenantAdmin).AddMenuIDs(menuIDs...).Save(ctx)
 	}
 	if err != nil {
 		return nil, err
 	}
-	return item.Update().SetStatus(1).ClearMenus().AddMenuIDs(menuIDs...).Save(ctx)
+	return item.Update().SetStatus(1).SetDataScope(dataScope).SetIsTenantAdmin(isTenantAdmin).ClearMenus().AddMenuIDs(menuIDs...).Save(ctx)
 }
 
 func assignUserRoles(ctx context.Context, item *gen.User, roleIDs ...uint32) error {
@@ -661,6 +848,181 @@ func ensureProject(ctx context.Context, client *gen.Client, tenantID uint32, nam
 	}
 	_, err = item.Update().SetOwnerID(ownerID).ClearMembers().AddMemberIDs(memberIDs...).Save(ctx)
 	return err
+}
+
+func seedParameters(ctx context.Context, client *gen.Client, tenantOneOperator, tenantTwoOperator uint32) error {
+	type parameterSpec struct {
+		key               string
+		name              string
+		valueType         pbCore.ParameterValueType
+		defaultValue      string
+		tenantOverridable bool
+		description       string
+	}
+	specs := []parameterSpec{
+		{"system.page_size", "默认分页大小", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_INTEGER, "20", true, "后台列表默认分页大小"},
+		{"system.locale", "默认语言", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_STRING, "zh-CN", true, "租户默认语言"},
+		{"feature.notification_enabled", "通知功能开关", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_BOOLEAN, "true", true, "是否启用通知能力"},
+		{"upload.max_file_size_mb", "文件上传上限", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_INTEGER, "20", true, "单文件上传大小上限（MB）"},
+		{"security.session_idle_minutes", "会话空闲时间", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_INTEGER, "30", false, "平台统一会话安全参数"},
+		{"ui.date_format", "日期格式", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_STRING, "YYYY-MM-DD", true, "租户界面日期显示格式"},
+		{"workflow.options", "工作流通用选项", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_JSON, `{"autoSave":true,"maxSteps":20}`, true, "通用工作流运行参数"},
+		{"export.max_rows", "导出最大行数", pbCore.ParameterValueType_PARAMETER_VALUE_TYPE_INTEGER, "10000", true, "单次导出最大数据行数"},
+	}
+	definitions := make(map[string]*gen.ParameterDefinition, len(specs))
+	for i, spec := range specs {
+		item, err := client.ParameterDefinition.Query().
+			Where(parameterdefinition.KeyEQ(spec.key)).
+			Only(ctx)
+		if gen.IsNotFound(err) {
+			item, err = client.ParameterDefinition.Create().
+				SetKey(spec.key).
+				SetName(spec.name).
+				SetValueType(int32(spec.valueType)).
+				SetDefaultValue(spec.defaultValue).
+				SetTenantOverridable(spec.tenantOverridable).
+				SetDescription(spec.description).
+				SetStatus(1).
+				SetSort(int32((i + 1) * 10)).
+				Save(ctx)
+		} else if err == nil {
+			item, err = item.Update().
+				SetName(spec.name).
+				SetValueType(int32(spec.valueType)).
+				SetDefaultValue(spec.defaultValue).
+				SetTenantOverridable(spec.tenantOverridable).
+				SetDescription(spec.description).
+				SetStatus(1).
+				SetSort(int32((i + 1) * 10)).
+				Save(ctx)
+		}
+		if err != nil {
+			return err
+		}
+		definitions[spec.key] = item
+	}
+	overrides := []struct {
+		tenantID uint32
+		operator uint32
+		key      string
+		value    string
+	}{
+		{1, tenantOneOperator, "system.page_size", "50"},
+		{1, tenantOneOperator, "export.max_rows", "25000"},
+		{2, tenantTwoOperator, "system.page_size", "30"},
+		{2, tenantTwoOperator, "system.locale", "en-US"},
+		{2, tenantTwoOperator, "feature.notification_enabled", "false"},
+	}
+	for _, override := range overrides {
+		definition := definitions[override.key]
+		item, err := client.TenantParameterOverride.Query().
+			Where(
+				tenantparameteroverride.TenantIDEQ(override.tenantID),
+				tenantparameteroverride.DefinitionIDEQ(definition.ID),
+			).
+			Only(ctx)
+		if gen.IsNotFound(err) {
+			_, err = client.TenantParameterOverride.Create().
+				SetTenantID(override.tenantID).
+				SetDefinitionID(definition.ID).
+				SetValue(override.value).
+				SetUpdatedBy(override.operator).
+				Save(ctx)
+		} else if err == nil {
+			_, err = item.Update().
+				SetValue(override.value).
+				SetUpdatedBy(override.operator).
+				Save(ctx)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func seedAsyncTasks(ctx context.Context, client *gen.Client, operatorID uint32) error {
+	type taskSpec struct {
+		key           string
+		tenantID      *uint32
+		status        pbCore.AsyncTaskStatus
+		attempts      int32
+		scheduledAt   time.Time
+		completedAt   *time.Time
+		resultSummary string
+		lastError     string
+	}
+	now := time.Now()
+	tenantOne := uint32(1)
+	completed := now.Add(-2 * time.Hour)
+	canceled := now.Add(-time.Hour)
+	specs := []taskSpec{
+		{
+			key: "mock:async-task:succeeded", status: pbCore.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED,
+			attempts: 1, scheduledAt: now.Add(-3 * time.Hour), completedAt: &completed,
+			resultSummary: "已清理 0 条过期终态任务",
+		},
+		{
+			key: "mock:async-task:failed", tenantID: &tenantOne, status: pbCore.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED,
+			attempts: 3, scheduledAt: now.Add(-4 * time.Hour), completedAt: &completed,
+			lastError: "模拟下游服务暂时不可用",
+		},
+		{
+			key: "mock:async-task:pending", tenantID: &tenantOne, status: pbCore.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING,
+			scheduledAt: now.Add(24 * time.Hour),
+		},
+		{
+			key: "mock:async-task:canceled", status: pbCore.AsyncTaskStatus_ASYNC_TASK_STATUS_CANCELED,
+			scheduledAt: now.Add(-2 * time.Hour), completedAt: &canceled,
+		},
+	}
+	for _, spec := range specs {
+		item, err := client.AsyncTask.Query().
+			Where(asynctask.IdempotencyKeyEQ(spec.key)).
+			Only(ctx)
+		if gen.IsNotFound(err) {
+			builder := client.AsyncTask.Create().
+				SetTaskType("system.task_retention_cleanup").
+				SetQueue("maintenance").
+				SetStatus(int32(spec.status)).
+				SetPriority(-10).
+				SetPayload(`{"retentionDays":30,"batchSize":500}`).
+				SetPayloadSummary("清理 30 天前的终态任务，单批最多 500 条").
+				SetIdempotencyKey(spec.key).
+				SetAttempts(spec.attempts).
+				SetMaxAttempts(3).
+				SetScheduledAt(spec.scheduledAt).
+				SetCreatedBy(operatorID).
+				SetResultSummary(spec.resultSummary).
+				SetLastError(spec.lastError)
+			if spec.tenantID != nil {
+				builder.SetTenantID(*spec.tenantID)
+			}
+			if spec.completedAt != nil {
+				builder.SetCompletedAt(*spec.completedAt)
+			}
+			_, err = builder.Save(ctx)
+		} else if err == nil {
+			update := item.Update().
+				SetStatus(int32(spec.status)).
+				SetAttempts(spec.attempts).
+				SetScheduledAt(spec.scheduledAt).
+				SetResultSummary(spec.resultSummary).
+				SetLastError(spec.lastError).
+				SetLeaseOwner("").
+				ClearLeaseExpiresAt()
+			if spec.completedAt != nil {
+				update.SetCompletedAt(*spec.completedAt)
+			} else {
+				update.ClearCompletedAt()
+			}
+			_, err = update.Save(ctx)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type mockDictionarySpec struct {
@@ -789,7 +1151,7 @@ func seedTenantOperationLogs(ctx context.Context, client *gen.Client, tenantID, 
 				SetPath(fmt.Sprintf("/admin/v1/%ss/%d", module, i)).
 				SetRequestSummary(fmt.Sprintf(`{"mock":true,"sequence":%d}`, i)).
 				SetIP(fmt.Sprintf("192.168.%d.%d", tenantID, i%250+1)).
-				SetUserAgent("AVMC Mock Client/1.0").
+				SetUserAgent("Platform Mock Client/1.0").
 				SetTraceID(traceID).
 				SetSuccess(success).
 				SetDurationMs(int64(15 + i%480)).
@@ -906,6 +1268,9 @@ func verify(ctx context.Context, client *gen.Client) error {
 		{"tenant 2 roles", func(ctx context.Context) (int, error) {
 			return client.Role.Query().Where(role.TenantIDEQ(2)).Count(ctx)
 		}, 1},
+		{"tenant admin roles", func(ctx context.Context) (int, error) {
+			return client.Role.Query().Where(role.IsTenantAdminEQ(true)).Count(ctx)
+		}, 2},
 		{"tenant 1 posts", func(ctx context.Context) (int, error) {
 			return client.Post.Query().Where(post.TenantIDEQ(1)).Count(ctx)
 		}, 2},
@@ -948,6 +1313,15 @@ func verify(ctx context.Context, client *gen.Client) error {
 		{"tenant 2 login logs", func(ctx context.Context) (int, error) {
 			return client.LoginLog.Query().Where(loginlog.TenantIDEQ(2)).Count(ctx)
 		}, 30},
+		{"parameter definitions", func(ctx context.Context) (int, error) {
+			return client.ParameterDefinition.Query().Where(parameterdefinition.DeletedAtIsNil()).Count(ctx)
+		}, 8},
+		{"parameter overrides", func(ctx context.Context) (int, error) {
+			return client.TenantParameterOverride.Query().Count(ctx)
+		}, 5},
+		{"async tasks", func(ctx context.Context) (int, error) {
+			return client.AsyncTask.Query().Count(ctx)
+		}, 4},
 	}
 	for _, check := range checks {
 		count, err := check.count(ctx)
@@ -959,5 +1333,15 @@ func verify(ctx context.Context, client *gen.Client) error {
 		}
 		fmt.Printf("verified %-22s count=%d\n", check.name, count)
 	}
+	platformTenants, err := client.Tenant.Query().
+		Where(tenant.IsPlatformEQ(true)).
+		IDs(ctx)
+	if err != nil {
+		return fmt.Errorf("checking platform tenant marker: %w", err)
+	}
+	if len(platformTenants) != 1 || platformTenants[0] != 1 {
+		return fmt.Errorf("platform tenants=%v, want [1]", platformTenants)
+	}
+	fmt.Printf("verified %-22s ids=%v\n", "platform tenant", platformTenants)
 	return nil
 }

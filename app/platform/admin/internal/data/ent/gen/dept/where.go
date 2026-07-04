@@ -631,6 +631,52 @@ func HasChildrenWith(preds ...predicate.Dept) predicate.Dept {
 	})
 }
 
+// HasUsers applies the HasEdge predicate on the "users" edge.
+func HasUsers() predicate.Dept {
+	return predicate.Dept(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, UsersTable, UsersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
+func HasUsersWith(preds ...predicate.User) predicate.Dept {
+	return predicate.Dept(func(s *sql.Selector) {
+		step := newUsersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDataScopeRoles applies the HasEdge predicate on the "data_scope_roles" edge.
+func HasDataScopeRoles() predicate.Dept {
+	return predicate.Dept(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DataScopeRolesTable, DataScopeRolesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDataScopeRolesWith applies the HasEdge predicate on the "data_scope_roles" edge with a given conditions (other predicates).
+func HasDataScopeRolesWith(preds ...predicate.Role) predicate.Dept {
+	return predicate.Dept(func(s *sql.Selector) {
+		step := newDataScopeRolesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Dept) predicate.Dept {
 	return predicate.Dept(sql.AndPredicates(predicates...))

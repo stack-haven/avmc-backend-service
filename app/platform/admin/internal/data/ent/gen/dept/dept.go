@@ -41,6 +41,10 @@ const (
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
+	// EdgeDataScopeRoles holds the string denoting the data_scope_roles edge name in mutations.
+	EdgeDataScopeRoles = "data_scope_roles"
 	// Table holds the table name of the dept in the database.
 	Table = "depts"
 	// ParentTable is the table that holds the parent relation/edge.
@@ -51,6 +55,18 @@ const (
 	ChildrenTable = "depts"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "parent_id"
+	// UsersTable is the table that holds the users relation/edge.
+	UsersTable = "users"
+	// UsersInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UsersInverseTable = "users"
+	// UsersColumn is the table column denoting the users relation/edge.
+	UsersColumn = "dept_id"
+	// DataScopeRolesTable is the table that holds the data_scope_roles relation/edge. The primary key declared below.
+	DataScopeRolesTable = "role_data_scope_depts"
+	// DataScopeRolesInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	DataScopeRolesInverseTable = "roles"
 )
 
 // Columns holds all SQL columns for dept fields.
@@ -68,6 +84,12 @@ var Columns = []string{
 	FieldSort,
 	FieldRemark,
 }
+
+var (
+	// DataScopeRolesPrimaryKey and DataScopeRolesColumn2 are the table columns denoting the
+	// primary key for the data_scope_roles relation (M2M).
+	DataScopeRolesPrimaryKey = []string{"role_id", "dept_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -196,6 +218,34 @@ func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByUsersCount orders the results by users count.
+func ByUsersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUsersStep(), opts...)
+	}
+}
+
+// ByUsers orders the results by users terms.
+func ByUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDataScopeRolesCount orders the results by data_scope_roles count.
+func ByDataScopeRolesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDataScopeRolesStep(), opts...)
+	}
+}
+
+// ByDataScopeRoles orders the results by data_scope_roles terms.
+func ByDataScopeRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDataScopeRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newParentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -208,5 +258,19 @@ func newChildrenStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(Table, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
+	)
+}
+func newUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UsersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UsersTable, UsersColumn),
+	)
+}
+func newDataScopeRolesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DataScopeRolesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, DataScopeRolesTable, DataScopeRolesPrimaryKey...),
 	)
 }

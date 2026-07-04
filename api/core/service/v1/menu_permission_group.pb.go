@@ -24,6 +24,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type MenuPermissionGroupVersionState int32
+
+const (
+	MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED MenuPermissionGroupVersionState = 0
+	MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED   MenuPermissionGroupVersionState = 1
+	MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED  MenuPermissionGroupVersionState = 2
+)
+
+// Enum value maps for MenuPermissionGroupVersionState.
+var (
+	MenuPermissionGroupVersionState_name = map[int32]string{
+		0: "MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED",
+		1: "MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED",
+		2: "MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED",
+	}
+	MenuPermissionGroupVersionState_value = map[string]int32{
+		"MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED": 0,
+		"MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED":   1,
+		"MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED":  2,
+	}
+)
+
+func (x MenuPermissionGroupVersionState) Enum() *MenuPermissionGroupVersionState {
+	p := new(MenuPermissionGroupVersionState)
+	*p = x
+	return p
+}
+
+func (x MenuPermissionGroupVersionState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MenuPermissionGroupVersionState) Descriptor() protoreflect.EnumDescriptor {
+	return file_core_service_v1_menu_permission_group_proto_enumTypes[0].Descriptor()
+}
+
+func (MenuPermissionGroupVersionState) Type() protoreflect.EnumType {
+	return &file_core_service_v1_menu_permission_group_proto_enumTypes[0]
+}
+
+func (x MenuPermissionGroupVersionState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use MenuPermissionGroupVersionState.Descriptor instead.
+func (MenuPermissionGroupVersionState) EnumDescriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{0}
+}
+
 // 菜单权限组
 type MenuPermissionGroup struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -50,9 +99,11 @@ type MenuPermissionGroup struct {
 	// 创建时间
 	CreatedAt *string `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`
 	// 更新时间
-	UpdatedAt     *string `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	UpdatedAt        *string `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`
+	CurrentVersionId *uint32 `protobuf:"varint,13,opt,name=current_version_id,json=currentVersionId,proto3,oneof" json:"current_version_id,omitempty"`
+	CurrentVersion   *int32  `protobuf:"varint,14,opt,name=current_version,json=currentVersion,proto3,oneof" json:"current_version,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *MenuPermissionGroup) Reset() {
@@ -169,6 +220,144 @@ func (x *MenuPermissionGroup) GetUpdatedAt() string {
 	return ""
 }
 
+func (x *MenuPermissionGroup) GetCurrentVersionId() uint32 {
+	if x != nil && x.CurrentVersionId != nil {
+		return *x.CurrentVersionId
+	}
+	return 0
+}
+
+func (x *MenuPermissionGroup) GetCurrentVersion() int32 {
+	if x != nil && x.CurrentVersion != nil {
+		return *x.CurrentVersion
+	}
+	return 0
+}
+
+type MenuPermissionGroupVersion struct {
+	state         protoimpl.MessageState          `protogen:"open.v1"`
+	Id            uint32                          `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	GroupId       uint32                          `protobuf:"varint,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	Version       int32                           `protobuf:"varint,3,opt,name=version,proto3" json:"version,omitempty"`
+	State         MenuPermissionGroupVersionState `protobuf:"varint,4,opt,name=state,proto3,enum=core.service.v1.MenuPermissionGroupVersionState" json:"state,omitempty"`
+	MenuIds       []uint32                        `protobuf:"varint,5,rep,packed,name=menu_ids,json=menuIds,proto3" json:"menu_ids,omitempty"`
+	ChangeSummary *string                         `protobuf:"bytes,6,opt,name=change_summary,json=changeSummary,proto3,oneof" json:"change_summary,omitempty"`
+	CreatedBy     *uint32                         `protobuf:"varint,7,opt,name=created_by,json=createdBy,proto3,oneof" json:"created_by,omitempty"`
+	PublishedBy   *uint32                         `protobuf:"varint,8,opt,name=published_by,json=publishedBy,proto3,oneof" json:"published_by,omitempty"`
+	EffectiveAt   *string                         `protobuf:"bytes,9,opt,name=effective_at,json=effectiveAt,proto3,oneof" json:"effective_at,omitempty"`
+	PublishedAt   *string                         `protobuf:"bytes,10,opt,name=published_at,json=publishedAt,proto3,oneof" json:"published_at,omitempty"`
+	CreatedAt     *string                         `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MenuPermissionGroupVersion) Reset() {
+	*x = MenuPermissionGroupVersion{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MenuPermissionGroupVersion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MenuPermissionGroupVersion) ProtoMessage() {}
+
+func (x *MenuPermissionGroupVersion) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MenuPermissionGroupVersion.ProtoReflect.Descriptor instead.
+func (*MenuPermissionGroupVersion) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *MenuPermissionGroupVersion) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *MenuPermissionGroupVersion) GetGroupId() uint32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+func (x *MenuPermissionGroupVersion) GetVersion() int32 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *MenuPermissionGroupVersion) GetState() MenuPermissionGroupVersionState {
+	if x != nil {
+		return x.State
+	}
+	return MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED
+}
+
+func (x *MenuPermissionGroupVersion) GetMenuIds() []uint32 {
+	if x != nil {
+		return x.MenuIds
+	}
+	return nil
+}
+
+func (x *MenuPermissionGroupVersion) GetChangeSummary() string {
+	if x != nil && x.ChangeSummary != nil {
+		return *x.ChangeSummary
+	}
+	return ""
+}
+
+func (x *MenuPermissionGroupVersion) GetCreatedBy() uint32 {
+	if x != nil && x.CreatedBy != nil {
+		return *x.CreatedBy
+	}
+	return 0
+}
+
+func (x *MenuPermissionGroupVersion) GetPublishedBy() uint32 {
+	if x != nil && x.PublishedBy != nil {
+		return *x.PublishedBy
+	}
+	return 0
+}
+
+func (x *MenuPermissionGroupVersion) GetEffectiveAt() string {
+	if x != nil && x.EffectiveAt != nil {
+		return *x.EffectiveAt
+	}
+	return ""
+}
+
+func (x *MenuPermissionGroupVersion) GetPublishedAt() string {
+	if x != nil && x.PublishedAt != nil {
+		return *x.PublishedAt
+	}
+	return ""
+}
+
+func (x *MenuPermissionGroupVersion) GetCreatedAt() string {
+	if x != nil && x.CreatedAt != nil {
+		return *x.CreatedAt
+	}
+	return ""
+}
+
 type CreateMenuPermissionGroupRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Group         *MenuPermissionGroup   `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
@@ -179,7 +368,7 @@ type CreateMenuPermissionGroupRequest struct {
 
 func (x *CreateMenuPermissionGroupRequest) Reset() {
 	*x = CreateMenuPermissionGroupRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[1]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -191,7 +380,7 @@ func (x *CreateMenuPermissionGroupRequest) String() string {
 func (*CreateMenuPermissionGroupRequest) ProtoMessage() {}
 
 func (x *CreateMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[1]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -204,7 +393,7 @@ func (x *CreateMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMenuPermissionGroupRequest.ProtoReflect.Descriptor instead.
 func (*CreateMenuPermissionGroupRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{1}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateMenuPermissionGroupRequest) GetGroup() *MenuPermissionGroup {
@@ -230,7 +419,7 @@ type CreateMenuPermissionGroupResponse struct {
 
 func (x *CreateMenuPermissionGroupResponse) Reset() {
 	*x = CreateMenuPermissionGroupResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[2]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -242,7 +431,7 @@ func (x *CreateMenuPermissionGroupResponse) String() string {
 func (*CreateMenuPermissionGroupResponse) ProtoMessage() {}
 
 func (x *CreateMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[2]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -255,7 +444,7 @@ func (x *CreateMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use CreateMenuPermissionGroupResponse.ProtoReflect.Descriptor instead.
 func (*CreateMenuPermissionGroupResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{2}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateMenuPermissionGroupResponse) GetId() uint32 {
@@ -276,7 +465,7 @@ type UpdateMenuPermissionGroupRequest struct {
 
 func (x *UpdateMenuPermissionGroupRequest) Reset() {
 	*x = UpdateMenuPermissionGroupRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[3]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -288,7 +477,7 @@ func (x *UpdateMenuPermissionGroupRequest) String() string {
 func (*UpdateMenuPermissionGroupRequest) ProtoMessage() {}
 
 func (x *UpdateMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[3]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,7 +490,7 @@ func (x *UpdateMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMenuPermissionGroupRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMenuPermissionGroupRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{3}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UpdateMenuPermissionGroupRequest) GetId() uint32 {
@@ -333,7 +522,7 @@ type UpdateMenuPermissionGroupResponse struct {
 
 func (x *UpdateMenuPermissionGroupResponse) Reset() {
 	*x = UpdateMenuPermissionGroupResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[4]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -345,7 +534,7 @@ func (x *UpdateMenuPermissionGroupResponse) String() string {
 func (*UpdateMenuPermissionGroupResponse) ProtoMessage() {}
 
 func (x *UpdateMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[4]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -358,7 +547,7 @@ func (x *UpdateMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use UpdateMenuPermissionGroupResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMenuPermissionGroupResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{4}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{5}
 }
 
 type DeleteMenuPermissionGroupRequest struct {
@@ -371,7 +560,7 @@ type DeleteMenuPermissionGroupRequest struct {
 
 func (x *DeleteMenuPermissionGroupRequest) Reset() {
 	*x = DeleteMenuPermissionGroupRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[5]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +572,7 @@ func (x *DeleteMenuPermissionGroupRequest) String() string {
 func (*DeleteMenuPermissionGroupRequest) ProtoMessage() {}
 
 func (x *DeleteMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[5]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,7 +585,7 @@ func (x *DeleteMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMenuPermissionGroupRequest.ProtoReflect.Descriptor instead.
 func (*DeleteMenuPermissionGroupRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{5}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DeleteMenuPermissionGroupRequest) GetId() uint32 {
@@ -421,7 +610,7 @@ type DeleteMenuPermissionGroupResponse struct {
 
 func (x *DeleteMenuPermissionGroupResponse) Reset() {
 	*x = DeleteMenuPermissionGroupResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[6]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -433,7 +622,7 @@ func (x *DeleteMenuPermissionGroupResponse) String() string {
 func (*DeleteMenuPermissionGroupResponse) ProtoMessage() {}
 
 func (x *DeleteMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[6]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -446,7 +635,7 @@ func (x *DeleteMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use DeleteMenuPermissionGroupResponse.ProtoReflect.Descriptor instead.
 func (*DeleteMenuPermissionGroupResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{6}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{7}
 }
 
 type GetMenuPermissionGroupRequest struct {
@@ -458,7 +647,7 @@ type GetMenuPermissionGroupRequest struct {
 
 func (x *GetMenuPermissionGroupRequest) Reset() {
 	*x = GetMenuPermissionGroupRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[7]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -470,7 +659,7 @@ func (x *GetMenuPermissionGroupRequest) String() string {
 func (*GetMenuPermissionGroupRequest) ProtoMessage() {}
 
 func (x *GetMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[7]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -483,7 +672,7 @@ func (x *GetMenuPermissionGroupRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMenuPermissionGroupRequest.ProtoReflect.Descriptor instead.
 func (*GetMenuPermissionGroupRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{7}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetMenuPermissionGroupRequest) GetId() uint32 {
@@ -502,7 +691,7 @@ type GetMenuPermissionGroupResponse struct {
 
 func (x *GetMenuPermissionGroupResponse) Reset() {
 	*x = GetMenuPermissionGroupResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[8]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -514,7 +703,7 @@ func (x *GetMenuPermissionGroupResponse) String() string {
 func (*GetMenuPermissionGroupResponse) ProtoMessage() {}
 
 func (x *GetMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[8]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -527,7 +716,7 @@ func (x *GetMenuPermissionGroupResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMenuPermissionGroupResponse.ProtoReflect.Descriptor instead.
 func (*GetMenuPermissionGroupResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{8}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetMenuPermissionGroupResponse) GetGroup() *MenuPermissionGroup {
@@ -554,7 +743,7 @@ type ListMenuPermissionGroupsRequest struct {
 
 func (x *ListMenuPermissionGroupsRequest) Reset() {
 	*x = ListMenuPermissionGroupsRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[9]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -566,7 +755,7 @@ func (x *ListMenuPermissionGroupsRequest) String() string {
 func (*ListMenuPermissionGroupsRequest) ProtoMessage() {}
 
 func (x *ListMenuPermissionGroupsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[9]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -579,7 +768,7 @@ func (x *ListMenuPermissionGroupsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMenuPermissionGroupsRequest.ProtoReflect.Descriptor instead.
 func (*ListMenuPermissionGroupsRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{9}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ListMenuPermissionGroupsRequest) GetPageToken() string {
@@ -656,7 +845,7 @@ type ListMenuPermissionGroupsResponse struct {
 
 func (x *ListMenuPermissionGroupsResponse) Reset() {
 	*x = ListMenuPermissionGroupsResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[10]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -668,7 +857,7 @@ func (x *ListMenuPermissionGroupsResponse) String() string {
 func (*ListMenuPermissionGroupsResponse) ProtoMessage() {}
 
 func (x *ListMenuPermissionGroupsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[10]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -681,7 +870,7 @@ func (x *ListMenuPermissionGroupsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMenuPermissionGroupsResponse.ProtoReflect.Descriptor instead.
 func (*ListMenuPermissionGroupsResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{10}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListMenuPermissionGroupsResponse) GetItems() []*MenuPermissionGroup {
@@ -716,7 +905,7 @@ type UpdateMenuPermissionGroupStatusRequest struct {
 
 func (x *UpdateMenuPermissionGroupStatusRequest) Reset() {
 	*x = UpdateMenuPermissionGroupStatusRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[11]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -728,7 +917,7 @@ func (x *UpdateMenuPermissionGroupStatusRequest) String() string {
 func (*UpdateMenuPermissionGroupStatusRequest) ProtoMessage() {}
 
 func (x *UpdateMenuPermissionGroupStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[11]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -741,7 +930,7 @@ func (x *UpdateMenuPermissionGroupStatusRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use UpdateMenuPermissionGroupStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMenuPermissionGroupStatusRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{11}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateMenuPermissionGroupStatusRequest) GetId() uint32 {
@@ -773,7 +962,7 @@ type UpdateMenuPermissionGroupStatusResponse struct {
 
 func (x *UpdateMenuPermissionGroupStatusResponse) Reset() {
 	*x = UpdateMenuPermissionGroupStatusResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[12]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -785,7 +974,7 @@ func (x *UpdateMenuPermissionGroupStatusResponse) String() string {
 func (*UpdateMenuPermissionGroupStatusResponse) ProtoMessage() {}
 
 func (x *UpdateMenuPermissionGroupStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[12]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -798,7 +987,327 @@ func (x *UpdateMenuPermissionGroupStatusResponse) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use UpdateMenuPermissionGroupStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMenuPermissionGroupStatusResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{12}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{13}
+}
+
+type ListMenuPermissionGroupVersionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       uint32                 `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMenuPermissionGroupVersionsRequest) Reset() {
+	*x = ListMenuPermissionGroupVersionsRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMenuPermissionGroupVersionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMenuPermissionGroupVersionsRequest) ProtoMessage() {}
+
+func (x *ListMenuPermissionGroupVersionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMenuPermissionGroupVersionsRequest.ProtoReflect.Descriptor instead.
+func (*ListMenuPermissionGroupVersionsRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListMenuPermissionGroupVersionsRequest) GetGroupId() uint32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+type ListMenuPermissionGroupVersionsResponse struct {
+	state         protoimpl.MessageState        `protogen:"open.v1"`
+	Items         []*MenuPermissionGroupVersion `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMenuPermissionGroupVersionsResponse) Reset() {
+	*x = ListMenuPermissionGroupVersionsResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMenuPermissionGroupVersionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMenuPermissionGroupVersionsResponse) ProtoMessage() {}
+
+func (x *ListMenuPermissionGroupVersionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMenuPermissionGroupVersionsResponse.ProtoReflect.Descriptor instead.
+func (*ListMenuPermissionGroupVersionsResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ListMenuPermissionGroupVersionsResponse) GetItems() []*MenuPermissionGroupVersion {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type PublishMenuPermissionGroupVersionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       uint32                 `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	MenuIds       []uint32               `protobuf:"varint,2,rep,packed,name=menu_ids,json=menuIds,proto3" json:"menu_ids,omitempty"`
+	ChangeSummary *string                `protobuf:"bytes,3,opt,name=change_summary,json=changeSummary,proto3,oneof" json:"change_summary,omitempty"`
+	OperatorId    *uint32                `protobuf:"varint,4,opt,name=operator_id,json=operatorId,proto3,oneof" json:"operator_id,omitempty"`
+	EffectiveAt   *string                `protobuf:"bytes,5,opt,name=effective_at,json=effectiveAt,proto3,oneof" json:"effective_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) Reset() {
+	*x = PublishMenuPermissionGroupVersionRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishMenuPermissionGroupVersionRequest) ProtoMessage() {}
+
+func (x *PublishMenuPermissionGroupVersionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishMenuPermissionGroupVersionRequest.ProtoReflect.Descriptor instead.
+func (*PublishMenuPermissionGroupVersionRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) GetGroupId() uint32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) GetMenuIds() []uint32 {
+	if x != nil {
+		return x.MenuIds
+	}
+	return nil
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) GetChangeSummary() string {
+	if x != nil && x.ChangeSummary != nil {
+		return *x.ChangeSummary
+	}
+	return ""
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) GetOperatorId() uint32 {
+	if x != nil && x.OperatorId != nil {
+		return *x.OperatorId
+	}
+	return 0
+}
+
+func (x *PublishMenuPermissionGroupVersionRequest) GetEffectiveAt() string {
+	if x != nil && x.EffectiveAt != nil {
+		return *x.EffectiveAt
+	}
+	return ""
+}
+
+type PublishMenuPermissionGroupVersionResponse struct {
+	state         protoimpl.MessageState      `protogen:"open.v1"`
+	Version       *MenuPermissionGroupVersion `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishMenuPermissionGroupVersionResponse) Reset() {
+	*x = PublishMenuPermissionGroupVersionResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishMenuPermissionGroupVersionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishMenuPermissionGroupVersionResponse) ProtoMessage() {}
+
+func (x *PublishMenuPermissionGroupVersionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishMenuPermissionGroupVersionResponse.ProtoReflect.Descriptor instead.
+func (*PublishMenuPermissionGroupVersionResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *PublishMenuPermissionGroupVersionResponse) GetVersion() *MenuPermissionGroupVersion {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+type RollbackMenuPermissionGroupVersionRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	GroupId         uint32                 `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	SourceVersionId uint32                 `protobuf:"varint,2,opt,name=source_version_id,json=sourceVersionId,proto3" json:"source_version_id,omitempty"`
+	ChangeSummary   *string                `protobuf:"bytes,3,opt,name=change_summary,json=changeSummary,proto3,oneof" json:"change_summary,omitempty"`
+	OperatorId      *uint32                `protobuf:"varint,4,opt,name=operator_id,json=operatorId,proto3,oneof" json:"operator_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) Reset() {
+	*x = RollbackMenuPermissionGroupVersionRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RollbackMenuPermissionGroupVersionRequest) ProtoMessage() {}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RollbackMenuPermissionGroupVersionRequest.ProtoReflect.Descriptor instead.
+func (*RollbackMenuPermissionGroupVersionRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) GetGroupId() uint32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) GetSourceVersionId() uint32 {
+	if x != nil {
+		return x.SourceVersionId
+	}
+	return 0
+}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) GetChangeSummary() string {
+	if x != nil && x.ChangeSummary != nil {
+		return *x.ChangeSummary
+	}
+	return ""
+}
+
+func (x *RollbackMenuPermissionGroupVersionRequest) GetOperatorId() uint32 {
+	if x != nil && x.OperatorId != nil {
+		return *x.OperatorId
+	}
+	return 0
+}
+
+type RollbackMenuPermissionGroupVersionResponse struct {
+	state         protoimpl.MessageState      `protogen:"open.v1"`
+	Version       *MenuPermissionGroupVersion `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RollbackMenuPermissionGroupVersionResponse) Reset() {
+	*x = RollbackMenuPermissionGroupVersionResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RollbackMenuPermissionGroupVersionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RollbackMenuPermissionGroupVersionResponse) ProtoMessage() {}
+
+func (x *RollbackMenuPermissionGroupVersionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RollbackMenuPermissionGroupVersionResponse.ProtoReflect.Descriptor instead.
+func (*RollbackMenuPermissionGroupVersionResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *RollbackMenuPermissionGroupVersionResponse) GetVersion() *MenuPermissionGroupVersion {
+	if x != nil {
+		return x.Version
+	}
+	return nil
 }
 
 type TenantPermissionGroupBinding struct {
@@ -808,13 +1317,16 @@ type TenantPermissionGroupBinding struct {
 	Enabled       *bool                  `protobuf:"varint,3,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
 	BoundBy       *uint32                `protobuf:"varint,4,opt,name=bound_by,json=boundBy,proto3,oneof" json:"bound_by,omitempty"`
 	BoundAt       *string                `protobuf:"bytes,5,opt,name=bound_at,json=boundAt,proto3,oneof" json:"bound_at,omitempty"`
+	VersionId     *uint32                `protobuf:"varint,6,opt,name=version_id,json=versionId,proto3,oneof" json:"version_id,omitempty"`
+	Version       *int32                 `protobuf:"varint,7,opt,name=version,proto3,oneof" json:"version,omitempty"`
+	AutoUpgrade   *bool                  `protobuf:"varint,8,opt,name=auto_upgrade,json=autoUpgrade,proto3,oneof" json:"auto_upgrade,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *TenantPermissionGroupBinding) Reset() {
 	*x = TenantPermissionGroupBinding{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[13]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -826,7 +1338,7 @@ func (x *TenantPermissionGroupBinding) String() string {
 func (*TenantPermissionGroupBinding) ProtoMessage() {}
 
 func (x *TenantPermissionGroupBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[13]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -839,7 +1351,7 @@ func (x *TenantPermissionGroupBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantPermissionGroupBinding.ProtoReflect.Descriptor instead.
 func (*TenantPermissionGroupBinding) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{13}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *TenantPermissionGroupBinding) GetTenantId() uint32 {
@@ -877,6 +1389,27 @@ func (x *TenantPermissionGroupBinding) GetBoundAt() string {
 	return ""
 }
 
+func (x *TenantPermissionGroupBinding) GetVersionId() uint32 {
+	if x != nil && x.VersionId != nil {
+		return *x.VersionId
+	}
+	return 0
+}
+
+func (x *TenantPermissionGroupBinding) GetVersion() int32 {
+	if x != nil && x.Version != nil {
+		return *x.Version
+	}
+	return 0
+}
+
+func (x *TenantPermissionGroupBinding) GetAutoUpgrade() bool {
+	if x != nil && x.AutoUpgrade != nil {
+		return *x.AutoUpgrade
+	}
+	return false
+}
+
 type GetTenantPermissionGroupsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TenantId      uint32                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
@@ -886,7 +1419,7 @@ type GetTenantPermissionGroupsRequest struct {
 
 func (x *GetTenantPermissionGroupsRequest) Reset() {
 	*x = GetTenantPermissionGroupsRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[14]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -898,7 +1431,7 @@ func (x *GetTenantPermissionGroupsRequest) String() string {
 func (*GetTenantPermissionGroupsRequest) ProtoMessage() {}
 
 func (x *GetTenantPermissionGroupsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[14]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -911,7 +1444,7 @@ func (x *GetTenantPermissionGroupsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTenantPermissionGroupsRequest.ProtoReflect.Descriptor instead.
 func (*GetTenantPermissionGroupsRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{14}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetTenantPermissionGroupsRequest) GetTenantId() uint32 {
@@ -922,16 +1455,17 @@ func (x *GetTenantPermissionGroupsRequest) GetTenantId() uint32 {
 }
 
 type GetTenantPermissionGroupsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Groups        []*MenuPermissionGroup `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
-	GroupIds      []uint32               `protobuf:"varint,2,rep,packed,name=group_ids,json=groupIds,proto3" json:"group_ids,omitempty"`
+	state         protoimpl.MessageState          `protogen:"open.v1"`
+	Groups        []*MenuPermissionGroup          `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
+	GroupIds      []uint32                        `protobuf:"varint,2,rep,packed,name=group_ids,json=groupIds,proto3" json:"group_ids,omitempty"`
+	Bindings      []*TenantPermissionGroupBinding `protobuf:"bytes,3,rep,name=bindings,proto3" json:"bindings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetTenantPermissionGroupsResponse) Reset() {
 	*x = GetTenantPermissionGroupsResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[15]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -943,7 +1477,7 @@ func (x *GetTenantPermissionGroupsResponse) String() string {
 func (*GetTenantPermissionGroupsResponse) ProtoMessage() {}
 
 func (x *GetTenantPermissionGroupsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[15]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -956,7 +1490,7 @@ func (x *GetTenantPermissionGroupsResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetTenantPermissionGroupsResponse.ProtoReflect.Descriptor instead.
 func (*GetTenantPermissionGroupsResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{15}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetTenantPermissionGroupsResponse) GetGroups() []*MenuPermissionGroup {
@@ -973,6 +1507,13 @@ func (x *GetTenantPermissionGroupsResponse) GetGroupIds() []uint32 {
 	return nil
 }
 
+func (x *GetTenantPermissionGroupsResponse) GetBindings() []*TenantPermissionGroupBinding {
+	if x != nil {
+		return x.Bindings
+	}
+	return nil
+}
+
 type UpdateTenantPermissionGroupsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TenantId      uint32                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
@@ -984,7 +1525,7 @@ type UpdateTenantPermissionGroupsRequest struct {
 
 func (x *UpdateTenantPermissionGroupsRequest) Reset() {
 	*x = UpdateTenantPermissionGroupsRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[16]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -996,7 +1537,7 @@ func (x *UpdateTenantPermissionGroupsRequest) String() string {
 func (*UpdateTenantPermissionGroupsRequest) ProtoMessage() {}
 
 func (x *UpdateTenantPermissionGroupsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[16]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1009,7 +1550,7 @@ func (x *UpdateTenantPermissionGroupsRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use UpdateTenantPermissionGroupsRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTenantPermissionGroupsRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{16}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *UpdateTenantPermissionGroupsRequest) GetTenantId() uint32 {
@@ -1041,7 +1582,7 @@ type UpdateTenantPermissionGroupsResponse struct {
 
 func (x *UpdateTenantPermissionGroupsResponse) Reset() {
 	*x = UpdateTenantPermissionGroupsResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[17]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1053,7 +1594,7 @@ func (x *UpdateTenantPermissionGroupsResponse) String() string {
 func (*UpdateTenantPermissionGroupsResponse) ProtoMessage() {}
 
 func (x *UpdateTenantPermissionGroupsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[17]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1066,7 +1607,127 @@ func (x *UpdateTenantPermissionGroupsResponse) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use UpdateTenantPermissionGroupsResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTenantPermissionGroupsResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{17}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{24}
+}
+
+type UpdateTenantPermissionGroupVersionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TenantId      uint32                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	GroupId       uint32                 `protobuf:"varint,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	VersionId     *uint32                `protobuf:"varint,3,opt,name=version_id,json=versionId,proto3,oneof" json:"version_id,omitempty"`
+	AutoUpgrade   bool                   `protobuf:"varint,4,opt,name=auto_upgrade,json=autoUpgrade,proto3" json:"auto_upgrade,omitempty"`
+	OperatorId    *uint32                `protobuf:"varint,5,opt,name=operator_id,json=operatorId,proto3,oneof" json:"operator_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) Reset() {
+	*x = UpdateTenantPermissionGroupVersionRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTenantPermissionGroupVersionRequest) ProtoMessage() {}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTenantPermissionGroupVersionRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTenantPermissionGroupVersionRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) GetTenantId() uint32 {
+	if x != nil {
+		return x.TenantId
+	}
+	return 0
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) GetGroupId() uint32 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) GetVersionId() uint32 {
+	if x != nil && x.VersionId != nil {
+		return *x.VersionId
+	}
+	return 0
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) GetAutoUpgrade() bool {
+	if x != nil {
+		return x.AutoUpgrade
+	}
+	return false
+}
+
+func (x *UpdateTenantPermissionGroupVersionRequest) GetOperatorId() uint32 {
+	if x != nil && x.OperatorId != nil {
+		return *x.OperatorId
+	}
+	return 0
+}
+
+type UpdateTenantPermissionGroupVersionResponse struct {
+	state         protoimpl.MessageState        `protogen:"open.v1"`
+	Binding       *TenantPermissionGroupBinding `protobuf:"bytes,1,opt,name=binding,proto3" json:"binding,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTenantPermissionGroupVersionResponse) Reset() {
+	*x = UpdateTenantPermissionGroupVersionResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTenantPermissionGroupVersionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTenantPermissionGroupVersionResponse) ProtoMessage() {}
+
+func (x *UpdateTenantPermissionGroupVersionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTenantPermissionGroupVersionResponse.ProtoReflect.Descriptor instead.
+func (*UpdateTenantPermissionGroupVersionResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *UpdateTenantPermissionGroupVersionResponse) GetBinding() *TenantPermissionGroupBinding {
+	if x != nil {
+		return x.Binding
+	}
+	return nil
 }
 
 type GetTenantEffectiveMenusRequest struct {
@@ -1079,7 +1740,7 @@ type GetTenantEffectiveMenusRequest struct {
 
 func (x *GetTenantEffectiveMenusRequest) Reset() {
 	*x = GetTenantEffectiveMenusRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[18]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1091,7 +1752,7 @@ func (x *GetTenantEffectiveMenusRequest) String() string {
 func (*GetTenantEffectiveMenusRequest) ProtoMessage() {}
 
 func (x *GetTenantEffectiveMenusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[18]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1104,7 +1765,7 @@ func (x *GetTenantEffectiveMenusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTenantEffectiveMenusRequest.ProtoReflect.Descriptor instead.
 func (*GetTenantEffectiveMenusRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{18}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GetTenantEffectiveMenusRequest) GetTenantId() uint32 {
@@ -1130,7 +1791,7 @@ type GetTenantEffectiveMenusResponse struct {
 
 func (x *GetTenantEffectiveMenusResponse) Reset() {
 	*x = GetTenantEffectiveMenusResponse{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[19]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1142,7 +1803,7 @@ func (x *GetTenantEffectiveMenusResponse) String() string {
 func (*GetTenantEffectiveMenusResponse) ProtoMessage() {}
 
 func (x *GetTenantEffectiveMenusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[19]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1155,7 +1816,7 @@ func (x *GetTenantEffectiveMenusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTenantEffectiveMenusResponse.ProtoReflect.Descriptor instead.
 func (*GetTenantEffectiveMenusResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{19}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetTenantEffectiveMenusResponse) GetItems() []*Menu {
@@ -1174,7 +1835,7 @@ type GetCurrentTenantEffectiveMenusRequest struct {
 
 func (x *GetCurrentTenantEffectiveMenusRequest) Reset() {
 	*x = GetCurrentTenantEffectiveMenusRequest{}
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[20]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1186,7 +1847,7 @@ func (x *GetCurrentTenantEffectiveMenusRequest) String() string {
 func (*GetCurrentTenantEffectiveMenusRequest) ProtoMessage() {}
 
 func (x *GetCurrentTenantEffectiveMenusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[20]
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1199,7 +1860,7 @@ func (x *GetCurrentTenantEffectiveMenusRequest) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use GetCurrentTenantEffectiveMenusRequest.ProtoReflect.Descriptor instead.
 func (*GetCurrentTenantEffectiveMenusRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{20}
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GetCurrentTenantEffectiveMenusRequest) GetParentId() uint32 {
@@ -1213,7 +1874,7 @@ var File_core_service_v1_menu_permission_group_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"\n" +
-	"+core/service/v1/menu_permission_group.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\x1acore/service/v1/menu.proto\x1a$gnostic/openapi/v3/annotations.proto\"\xd0\x06\n" +
+	"+core/service/v1/menu_permission_group.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\x1acore/service/v1/menu.proto\x1a$gnostic/openapi/v3/annotations.proto\"\x95\b\n" +
 	"\x13MenuPermissionGroup\x12!\n" +
 	"\x02id\x18\x01 \x01(\rB\x11\xbaG\x0e\x92\x02\v权限组IDR\x02id\x127\n" +
 	"\x04name\x18\x02 \x01(\tB\x1e\xbaG\x12\x92\x02\x0f权限组名称\xbaH\x06r\x04\x10\x01\x182H\x00R\x04name\x88\x01\x01\x12I\n" +
@@ -1229,7 +1890,10 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\v \x01(\tB\x12\xbaG\x0f\x92\x02\f创建时间H\bR\tcreatedAt\x88\x01\x01\x126\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间H\tR\tupdatedAt\x88\x01\x01B\a\n" +
+	"updated_at\x18\f \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间H\tR\tupdatedAt\x88\x01\x01\x12M\n" +
+	"\x12current_version_id\x18\r \x01(\rB\x1a\xbaG\x17\x92\x02\x14当前发布版本IDH\n" +
+	"R\x10currentVersionId\x88\x01\x01\x12I\n" +
+	"\x0fcurrent_version\x18\x0e \x01(\x05B\x1b\xbaG\x18\x92\x02\x15当前发布版本号H\vR\x0ecurrentVersion\x88\x01\x01B\a\n" +
 	"\x05_nameB\a\n" +
 	"\x05_codeB\t\n" +
 	"\a_statusB\f\n" +
@@ -1240,7 +1904,30 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"\a_remarkB\x0f\n" +
 	"\r_tenant_countB\r\n" +
 	"\v_created_atB\r\n" +
-	"\v_updated_at\"\xcb\x01\n" +
+	"\v_updated_atB\x15\n" +
+	"\x13_current_version_idB\x12\n" +
+	"\x10_current_version\"\x9e\x04\n" +
+	"\x1aMenuPermissionGroupVersion\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x19\n" +
+	"\bgroup_id\x18\x02 \x01(\rR\agroupId\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x05R\aversion\x12F\n" +
+	"\x05state\x18\x04 \x01(\x0e20.core.service.v1.MenuPermissionGroupVersionStateR\x05state\x12\x19\n" +
+	"\bmenu_ids\x18\x05 \x03(\rR\amenuIds\x124\n" +
+	"\x0echange_summary\x18\x06 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x00R\rchangeSummary\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"created_by\x18\a \x01(\rH\x01R\tcreatedBy\x88\x01\x01\x12&\n" +
+	"\fpublished_by\x18\b \x01(\rH\x02R\vpublishedBy\x88\x01\x01\x12&\n" +
+	"\feffective_at\x18\t \x01(\tH\x03R\veffectiveAt\x88\x01\x01\x12&\n" +
+	"\fpublished_at\x18\n" +
+	" \x01(\tH\x04R\vpublishedAt\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"created_at\x18\v \x01(\tH\x05R\tcreatedAt\x88\x01\x01B\x11\n" +
+	"\x0f_change_summaryB\r\n" +
+	"\v_created_byB\x0f\n" +
+	"\r_published_byB\x0f\n" +
+	"\r_effective_atB\x0f\n" +
+	"\r_published_atB\r\n" +
+	"\v_created_at\"\xcb\x01\n" +
 	" CreateMenuPermissionGroupRequest\x12W\n" +
 	"\x05group\x18\x01 \x01(\v2$.core.service.v1.MenuPermissionGroupB\x1b\xbaG\x12\x92\x02\x0f菜单权限组\xbaH\x03\xc8\x01\x01R\x05group\x12>\n" +
 	"\voperator_id\x18\x02 \x01(\rB\x18\xbaG\x0e\x92\x02\v操作人ID\xbaH\x04*\x02 \x00H\x00R\n" +
@@ -1295,29 +1982,76 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"operatorId\x88\x01\x01B\t\n" +
 	"\a_statusB\x0e\n" +
 	"\f_operator_id\")\n" +
-	"'UpdateMenuPermissionGroupStatusResponse\"\xcd\x02\n" +
+	"'UpdateMenuPermissionGroupStatusResponse\"L\n" +
+	"&ListMenuPermissionGroupVersionsRequest\x12\"\n" +
+	"\bgroup_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\agroupId\"l\n" +
+	"'ListMenuPermissionGroupVersionsResponse\x12A\n" +
+	"\x05items\x18\x01 \x03(\v2+.core.service.v1.MenuPermissionGroupVersionR\x05items\"\xaa\x02\n" +
+	"(PublishMenuPermissionGroupVersionRequest\x12\"\n" +
+	"\bgroup_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\agroupId\x12\x19\n" +
+	"\bmenu_ids\x18\x02 \x03(\rR\amenuIds\x124\n" +
+	"\x0echange_summary\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x00R\rchangeSummary\x88\x01\x01\x12-\n" +
+	"\voperator_id\x18\x04 \x01(\rB\a\xbaH\x04*\x02 \x00H\x01R\n" +
+	"operatorId\x88\x01\x01\x12&\n" +
+	"\feffective_at\x18\x05 \x01(\tH\x02R\veffectiveAt\x88\x01\x01B\x11\n" +
+	"\x0f_change_summaryB\x0e\n" +
+	"\f_operator_idB\x0f\n" +
+	"\r_effective_at\"r\n" +
+	")PublishMenuPermissionGroupVersionResponse\x12E\n" +
+	"\aversion\x18\x01 \x01(\v2+.core.service.v1.MenuPermissionGroupVersionR\aversion\"\x8c\x02\n" +
+	")RollbackMenuPermissionGroupVersionRequest\x12\"\n" +
+	"\bgroup_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\agroupId\x123\n" +
+	"\x11source_version_id\x18\x02 \x01(\rB\a\xbaH\x04*\x02 \x00R\x0fsourceVersionId\x124\n" +
+	"\x0echange_summary\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01H\x00R\rchangeSummary\x88\x01\x01\x12-\n" +
+	"\voperator_id\x18\x04 \x01(\rB\a\xbaH\x04*\x02 \x00H\x01R\n" +
+	"operatorId\x88\x01\x01B\x11\n" +
+	"\x0f_change_summaryB\x0e\n" +
+	"\f_operator_id\"s\n" +
+	"*RollbackMenuPermissionGroupVersionResponse\x12E\n" +
+	"\aversion\x18\x01 \x01(\v2+.core.service.v1.MenuPermissionGroupVersionR\aversion\"\xc0\x04\n" +
 	"\x1cTenantPermissionGroupBinding\x122\n" +
 	"\ttenant_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b租户ID\xbaH\x04*\x02 \x00R\btenantId\x123\n" +
 	"\bgroup_id\x18\x02 \x01(\rB\x18\xbaG\x0e\x92\x02\v权限组ID\xbaH\x04*\x02 \x00R\agroupId\x121\n" +
 	"\aenabled\x18\x03 \x01(\bB\x12\xbaG\x0f\x92\x02\f是否启用H\x00R\aenabled\x88\x01\x01\x127\n" +
 	"\bbound_by\x18\x04 \x01(\rB\x17\xbaG\x14\x92\x02\x11绑定操作人IDH\x01R\aboundBy\x88\x01\x01\x122\n" +
-	"\bbound_at\x18\x05 \x01(\tB\x12\xbaG\x0f\x92\x02\f绑定时间H\x02R\aboundAt\x88\x01\x01B\n" +
+	"\bbound_at\x18\x05 \x01(\tB\x12\xbaG\x0f\x92\x02\f绑定时间H\x02R\aboundAt\x88\x01\x01\x12>\n" +
+	"\n" +
+	"version_id\x18\x06 \x01(\rB\x1a\xbaG\x17\x92\x02\x14当前使用版本IDH\x03R\tversionId\x88\x01\x01\x12:\n" +
+	"\aversion\x18\a \x01(\x05B\x1b\xbaG\x18\x92\x02\x15当前使用版本号H\x04R\aversion\x88\x01\x01\x12I\n" +
+	"\fauto_upgrade\x18\b \x01(\bB!\xbaG\x1e\x92\x02\x1b是否自动跟随最新版H\x05R\vautoUpgrade\x88\x01\x01B\n" +
 	"\n" +
 	"\b_enabledB\v\n" +
 	"\t_bound_byB\v\n" +
-	"\t_bound_at\"V\n" +
+	"\t_bound_atB\r\n" +
+	"\v_version_idB\n" +
+	"\n" +
+	"\b_versionB\x0f\n" +
+	"\r_auto_upgrade\"V\n" +
 	" GetTenantPermissionGroupsRequest\x122\n" +
-	"\ttenant_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b租户ID\xbaH\x04*\x02 \x00R\btenantId\"\xc0\x01\n" +
+	"\ttenant_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b租户ID\xbaH\x04*\x02 \x00R\btenantId\"\xab\x02\n" +
 	"!GetTenantPermissionGroupsResponse\x12\\\n" +
 	"\x06groups\x18\x01 \x03(\v2$.core.service.v1.MenuPermissionGroupB\x1e\xbaG\x1b\x92\x02\x18租户绑定的权限组R\x06groups\x12=\n" +
-	"\tgroup_ids\x18\x02 \x03(\rB \xbaG\x1d\x92\x02\x1a租户绑定的权限组IDR\bgroupIds\"\xdf\x01\n" +
+	"\tgroup_ids\x18\x02 \x03(\rB \xbaG\x1d\x92\x02\x1a租户绑定的权限组IDR\bgroupIds\x12i\n" +
+	"\bbindings\x18\x03 \x03(\v2-.core.service.v1.TenantPermissionGroupBindingB\x1e\xbaG\x1b\x92\x02\x18租户套餐版本绑定R\bbindings\"\xdf\x01\n" +
 	"#UpdateTenantPermissionGroupsRequest\x122\n" +
 	"\ttenant_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b租户ID\xbaH\x04*\x02 \x00R\btenantId\x124\n" +
 	"\tgroup_ids\x18\x02 \x03(\rB\x17\xbaG\x14\x92\x02\x11权限组ID列表R\bgroupIds\x12>\n" +
 	"\voperator_id\x18\x03 \x01(\rB\x18\xbaG\x0e\x92\x02\v操作人ID\xbaH\x04*\x02 \x00H\x00R\n" +
 	"operatorId\x88\x01\x01B\x0e\n" +
 	"\f_operator_id\"&\n" +
-	"$UpdateTenantPermissionGroupsResponse\"\x9b\x01\n" +
+	"$UpdateTenantPermissionGroupsResponse\"\x93\x02\n" +
+	")UpdateTenantPermissionGroupVersionRequest\x12$\n" +
+	"\ttenant_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\btenantId\x12\"\n" +
+	"\bgroup_id\x18\x02 \x01(\rB\a\xbaH\x04*\x02 \x00R\agroupId\x12+\n" +
+	"\n" +
+	"version_id\x18\x03 \x01(\rB\a\xbaH\x04*\x02 \x00H\x00R\tversionId\x88\x01\x01\x12!\n" +
+	"\fauto_upgrade\x18\x04 \x01(\bR\vautoUpgrade\x12-\n" +
+	"\voperator_id\x18\x05 \x01(\rB\a\xbaH\x04*\x02 \x00H\x01R\n" +
+	"operatorId\x88\x01\x01B\r\n" +
+	"\v_version_idB\x0e\n" +
+	"\f_operator_id\"u\n" +
+	"*UpdateTenantPermissionGroupVersionResponse\x12G\n" +
+	"\abinding\x18\x01 \x01(\v2-.core.service.v1.TenantPermissionGroupBindingR\abinding\"\x9b\x01\n" +
 	"\x1eGetTenantEffectiveMenusRequest\x122\n" +
 	"\ttenant_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b租户ID\xbaH\x04*\x02 \x00R\btenantId\x127\n" +
 	"\tparent_id\x18\x02 \x01(\rB\x15\xbaG\v\x92\x02\b父级ID\xbaH\x04*\x02(\x00H\x00R\bparentId\x88\x01\x01B\f\n" +
@@ -1328,19 +2062,28 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"%GetCurrentTenantEffectiveMenusRequest\x127\n" +
 	"\tparent_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b父级ID\xbaH\x04*\x02(\x00H\x00R\bparentId\x88\x01\x01B\f\n" +
 	"\n" +
-	"_parent_id2\xbe\x06\n" +
+	"_parent_id*\xbd\x01\n" +
+	"\x1fMenuPermissionGroupVersionState\x123\n" +
+	"/MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED\x10\x00\x121\n" +
+	"-MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED\x10\x01\x122\n" +
+	".MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED\x10\x022\x92\n" +
+	"\n" +
 	"\x1aMenuPermissionGroupService\x12\x82\x01\n" +
 	"\x19CreateMenuPermissionGroup\x121.core.service.v1.CreateMenuPermissionGroupRequest\x1a2.core.service.v1.CreateMenuPermissionGroupResponse\x12\x82\x01\n" +
 	"\x19UpdateMenuPermissionGroup\x121.core.service.v1.UpdateMenuPermissionGroupRequest\x1a2.core.service.v1.UpdateMenuPermissionGroupResponse\x12\x82\x01\n" +
 	"\x19DeleteMenuPermissionGroup\x121.core.service.v1.DeleteMenuPermissionGroupRequest\x1a2.core.service.v1.DeleteMenuPermissionGroupResponse\x12y\n" +
 	"\x16GetMenuPermissionGroup\x12..core.service.v1.GetMenuPermissionGroupRequest\x1a/.core.service.v1.GetMenuPermissionGroupResponse\x12\x7f\n" +
 	"\x18ListMenuPermissionGroups\x120.core.service.v1.ListMenuPermissionGroupsRequest\x1a1.core.service.v1.ListMenuPermissionGroupsResponse\x12\x94\x01\n" +
-	"\x1fUpdateMenuPermissionGroupStatus\x127.core.service.v1.UpdateMenuPermissionGroupStatusRequest\x1a8.core.service.v1.UpdateMenuPermissionGroupStatusResponse2\xb7\x04\n" +
+	"\x1fUpdateMenuPermissionGroupStatus\x127.core.service.v1.UpdateMenuPermissionGroupStatusRequest\x1a8.core.service.v1.UpdateMenuPermissionGroupStatusResponse\x12\x94\x01\n" +
+	"\x1fListMenuPermissionGroupVersions\x127.core.service.v1.ListMenuPermissionGroupVersionsRequest\x1a8.core.service.v1.ListMenuPermissionGroupVersionsResponse\x12\x9a\x01\n" +
+	"!PublishMenuPermissionGroupVersion\x129.core.service.v1.PublishMenuPermissionGroupVersionRequest\x1a:.core.service.v1.PublishMenuPermissionGroupVersionResponse\x12\x9d\x01\n" +
+	"\"RollbackMenuPermissionGroupVersion\x12:.core.service.v1.RollbackMenuPermissionGroupVersionRequest\x1a;.core.service.v1.RollbackMenuPermissionGroupVersionResponse2\xd7\x05\n" +
 	"\x17TenantPermissionService\x12\x82\x01\n" +
 	"\x19GetTenantPermissionGroups\x121.core.service.v1.GetTenantPermissionGroupsRequest\x1a2.core.service.v1.GetTenantPermissionGroupsResponse\x12\x8b\x01\n" +
 	"\x1cUpdateTenantPermissionGroups\x124.core.service.v1.UpdateTenantPermissionGroupsRequest\x1a5.core.service.v1.UpdateTenantPermissionGroupsResponse\x12|\n" +
 	"\x17GetTenantEffectiveMenus\x12/.core.service.v1.GetTenantEffectiveMenusRequest\x1a0.core.service.v1.GetTenantEffectiveMenusResponse\x12\x8a\x01\n" +
-	"\x1eGetCurrentTenantEffectiveMenus\x126.core.service.v1.GetCurrentTenantEffectiveMenusRequest\x1a0.core.service.v1.GetTenantEffectiveMenusResponseB\xb5\x01\n" +
+	"\x1eGetCurrentTenantEffectiveMenus\x126.core.service.v1.GetCurrentTenantEffectiveMenusRequest\x1a0.core.service.v1.GetTenantEffectiveMenusResponse\x12\x9d\x01\n" +
+	"\"UpdateTenantPermissionGroupVersion\x12:.core.service.v1.UpdateTenantPermissionGroupVersionRequest\x1a;.core.service.v1.UpdateTenantPermissionGroupVersionResponseB\xb5\x01\n" +
 	"\x13com.core.service.v1B\x18MenuPermissionGroupProtoP\x01Z&backend-service/api/core/service/v1;v1\xa2\x02\x03CSX\xaa\x02\x0fCore.Service.V1\xca\x02\x0fCore\\Service\\V1\xe2\x02\x1bCore\\Service\\V1\\GPBMetadata\xea\x02\x11Core::Service::V1b\x06proto3"
 
 var (
@@ -1355,67 +2098,92 @@ func file_core_service_v1_menu_permission_group_proto_rawDescGZIP() []byte {
 	return file_core_service_v1_menu_permission_group_proto_rawDescData
 }
 
-var file_core_service_v1_menu_permission_group_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_core_service_v1_menu_permission_group_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_core_service_v1_menu_permission_group_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_core_service_v1_menu_permission_group_proto_goTypes = []any{
-	(*MenuPermissionGroup)(nil),                     // 0: core.service.v1.MenuPermissionGroup
-	(*CreateMenuPermissionGroupRequest)(nil),        // 1: core.service.v1.CreateMenuPermissionGroupRequest
-	(*CreateMenuPermissionGroupResponse)(nil),       // 2: core.service.v1.CreateMenuPermissionGroupResponse
-	(*UpdateMenuPermissionGroupRequest)(nil),        // 3: core.service.v1.UpdateMenuPermissionGroupRequest
-	(*UpdateMenuPermissionGroupResponse)(nil),       // 4: core.service.v1.UpdateMenuPermissionGroupResponse
-	(*DeleteMenuPermissionGroupRequest)(nil),        // 5: core.service.v1.DeleteMenuPermissionGroupRequest
-	(*DeleteMenuPermissionGroupResponse)(nil),       // 6: core.service.v1.DeleteMenuPermissionGroupResponse
-	(*GetMenuPermissionGroupRequest)(nil),           // 7: core.service.v1.GetMenuPermissionGroupRequest
-	(*GetMenuPermissionGroupResponse)(nil),          // 8: core.service.v1.GetMenuPermissionGroupResponse
-	(*ListMenuPermissionGroupsRequest)(nil),         // 9: core.service.v1.ListMenuPermissionGroupsRequest
-	(*ListMenuPermissionGroupsResponse)(nil),        // 10: core.service.v1.ListMenuPermissionGroupsResponse
-	(*UpdateMenuPermissionGroupStatusRequest)(nil),  // 11: core.service.v1.UpdateMenuPermissionGroupStatusRequest
-	(*UpdateMenuPermissionGroupStatusResponse)(nil), // 12: core.service.v1.UpdateMenuPermissionGroupStatusResponse
-	(*TenantPermissionGroupBinding)(nil),            // 13: core.service.v1.TenantPermissionGroupBinding
-	(*GetTenantPermissionGroupsRequest)(nil),        // 14: core.service.v1.GetTenantPermissionGroupsRequest
-	(*GetTenantPermissionGroupsResponse)(nil),       // 15: core.service.v1.GetTenantPermissionGroupsResponse
-	(*UpdateTenantPermissionGroupsRequest)(nil),     // 16: core.service.v1.UpdateTenantPermissionGroupsRequest
-	(*UpdateTenantPermissionGroupsResponse)(nil),    // 17: core.service.v1.UpdateTenantPermissionGroupsResponse
-	(*GetTenantEffectiveMenusRequest)(nil),          // 18: core.service.v1.GetTenantEffectiveMenusRequest
-	(*GetTenantEffectiveMenusResponse)(nil),         // 19: core.service.v1.GetTenantEffectiveMenusResponse
-	(*GetCurrentTenantEffectiveMenusRequest)(nil),   // 20: core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	(enum.Status)(0),                                // 21: enum.Status
-	(*Menu)(nil),                                    // 22: core.service.v1.Menu
+	(MenuPermissionGroupVersionState)(0),               // 0: core.service.v1.MenuPermissionGroupVersionState
+	(*MenuPermissionGroup)(nil),                        // 1: core.service.v1.MenuPermissionGroup
+	(*MenuPermissionGroupVersion)(nil),                 // 2: core.service.v1.MenuPermissionGroupVersion
+	(*CreateMenuPermissionGroupRequest)(nil),           // 3: core.service.v1.CreateMenuPermissionGroupRequest
+	(*CreateMenuPermissionGroupResponse)(nil),          // 4: core.service.v1.CreateMenuPermissionGroupResponse
+	(*UpdateMenuPermissionGroupRequest)(nil),           // 5: core.service.v1.UpdateMenuPermissionGroupRequest
+	(*UpdateMenuPermissionGroupResponse)(nil),          // 6: core.service.v1.UpdateMenuPermissionGroupResponse
+	(*DeleteMenuPermissionGroupRequest)(nil),           // 7: core.service.v1.DeleteMenuPermissionGroupRequest
+	(*DeleteMenuPermissionGroupResponse)(nil),          // 8: core.service.v1.DeleteMenuPermissionGroupResponse
+	(*GetMenuPermissionGroupRequest)(nil),              // 9: core.service.v1.GetMenuPermissionGroupRequest
+	(*GetMenuPermissionGroupResponse)(nil),             // 10: core.service.v1.GetMenuPermissionGroupResponse
+	(*ListMenuPermissionGroupsRequest)(nil),            // 11: core.service.v1.ListMenuPermissionGroupsRequest
+	(*ListMenuPermissionGroupsResponse)(nil),           // 12: core.service.v1.ListMenuPermissionGroupsResponse
+	(*UpdateMenuPermissionGroupStatusRequest)(nil),     // 13: core.service.v1.UpdateMenuPermissionGroupStatusRequest
+	(*UpdateMenuPermissionGroupStatusResponse)(nil),    // 14: core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	(*ListMenuPermissionGroupVersionsRequest)(nil),     // 15: core.service.v1.ListMenuPermissionGroupVersionsRequest
+	(*ListMenuPermissionGroupVersionsResponse)(nil),    // 16: core.service.v1.ListMenuPermissionGroupVersionsResponse
+	(*PublishMenuPermissionGroupVersionRequest)(nil),   // 17: core.service.v1.PublishMenuPermissionGroupVersionRequest
+	(*PublishMenuPermissionGroupVersionResponse)(nil),  // 18: core.service.v1.PublishMenuPermissionGroupVersionResponse
+	(*RollbackMenuPermissionGroupVersionRequest)(nil),  // 19: core.service.v1.RollbackMenuPermissionGroupVersionRequest
+	(*RollbackMenuPermissionGroupVersionResponse)(nil), // 20: core.service.v1.RollbackMenuPermissionGroupVersionResponse
+	(*TenantPermissionGroupBinding)(nil),               // 21: core.service.v1.TenantPermissionGroupBinding
+	(*GetTenantPermissionGroupsRequest)(nil),           // 22: core.service.v1.GetTenantPermissionGroupsRequest
+	(*GetTenantPermissionGroupsResponse)(nil),          // 23: core.service.v1.GetTenantPermissionGroupsResponse
+	(*UpdateTenantPermissionGroupsRequest)(nil),        // 24: core.service.v1.UpdateTenantPermissionGroupsRequest
+	(*UpdateTenantPermissionGroupsResponse)(nil),       // 25: core.service.v1.UpdateTenantPermissionGroupsResponse
+	(*UpdateTenantPermissionGroupVersionRequest)(nil),  // 26: core.service.v1.UpdateTenantPermissionGroupVersionRequest
+	(*UpdateTenantPermissionGroupVersionResponse)(nil), // 27: core.service.v1.UpdateTenantPermissionGroupVersionResponse
+	(*GetTenantEffectiveMenusRequest)(nil),             // 28: core.service.v1.GetTenantEffectiveMenusRequest
+	(*GetTenantEffectiveMenusResponse)(nil),            // 29: core.service.v1.GetTenantEffectiveMenusResponse
+	(*GetCurrentTenantEffectiveMenusRequest)(nil),      // 30: core.service.v1.GetCurrentTenantEffectiveMenusRequest
+	(enum.Status)(0), // 31: enum.Status
+	(*Menu)(nil),     // 32: core.service.v1.Menu
 }
 var file_core_service_v1_menu_permission_group_proto_depIdxs = []int32{
-	21, // 0: core.service.v1.MenuPermissionGroup.status:type_name -> enum.Status
-	0,  // 1: core.service.v1.CreateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
-	0,  // 2: core.service.v1.UpdateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
-	0,  // 3: core.service.v1.GetMenuPermissionGroupResponse.group:type_name -> core.service.v1.MenuPermissionGroup
-	21, // 4: core.service.v1.ListMenuPermissionGroupsRequest.status:type_name -> enum.Status
-	0,  // 5: core.service.v1.ListMenuPermissionGroupsResponse.items:type_name -> core.service.v1.MenuPermissionGroup
-	21, // 6: core.service.v1.UpdateMenuPermissionGroupStatusRequest.status:type_name -> enum.Status
-	0,  // 7: core.service.v1.GetTenantPermissionGroupsResponse.groups:type_name -> core.service.v1.MenuPermissionGroup
-	22, // 8: core.service.v1.GetTenantEffectiveMenusResponse.items:type_name -> core.service.v1.Menu
-	1,  // 9: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:input_type -> core.service.v1.CreateMenuPermissionGroupRequest
-	3,  // 10: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
-	5,  // 11: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
-	7,  // 12: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:input_type -> core.service.v1.GetMenuPermissionGroupRequest
-	9,  // 13: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
-	11, // 14: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
-	14, // 15: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
-	16, // 16: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
-	18, // 17: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
-	20, // 18: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	2,  // 19: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
-	4,  // 20: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
-	6,  // 21: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
-	8,  // 22: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.GetMenuPermissionGroupResponse
-	10, // 23: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
-	12, // 24: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
-	15, // 25: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
-	17, // 26: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
-	19, // 27: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	19, // 28: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	19, // [19:29] is the sub-list for method output_type
-	9,  // [9:19] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	31, // 0: core.service.v1.MenuPermissionGroup.status:type_name -> enum.Status
+	0,  // 1: core.service.v1.MenuPermissionGroupVersion.state:type_name -> core.service.v1.MenuPermissionGroupVersionState
+	1,  // 2: core.service.v1.CreateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
+	1,  // 3: core.service.v1.UpdateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
+	1,  // 4: core.service.v1.GetMenuPermissionGroupResponse.group:type_name -> core.service.v1.MenuPermissionGroup
+	31, // 5: core.service.v1.ListMenuPermissionGroupsRequest.status:type_name -> enum.Status
+	1,  // 6: core.service.v1.ListMenuPermissionGroupsResponse.items:type_name -> core.service.v1.MenuPermissionGroup
+	31, // 7: core.service.v1.UpdateMenuPermissionGroupStatusRequest.status:type_name -> enum.Status
+	2,  // 8: core.service.v1.ListMenuPermissionGroupVersionsResponse.items:type_name -> core.service.v1.MenuPermissionGroupVersion
+	2,  // 9: core.service.v1.PublishMenuPermissionGroupVersionResponse.version:type_name -> core.service.v1.MenuPermissionGroupVersion
+	2,  // 10: core.service.v1.RollbackMenuPermissionGroupVersionResponse.version:type_name -> core.service.v1.MenuPermissionGroupVersion
+	1,  // 11: core.service.v1.GetTenantPermissionGroupsResponse.groups:type_name -> core.service.v1.MenuPermissionGroup
+	21, // 12: core.service.v1.GetTenantPermissionGroupsResponse.bindings:type_name -> core.service.v1.TenantPermissionGroupBinding
+	21, // 13: core.service.v1.UpdateTenantPermissionGroupVersionResponse.binding:type_name -> core.service.v1.TenantPermissionGroupBinding
+	32, // 14: core.service.v1.GetTenantEffectiveMenusResponse.items:type_name -> core.service.v1.Menu
+	3,  // 15: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:input_type -> core.service.v1.CreateMenuPermissionGroupRequest
+	5,  // 16: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
+	7,  // 17: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
+	9,  // 18: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:input_type -> core.service.v1.GetMenuPermissionGroupRequest
+	11, // 19: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
+	13, // 20: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
+	15, // 21: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:input_type -> core.service.v1.ListMenuPermissionGroupVersionsRequest
+	17, // 22: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:input_type -> core.service.v1.PublishMenuPermissionGroupVersionRequest
+	19, // 23: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:input_type -> core.service.v1.RollbackMenuPermissionGroupVersionRequest
+	22, // 24: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
+	24, // 25: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
+	28, // 26: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
+	30, // 27: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
+	26, // 28: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
+	4,  // 29: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
+	6,  // 30: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
+	8,  // 31: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
+	10, // 32: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.GetMenuPermissionGroupResponse
+	12, // 33: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
+	14, // 34: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	16, // 35: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:output_type -> core.service.v1.ListMenuPermissionGroupVersionsResponse
+	18, // 36: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:output_type -> core.service.v1.PublishMenuPermissionGroupVersionResponse
+	20, // 37: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:output_type -> core.service.v1.RollbackMenuPermissionGroupVersionResponse
+	23, // 38: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
+	25, // 39: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
+	29, // 40: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	29, // 41: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	27, // 42: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
+	29, // [29:43] is the sub-list for method output_type
+	15, // [15:29] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_menu_permission_group_proto_init() }
@@ -1426,26 +2194,31 @@ func file_core_service_v1_menu_permission_group_proto_init() {
 	file_core_service_v1_menu_proto_init()
 	file_core_service_v1_menu_permission_group_proto_msgTypes[0].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[1].OneofWrappers = []any{}
-	file_core_service_v1_menu_permission_group_proto_msgTypes[3].OneofWrappers = []any{}
-	file_core_service_v1_menu_permission_group_proto_msgTypes[5].OneofWrappers = []any{}
-	file_core_service_v1_menu_permission_group_proto_msgTypes[9].OneofWrappers = []any{}
-	file_core_service_v1_menu_permission_group_proto_msgTypes[11].OneofWrappers = []any{}
-	file_core_service_v1_menu_permission_group_proto_msgTypes[13].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[2].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[4].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[6].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[10].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[12].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[16].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[18].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[20].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[23].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[25].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[27].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[29].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_menu_permission_group_proto_rawDesc), len(file_core_service_v1_menu_permission_group_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   21,
+			NumEnums:      1,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
 		GoTypes:           file_core_service_v1_menu_permission_group_proto_goTypes,
 		DependencyIndexes: file_core_service_v1_menu_permission_group_proto_depIdxs,
+		EnumInfos:         file_core_service_v1_menu_permission_group_proto_enumTypes,
 		MessageInfos:      file_core_service_v1_menu_permission_group_proto_msgTypes,
 	}.Build()
 	File_core_service_v1_menu_permission_group_proto = out.File

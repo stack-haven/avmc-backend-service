@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/parameter.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service ParameterService {
+  rpc ListParameterDefinitions(core.service.v1.ListParameterDefinitionsRequest) returns (core.service.v1.ListParameterDefinitionsResponse) {
+    option (google.api.http) = {get: "/admin/v1/parameters/definitions"};
+  }
+  rpc GetParameterDefinition(core.service.v1.GetParameterDefinitionRequest) returns (core.service.v1.GetParameterDefinitionResponse) {
+    option (google.api.http) = {get: "/admin/v1/parameters/definitions/{id}"};
+  }
+  rpc CreateParameterDefinition(core.service.v1.CreateParameterDefinitionRequest) returns (core.service.v1.CreateParameterDefinitionResponse) {
+    option (google.api.http) = {post: "/admin/v1/parameters/definitions" body: "parameter"};
+  }
+  rpc UpdateParameterDefinition(core.service.v1.UpdateParameterDefinitionRequest) returns (core.service.v1.UpdateParameterDefinitionResponse) {
+    option (google.api.http) = {put: "/admin/v1/parameters/definitions/{id}" body: "parameter"};
+  }
+  rpc DeleteParameterDefinition(core.service.v1.DeleteParameterDefinitionRequest) returns (core.service.v1.DeleteParameterDefinitionResponse) {
+    option (google.api.http) = {delete: "/admin/v1/parameters/definitions/{id}"};
+  }
+
+  rpc ListCurrentTenantParameters(core.service.v1.ListCurrentTenantParametersRequest) returns (core.service.v1.ListCurrentTenantParametersResponse) {
+    option (google.api.http) = {get: "/admin/v1/parameters/current"};
+  }
+  rpc SetCurrentTenantParameter(core.service.v1.SetCurrentTenantParameterRequest) returns (core.service.v1.SetCurrentTenantParameterResponse) {
+    option (google.api.http) = {put: "/admin/v1/parameters/current/{key}" body: "*"};
+  }
+  rpc ResetCurrentTenantParameter(core.service.v1.ResetCurrentTenantParameterRequest) returns (core.service.v1.ResetCurrentTenantParameterResponse) {
+    option (google.api.http) = {delete: "/admin/v1/parameters/current/{key}"};
+  }
+
+  rpc ListTenantParameters(core.service.v1.ListTenantParametersRequest) returns (core.service.v1.ListTenantParametersResponse) {
+    option (google.api.http) = {get: "/admin/v1/tenants/{tenant_id}/parameters"};
+  }
+  rpc SetTenantParameter(core.service.v1.SetTenantParameterRequest) returns (core.service.v1.SetTenantParameterResponse) {
+    option (google.api.http) = {put: "/admin/v1/tenants/{tenant_id}/parameters/{key}" body: "*"};
+  }
+  rpc ResetTenantParameter(core.service.v1.ResetTenantParameterRequest) returns (core.service.v1.ResetTenantParameterResponse) {
+    option (google.api.http) = {delete: "/admin/v1/tenants/{tenant_id}/parameters/{key}"};
+  }
+}

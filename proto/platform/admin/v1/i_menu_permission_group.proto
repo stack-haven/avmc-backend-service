@@ -138,4 +138,22 @@ service MenuPermissionGroupService {
       ]
     };
   }
+
+  rpc ListMenuPermissionGroupVersions(core.service.v1.ListMenuPermissionGroupVersionsRequest) returns (core.service.v1.ListMenuPermissionGroupVersionsResponse) {
+    option (google.api.http) = {get: "/admin/v1/menu-permission-groups/{group_id}/versions"};
+  }
+
+  rpc PublishMenuPermissionGroupVersion(core.service.v1.PublishMenuPermissionGroupVersionRequest) returns (core.service.v1.PublishMenuPermissionGroupVersionResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/menu-permission-groups/{group_id}/versions:publish"
+      body: "*"
+    };
+  }
+
+  rpc RollbackMenuPermissionGroupVersion(core.service.v1.RollbackMenuPermissionGroupVersionRequest) returns (core.service.v1.RollbackMenuPermissionGroupVersionResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/menu-permission-groups/{group_id}/versions:rollback"
+      body: "*"
+    };
+  }
 }

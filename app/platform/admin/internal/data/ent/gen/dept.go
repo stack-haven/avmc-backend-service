@@ -53,9 +53,13 @@ type DeptEdges struct {
 	Parent *Dept `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Dept `json:"children,omitempty"`
+	// Users holds the value of the users edge.
+	Users []*User `json:"users,omitempty"`
+	// DataScopeRoles holds the value of the data_scope_roles edge.
+	DataScopeRoles []*Role `json:"data_scope_roles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // ParentOrErr returns the Parent value or an error if the edge
@@ -76,6 +80,24 @@ func (e DeptEdges) ChildrenOrErr() ([]*Dept, error) {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
+}
+
+// UsersOrErr returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e DeptEdges) UsersOrErr() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.Users, nil
+	}
+	return nil, &NotLoadedError{edge: "users"}
+}
+
+// DataScopeRolesOrErr returns the DataScopeRoles value or an error if the edge
+// was not loaded in eager-loading.
+func (e DeptEdges) DataScopeRolesOrErr() ([]*Role, error) {
+	if e.loadedTypes[3] {
+		return e.DataScopeRoles, nil
+	}
+	return nil, &NotLoadedError{edge: "data_scope_roles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -208,6 +230,16 @@ func (_m *Dept) QueryParent() *DeptQuery {
 // QueryChildren queries the "children" edge of the Dept entity.
 func (_m *Dept) QueryChildren() *DeptQuery {
 	return NewDeptClient(_m.config).QueryChildren(_m)
+}
+
+// QueryUsers queries the "users" edge of the Dept entity.
+func (_m *Dept) QueryUsers() *UserQuery {
+	return NewDeptClient(_m.config).QueryUsers(_m)
+}
+
+// QueryDataScopeRoles queries the "data_scope_roles" edge of the Dept entity.
+func (_m *Dept) QueryDataScopeRoles() *RoleQuery {
+	return NewDeptClient(_m.config).QueryDataScopeRoles(_m)
 }
 
 // Update returns a builder for updating this Dept.
