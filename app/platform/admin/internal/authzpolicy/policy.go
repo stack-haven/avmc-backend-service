@@ -119,6 +119,31 @@ func ProtectedOperations() []Operation {
 	}
 }
 
+func MatchProtectedOperation(object authz.Object, action authz.Action) bool {
+	for _, operation := range ProtectedOperations() {
+		if operation.Object == object &&
+			(operation.HTTPAction == action || operation.GRPCAction == action) {
+			return true
+		}
+	}
+	return false
+}
+
+func IsAuthenticatedSelfServiceOperation(object authz.Object, action authz.Action) bool {
+	switch object {
+	case authz.Object(v1.OperationAuthServiceCodes),
+		authz.Object(v1.OperationAuthServiceMenus),
+		authz.Object(v1.OperationAuthServiceProfile),
+		authz.Object(v1.OperationAuthServiceVbenProfile):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationAuthServiceLogout):
+		return action == "POST" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationSessionServiceListMySessions):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+	}
+	return false
+}
+
 // IsPlatformControlOperation identifies operations that manage global platform
 // resources or explicitly target another tenant.
 func IsPlatformControlOperation(operation string) bool {

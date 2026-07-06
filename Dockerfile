@@ -18,6 +18,8 @@ FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /app
 COPY --from=builder --chown=nonroot:nonroot /out/server /app/server
 
+ENV platform_ADMIN_ENV=production
+
 EXPOSE 8000 9000
 VOLUME ["/data/conf"]
 

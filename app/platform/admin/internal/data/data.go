@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -56,14 +57,15 @@ var ProviderSet = wire.NewSet(
 	NewSessionRepo,
 	NewParameterRepo,
 	NewAsyncTaskRepo,
+	NewPermissionCacheInvalidator,
 	NewTenantAdminPolicy,
 )
 
 // Data .
 type Data struct {
-	// TODO wrapped database client
-	db  *gen.Client
-	rdb *redis.Client
+	db                    *gen.Client
+	rdb                   *redis.Client
+	permissionCacheBypass sync.Map
 }
 
 // NewData .
@@ -224,7 +226,7 @@ func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duratio
 }
 
 // NewAuthorizer 创建权鉴器
-func NewAuthorizer(cfg *conf.Data, logger log.Logger) (authzEngine.Authorizer, error) {
+func NewAuthorizer(cfg *conf.Data, db *gen.Client, logger log.Logger) (authzEngine.Authorizer, error) {
 	// adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
 	// if err != nil {
 	// 	l.Fatalf("failed creating adapter: %s", err.Error())
@@ -248,5 +250,5 @@ func NewAuthorizer(cfg *conf.Data, logger log.Logger) (authzEngine.Authorizer, e
 	if err != nil {
 		return nil, fmt.Errorf("creating authorizer: %w", err)
 	}
-	return authorizer, nil
+	return newTenantRoleAuthorizer(authorizer, db), nil
 }

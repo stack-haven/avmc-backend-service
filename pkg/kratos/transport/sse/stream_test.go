@@ -37,6 +37,7 @@ func TestStream_Creation(t *testing.T) {
 	}
 
 	stream.Close()
+	stream.Close()
 	if !unsubscribeCalled {
 		t.Error("unsubscribeFunc was not called")
 	}

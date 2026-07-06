@@ -10,6 +10,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/mixins"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
@@ -170,6 +171,43 @@ func (r *tenantRepo) Provision(ctx context.Context, input *biz.TenantProvisionin
 	return &biz.TenantProvisioningResult{
 		Tenant: created, AdminUserID: adminUser.ID, AdminRoleID: adminRole.ID, RootDeptID: rootDept.ID,
 	}, nil
+}
+
+func (r *tenantRepo) RollbackProvisioning(ctx context.Context, result *biz.TenantProvisioningResult) error {
+	if result == nil || result.Tenant == nil || result.Tenant.GetId() == 0 {
+		return pb.ErrorBadRequest("租户开通补偿信息不能为空")
+	}
+	systemCtx := mixins.SkipSoftDelete(entviewer.NewSystemContext(ctx))
+	tx, err := r.Data.DB(systemCtx).Tx(systemCtx)
+	if err != nil {
+		return err
+	}
+	defer rollback(tx, r.Log)
+
+	if result.AdminUserID > 0 {
+		if err = tx.User.DeleteOneID(result.AdminUserID).Exec(systemCtx); err != nil && !gen.IsNotFound(err) {
+			return err
+		}
+	}
+	if result.AdminRoleID > 0 {
+		if err = tx.Role.DeleteOneID(result.AdminRoleID).Exec(systemCtx); err != nil && !gen.IsNotFound(err) {
+			return err
+		}
+	}
+	if result.RootDeptID > 0 {
+		if err = tx.Dept.DeleteOneID(result.RootDeptID).Exec(systemCtx); err != nil && !gen.IsNotFound(err) {
+			return err
+		}
+	}
+	if _, err = tx.TenantPermissionGroup.Delete().
+		Where(tenantpermissiongroup.TenantIDEQ(result.Tenant.GetId())).
+		Exec(systemCtx); err != nil {
+		return err
+	}
+	if err = tx.Tenant.DeleteOneID(result.Tenant.GetId()).Exec(systemCtx); err != nil && !gen.IsNotFound(err) {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (r *tenantRepo) menuIDsByGroups(ctx context.Context, groupIDs []uint32) ([]uint32, error) {

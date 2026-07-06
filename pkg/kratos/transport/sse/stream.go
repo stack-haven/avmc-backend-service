@@ -34,6 +34,8 @@ type Stream struct {
 	events []*Event
 	// mutex is the mutex for events.
 	mutex sync.RWMutex
+	// closeOnce makes stream shutdown safe across handler and server cleanup.
+	closeOnce sync.Once
 }
 
 // NewStream creates a new stream.
@@ -60,12 +62,12 @@ func (s *Stream) Run() {
 
 // Close closes the stream.
 func (s *Stream) Close() {
-	close(s.quit)
-	close(s.event)
-
-	if s.unsubscribeFunc != nil {
-		s.unsubscribeFunc(s.ID)
-	}
+	s.closeOnce.Do(func() {
+		close(s.quit)
+		if s.unsubscribeFunc != nil {
+			s.unsubscribeFunc(s.ID)
+		}
+	})
 }
 
 // Send sends an event to the stream.

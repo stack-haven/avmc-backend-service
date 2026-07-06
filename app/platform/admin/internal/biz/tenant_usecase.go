@@ -18,6 +18,7 @@ import (
 type TenantRepo interface {
 	Save(context.Context, *pbCore.Tenant, uint32) (*pbCore.Tenant, error)
 	Provision(context.Context, *TenantProvisioning) (*TenantProvisioningResult, error)
+	RollbackProvisioning(context.Context, *TenantProvisioningResult) error
 	Update(context.Context, *pbCore.Tenant, uint32) (*pbCore.Tenant, error)
 	FindByID(context.Context, uint32) (*pbCore.Tenant, error)
 	CountTenants(context.Context, ...listing.Option) (int32, error)
@@ -103,6 +104,16 @@ func (uc *TenantUsecase) Create(ctx context.Context, tenant *pbCore.Tenant, admi
 	}
 	if uc.policy != nil {
 		if err = uc.policy.SetMembership(ctx, result.Tenant.GetId(), result.AdminUserID, true); err != nil {
+			if cleanupErr := uc.policy.SetMembership(ctx, result.Tenant.GetId(), result.AdminUserID, false); cleanupErr != nil {
+				uc.log.WithContext(ctx).Errorf("cleanup tenant admin policy after provisioning failure: %v", cleanupErr)
+			}
+			if rollbackErr := uc.repo.RollbackProvisioning(ctx, result); rollbackErr != nil {
+				uc.log.WithContext(ctx).Errorf(
+					"rollback tenant provisioning after policy failure: tenant_id=%d err=%v",
+					result.Tenant.GetId(),
+					rollbackErr,
+				)
+			}
 			return nil, err
 		}
 	}

@@ -14,7 +14,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-const AsyncTaskTypeRetentionCleanup = "system.task_retention_cleanup"
+const (
+	AsyncTaskTypeRetentionCleanup          = "system.task_retention_cleanup"
+	AsyncTaskTypePermissionCacheInvalidate = "system.permission_cache_invalidate"
+)
 
 type AsyncTaskSpec struct {
 	TenantID       *uint32
@@ -49,6 +52,11 @@ type AsyncTaskRepo interface {
 type AsyncTaskHandler interface {
 	Type() string
 	Handle(context.Context, json.RawMessage) (string, error)
+}
+
+type PermissionCacheInvalidator interface {
+	InvalidateMenuPermissionCache(context.Context) error
+	InvalidateTenantPackagePermissionCache(context.Context, uint32) error
 }
 
 type AsyncTaskUsecase struct {
@@ -199,8 +207,20 @@ type retentionCleanupPayload struct {
 
 type retentionCleanupHandler struct{ repo AsyncTaskRepo }
 
-func NewAsyncTaskHandlers(repo AsyncTaskRepo) []AsyncTaskHandler {
-	return []AsyncTaskHandler{&retentionCleanupHandler{repo: repo}}
+type permissionCacheInvalidationPayload struct {
+	Scope    string `json:"scope"`
+	TenantID uint32 `json:"tenantId,omitempty"`
+}
+
+type permissionCacheInvalidationHandler struct {
+	invalidator PermissionCacheInvalidator
+}
+
+func NewAsyncTaskHandlers(repo AsyncTaskRepo, invalidator PermissionCacheInvalidator) []AsyncTaskHandler {
+	return []AsyncTaskHandler{
+		&retentionCleanupHandler{repo: repo},
+		&permissionCacheInvalidationHandler{invalidator: invalidator},
+	}
 }
 
 func (h *retentionCleanupHandler) Type() string { return AsyncTaskTypeRetentionCleanup }
@@ -221,4 +241,32 @@ func (h *retentionCleanupHandler) Handle(ctx context.Context, payload json.RawMe
 		return "", err
 	}
 	return fmt.Sprintf("已清理 %d 条过期终态任务", count), nil
+}
+
+func (h *permissionCacheInvalidationHandler) Type() string {
+	return AsyncTaskTypePermissionCacheInvalidate
+}
+
+func (h *permissionCacheInvalidationHandler) Handle(ctx context.Context, payload json.RawMessage) (string, error) {
+	var input permissionCacheInvalidationPayload
+	if err := json.Unmarshal(payload, &input); err != nil {
+		return "", fmt.Errorf("decode permission cache invalidation payload: %w", err)
+	}
+	switch input.Scope {
+	case "menu":
+		if err := h.invalidator.InvalidateMenuPermissionCache(ctx); err != nil {
+			return "", err
+		}
+		return "已刷新全局菜单权限缓存版本", nil
+	case "tenant_package":
+		if input.TenantID == 0 {
+			return "", fmt.Errorf("tenant id is required for tenant package invalidation")
+		}
+		if err := h.invalidator.InvalidateTenantPackagePermissionCache(ctx, input.TenantID); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("已刷新租户 %d 套餐权限缓存版本", input.TenantID), nil
+	default:
+		return "", fmt.Errorf("unsupported permission cache invalidation scope %q", input.Scope)
+	}
 }

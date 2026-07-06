@@ -22,6 +22,10 @@ server:
       origins:
         - "https://admin.example.com"
     middleware:
+      enable_logging: true
+      enable_recovery: true
+      enable_validate: true
+      enable_circuit_breaker: true
       auth:
         method: "HS256"
         key: "replace-with-platform_ADMIN_JWT_KEY"
@@ -29,6 +33,11 @@ server:
   grpc:
     addr: 0.0.0.0:9000
     timeout: 3s
+    middleware:
+      enable_logging: true
+      enable_recovery: true
+      enable_validate: true
+      enable_circuit_breaker: true
 data:
   database:
     driver: mysql

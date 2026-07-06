@@ -67,6 +67,31 @@ func TestParseParamsRejectsUnknownFilterField(t *testing.T) {
 	}
 }
 
+func TestParseParamsAcceptsNumericOffsetPageToken(t *testing.T) {
+	t.Parallel()
+
+	req := &pbCore.ListUsersRequest{
+		PageSize:  20,
+		PageToken: "40",
+	}
+	params, err := ParseParams(req)
+	if err != nil {
+		t.Fatalf("ParseParams() error = %v", err)
+	}
+	if params.PageToken.Offset != 40 {
+		t.Fatalf("PageToken.Offset = %d, want 40", params.PageToken.Offset)
+	}
+}
+
+func TestParseParamsRejectsNegativeNumericOffsetPageToken(t *testing.T) {
+	t.Parallel()
+
+	req := &pbCore.ListUsersRequest{PageToken: "-1"}
+	if _, err := ParseParams(req); err == nil {
+		t.Fatal("ParseParams() error = nil")
+	}
+}
+
 func ptr[T any](v T) *T {
 	return &v
 }

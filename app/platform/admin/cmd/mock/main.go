@@ -92,7 +92,7 @@ func run(ctx context.Context, logger log.Logger) error {
 	if err != nil {
 		return err
 	}
-	if err := syncPolicies(ctx, bc.Data, logger, result); err != nil {
+	if err := syncPolicies(ctx, bc.Data, client, logger, result); err != nil {
 		return err
 	}
 	if err := refreshTenantMenuCacheVersions(ctx, bc.Data, logger, []uint32{1, 2}); err != nil {
@@ -312,6 +312,36 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	projectListButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemProjectList", Title: "项目查看", Path: "/system/project:list", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.ProjectService/ListProjects",
+	}, projectMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	roleListButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemRoleList", Title: "角色查看", Path: "/system/role:list", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.RoleService/ListRoles",
+	}, roleMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	deptListButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemDeptList", Title: "部门查看", Path: "/system/dept:list", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.DeptService/ListDepts",
+	}, deptMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	userListButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemUserList", Title: "用户查看", Path: "/system/user:list", Type: 3, Sort: 20, AuthCode: "/platform.admin.v1.UserService/ListUsers",
+	}, userMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	parameterCurrentButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemParameterCurrent", Title: "租户参数查看", Path: "/system/parameter:list", Type: 3, Sort: 20, AuthCode: "/platform.admin.v1.ParameterService/ListCurrentTenantParameters",
+	}, parameterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	parameterManageButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemParameterManage", Title: "平台参数定义管理", Path: "/system/parameter:manage", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.ParameterService/ListParameterDefinitions",
 	}, parameterMenu.ID)
@@ -319,8 +349,11 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		return nil, err
 	}
 
+	basicPermissionMenuIDs := []uint32{projectListButton.ID, roleListButton.ID, deptListButton.ID, userListButton.ID, parameterCurrentButton.ID}
 	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, parameterMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, asyncTaskMenu.ID, userCreateButton.ID, parameterManageButton.ID}
+	fullMenuIDs = append(fullMenuIDs, basicPermissionMenuIDs...)
 	basicMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, roleMenu.ID, deptMenu.ID, userMenu.ID, parameterMenu.ID}
+	basicMenuIDs = append(basicMenuIDs, basicPermissionMenuIDs...)
 
 	fullGroup, err := ensureMenuPermissionGroup(ctx, client, "演示完整管理权限组", "demo-full-admin", true, fullMenuIDs)
 	if err != nil {
@@ -488,11 +521,11 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	}, nil
 }
 
-func syncPolicies(ctx context.Context, cfg *conf.Data, logger log.Logger, result *mockSeedResult) error {
+func syncPolicies(ctx context.Context, cfg *conf.Data, client *gen.Client, logger log.Logger, result *mockSeedResult) error {
 	if cfg == nil || cfg.Database == nil {
 		return nil
 	}
-	authorizer, err := data.NewAuthorizer(cfg, logger)
+	authorizer, err := data.NewAuthorizer(cfg, client, logger)
 	if err != nil {
 		return err
 	}

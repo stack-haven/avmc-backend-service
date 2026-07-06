@@ -103,6 +103,43 @@ func TestTenantRepoProvisionRollsBackOnInitializationFailure(t *testing.T) {
 	}
 }
 
+func TestTenantRepoRollbackProvisioningRemovesInitializedTenant(t *testing.T) {
+	ctx := systemContext()
+	client := newTestClient(t)
+	defer client.Close()
+
+	menuItem := client.Menu.Create().SetName("compensation-menu").SetTitle("Compensation").SetStatus(1).SaveX(ctx)
+	group := client.MenuPermissionGroup.Create().
+		SetName("compensation package").
+		SetCode("compensation-package").
+		SetStatus(1).
+		AddMenuIDs(menuItem.ID).
+		SaveX(ctx)
+	repo := NewTenantRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	result, err := repo.Provision(ctx, &biz.TenantProvisioning{
+		Tenant: &pbCore.Tenant{
+			Name:     ptr("Compensation Tenant"),
+			Code:     ptr("compensation-tenant"),
+			GroupIds: []uint32{group.ID},
+		},
+		AdminUsername:     "compensation_admin",
+		AdminPasswordHash: "hashed-password",
+	})
+	if err != nil {
+		t.Fatalf("provision tenant: %v", err)
+	}
+	if err = repo.RollbackProvisioning(ctx, result); err != nil {
+		t.Fatalf("rollback provisioning: %v", err)
+	}
+	exists, err := client.Tenant.Query().Where(tenant.CodeEQ("compensation-tenant")).Exist(ctx)
+	if err != nil {
+		t.Fatalf("query compensated tenant: %v", err)
+	}
+	if exists {
+		t.Fatal("tenant remains after provisioning compensation")
+	}
+}
+
 func TestTenantRepoUpdateCannotBypassLifecycle(t *testing.T) {
 	ctx := systemContext()
 	client := newTestClient(t)

@@ -1,9 +1,13 @@
 package listing
 
 import (
+	"fmt"
+	"strconv"
+
 	"go.einride.tech/aip/filtering"
 	"go.einride.tech/aip/ordering"
 	"go.einride.tech/aip/pagination"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -39,7 +43,7 @@ func ParseParams(req Request, fields ...filtering.DeclarationOption) (Params, er
 	if err != nil {
 		return Params{}, err
 	}
-	pageToken, err := pagination.ParsePageToken(req)
+	pageToken, err := parsePageToken(req)
 	if err != nil {
 		return Params{}, err
 	}
@@ -53,6 +57,35 @@ func ParseParams(req Request, fields ...filtering.DeclarationOption) (Params, er
 		PageToken: pageToken,
 		OrderBy:   orderBy,
 	}, nil
+}
+
+// parsePageToken accepts AIP opaque tokens and the numeric offsets used by the
+// administration console's page-number grids.
+func parsePageToken(req Request) (pagination.PageToken, error) {
+	raw := req.GetPageToken()
+	if raw == "" {
+		return pagination.ParsePageToken(req)
+	}
+	offset, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		return pagination.ParsePageToken(req)
+	}
+	if offset < 0 {
+		return pagination.PageToken{}, fmt.Errorf("page token offset must not be negative")
+	}
+
+	cloned := proto.Clone(req)
+	cloned.ProtoReflect().Clear(cloned.ProtoReflect().Descriptor().Fields().ByName("page_token"))
+	normalized, ok := cloned.(pagination.Request)
+	if !ok {
+		return pagination.PageToken{}, fmt.Errorf("request does not implement pagination request")
+	}
+	token, err := pagination.ParsePageToken(normalized)
+	if err != nil {
+		return pagination.PageToken{}, err
+	}
+	token.Offset = offset
+	return token, nil
 }
 
 // Option configures repository list queries.

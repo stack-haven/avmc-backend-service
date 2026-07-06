@@ -20,6 +20,21 @@ func (panicTaskHandler) Handle(context.Context, json.RawMessage) (string, error)
 	panic("boom")
 }
 
+type permissionCacheInvalidatorStub struct {
+	menuCalls   int
+	tenantCalls []uint32
+}
+
+func (s *permissionCacheInvalidatorStub) InvalidateMenuPermissionCache(context.Context) error {
+	s.menuCalls++
+	return nil
+}
+
+func (s *permissionCacheInvalidatorStub) InvalidateTenantPackagePermissionCache(_ context.Context, tenantID uint32) error {
+	s.tenantCalls = append(s.tenantCalls, tenantID)
+	return nil
+}
+
 type taskRepoStub struct {
 	claimed *AsyncTaskExecution
 	failed  bool
@@ -80,5 +95,29 @@ func TestAsyncTaskUsecaseRecoversHandlerPanic(t *testing.T) {
 	}
 	if !repo.failed {
 		t.Fatal("panicking task was not marked failed/retryable")
+	}
+}
+
+func TestPermissionCacheInvalidationHandler(t *testing.T) {
+	invalidator := &permissionCacheInvalidatorStub{}
+	handler := &permissionCacheInvalidationHandler{invalidator: invalidator}
+
+	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"menu"}`)); err != nil {
+		t.Fatalf("invalidate menu cache: %v", err)
+	}
+	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"tenant_package","tenantId":7}`)); err != nil {
+		t.Fatalf("invalidate tenant package cache: %v", err)
+	}
+	if invalidator.menuCalls != 1 {
+		t.Fatalf("menu invalidation calls = %d, want 1", invalidator.menuCalls)
+	}
+	if len(invalidator.tenantCalls) != 1 || invalidator.tenantCalls[0] != 7 {
+		t.Fatalf("tenant invalidation calls = %v, want [7]", invalidator.tenantCalls)
+	}
+	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"tenant_package"}`)); err == nil {
+		t.Fatal("tenant package invalidation without tenant id succeeded")
+	}
+	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"arbitrary"}`)); err == nil {
+		t.Fatal("unsupported cache invalidation scope succeeded")
 	}
 }
