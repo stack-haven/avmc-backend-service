@@ -111,6 +111,43 @@ func TestRoleRepoListReturnsMenuIDs(t *testing.T) {
 	}
 }
 
+func TestRoleRepoExcludesDeletedMenusFromAuthorizations(t *testing.T) {
+	ctx := tenantContext(1)
+	client := newTestClient(t)
+	defer client.Close()
+	menuItem := client.Menu.Create().
+		SetName("deleted-menu").
+		SetTitle("Deleted").
+		SetStatus(1).
+		SaveX(ctx)
+	seedTenantMenuPermissionGroup(t, client, 1, menuItem.ID)
+	roleRepo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	menuRepo := NewMenuRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	role, err := roleRepo.Save(ctx, &pbCore.Role{Name: ptr("menu-cleanup-role"), MenuIds: []uint32{menuItem.ID}})
+	if err != nil {
+		t.Fatalf("save role: %v", err)
+	}
+
+	if err := menuRepo.Delete(systemContext(), menuItem.ID); err != nil {
+		t.Fatalf("delete menu: %v", err)
+	}
+
+	got, err := roleRepo.FindByID(ctx, role.GetId())
+	if err != nil {
+		t.Fatalf("find role: %v", err)
+	}
+	if len(got.GetMenuIds()) != 0 {
+		t.Fatalf("FindByID() menu IDs = %v, want empty after menu deletion", got.GetMenuIds())
+	}
+	roles, err := roleRepo.ListRoles(ctx)
+	if err != nil {
+		t.Fatalf("list roles: %v", err)
+	}
+	if len(roles) != 1 || len(roles[0].GetMenuIds()) != 0 {
+		t.Fatalf("ListRoles() roles = %#v, want deleted menu excluded", roles)
+	}
+}
+
 func TestRoleRepoProtectsTenantAdminRole(t *testing.T) {
 	ctx := tenantContext(1)
 	client := newTestClient(t)
