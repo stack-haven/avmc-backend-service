@@ -120,6 +120,77 @@ func TestCurrentTenantMenusRemainTenantOperation(t *testing.T) {
 	}
 }
 
+func TestMatchProtectedOperation(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		object authz.Object
+		action authz.Action
+		want   bool
+	}{
+		{
+			name:   "http action",
+			object: authz.Object(v1.OperationUserServiceListUsers),
+			action: "GET",
+			want:   true,
+		},
+		{
+			name:   "grpc action",
+			object: authz.Object(v1.OperationUserServiceListUsers),
+			action: "ListUsers",
+			want:   true,
+		},
+		{
+			name:   "wrong action",
+			object: authz.Object(v1.OperationUserServiceListUsers),
+			action: "POST",
+			want:   false,
+		},
+		{
+			name:   "unknown object",
+			object: "unknown.Operation",
+			action: "GET",
+			want:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := MatchProtectedOperation(tt.object, tt.action); got != tt.want {
+				t.Fatalf("MatchProtectedOperation(%q, %q) = %v, want %v", tt.object, tt.action, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAuthenticatedSelfServiceOperations(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		object authz.Object
+		action authz.Action
+		want   bool
+	}{
+		{name: "profile http", object: authz.Object(v1.OperationAuthServiceProfile), action: "GET", want: true},
+		{name: "profile grpc", object: authz.Object(v1.OperationAuthServiceProfile), action: "Profile", want: true},
+		{name: "logout http", object: authz.Object(v1.OperationAuthServiceLogout), action: "POST", want: true},
+		{name: "logout grpc", object: authz.Object(v1.OperationAuthServiceLogout), action: "Logout", want: true},
+		{name: "my sessions", object: authz.Object(v1.OperationSessionServiceListMySessions), action: "GET", want: true},
+		{name: "wrong action", object: authz.Object(v1.OperationAuthServiceProfile), action: "POST", want: false},
+		{name: "ordinary protected operation", object: authz.Object(v1.OperationUserServiceListUsers), action: "GET", want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsAuthenticatedSelfServiceOperation(tt.object, tt.action); got != tt.want {
+				t.Fatalf("IsAuthenticatedSelfServiceOperation(%q, %q) = %v, want %v", tt.object, tt.action, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParameterControlPlaneClassification(t *testing.T) {
 	if !IsPlatformControlOperation(v1.OperationParameterServiceListParameterDefinitions) {
 		t.Fatal("parameter definitions must be platform control-plane operations")

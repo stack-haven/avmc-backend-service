@@ -22,7 +22,8 @@ type stubUserRepo struct {
 }
 
 type stubSessionRepo struct {
-	revokedUser uint32
+	revokedUser   uint32
+	revokedTenant uint32
 }
 
 func (*stubSessionRepo) List(context.Context, *pbCore.ListSessionsRequest, string) ([]*pbCore.Session, int32, error) {
@@ -36,7 +37,10 @@ func (r *stubSessionRepo) RevokeUser(_ context.Context, id uint32) error {
 	r.revokedUser = id
 	return nil
 }
-func (*stubSessionRepo) RevokeTenant(context.Context, uint32) error { return nil }
+func (r *stubSessionRepo) RevokeTenant(_ context.Context, id uint32) error {
+	r.revokedTenant = id
+	return nil
+}
 
 type stubTenantAdminPolicy struct {
 	tenantID uint32

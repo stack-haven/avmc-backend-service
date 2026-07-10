@@ -5,7 +5,9 @@ import (
 	nethttp "net/http"
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/transport"
+	"google.golang.org/grpc/metadata"
 
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/auth/authz"
@@ -114,6 +116,36 @@ func TestAuthzMiddlewareUsesHTTPMethodAndTokenTenant(t *testing.T) {
 	}
 }
 
+func TestAuthzMiddlewareUsesGRPCMethodSegment(t *testing.T) {
+	authorizer := &testAuthorizer{allowed: true}
+	handler := AuthzMiddleware(authorizer)(func(context.Context, interface{}) (interface{}, error) {
+		return "ok", nil
+	})
+
+	ctx := authn.ContextWithAuthClaims(testGRPCContext(), testClaims())
+	got, err := handler(ctx, nil)
+	if err != nil {
+		t.Fatalf("authz middleware: %v", err)
+	}
+	if got != "ok" {
+		t.Fatalf("response = %v", got)
+	}
+	if authorizer.action != "GetUser" || authorizer.object != "/admin.v1.UserService/GetUser" || authorizer.tenant != "3" {
+		t.Fatalf("enforce object/action/tenant = %q/%q/%q", authorizer.object, authorizer.action, authorizer.tenant)
+	}
+}
+
+func TestAuthzMiddlewareRejectsTransportWithoutClaims(t *testing.T) {
+	handler := AuthzMiddleware(&testAuthorizer{allowed: true})(func(context.Context, interface{}) (interface{}, error) {
+		t.Fatal("handler must not be called")
+		return nil, nil
+	})
+
+	if _, err := handler(testGRPCContext(), nil); err != ErrInvalidToken {
+		t.Fatalf("error = %v, want invalid token", err)
+	}
+}
+
 func TestCombinedAuthMiddlewareInjectsUserAndAuthorizes(t *testing.T) {
 	claims := testClaims()
 	authenticator := &testAuthenticator{
@@ -145,6 +177,41 @@ func TestCombinedAuthMiddlewareInjectsUserAndAuthorizes(t *testing.T) {
 	}
 }
 
+func TestAuthnMiddlewareMapsAuthenticatorErrors(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		err  error
+		want error
+	}{
+		{name: "missing", err: authn.NewAuthError(authn.ErrCodeMissingToken, "missing", nil), want: ErrMissingToken},
+		{name: "expired", err: authn.NewAuthError(authn.ErrCodeExpiredToken, "expired", nil), want: ErrExpiredToken},
+		{name: "invalid", err: authn.NewAuthError(authn.ErrCodeInvalidToken, "invalid", nil), want: ErrInvalidToken},
+		{name: "unknown", err: authn.NewAuthError(authn.ErrCodeUnknown, "other", nil), want: nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			authenticator := &testAuthenticator{err: tt.err}
+			handler := AuthnMiddleware(authenticator)(func(context.Context, interface{}) (interface{}, error) {
+				t.Fatal("handler must not be called")
+				return nil, nil
+			})
+			_, err := handler(context.Background(), nil)
+			if tt.want != nil {
+				if err != tt.want {
+					t.Fatalf("error = %v, want %v", err, tt.want)
+				}
+				return
+			}
+			if err == nil || !errors.IsUnauthorized(err) {
+				t.Fatalf("error = %v, want unauthorized", err)
+			}
+		})
+	}
+}
+
 func TestAuthzMiddlewareFailsClosed(t *testing.T) {
 	authorizer := &testAuthorizer{allowed: true}
 	handler := AuthzMiddleware(authorizer)(func(context.Context, interface{}) (interface{}, error) {
@@ -154,6 +221,55 @@ func TestAuthzMiddlewareFailsClosed(t *testing.T) {
 
 	if _, err := handler(context.Background(), nil); err != ErrPermissionDenied {
 		t.Fatalf("error = %v, want permission denied", err)
+	}
+}
+
+func TestDefaultGRPCAuthExtractor(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		md      metadata.MD
+		want    string
+		wantErr bool
+	}{
+		{name: "bearer", md: metadata.Pairs("authorization", "Bearer abc"), want: "abc"},
+		{name: "token scheme", md: metadata.Pairs("authorization", "Token abc"), want: "abc"},
+		{name: "token header", md: metadata.Pairs("token", "abc"), want: "abc"},
+		{name: "x token header", md: metadata.Pairs("x-token", "abc"), want: "abc"},
+		{name: "missing", md: metadata.MD{}, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := metadata.NewIncomingContext(context.Background(), tt.md)
+			got, err := DefaultGRPCAuthExtractor(ctx)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("DefaultGRPCAuthExtractor() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got != tt.want {
+				t.Fatalf("token = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDefaultGRPCAuthzInfoExtractor(t *testing.T) {
+	t.Parallel()
+
+	sub, obj, act, tenant, err := DefaultGRPCAuthzInfoExtractor(
+		authn.ContextWithAuthClaims(context.Background(), testClaims()),
+		"/admin.v1.UserService/GetUser",
+	)
+	if err != nil {
+		t.Fatalf("DefaultGRPCAuthzInfoExtractor() error = %v", err)
+	}
+	if sub != "7" || tenant != "3" || obj != "/admin.v1.UserService/GetUser" || act != "GetUser" {
+		t.Fatalf("authz info = sub:%q obj:%q act:%q tenant:%q", sub, obj, act, tenant)
+	}
+
+	if _, _, _, _, err := DefaultGRPCAuthzInfoExtractor(context.Background(), "/admin.v1.UserService/GetUser"); err == nil {
+		t.Fatal("extractor without claims succeeded")
 	}
 }
 
