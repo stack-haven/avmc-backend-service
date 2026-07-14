@@ -43,4 +43,43 @@ func TestCacheVersionFailureBypassesPermissionCache(t *testing.T) {
 	if task.Queue != "maintenance" || task.MaxAttempts != 10 {
 		t.Fatalf("cache invalidation task retry config = queue:%s attempts:%d", task.Queue, task.MaxAttempts)
 	}
+	if task.IdempotencyKey == nil || *task.IdempotencyKey == "" {
+		t.Fatal("cache invalidation task idempotency key is empty")
+	}
+}
+
+func TestPermissionCacheInvalidationIntentIsDurable(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	data := &Data{db: client}
+	repo := NewBaseRepo(data, log.NewStdLogger(io.Discard))
+
+	ctx := context.Background()
+	repo.bumpMenuVersion(ctx)
+
+	tasks := client.AsyncTask.Query().
+		Where(asynctask.TaskTypeEQ(biz.AsyncTaskTypePermissionCacheInvalidate)).
+		AllX(systemContext())
+	if len(tasks) != 1 {
+		t.Fatalf("cache invalidation task count = %d, want 1", len(tasks))
+	}
+	task := tasks[0]
+	if task.TenantID != nil {
+		t.Fatalf("menu cache invalidation tenant = %v, want nil", *task.TenantID)
+	}
+	if task.Payload != `{"scope":"menu","tenantId":0}` {
+		t.Fatalf("cache invalidation payload = %s", task.Payload)
+	}
+	if task.IdempotencyKey == nil || *task.IdempotencyKey == "" {
+		t.Fatal("cache invalidation idempotency key is empty")
+	}
+}
+
+func TestPermissionCacheInvalidationIdempotencyKeyIncludesChangeTimestamp(t *testing.T) {
+	base := time.Date(2026, 7, 14, 9, 8, 7, 0, time.FixedZone("CST", 8*60*60))
+	got := permissionCacheInvalidationIdempotencyKey("tenant_package", 42, base)
+	want := "permission-cache:tenant_package:42:1783991287000000000"
+	if got != want {
+		t.Fatalf("idempotency key = %s, want %s", got, want)
+	}
 }

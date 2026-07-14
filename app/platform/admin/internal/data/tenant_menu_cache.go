@@ -8,6 +8,8 @@ import (
 
 	pb "backend-service/api/core/service/v1"
 	"backend-service/app/platform/admin/internal/biz"
+	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 
 	"github.com/redis/go-redis/v9"
@@ -67,18 +69,16 @@ func (r *BaseRepo) bumpCacheVersion(ctx context.Context, key string) bool {
 }
 
 func (r *BaseRepo) bumpMenuVersion(ctx context.Context) {
-	if !r.bumpCacheVersion(ctx, menuVersionKey()) {
-		r.enqueuePermissionCacheInvalidation(ctx, "menu", 0)
-	}
+	r.enqueuePermissionCacheInvalidation(ctx, "menu", 0)
+	r.bumpCacheVersion(ctx, menuVersionKey())
 }
 
 func (r *BaseRepo) bumpTenantPackageVersion(ctx context.Context, tenantID uint32) {
 	if tenantID == 0 {
 		return
 	}
-	if !r.bumpCacheVersion(ctx, tenantPackageVersionKey(tenantID)) {
-		r.enqueuePermissionCacheInvalidation(ctx, "tenant_package", tenantID)
-	}
+	r.enqueuePermissionCacheInvalidation(ctx, "tenant_package", tenantID)
+	r.bumpCacheVersion(ctx, tenantPackageVersionKey(tenantID))
 }
 
 func (r *BaseRepo) enqueuePermissionCacheInvalidation(ctx context.Context, scope string, tenantID uint32) {
@@ -96,7 +96,10 @@ func (r *BaseRepo) enqueuePermissionCacheInvalidation(ctx context.Context, scope
 		summary = fmt.Sprintf("刷新租户 %d 套餐权限缓存版本", tenantID)
 		taskTenantID = &tenantID
 	}
-	_, err = r.Data.DB(entviewer.NewSystemContext(ctx)).AsyncTask.Create().
+	now := time.Now()
+	idempotencyKey := permissionCacheInvalidationIdempotencyKey(scope, tenantID, now)
+	systemCtx := entviewer.NewSystemContext(ctx)
+	_, err = r.Data.DB(systemCtx).AsyncTask.Create().
 		SetNillableTenantID(taskTenantID).
 		SetTaskType(biz.AsyncTaskTypePermissionCacheInvalidate).
 		SetQueue("maintenance").
@@ -104,13 +107,29 @@ func (r *BaseRepo) enqueuePermissionCacheInvalidation(ctx context.Context, scope
 		SetPriority(100).
 		SetPayload(string(payload)).
 		SetPayloadSummary(summary).
+		SetIdempotencyKey(idempotencyKey).
 		SetAttempts(0).
 		SetMaxAttempts(10).
-		SetScheduledAt(time.Now()).
-		Save(entviewer.NewSystemContext(ctx))
+		SetScheduledAt(now).
+		Save(systemCtx)
+	if gen.IsConstraintError(err) {
+		exists, lookupErr := r.Data.DB(systemCtx).AsyncTask.Query().
+			Where(asynctask.IdempotencyKeyEQ(idempotencyKey)).
+			Exist(systemCtx)
+		if lookupErr == nil && exists {
+			return
+		}
+	}
 	if err != nil {
 		r.Log.WithContext(ctx).Errorf("持久化权限缓存失效任务失败 scope=%s tenant_id=%d err=%v", scope, tenantID, err)
 	}
+}
+
+func permissionCacheInvalidationIdempotencyKey(scope string, tenantID uint32, now time.Time) string {
+	if tenantID > 0 {
+		return fmt.Sprintf("permission-cache:%s:%d:%d", scope, tenantID, now.UTC().UnixNano())
+	}
+	return fmt.Sprintf("permission-cache:%s:%d", scope, now.UTC().UnixNano())
 }
 
 func (r *BaseRepo) getTenantEffectiveMenuIDsCache(ctx context.Context, tenantID uint32) ([]uint32, bool) {
