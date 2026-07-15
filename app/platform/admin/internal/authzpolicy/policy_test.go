@@ -206,6 +206,7 @@ func TestParameterControlPlaneClassification(t *testing.T) {
 func TestAsyncTaskOperationsRequirePlatformIdentity(t *testing.T) {
 	for _, operation := range []string{
 		v1.OperationAsyncTaskServiceListAsyncTasks,
+		v1.OperationAsyncTaskServiceGetAsyncTaskStats,
 		v1.OperationAsyncTaskServiceGetAsyncTask,
 		v1.OperationAsyncTaskServiceCancelAsyncTask,
 		v1.OperationAsyncTaskServiceRetryAsyncTask,

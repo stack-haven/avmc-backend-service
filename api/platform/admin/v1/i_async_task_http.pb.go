@@ -22,12 +22,14 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationAsyncTaskServiceCancelAsyncTask = "/platform.admin.v1.AsyncTaskService/CancelAsyncTask"
 const OperationAsyncTaskServiceGetAsyncTask = "/platform.admin.v1.AsyncTaskService/GetAsyncTask"
+const OperationAsyncTaskServiceGetAsyncTaskStats = "/platform.admin.v1.AsyncTaskService/GetAsyncTaskStats"
 const OperationAsyncTaskServiceListAsyncTasks = "/platform.admin.v1.AsyncTaskService/ListAsyncTasks"
 const OperationAsyncTaskServiceRetryAsyncTask = "/platform.admin.v1.AsyncTaskService/RetryAsyncTask"
 
 type AsyncTaskServiceHTTPServer interface {
 	CancelAsyncTask(context.Context, *v1.CancelAsyncTaskRequest) (*v1.CancelAsyncTaskResponse, error)
 	GetAsyncTask(context.Context, *v1.GetAsyncTaskRequest) (*v1.GetAsyncTaskResponse, error)
+	GetAsyncTaskStats(context.Context, *v1.GetAsyncTaskStatsRequest) (*v1.GetAsyncTaskStatsResponse, error)
 	ListAsyncTasks(context.Context, *v1.ListAsyncTasksRequest) (*v1.ListAsyncTasksResponse, error)
 	RetryAsyncTask(context.Context, *v1.RetryAsyncTaskRequest) (*v1.RetryAsyncTaskResponse, error)
 }
@@ -35,6 +37,7 @@ type AsyncTaskServiceHTTPServer interface {
 func RegisterAsyncTaskServiceHTTPServer(s *http.Server, srv AsyncTaskServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/admin/v1/async-tasks", _AsyncTaskService_ListAsyncTasks0_HTTP_Handler(srv))
+	r.GET("/admin/v1/async-tasks:stats", _AsyncTaskService_GetAsyncTaskStats0_HTTP_Handler(srv))
 	r.GET("/admin/v1/async-tasks/{id}", _AsyncTaskService_GetAsyncTask0_HTTP_Handler(srv))
 	r.POST("/admin/v1/async-tasks/{id}:cancel", _AsyncTaskService_CancelAsyncTask0_HTTP_Handler(srv))
 	r.POST("/admin/v1/async-tasks/{id}:retry", _AsyncTaskService_RetryAsyncTask0_HTTP_Handler(srv))
@@ -55,6 +58,25 @@ func _AsyncTaskService_ListAsyncTasks0_HTTP_Handler(srv AsyncTaskServiceHTTPServ
 			return err
 		}
 		reply := out.(*v1.ListAsyncTasksResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AsyncTaskService_GetAsyncTaskStats0_HTTP_Handler(srv AsyncTaskServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.GetAsyncTaskStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAsyncTaskServiceGetAsyncTaskStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetAsyncTaskStats(ctx, req.(*v1.GetAsyncTaskStatsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.GetAsyncTaskStatsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -134,6 +156,7 @@ func _AsyncTaskService_RetryAsyncTask0_HTTP_Handler(srv AsyncTaskServiceHTTPServ
 type AsyncTaskServiceHTTPClient interface {
 	CancelAsyncTask(ctx context.Context, req *v1.CancelAsyncTaskRequest, opts ...http.CallOption) (rsp *v1.CancelAsyncTaskResponse, err error)
 	GetAsyncTask(ctx context.Context, req *v1.GetAsyncTaskRequest, opts ...http.CallOption) (rsp *v1.GetAsyncTaskResponse, err error)
+	GetAsyncTaskStats(ctx context.Context, req *v1.GetAsyncTaskStatsRequest, opts ...http.CallOption) (rsp *v1.GetAsyncTaskStatsResponse, err error)
 	ListAsyncTasks(ctx context.Context, req *v1.ListAsyncTasksRequest, opts ...http.CallOption) (rsp *v1.ListAsyncTasksResponse, err error)
 	RetryAsyncTask(ctx context.Context, req *v1.RetryAsyncTaskRequest, opts ...http.CallOption) (rsp *v1.RetryAsyncTaskResponse, err error)
 }
@@ -164,6 +187,19 @@ func (c *AsyncTaskServiceHTTPClientImpl) GetAsyncTask(ctx context.Context, in *v
 	pattern := "/admin/v1/async-tasks/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAsyncTaskServiceGetAsyncTask))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AsyncTaskServiceHTTPClientImpl) GetAsyncTaskStats(ctx context.Context, in *v1.GetAsyncTaskStatsRequest, opts ...http.CallOption) (*v1.GetAsyncTaskStatsResponse, error) {
+	var out v1.GetAsyncTaskStatsResponse
+	pattern := "/admin/v1/async-tasks:stats"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAsyncTaskServiceGetAsyncTaskStats))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -40,6 +40,7 @@ type AsyncTaskExecution struct {
 type AsyncTaskRepo interface {
 	Enqueue(context.Context, *AsyncTaskSpec) (*pb.AsyncTask, error)
 	List(context.Context, *pb.ListAsyncTasksRequest) ([]*pb.AsyncTask, int32, error)
+	Stats(context.Context, *pb.GetAsyncTaskStatsRequest) (*pb.AsyncTaskStats, error)
 	Get(context.Context, uint32) (*pb.AsyncTask, error)
 	Cancel(context.Context, uint32) error
 	Retry(context.Context, uint32) (*pb.AsyncTask, error)
@@ -113,6 +114,10 @@ func (uc *AsyncTaskUsecase) Enqueue(ctx context.Context, spec *AsyncTaskSpec) (*
 
 func (uc *AsyncTaskUsecase) List(ctx context.Context, req *pb.ListAsyncTasksRequest) ([]*pb.AsyncTask, int32, error) {
 	return uc.repo.List(ctx, req)
+}
+
+func (uc *AsyncTaskUsecase) Stats(ctx context.Context, req *pb.GetAsyncTaskStatsRequest) (*pb.AsyncTaskStats, error) {
+	return uc.repo.Stats(ctx, req)
 }
 
 func (uc *AsyncTaskUsecase) Get(ctx context.Context, id uint32) (*pb.AsyncTask, error) {

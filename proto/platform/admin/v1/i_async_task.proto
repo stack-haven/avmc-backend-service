@@ -12,6 +12,10 @@ service AsyncTaskService {
     option (google.api.http) = {get: "/admin/v1/async-tasks"};
   }
 
+  rpc GetAsyncTaskStats(core.service.v1.GetAsyncTaskStatsRequest) returns (core.service.v1.GetAsyncTaskStatsResponse) {
+    option (google.api.http) = {get: "/admin/v1/async-tasks:stats"};
+  }
+
   rpc GetAsyncTask(core.service.v1.GetAsyncTaskRequest) returns (core.service.v1.GetAsyncTaskResponse) {
     option (google.api.http) = {get: "/admin/v1/async-tasks/{id}"};
   }

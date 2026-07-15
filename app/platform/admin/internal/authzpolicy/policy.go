@@ -113,6 +113,7 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationParameterServiceSetTenantParameter, "PUT"),
 		op(v1.OperationParameterServiceResetTenantParameter, "DELETE"),
 		op(v1.OperationAsyncTaskServiceListAsyncTasks, "GET"),
+		op(v1.OperationAsyncTaskServiceGetAsyncTaskStats, "GET"),
 		op(v1.OperationAsyncTaskServiceGetAsyncTask, "GET"),
 		op(v1.OperationAsyncTaskServiceCancelAsyncTask, "POST"),
 		op(v1.OperationAsyncTaskServiceRetryAsyncTask, "POST"),
@@ -187,6 +188,7 @@ func IsPlatformControlOperation(operation string) bool {
 		v1.OperationParameterServiceSetTenantParameter,
 		v1.OperationParameterServiceResetTenantParameter,
 		v1.OperationAsyncTaskServiceListAsyncTasks,
+		v1.OperationAsyncTaskServiceGetAsyncTaskStats,
 		v1.OperationAsyncTaskServiceGetAsyncTask,
 		v1.OperationAsyncTaskServiceCancelAsyncTask,
 		v1.OperationAsyncTaskServiceRetryAsyncTask:

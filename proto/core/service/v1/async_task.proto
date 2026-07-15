@@ -58,6 +58,35 @@ message ListAsyncTasksResponse {
   string next_page_token = 3;
 }
 
+message AsyncTaskStatusCount {
+  AsyncTaskStatus status = 1;
+  int32 count = 2;
+}
+
+message AsyncTaskStats {
+  repeated AsyncTaskStatusCount status_counts = 1;
+  int32 total = 2;
+  int32 pending_overdue = 3;
+  int32 running_lease_expired = 4;
+  int32 failed = 5;
+  int32 retry_pressure = 6;
+  optional string checked_at = 7;
+}
+
+message GetAsyncTaskStatsRequest {
+  optional string queue = 1 [(buf.validate.field).string.max_len = 50];
+  int32 pending_overdue_seconds = 2 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 86400
+    }
+  ];
+}
+
+message GetAsyncTaskStatsResponse {
+  AsyncTaskStats stats = 1;
+}
+
 message GetAsyncTaskRequest {
   uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
 }

@@ -170,6 +170,60 @@ func TestAsyncTaskRepoCancelAndRetention(t *testing.T) {
 	}
 }
 
+func TestAsyncTaskRepoStatsSummarizesOperationalHealth(t *testing.T) {
+	repo, closeRepo := newAsyncTaskRepoForTest(t)
+	defer closeRepo()
+	ctx := systemContext()
+	now := time.Now()
+	maintenance := "maintenance"
+	defaultQueue := "default"
+
+	createTask := func(queue string, status pb.AsyncTaskStatus, scheduledAt time.Time, attempts, maxAttempts int32) {
+		builder := repo.Data.DB(ctx).AsyncTask.Create().
+			SetTaskType(biz.AsyncTaskTypeRetentionCleanup).
+			SetQueue(queue).
+			SetStatus(int32(status)).
+			SetPayload(`{"retentionDays":30,"batchSize":100}`).
+			SetScheduledAt(scheduledAt).
+			SetAttempts(attempts).
+			SetMaxAttempts(maxAttempts)
+		if status == pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING {
+			builder.SetLeaseOwner("worker").SetLeaseExpiresAt(now.Add(-time.Minute))
+		}
+		builder.SaveX(ctx)
+	}
+	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING, now.Add(-10*time.Minute), 2, 3)
+	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING, now.Add(-time.Minute), 1, 3)
+	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED, now.Add(-time.Hour), 3, 3)
+	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED, now.Add(-time.Hour), 1, 3)
+	createTask(defaultQueue, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING, now.Add(-10*time.Minute), 0, 3)
+
+	stats, err := repo.Stats(ctx, &pb.GetAsyncTaskStatsRequest{Queue: &maintenance, PendingOverdueSeconds: 300})
+	if err != nil {
+		t.Fatalf("stats: %v", err)
+	}
+	if stats.GetTotal() != 4 ||
+		stats.GetPendingOverdue() != 1 ||
+		stats.GetRunningLeaseExpired() != 1 ||
+		stats.GetFailed() != 1 ||
+		stats.GetRetryPressure() != 1 {
+		t.Fatalf("stats = %+v", stats)
+	}
+	countByStatus := map[pb.AsyncTaskStatus]int32{}
+	for _, item := range stats.GetStatusCounts() {
+		countByStatus[item.GetStatus()] = item.GetCount()
+	}
+	if countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING] != 1 ||
+		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING] != 1 ||
+		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED] != 1 ||
+		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED] != 1 {
+		t.Fatalf("status counts = %+v", countByStatus)
+	}
+	if stats.GetCheckedAt() == "" {
+		t.Fatal("checked_at must be set")
+	}
+}
+
 func TestAsyncTaskRepoDoesNotExceedMaxAttemptsAfterLeaseExpiry(t *testing.T) {
 	repo, closeRepo := newAsyncTaskRepoForTest(t)
 	defer closeRepo()

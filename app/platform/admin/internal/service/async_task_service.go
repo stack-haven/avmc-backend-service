@@ -31,6 +31,14 @@ func (s *AsyncTaskServiceService) ListAsyncTasks(ctx context.Context, req *pbCor
 	return resp, nil
 }
 
+func (s *AsyncTaskServiceService) GetAsyncTaskStats(ctx context.Context, req *pbCore.GetAsyncTaskStatsRequest) (*pbCore.GetAsyncTaskStatsResponse, error) {
+	stats, err := s.uc.Stats(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.GetAsyncTaskStatsResponse{Stats: stats}, nil
+}
+
 func (s *AsyncTaskServiceService) GetAsyncTask(ctx context.Context, req *pbCore.GetAsyncTaskRequest) (*pbCore.GetAsyncTaskResponse, error) {
 	task, err := s.uc.Get(ctx, req.GetId())
 	if err != nil {

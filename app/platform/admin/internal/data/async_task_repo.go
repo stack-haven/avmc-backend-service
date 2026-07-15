@@ -147,6 +147,87 @@ func (r *asyncTaskRepo) List(ctx context.Context, req *pb.ListAsyncTasksRequest)
 	return ConvertSlice(rows, asyncTaskProto), int32(total), nil
 }
 
+func (r *asyncTaskRepo) Stats(ctx context.Context, req *pb.GetAsyncTaskStatsRequest) (*pb.AsyncTaskStats, error) {
+	if req == nil {
+		req = &pb.GetAsyncTaskStatsRequest{}
+	}
+	ctx = entviewer.NewSystemContext(ctx)
+	now := time.Now()
+	overdueSeconds := req.GetPendingOverdueSeconds()
+	if overdueSeconds <= 0 {
+		overdueSeconds = 300
+	}
+	overdueBefore := now.Add(-time.Duration(overdueSeconds) * time.Second)
+	statuses := []pb.AsyncTaskStatus{
+		pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING,
+		pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING,
+		pb.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED,
+		pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED,
+		pb.AsyncTaskStatus_ASYNC_TASK_STATUS_CANCELED,
+	}
+	base := func() *gen.AsyncTaskQuery {
+		query := r.Data.DB(ctx).AsyncTask.Query()
+		if value := strings.TrimSpace(req.GetQueue()); value != "" {
+			query.Where(asynctask.QueueEQ(value))
+		}
+		return query
+	}
+
+	total, err := base().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	stats := &pb.AsyncTaskStats{Total: int32(total)}
+	for _, status := range statuses {
+		count, countErr := base().Where(asynctask.StatusEQ(int32(status))).Count(ctx)
+		if countErr != nil {
+			return nil, countErr
+		}
+		stats.StatusCounts = append(stats.StatusCounts, &pb.AsyncTaskStatusCount{
+			Status: status,
+			Count:  int32(count),
+		})
+		if status == pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED {
+			stats.Failed = int32(count)
+		}
+	}
+	pendingOverdue, err := base().Where(
+		asynctask.StatusEQ(int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING)),
+		asynctask.ScheduledAtLTE(overdueBefore),
+	).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	stats.PendingOverdue = int32(pendingOverdue)
+
+	runningLeaseExpired, err := base().Where(
+		asynctask.StatusEQ(int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING)),
+		asynctask.LeaseExpiresAtNotNil(),
+		asynctask.LeaseExpiresAtLTE(now),
+	).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	stats.RunningLeaseExpired = int32(runningLeaseExpired)
+
+	retryPressureRows, err := base().Where(
+		asynctask.StatusIn(
+			int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING),
+			int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING),
+		),
+	).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range retryPressureRows {
+		if row.Attempts >= row.MaxAttempts-1 {
+			stats.RetryPressure++
+		}
+	}
+	setOptionalTime(&stats.CheckedAt, &now)
+	return stats, nil
+}
+
 func (r *asyncTaskRepo) Get(ctx context.Context, id uint32) (*pb.AsyncTask, error) {
 	ctx = entviewer.NewSystemContext(ctx)
 	row, err := r.Data.DB(ctx).AsyncTask.Get(ctx, id)

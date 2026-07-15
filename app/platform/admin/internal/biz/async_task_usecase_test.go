@@ -47,6 +47,8 @@ func (s *permissionCacheInvalidatorStub) InvalidateTenantPackagePermissionCache(
 type taskRepoStub struct {
 	claimed     *AsyncTaskExecution
 	enqueued    *AsyncTaskSpec
+	statsReq    *pb.GetAsyncTaskStatsRequest
+	stats       *pb.AsyncTaskStats
 	completedID uint32
 	failed      bool
 	failedID    uint32
@@ -67,6 +69,13 @@ func (r *taskRepoStub) Enqueue(_ context.Context, spec *AsyncTaskSpec) (*pb.Asyn
 }
 func (r *taskRepoStub) List(context.Context, *pb.ListAsyncTasksRequest) ([]*pb.AsyncTask, int32, error) {
 	return nil, 0, nil
+}
+func (r *taskRepoStub) Stats(_ context.Context, req *pb.GetAsyncTaskStatsRequest) (*pb.AsyncTaskStats, error) {
+	r.statsReq = req
+	if r.stats != nil {
+		return r.stats, nil
+	}
+	return &pb.AsyncTaskStats{}, nil
 }
 func (r *taskRepoStub) Get(context.Context, uint32) (*pb.AsyncTask, error) { return nil, nil }
 func (r *taskRepoStub) Cancel(context.Context, uint32) error               { return nil }
@@ -159,6 +168,25 @@ func TestAsyncTaskUsecaseRunOneCompletesSuccessfulTask(t *testing.T) {
 	}
 	if repo.completedID != 3 || repo.failed {
 		t.Fatalf("completedID=%d failed=%v", repo.completedID, repo.failed)
+	}
+}
+
+func TestAsyncTaskUsecaseStatsPassThrough(t *testing.T) {
+	t.Parallel()
+
+	queue := "maintenance"
+	repo := &taskRepoStub{stats: &pb.AsyncTaskStats{Total: 4, RetryPressure: 1}}
+	uc := NewAsyncTaskUsecase(repo, []AsyncTaskHandler{successTaskHandler{}}, log.NewStdLogger(io.Discard))
+
+	got, err := uc.Stats(context.Background(), &pb.GetAsyncTaskStatsRequest{Queue: &queue, PendingOverdueSeconds: 120})
+	if err != nil {
+		t.Fatalf("Stats() error = %v", err)
+	}
+	if repo.statsReq.GetQueue() != queue || repo.statsReq.GetPendingOverdueSeconds() != 120 {
+		t.Fatalf("stats request = %+v", repo.statsReq)
+	}
+	if got.GetTotal() != 4 || got.GetRetryPressure() != 1 {
+		t.Fatalf("stats = %+v", got)
 	}
 }
 

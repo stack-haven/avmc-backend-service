@@ -17,6 +17,8 @@ type asyncTaskRepoStub struct {
 	listReq   *pbCore.ListAsyncTasksRequest
 	listItems []*pbCore.AsyncTask
 	listTotal int32
+	statsReq  *pbCore.GetAsyncTaskStatsRequest
+	stats     *pbCore.AsyncTaskStats
 	getID     uint32
 	getTask   *pbCore.AsyncTask
 	cancelID  uint32
@@ -31,6 +33,14 @@ func (*asyncTaskRepoStub) Enqueue(context.Context, *biz.AsyncTaskSpec) (*pbCore.
 func (r *asyncTaskRepoStub) List(_ context.Context, req *pbCore.ListAsyncTasksRequest) ([]*pbCore.AsyncTask, int32, error) {
 	r.listReq = req
 	return r.listItems, r.listTotal, nil
+}
+
+func (r *asyncTaskRepoStub) Stats(_ context.Context, req *pbCore.GetAsyncTaskStatsRequest) (*pbCore.AsyncTaskStats, error) {
+	r.statsReq = req
+	if r.stats != nil {
+		return r.stats, nil
+	}
+	return &pbCore.AsyncTaskStats{}, nil
 }
 
 func (r *asyncTaskRepoStub) Get(context.Context, uint32) (*pbCore.AsyncTask, error) {
@@ -73,6 +83,8 @@ func (noopTaskHandler) Handle(context.Context, json.RawMessage) (string, error) 
 	return "", nil
 }
 
+func ptrString(value string) *string { return &value }
+
 func TestAsyncTaskServiceListSetsNextPageToken(t *testing.T) {
 	t.Parallel()
 
@@ -91,6 +103,26 @@ func TestAsyncTaskServiceListSetsNextPageToken(t *testing.T) {
 	}
 	if len(resp.GetItems()) != 2 || resp.GetTotal() != 5 || resp.GetNextPageToken() != "4" {
 		t.Fatalf("response items=%d total=%d next=%q", len(resp.GetItems()), resp.GetTotal(), resp.GetNextPageToken())
+	}
+}
+
+func TestAsyncTaskServiceGetStats(t *testing.T) {
+	t.Parallel()
+
+	repo := &asyncTaskRepoStub{
+		stats: &pbCore.AsyncTaskStats{Total: 9, PendingOverdue: 2},
+	}
+	service := NewAsyncTaskServiceService(biz.NewAsyncTaskUsecase(repo, []biz.AsyncTaskHandler{noopTaskHandler{}}, log.NewStdLogger(io.Discard)))
+
+	resp, err := service.GetAsyncTaskStats(context.Background(), &pbCore.GetAsyncTaskStatsRequest{Queue: ptrString("maintenance"), PendingOverdueSeconds: 60})
+	if err != nil {
+		t.Fatalf("GetAsyncTaskStats() error = %v", err)
+	}
+	if repo.statsReq.GetQueue() != "maintenance" || repo.statsReq.GetPendingOverdueSeconds() != 60 {
+		t.Fatalf("stats request = %+v", repo.statsReq)
+	}
+	if resp.GetStats().GetTotal() != 9 || resp.GetStats().GetPendingOverdue() != 2 {
+		t.Fatalf("stats response = %+v", resp.GetStats())
 	}
 }
 
