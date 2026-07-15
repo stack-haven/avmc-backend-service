@@ -525,7 +525,7 @@ func syncPolicies(ctx context.Context, cfg *conf.Data, client *gen.Client, logge
 	if cfg == nil || cfg.Database == nil {
 		return nil
 	}
-	authorizer, err := data.NewAuthorizer(cfg, client, logger)
+	authorizer, err := data.NewAuthorizer(cfg, client, &data.Data{}, logger)
 	if err != nil {
 		return err
 	}

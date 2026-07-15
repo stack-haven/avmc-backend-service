@@ -50,7 +50,7 @@ func TestTenantRoleAuthorizerUsesRoleMenuPermission(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create base authorizer: %v", err)
 	}
-	authorizer := newTenantRoleAuthorizer(base, client)
+	authorizer := newTenantRoleAuthorizer(base, client, &Data{db: client})
 	subject := authz.Subject(strconv.FormatUint(uint64(tenantUser.ID), 10))
 
 	allowed, err := authorizer.Enforce(ctx, subject, pbAdmin.OperationUserServiceListUsers, "GET", "1")
@@ -96,7 +96,7 @@ func TestTenantRoleAuthorizerAllowsAuthenticatedSelfService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create base authorizer: %v", err)
 	}
-	authorizer := newTenantRoleAuthorizer(base, client)
+	authorizer := newTenantRoleAuthorizer(base, client, &Data{db: client})
 	allowed, err := authorizer.Enforce(
 		ctx,
 		authz.Subject(strconv.FormatUint(uint64(tenantUser.ID), 10)),
@@ -148,7 +148,7 @@ func BenchmarkTenantRoleAuthorizerEnforceAllowed(b *testing.B) {
 	if err != nil {
 		b.Fatalf("create base authorizer: %v", err)
 	}
-	authorizer := newTenantRoleAuthorizer(base, client)
+	authorizer := newTenantRoleAuthorizer(base, client, &Data{db: client})
 	subject := authz.Subject(strconv.FormatUint(uint64(tenantUser.ID), 10))
 
 	b.ReportAllocs()

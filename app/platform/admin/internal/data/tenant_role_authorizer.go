@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"io"
 	"strconv"
 
 	pbEnum "backend-service/api/common/enum"
@@ -15,17 +16,23 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/auth/authz"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 // tenantRoleAuthorizer keeps Casbin as the platform-policy engine and resolves
 // ordinary tenant role permissions from the database source of truth.
 type tenantRoleAuthorizer struct {
 	authz.Authorizer
-	db *gen.Client
+	db   *gen.Client
+	repo BaseRepo
 }
 
-func newTenantRoleAuthorizer(base authz.Authorizer, db *gen.Client) authz.Authorizer {
-	return &tenantRoleAuthorizer{Authorizer: base, db: db}
+func newTenantRoleAuthorizer(base authz.Authorizer, db *gen.Client, data *Data) authz.Authorizer {
+	if data == nil {
+		data = &Data{db: db}
+	}
+	return &tenantRoleAuthorizer{Authorizer: base, db: db, repo: NewBaseRepo(data, log.NewStdLogger(io.Discard))}
 }
 
 func (a *tenantRoleAuthorizer) Enforce(
@@ -62,6 +69,9 @@ func (a *tenantRoleAuthorizer) enforceTenantRole(
 	if !authzpolicy.MatchProtectedOperation(obj, act) {
 		return false, nil
 	}
+	if allowed, ok := a.repo.getTenantRoleAuthorizationCache(ctx, uint32(tenantID), uint32(userID), string(obj), string(act)); ok {
+		return allowed, nil
+	}
 
 	tenantCtx := entviewer.NewTenantContext(ctx, uint32(tenantID))
 	activeUser, err := a.db.User.Query().
@@ -87,11 +97,15 @@ func (a *tenantRoleAuthorizer) enforceTenantRole(
 			),
 		).
 		IDs(tenantCtx)
-	if err != nil || len(roleMenuIDs) == 0 {
+	if err != nil {
 		return false, err
 	}
+	if len(roleMenuIDs) == 0 {
+		a.repo.setTenantRoleAuthorizationCache(ctx, uint32(tenantID), uint32(userID), string(obj), string(act), false)
+		return false, nil
+	}
 
-	return a.db.TenantPermissionGroup.Query().
+	allowed, err := a.db.TenantPermissionGroup.Query().
 		Where(
 			tenantpermissiongroup.TenantIDEQ(uint32(tenantID)),
 			tenantpermissiongroup.EnabledEQ(true),
@@ -111,6 +125,10 @@ func (a *tenantRoleAuthorizer) enforceTenantRole(
 			),
 		).
 		Exist(entviewer.NewSystemContext(ctx))
+	if err == nil {
+		a.repo.setTenantRoleAuthorizationCache(ctx, uint32(tenantID), uint32(userID), string(obj), string(act), allowed)
+	}
+	return allowed, err
 }
 
 func (a *tenantRoleAuthorizer) BatchEnforce(

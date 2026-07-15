@@ -16,9 +16,29 @@ import (
 )
 
 const tenantEffectiveMenuCacheTTL = 30 * time.Minute
+const tenantRoleAuthorizationCacheTTL = 5 * time.Minute
+
+type tenantRoleAuthorizationCacheKey struct {
+	tenantID       uint32
+	userID         uint32
+	object         string
+	action         string
+	menuVersion    uint64
+	packageVersion uint64
+	authVersion    uint64
+}
+
+type tenantRoleAuthorizationCacheEntry struct {
+	allowed   bool
+	expiresAt time.Time
+}
 
 func tenantPackageVersionKey(tenantID uint32) string {
 	return fmt.Sprintf("platform:admin:tenant:%d:package_version", tenantID)
+}
+
+func tenantAuthorizationVersionKey(tenantID uint32) string {
+	return fmt.Sprintf("platform:admin:tenant:%d:authorization_version", tenantID)
 }
 
 func menuVersionKey() string {
@@ -81,6 +101,15 @@ func (r *BaseRepo) bumpTenantPackageVersion(ctx context.Context, tenantID uint32
 	r.bumpCacheVersion(ctx, tenantPackageVersionKey(tenantID))
 }
 
+func (r *BaseRepo) bumpTenantAuthorizationVersion(ctx context.Context, tenantID uint32) {
+	if tenantID == 0 {
+		return
+	}
+	r.enqueuePermissionCacheInvalidation(ctx, "tenant_authorization", tenantID)
+	r.clearTenantAuthorizationCache(tenantID)
+	r.bumpCacheVersion(ctx, tenantAuthorizationVersionKey(tenantID))
+}
+
 func (r *BaseRepo) enqueuePermissionCacheInvalidation(ctx context.Context, scope string, tenantID uint32) {
 	if r == nil || r.Data == nil || r.Data.db == nil {
 		return
@@ -94,6 +123,9 @@ func (r *BaseRepo) enqueuePermissionCacheInvalidation(ctx context.Context, scope
 	var taskTenantID *uint32
 	if tenantID > 0 {
 		summary = fmt.Sprintf("刷新租户 %d 套餐权限缓存版本", tenantID)
+		if scope == "tenant_authorization" {
+			summary = fmt.Sprintf("刷新租户 %d 授权快照缓存版本", tenantID)
+		}
 		taskTenantID = &tenantID
 	}
 	now := time.Now()
@@ -191,6 +223,94 @@ func (r *BaseRepo) setTenantEffectiveMenuIDsCache(ctx context.Context, tenantID 
 	}
 }
 
+func (r *BaseRepo) getTenantRoleAuthorizationCache(
+	ctx context.Context,
+	tenantID uint32,
+	userID uint32,
+	object string,
+	action string,
+) (bool, bool) {
+	key, ok := r.tenantRoleAuthorizationCacheKey(ctx, tenantID, userID, object, action)
+	if !ok {
+		return false, false
+	}
+	value, ok := r.Data.authorizationCache.Load(key)
+	if !ok {
+		return false, false
+	}
+	entry, ok := value.(tenantRoleAuthorizationCacheEntry)
+	if !ok || time.Now().After(entry.expiresAt) {
+		r.Data.authorizationCache.Delete(key)
+		return false, false
+	}
+	return entry.allowed, true
+}
+
+func (r *BaseRepo) setTenantRoleAuthorizationCache(
+	ctx context.Context,
+	tenantID uint32,
+	userID uint32,
+	object string,
+	action string,
+	allowed bool,
+) {
+	key, ok := r.tenantRoleAuthorizationCacheKey(ctx, tenantID, userID, object, action)
+	if !ok {
+		return
+	}
+	r.Data.authorizationCache.Store(key, tenantRoleAuthorizationCacheEntry{
+		allowed:   allowed,
+		expiresAt: time.Now().Add(tenantRoleAuthorizationCacheTTL),
+	})
+}
+
+func (r *BaseRepo) tenantRoleAuthorizationCacheKey(
+	ctx context.Context,
+	tenantID uint32,
+	userID uint32,
+	object string,
+	action string,
+) (tenantRoleAuthorizationCacheKey, bool) {
+	if r == nil || r.Data == nil || r.Data.rdb == nil || tenantID == 0 || userID == 0 {
+		return tenantRoleAuthorizationCacheKey{}, false
+	}
+	packageKey := tenantPackageVersionKey(tenantID)
+	authKey := tenantAuthorizationVersionKey(tenantID)
+	for _, key := range []string{menuVersionKey(), packageKey, authKey} {
+		if _, bypass := r.Data.permissionCacheBypass.Load(key); bypass {
+			return tenantRoleAuthorizationCacheKey{}, false
+		}
+	}
+	menuVersion, menuVersionOK := r.cacheUint64(ctx, menuVersionKey())
+	packageVersion, packageVersionOK := r.cacheUint64(ctx, packageKey)
+	authVersion, authVersionOK := r.cacheUint64(ctx, authKey)
+	if !menuVersionOK || !packageVersionOK || !authVersionOK {
+		return tenantRoleAuthorizationCacheKey{}, false
+	}
+	return tenantRoleAuthorizationCacheKey{
+		tenantID:       tenantID,
+		userID:         userID,
+		object:         object,
+		action:         action,
+		menuVersion:    menuVersion,
+		packageVersion: packageVersion,
+		authVersion:    authVersion,
+	}, true
+}
+
+func (r *BaseRepo) clearTenantAuthorizationCache(tenantID uint32) {
+	if r == nil || r.Data == nil || tenantID == 0 {
+		return
+	}
+	r.Data.authorizationCache.Range(func(key, _ any) bool {
+		cacheKey, ok := key.(tenantRoleAuthorizationCacheKey)
+		if ok && cacheKey.tenantID == tenantID {
+			r.Data.authorizationCache.Delete(key)
+		}
+		return true
+	})
+}
+
 type permissionCacheInvalidator struct {
 	data *Data
 }
@@ -208,6 +328,23 @@ func (i *permissionCacheInvalidator) InvalidateTenantPackagePermissionCache(ctx 
 		return fmt.Errorf("tenant id is required")
 	}
 	return i.invalidate(ctx, tenantPackageVersionKey(tenantID))
+}
+
+func (i *permissionCacheInvalidator) InvalidateTenantAuthorizationCache(ctx context.Context, tenantID uint32) error {
+	if tenantID == 0 {
+		return fmt.Errorf("tenant id is required")
+	}
+	if err := i.invalidate(ctx, tenantAuthorizationVersionKey(tenantID)); err != nil {
+		return err
+	}
+	i.data.authorizationCache.Range(func(key, _ any) bool {
+		cacheKey, ok := key.(tenantRoleAuthorizationCacheKey)
+		if ok && cacheKey.tenantID == tenantID {
+			i.data.authorizationCache.Delete(key)
+		}
+		return true
+	})
+	return nil
 }
 
 func (i *permissionCacheInvalidator) invalidate(ctx context.Context, key string) error {

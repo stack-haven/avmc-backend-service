@@ -66,6 +66,7 @@ type Data struct {
 	db                    *gen.Client
 	rdb                   *redis.Client
 	permissionCacheBypass sync.Map
+	authorizationCache    sync.Map
 }
 
 // NewData .
@@ -226,7 +227,7 @@ func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duratio
 }
 
 // NewAuthorizer 创建权鉴器
-func NewAuthorizer(cfg *conf.Data, db *gen.Client, logger log.Logger) (authzEngine.Authorizer, error) {
+func NewAuthorizer(cfg *conf.Data, db *gen.Client, data *Data, logger log.Logger) (authzEngine.Authorizer, error) {
 	// adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
 	// if err != nil {
 	// 	l.Fatalf("failed creating adapter: %s", err.Error())
@@ -250,5 +251,5 @@ func NewAuthorizer(cfg *conf.Data, db *gen.Client, logger log.Logger) (authzEngi
 	if err != nil {
 		return nil, fmt.Errorf("creating authorizer: %w", err)
 	}
-	return newTenantRoleAuthorizer(authorizer, db), nil
+	return newTenantRoleAuthorizer(authorizer, db, data), nil
 }

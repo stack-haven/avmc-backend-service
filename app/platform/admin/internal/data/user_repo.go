@@ -177,6 +177,10 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	if g == nil || g.Name == nil || g.Password == nil {
 		return nil, pb.ErrorBadRequest("用户名和密码不能为空")
 	}
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
 	r.Log.Infof("保存用户")
 	ent := r.protoToEnt(g)
 	if err := r.validateRoleIDs(ctx, r.Data.DB(ctx), g.GetRoleIds()); err != nil {
@@ -215,6 +219,9 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	if err != nil {
 		return nil, err
 	}
+	if len(g.GetRoleIds()) > 0 {
+		r.bumpTenantAuthorizationVersion(ctx, tenantID)
+	}
 	return r.entToProto(res), nil
 }
 
@@ -223,7 +230,8 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	if g == nil || g.GetId() == 0 {
 		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
 	}
-	if _, err := requireTenantID(ctx); err != nil {
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
 		return nil, err
 	}
 	r.Log.Infof("更新用户 ID: %d", g.GetId())
@@ -289,6 +297,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 	if err != nil {
 		return nil, err
 	}
+	r.bumpTenantAuthorizationVersion(ctx, tenantID)
 	return r.entToProto(res), nil
 }
 

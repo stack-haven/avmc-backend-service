@@ -133,7 +133,8 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	}
 	r.Log.Infof("保存角色: %s", g.GetName())
 	ent := r.protoToEnt(g)
-	if _, err := requireTenantID(ctx); err != nil {
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
 		return nil, err
 	}
 	if g.DataScope != nil {
@@ -181,6 +182,7 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+	r.bumpTenantAuthorizationVersion(ctx, tenantID)
 	return r.entToProto(res), nil
 }
 
@@ -191,7 +193,8 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	}
 	r.Log.Infof("更新角色 ID: %d", g.GetId())
 	ent := r.protoToEnt(g)
-	if _, err := requireTenantID(ctx); err != nil {
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
 		return nil, err
 	}
 	if g.DataScope != nil {
@@ -263,6 +266,7 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+	r.bumpTenantAuthorizationVersion(ctx, tenantID)
 	return r.entToProto(res), nil
 }
 
@@ -300,7 +304,8 @@ func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error
 
 // Delete 软删除
 func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	tenantID, err := requireTenantID(ctx)
+	if err != nil {
 		return err
 	}
 	tx, err := r.Data.DB(ctx).Tx(ctx)
@@ -332,7 +337,11 @@ func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 	if err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	r.bumpTenantAuthorizationVersion(ctx, tenantID)
+	return nil
 }
 
 func findRoleForUpdate(ctx context.Context, client *gen.Client, id uint32) (*gen.Role, error) {

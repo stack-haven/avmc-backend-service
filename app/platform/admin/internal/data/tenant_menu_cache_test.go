@@ -75,6 +75,51 @@ func TestPermissionCacheInvalidationIntentIsDurable(t *testing.T) {
 	}
 }
 
+func TestTenantAuthorizationInvalidationClearsLocalSnapshotAndPersistsIntent(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	data := &Data{db: client}
+	repo := NewBaseRepo(data, log.NewStdLogger(io.Discard))
+
+	targetKey := tenantRoleAuthorizationCacheKey{
+		tenantID:       7,
+		userID:         11,
+		object:         "platform.admin.v1.UserService/ListUsers",
+		action:         "GET",
+		menuVersion:    1,
+		packageVersion: 1,
+		authVersion:    1,
+	}
+	otherTenantKey := targetKey
+	otherTenantKey.tenantID = 8
+	data.authorizationCache.Store(targetKey, tenantRoleAuthorizationCacheEntry{
+		allowed:   true,
+		expiresAt: time.Now().Add(time.Minute),
+	})
+	data.authorizationCache.Store(otherTenantKey, tenantRoleAuthorizationCacheEntry{
+		allowed:   true,
+		expiresAt: time.Now().Add(time.Minute),
+	})
+
+	repo.bumpTenantAuthorizationVersion(context.Background(), 7)
+
+	if _, ok := data.authorizationCache.Load(targetKey); ok {
+		t.Fatal("tenant authorization cache entry was not cleared")
+	}
+	if _, ok := data.authorizationCache.Load(otherTenantKey); !ok {
+		t.Fatal("authorization cache entry for another tenant was cleared")
+	}
+	task := client.AsyncTask.Query().
+		Where(asynctask.TaskTypeEQ(biz.AsyncTaskTypePermissionCacheInvalidate)).
+		OnlyX(systemContext())
+	if task.TenantID == nil || *task.TenantID != 7 {
+		t.Fatalf("authorization cache invalidation task tenant = %v, want 7", task.TenantID)
+	}
+	if task.Payload != `{"scope":"tenant_authorization","tenantId":7}` {
+		t.Fatalf("authorization cache invalidation payload = %s", task.Payload)
+	}
+}
+
 func TestPermissionCacheInvalidationIdempotencyKeyIncludesChangeTimestamp(t *testing.T) {
 	base := time.Date(2026, 7, 14, 9, 8, 7, 0, time.FixedZone("CST", 8*60*60))
 	got := permissionCacheInvalidationIdempotencyKey("tenant_package", 42, base)

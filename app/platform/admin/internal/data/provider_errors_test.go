@@ -43,7 +43,7 @@ func TestProvidersReturnConfigErrors(t *testing.T) {
 		{
 			name: "authorizer",
 			run: func() error {
-				_, err := NewAuthorizer(nil, nil, logger)
+				_, err := NewAuthorizer(nil, nil, nil, logger)
 				return err
 			},
 		},

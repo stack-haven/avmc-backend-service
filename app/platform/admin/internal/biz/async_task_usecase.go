@@ -58,6 +58,7 @@ type AsyncTaskHandler interface {
 type PermissionCacheInvalidator interface {
 	InvalidateMenuPermissionCache(context.Context) error
 	InvalidateTenantPackagePermissionCache(context.Context, uint32) error
+	InvalidateTenantAuthorizationCache(context.Context, uint32) error
 }
 
 type AsyncTaskUsecase struct {
@@ -271,6 +272,14 @@ func (h *permissionCacheInvalidationHandler) Handle(ctx context.Context, payload
 			return "", err
 		}
 		return fmt.Sprintf("已刷新租户 %d 套餐权限缓存版本", input.TenantID), nil
+	case "tenant_authorization":
+		if input.TenantID == 0 {
+			return "", fmt.Errorf("tenant id is required for tenant authorization invalidation")
+		}
+		if err := h.invalidator.InvalidateTenantAuthorizationCache(ctx, input.TenantID); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("已刷新租户 %d 授权快照缓存版本", input.TenantID), nil
 	default:
 		return "", fmt.Errorf("unsupported permission cache invalidation scope %q", input.Scope)
 	}

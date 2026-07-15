@@ -30,8 +30,9 @@ func (successTaskHandler) Handle(context.Context, json.RawMessage) (string, erro
 }
 
 type permissionCacheInvalidatorStub struct {
-	menuCalls   int
-	tenantCalls []uint32
+	menuCalls                int
+	tenantCalls              []uint32
+	tenantAuthorizationCalls []uint32
 }
 
 func (s *permissionCacheInvalidatorStub) InvalidateMenuPermissionCache(context.Context) error {
@@ -41,6 +42,11 @@ func (s *permissionCacheInvalidatorStub) InvalidateMenuPermissionCache(context.C
 
 func (s *permissionCacheInvalidatorStub) InvalidateTenantPackagePermissionCache(_ context.Context, tenantID uint32) error {
 	s.tenantCalls = append(s.tenantCalls, tenantID)
+	return nil
+}
+
+func (s *permissionCacheInvalidatorStub) InvalidateTenantAuthorizationCache(_ context.Context, tenantID uint32) error {
+	s.tenantAuthorizationCalls = append(s.tenantAuthorizationCalls, tenantID)
 	return nil
 }
 
@@ -317,14 +323,23 @@ func TestPermissionCacheInvalidationHandler(t *testing.T) {
 	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"tenant_package","tenantId":7}`)); err != nil {
 		t.Fatalf("invalidate tenant package cache: %v", err)
 	}
+	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"tenant_authorization","tenantId":8}`)); err != nil {
+		t.Fatalf("invalidate tenant authorization cache: %v", err)
+	}
 	if invalidator.menuCalls != 1 {
 		t.Fatalf("menu invalidation calls = %d, want 1", invalidator.menuCalls)
 	}
 	if len(invalidator.tenantCalls) != 1 || invalidator.tenantCalls[0] != 7 {
 		t.Fatalf("tenant invalidation calls = %v, want [7]", invalidator.tenantCalls)
 	}
+	if len(invalidator.tenantAuthorizationCalls) != 1 || invalidator.tenantAuthorizationCalls[0] != 8 {
+		t.Fatalf("tenant authorization invalidation calls = %v, want [8]", invalidator.tenantAuthorizationCalls)
+	}
 	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"tenant_package"}`)); err == nil {
 		t.Fatal("tenant package invalidation without tenant id succeeded")
+	}
+	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"tenant_authorization"}`)); err == nil {
+		t.Fatal("tenant authorization invalidation without tenant id succeeded")
 	}
 	if _, err := handler.Handle(context.Background(), json.RawMessage(`{"scope":"arbitrary"}`)); err == nil {
 		t.Fatal("unsupported cache invalidation scope succeeded")
