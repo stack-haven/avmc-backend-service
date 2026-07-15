@@ -1,6 +1,8 @@
 package runtimeconfig
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -39,6 +41,52 @@ func TestValidateAcceptsSafeProductionConfig(t *testing.T) {
 	}
 }
 
+func TestLoadRejectsDevelopmentConfigInProduction(t *testing.T) {
+	t.Setenv("platform_ADMIN_ENV", "production")
+	confDir := writeRuntimeConfig(t, developmentRuntimeConfigYAML())
+
+	_, err := Load(confDir)
+	if err == nil {
+		t.Fatal("expected production load to reject development config")
+	}
+	if !strings.Contains(err.Error(), "platform_ADMIN_JWT_KEY") {
+		t.Fatalf("Load() error = %v, want jwt production validation error", err)
+	}
+}
+
+func TestLoadAcceptsProductionEnvOverrides(t *testing.T) {
+	t.Setenv("platform_ADMIN_ENV", "production")
+	t.Setenv("platform_ADMIN_JWT_KEY", "0123456789abcdef0123456789abcdef")
+	t.Setenv("platform_ADMIN_DB_SOURCE", "admin:secret@tcp(db:3306)/platform_system")
+	t.Setenv("platform_ADMIN_DB_DEBUG", "false")
+	t.Setenv("platform_ADMIN_DB_MIGRATE", "false")
+	t.Setenv("platform_ADMIN_REDIS_ADDR", "redis:6379")
+	t.Setenv("platform_ADMIN_REDIS_PASSWORD", "redis-secret")
+	t.Setenv("platform_ADMIN_CORS_ORIGINS", "https://admin.example.com")
+	t.Setenv("platform_ADMIN_ENABLE_SWAGGER", "false")
+	confDir := writeRuntimeConfig(t, developmentRuntimeConfigYAML())
+
+	bc, err := Load(confDir)
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if bc.Server.Http.EnableSwagger {
+		t.Fatal("swagger should be disabled by production env override")
+	}
+	if got := bc.Server.Http.Cors.Origins; len(got) != 1 || got[0] != "https://admin.example.com" {
+		t.Fatalf("cors origins = %#v", got)
+	}
+	if got := bc.Data.Database.Source; got != "admin:secret@tcp(db:3306)/platform_system" {
+		t.Fatalf("db source = %q", got)
+	}
+	if bc.Data.Database.Debug || bc.Data.Database.Migrate {
+		t.Fatalf("database debug=%v migrate=%v, want false", bc.Data.Database.Debug, bc.Data.Database.Migrate)
+	}
+	if got := bc.Data.Redis.Password; got != "redis-secret" {
+		t.Fatalf("redis password = %q", got)
+	}
+}
+
 func TestApplyEnvOverrides(t *testing.T) {
 	t.Setenv("platform_ADMIN_HTTP_ADDR", "127.0.0.1:18000")
 	t.Setenv("platform_ADMIN_GRPC_ADDR", "127.0.0.1:19000")
@@ -72,6 +120,57 @@ func TestApplyEnvOverrides(t *testing.T) {
 	if got := bc.Data.Redis.Password; got != "" {
 		t.Fatalf("redis password = %q", got)
 	}
+}
+
+func writeRuntimeConfig(t *testing.T, content string) string {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "config.yaml"), []byte(content), 0o600); err != nil {
+		t.Fatalf("write runtime config: %v", err)
+	}
+	return dir
+}
+
+func developmentRuntimeConfigYAML() string {
+	return `
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+    enable_swagger: true
+    enable_pprof: false
+    cors:
+      methods:
+        - GET
+      origins:
+        - "*"
+    middleware:
+      limiter:
+        name: bbr
+      enable_recovery: true
+      enable_validate: true
+      auth:
+        method: HS256
+        key: dev-only-change-before-production-32-bytes
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+    middleware:
+      limiter:
+        name: bbr
+      enable_recovery: true
+      enable_validate: true
+data:
+  database:
+    driver: mysql
+    source: root:123456@tcp(127.0.0.1:3306)/platform_system
+    migrate: true
+    debug: true
+  redis:
+    addr: 127.0.0.1:6379
+    password: "123456"
+    db: 0
+`
 }
 
 func TestValidateRejectsMissingRequiredConfig(t *testing.T) {
