@@ -224,6 +224,24 @@ func (r *asyncTaskRepo) Stats(ctx context.Context, req *pb.GetAsyncTaskStatsRequ
 			stats.RetryPressure++
 		}
 	}
+	stats.HealthStatus = pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_HEALTHY
+	appendAlert := func(code string, status pb.AsyncTaskHealthStatus, count int32) {
+		if count <= 0 {
+			return
+		}
+		stats.Alerts = append(stats.Alerts, &pb.AsyncTaskHealthAlert{
+			Code:   code,
+			Status: status,
+			Count:  count,
+		})
+		if status > stats.HealthStatus {
+			stats.HealthStatus = status
+		}
+	}
+	appendAlert("pending_overdue", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING, stats.GetPendingOverdue())
+	appendAlert("failed", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING, stats.GetFailed())
+	appendAlert("running_lease_expired", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, stats.GetRunningLeaseExpired())
+	appendAlert("retry_pressure", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, stats.GetRetryPressure())
 	setOptionalTime(&stats.CheckedAt, &now)
 	return stats, nil
 }

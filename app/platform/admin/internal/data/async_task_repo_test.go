@@ -222,6 +222,19 @@ func TestAsyncTaskRepoStatsSummarizesOperationalHealth(t *testing.T) {
 	if stats.GetCheckedAt() == "" {
 		t.Fatal("checked_at must be set")
 	}
+	if stats.GetHealthStatus() != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL {
+		t.Fatalf("health status = %s", stats.GetHealthStatus())
+	}
+	alerts := map[string]pb.AsyncTaskHealthStatus{}
+	for _, item := range stats.GetAlerts() {
+		alerts[item.GetCode()] = item.GetStatus()
+	}
+	if alerts["pending_overdue"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING ||
+		alerts["failed"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING ||
+		alerts["running_lease_expired"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL ||
+		alerts["retry_pressure"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL {
+		t.Fatalf("alerts = %+v", alerts)
+	}
 }
 
 func TestAsyncTaskRepoDoesNotExceedMaxAttemptsAfterLeaseExpiry(t *testing.T) {

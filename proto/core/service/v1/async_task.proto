@@ -15,6 +15,13 @@ enum AsyncTaskStatus {
   ASYNC_TASK_STATUS_CANCELED = 5;
 }
 
+enum AsyncTaskHealthStatus {
+  ASYNC_TASK_HEALTH_STATUS_UNSPECIFIED = 0;
+  ASYNC_TASK_HEALTH_STATUS_HEALTHY = 1;
+  ASYNC_TASK_HEALTH_STATUS_WARNING = 2;
+  ASYNC_TASK_HEALTH_STATUS_CRITICAL = 3;
+}
+
 message AsyncTask {
   uint32 id = 1;
   optional uint32 tenant_id = 2;
@@ -71,6 +78,14 @@ message AsyncTaskStats {
   int32 failed = 5;
   int32 retry_pressure = 6;
   optional string checked_at = 7;
+  AsyncTaskHealthStatus health_status = 8;
+  repeated AsyncTaskHealthAlert alerts = 9;
+}
+
+message AsyncTaskHealthAlert {
+  string code = 1;
+  AsyncTaskHealthStatus status = 2;
+  int32 count = 3;
 }
 
 message GetAsyncTaskStatsRequest {
