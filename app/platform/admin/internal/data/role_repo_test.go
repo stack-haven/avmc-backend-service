@@ -223,7 +223,7 @@ func seedTenantMenuPermissionGroup(t *testing.T, client *gen.Client, tenantID ui
 		SaveX(ctx)
 }
 
-func newTestClient(t *testing.T) *gen.Client {
+func newTestClient(t testing.TB) *gen.Client {
 	t.Helper()
 	db, err := stdsql.Open("sqlite", "file:admin_role_repo?mode=memory&cache=shared&_fk=1")
 	if err != nil {

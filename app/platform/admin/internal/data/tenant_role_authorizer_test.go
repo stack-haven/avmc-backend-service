@@ -108,3 +108,58 @@ func TestTenantRoleAuthorizerAllowsAuthenticatedSelfService(t *testing.T) {
 		t.Fatalf("authenticated self-service denied: allowed=%v err=%v", allowed, err)
 	}
 }
+
+func BenchmarkTenantRoleAuthorizerEnforceAllowed(b *testing.B) {
+	client := newTestClient(b)
+	defer client.Close()
+
+	ctx := tenantContext(1)
+	permission := client.Menu.Create().
+		SetName("bench-user-list-permission").
+		SetTitle("User list").
+		SetAuthCode(pbAdmin.OperationUserServiceListUsers).
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SaveX(systemContext())
+	group := client.MenuPermissionGroup.Create().
+		SetName("bench operator package").
+		SetCode("bench-operator-package").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		AddMenuIDs(permission.ID).
+		SaveX(systemContext())
+	client.TenantPermissionGroup.Create().
+		SetTenantID(1).
+		SetGroupID(group.ID).
+		SetEnabled(true).
+		SaveX(systemContext())
+	tenantRole := client.Role.Create().
+		SetName("bench-operator").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		AddMenuIDs(permission.ID).
+		SaveX(ctx)
+	tenantUser := client.User.Create().
+		SetName("bench-operator").
+		SetPassword("hashed").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		AddRoleIDs(tenantRole.ID).
+		SaveX(ctx)
+
+	provider := casbin.NewProvider()
+	base, err := provider.NewAuthorizer(context.Background(), authz.WithAdapterType(authz.AdapterMemory))
+	if err != nil {
+		b.Fatalf("create base authorizer: %v", err)
+	}
+	authorizer := newTenantRoleAuthorizer(base, client)
+	subject := authz.Subject(strconv.FormatUint(uint64(tenantUser.ID), 10))
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		allowed, err := authorizer.Enforce(ctx, subject, pbAdmin.OperationUserServiceListUsers, "GET", "1")
+		if err != nil {
+			b.Fatalf("enforce tenant role permission: %v", err)
+		}
+		if !allowed {
+			b.Fatal("tenant role permission denied")
+		}
+	}
+}
