@@ -1,19 +1,4 @@
-GOHOSTOS:=$(shell go env GOHOSTOS)
-GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
-
-ifeq ($(GOHOSTOS), windows)
-	#the `find.exe` is different from `find` in bash/shell.
-	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
-	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
-	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
-	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
-	INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find internal -name *.proto")
-	API_PROTO_FILES=$(shell $(Git_Bash) -c "find proto -name *.proto")
-else
-	INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
-	API_PROTO_FILES=$(shell find proto -name *.proto)
-endif
 
 .PHONY: init
 # init env
@@ -25,28 +10,7 @@ init:
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 	go install github.com/google/wire/cmd/wire@latest
 
-.PHONY: config
-# generate internal proto
-config:
-	protoc --proto_path=./internal \
-	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:./internal \
-	       $(INTERNAL_PROTO_FILES)
-
-.PHONY: api
-# generate api proto
-api:
-	protoc --proto_path=./proto \
-	       --proto_path=./proto/third_party \
- 	       --go_out=paths=source_relative:./api \
- 	       --go-http_out=paths=source_relative:./api \
- 	       --go-grpc_out=paths=source_relative:./api \
-	       --openapi_out=fq_schema_naming=true,default_response=false:. \
-	       $(API_PROTO_FILES)
-
 # generate protobuf api go code using buf
-# This target uses buf tool to manage protobuf files
-# located in the proto directory at the project root
 .PHONY: proto
 proto:
 	@cd proto && \
@@ -64,35 +28,22 @@ diff-check:
 	@git diff --exit-code -- \
 		go.mod \
 		go.sum \
-		api \
-		app/platform/admin/cmd/server/assets/openapi.yaml \
-		app/platform/admin/internal/conf \
-		app/platform/admin/internal/data/ent/gen
+		api
 	@git diff --cached --exit-code -- \
 		go.mod \
 		go.sum \
-		api \
-		app/platform/admin/cmd/server/assets/openapi.yaml \
-		app/platform/admin/internal/conf \
-		app/platform/admin/internal/data/ent/gen
+		api
 	@test -z "$$(git ls-files --others --exclude-standard -- \
-		api \
-		app/platform/admin/cmd/server/assets/openapi.yaml \
-		app/platform/admin/internal/conf \
-		app/platform/admin/internal/data/ent/gen)" || \
+		api)" || \
 		(echo "Untracked generated files found:"; \
 		 git ls-files --others --exclude-standard -- \
-			api \
-			app/platform/admin/cmd/server/assets/openapi.yaml \
-			app/platform/admin/internal/conf \
-			app/platform/admin/internal/data/ent/gen; \
+			api; \
 		 exit 1)
 
 .PHONY: generate-check
-# regenerate admin template code and verify generated outputs are committed
+# regenerate global protobuf API code and verify generated outputs are committed
 generate-check:
 	$(MAKE) proto
-	go generate ./app/platform/admin/internal/data/ent
 	go mod tidy
 	$(MAKE) diff-check
 
@@ -129,23 +80,8 @@ race:
 		./app/platform/admin/internal/authzpolicy \
 		./app/platform/admin/internal/biz \
 		./app/platform/admin/internal/data \
-		./app/platform/admin/internal/server \
-		./app/platform/admin/internal/service
-
-.PHONY: admin-migrate
-# run admin database migration explicitly
-admin-migrate:
-	cd app/platform/admin && go run ./cmd/migrate -conf ./configs
-
-.PHONY: ai-migrate
-# run ai database migration explicitly
-ai-migrate:
-	cd app/platform/ai && go run ./cmd/migrate -conf ./configs
-
-.PHONY: admin-policy
-# seed admin authorization policies explicitly
-admin-policy:
-	cd app/platform/admin && go run ./cmd/policy -conf ./configs
+	./app/platform/admin/internal/server \
+	./app/platform/admin/internal/service
 
 .PHONY: generate
 # generate
@@ -156,9 +92,6 @@ generate:
 .PHONY: all
 # generate all
 all:
-	# make api;
-	# make config;
-	# make generate;
 	make proto;
 
 # show help

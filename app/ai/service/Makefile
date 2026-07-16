@@ -21,6 +21,9 @@ ts:
 	@cd ../../../proto && \
 	buf generate --template ../app/ai/service/buf.typescript.gen.yaml
 
+.PHONY: migrate
+migrate:
+	@go run ./cmd/migrate -conf ./configs
 
 .PHONY: demo
 demo:
