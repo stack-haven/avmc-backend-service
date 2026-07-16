@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -67,6 +68,42 @@ type Data struct {
 	rdb                   *redis.Client
 	permissionCacheBypass sync.Map
 	authorizationCache    sync.Map
+	authorizationStats    tenantAuthorizationCacheStats
+}
+
+type tenantAuthorizationCacheStats struct {
+	hits          atomic.Uint64
+	misses        atomic.Uint64
+	sets          atomic.Uint64
+	bypasses      atomic.Uint64
+	expired       atomic.Uint64
+	clears        atomic.Uint64
+	invalidations atomic.Uint64
+}
+
+type tenantAuthorizationCacheStatsSnapshot struct {
+	Hits          uint64
+	Misses        uint64
+	Sets          uint64
+	Bypasses      uint64
+	Expired       uint64
+	Clears        uint64
+	Invalidations uint64
+}
+
+func (d *Data) tenantAuthorizationCacheStatsSnapshot() tenantAuthorizationCacheStatsSnapshot {
+	if d == nil {
+		return tenantAuthorizationCacheStatsSnapshot{}
+	}
+	return tenantAuthorizationCacheStatsSnapshot{
+		Hits:          d.authorizationStats.hits.Load(),
+		Misses:        d.authorizationStats.misses.Load(),
+		Sets:          d.authorizationStats.sets.Load(),
+		Bypasses:      d.authorizationStats.bypasses.Load(),
+		Expired:       d.authorizationStats.expired.Load(),
+		Clears:        d.authorizationStats.clears.Load(),
+		Invalidations: d.authorizationStats.invalidations.Load(),
+	}
 }
 
 // NewData .

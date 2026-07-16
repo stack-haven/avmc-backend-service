@@ -34,6 +34,12 @@ func TestCacheVersionFailureBypassesPermissionCache(t *testing.T) {
 	if ids, ok := repo.getTenantEffectiveMenuIDsCache(context.Background(), 7); ok || ids != nil {
 		t.Fatalf("permission cache returned data while bypassed: ids=%v ok=%v", ids, ok)
 	}
+	if allowed, ok := repo.getTenantRoleAuthorizationCache(context.Background(), 7, 11, "object", "GET"); ok || allowed {
+		t.Fatalf("authorization cache returned data while redis is unavailable: allowed=%v ok=%v", allowed, ok)
+	}
+	if stats := data.tenantAuthorizationCacheStatsSnapshot(); stats.Bypasses != 1 {
+		t.Fatalf("authorization cache bypasses = %d, want 1", stats.Bypasses)
+	}
 	task := client.AsyncTask.Query().
 		Where(asynctask.TaskTypeEQ(biz.AsyncTaskTypePermissionCacheInvalidate)).
 		OnlyX(systemContext())
@@ -108,6 +114,9 @@ func TestTenantAuthorizationInvalidationClearsLocalSnapshotAndPersistsIntent(t *
 	}
 	if _, ok := data.authorizationCache.Load(otherTenantKey); !ok {
 		t.Fatal("authorization cache entry for another tenant was cleared")
+	}
+	if stats := data.tenantAuthorizationCacheStatsSnapshot(); stats.Clears != 1 {
+		t.Fatalf("authorization cache clears = %d, want 1", stats.Clears)
 	}
 	task := client.AsyncTask.Query().
 		Where(asynctask.TaskTypeEQ(biz.AsyncTaskTypePermissionCacheInvalidate)).

@@ -232,17 +232,23 @@ func (r *BaseRepo) getTenantRoleAuthorizationCache(
 ) (bool, bool) {
 	key, ok := r.tenantRoleAuthorizationCacheKey(ctx, tenantID, userID, object, action)
 	if !ok {
+		if r != nil && r.Data != nil {
+			r.Data.authorizationStats.bypasses.Add(1)
+		}
 		return false, false
 	}
 	value, ok := r.Data.authorizationCache.Load(key)
 	if !ok {
+		r.Data.authorizationStats.misses.Add(1)
 		return false, false
 	}
 	entry, ok := value.(tenantRoleAuthorizationCacheEntry)
 	if !ok || time.Now().After(entry.expiresAt) {
 		r.Data.authorizationCache.Delete(key)
+		r.Data.authorizationStats.expired.Add(1)
 		return false, false
 	}
+	r.Data.authorizationStats.hits.Add(1)
 	return entry.allowed, true
 }
 
@@ -262,6 +268,7 @@ func (r *BaseRepo) setTenantRoleAuthorizationCache(
 		allowed:   allowed,
 		expiresAt: time.Now().Add(tenantRoleAuthorizationCacheTTL),
 	})
+	r.Data.authorizationStats.sets.Add(1)
 }
 
 func (r *BaseRepo) tenantRoleAuthorizationCacheKey(
@@ -302,13 +309,18 @@ func (r *BaseRepo) clearTenantAuthorizationCache(tenantID uint32) {
 	if r == nil || r.Data == nil || tenantID == 0 {
 		return
 	}
+	var cleared uint64
 	r.Data.authorizationCache.Range(func(key, _ any) bool {
 		cacheKey, ok := key.(tenantRoleAuthorizationCacheKey)
 		if ok && cacheKey.tenantID == tenantID {
 			r.Data.authorizationCache.Delete(key)
+			cleared++
 		}
 		return true
 	})
+	if cleared > 0 {
+		r.Data.authorizationStats.clears.Add(cleared)
+	}
 }
 
 type permissionCacheInvalidator struct {
@@ -337,13 +349,8 @@ func (i *permissionCacheInvalidator) InvalidateTenantAuthorizationCache(ctx cont
 	if err := i.invalidate(ctx, tenantAuthorizationVersionKey(tenantID)); err != nil {
 		return err
 	}
-	i.data.authorizationCache.Range(func(key, _ any) bool {
-		cacheKey, ok := key.(tenantRoleAuthorizationCacheKey)
-		if ok && cacheKey.tenantID == tenantID {
-			i.data.authorizationCache.Delete(key)
-		}
-		return true
-	})
+	i.data.authorizationStats.invalidations.Add(1)
+	(&BaseRepo{Data: i.data}).clearTenantAuthorizationCache(tenantID)
 	return nil
 }
 
