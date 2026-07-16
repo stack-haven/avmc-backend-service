@@ -63,6 +63,10 @@ func (m *MenuPermissionGroup) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for FeatureFlags
+
+	// no validation rules for ResourceQuotas
+
 	if m.Name != nil {
 		// no validation rules for Name
 	}
@@ -101,6 +105,14 @@ func (m *MenuPermissionGroup) validate(all bool) error {
 
 	if m.UpdatedAt != nil {
 		// no validation rules for UpdatedAt
+	}
+
+	if m.CurrentVersionId != nil {
+		// no validation rules for CurrentVersionId
+	}
+
+	if m.CurrentVersion != nil {
+		// no validation rules for CurrentVersion
 	}
 
 	if len(errors) > 0 {
@@ -182,6 +194,144 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = MenuPermissionGroupValidationError{}
+
+// Validate checks the field values on MenuPermissionGroupVersion with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *MenuPermissionGroupVersion) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on MenuPermissionGroupVersion with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// MenuPermissionGroupVersionMultiError, or nil if none found.
+func (m *MenuPermissionGroupVersion) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *MenuPermissionGroupVersion) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for GroupId
+
+	// no validation rules for Version
+
+	// no validation rules for State
+
+	// no validation rules for FeatureFlags
+
+	// no validation rules for ResourceQuotas
+
+	if m.ChangeSummary != nil {
+		// no validation rules for ChangeSummary
+	}
+
+	if m.CreatedBy != nil {
+		// no validation rules for CreatedBy
+	}
+
+	if m.PublishedBy != nil {
+		// no validation rules for PublishedBy
+	}
+
+	if m.EffectiveAt != nil {
+		// no validation rules for EffectiveAt
+	}
+
+	if m.PublishedAt != nil {
+		// no validation rules for PublishedAt
+	}
+
+	if m.CreatedAt != nil {
+		// no validation rules for CreatedAt
+	}
+
+	if len(errors) > 0 {
+		return MenuPermissionGroupVersionMultiError(errors)
+	}
+
+	return nil
+}
+
+// MenuPermissionGroupVersionMultiError is an error wrapping multiple
+// validation errors returned by MenuPermissionGroupVersion.ValidateAll() if
+// the designated constraints aren't met.
+type MenuPermissionGroupVersionMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m MenuPermissionGroupVersionMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m MenuPermissionGroupVersionMultiError) AllErrors() []error { return m }
+
+// MenuPermissionGroupVersionValidationError is the validation error returned
+// by MenuPermissionGroupVersion.Validate if the designated constraints aren't met.
+type MenuPermissionGroupVersionValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MenuPermissionGroupVersionValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MenuPermissionGroupVersionValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MenuPermissionGroupVersionValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MenuPermissionGroupVersionValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MenuPermissionGroupVersionValidationError) ErrorName() string {
+	return "MenuPermissionGroupVersionValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MenuPermissionGroupVersionValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMenuPermissionGroupVersion.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MenuPermissionGroupVersionValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MenuPermissionGroupVersionValidationError{}
 
 // Validate checks the field values on CreateMenuPermissionGroupRequest with
 // the rules defined in the proto definition for this message. If any rules
@@ -1624,6 +1774,766 @@ var _ interface {
 	ErrorName() string
 } = UpdateMenuPermissionGroupStatusResponseValidationError{}
 
+// Validate checks the field values on ListMenuPermissionGroupVersionsRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ListMenuPermissionGroupVersionsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ListMenuPermissionGroupVersionsRequest with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// ListMenuPermissionGroupVersionsRequestMultiError, or nil if none found.
+func (m *ListMenuPermissionGroupVersionsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListMenuPermissionGroupVersionsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for GroupId
+
+	if len(errors) > 0 {
+		return ListMenuPermissionGroupVersionsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListMenuPermissionGroupVersionsRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// ListMenuPermissionGroupVersionsRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListMenuPermissionGroupVersionsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListMenuPermissionGroupVersionsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListMenuPermissionGroupVersionsRequestMultiError) AllErrors() []error { return m }
+
+// ListMenuPermissionGroupVersionsRequestValidationError is the validation
+// error returned by ListMenuPermissionGroupVersionsRequest.Validate if the
+// designated constraints aren't met.
+type ListMenuPermissionGroupVersionsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListMenuPermissionGroupVersionsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListMenuPermissionGroupVersionsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListMenuPermissionGroupVersionsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListMenuPermissionGroupVersionsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListMenuPermissionGroupVersionsRequestValidationError) ErrorName() string {
+	return "ListMenuPermissionGroupVersionsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListMenuPermissionGroupVersionsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListMenuPermissionGroupVersionsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListMenuPermissionGroupVersionsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListMenuPermissionGroupVersionsRequestValidationError{}
+
+// Validate checks the field values on ListMenuPermissionGroupVersionsResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ListMenuPermissionGroupVersionsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ListMenuPermissionGroupVersionsResponse with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// ListMenuPermissionGroupVersionsResponseMultiError, or nil if none found.
+func (m *ListMenuPermissionGroupVersionsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListMenuPermissionGroupVersionsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListMenuPermissionGroupVersionsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListMenuPermissionGroupVersionsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListMenuPermissionGroupVersionsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListMenuPermissionGroupVersionsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListMenuPermissionGroupVersionsResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// ListMenuPermissionGroupVersionsResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListMenuPermissionGroupVersionsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListMenuPermissionGroupVersionsResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListMenuPermissionGroupVersionsResponseMultiError) AllErrors() []error { return m }
+
+// ListMenuPermissionGroupVersionsResponseValidationError is the validation
+// error returned by ListMenuPermissionGroupVersionsResponse.Validate if the
+// designated constraints aren't met.
+type ListMenuPermissionGroupVersionsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListMenuPermissionGroupVersionsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListMenuPermissionGroupVersionsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListMenuPermissionGroupVersionsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListMenuPermissionGroupVersionsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListMenuPermissionGroupVersionsResponseValidationError) ErrorName() string {
+	return "ListMenuPermissionGroupVersionsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListMenuPermissionGroupVersionsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListMenuPermissionGroupVersionsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListMenuPermissionGroupVersionsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListMenuPermissionGroupVersionsResponseValidationError{}
+
+// Validate checks the field values on PublishMenuPermissionGroupVersionRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *PublishMenuPermissionGroupVersionRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// PublishMenuPermissionGroupVersionRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// PublishMenuPermissionGroupVersionRequestMultiError, or nil if none found.
+func (m *PublishMenuPermissionGroupVersionRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PublishMenuPermissionGroupVersionRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for GroupId
+
+	// no validation rules for FeatureFlags
+
+	// no validation rules for ResourceQuotas
+
+	if m.ChangeSummary != nil {
+		// no validation rules for ChangeSummary
+	}
+
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
+
+	if m.EffectiveAt != nil {
+		// no validation rules for EffectiveAt
+	}
+
+	if len(errors) > 0 {
+		return PublishMenuPermissionGroupVersionRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// PublishMenuPermissionGroupVersionRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// PublishMenuPermissionGroupVersionRequest.ValidateAll() if the designated
+// constraints aren't met.
+type PublishMenuPermissionGroupVersionRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PublishMenuPermissionGroupVersionRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PublishMenuPermissionGroupVersionRequestMultiError) AllErrors() []error { return m }
+
+// PublishMenuPermissionGroupVersionRequestValidationError is the validation
+// error returned by PublishMenuPermissionGroupVersionRequest.Validate if the
+// designated constraints aren't met.
+type PublishMenuPermissionGroupVersionRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PublishMenuPermissionGroupVersionRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PublishMenuPermissionGroupVersionRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PublishMenuPermissionGroupVersionRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PublishMenuPermissionGroupVersionRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PublishMenuPermissionGroupVersionRequestValidationError) ErrorName() string {
+	return "PublishMenuPermissionGroupVersionRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PublishMenuPermissionGroupVersionRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPublishMenuPermissionGroupVersionRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PublishMenuPermissionGroupVersionRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PublishMenuPermissionGroupVersionRequestValidationError{}
+
+// Validate checks the field values on
+// PublishMenuPermissionGroupVersionResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *PublishMenuPermissionGroupVersionResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// PublishMenuPermissionGroupVersionResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// PublishMenuPermissionGroupVersionResponseMultiError, or nil if none found.
+func (m *PublishMenuPermissionGroupVersionResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PublishMenuPermissionGroupVersionResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetVersion()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, PublishMenuPermissionGroupVersionResponseValidationError{
+					field:  "Version",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, PublishMenuPermissionGroupVersionResponseValidationError{
+					field:  "Version",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetVersion()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PublishMenuPermissionGroupVersionResponseValidationError{
+				field:  "Version",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return PublishMenuPermissionGroupVersionResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// PublishMenuPermissionGroupVersionResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// PublishMenuPermissionGroupVersionResponse.ValidateAll() if the designated
+// constraints aren't met.
+type PublishMenuPermissionGroupVersionResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PublishMenuPermissionGroupVersionResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PublishMenuPermissionGroupVersionResponseMultiError) AllErrors() []error { return m }
+
+// PublishMenuPermissionGroupVersionResponseValidationError is the validation
+// error returned by PublishMenuPermissionGroupVersionResponse.Validate if the
+// designated constraints aren't met.
+type PublishMenuPermissionGroupVersionResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PublishMenuPermissionGroupVersionResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PublishMenuPermissionGroupVersionResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PublishMenuPermissionGroupVersionResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PublishMenuPermissionGroupVersionResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PublishMenuPermissionGroupVersionResponseValidationError) ErrorName() string {
+	return "PublishMenuPermissionGroupVersionResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PublishMenuPermissionGroupVersionResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPublishMenuPermissionGroupVersionResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PublishMenuPermissionGroupVersionResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PublishMenuPermissionGroupVersionResponseValidationError{}
+
+// Validate checks the field values on
+// RollbackMenuPermissionGroupVersionRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *RollbackMenuPermissionGroupVersionRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// RollbackMenuPermissionGroupVersionRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// RollbackMenuPermissionGroupVersionRequestMultiError, or nil if none found.
+func (m *RollbackMenuPermissionGroupVersionRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RollbackMenuPermissionGroupVersionRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for GroupId
+
+	// no validation rules for SourceVersionId
+
+	if m.ChangeSummary != nil {
+		// no validation rules for ChangeSummary
+	}
+
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
+
+	if len(errors) > 0 {
+		return RollbackMenuPermissionGroupVersionRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// RollbackMenuPermissionGroupVersionRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// RollbackMenuPermissionGroupVersionRequest.ValidateAll() if the designated
+// constraints aren't met.
+type RollbackMenuPermissionGroupVersionRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RollbackMenuPermissionGroupVersionRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RollbackMenuPermissionGroupVersionRequestMultiError) AllErrors() []error { return m }
+
+// RollbackMenuPermissionGroupVersionRequestValidationError is the validation
+// error returned by RollbackMenuPermissionGroupVersionRequest.Validate if the
+// designated constraints aren't met.
+type RollbackMenuPermissionGroupVersionRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RollbackMenuPermissionGroupVersionRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RollbackMenuPermissionGroupVersionRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RollbackMenuPermissionGroupVersionRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RollbackMenuPermissionGroupVersionRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RollbackMenuPermissionGroupVersionRequestValidationError) ErrorName() string {
+	return "RollbackMenuPermissionGroupVersionRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RollbackMenuPermissionGroupVersionRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRollbackMenuPermissionGroupVersionRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RollbackMenuPermissionGroupVersionRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RollbackMenuPermissionGroupVersionRequestValidationError{}
+
+// Validate checks the field values on
+// RollbackMenuPermissionGroupVersionResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *RollbackMenuPermissionGroupVersionResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// RollbackMenuPermissionGroupVersionResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// RollbackMenuPermissionGroupVersionResponseMultiError, or nil if none found.
+func (m *RollbackMenuPermissionGroupVersionResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RollbackMenuPermissionGroupVersionResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetVersion()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, RollbackMenuPermissionGroupVersionResponseValidationError{
+					field:  "Version",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, RollbackMenuPermissionGroupVersionResponseValidationError{
+					field:  "Version",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetVersion()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return RollbackMenuPermissionGroupVersionResponseValidationError{
+				field:  "Version",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return RollbackMenuPermissionGroupVersionResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// RollbackMenuPermissionGroupVersionResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// RollbackMenuPermissionGroupVersionResponse.ValidateAll() if the designated
+// constraints aren't met.
+type RollbackMenuPermissionGroupVersionResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RollbackMenuPermissionGroupVersionResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RollbackMenuPermissionGroupVersionResponseMultiError) AllErrors() []error { return m }
+
+// RollbackMenuPermissionGroupVersionResponseValidationError is the validation
+// error returned by RollbackMenuPermissionGroupVersionResponse.Validate if
+// the designated constraints aren't met.
+type RollbackMenuPermissionGroupVersionResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RollbackMenuPermissionGroupVersionResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RollbackMenuPermissionGroupVersionResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RollbackMenuPermissionGroupVersionResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RollbackMenuPermissionGroupVersionResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RollbackMenuPermissionGroupVersionResponseValidationError) ErrorName() string {
+	return "RollbackMenuPermissionGroupVersionResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RollbackMenuPermissionGroupVersionResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRollbackMenuPermissionGroupVersionResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RollbackMenuPermissionGroupVersionResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RollbackMenuPermissionGroupVersionResponseValidationError{}
+
 // Validate checks the field values on TenantPermissionGroupBinding with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1660,6 +2570,18 @@ func (m *TenantPermissionGroupBinding) validate(all bool) error {
 
 	if m.BoundAt != nil {
 		// no validation rules for BoundAt
+	}
+
+	if m.VersionId != nil {
+		// no validation rules for VersionId
+	}
+
+	if m.Version != nil {
+		// no validation rules for Version
+	}
+
+	if m.AutoUpgrade != nil {
+		// no validation rules for AutoUpgrade
 	}
 
 	if len(errors) > 0 {
@@ -1899,6 +2821,40 @@ func (m *GetTenantPermissionGroupsResponse) validate(all bool) error {
 			if err := v.Validate(); err != nil {
 				return GetTenantPermissionGroupsResponseValidationError{
 					field:  fmt.Sprintf("Groups[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetBindings() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetTenantPermissionGroupsResponseValidationError{
+						field:  fmt.Sprintf("Bindings[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetTenantPermissionGroupsResponseValidationError{
+						field:  fmt.Sprintf("Bindings[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetTenantPermissionGroupsResponseValidationError{
+					field:  fmt.Sprintf("Bindings[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
 				}
@@ -2204,6 +3160,261 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UpdateTenantPermissionGroupsResponseValidationError{}
+
+// Validate checks the field values on
+// UpdateTenantPermissionGroupVersionRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *UpdateTenantPermissionGroupVersionRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// UpdateTenantPermissionGroupVersionRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// UpdateTenantPermissionGroupVersionRequestMultiError, or nil if none found.
+func (m *UpdateTenantPermissionGroupVersionRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateTenantPermissionGroupVersionRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TenantId
+
+	// no validation rules for GroupId
+
+	// no validation rules for AutoUpgrade
+
+	if m.VersionId != nil {
+		// no validation rules for VersionId
+	}
+
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
+
+	if len(errors) > 0 {
+		return UpdateTenantPermissionGroupVersionRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateTenantPermissionGroupVersionRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// UpdateTenantPermissionGroupVersionRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateTenantPermissionGroupVersionRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateTenantPermissionGroupVersionRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateTenantPermissionGroupVersionRequestMultiError) AllErrors() []error { return m }
+
+// UpdateTenantPermissionGroupVersionRequestValidationError is the validation
+// error returned by UpdateTenantPermissionGroupVersionRequest.Validate if the
+// designated constraints aren't met.
+type UpdateTenantPermissionGroupVersionRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateTenantPermissionGroupVersionRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateTenantPermissionGroupVersionRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateTenantPermissionGroupVersionRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateTenantPermissionGroupVersionRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateTenantPermissionGroupVersionRequestValidationError) ErrorName() string {
+	return "UpdateTenantPermissionGroupVersionRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateTenantPermissionGroupVersionRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateTenantPermissionGroupVersionRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateTenantPermissionGroupVersionRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateTenantPermissionGroupVersionRequestValidationError{}
+
+// Validate checks the field values on
+// UpdateTenantPermissionGroupVersionResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *UpdateTenantPermissionGroupVersionResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// UpdateTenantPermissionGroupVersionResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// UpdateTenantPermissionGroupVersionResponseMultiError, or nil if none found.
+func (m *UpdateTenantPermissionGroupVersionResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateTenantPermissionGroupVersionResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetBinding()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateTenantPermissionGroupVersionResponseValidationError{
+					field:  "Binding",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateTenantPermissionGroupVersionResponseValidationError{
+					field:  "Binding",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetBinding()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateTenantPermissionGroupVersionResponseValidationError{
+				field:  "Binding",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateTenantPermissionGroupVersionResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateTenantPermissionGroupVersionResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// UpdateTenantPermissionGroupVersionResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateTenantPermissionGroupVersionResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateTenantPermissionGroupVersionResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateTenantPermissionGroupVersionResponseMultiError) AllErrors() []error { return m }
+
+// UpdateTenantPermissionGroupVersionResponseValidationError is the validation
+// error returned by UpdateTenantPermissionGroupVersionResponse.Validate if
+// the designated constraints aren't met.
+type UpdateTenantPermissionGroupVersionResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateTenantPermissionGroupVersionResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateTenantPermissionGroupVersionResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateTenantPermissionGroupVersionResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateTenantPermissionGroupVersionResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateTenantPermissionGroupVersionResponseValidationError) ErrorName() string {
+	return "UpdateTenantPermissionGroupVersionResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateTenantPermissionGroupVersionResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateTenantPermissionGroupVersionResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateTenantPermissionGroupVersionResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateTenantPermissionGroupVersionResponseValidationError{}
 
 // Validate checks the field values on GetTenantEffectiveMenusRequest with the
 // rules defined in the proto definition for this message. If any rules are

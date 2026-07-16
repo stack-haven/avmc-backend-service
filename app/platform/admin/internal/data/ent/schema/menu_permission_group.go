@@ -39,6 +39,9 @@ func (MenuPermissionGroup) Fields() []ent.Field {
 		field.String("description").Comment("描述").MaxLen(255).Default("").Nillable(),
 		field.String("remark").Comment("备注").MaxLen(255).Default("").Nillable(),
 		field.Uint32("current_version_id").Comment("当前发布版本ID").Optional().Nillable(),
+		field.Strings("api_permissions").Comment("接口能力权限码列表").Optional(),
+		field.JSON("feature_flags", map[string]bool{}).Comment("功能开关配置").Optional(),
+		field.JSON("resource_quotas", map[string]int64{}).Comment("资源额度配置").Optional(),
 	}
 }
 

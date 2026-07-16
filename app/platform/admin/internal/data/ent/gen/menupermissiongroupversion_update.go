@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -193,6 +194,48 @@ func (_u *MenuPermissionGroupVersionUpdate) SetNillablePublishedAt(v *time.Time)
 // ClearPublishedAt clears the value of the "published_at" field.
 func (_u *MenuPermissionGroupVersionUpdate) ClearPublishedAt() *MenuPermissionGroupVersionUpdate {
 	_u.mutation.ClearPublishedAt()
+	return _u
+}
+
+// SetAPIPermissions sets the "api_permissions" field.
+func (_u *MenuPermissionGroupVersionUpdate) SetAPIPermissions(v []string) *MenuPermissionGroupVersionUpdate {
+	_u.mutation.SetAPIPermissions(v)
+	return _u
+}
+
+// AppendAPIPermissions appends value to the "api_permissions" field.
+func (_u *MenuPermissionGroupVersionUpdate) AppendAPIPermissions(v []string) *MenuPermissionGroupVersionUpdate {
+	_u.mutation.AppendAPIPermissions(v)
+	return _u
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (_u *MenuPermissionGroupVersionUpdate) ClearAPIPermissions() *MenuPermissionGroupVersionUpdate {
+	_u.mutation.ClearAPIPermissions()
+	return _u
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (_u *MenuPermissionGroupVersionUpdate) SetFeatureFlags(v map[string]bool) *MenuPermissionGroupVersionUpdate {
+	_u.mutation.SetFeatureFlags(v)
+	return _u
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (_u *MenuPermissionGroupVersionUpdate) ClearFeatureFlags() *MenuPermissionGroupVersionUpdate {
+	_u.mutation.ClearFeatureFlags()
+	return _u
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (_u *MenuPermissionGroupVersionUpdate) SetResourceQuotas(v map[string]int64) *MenuPermissionGroupVersionUpdate {
+	_u.mutation.SetResourceQuotas(v)
+	return _u
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (_u *MenuPermissionGroupVersionUpdate) ClearResourceQuotas() *MenuPermissionGroupVersionUpdate {
+	_u.mutation.ClearResourceQuotas()
 	return _u
 }
 
@@ -396,6 +439,29 @@ func (_u *MenuPermissionGroupVersionUpdate) sqlSave(ctx context.Context) (_node 
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(menupermissiongroupversion.FieldPublishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.APIPermissions(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldAPIPermissions, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAPIPermissions(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, menupermissiongroupversion.FieldAPIPermissions, value)
+		})
+	}
+	if _u.mutation.APIPermissionsCleared() {
+		_spec.ClearField(menupermissiongroupversion.FieldAPIPermissions, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.FeatureFlags(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldFeatureFlags, field.TypeJSON, value)
+	}
+	if _u.mutation.FeatureFlagsCleared() {
+		_spec.ClearField(menupermissiongroupversion.FieldFeatureFlags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.ResourceQuotas(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldResourceQuotas, field.TypeJSON, value)
+	}
+	if _u.mutation.ResourceQuotasCleared() {
+		_spec.ClearField(menupermissiongroupversion.FieldResourceQuotas, field.TypeJSON)
 	}
 	if _u.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -702,6 +768,48 @@ func (_u *MenuPermissionGroupVersionUpdateOne) ClearPublishedAt() *MenuPermissio
 	return _u
 }
 
+// SetAPIPermissions sets the "api_permissions" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) SetAPIPermissions(v []string) *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.SetAPIPermissions(v)
+	return _u
+}
+
+// AppendAPIPermissions appends value to the "api_permissions" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) AppendAPIPermissions(v []string) *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.AppendAPIPermissions(v)
+	return _u
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) ClearAPIPermissions() *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.ClearAPIPermissions()
+	return _u
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) SetFeatureFlags(v map[string]bool) *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.SetFeatureFlags(v)
+	return _u
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) ClearFeatureFlags() *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.ClearFeatureFlags()
+	return _u
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) SetResourceQuotas(v map[string]int64) *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.SetResourceQuotas(v)
+	return _u
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (_u *MenuPermissionGroupVersionUpdateOne) ClearResourceQuotas() *MenuPermissionGroupVersionUpdateOne {
+	_u.mutation.ClearResourceQuotas()
+	return _u
+}
+
 // SetGroup sets the "group" edge to the MenuPermissionGroup entity.
 func (_u *MenuPermissionGroupVersionUpdateOne) SetGroup(v *MenuPermissionGroup) *MenuPermissionGroupVersionUpdateOne {
 	return _u.SetGroupID(v.ID)
@@ -932,6 +1040,29 @@ func (_u *MenuPermissionGroupVersionUpdateOne) sqlSave(ctx context.Context) (_no
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(menupermissiongroupversion.FieldPublishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.APIPermissions(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldAPIPermissions, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAPIPermissions(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, menupermissiongroupversion.FieldAPIPermissions, value)
+		})
+	}
+	if _u.mutation.APIPermissionsCleared() {
+		_spec.ClearField(menupermissiongroupversion.FieldAPIPermissions, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.FeatureFlags(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldFeatureFlags, field.TypeJSON, value)
+	}
+	if _u.mutation.FeatureFlagsCleared() {
+		_spec.ClearField(menupermissiongroupversion.FieldFeatureFlags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.ResourceQuotas(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldResourceQuotas, field.TypeJSON, value)
+	}
+	if _u.mutation.ResourceQuotasCleared() {
+		_spec.ClearField(menupermissiongroupversion.FieldResourceQuotas, field.TypeJSON)
 	}
 	if _u.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{

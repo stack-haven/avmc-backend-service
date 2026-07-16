@@ -620,6 +620,36 @@ func CurrentVersionIDNotNil() predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(sql.FieldNotNull(FieldCurrentVersionID))
 }
 
+// APIPermissionsIsNil applies the IsNil predicate on the "api_permissions" field.
+func APIPermissionsIsNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldIsNull(FieldAPIPermissions))
+}
+
+// APIPermissionsNotNil applies the NotNil predicate on the "api_permissions" field.
+func APIPermissionsNotNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldNotNull(FieldAPIPermissions))
+}
+
+// FeatureFlagsIsNil applies the IsNil predicate on the "feature_flags" field.
+func FeatureFlagsIsNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldIsNull(FieldFeatureFlags))
+}
+
+// FeatureFlagsNotNil applies the NotNil predicate on the "feature_flags" field.
+func FeatureFlagsNotNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldNotNull(FieldFeatureFlags))
+}
+
+// ResourceQuotasIsNil applies the IsNil predicate on the "resource_quotas" field.
+func ResourceQuotasIsNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldIsNull(FieldResourceQuotas))
+}
+
+// ResourceQuotasNotNil applies the NotNil predicate on the "resource_quotas" field.
+func ResourceQuotasNotNil() predicate.MenuPermissionGroup {
+	return predicate.MenuPermissionGroup(sql.FieldNotNull(FieldResourceQuotas))
+}
+
 // HasMenus applies the HasEdge predicate on the "menus" edge.
 func HasMenus() predicate.MenuPermissionGroup {
 	return predicate.MenuPermissionGroup(func(s *sql.Selector) {

@@ -36,6 +36,9 @@ func (MenuPermissionGroupVersion) Fields() []ent.Field {
 		field.Uint32("published_by").Comment("发布人ID").Optional().Nillable(),
 		field.Time("effective_at").Comment("生效时间").Optional().Nillable(),
 		field.Time("published_at").Comment("发布时间").Optional().Nillable(),
+		field.Strings("api_permissions").Comment("接口能力权限码快照").Optional(),
+		field.JSON("feature_flags", map[string]bool{}).Comment("功能开关配置快照").Optional(),
+		field.JSON("resource_quotas", map[string]int64{}).Comment("资源额度配置快照").Optional(),
 	}
 }
 

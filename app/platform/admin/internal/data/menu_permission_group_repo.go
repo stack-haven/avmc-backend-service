@@ -14,6 +14,7 @@ import (
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 	"context"
+	"reflect"
 	"sort"
 	"strconv"
 	"time"
@@ -61,18 +62,21 @@ func (r *menuPermissionGroupRepo) entToProto(e *gen.MenuPermissionGroup) *pbCore
 		status = pbEnum.Status(*e.Status)
 	}
 	result := &pbCore.MenuPermissionGroup{
-		Id:          e.ID,
-		Name:        convert.ToPointer(e.Name),
-		Code:        convert.ToPointer(e.Code),
-		Status:      &status,
-		IsSystem:    e.IsSystem,
-		Sort:        e.Sort,
-		Description: e.Description,
-		Remark:      e.Remark,
-		MenuIds:     menuPermissionGroupMenuIDs(e),
-		TenantCount: convert.EmptyToNil(int32(len(e.Edges.TenantBindings))),
-		CreatedAt:   convert.TimeValueToString(&e.CreatedAt, time.DateTime),
-		UpdatedAt:   convert.TimeValueToString(&e.UpdatedAt, time.DateTime),
+		Id:             e.ID,
+		Name:           convert.ToPointer(e.Name),
+		Code:           convert.ToPointer(e.Code),
+		Status:         &status,
+		IsSystem:       e.IsSystem,
+		Sort:           e.Sort,
+		Description:    e.Description,
+		Remark:         e.Remark,
+		MenuIds:        menuPermissionGroupMenuIDs(e),
+		ApiPermissions: normalizeStringList(e.APIPermissions),
+		FeatureFlags:   copyBoolMap(e.FeatureFlags),
+		ResourceQuotas: copyInt64Map(e.ResourceQuotas),
+		TenantCount:    convert.EmptyToNil(int32(len(e.Edges.TenantBindings))),
+		CreatedAt:      convert.TimeValueToString(&e.CreatedAt, time.DateTime),
+		UpdatedAt:      convert.TimeValueToString(&e.UpdatedAt, time.DateTime),
 	}
 	if current, err := e.Edges.CurrentVersionOrErr(); err == nil {
 		result.CurrentVersionId = &current.ID
@@ -86,17 +90,20 @@ func menuPermissionGroupVersionToProto(e *gen.MenuPermissionGroupVersion) *pbCor
 		return nil
 	}
 	return &pbCore.MenuPermissionGroupVersion{
-		Id:            e.ID,
-		GroupId:       e.GroupID,
-		Version:       e.Version,
-		State:         pbCore.MenuPermissionGroupVersionState(e.State),
-		MenuIds:       menuPermissionGroupVersionMenuIDs(e),
-		ChangeSummary: e.ChangeSummary,
-		CreatedBy:     e.CreatedBy,
-		PublishedBy:   e.PublishedBy,
-		EffectiveAt:   convert.TimeValueToString(e.EffectiveAt, time.DateTime),
-		PublishedAt:   convert.TimeValueToString(e.PublishedAt, time.DateTime),
-		CreatedAt:     convert.TimeValueToString(&e.CreatedAt, time.DateTime),
+		Id:             e.ID,
+		GroupId:        e.GroupID,
+		Version:        e.Version,
+		State:          pbCore.MenuPermissionGroupVersionState(e.State),
+		MenuIds:        menuPermissionGroupVersionMenuIDs(e),
+		ApiPermissions: normalizeStringList(e.APIPermissions),
+		FeatureFlags:   copyBoolMap(e.FeatureFlags),
+		ResourceQuotas: copyInt64Map(e.ResourceQuotas),
+		ChangeSummary:  e.ChangeSummary,
+		CreatedBy:      e.CreatedBy,
+		PublishedBy:    e.PublishedBy,
+		EffectiveAt:    convert.TimeValueToString(e.EffectiveAt, time.DateTime),
+		PublishedAt:    convert.TimeValueToString(e.PublishedAt, time.DateTime),
+		CreatedAt:      convert.TimeValueToString(&e.CreatedAt, time.DateTime),
 	}
 }
 
@@ -133,7 +140,10 @@ func (r *menuPermissionGroupRepo) Save(ctx context.Context, g *pbCore.MenuPermis
 		SetNillableIsSystem(g.IsSystem).
 		SetNillableSort(g.Sort).
 		SetNillableDescription(g.Description).
-		SetNillableRemark(g.Remark)
+		SetNillableRemark(g.Remark).
+		SetAPIPermissions(normalizeStringList(g.GetApiPermissions())).
+		SetFeatureFlags(copyBoolMap(g.GetFeatureFlags())).
+		SetResourceQuotas(copyInt64Map(g.GetResourceQuotas()))
 	if len(g.GetMenuIds()) > 0 {
 		builder.AddMenuIDs(uniquePositiveIDs(g.GetMenuIds())...)
 	}
@@ -144,7 +154,7 @@ func (r *menuPermissionGroupRepo) Save(ctx context.Context, g *pbCore.MenuPermis
 		}
 		return nil, err
 	}
-	version, err := r.createVersionTx(ctx, tx, res.ID, 1, g.GetMenuIds(), "初始版本", 0)
+	version, err := r.createVersionTx(ctx, tx, res.ID, 1, groupVersionSnapshotFromGroup(g), "初始版本", 0)
 	if err != nil {
 		return nil, err
 	}
@@ -174,8 +184,24 @@ func (r *menuPermissionGroupRepo) Update(ctx context.Context, g *pbCore.MenuPerm
 	if g.MenuIds != nil {
 		targetMenuIDs = g.GetMenuIds()
 	}
+	targetAPIPermissions := current.GetApiPermissions()
+	if g.ApiPermissions != nil {
+		targetAPIPermissions = g.GetApiPermissions()
+	}
+	targetFeatureFlags := current.GetFeatureFlags()
+	if g.FeatureFlags != nil {
+		targetFeatureFlags = g.GetFeatureFlags()
+	}
+	targetResourceQuotas := current.GetResourceQuotas()
+	if g.ResourceQuotas != nil {
+		targetResourceQuotas = g.GetResourceQuotas()
+	}
 	menuChanged := current.GetCurrentVersionId() == 0 ||
 		(g.MenuIds != nil && !sameUint32Set(current.GetMenuIds(), targetMenuIDs))
+	capabilityChanged := g.ApiPermissions != nil && !sameStringSet(current.GetApiPermissions(), targetAPIPermissions) ||
+		g.FeatureFlags != nil && !reflect.DeepEqual(copyBoolMap(current.GetFeatureFlags()), copyBoolMap(targetFeatureFlags)) ||
+		g.ResourceQuotas != nil && !reflect.DeepEqual(copyInt64Map(current.GetResourceQuotas()), copyInt64Map(targetResourceQuotas))
+	versionChanged := menuChanged || capabilityChanged
 	tx, err := r.Data.DB(ctx).Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -188,6 +214,15 @@ func (r *menuPermissionGroupRepo) Update(ctx context.Context, g *pbCore.MenuPerm
 		SetNillableSort(g.Sort).
 		SetNillableDescription(g.Description).
 		SetNillableRemark(g.Remark)
+	if g.ApiPermissions != nil {
+		builder.SetAPIPermissions(normalizeStringList(targetAPIPermissions))
+	}
+	if g.FeatureFlags != nil {
+		builder.SetFeatureFlags(copyBoolMap(targetFeatureFlags))
+	}
+	if g.ResourceQuotas != nil {
+		builder.SetResourceQuotas(copyInt64Map(targetResourceQuotas))
+	}
 	if menuChanged {
 		builder.ClearMenus()
 		if len(targetMenuIDs) > 0 {
@@ -205,8 +240,13 @@ func (r *menuPermissionGroupRepo) Update(ctx context.Context, g *pbCore.MenuPerm
 		return nil, err
 	}
 	var affectedTenantIDs []uint32
-	if menuChanged {
-		version, publishErr := r.publishVersionTx(ctx, tx, g.GetId(), targetMenuIDs, "通过套餐编辑发布", 0)
+	if versionChanged {
+		version, publishErr := r.publishVersionTx(ctx, tx, g.GetId(), &pbCore.MenuPermissionGroupVersion{
+			MenuIds:        targetMenuIDs,
+			ApiPermissions: targetAPIPermissions,
+			FeatureFlags:   targetFeatureFlags,
+			ResourceQuotas: targetResourceQuotas,
+		}, "通过套餐编辑发布", 0)
 		if publishErr != nil {
 			return nil, publishErr
 		}
@@ -331,8 +371,11 @@ func (r *menuPermissionGroupRepo) ListVersions(ctx context.Context, groupID uint
 	return ConvertSlice(rows, menuPermissionGroupVersionToProto), nil
 }
 
-func (r *menuPermissionGroupRepo) PublishVersion(ctx context.Context, groupID uint32, menuIDs []uint32, summary string, operatorID uint32, effectiveAt string) (*pbCore.MenuPermissionGroupVersion, error) {
-	if err := r.validateMenuIDs(ctx, menuIDs); err != nil {
+func (r *menuPermissionGroupRepo) PublishVersion(ctx context.Context, groupID uint32, input *pbCore.MenuPermissionGroupVersion, summary string, operatorID uint32, effectiveAt string) (*pbCore.MenuPermissionGroupVersion, error) {
+	if input == nil {
+		input = &pbCore.MenuPermissionGroupVersion{}
+	}
+	if err := r.validateMenuIDs(ctx, input.GetMenuIds()); err != nil {
 		return nil, err
 	}
 	now := time.Now()
@@ -350,13 +393,24 @@ func (r *menuPermissionGroupRepo) PublishVersion(ctx context.Context, groupID ui
 		return nil, err
 	}
 	defer rollback(tx, r.Log)
+	current, err := tx.MenuPermissionGroup.Query().
+		Where(menupermissiongroup.IDEQ(groupID)).
+		WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorResourceNotFound("套餐不存在")
+		}
+		return nil, err
+	}
+	snapshot := mergeVersionSnapshot(current, input)
 	if _, err = tx.MenuPermissionGroup.UpdateOneID(groupID).SetUpdatedAt(now).Save(ctx); err != nil {
 		if gen.IsNotFound(err) {
 			return nil, pb.ErrorResourceNotFound("套餐不存在")
 		}
 		return nil, err
 	}
-	version, err := r.publishVersionTx(ctx, tx, groupID, menuIDs, summary, operatorID)
+	version, err := r.publishVersionTx(ctx, tx, groupID, snapshot, summary, operatorID)
 	if err != nil {
 		return nil, err
 	}
@@ -395,10 +449,13 @@ func (r *menuPermissionGroupRepo) RollbackVersion(ctx context.Context, groupID, 
 	if summary == "" {
 		summary = "回滚至版本 " + strconv.Itoa(int(source.Version))
 	}
-	return r.PublishVersion(ctx, groupID, menuPermissionGroupVersionMenuIDs(source), summary, operatorID, "")
+	return r.PublishVersion(ctx, groupID, menuPermissionGroupVersionToProto(source), summary, operatorID, "")
 }
 
-func (r *menuPermissionGroupRepo) createVersionTx(ctx context.Context, tx *gen.Tx, groupID uint32, version int32, menuIDs []uint32, summary string, operatorID uint32) (*gen.MenuPermissionGroupVersion, error) {
+func (r *menuPermissionGroupRepo) createVersionTx(ctx context.Context, tx *gen.Tx, groupID uint32, version int32, snapshot *pbCore.MenuPermissionGroupVersion, summary string, operatorID uint32) (*gen.MenuPermissionGroupVersion, error) {
+	if snapshot == nil {
+		snapshot = &pbCore.MenuPermissionGroupVersion{}
+	}
 	now := time.Now()
 	builder := tx.MenuPermissionGroupVersion.Create().
 		SetGroupID(groupID).
@@ -406,17 +463,20 @@ func (r *menuPermissionGroupRepo) createVersionTx(ctx context.Context, tx *gen.T
 		SetState(int32(pbCore.MenuPermissionGroupVersionState_MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED)).
 		SetChangeSummary(summary).
 		SetEffectiveAt(now).
-		SetPublishedAt(now)
+		SetPublishedAt(now).
+		SetAPIPermissions(normalizeStringList(snapshot.GetApiPermissions())).
+		SetFeatureFlags(copyBoolMap(snapshot.GetFeatureFlags())).
+		SetResourceQuotas(copyInt64Map(snapshot.GetResourceQuotas()))
 	if operatorID > 0 {
 		builder.SetCreatedBy(operatorID).SetPublishedBy(operatorID)
 	}
-	if ids := uniquePositiveIDs(menuIDs); len(ids) > 0 {
+	if ids := uniquePositiveIDs(snapshot.GetMenuIds()); len(ids) > 0 {
 		builder.AddMenuIDs(ids...)
 	}
 	return builder.Save(ctx)
 }
 
-func (r *menuPermissionGroupRepo) publishVersionTx(ctx context.Context, tx *gen.Tx, groupID uint32, menuIDs []uint32, summary string, operatorID uint32) (*gen.MenuPermissionGroupVersion, error) {
+func (r *menuPermissionGroupRepo) publishVersionTx(ctx context.Context, tx *gen.Tx, groupID uint32, snapshot *pbCore.MenuPermissionGroupVersion, summary string, operatorID uint32) (*gen.MenuPermissionGroupVersion, error) {
 	latest, err := tx.MenuPermissionGroupVersion.Query().
 		Where(menupermissiongroupversion.GroupIDEQ(groupID)).
 		Order(gen.Desc(menupermissiongroupversion.FieldVersion)).
@@ -436,7 +496,7 @@ func (r *menuPermissionGroupRepo) publishVersionTx(ctx context.Context, tx *gen.
 		Save(ctx); err != nil {
 		return nil, err
 	}
-	version, err := r.createVersionTx(ctx, tx, groupID, nextVersion, menuIDs, summary, operatorID)
+	version, err := r.createVersionTx(ctx, tx, groupID, nextVersion, snapshot, summary, operatorID)
 	if err != nil {
 		if gen.IsConstraintError(err) {
 			return nil, kratosErrors.Conflict("MENU_PERMISSION_GROUP_VERSION_CONFLICT", "套餐版本发布冲突，请重试")
@@ -445,8 +505,11 @@ func (r *menuPermissionGroupRepo) publishVersionTx(ctx context.Context, tx *gen.
 	}
 	builder := tx.MenuPermissionGroup.UpdateOneID(groupID).
 		SetCurrentVersionID(version.ID).
-		ClearMenus()
-	if ids := uniquePositiveIDs(menuIDs); len(ids) > 0 {
+		ClearMenus().
+		SetAPIPermissions(normalizeStringList(snapshot.GetApiPermissions())).
+		SetFeatureFlags(copyBoolMap(snapshot.GetFeatureFlags())).
+		SetResourceQuotas(copyInt64Map(snapshot.GetResourceQuotas()))
+	if ids := uniquePositiveIDs(snapshot.GetMenuIds()); len(ids) > 0 {
 		builder.AddMenuIDs(ids...)
 	}
 	if _, err = builder.Save(ctx); err != nil {
@@ -497,6 +560,113 @@ func sameUint32Set(left, right []uint32) bool {
 		}
 	}
 	return true
+}
+
+func sameStringSet(left, right []string) bool {
+	a := normalizeStringList(left)
+	b := normalizeStringList(right)
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func normalizeStringList(values []string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	set := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		if value == "" {
+			continue
+		}
+		set[value] = struct{}{}
+	}
+	if len(set) == 0 {
+		return nil
+	}
+	result := make([]string, 0, len(set))
+	for value := range set {
+		result = append(result, value)
+	}
+	sort.Strings(result)
+	return result
+}
+
+func copyBoolMap(values map[string]bool) map[string]bool {
+	if len(values) == 0 {
+		return nil
+	}
+	result := make(map[string]bool, len(values))
+	for key, value := range values {
+		if key == "" {
+			continue
+		}
+		result[key] = value
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
+}
+
+func copyInt64Map(values map[string]int64) map[string]int64 {
+	if len(values) == 0 {
+		return nil
+	}
+	result := make(map[string]int64, len(values))
+	for key, value := range values {
+		if key == "" {
+			continue
+		}
+		result[key] = value
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
+}
+
+func groupVersionSnapshotFromGroup(group *pbCore.MenuPermissionGroup) *pbCore.MenuPermissionGroupVersion {
+	if group == nil {
+		return &pbCore.MenuPermissionGroupVersion{}
+	}
+	return &pbCore.MenuPermissionGroupVersion{
+		MenuIds:        uniquePositiveIDs(group.GetMenuIds()),
+		ApiPermissions: normalizeStringList(group.GetApiPermissions()),
+		FeatureFlags:   copyBoolMap(group.GetFeatureFlags()),
+		ResourceQuotas: copyInt64Map(group.GetResourceQuotas()),
+	}
+}
+
+func mergeVersionSnapshot(current *gen.MenuPermissionGroup, input *pbCore.MenuPermissionGroupVersion) *pbCore.MenuPermissionGroupVersion {
+	if input == nil {
+		input = &pbCore.MenuPermissionGroupVersion{}
+	}
+	snapshot := &pbCore.MenuPermissionGroupVersion{
+		MenuIds:        menuPermissionGroupMenuIDs(current),
+		ApiPermissions: normalizeStringList(current.APIPermissions),
+		FeatureFlags:   copyBoolMap(current.FeatureFlags),
+		ResourceQuotas: copyInt64Map(current.ResourceQuotas),
+	}
+	if input.MenuIds != nil {
+		snapshot.MenuIds = uniquePositiveIDs(input.GetMenuIds())
+	}
+	if input.ApiPermissions != nil {
+		snapshot.ApiPermissions = normalizeStringList(input.GetApiPermissions())
+	}
+	if input.FeatureFlags != nil {
+		snapshot.FeatureFlags = copyBoolMap(input.GetFeatureFlags())
+	}
+	if input.ResourceQuotas != nil {
+		snapshot.ResourceQuotas = copyInt64Map(input.GetResourceQuotas())
+	}
+	return snapshot
 }
 
 func (r *menuPermissionGroupRepo) GetTenantGroups(ctx context.Context, tenantID uint32) ([]*pbCore.MenuPermissionGroup, error) {

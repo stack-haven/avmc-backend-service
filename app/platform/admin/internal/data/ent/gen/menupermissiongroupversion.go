@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -37,6 +38,12 @@ type MenuPermissionGroupVersion struct {
 	EffectiveAt *time.Time `json:"effective_at,omitempty"`
 	// 发布时间
 	PublishedAt *time.Time `json:"published_at,omitempty"`
+	// 接口能力权限码快照
+	APIPermissions []string `json:"api_permissions,omitempty"`
+	// 功能开关配置快照
+	FeatureFlags map[string]bool `json:"feature_flags,omitempty"`
+	// 资源额度配置快照
+	ResourceQuotas map[string]int64 `json:"resource_quotas,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MenuPermissionGroupVersionQuery when eager-loading is set.
 	Edges        MenuPermissionGroupVersionEdges `json:"edges"`
@@ -90,6 +97,8 @@ func (*MenuPermissionGroupVersion) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case menupermissiongroupversion.FieldAPIPermissions, menupermissiongroupversion.FieldFeatureFlags, menupermissiongroupversion.FieldResourceQuotas:
+			values[i] = new([]byte)
 		case menupermissiongroupversion.FieldID, menupermissiongroupversion.FieldGroupID, menupermissiongroupversion.FieldVersion, menupermissiongroupversion.FieldState, menupermissiongroupversion.FieldCreatedBy, menupermissiongroupversion.FieldPublishedBy:
 			values[i] = new(sql.NullInt64)
 		case menupermissiongroupversion.FieldChangeSummary:
@@ -175,6 +184,30 @@ func (_m *MenuPermissionGroupVersion) assignValues(columns []string, values []an
 			} else if value.Valid {
 				_m.PublishedAt = new(time.Time)
 				*_m.PublishedAt = value.Time
+			}
+		case menupermissiongroupversion.FieldAPIPermissions:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field api_permissions", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.APIPermissions); err != nil {
+					return fmt.Errorf("unmarshal field api_permissions: %w", err)
+				}
+			}
+		case menupermissiongroupversion.FieldFeatureFlags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field feature_flags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.FeatureFlags); err != nil {
+					return fmt.Errorf("unmarshal field feature_flags: %w", err)
+				}
+			}
+		case menupermissiongroupversion.FieldResourceQuotas:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_quotas", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ResourceQuotas); err != nil {
+					return fmt.Errorf("unmarshal field resource_quotas: %w", err)
+				}
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -263,6 +296,15 @@ func (_m *MenuPermissionGroupVersion) String() string {
 		builder.WriteString("published_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("api_permissions=")
+	builder.WriteString(fmt.Sprintf("%v", _m.APIPermissions))
+	builder.WriteString(", ")
+	builder.WriteString("feature_flags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FeatureFlags))
+	builder.WriteString(", ")
+	builder.WriteString("resource_quotas=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceQuotas))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -41,6 +42,12 @@ type MenuPermissionGroup struct {
 	Remark *string `json:"remark,omitempty"`
 	// 当前发布版本ID
 	CurrentVersionID *uint32 `json:"current_version_id,omitempty"`
+	// 接口能力权限码列表
+	APIPermissions []string `json:"api_permissions,omitempty"`
+	// 功能开关配置
+	FeatureFlags map[string]bool `json:"feature_flags,omitempty"`
+	// 资源额度配置
+	ResourceQuotas map[string]int64 `json:"resource_quotas,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MenuPermissionGroupQuery when eager-loading is set.
 	Edges        MenuPermissionGroupEdges `json:"edges"`
@@ -105,6 +112,8 @@ func (*MenuPermissionGroup) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case menupermissiongroup.FieldAPIPermissions, menupermissiongroup.FieldFeatureFlags, menupermissiongroup.FieldResourceQuotas:
+			values[i] = new([]byte)
 		case menupermissiongroup.FieldIsSystem:
 			values[i] = new(sql.NullBool)
 		case menupermissiongroup.FieldID, menupermissiongroup.FieldStatus, menupermissiongroup.FieldSort, menupermissiongroup.FieldCurrentVersionID:
@@ -206,6 +215,30 @@ func (_m *MenuPermissionGroup) assignValues(columns []string, values []any) erro
 			} else if value.Valid {
 				_m.CurrentVersionID = new(uint32)
 				*_m.CurrentVersionID = uint32(value.Int64)
+			}
+		case menupermissiongroup.FieldAPIPermissions:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field api_permissions", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.APIPermissions); err != nil {
+					return fmt.Errorf("unmarshal field api_permissions: %w", err)
+				}
+			}
+		case menupermissiongroup.FieldFeatureFlags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field feature_flags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.FeatureFlags); err != nil {
+					return fmt.Errorf("unmarshal field feature_flags: %w", err)
+				}
+			}
+		case menupermissiongroup.FieldResourceQuotas:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_quotas", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ResourceQuotas); err != nil {
+					return fmt.Errorf("unmarshal field resource_quotas: %w", err)
+				}
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -309,6 +342,15 @@ func (_m *MenuPermissionGroup) String() string {
 		builder.WriteString("current_version_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("api_permissions=")
+	builder.WriteString(fmt.Sprintf("%v", _m.APIPermissions))
+	builder.WriteString(", ")
+	builder.WriteString("feature_flags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FeatureFlags))
+	builder.WriteString(", ")
+	builder.WriteString("resource_quotas=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceQuotas))
 	builder.WriteByte(')')
 	return builder.String()
 }

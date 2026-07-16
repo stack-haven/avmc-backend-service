@@ -328,6 +328,9 @@ var (
 		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10, SchemaType: map[string]string{"mysql": "int", "postgres": "int"}},
 		{Name: "description", Type: field.TypeString, Size: 255, Comment: "描述", Default: ""},
 		{Name: "remark", Type: field.TypeString, Size: 255, Comment: "备注", Default: ""},
+		{Name: "api_permissions", Type: field.TypeJSON, Nullable: true, Comment: "接口能力权限码列表"},
+		{Name: "feature_flags", Type: field.TypeJSON, Nullable: true, Comment: "功能开关配置"},
+		{Name: "resource_quotas", Type: field.TypeJSON, Nullable: true, Comment: "资源额度配置"},
 		{Name: "current_version_id", Type: field.TypeUint32, Nullable: true, Comment: "当前发布版本ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// MenuPermissionGroupsTable holds the schema information for the "menu_permission_groups" table.
@@ -339,7 +342,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "menu_permission_groups_menu_permission_group_versions_current_version",
-				Columns:    []*schema.Column{MenuPermissionGroupsColumns[11]},
+				Columns:    []*schema.Column{MenuPermissionGroupsColumns[14]},
 				RefColumns: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -378,6 +381,9 @@ var (
 		{Name: "published_by", Type: field.TypeUint32, Nullable: true, Comment: "发布人ID"},
 		{Name: "effective_at", Type: field.TypeTime, Nullable: true, Comment: "生效时间"},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true, Comment: "发布时间"},
+		{Name: "api_permissions", Type: field.TypeJSON, Nullable: true, Comment: "接口能力权限码快照"},
+		{Name: "feature_flags", Type: field.TypeJSON, Nullable: true, Comment: "功能开关配置快照"},
+		{Name: "resource_quotas", Type: field.TypeJSON, Nullable: true, Comment: "资源额度配置快照"},
 		{Name: "group_id", Type: field.TypeUint32, Comment: "套餐ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 	}
 	// MenuPermissionGroupVersionsTable holds the schema information for the "menu_permission_group_versions" table.
@@ -389,7 +395,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "menu_permission_group_versions_menu_permission_groups_group",
-				Columns:    []*schema.Column{MenuPermissionGroupVersionsColumns[9]},
+				Columns:    []*schema.Column{MenuPermissionGroupVersionsColumns[12]},
 				RefColumns: []*schema.Column{MenuPermissionGroupsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -403,12 +409,12 @@ var (
 			{
 				Name:    "menupermissiongroupversion_group_id_version",
 				Unique:  true,
-				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[9], MenuPermissionGroupVersionsColumns[2]},
+				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[12], MenuPermissionGroupVersionsColumns[2]},
 			},
 			{
 				Name:    "menupermissiongroupversion_group_id_state",
 				Unique:  false,
-				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[9], MenuPermissionGroupVersionsColumns[3]},
+				Columns: []*schema.Column{MenuPermissionGroupVersionsColumns[12], MenuPermissionGroupVersionsColumns[3]},
 			},
 			{
 				Name:    "menupermissiongroupversion_effective_at",

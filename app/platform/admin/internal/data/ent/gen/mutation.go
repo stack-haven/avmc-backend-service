@@ -8943,6 +8943,10 @@ type MenuPermissionGroupMutation struct {
 	addsort                *int32
 	description            *string
 	remark                 *string
+	api_permissions        *[]string
+	appendapi_permissions  []string
+	feature_flags          *map[string]bool
+	resource_quotas        *map[string]int64
 	clearedFields          map[string]struct{}
 	menus                  map[uint32]struct{}
 	removedmenus           map[uint32]struct{}
@@ -9526,6 +9530,169 @@ func (m *MenuPermissionGroupMutation) ResetCurrentVersionID() {
 	delete(m.clearedFields, menupermissiongroup.FieldCurrentVersionID)
 }
 
+// SetAPIPermissions sets the "api_permissions" field.
+func (m *MenuPermissionGroupMutation) SetAPIPermissions(s []string) {
+	m.api_permissions = &s
+	m.appendapi_permissions = nil
+}
+
+// APIPermissions returns the value of the "api_permissions" field in the mutation.
+func (m *MenuPermissionGroupMutation) APIPermissions() (r []string, exists bool) {
+	v := m.api_permissions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIPermissions returns the old "api_permissions" field's value of the MenuPermissionGroup entity.
+// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuPermissionGroupMutation) OldAPIPermissions(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIPermissions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIPermissions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIPermissions: %w", err)
+	}
+	return oldValue.APIPermissions, nil
+}
+
+// AppendAPIPermissions adds s to the "api_permissions" field.
+func (m *MenuPermissionGroupMutation) AppendAPIPermissions(s []string) {
+	m.appendapi_permissions = append(m.appendapi_permissions, s...)
+}
+
+// AppendedAPIPermissions returns the list of values that were appended to the "api_permissions" field in this mutation.
+func (m *MenuPermissionGroupMutation) AppendedAPIPermissions() ([]string, bool) {
+	if len(m.appendapi_permissions) == 0 {
+		return nil, false
+	}
+	return m.appendapi_permissions, true
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (m *MenuPermissionGroupMutation) ClearAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	m.clearedFields[menupermissiongroup.FieldAPIPermissions] = struct{}{}
+}
+
+// APIPermissionsCleared returns if the "api_permissions" field was cleared in this mutation.
+func (m *MenuPermissionGroupMutation) APIPermissionsCleared() bool {
+	_, ok := m.clearedFields[menupermissiongroup.FieldAPIPermissions]
+	return ok
+}
+
+// ResetAPIPermissions resets all changes to the "api_permissions" field.
+func (m *MenuPermissionGroupMutation) ResetAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	delete(m.clearedFields, menupermissiongroup.FieldAPIPermissions)
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (m *MenuPermissionGroupMutation) SetFeatureFlags(value map[string]bool) {
+	m.feature_flags = &value
+}
+
+// FeatureFlags returns the value of the "feature_flags" field in the mutation.
+func (m *MenuPermissionGroupMutation) FeatureFlags() (r map[string]bool, exists bool) {
+	v := m.feature_flags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeatureFlags returns the old "feature_flags" field's value of the MenuPermissionGroup entity.
+// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuPermissionGroupMutation) OldFeatureFlags(ctx context.Context) (v map[string]bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeatureFlags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeatureFlags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeatureFlags: %w", err)
+	}
+	return oldValue.FeatureFlags, nil
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (m *MenuPermissionGroupMutation) ClearFeatureFlags() {
+	m.feature_flags = nil
+	m.clearedFields[menupermissiongroup.FieldFeatureFlags] = struct{}{}
+}
+
+// FeatureFlagsCleared returns if the "feature_flags" field was cleared in this mutation.
+func (m *MenuPermissionGroupMutation) FeatureFlagsCleared() bool {
+	_, ok := m.clearedFields[menupermissiongroup.FieldFeatureFlags]
+	return ok
+}
+
+// ResetFeatureFlags resets all changes to the "feature_flags" field.
+func (m *MenuPermissionGroupMutation) ResetFeatureFlags() {
+	m.feature_flags = nil
+	delete(m.clearedFields, menupermissiongroup.FieldFeatureFlags)
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (m *MenuPermissionGroupMutation) SetResourceQuotas(value map[string]int64) {
+	m.resource_quotas = &value
+}
+
+// ResourceQuotas returns the value of the "resource_quotas" field in the mutation.
+func (m *MenuPermissionGroupMutation) ResourceQuotas() (r map[string]int64, exists bool) {
+	v := m.resource_quotas
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceQuotas returns the old "resource_quotas" field's value of the MenuPermissionGroup entity.
+// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuPermissionGroupMutation) OldResourceQuotas(ctx context.Context) (v map[string]int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceQuotas is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceQuotas requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceQuotas: %w", err)
+	}
+	return oldValue.ResourceQuotas, nil
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (m *MenuPermissionGroupMutation) ClearResourceQuotas() {
+	m.resource_quotas = nil
+	m.clearedFields[menupermissiongroup.FieldResourceQuotas] = struct{}{}
+}
+
+// ResourceQuotasCleared returns if the "resource_quotas" field was cleared in this mutation.
+func (m *MenuPermissionGroupMutation) ResourceQuotasCleared() bool {
+	_, ok := m.clearedFields[menupermissiongroup.FieldResourceQuotas]
+	return ok
+}
+
+// ResetResourceQuotas resets all changes to the "resource_quotas" field.
+func (m *MenuPermissionGroupMutation) ResetResourceQuotas() {
+	m.resource_quotas = nil
+	delete(m.clearedFields, menupermissiongroup.FieldResourceQuotas)
+}
+
 // AddMenuIDs adds the "menus" edge to the Menu entity by ids.
 func (m *MenuPermissionGroupMutation) AddMenuIDs(ids ...uint32) {
 	if m.menus == nil {
@@ -9749,7 +9916,7 @@ func (m *MenuPermissionGroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MenuPermissionGroupMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 14)
 	if m.status != nil {
 		fields = append(fields, menupermissiongroup.FieldStatus)
 	}
@@ -9783,6 +9950,15 @@ func (m *MenuPermissionGroupMutation) Fields() []string {
 	if m.current_version != nil {
 		fields = append(fields, menupermissiongroup.FieldCurrentVersionID)
 	}
+	if m.api_permissions != nil {
+		fields = append(fields, menupermissiongroup.FieldAPIPermissions)
+	}
+	if m.feature_flags != nil {
+		fields = append(fields, menupermissiongroup.FieldFeatureFlags)
+	}
+	if m.resource_quotas != nil {
+		fields = append(fields, menupermissiongroup.FieldResourceQuotas)
+	}
 	return fields
 }
 
@@ -9813,6 +9989,12 @@ func (m *MenuPermissionGroupMutation) Field(name string) (ent.Value, bool) {
 		return m.Remark()
 	case menupermissiongroup.FieldCurrentVersionID:
 		return m.CurrentVersionID()
+	case menupermissiongroup.FieldAPIPermissions:
+		return m.APIPermissions()
+	case menupermissiongroup.FieldFeatureFlags:
+		return m.FeatureFlags()
+	case menupermissiongroup.FieldResourceQuotas:
+		return m.ResourceQuotas()
 	}
 	return nil, false
 }
@@ -9844,6 +10026,12 @@ func (m *MenuPermissionGroupMutation) OldField(ctx context.Context, name string)
 		return m.OldRemark(ctx)
 	case menupermissiongroup.FieldCurrentVersionID:
 		return m.OldCurrentVersionID(ctx)
+	case menupermissiongroup.FieldAPIPermissions:
+		return m.OldAPIPermissions(ctx)
+	case menupermissiongroup.FieldFeatureFlags:
+		return m.OldFeatureFlags(ctx)
+	case menupermissiongroup.FieldResourceQuotas:
+		return m.OldResourceQuotas(ctx)
 	}
 	return nil, fmt.Errorf("unknown MenuPermissionGroup field %s", name)
 }
@@ -9930,6 +10118,27 @@ func (m *MenuPermissionGroupMutation) SetField(name string, value ent.Value) err
 		}
 		m.SetCurrentVersionID(v)
 		return nil
+	case menupermissiongroup.FieldAPIPermissions:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIPermissions(v)
+		return nil
+	case menupermissiongroup.FieldFeatureFlags:
+		v, ok := value.(map[string]bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeatureFlags(v)
+		return nil
+	case menupermissiongroup.FieldResourceQuotas:
+		v, ok := value.(map[string]int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceQuotas(v)
+		return nil
 	}
 	return fmt.Errorf("unknown MenuPermissionGroup field %s", name)
 }
@@ -9993,6 +10202,15 @@ func (m *MenuPermissionGroupMutation) ClearedFields() []string {
 	if m.FieldCleared(menupermissiongroup.FieldCurrentVersionID) {
 		fields = append(fields, menupermissiongroup.FieldCurrentVersionID)
 	}
+	if m.FieldCleared(menupermissiongroup.FieldAPIPermissions) {
+		fields = append(fields, menupermissiongroup.FieldAPIPermissions)
+	}
+	if m.FieldCleared(menupermissiongroup.FieldFeatureFlags) {
+		fields = append(fields, menupermissiongroup.FieldFeatureFlags)
+	}
+	if m.FieldCleared(menupermissiongroup.FieldResourceQuotas) {
+		fields = append(fields, menupermissiongroup.FieldResourceQuotas)
+	}
 	return fields
 }
 
@@ -10012,6 +10230,15 @@ func (m *MenuPermissionGroupMutation) ClearField(name string) error {
 		return nil
 	case menupermissiongroup.FieldCurrentVersionID:
 		m.ClearCurrentVersionID()
+		return nil
+	case menupermissiongroup.FieldAPIPermissions:
+		m.ClearAPIPermissions()
+		return nil
+	case menupermissiongroup.FieldFeatureFlags:
+		m.ClearFeatureFlags()
+		return nil
+	case menupermissiongroup.FieldResourceQuotas:
+		m.ClearResourceQuotas()
 		return nil
 	}
 	return fmt.Errorf("unknown MenuPermissionGroup nullable field %s", name)
@@ -10053,6 +10280,15 @@ func (m *MenuPermissionGroupMutation) ResetField(name string) error {
 		return nil
 	case menupermissiongroup.FieldCurrentVersionID:
 		m.ResetCurrentVersionID()
+		return nil
+	case menupermissiongroup.FieldAPIPermissions:
+		m.ResetAPIPermissions()
+		return nil
+	case menupermissiongroup.FieldFeatureFlags:
+		m.ResetFeatureFlags()
+		return nil
+	case menupermissiongroup.FieldResourceQuotas:
+		m.ResetResourceQuotas()
 		return nil
 	}
 	return fmt.Errorf("unknown MenuPermissionGroup field %s", name)
@@ -10230,6 +10466,10 @@ type MenuPermissionGroupVersionMutation struct {
 	addpublished_by        *int32
 	effective_at           *time.Time
 	published_at           *time.Time
+	api_permissions        *[]string
+	appendapi_permissions  []string
+	feature_flags          *map[string]bool
+	resource_quotas        *map[string]int64
 	clearedFields          map[string]struct{}
 	group                  *uint32
 	clearedgroup           bool
@@ -10806,6 +11046,169 @@ func (m *MenuPermissionGroupVersionMutation) ResetPublishedAt() {
 	delete(m.clearedFields, menupermissiongroupversion.FieldPublishedAt)
 }
 
+// SetAPIPermissions sets the "api_permissions" field.
+func (m *MenuPermissionGroupVersionMutation) SetAPIPermissions(s []string) {
+	m.api_permissions = &s
+	m.appendapi_permissions = nil
+}
+
+// APIPermissions returns the value of the "api_permissions" field in the mutation.
+func (m *MenuPermissionGroupVersionMutation) APIPermissions() (r []string, exists bool) {
+	v := m.api_permissions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIPermissions returns the old "api_permissions" field's value of the MenuPermissionGroupVersion entity.
+// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuPermissionGroupVersionMutation) OldAPIPermissions(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIPermissions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIPermissions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIPermissions: %w", err)
+	}
+	return oldValue.APIPermissions, nil
+}
+
+// AppendAPIPermissions adds s to the "api_permissions" field.
+func (m *MenuPermissionGroupVersionMutation) AppendAPIPermissions(s []string) {
+	m.appendapi_permissions = append(m.appendapi_permissions, s...)
+}
+
+// AppendedAPIPermissions returns the list of values that were appended to the "api_permissions" field in this mutation.
+func (m *MenuPermissionGroupVersionMutation) AppendedAPIPermissions() ([]string, bool) {
+	if len(m.appendapi_permissions) == 0 {
+		return nil, false
+	}
+	return m.appendapi_permissions, true
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (m *MenuPermissionGroupVersionMutation) ClearAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	m.clearedFields[menupermissiongroupversion.FieldAPIPermissions] = struct{}{}
+}
+
+// APIPermissionsCleared returns if the "api_permissions" field was cleared in this mutation.
+func (m *MenuPermissionGroupVersionMutation) APIPermissionsCleared() bool {
+	_, ok := m.clearedFields[menupermissiongroupversion.FieldAPIPermissions]
+	return ok
+}
+
+// ResetAPIPermissions resets all changes to the "api_permissions" field.
+func (m *MenuPermissionGroupVersionMutation) ResetAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	delete(m.clearedFields, menupermissiongroupversion.FieldAPIPermissions)
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (m *MenuPermissionGroupVersionMutation) SetFeatureFlags(value map[string]bool) {
+	m.feature_flags = &value
+}
+
+// FeatureFlags returns the value of the "feature_flags" field in the mutation.
+func (m *MenuPermissionGroupVersionMutation) FeatureFlags() (r map[string]bool, exists bool) {
+	v := m.feature_flags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeatureFlags returns the old "feature_flags" field's value of the MenuPermissionGroupVersion entity.
+// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuPermissionGroupVersionMutation) OldFeatureFlags(ctx context.Context) (v map[string]bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeatureFlags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeatureFlags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeatureFlags: %w", err)
+	}
+	return oldValue.FeatureFlags, nil
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (m *MenuPermissionGroupVersionMutation) ClearFeatureFlags() {
+	m.feature_flags = nil
+	m.clearedFields[menupermissiongroupversion.FieldFeatureFlags] = struct{}{}
+}
+
+// FeatureFlagsCleared returns if the "feature_flags" field was cleared in this mutation.
+func (m *MenuPermissionGroupVersionMutation) FeatureFlagsCleared() bool {
+	_, ok := m.clearedFields[menupermissiongroupversion.FieldFeatureFlags]
+	return ok
+}
+
+// ResetFeatureFlags resets all changes to the "feature_flags" field.
+func (m *MenuPermissionGroupVersionMutation) ResetFeatureFlags() {
+	m.feature_flags = nil
+	delete(m.clearedFields, menupermissiongroupversion.FieldFeatureFlags)
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (m *MenuPermissionGroupVersionMutation) SetResourceQuotas(value map[string]int64) {
+	m.resource_quotas = &value
+}
+
+// ResourceQuotas returns the value of the "resource_quotas" field in the mutation.
+func (m *MenuPermissionGroupVersionMutation) ResourceQuotas() (r map[string]int64, exists bool) {
+	v := m.resource_quotas
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceQuotas returns the old "resource_quotas" field's value of the MenuPermissionGroupVersion entity.
+// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenuPermissionGroupVersionMutation) OldResourceQuotas(ctx context.Context) (v map[string]int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceQuotas is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceQuotas requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceQuotas: %w", err)
+	}
+	return oldValue.ResourceQuotas, nil
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (m *MenuPermissionGroupVersionMutation) ClearResourceQuotas() {
+	m.resource_quotas = nil
+	m.clearedFields[menupermissiongroupversion.FieldResourceQuotas] = struct{}{}
+}
+
+// ResourceQuotasCleared returns if the "resource_quotas" field was cleared in this mutation.
+func (m *MenuPermissionGroupVersionMutation) ResourceQuotasCleared() bool {
+	_, ok := m.clearedFields[menupermissiongroupversion.FieldResourceQuotas]
+	return ok
+}
+
+// ResetResourceQuotas resets all changes to the "resource_quotas" field.
+func (m *MenuPermissionGroupVersionMutation) ResetResourceQuotas() {
+	m.resource_quotas = nil
+	delete(m.clearedFields, menupermissiongroupversion.FieldResourceQuotas)
+}
+
 // ClearGroup clears the "group" edge to the MenuPermissionGroup entity.
 func (m *MenuPermissionGroupVersionMutation) ClearGroup() {
 	m.clearedgroup = true
@@ -10975,7 +11378,7 @@ func (m *MenuPermissionGroupVersionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MenuPermissionGroupVersionMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, menupermissiongroupversion.FieldCreatedAt)
 	}
@@ -11003,6 +11406,15 @@ func (m *MenuPermissionGroupVersionMutation) Fields() []string {
 	if m.published_at != nil {
 		fields = append(fields, menupermissiongroupversion.FieldPublishedAt)
 	}
+	if m.api_permissions != nil {
+		fields = append(fields, menupermissiongroupversion.FieldAPIPermissions)
+	}
+	if m.feature_flags != nil {
+		fields = append(fields, menupermissiongroupversion.FieldFeatureFlags)
+	}
+	if m.resource_quotas != nil {
+		fields = append(fields, menupermissiongroupversion.FieldResourceQuotas)
+	}
 	return fields
 }
 
@@ -11029,6 +11441,12 @@ func (m *MenuPermissionGroupVersionMutation) Field(name string) (ent.Value, bool
 		return m.EffectiveAt()
 	case menupermissiongroupversion.FieldPublishedAt:
 		return m.PublishedAt()
+	case menupermissiongroupversion.FieldAPIPermissions:
+		return m.APIPermissions()
+	case menupermissiongroupversion.FieldFeatureFlags:
+		return m.FeatureFlags()
+	case menupermissiongroupversion.FieldResourceQuotas:
+		return m.ResourceQuotas()
 	}
 	return nil, false
 }
@@ -11056,6 +11474,12 @@ func (m *MenuPermissionGroupVersionMutation) OldField(ctx context.Context, name 
 		return m.OldEffectiveAt(ctx)
 	case menupermissiongroupversion.FieldPublishedAt:
 		return m.OldPublishedAt(ctx)
+	case menupermissiongroupversion.FieldAPIPermissions:
+		return m.OldAPIPermissions(ctx)
+	case menupermissiongroupversion.FieldFeatureFlags:
+		return m.OldFeatureFlags(ctx)
+	case menupermissiongroupversion.FieldResourceQuotas:
+		return m.OldResourceQuotas(ctx)
 	}
 	return nil, fmt.Errorf("unknown MenuPermissionGroupVersion field %s", name)
 }
@@ -11127,6 +11551,27 @@ func (m *MenuPermissionGroupVersionMutation) SetField(name string, value ent.Val
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPublishedAt(v)
+		return nil
+	case menupermissiongroupversion.FieldAPIPermissions:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIPermissions(v)
+		return nil
+	case menupermissiongroupversion.FieldFeatureFlags:
+		v, ok := value.(map[string]bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeatureFlags(v)
+		return nil
+	case menupermissiongroupversion.FieldResourceQuotas:
+		v, ok := value.(map[string]int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceQuotas(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MenuPermissionGroupVersion field %s", name)
@@ -11221,6 +11666,15 @@ func (m *MenuPermissionGroupVersionMutation) ClearedFields() []string {
 	if m.FieldCleared(menupermissiongroupversion.FieldPublishedAt) {
 		fields = append(fields, menupermissiongroupversion.FieldPublishedAt)
 	}
+	if m.FieldCleared(menupermissiongroupversion.FieldAPIPermissions) {
+		fields = append(fields, menupermissiongroupversion.FieldAPIPermissions)
+	}
+	if m.FieldCleared(menupermissiongroupversion.FieldFeatureFlags) {
+		fields = append(fields, menupermissiongroupversion.FieldFeatureFlags)
+	}
+	if m.FieldCleared(menupermissiongroupversion.FieldResourceQuotas) {
+		fields = append(fields, menupermissiongroupversion.FieldResourceQuotas)
+	}
 	return fields
 }
 
@@ -11246,6 +11700,15 @@ func (m *MenuPermissionGroupVersionMutation) ClearField(name string) error {
 		return nil
 	case menupermissiongroupversion.FieldPublishedAt:
 		m.ClearPublishedAt()
+		return nil
+	case menupermissiongroupversion.FieldAPIPermissions:
+		m.ClearAPIPermissions()
+		return nil
+	case menupermissiongroupversion.FieldFeatureFlags:
+		m.ClearFeatureFlags()
+		return nil
+	case menupermissiongroupversion.FieldResourceQuotas:
+		m.ClearResourceQuotas()
 		return nil
 	}
 	return fmt.Errorf("unknown MenuPermissionGroupVersion nullable field %s", name)
@@ -11281,6 +11744,15 @@ func (m *MenuPermissionGroupVersionMutation) ResetField(name string) error {
 		return nil
 	case menupermissiongroupversion.FieldPublishedAt:
 		m.ResetPublishedAt()
+		return nil
+	case menupermissiongroupversion.FieldAPIPermissions:
+		m.ResetAPIPermissions()
+		return nil
+	case menupermissiongroupversion.FieldFeatureFlags:
+		m.ResetFeatureFlags()
+		return nil
+	case menupermissiongroupversion.FieldResourceQuotas:
+		m.ResetResourceQuotas()
 		return nil
 	}
 	return fmt.Errorf("unknown MenuPermissionGroupVersion field %s", name)

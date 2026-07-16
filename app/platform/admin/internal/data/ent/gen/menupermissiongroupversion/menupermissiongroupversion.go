@@ -32,6 +32,12 @@ const (
 	FieldEffectiveAt = "effective_at"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
 	FieldPublishedAt = "published_at"
+	// FieldAPIPermissions holds the string denoting the api_permissions field in the database.
+	FieldAPIPermissions = "api_permissions"
+	// FieldFeatureFlags holds the string denoting the feature_flags field in the database.
+	FieldFeatureFlags = "feature_flags"
+	// FieldResourceQuotas holds the string denoting the resource_quotas field in the database.
+	FieldResourceQuotas = "resource_quotas"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
 	EdgeGroup = "group"
 	// EdgeMenus holds the string denoting the menus edge name in mutations.
@@ -73,6 +79,9 @@ var Columns = []string{
 	FieldPublishedBy,
 	FieldEffectiveAt,
 	FieldPublishedAt,
+	FieldAPIPermissions,
+	FieldFeatureFlags,
+	FieldResourceQuotas,
 }
 
 var (

@@ -59,7 +59,7 @@ func (*tenantPermissionRepoStub) UpdateStatus(context.Context, uint32, pbEnum.St
 func (*tenantPermissionRepoStub) ListVersions(context.Context, uint32) ([]*pbCore.MenuPermissionGroupVersion, error) {
 	return nil, nil
 }
-func (*tenantPermissionRepoStub) PublishVersion(context.Context, uint32, []uint32, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error) {
+func (*tenantPermissionRepoStub) PublishVersion(context.Context, uint32, *pbCore.MenuPermissionGroupVersion, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error) {
 	return nil, nil
 }
 func (*tenantPermissionRepoStub) RollbackVersion(context.Context, uint32, uint32, string, uint32) (*pbCore.MenuPermissionGroupVersion, error) {

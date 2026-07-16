@@ -135,6 +135,24 @@ func (_c *MenuPermissionGroupVersionCreate) SetNillablePublishedAt(v *time.Time)
 	return _c
 }
 
+// SetAPIPermissions sets the "api_permissions" field.
+func (_c *MenuPermissionGroupVersionCreate) SetAPIPermissions(v []string) *MenuPermissionGroupVersionCreate {
+	_c.mutation.SetAPIPermissions(v)
+	return _c
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (_c *MenuPermissionGroupVersionCreate) SetFeatureFlags(v map[string]bool) *MenuPermissionGroupVersionCreate {
+	_c.mutation.SetFeatureFlags(v)
+	return _c
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (_c *MenuPermissionGroupVersionCreate) SetResourceQuotas(v map[string]int64) *MenuPermissionGroupVersionCreate {
+	_c.mutation.SetResourceQuotas(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *MenuPermissionGroupVersionCreate) SetID(v uint32) *MenuPermissionGroupVersionCreate {
 	_c.mutation.SetID(v)
@@ -329,6 +347,18 @@ func (_c *MenuPermissionGroupVersionCreate) createSpec() (*MenuPermissionGroupVe
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(menupermissiongroupversion.FieldPublishedAt, field.TypeTime, value)
 		_node.PublishedAt = &value
+	}
+	if value, ok := _c.mutation.APIPermissions(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldAPIPermissions, field.TypeJSON, value)
+		_node.APIPermissions = value
+	}
+	if value, ok := _c.mutation.FeatureFlags(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldFeatureFlags, field.TypeJSON, value)
+		_node.FeatureFlags = value
+	}
+	if value, ok := _c.mutation.ResourceQuotas(); ok {
+		_spec.SetField(menupermissiongroupversion.FieldResourceQuotas, field.TypeJSON, value)
+		_node.ResourceQuotas = value
 	}
 	if nodes := _c.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -575,6 +605,60 @@ func (u *MenuPermissionGroupVersionUpsert) ClearPublishedAt() *MenuPermissionGro
 	return u
 }
 
+// SetAPIPermissions sets the "api_permissions" field.
+func (u *MenuPermissionGroupVersionUpsert) SetAPIPermissions(v []string) *MenuPermissionGroupVersionUpsert {
+	u.Set(menupermissiongroupversion.FieldAPIPermissions, v)
+	return u
+}
+
+// UpdateAPIPermissions sets the "api_permissions" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsert) UpdateAPIPermissions() *MenuPermissionGroupVersionUpsert {
+	u.SetExcluded(menupermissiongroupversion.FieldAPIPermissions)
+	return u
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (u *MenuPermissionGroupVersionUpsert) ClearAPIPermissions() *MenuPermissionGroupVersionUpsert {
+	u.SetNull(menupermissiongroupversion.FieldAPIPermissions)
+	return u
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (u *MenuPermissionGroupVersionUpsert) SetFeatureFlags(v map[string]bool) *MenuPermissionGroupVersionUpsert {
+	u.Set(menupermissiongroupversion.FieldFeatureFlags, v)
+	return u
+}
+
+// UpdateFeatureFlags sets the "feature_flags" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsert) UpdateFeatureFlags() *MenuPermissionGroupVersionUpsert {
+	u.SetExcluded(menupermissiongroupversion.FieldFeatureFlags)
+	return u
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (u *MenuPermissionGroupVersionUpsert) ClearFeatureFlags() *MenuPermissionGroupVersionUpsert {
+	u.SetNull(menupermissiongroupversion.FieldFeatureFlags)
+	return u
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (u *MenuPermissionGroupVersionUpsert) SetResourceQuotas(v map[string]int64) *MenuPermissionGroupVersionUpsert {
+	u.Set(menupermissiongroupversion.FieldResourceQuotas, v)
+	return u
+}
+
+// UpdateResourceQuotas sets the "resource_quotas" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsert) UpdateResourceQuotas() *MenuPermissionGroupVersionUpsert {
+	u.SetExcluded(menupermissiongroupversion.FieldResourceQuotas)
+	return u
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (u *MenuPermissionGroupVersionUpsert) ClearResourceQuotas() *MenuPermissionGroupVersionUpsert {
+	u.SetNull(menupermissiongroupversion.FieldResourceQuotas)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -791,6 +875,69 @@ func (u *MenuPermissionGroupVersionUpsertOne) UpdatePublishedAt() *MenuPermissio
 func (u *MenuPermissionGroupVersionUpsertOne) ClearPublishedAt() *MenuPermissionGroupVersionUpsertOne {
 	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
 		s.ClearPublishedAt()
+	})
+}
+
+// SetAPIPermissions sets the "api_permissions" field.
+func (u *MenuPermissionGroupVersionUpsertOne) SetAPIPermissions(v []string) *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.SetAPIPermissions(v)
+	})
+}
+
+// UpdateAPIPermissions sets the "api_permissions" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsertOne) UpdateAPIPermissions() *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.UpdateAPIPermissions()
+	})
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (u *MenuPermissionGroupVersionUpsertOne) ClearAPIPermissions() *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.ClearAPIPermissions()
+	})
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (u *MenuPermissionGroupVersionUpsertOne) SetFeatureFlags(v map[string]bool) *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.SetFeatureFlags(v)
+	})
+}
+
+// UpdateFeatureFlags sets the "feature_flags" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsertOne) UpdateFeatureFlags() *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.UpdateFeatureFlags()
+	})
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (u *MenuPermissionGroupVersionUpsertOne) ClearFeatureFlags() *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.ClearFeatureFlags()
+	})
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (u *MenuPermissionGroupVersionUpsertOne) SetResourceQuotas(v map[string]int64) *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.SetResourceQuotas(v)
+	})
+}
+
+// UpdateResourceQuotas sets the "resource_quotas" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsertOne) UpdateResourceQuotas() *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.UpdateResourceQuotas()
+	})
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (u *MenuPermissionGroupVersionUpsertOne) ClearResourceQuotas() *MenuPermissionGroupVersionUpsertOne {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.ClearResourceQuotas()
 	})
 }
 
@@ -1176,6 +1323,69 @@ func (u *MenuPermissionGroupVersionUpsertBulk) UpdatePublishedAt() *MenuPermissi
 func (u *MenuPermissionGroupVersionUpsertBulk) ClearPublishedAt() *MenuPermissionGroupVersionUpsertBulk {
 	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
 		s.ClearPublishedAt()
+	})
+}
+
+// SetAPIPermissions sets the "api_permissions" field.
+func (u *MenuPermissionGroupVersionUpsertBulk) SetAPIPermissions(v []string) *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.SetAPIPermissions(v)
+	})
+}
+
+// UpdateAPIPermissions sets the "api_permissions" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsertBulk) UpdateAPIPermissions() *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.UpdateAPIPermissions()
+	})
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (u *MenuPermissionGroupVersionUpsertBulk) ClearAPIPermissions() *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.ClearAPIPermissions()
+	})
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (u *MenuPermissionGroupVersionUpsertBulk) SetFeatureFlags(v map[string]bool) *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.SetFeatureFlags(v)
+	})
+}
+
+// UpdateFeatureFlags sets the "feature_flags" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsertBulk) UpdateFeatureFlags() *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.UpdateFeatureFlags()
+	})
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (u *MenuPermissionGroupVersionUpsertBulk) ClearFeatureFlags() *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.ClearFeatureFlags()
+	})
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (u *MenuPermissionGroupVersionUpsertBulk) SetResourceQuotas(v map[string]int64) *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.SetResourceQuotas(v)
+	})
+}
+
+// UpdateResourceQuotas sets the "resource_quotas" field to the value that was provided on create.
+func (u *MenuPermissionGroupVersionUpsertBulk) UpdateResourceQuotas() *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.UpdateResourceQuotas()
+	})
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (u *MenuPermissionGroupVersionUpsertBulk) ClearResourceQuotas() *MenuPermissionGroupVersionUpsertBulk {
+	return u.Update(func(s *MenuPermissionGroupVersionUpsert) {
+		s.ClearResourceQuotas()
 	})
 }
 

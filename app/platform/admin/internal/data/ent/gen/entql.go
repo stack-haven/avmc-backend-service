@@ -225,6 +225,9 @@ var schemaGraph = func() *sqlgraph.Schema {
 			menupermissiongroup.FieldDescription:      {Type: field.TypeString, Column: menupermissiongroup.FieldDescription},
 			menupermissiongroup.FieldRemark:           {Type: field.TypeString, Column: menupermissiongroup.FieldRemark},
 			menupermissiongroup.FieldCurrentVersionID: {Type: field.TypeUint32, Column: menupermissiongroup.FieldCurrentVersionID},
+			menupermissiongroup.FieldAPIPermissions:   {Type: field.TypeJSON, Column: menupermissiongroup.FieldAPIPermissions},
+			menupermissiongroup.FieldFeatureFlags:     {Type: field.TypeJSON, Column: menupermissiongroup.FieldFeatureFlags},
+			menupermissiongroup.FieldResourceQuotas:   {Type: field.TypeJSON, Column: menupermissiongroup.FieldResourceQuotas},
 		},
 	}
 	graph.Nodes[7] = &sqlgraph.Node{
@@ -238,15 +241,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "MenuPermissionGroupVersion",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			menupermissiongroupversion.FieldCreatedAt:     {Type: field.TypeTime, Column: menupermissiongroupversion.FieldCreatedAt},
-			menupermissiongroupversion.FieldGroupID:       {Type: field.TypeUint32, Column: menupermissiongroupversion.FieldGroupID},
-			menupermissiongroupversion.FieldVersion:       {Type: field.TypeInt32, Column: menupermissiongroupversion.FieldVersion},
-			menupermissiongroupversion.FieldState:         {Type: field.TypeInt32, Column: menupermissiongroupversion.FieldState},
-			menupermissiongroupversion.FieldChangeSummary: {Type: field.TypeString, Column: menupermissiongroupversion.FieldChangeSummary},
-			menupermissiongroupversion.FieldCreatedBy:     {Type: field.TypeUint32, Column: menupermissiongroupversion.FieldCreatedBy},
-			menupermissiongroupversion.FieldPublishedBy:   {Type: field.TypeUint32, Column: menupermissiongroupversion.FieldPublishedBy},
-			menupermissiongroupversion.FieldEffectiveAt:   {Type: field.TypeTime, Column: menupermissiongroupversion.FieldEffectiveAt},
-			menupermissiongroupversion.FieldPublishedAt:   {Type: field.TypeTime, Column: menupermissiongroupversion.FieldPublishedAt},
+			menupermissiongroupversion.FieldCreatedAt:      {Type: field.TypeTime, Column: menupermissiongroupversion.FieldCreatedAt},
+			menupermissiongroupversion.FieldGroupID:        {Type: field.TypeUint32, Column: menupermissiongroupversion.FieldGroupID},
+			menupermissiongroupversion.FieldVersion:        {Type: field.TypeInt32, Column: menupermissiongroupversion.FieldVersion},
+			menupermissiongroupversion.FieldState:          {Type: field.TypeInt32, Column: menupermissiongroupversion.FieldState},
+			menupermissiongroupversion.FieldChangeSummary:  {Type: field.TypeString, Column: menupermissiongroupversion.FieldChangeSummary},
+			menupermissiongroupversion.FieldCreatedBy:      {Type: field.TypeUint32, Column: menupermissiongroupversion.FieldCreatedBy},
+			menupermissiongroupversion.FieldPublishedBy:    {Type: field.TypeUint32, Column: menupermissiongroupversion.FieldPublishedBy},
+			menupermissiongroupversion.FieldEffectiveAt:    {Type: field.TypeTime, Column: menupermissiongroupversion.FieldEffectiveAt},
+			menupermissiongroupversion.FieldPublishedAt:    {Type: field.TypeTime, Column: menupermissiongroupversion.FieldPublishedAt},
+			menupermissiongroupversion.FieldAPIPermissions: {Type: field.TypeJSON, Column: menupermissiongroupversion.FieldAPIPermissions},
+			menupermissiongroupversion.FieldFeatureFlags:   {Type: field.TypeJSON, Column: menupermissiongroupversion.FieldFeatureFlags},
+			menupermissiongroupversion.FieldResourceQuotas: {Type: field.TypeJSON, Column: menupermissiongroupversion.FieldResourceQuotas},
 		},
 	}
 	graph.Nodes[8] = &sqlgraph.Node{
@@ -1827,6 +1833,21 @@ func (f *MenuPermissionGroupFilter) WhereCurrentVersionID(p entql.Uint32P) {
 	f.Where(p.Field(menupermissiongroup.FieldCurrentVersionID))
 }
 
+// WhereAPIPermissions applies the entql json.RawMessage predicate on the api_permissions field.
+func (f *MenuPermissionGroupFilter) WhereAPIPermissions(p entql.BytesP) {
+	f.Where(p.Field(menupermissiongroup.FieldAPIPermissions))
+}
+
+// WhereFeatureFlags applies the entql json.RawMessage predicate on the feature_flags field.
+func (f *MenuPermissionGroupFilter) WhereFeatureFlags(p entql.BytesP) {
+	f.Where(p.Field(menupermissiongroup.FieldFeatureFlags))
+}
+
+// WhereResourceQuotas applies the entql json.RawMessage predicate on the resource_quotas field.
+func (f *MenuPermissionGroupFilter) WhereResourceQuotas(p entql.BytesP) {
+	f.Where(p.Field(menupermissiongroup.FieldResourceQuotas))
+}
+
 // WhereHasMenus applies a predicate to check if query has an edge menus.
 func (f *MenuPermissionGroupFilter) WhereHasMenus() {
 	f.Where(entql.HasEdge("menus"))
@@ -1966,6 +1987,21 @@ func (f *MenuPermissionGroupVersionFilter) WhereEffectiveAt(p entql.TimeP) {
 // WherePublishedAt applies the entql time.Time predicate on the published_at field.
 func (f *MenuPermissionGroupVersionFilter) WherePublishedAt(p entql.TimeP) {
 	f.Where(p.Field(menupermissiongroupversion.FieldPublishedAt))
+}
+
+// WhereAPIPermissions applies the entql json.RawMessage predicate on the api_permissions field.
+func (f *MenuPermissionGroupVersionFilter) WhereAPIPermissions(p entql.BytesP) {
+	f.Where(p.Field(menupermissiongroupversion.FieldAPIPermissions))
+}
+
+// WhereFeatureFlags applies the entql json.RawMessage predicate on the feature_flags field.
+func (f *MenuPermissionGroupVersionFilter) WhereFeatureFlags(p entql.BytesP) {
+	f.Where(p.Field(menupermissiongroupversion.FieldFeatureFlags))
+}
+
+// WhereResourceQuotas applies the entql json.RawMessage predicate on the resource_quotas field.
+func (f *MenuPermissionGroupVersionFilter) WhereResourceQuotas(p entql.BytesP) {
+	f.Where(p.Field(menupermissiongroupversion.FieldResourceQuotas))
 }
 
 // WhereHasGroup applies a predicate to check if query has an edge group.

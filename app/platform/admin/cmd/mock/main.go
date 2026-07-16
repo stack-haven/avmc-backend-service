@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -661,6 +662,7 @@ func ensureMenu(ctx context.Context, client *gen.Client, spec mockMenuSpec, pare
 }
 
 func ensureMenuPermissionGroup(ctx context.Context, client *gen.Client, name, code string, system bool, menuIDs []uint32) (*gen.MenuPermissionGroup, error) {
+	apiPermissions, featureFlags, resourceQuotas := mockPackageCapabilities(code)
 	item, err := client.MenuPermissionGroup.Query().Where(menupermissiongroup.Code(code)).Only(ctx)
 	if gen.IsNotFound(err) {
 		item, err = client.MenuPermissionGroup.Create().
@@ -669,6 +671,9 @@ func ensureMenuPermissionGroup(ctx context.Context, client *gen.Client, name, co
 			SetStatus(1).
 			SetIsSystem(system).
 			SetDescription("mock data").
+			SetAPIPermissions(apiPermissions).
+			SetFeatureFlags(featureFlags).
+			SetResourceQuotas(resourceQuotas).
 			AddMenuIDs(menuIDs...).
 			Save(ctx)
 		if err != nil {
@@ -682,21 +687,28 @@ func ensureMenuPermissionGroup(ctx context.Context, client *gen.Client, name, co
 			SetStatus(1).
 			SetIsSystem(system).
 			SetDescription("mock data").
+			SetAPIPermissions(apiPermissions).
+			SetFeatureFlags(featureFlags).
+			SetResourceQuotas(resourceQuotas).
 			Save(ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return ensureMenuPermissionGroupVersion(ctx, client, item, menuIDs)
+	return ensureMenuPermissionGroupVersion(ctx, client, item, menuIDs, apiPermissions, featureFlags, resourceQuotas)
 }
 
-func ensureMenuPermissionGroupVersion(ctx context.Context, client *gen.Client, group *gen.MenuPermissionGroup, menuIDs []uint32) (*gen.MenuPermissionGroup, error) {
+func ensureMenuPermissionGroupVersion(ctx context.Context, client *gen.Client, group *gen.MenuPermissionGroup, menuIDs []uint32, apiPermissions []string, featureFlags map[string]bool, resourceQuotas map[string]int64) (*gen.MenuPermissionGroup, error) {
 	currentMenus, err := group.QueryMenus().IDs(ctx)
 	if err != nil {
 		return nil, err
 	}
 	_, err = group.QueryCurrentVersion().Only(ctx)
-	if err == nil && sameIDs(currentMenus, menuIDs) {
+	if err == nil &&
+		sameIDs(currentMenus, menuIDs) &&
+		sameStrings(group.APIPermissions, apiPermissions) &&
+		reflect.DeepEqual(group.FeatureFlags, featureFlags) &&
+		reflect.DeepEqual(group.ResourceQuotas, resourceQuotas) {
 		return group, nil
 	}
 	if err != nil && !gen.IsNotFound(err) {
@@ -730,6 +742,9 @@ func ensureMenuPermissionGroupVersion(ctx context.Context, client *gen.Client, g
 		SetChangeSummary("mock data sync").
 		SetEffectiveAt(now).
 		SetPublishedAt(now).
+		SetAPIPermissions(apiPermissions).
+		SetFeatureFlags(featureFlags).
+		SetResourceQuotas(resourceQuotas).
 		AddMenuIDs(menuIDs...).
 		Save(ctx)
 	if err != nil {
@@ -738,6 +753,9 @@ func ensureMenuPermissionGroupVersion(ctx context.Context, client *gen.Client, g
 	if _, err = tx.MenuPermissionGroup.UpdateOneID(group.ID).
 		SetCurrentVersionID(version.ID).
 		ClearMenus().
+		SetAPIPermissions(apiPermissions).
+		SetFeatureFlags(featureFlags).
+		SetResourceQuotas(resourceQuotas).
 		AddMenuIDs(menuIDs...).
 		Save(ctx); err != nil {
 		return nil, err
@@ -755,6 +773,45 @@ func ensureMenuPermissionGroupVersion(ctx context.Context, client *gen.Client, g
 		return nil, err
 	}
 	return client.MenuPermissionGroup.Get(ctx, group.ID)
+}
+
+func mockPackageCapabilities(code string) ([]string, map[string]bool, map[string]int64) {
+	switch code {
+	case "demo-full-admin":
+		return []string{
+				"platform.admin.audit.read",
+				"platform.admin.async_task.manage",
+				"platform.admin.tenant.manage",
+				"platform.admin.webhook.manage",
+			},
+			map[string]bool{
+				"advanced_reports": true,
+				"file_center":      true,
+				"webhook_center":   true,
+			},
+			map[string]int64{
+				"api_calls_per_day": 100000,
+				"projects":          100,
+				"storage_mb":        102400,
+				"webhooks":          50,
+			}
+	default:
+		return []string{
+				"platform.admin.audit.read",
+				"platform.admin.tenant.read",
+			},
+			map[string]bool{
+				"advanced_reports": false,
+				"file_center":      false,
+				"webhook_center":   false,
+			},
+			map[string]int64{
+				"api_calls_per_day": 5000,
+				"projects":          10,
+				"storage_mb":        5120,
+				"webhooks":          0,
+			}
+	}
 }
 
 func ensureTenantPermissionGroups(ctx context.Context, client *gen.Client, tenantID, operatorID uint32, groupIDs []uint32) error {
@@ -820,6 +877,22 @@ func sameIDs(left, right []uint32) bool {
 	}
 	for _, id := range right {
 		if _, ok := seen[id]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func sameStrings(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	seen := make(map[string]struct{}, len(left))
+	for _, item := range left {
+		seen[item] = struct{}{}
+	}
+	for _, item := range right {
+		if _, ok := seen[item]; !ok {
 			return false
 		}
 	}

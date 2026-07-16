@@ -116,7 +116,12 @@ func (s *MenuPermissionGroupServiceService) ListMenuPermissionGroupVersions(ctx 
 }
 
 func (s *MenuPermissionGroupServiceService) PublishMenuPermissionGroupVersion(ctx context.Context, req *pbCore.PublishMenuPermissionGroupVersionRequest) (*pbCore.PublishMenuPermissionGroupVersionResponse, error) {
-	version, err := s.uc.PublishVersion(ctx, req.GetGroupId(), req.GetMenuIds(), req.GetChangeSummary(), req.GetOperatorId(), req.GetEffectiveAt())
+	version, err := s.uc.PublishVersion(ctx, req.GetGroupId(), &pbCore.MenuPermissionGroupVersion{
+		MenuIds:        req.GetMenuIds(),
+		ApiPermissions: req.GetApiPermissions(),
+		FeatureFlags:   req.GetFeatureFlags(),
+		ResourceQuotas: req.GetResourceQuotas(),
+	}, req.GetChangeSummary(), req.GetOperatorId(), req.GetEffectiveAt())
 	if err != nil {
 		return nil, err
 	}

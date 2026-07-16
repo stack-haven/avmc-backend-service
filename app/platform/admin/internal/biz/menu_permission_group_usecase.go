@@ -19,7 +19,7 @@ type MenuPermissionGroupRepo interface {
 	Delete(context.Context, uint32) error
 	UpdateStatus(context.Context, uint32, pbEnum.Status) (*pbCore.MenuPermissionGroup, error)
 	ListVersions(context.Context, uint32) ([]*pbCore.MenuPermissionGroupVersion, error)
-	PublishVersion(context.Context, uint32, []uint32, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error)
+	PublishVersion(context.Context, uint32, *pbCore.MenuPermissionGroupVersion, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error)
 	RollbackVersion(context.Context, uint32, uint32, string, uint32) (*pbCore.MenuPermissionGroupVersion, error)
 	GetTenantGroups(context.Context, uint32) ([]*pbCore.MenuPermissionGroup, error)
 	GetTenantGroupBindings(context.Context, uint32) ([]*pbCore.TenantPermissionGroupBinding, error)
@@ -34,8 +34,8 @@ func (uc *MenuPermissionGroupUsecase) ListVersions(ctx context.Context, groupID 
 	return uc.repo.ListVersions(ctx, groupID)
 }
 
-func (uc *MenuPermissionGroupUsecase) PublishVersion(ctx context.Context, groupID uint32, menuIDs []uint32, summary string, operatorID uint32, effectiveAt string) (*pbCore.MenuPermissionGroupVersion, error) {
-	return uc.repo.PublishVersion(ctx, groupID, menuIDs, summary, operatorID, effectiveAt)
+func (uc *MenuPermissionGroupUsecase) PublishVersion(ctx context.Context, groupID uint32, version *pbCore.MenuPermissionGroupVersion, summary string, operatorID uint32, effectiveAt string) (*pbCore.MenuPermissionGroupVersion, error) {
+	return uc.repo.PublishVersion(ctx, groupID, version, summary, operatorID, effectiveAt)
 }
 
 func (uc *MenuPermissionGroupUsecase) RollbackVersion(ctx context.Context, groupID, sourceVersionID uint32, summary string, operatorID uint32) (*pbCore.MenuPermissionGroupVersion, error) {

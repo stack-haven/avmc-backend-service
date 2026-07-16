@@ -83,7 +83,7 @@ func (*menuPermissionGroupRepoStub) ListVersions(context.Context, uint32) ([]*pb
 	return nil, nil
 }
 
-func (*menuPermissionGroupRepoStub) PublishVersion(context.Context, uint32, []uint32, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error) {
+func (*menuPermissionGroupRepoStub) PublishVersion(context.Context, uint32, *pbCore.MenuPermissionGroupVersion, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error) {
 	return nil, nil
 }
 

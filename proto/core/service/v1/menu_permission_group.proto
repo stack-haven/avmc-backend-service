@@ -103,6 +103,9 @@ message MenuPermissionGroup {
   optional string updated_at = 12 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
   optional uint32 current_version_id = 13 [(gnostic.openapi.v3.property) = {description: "当前发布版本ID"}];
   optional int32 current_version = 14 [(gnostic.openapi.v3.property) = {description: "当前发布版本号"}];
+  repeated string api_permissions = 15 [(gnostic.openapi.v3.property) = {description: "接口能力权限码列表"}];
+  map<string, bool> feature_flags = 16 [(gnostic.openapi.v3.property) = {description: "功能开关配置"}];
+  map<string, int64> resource_quotas = 17 [(gnostic.openapi.v3.property) = {description: "资源额度配置"}];
 }
 
 message MenuPermissionGroupVersion {
@@ -117,6 +120,9 @@ message MenuPermissionGroupVersion {
   optional string effective_at = 9;
   optional string published_at = 10;
   optional string created_at = 11;
+  repeated string api_permissions = 12;
+  map<string, bool> feature_flags = 13;
+  map<string, int64> resource_quotas = 14;
 }
 
 message CreateMenuPermissionGroupRequest {
@@ -236,6 +242,9 @@ message PublishMenuPermissionGroupVersionRequest {
   optional string change_summary = 3 [(buf.validate.field).string.max_len = 255];
   optional uint32 operator_id = 4 [(buf.validate.field).uint32.gt = 0];
   optional string effective_at = 5;
+  repeated string api_permissions = 6 [(gnostic.openapi.v3.property) = {description: "接口能力权限码列表"}];
+  map<string, bool> feature_flags = 7 [(gnostic.openapi.v3.property) = {description: "功能开关配置"}];
+  map<string, int64> resource_quotas = 8 [(gnostic.openapi.v3.property) = {description: "资源额度配置"}];
 }
 
 message PublishMenuPermissionGroupVersionResponse {
