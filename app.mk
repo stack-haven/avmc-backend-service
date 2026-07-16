@@ -103,30 +103,16 @@ docker:
 # generate code
 gen: ent wire api openapi
 
-# generate ent code
-# 新增 --feature sql/execquery --feature namedges --target ./internal/data/ent/gen --template ./internal/data/ent/templates
-# 重新指定生成目录、指定模版位置
+# generate ent code using the service-local entc configuration
 ent:
 ifneq ("$(wildcard ./internal/data/ent)","")
-	@go run -mod=mod entgo.io/ent/cmd/ent generate \
-				--feature privacy \
-				--feature sql/modifier \
-				--feature entql \
-				--feature sql/upsert \
-				--feature sql/lock \
-				--feature intercept,schema/snapshot \
-				--feature sql/execquery \
-				--feature namedges \
-				--target ./internal/data/ent/gen \
-				--template ./internal/data/ent/templates \
-				./internal/data/ent/schema
+	@go generate ./internal/data/ent
 endif
 
 # generate ent code
 ent02:
 ifneq ("$(wildcard ./internal/data/ent)","")
-	@cd ./internal/data/ent && \
-	go run -mod=mod ./entc.go
+	@go generate ./internal/data/ent
 endif
 
 # generate wire code

@@ -6,6 +6,7 @@ generate-check:
 	$(MAKE) api
 	$(MAKE) ent
 	$(MAKE) config
+	$(MAKE) wire
 	$(MAKE) doc
 	@cd ../../.. && go mod tidy
 	$(MAKE) diff-check
