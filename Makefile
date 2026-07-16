@@ -70,18 +70,13 @@ check: fmt-check
 	git diff --check
 
 .PHONY: race
-# run race detection for security and infrastructure packages
+# run race detection for global backend packages
 race:
 	go test -race -timeout 240s \
 		./pkg/aip/listing \
 		./pkg/auth/... \
 		./pkg/health/... \
-		./pkg/middleware/safelogging/... \
-		./app/platform/admin/internal/authzpolicy \
-		./app/platform/admin/internal/biz \
-		./app/platform/admin/internal/data \
-	./app/platform/admin/internal/server \
-	./app/platform/admin/internal/service
+		./pkg/middleware/safelogging/...
 
 .PHONY: generate
 # generate

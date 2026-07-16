@@ -42,6 +42,16 @@ diff-check:
 			app/platform/admin/internal/data/ent/gen; \
 		 exit 1)
 
+.PHONY: race
+# run race detection for platform admin packages
+race:
+	go test -race -timeout 240s \
+		./internal/authzpolicy \
+		./internal/biz \
+		./internal/data \
+		./internal/server \
+		./internal/service
+
 # generate OpenAPI v3 doc
 .PHONY: doc
 doc:
