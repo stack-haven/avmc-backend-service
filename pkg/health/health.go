@@ -18,6 +18,10 @@ type Checker interface {
 	Ready(context.Context) error
 }
 
+type DetailsProvider interface {
+	Details(context.Context) map[string]any
+}
+
 type CheckFunc func(context.Context) error
 
 func (f CheckFunc) Ready(ctx context.Context) error {
@@ -54,6 +58,10 @@ func HTTPHandler(checker Checker, timeout time.Duration) http.Handler {
 				writeStatus(w, http.StatusServiceUnavailable, "unavailable")
 				return
 			}
+			if provider, ok := checker.(DetailsProvider); ok {
+				writeStatusWithDetails(w, http.StatusOK, "ok", provider.Details(ctx))
+				return
+			}
 			writeStatus(w, http.StatusOK, "ok")
 		default:
 			http.NotFound(w, r)
@@ -62,8 +70,16 @@ func HTTPHandler(checker Checker, timeout time.Duration) http.Handler {
 }
 
 func writeStatus(w http.ResponseWriter, status int, value string) {
+	writeStatusWithDetails(w, status, value, nil)
+}
+
+func writeStatusWithDetails(w http.ResponseWriter, status int, value string, details map[string]any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": value})
+	body := map[string]any{"status": value}
+	if len(details) > 0 {
+		body["details"] = details
+	}
+	_ = json.NewEncoder(w).Encode(body)
 }

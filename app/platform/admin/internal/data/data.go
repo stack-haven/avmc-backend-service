@@ -170,18 +170,57 @@ func (d *Data) DB(ctx context.Context) *gen.Client {
 	return d.db
 }
 
+type platformHealthChecker struct {
+	data *Data
+}
+
 func NewHealthChecker(data *Data) pkgHealth.Checker {
-	return pkgHealth.CheckFunc(func(ctx context.Context) error {
-		ctx = entviewer.NewSystemContext(ctx)
-		var errs []error
-		if _, err := data.db.User.Query().Limit(1).Count(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("database: %w", err))
-		}
-		if err := data.rdb.Ping(ctx).Err(); err != nil {
-			errs = append(errs, fmt.Errorf("redis: %w", err))
-		}
-		return errors.Join(errs...)
-	})
+	return &platformHealthChecker{data: data}
+}
+
+func (c *platformHealthChecker) Ready(ctx context.Context) error {
+	ctx = entviewer.NewSystemContext(ctx)
+	var errs []error
+	if c == nil || c.data == nil || c.data.db == nil {
+		errs = append(errs, fmt.Errorf("database: unavailable"))
+	} else if _, err := c.data.db.User.Query().Limit(1).Count(ctx); err != nil {
+		errs = append(errs, fmt.Errorf("database: %w", err))
+	}
+	if c == nil || c.data == nil || c.data.rdb == nil {
+		errs = append(errs, fmt.Errorf("redis: unavailable"))
+	} else if err := c.data.rdb.Ping(ctx).Err(); err != nil {
+		errs = append(errs, fmt.Errorf("redis: %w", err))
+	}
+	return errors.Join(errs...)
+}
+
+func (c *platformHealthChecker) Details(context.Context) map[string]any {
+	if c == nil || c.data == nil {
+		return nil
+	}
+	stats := c.data.tenantAuthorizationCacheStatsSnapshot()
+	lookups := stats.Hits + stats.Misses + stats.Expired
+	totalDecisions := lookups + stats.Bypasses
+	return map[string]any{
+		"authorization_cache": map[string]any{
+			"hits":          stats.Hits,
+			"misses":        stats.Misses,
+			"sets":          stats.Sets,
+			"bypasses":      stats.Bypasses,
+			"expired":       stats.Expired,
+			"clears":        stats.Clears,
+			"invalidations": stats.Invalidations,
+			"hit_rate":      ratio(stats.Hits, lookups),
+			"bypass_rate":   ratio(stats.Bypasses, totalDecisions),
+		},
+	}
+}
+
+func ratio(value uint64, total uint64) float64 {
+	if total == 0 {
+		return 0
+	}
+	return float64(value) / float64(total)
 }
 
 func NewLoginAttemptGuard(rdb *redis.Client) (loginattempt.Guard, error) {
