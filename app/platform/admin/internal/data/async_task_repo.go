@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,8 +20,40 @@ import (
 
 type asyncTaskRepo struct{ BaseRepo }
 
+type asyncTaskAlertThresholds struct {
+	pendingOverdueWarning                int32
+	failedWarning                        int32
+	runningLeaseExpiredCritical          int32
+	retryPressureCritical                int32
+	permissionCacheFailedCritical        int32
+	permissionCacheRetryPressureCritical int32
+}
+
 func NewAsyncTaskRepo(data *Data, logger log.Logger) biz.AsyncTaskRepo {
 	return &asyncTaskRepo{BaseRepo: NewBaseRepo(data, logger)}
+}
+
+func asyncTaskAlertThresholdsFromEnv() asyncTaskAlertThresholds {
+	return asyncTaskAlertThresholds{
+		pendingOverdueWarning:                int32Env("platform_ADMIN_ASYNC_TASK_PENDING_OVERDUE_WARNING_THRESHOLD", 1),
+		failedWarning:                        int32Env("platform_ADMIN_ASYNC_TASK_FAILED_WARNING_THRESHOLD", 1),
+		runningLeaseExpiredCritical:          int32Env("platform_ADMIN_ASYNC_TASK_RUNNING_LEASE_EXPIRED_CRITICAL_THRESHOLD", 1),
+		retryPressureCritical:                int32Env("platform_ADMIN_ASYNC_TASK_RETRY_PRESSURE_CRITICAL_THRESHOLD", 1),
+		permissionCacheFailedCritical:        int32Env("platform_ADMIN_PERMISSION_CACHE_FAILED_CRITICAL_THRESHOLD", 1),
+		permissionCacheRetryPressureCritical: int32Env("platform_ADMIN_PERMISSION_CACHE_RETRY_PRESSURE_CRITICAL_THRESHOLD", 1),
+	}
+}
+
+func int32Env(key string, fallback int32) int32 {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return fallback
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil || value < 0 {
+		return fallback
+	}
+	return int32(value)
 }
 
 func asyncTaskProto(row *gen.AsyncTask) *pb.AsyncTask {
@@ -224,9 +257,33 @@ func (r *asyncTaskRepo) Stats(ctx context.Context, req *pb.GetAsyncTaskStatsRequ
 			stats.RetryPressure++
 		}
 	}
+	permissionCacheFailed, err := base().Where(
+		asynctask.TaskTypeEQ(biz.AsyncTaskTypePermissionCacheInvalidate),
+		asynctask.StatusEQ(int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED)),
+	).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	permissionCacheRetryPressureRows, err := base().Where(
+		asynctask.TaskTypeEQ(biz.AsyncTaskTypePermissionCacheInvalidate),
+		asynctask.StatusIn(
+			int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING),
+			int32(pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING),
+		),
+	).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var permissionCacheRetryPressure int32
+	for _, row := range permissionCacheRetryPressureRows {
+		if row.Attempts >= row.MaxAttempts-1 {
+			permissionCacheRetryPressure++
+		}
+	}
 	stats.HealthStatus = pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_HEALTHY
-	appendAlert := func(code string, status pb.AsyncTaskHealthStatus, count int32) {
-		if count <= 0 {
+	thresholds := asyncTaskAlertThresholdsFromEnv()
+	appendAlert := func(code string, status pb.AsyncTaskHealthStatus, count int32, threshold int32) {
+		if threshold <= 0 || count < threshold {
 			return
 		}
 		stats.Alerts = append(stats.Alerts, &pb.AsyncTaskHealthAlert{
@@ -238,10 +295,12 @@ func (r *asyncTaskRepo) Stats(ctx context.Context, req *pb.GetAsyncTaskStatsRequ
 			stats.HealthStatus = status
 		}
 	}
-	appendAlert("pending_overdue", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING, stats.GetPendingOverdue())
-	appendAlert("failed", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING, stats.GetFailed())
-	appendAlert("running_lease_expired", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, stats.GetRunningLeaseExpired())
-	appendAlert("retry_pressure", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, stats.GetRetryPressure())
+	appendAlert("pending_overdue", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING, stats.GetPendingOverdue(), thresholds.pendingOverdueWarning)
+	appendAlert("failed", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING, stats.GetFailed(), thresholds.failedWarning)
+	appendAlert("running_lease_expired", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, stats.GetRunningLeaseExpired(), thresholds.runningLeaseExpiredCritical)
+	appendAlert("retry_pressure", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, stats.GetRetryPressure(), thresholds.retryPressureCritical)
+	appendAlert("permission_cache_failed", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, int32(permissionCacheFailed), thresholds.permissionCacheFailedCritical)
+	appendAlert("permission_cache_retry_pressure", pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL, permissionCacheRetryPressure, thresholds.permissionCacheRetryPressureCritical)
 	setOptionalTime(&stats.CheckedAt, &now)
 	return stats, nil
 }

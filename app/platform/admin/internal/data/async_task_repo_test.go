@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"testing"
@@ -173,50 +174,45 @@ func TestAsyncTaskRepoCancelAndRetention(t *testing.T) {
 func TestAsyncTaskRepoStatsSummarizesOperationalHealth(t *testing.T) {
 	repo, closeRepo := newAsyncTaskRepoForTest(t)
 	defer closeRepo()
+	setAsyncTaskAlertThresholdsForTest(t, "1")
 	ctx := systemContext()
 	now := time.Now()
 	maintenance := "maintenance"
 	defaultQueue := "default"
 
 	createTask := func(queue string, status pb.AsyncTaskStatus, scheduledAt time.Time, attempts, maxAttempts int32) {
-		builder := repo.Data.DB(ctx).AsyncTask.Create().
-			SetTaskType(biz.AsyncTaskTypeRetentionCleanup).
-			SetQueue(queue).
-			SetStatus(int32(status)).
-			SetPayload(`{"retentionDays":30,"batchSize":100}`).
-			SetScheduledAt(scheduledAt).
-			SetAttempts(attempts).
-			SetMaxAttempts(maxAttempts)
-		if status == pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING {
-			builder.SetLeaseOwner("worker").SetLeaseExpiresAt(now.Add(-time.Minute))
-		}
-		builder.SaveX(ctx)
+		createTaskOfType(repo, ctx, biz.AsyncTaskTypeRetentionCleanup, queue, status, scheduledAt, attempts, maxAttempts, now)
+	}
+	createPermissionCacheTask := func(queue string, status pb.AsyncTaskStatus, scheduledAt time.Time, attempts, maxAttempts int32) {
+		createTaskOfType(repo, ctx, biz.AsyncTaskTypePermissionCacheInvalidate, queue, status, scheduledAt, attempts, maxAttempts, now)
 	}
 	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING, now.Add(-10*time.Minute), 2, 3)
 	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING, now.Add(-time.Minute), 1, 3)
 	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED, now.Add(-time.Hour), 3, 3)
 	createTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED, now.Add(-time.Hour), 1, 3)
 	createTask(defaultQueue, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING, now.Add(-10*time.Minute), 0, 3)
+	createPermissionCacheTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED, now.Add(-time.Hour), 3, 3)
+	createPermissionCacheTask(maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING, now.Add(-time.Minute), 9, 10)
 
 	stats, err := repo.Stats(ctx, &pb.GetAsyncTaskStatsRequest{Queue: &maintenance, PendingOverdueSeconds: 300})
 	if err != nil {
 		t.Fatalf("stats: %v", err)
 	}
-	if stats.GetTotal() != 4 ||
+	if stats.GetTotal() != 6 ||
 		stats.GetPendingOverdue() != 1 ||
 		stats.GetRunningLeaseExpired() != 1 ||
-		stats.GetFailed() != 1 ||
-		stats.GetRetryPressure() != 1 {
+		stats.GetFailed() != 2 ||
+		stats.GetRetryPressure() != 2 {
 		t.Fatalf("stats = %+v", stats)
 	}
 	countByStatus := map[pb.AsyncTaskStatus]int32{}
 	for _, item := range stats.GetStatusCounts() {
 		countByStatus[item.GetStatus()] = item.GetCount()
 	}
-	if countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING] != 1 ||
+	if countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING] != 2 ||
 		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING] != 1 ||
 		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED] != 1 ||
-		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED] != 1 {
+		countByStatus[pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED] != 2 {
 		t.Fatalf("status counts = %+v", countByStatus)
 	}
 	if stats.GetCheckedAt() == "" {
@@ -232,9 +228,69 @@ func TestAsyncTaskRepoStatsSummarizesOperationalHealth(t *testing.T) {
 	if alerts["pending_overdue"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING ||
 		alerts["failed"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_WARNING ||
 		alerts["running_lease_expired"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL ||
-		alerts["retry_pressure"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL {
+		alerts["retry_pressure"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL ||
+		alerts["permission_cache_failed"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL ||
+		alerts["permission_cache_retry_pressure"] != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_CRITICAL {
 		t.Fatalf("alerts = %+v", alerts)
 	}
+}
+
+func TestAsyncTaskRepoStatsAppliesAlertThresholds(t *testing.T) {
+	repo, closeRepo := newAsyncTaskRepoForTest(t)
+	defer closeRepo()
+	setAsyncTaskAlertThresholdsForTest(t, "10")
+	ctx := systemContext()
+	now := time.Now()
+	maintenance := "maintenance"
+
+	createTaskOfType(repo, ctx, biz.AsyncTaskTypePermissionCacheInvalidate, maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_FAILED, now.Add(-time.Hour), 3, 3, now)
+	createTaskOfType(repo, ctx, biz.AsyncTaskTypePermissionCacheInvalidate, maintenance, pb.AsyncTaskStatus_ASYNC_TASK_STATUS_PENDING, now.Add(-time.Hour), 9, 10, now)
+
+	stats, err := repo.Stats(ctx, &pb.GetAsyncTaskStatsRequest{Queue: &maintenance, PendingOverdueSeconds: 300})
+	if err != nil {
+		t.Fatalf("stats: %v", err)
+	}
+	if stats.GetHealthStatus() != pb.AsyncTaskHealthStatus_ASYNC_TASK_HEALTH_STATUS_HEALTHY {
+		t.Fatalf("health status = %s", stats.GetHealthStatus())
+	}
+	if len(stats.GetAlerts()) != 0 {
+		t.Fatalf("alerts = %+v, want none below thresholds", stats.GetAlerts())
+	}
+}
+
+func createTaskOfType(
+	repo *asyncTaskRepo,
+	ctx context.Context,
+	taskType string,
+	queue string,
+	status pb.AsyncTaskStatus,
+	scheduledAt time.Time,
+	attempts int32,
+	maxAttempts int32,
+	now time.Time,
+) {
+	builder := repo.Data.DB(ctx).AsyncTask.Create().
+		SetTaskType(taskType).
+		SetQueue(queue).
+		SetStatus(int32(status)).
+		SetPayload(`{"retentionDays":30,"batchSize":100}`).
+		SetScheduledAt(scheduledAt).
+		SetAttempts(attempts).
+		SetMaxAttempts(maxAttempts)
+	if status == pb.AsyncTaskStatus_ASYNC_TASK_STATUS_RUNNING {
+		builder.SetLeaseOwner("worker").SetLeaseExpiresAt(now.Add(-time.Minute))
+	}
+	builder.SaveX(ctx)
+}
+
+func setAsyncTaskAlertThresholdsForTest(t *testing.T, threshold string) {
+	t.Helper()
+	t.Setenv("platform_ADMIN_ASYNC_TASK_PENDING_OVERDUE_WARNING_THRESHOLD", threshold)
+	t.Setenv("platform_ADMIN_ASYNC_TASK_FAILED_WARNING_THRESHOLD", threshold)
+	t.Setenv("platform_ADMIN_ASYNC_TASK_RUNNING_LEASE_EXPIRED_CRITICAL_THRESHOLD", threshold)
+	t.Setenv("platform_ADMIN_ASYNC_TASK_RETRY_PRESSURE_CRITICAL_THRESHOLD", threshold)
+	t.Setenv("platform_ADMIN_PERMISSION_CACHE_FAILED_CRITICAL_THRESHOLD", threshold)
+	t.Setenv("platform_ADMIN_PERMISSION_CACHE_RETRY_PRESSURE_CRITICAL_THRESHOLD", threshold)
 }
 
 func TestAsyncTaskRepoDoesNotExceedMaxAttemptsAfterLeaseExpiry(t *testing.T) {
