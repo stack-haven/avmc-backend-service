@@ -105,7 +105,7 @@ func (a *tenantRoleAuthorizer) enforceTenantRole(
 		return false, nil
 	}
 
-	allowed, err := a.db.TenantPermissionGroup.Query().
+	bindings, err := a.db.TenantPermissionGroup.Query().
 		Where(
 			tenantpermissiongroup.TenantIDEQ(uint32(tenantID)),
 			tenantpermissiongroup.EnabledEQ(true),
@@ -124,11 +124,35 @@ func (a *tenantRoleAuthorizer) enforceTenantRole(
 				),
 			),
 		).
-		Exist(entviewer.NewSystemContext(ctx))
-	if err == nil {
-		a.repo.setTenantRoleAuthorizationCache(ctx, uint32(tenantID), uint32(userID), string(obj), string(act), allowed)
+		WithGroup(func(q *gen.MenuPermissionGroupQuery) {
+			q.Select(menupermissiongroup.FieldAPIPermissions)
+		}).
+		WithVersion(func(q *gen.MenuPermissionGroupVersionQuery) {
+			q.Select(menupermissiongroupversion.FieldAPIPermissions)
+		}).
+		All(entviewer.NewSystemContext(ctx))
+	if err != nil {
+		return false, err
 	}
-	return allowed, err
+	allowed := false
+	for _, binding := range bindings {
+		if binding == nil {
+			continue
+		}
+		if binding.VersionID != nil {
+			if binding.Edges.Version != nil && apiPermissionsAllow(binding.Edges.Version.APIPermissions, string(obj)) {
+				allowed = true
+				break
+			}
+			continue
+		}
+		if binding.Edges.Group != nil && apiPermissionsAllow(binding.Edges.Group.APIPermissions, string(obj)) {
+			allowed = true
+			break
+		}
+	}
+	a.repo.setTenantRoleAuthorizationCache(ctx, uint32(tenantID), uint32(userID), string(obj), string(act), allowed)
+	return allowed, nil
 }
 
 func (a *tenantRoleAuthorizer) BatchEnforce(
@@ -150,4 +174,16 @@ func (a *tenantRoleAuthorizer) BatchEnforce(
 		results[i] = allowed
 	}
 	return results, nil
+}
+
+func apiPermissionsAllow(permissions []string, operation string) bool {
+	if len(permissions) == 0 {
+		return true
+	}
+	for _, permission := range permissions {
+		if permission == operation {
+			return true
+		}
+	}
+	return false
 }
