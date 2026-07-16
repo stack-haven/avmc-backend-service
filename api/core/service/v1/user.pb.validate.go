@@ -62,6 +62,8 @@ func (m *User) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for IsTenantAdmin
+
 	if m.Name != nil {
 		// no validation rules for Name
 	}
@@ -112,6 +114,10 @@ func (m *User) validate(all bool) error {
 
 	if m.Description != nil {
 		// no validation rules for Description
+	}
+
+	if m.DeptId != nil {
+		// no validation rules for DeptId
 	}
 
 	if len(errors) > 0 {

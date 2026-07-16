@@ -62,6 +62,8 @@ func (m *Role) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for IsTenantAdmin
+
 	if m.Name != nil {
 		// no validation rules for Name
 	}

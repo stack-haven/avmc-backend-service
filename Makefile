@@ -62,10 +62,31 @@ proto-lint:
 diff-check:
 	@git diff --check
 	@git diff --exit-code -- \
+		go.mod \
+		go.sum \
 		api \
 		app/platform/admin/cmd/server/assets/openapi.yaml \
 		app/platform/admin/internal/conf \
 		app/platform/admin/internal/data/ent/gen
+	@git diff --cached --exit-code -- \
+		go.mod \
+		go.sum \
+		api \
+		app/platform/admin/cmd/server/assets/openapi.yaml \
+		app/platform/admin/internal/conf \
+		app/platform/admin/internal/data/ent/gen
+	@test -z "$$(git ls-files --others --exclude-standard -- \
+		api \
+		app/platform/admin/cmd/server/assets/openapi.yaml \
+		app/platform/admin/internal/conf \
+		app/platform/admin/internal/data/ent/gen)" || \
+		(echo "Untracked generated files found:"; \
+		 git ls-files --others --exclude-standard -- \
+			api \
+			app/platform/admin/cmd/server/assets/openapi.yaml \
+			app/platform/admin/internal/conf \
+			app/platform/admin/internal/data/ent/gen; \
+		 exit 1)
 
 .PHONY: generate-check
 # regenerate admin template code and verify generated outputs are committed

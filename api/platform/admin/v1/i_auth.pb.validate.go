@@ -626,6 +626,8 @@ func (m *LoginResponse) validate(all bool) error {
 
 	// no validation rules for RefreshToken
 
+	// no validation rules for SessionId
+
 	if m.Name != nil {
 		// no validation rules for Name
 	}
@@ -845,6 +847,8 @@ func (m *RefreshTokenResponse) validate(all bool) error {
 	// no validation rules for AccessToken
 
 	// no validation rules for RefreshToken
+
+	// no validation rules for SessionId
 
 	if m.ExpiresIn != nil {
 		// no validation rules for ExpiresIn
