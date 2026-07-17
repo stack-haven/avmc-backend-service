@@ -75,42 +75,42 @@ func (r *resourceQuotaRepo) GetUsage(ctx context.Context, tenantID uint32, resou
 	return resourceQuotaUsageToProto(row), nil
 }
 
-func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, bool, error) {
 	r.recordConsume()
 	if tenantID == 0 {
-		return nil, pb.ErrorBadRequest("租户ID不能为空")
+		return nil, false, pb.ErrorBadRequest("租户ID不能为空")
 	}
 	if amount <= 0 {
-		return nil, pb.ErrorBadRequest("资源额度数量必须大于0")
+		return nil, false, pb.ErrorBadRequest("资源额度数量必须大于0")
 	}
 	tx, err := r.Data.DB(ctx).Tx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer rollback(tx, r.Log)
 
 	if idempotencyKey != "" {
 		op, err := findQuotaOperationForUpdate(ctx, tx.Client(), tenantID, quotaOperationConsume, idempotencyKey)
 		if err != nil && !gen.IsNotFound(err) {
-			return nil, err
+			return nil, false, err
 		}
 		if op != nil {
 			if err = ensureQuotaOperationReplay(op, resourceKey, amount); err != nil {
 				r.recordIdempotencyConflict()
-				return nil, err
+				return nil, false, err
 			}
-			return quotaUsageFromOperation(op), nil
+			return quotaUsageFromOperation(op), true, nil
 		}
 	}
 
 	row, err := findQuotaUsageForUpdate(ctx, tx.Client(), tenantID, resourceKey)
 	if err != nil && !gen.IsNotFound(err) {
-		return nil, err
+		return nil, false, err
 	}
 	if err != nil && gen.IsNotFound(err) {
 		if !unlimited && amount > limit {
 			r.recordQuotaExceeded()
-			return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
+			return nil, false, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
 		}
 		builder := tx.TenantResourceQuotaUsage.Create().
 			SetTenantID(tenantID).
@@ -122,15 +122,15 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 		row, err = builder.Save(ctx)
 		if err != nil {
 			if gen.IsConstraintError(err) {
-				return nil, pb.ErrorBadRequest("资源额度使用量正在被并发更新，请重试")
+				return nil, false, pb.ErrorBadRequest("资源额度使用量正在被并发更新，请重试")
 			}
-			return nil, err
+			return nil, false, err
 		}
 	} else {
 		nextUsed := row.Used + amount
 		if !unlimited && nextUsed > limit {
 			r.recordQuotaExceeded()
-			return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
+			return nil, false, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
 		}
 		builder := tx.TenantResourceQuotaUsage.UpdateOneID(row.ID).SetUsed(nextUsed)
 		if operatorID > 0 {
@@ -138,18 +138,18 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 		}
 		row, err = builder.Save(ctx)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 	if idempotencyKey != "" {
 		if err = createQuotaOperation(ctx, tx.Client(), tenantID, resourceKey, quotaOperationConsume, idempotencyKey, amount, row.Used, operatorID); err != nil {
-			return nil, err
+			return nil, false, err
 		}
 	}
 	if err = tx.Commit(); err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return resourceQuotaUsageToProto(row), nil
+	return resourceQuotaUsageToProto(row), false, nil
 }
 
 func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resourceKey string, amount int64, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {

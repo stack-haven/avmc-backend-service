@@ -16,7 +16,7 @@ import (
 type ResourceQuotaRepo interface {
 	ListUsage(context.Context, uint32) ([]*pbCore.TenantResourceQuotaUsage, error)
 	GetUsage(context.Context, uint32, string) (*pbCore.TenantResourceQuotaUsage, error)
-	Consume(context.Context, uint32, string, int64, int64, bool, string, uint32) (*pbCore.TenantResourceQuotaUsage, error)
+	Consume(context.Context, uint32, string, int64, int64, bool, string, uint32) (*pbCore.TenantResourceQuotaUsage, bool, error)
 	Release(context.Context, uint32, string, int64, string, uint32) (*pbCore.TenantResourceQuotaUsage, error)
 }
 
@@ -31,6 +31,7 @@ type ResourceQuotaReservation struct {
 	resourceKey           string
 	amount                int64
 	releaseIdempotencyKey string
+	replay                bool
 }
 
 func NewResourceQuotaUsecase(repo ResourceQuotaRepo, packages MenuPermissionGroupRepo, logger log.Logger) *ResourceQuotaUsecase {
@@ -122,7 +123,7 @@ func (uc *ResourceQuotaUsecase) ConsumeCurrent(ctx context.Context, resourceKey 
 	if err != nil {
 		return nil, err
 	}
-	usage, err := uc.repo.Consume(ctx, tenantID, resourceKey, amount, limit, unlimited, idempotencyKey, authn.GetAuthUserID(ctx))
+	usage, _, err := uc.repo.Consume(ctx, tenantID, resourceKey, amount, limit, unlimited, idempotencyKey, authn.GetAuthUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -167,17 +168,38 @@ func (uc *ResourceQuotaUsecase) ReserveCurrent(ctx context.Context, resourceKey 
 	if len(idempotencyKey)+len(":release") > 120 {
 		return nil, nil, errors.BadRequest("RESOURCE_QUOTA_IDEMPOTENCY_KEY_INVALID", "资源额度预留幂等键长度不能超过112")
 	}
-	usage, err := uc.ConsumeCurrent(ctx, resourceKey, amount, idempotencyKey)
+	tenantID, err := currentTenantID(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
+	resourceKey, err = normalizeResourceKey(resourceKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	if amount <= 0 {
+		return nil, nil, errors.BadRequest("RESOURCE_QUOTA_AMOUNT_INVALID", "资源额度数量必须大于0")
+	}
+	limit, unlimited, err := uc.resourceLimit(ctx, tenantID, resourceKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	usage, replay, err := uc.repo.Consume(ctx, tenantID, resourceKey, amount, limit, unlimited, idempotencyKey, authn.GetAuthUserID(ctx))
+	if err != nil {
+		return nil, nil, err
+	}
+	usage = applyQuotaLimit(usage, limit, unlimited)
 	reservation := &ResourceQuotaReservation{
 		uc:                    uc,
 		resourceKey:           usage.GetResourceKey(),
 		amount:                amount,
 		releaseIdempotencyKey: idempotencyKey + ":release",
+		replay:                replay,
 	}
 	return reservation, usage, nil
+}
+
+func (r *ResourceQuotaReservation) IsReplay() bool {
+	return r != nil && r.replay
 }
 
 func (r *ResourceQuotaReservation) Release(ctx context.Context) (*pbCore.TenantResourceQuotaUsage, error) {

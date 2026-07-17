@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
@@ -22,19 +23,36 @@ type ProjectRepo interface {
 
 // ProjectUsecase is a project usecase.
 type ProjectUsecase struct {
-	repo ProjectRepo
-	log  *log.Helper
+	repo  ProjectRepo
+	quota *ResourceQuotaUsecase
+	log   *log.Helper
 }
 
 // NewProjectUsecase creates a project usecase.
-func NewProjectUsecase(repo ProjectRepo, logger log.Logger) *ProjectUsecase {
-	return &ProjectUsecase{repo: repo, log: log.NewHelper(logger)}
+func NewProjectUsecase(repo ProjectRepo, quota *ResourceQuotaUsecase, logger log.Logger) *ProjectUsecase {
+	return &ProjectUsecase{repo: repo, quota: quota, log: log.NewHelper(logger)}
 }
 
 // Create creates a project.
 func (uc *ProjectUsecase) Create(ctx context.Context, g *pbCore.Project) (*pbCore.Project, error) {
 	uc.log.WithContext(ctx).Infof("CreateProject: %v", g.GetName())
-	return uc.repo.Save(ctx, g)
+	if uc.quota == nil {
+		return uc.repo.Save(ctx, g)
+	}
+	reservation, _, err := uc.quota.ReserveCurrent(ctx, projectResourceKey, 1, projectCreateQuotaKey(g))
+	if err != nil {
+		return nil, err
+	}
+	created, err := uc.repo.Save(ctx, g)
+	if err != nil {
+		if !reservation.IsReplay() {
+			if _, releaseErr := reservation.Release(ctx); releaseErr != nil {
+				uc.log.WithContext(ctx).Warnf("release project quota after create failure: %v", releaseErr)
+			}
+		}
+		return nil, err
+	}
+	return created, nil
 }
 
 // Get gets a project by id.
@@ -81,5 +99,35 @@ func (uc *ProjectUsecase) Delete(ctx context.Context, id uint32) error {
 	if err != nil {
 		return err
 	}
-	return uc.repo.Delete(ctx, id)
+	if err = uc.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+	if uc.quota == nil {
+		return nil
+	}
+	if _, err = uc.quota.ReleaseCurrent(ctx, projectResourceKey, 1, projectDeleteQuotaKey(id)); err != nil {
+		uc.log.WithContext(ctx).Warnf("release project quota after delete: %v", err)
+		return err
+	}
+	return nil
+}
+
+const projectResourceKey = "projects"
+
+func projectCreateQuotaKey(g *pbCore.Project) string {
+	if g == nil {
+		return "project:create:unknown"
+	}
+	identity := g.GetCode()
+	if identity == "" {
+		identity = g.GetName()
+	}
+	if identity == "" {
+		identity = "unknown"
+	}
+	return "project:create:" + identity
+}
+
+func projectDeleteQuotaKey(id uint32) string {
+	return fmt.Sprintf("project:delete:%d", id)
 }

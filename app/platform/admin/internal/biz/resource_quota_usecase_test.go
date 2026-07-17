@@ -15,6 +15,7 @@ import (
 
 type resourceQuotaRepoStub struct {
 	usages map[string]*pbCore.TenantResourceQuotaUsage
+	replay bool
 }
 
 func (r *resourceQuotaRepoStub) ListUsage(_ context.Context, tenantID uint32) ([]*pbCore.TenantResourceQuotaUsage, error) {
@@ -39,14 +40,17 @@ func (r *resourceQuotaRepoStub) GetUsage(_ context.Context, tenantID uint32, res
 	return &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey}, nil
 }
 
-func (r *resourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *resourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, bool, error) {
 	usage, _ := r.GetUsage(context.Background(), tenantID, resourceKey)
+	if r.replay {
+		return usage, true, nil
+	}
 	if !unlimited && usage.GetUsed()+amount > limit {
-		return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
+		return nil, false, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
 	}
 	usage.Used += amount
 	r.usages[resourceKey] = usage
-	return usage, nil
+	return usage, false, nil
 }
 
 func (r *resourceQuotaRepoStub) Release(_ context.Context, tenantID uint32, resourceKey string, amount int64, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
@@ -152,6 +156,9 @@ func TestResourceQuotaUsecaseReservationRelease(t *testing.T) {
 	if usage.GetUsed() != 2 || usage.GetRemaining() != 3 {
 		t.Fatalf("usage after reserve = %v", usage)
 	}
+	if reservation.IsReplay() {
+		t.Fatal("reservation IsReplay() = true, want false")
+	}
 
 	usage, err = reservation.Release(ctx)
 	if err != nil {
@@ -159,6 +166,36 @@ func TestResourceQuotaUsecaseReservationRelease(t *testing.T) {
 	}
 	if usage.GetUsed() != 0 || usage.GetRemaining() != 5 {
 		t.Fatalf("usage after release = %v", usage)
+	}
+}
+
+func TestResourceQuotaUsecaseReservationMarksReplay(t *testing.T) {
+	t.Parallel()
+
+	ctx := authn.ContextWithAuthUser(context.Background(), resourceQuotaTestUser{subject: "7", tenant: "10"})
+	uc := NewResourceQuotaUsecase(
+		&resourceQuotaRepoStub{
+			replay: true,
+			usages: map[string]*pbCore.TenantResourceQuotaUsage{
+				"projects": {TenantId: 10, ResourceKey: "projects", Used: 1},
+			},
+		},
+		&menuPermissionGroupRepoStub{caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+			TenantId:       10,
+			ResourceQuotas: map[string]int64{"projects": 5},
+		}},
+		log.NewStdLogger(io.Discard),
+	)
+
+	reservation, usage, err := uc.ReserveCurrent(ctx, "projects", 1, "project-create-42")
+	if err != nil {
+		t.Fatalf("ReserveCurrent() error = %v", err)
+	}
+	if !reservation.IsReplay() {
+		t.Fatal("reservation IsReplay() = false, want true")
+	}
+	if usage.GetUsed() != 1 || usage.GetRemaining() != 4 {
+		t.Fatalf("usage after replay reserve = %v", usage)
 	}
 }
 

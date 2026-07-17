@@ -23,14 +23,14 @@ func TestResourceQuotaRepoConsumeAndRelease(t *testing.T) {
 	data := &Data{db: client}
 	repo := NewResourceQuotaRepo(data, log.NewStdLogger(io.Discard))
 
-	usage, err := repo.Consume(ctx, tenant.ID, "projects", 3, 5, false, "", 7)
+	usage, _, err := repo.Consume(ctx, tenant.ID, "projects", 3, 5, false, "", 7)
 	if err != nil {
 		t.Fatalf("consume quota: %v", err)
 	}
 	if usage.GetUsed() != 3 {
 		t.Fatalf("usage after consume = %v, want 3", usage.GetUsed())
 	}
-	if _, err = repo.Consume(ctx, tenant.ID, "projects", 3, 5, false, "", 7); !errors.IsForbidden(err) {
+	if _, _, err = repo.Consume(ctx, tenant.ID, "projects", 3, 5, false, "", 7); !errors.IsForbidden(err) {
 		t.Fatalf("consume over quota error = %v, want quota exceeded", err)
 	}
 
@@ -68,7 +68,7 @@ func TestResourceQuotaRepoUnlimitedUsage(t *testing.T) {
 	data := &Data{db: client}
 	repo := NewResourceQuotaRepo(data, log.NewStdLogger(io.Discard))
 
-	usage, err := repo.Consume(ctx, tenant.ID, "custom.metric", 100, 0, true, "", 0)
+	usage, _, err := repo.Consume(ctx, tenant.ID, "custom.metric", 100, 0, true, "", 0)
 	if err != nil {
 		t.Fatalf("consume unlimited quota: %v", err)
 	}
@@ -90,23 +90,29 @@ func TestResourceQuotaRepoConsumeIsIdempotent(t *testing.T) {
 	data := &Data{db: client}
 	repo := NewResourceQuotaRepo(data, log.NewStdLogger(io.Discard))
 
-	usage, err := repo.Consume(ctx, tenant.ID, "projects", 3, 10, false, "consume-key-1", 7)
+	usage, replay, err := repo.Consume(ctx, tenant.ID, "projects", 3, 10, false, "consume-key-1", 7)
 	if err != nil {
 		t.Fatalf("consume quota: %v", err)
 	}
 	if usage.GetUsed() != 3 {
 		t.Fatalf("usage after first consume = %v, want 3", usage.GetUsed())
 	}
+	if replay {
+		t.Fatal("first consume replay = true, want false")
+	}
 
-	usage, err = repo.Consume(ctx, tenant.ID, "projects", 3, 10, false, "consume-key-1", 7)
+	usage, replay, err = repo.Consume(ctx, tenant.ID, "projects", 3, 10, false, "consume-key-1", 7)
 	if err != nil {
 		t.Fatalf("replay consume quota: %v", err)
 	}
 	if usage.GetUsed() != 3 {
 		t.Fatalf("usage after replay consume = %v, want 3", usage.GetUsed())
 	}
+	if !replay {
+		t.Fatal("replay consume replay = false, want true")
+	}
 
-	if _, err = repo.Consume(ctx, tenant.ID, "projects", 4, 10, false, "consume-key-1", 7); !errors.IsConflict(err) {
+	if _, _, err = repo.Consume(ctx, tenant.ID, "projects", 4, 10, false, "consume-key-1", 7); !errors.IsConflict(err) {
 		t.Fatalf("consume idempotency conflict = %v, want conflict", err)
 	}
 	stats := data.resourceQuotaStatsSnapshot()
@@ -127,7 +133,7 @@ func TestResourceQuotaRepoReleaseIsIdempotent(t *testing.T) {
 		SaveX(ctx)
 	repo := NewResourceQuotaRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 
-	if _, err := repo.Consume(ctx, tenant.ID, "projects", 6, 10, false, "consume-before-release", 7); err != nil {
+	if _, _, err := repo.Consume(ctx, tenant.ID, "projects", 6, 10, false, "consume-before-release", 7); err != nil {
 		t.Fatalf("consume quota: %v", err)
 	}
 	usage, err := repo.Release(ctx, tenant.ID, "projects", 2, "release-key-1", 7)

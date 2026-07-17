@@ -85,7 +85,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	postUsecase := biz.NewPostUsecase(postRepo, logger)
 	postServiceService := service.NewPostServiceService(postUsecase, logger)
 	projectRepo := data.NewProjectRepo(dataData, logger)
-	projectUsecase := biz.NewProjectUsecase(projectRepo, logger)
+	projectUsecase := biz.NewProjectUsecase(projectRepo, resourceQuotaUsecase, logger)
 	projectServiceService := service.NewProjectServiceService(projectUsecase, logger)
 	dictionaryRepo := data.NewDictionaryRepo(dataData, logger)
 	dictionaryUsecase := biz.NewDictionaryUsecase(dictionaryRepo)
