@@ -20,7 +20,8 @@ func TestResourceQuotaRepoConsumeAndRelease(t *testing.T) {
 		SetCode("quota-tenant").
 		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
 		SaveX(ctx)
-	repo := NewResourceQuotaRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	data := &Data{db: client}
+	repo := NewResourceQuotaRepo(data, log.NewStdLogger(io.Discard))
 
 	usage, err := repo.Consume(ctx, tenant.ID, "projects", 3, 5, false, "", 7)
 	if err != nil {
@@ -48,6 +49,10 @@ func TestResourceQuotaRepoConsumeAndRelease(t *testing.T) {
 	if len(items) != 1 || items[0].GetResourceKey() != "projects" {
 		t.Fatalf("usage items = %v", items)
 	}
+	stats := data.resourceQuotaStatsSnapshot()
+	if stats.Consumes != 2 || stats.Releases != 1 || stats.QuotaExceeded != 1 {
+		t.Fatalf("quota stats = %+v", stats)
+	}
 }
 
 func TestResourceQuotaRepoUnlimitedUsage(t *testing.T) {
@@ -60,7 +65,8 @@ func TestResourceQuotaRepoUnlimitedUsage(t *testing.T) {
 		SetCode("unlimited-quota-tenant").
 		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
 		SaveX(ctx)
-	repo := NewResourceQuotaRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	data := &Data{db: client}
+	repo := NewResourceQuotaRepo(data, log.NewStdLogger(io.Discard))
 
 	usage, err := repo.Consume(ctx, tenant.ID, "custom.metric", 100, 0, true, "", 0)
 	if err != nil {
@@ -81,7 +87,8 @@ func TestResourceQuotaRepoConsumeIsIdempotent(t *testing.T) {
 		SetCode("idempotent-consume-tenant").
 		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
 		SaveX(ctx)
-	repo := NewResourceQuotaRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	data := &Data{db: client}
+	repo := NewResourceQuotaRepo(data, log.NewStdLogger(io.Discard))
 
 	usage, err := repo.Consume(ctx, tenant.ID, "projects", 3, 10, false, "consume-key-1", 7)
 	if err != nil {
@@ -101,6 +108,10 @@ func TestResourceQuotaRepoConsumeIsIdempotent(t *testing.T) {
 
 	if _, err = repo.Consume(ctx, tenant.ID, "projects", 4, 10, false, "consume-key-1", 7); !errors.IsConflict(err) {
 		t.Fatalf("consume idempotency conflict = %v, want conflict", err)
+	}
+	stats := data.resourceQuotaStatsSnapshot()
+	if stats.Consumes != 3 || stats.IdempotencyConflicts != 1 {
+		t.Fatalf("quota stats = %+v", stats)
 	}
 }
 

@@ -132,6 +132,54 @@ func TestResourceQuotaUsecaseTreatsMissingLimitAsUnlimited(t *testing.T) {
 	}
 }
 
+func TestResourceQuotaUsecaseReservationRelease(t *testing.T) {
+	t.Parallel()
+
+	ctx := authn.ContextWithAuthUser(context.Background(), resourceQuotaTestUser{subject: "7", tenant: "10"})
+	uc := NewResourceQuotaUsecase(
+		&resourceQuotaRepoStub{},
+		&menuPermissionGroupRepoStub{caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+			TenantId:       10,
+			ResourceQuotas: map[string]int64{"projects": 5},
+		}},
+		log.NewStdLogger(io.Discard),
+	)
+
+	reservation, usage, err := uc.ReserveCurrent(ctx, "projects", 2, "project-create-42")
+	if err != nil {
+		t.Fatalf("ReserveCurrent() error = %v", err)
+	}
+	if usage.GetUsed() != 2 || usage.GetRemaining() != 3 {
+		t.Fatalf("usage after reserve = %v", usage)
+	}
+
+	usage, err = reservation.Release(ctx)
+	if err != nil {
+		t.Fatalf("reservation Release() error = %v", err)
+	}
+	if usage.GetUsed() != 0 || usage.GetRemaining() != 5 {
+		t.Fatalf("usage after release = %v", usage)
+	}
+}
+
+func TestResourceQuotaUsecaseReservationRequiresIdempotencyKey(t *testing.T) {
+	t.Parallel()
+
+	ctx := authn.ContextWithAuthUser(context.Background(), resourceQuotaTestUser{subject: "7", tenant: "10"})
+	uc := NewResourceQuotaUsecase(
+		&resourceQuotaRepoStub{},
+		&menuPermissionGroupRepoStub{caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+			TenantId:       10,
+			ResourceQuotas: map[string]int64{"projects": 5},
+		}},
+		log.NewStdLogger(io.Discard),
+	)
+
+	if _, _, err := uc.ReserveCurrent(ctx, "projects", 1, ""); !errors.IsBadRequest(err) {
+		t.Fatalf("ReserveCurrent() error = %v, want bad request", err)
+	}
+}
+
 func TestResourceQuotaUsecaseRequiresTenantContext(t *testing.T) {
 	t.Parallel()
 

@@ -14,6 +14,10 @@ func TestPlatformHealthCheckerDetailsExposeAuthorizationCacheStats(t *testing.T)
 	data.authorizationStats.expired.Add(1)
 	data.authorizationStats.clears.Add(1)
 	data.authorizationStats.invalidations.Add(1)
+	data.resourceQuotaStats.consumes.Add(4)
+	data.resourceQuotaStats.releases.Add(1)
+	data.resourceQuotaStats.quotaExceeded.Add(2)
+	data.resourceQuotaStats.idempotencyConflicts.Add(1)
 
 	checker := &platformHealthChecker{data: data}
 	details := checker.Details(context.Background())
@@ -35,5 +39,22 @@ func TestPlatformHealthCheckerDetailsExposeAuthorizationCacheStats(t *testing.T)
 	}
 	if payload["bypass_rate"] != float64(2)/float64(7) {
 		t.Fatalf("bypass_rate = %v, want %v", payload["bypass_rate"], float64(2)/float64(7))
+	}
+	quotaPayload, ok := details["resource_quota"].(map[string]any)
+	if !ok {
+		t.Fatalf("resource_quota details missing: %+v", details)
+	}
+	if quotaPayload["consumes"] != uint64(4) ||
+		quotaPayload["releases"] != uint64(1) ||
+		quotaPayload["quota_exceeded"] != uint64(2) ||
+		quotaPayload["idempotency_conflicts"] != uint64(1) ||
+		quotaPayload["mutations"] != uint64(5) {
+		t.Fatalf("resource quota counters = %+v", quotaPayload)
+	}
+	if quotaPayload["exceeded_rate"] != 0.5 {
+		t.Fatalf("exceeded_rate = %v, want 0.5", quotaPayload["exceeded_rate"])
+	}
+	if quotaPayload["conflict_rate"] != 0.2 {
+		t.Fatalf("conflict_rate = %v, want 0.2", quotaPayload["conflict_rate"])
 	}
 }

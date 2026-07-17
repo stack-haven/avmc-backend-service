@@ -76,6 +76,7 @@ func (r *resourceQuotaRepo) GetUsage(ctx context.Context, tenantID uint32, resou
 }
 
 func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+	r.recordConsume()
 	if tenantID == 0 {
 		return nil, pb.ErrorBadRequest("租户ID不能为空")
 	}
@@ -95,6 +96,7 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 		}
 		if op != nil {
 			if err = ensureQuotaOperationReplay(op, resourceKey, amount); err != nil {
+				r.recordIdempotencyConflict()
 				return nil, err
 			}
 			return quotaUsageFromOperation(op), nil
@@ -107,6 +109,7 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 	}
 	if err != nil && gen.IsNotFound(err) {
 		if !unlimited && amount > limit {
+			r.recordQuotaExceeded()
 			return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
 		}
 		builder := tx.TenantResourceQuotaUsage.Create().
@@ -126,6 +129,7 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 	} else {
 		nextUsed := row.Used + amount
 		if !unlimited && nextUsed > limit {
+			r.recordQuotaExceeded()
 			return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
 		}
 		builder := tx.TenantResourceQuotaUsage.UpdateOneID(row.ID).SetUsed(nextUsed)
@@ -149,6 +153,7 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 }
 
 func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resourceKey string, amount int64, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+	r.recordRelease()
 	if tenantID == 0 {
 		return nil, pb.ErrorBadRequest("租户ID不能为空")
 	}
@@ -168,6 +173,7 @@ func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resour
 		}
 		if op != nil {
 			if err = ensureQuotaOperationReplay(op, resourceKey, amount); err != nil {
+				r.recordIdempotencyConflict()
 				return nil, err
 			}
 			return quotaUsageFromOperation(op), nil
@@ -273,4 +279,28 @@ func createQuotaOperation(ctx context.Context, client *gen.Client, tenantID uint
 		return errors.Conflict("RESOURCE_QUOTA_IDEMPOTENCY_CONFLICT", "资源额度幂等键正在被并发使用，请重试")
 	}
 	return err
+}
+
+func (r *resourceQuotaRepo) recordConsume() {
+	if r != nil && r.Data != nil {
+		r.Data.resourceQuotaStats.consumes.Add(1)
+	}
+}
+
+func (r *resourceQuotaRepo) recordRelease() {
+	if r != nil && r.Data != nil {
+		r.Data.resourceQuotaStats.releases.Add(1)
+	}
+}
+
+func (r *resourceQuotaRepo) recordQuotaExceeded() {
+	if r != nil && r.Data != nil {
+		r.Data.resourceQuotaStats.quotaExceeded.Add(1)
+	}
+}
+
+func (r *resourceQuotaRepo) recordIdempotencyConflict() {
+	if r != nil && r.Data != nil {
+		r.Data.resourceQuotaStats.idempotencyConflicts.Add(1)
+	}
 }

@@ -26,6 +26,13 @@ type ResourceQuotaUsecase struct {
 	log      *log.Helper
 }
 
+type ResourceQuotaReservation struct {
+	uc                    *ResourceQuotaUsecase
+	resourceKey           string
+	amount                int64
+	releaseIdempotencyKey string
+}
+
 func NewResourceQuotaUsecase(repo ResourceQuotaRepo, packages MenuPermissionGroupRepo, logger log.Logger) *ResourceQuotaUsecase {
 	return &ResourceQuotaUsecase{repo: repo, packages: packages, log: log.NewHelper(logger)}
 }
@@ -147,6 +154,37 @@ func (uc *ResourceQuotaUsecase) ReleaseCurrent(ctx context.Context, resourceKey 
 		return nil, err
 	}
 	return applyQuotaLimit(usage, limit, unlimited), nil
+}
+
+func (uc *ResourceQuotaUsecase) ReserveCurrent(ctx context.Context, resourceKey string, amount int64, idempotencyKey string) (*ResourceQuotaReservation, *pbCore.TenantResourceQuotaUsage, error) {
+	idempotencyKey, err := normalizeQuotaIdempotencyKey(idempotencyKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	if idempotencyKey == "" {
+		return nil, nil, errors.BadRequest("RESOURCE_QUOTA_IDEMPOTENCY_KEY_REQUIRED", "资源额度预留必须提供业务幂等键")
+	}
+	if len(idempotencyKey)+len(":release") > 120 {
+		return nil, nil, errors.BadRequest("RESOURCE_QUOTA_IDEMPOTENCY_KEY_INVALID", "资源额度预留幂等键长度不能超过112")
+	}
+	usage, err := uc.ConsumeCurrent(ctx, resourceKey, amount, idempotencyKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	reservation := &ResourceQuotaReservation{
+		uc:                    uc,
+		resourceKey:           usage.GetResourceKey(),
+		amount:                amount,
+		releaseIdempotencyKey: idempotencyKey + ":release",
+	}
+	return reservation, usage, nil
+}
+
+func (r *ResourceQuotaReservation) Release(ctx context.Context) (*pbCore.TenantResourceQuotaUsage, error) {
+	if r == nil || r.uc == nil {
+		return nil, errors.BadRequest("RESOURCE_QUOTA_RESERVATION_INVALID", "资源额度预留不存在")
+	}
+	return r.uc.ReleaseCurrent(ctx, r.resourceKey, r.amount, r.releaseIdempotencyKey)
 }
 
 func (uc *ResourceQuotaUsecase) resourceLimit(ctx context.Context, tenantID uint32, resourceKey string) (int64, bool, error) {

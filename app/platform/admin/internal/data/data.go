@@ -70,6 +70,7 @@ type Data struct {
 	permissionCacheBypass sync.Map
 	authorizationCache    sync.Map
 	authorizationStats    tenantAuthorizationCacheStats
+	resourceQuotaStats    resourceQuotaStats
 }
 
 type tenantAuthorizationCacheStats struct {
@@ -92,6 +93,20 @@ type tenantAuthorizationCacheStatsSnapshot struct {
 	Invalidations uint64
 }
 
+type resourceQuotaStats struct {
+	consumes             atomic.Uint64
+	releases             atomic.Uint64
+	quotaExceeded        atomic.Uint64
+	idempotencyConflicts atomic.Uint64
+}
+
+type resourceQuotaStatsSnapshot struct {
+	Consumes             uint64
+	Releases             uint64
+	QuotaExceeded        uint64
+	IdempotencyConflicts uint64
+}
+
 func (d *Data) tenantAuthorizationCacheStatsSnapshot() tenantAuthorizationCacheStatsSnapshot {
 	if d == nil {
 		return tenantAuthorizationCacheStatsSnapshot{}
@@ -104,6 +119,18 @@ func (d *Data) tenantAuthorizationCacheStatsSnapshot() tenantAuthorizationCacheS
 		Expired:       d.authorizationStats.expired.Load(),
 		Clears:        d.authorizationStats.clears.Load(),
 		Invalidations: d.authorizationStats.invalidations.Load(),
+	}
+}
+
+func (d *Data) resourceQuotaStatsSnapshot() resourceQuotaStatsSnapshot {
+	if d == nil {
+		return resourceQuotaStatsSnapshot{}
+	}
+	return resourceQuotaStatsSnapshot{
+		Consumes:             d.resourceQuotaStats.consumes.Load(),
+		Releases:             d.resourceQuotaStats.releases.Load(),
+		QuotaExceeded:        d.resourceQuotaStats.quotaExceeded.Load(),
+		IdempotencyConflicts: d.resourceQuotaStats.idempotencyConflicts.Load(),
 	}
 }
 
@@ -202,6 +229,8 @@ func (c *platformHealthChecker) Details(context.Context) map[string]any {
 	stats := c.data.tenantAuthorizationCacheStatsSnapshot()
 	lookups := stats.Hits + stats.Misses + stats.Expired
 	totalDecisions := lookups + stats.Bypasses
+	quotaStats := c.data.resourceQuotaStatsSnapshot()
+	quotaMutations := quotaStats.Consumes + quotaStats.Releases
 	return map[string]any{
 		"authorization_cache": map[string]any{
 			"hits":          stats.Hits,
@@ -213,6 +242,15 @@ func (c *platformHealthChecker) Details(context.Context) map[string]any {
 			"invalidations": stats.Invalidations,
 			"hit_rate":      ratio(stats.Hits, lookups),
 			"bypass_rate":   ratio(stats.Bypasses, totalDecisions),
+		},
+		"resource_quota": map[string]any{
+			"consumes":              quotaStats.Consumes,
+			"releases":              quotaStats.Releases,
+			"quota_exceeded":        quotaStats.QuotaExceeded,
+			"idempotency_conflicts": quotaStats.IdempotencyConflicts,
+			"mutations":             quotaMutations,
+			"exceeded_rate":         ratio(quotaStats.QuotaExceeded, quotaStats.Consumes),
+			"conflict_rate":         ratio(quotaStats.IdempotencyConflicts, quotaMutations),
 		},
 	}
 }
