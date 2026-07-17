@@ -55,6 +55,17 @@ func (r *loginLogRepo) Append(ctx context.Context, value *pb.LoginLog) error {
 
 func (r *loginLogRepo) List(ctx context.Context, req *pb.ListLoginLogsRequest) ([]*pb.LoginLog, int32, error) {
 	query := r.Data.DB(ctx).LoginLog.Query()
+	scope, err := r.resolveDataScopeUsers(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	if !scope.all {
+		if len(scope.userIDs) == 0 {
+			query.Where(loginlog.IDEQ(0))
+		} else {
+			query.Where(loginlog.UserIDIn(scope.userIDs...))
+		}
+	}
 	if req.UserId != nil {
 		query.Where(loginlog.UserIDEQ(*req.UserId))
 	}
@@ -91,7 +102,19 @@ func (r *loginLogRepo) List(ctx context.Context, req *pb.ListLoginLogsRequest) (
 }
 
 func (r *loginLogRepo) Get(ctx context.Context, id uint64) (*pb.LoginLog, error) {
-	row, err := r.Data.DB(ctx).LoginLog.Get(ctx, uint32(id))
+	query := r.Data.DB(ctx).LoginLog.Query()
+	scope, err := r.resolveDataScopeUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !scope.all {
+		if len(scope.userIDs) == 0 {
+			query.Where(loginlog.IDEQ(0))
+		} else {
+			query.Where(loginlog.UserIDIn(scope.userIDs...))
+		}
+	}
+	row, err := query.Where(loginlog.IDEQ(uint32(id))).Only(ctx)
 	if gen.IsNotFound(err) {
 		return nil, errors.NotFound("LOGIN_LOG_NOT_FOUND", "登录日志不存在")
 	}

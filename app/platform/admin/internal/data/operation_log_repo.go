@@ -29,6 +29,17 @@ func (r *operationLogRepo) Append(ctx context.Context, value *pb.OperationLog) e
 }
 func (r *operationLogRepo) List(ctx context.Context, req *pb.ListOperationLogsRequest) ([]*pb.OperationLog, int32, error) {
 	query := r.Data.DB(ctx).OperationLog.Query()
+	scope, err := r.resolveDataScopeUsers(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	if !scope.all {
+		if len(scope.userIDs) == 0 {
+			query.Where(operationlog.IDEQ(0))
+		} else {
+			query.Where(operationlog.OperatorIDIn(scope.userIDs...))
+		}
+	}
 	if req.Module != nil {
 		query.Where(operationlog.ModuleEQ(*req.Module))
 	}
@@ -70,7 +81,19 @@ func (r *operationLogRepo) List(ctx context.Context, req *pb.ListOperationLogsRe
 	return result, int32(total), nil
 }
 func (r *operationLogRepo) Get(ctx context.Context, id uint64) (*pb.OperationLog, error) {
-	row, err := r.Data.DB(ctx).OperationLog.Get(ctx, uint32(id))
+	query := r.Data.DB(ctx).OperationLog.Query()
+	scope, err := r.resolveDataScopeUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !scope.all {
+		if len(scope.userIDs) == 0 {
+			query.Where(operationlog.IDEQ(0))
+		} else {
+			query.Where(operationlog.OperatorIDIn(scope.userIDs...))
+		}
+	}
+	row, err := query.Where(operationlog.IDEQ(uint32(id))).Only(ctx)
 	if gen.IsNotFound(err) {
 		return nil, errors.NotFound("OPERATION_LOG_NOT_FOUND", "操作日志不存在")
 	}
