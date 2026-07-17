@@ -117,6 +117,24 @@ func (r *projectRepo) validateUsersInTenant(ctx context.Context, ownerID uint32,
 	return nil
 }
 
+func (r *projectRepo) scopedProjectQuery(ctx context.Context) (*gen.ProjectQuery, error) {
+	query := r.Data.DB(ctx).Project.Query()
+	scope, err := r.resolveDataScopeUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if scope.all {
+		return query, nil
+	}
+	if len(scope.userIDs) == 0 {
+		return query.Where(project.IDEQ(0)), nil
+	}
+	return query.Where(project.Or(
+		project.OwnerIDIn(scope.userIDs...),
+		project.HasMembersWith(user.IDIn(scope.userIDs...)),
+	)), nil
+}
+
 func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Project, error) {
 	if g == nil || g.GetName() == "" {
 		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
@@ -271,7 +289,11 @@ func (r *projectRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Project,
 	if _, err := requireTenantID(ctx); err != nil {
 		return nil, err
 	}
-	res, err := r.Data.DB(ctx).Project.Query().
+	query, err := r.scopedProjectQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Where(project.IDEQ(id)).
 		WithMembers().
 		Only(ctx)
@@ -307,7 +329,11 @@ func (r *projectRepo) CountProjects(ctx context.Context, opts ...listing.Option)
 	for _, opt := range opts {
 		opt(&o)
 	}
-	count, err := r.Data.DB(ctx).Project.Query().
+	query, err := r.scopedProjectQuery(ctx)
+	if err != nil {
+		return 0, err
+	}
+	count, err := query.
 		Select(project.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
 		Count(ctx)
@@ -325,7 +351,11 @@ func (r *projectRepo) ListProjects(ctx context.Context, opts ...listing.Option) 
 	for _, opt := range opts {
 		opt(&o)
 	}
-	res, err := r.Data.DB(ctx).Project.Query().
+	query, err := r.scopedProjectQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
 		Select(project.FieldID, project.FieldName, project.FieldCode, project.FieldOwnerID, project.FieldStatus, project.FieldDescription, project.FieldCreatedAt, project.FieldUpdatedAt).
 		Where(ents.ApplyFilter(o.Filter)).
 		WithMembers().

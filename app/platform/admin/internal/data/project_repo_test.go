@@ -2,9 +2,11 @@ package data
 
 import (
 	"io"
+	"sort"
 	"strings"
 	"testing"
 
+	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 
@@ -44,6 +46,101 @@ func TestProjectRepoListProjectsLoadsOwnerNames(t *testing.T) {
 		if project.GetOwnerName() != "project-owner" {
 			t.Fatalf("owner name = %q, want project-owner", project.GetOwnerName())
 		}
+	}
+}
+
+func TestProjectRepoAppliesRoleDataScope(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+
+	ctx := tenantContext(1)
+	selfScope := int32(2)
+	allScope := int32(1)
+	selfRole := client.Role.Create().
+		SetTenantID(1).
+		SetName("project-self-scope").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SetDataScope(selfScope).
+		SaveX(ctx)
+	allRole := client.Role.Create().
+		SetTenantID(1).
+		SetName("project-all-scope").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SetDataScope(allScope).
+		SaveX(ctx)
+	actor := client.User.Create().
+		SetTenantID(1).
+		SetName("project-actor").
+		SetPassword("hashed-password").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		AddRoleIDs(selfRole.ID).
+		SaveX(ctx)
+	allActor := client.User.Create().
+		SetTenantID(1).
+		SetName("project-admin").
+		SetPassword("hashed-password").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		AddRoleIDs(allRole.ID).
+		SaveX(ctx)
+	peer := client.User.Create().
+		SetTenantID(1).
+		SetName("project-peer").
+		SetPassword("hashed-password").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SaveX(ctx)
+
+	ownedByActor := client.Project.Create().
+		SetTenantID(1).
+		SetName("owned-by-actor").
+		SetOwnerID(actor.ID).
+		SaveX(ctx)
+	memberActor := client.Project.Create().
+		SetTenantID(1).
+		SetName("member-actor").
+		SetOwnerID(peer.ID).
+		AddMemberIDs(actor.ID).
+		SaveX(ctx)
+	ownedByPeer := client.Project.Create().
+		SetTenantID(1).
+		SetName("owned-by-peer").
+		SetOwnerID(peer.ID).
+		SaveX(ctx)
+	noPrincipal := client.Project.Create().
+		SetTenantID(1).
+		SetName("no-principal").
+		SaveX(ctx)
+
+	repo := NewProjectRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	actorCtx := tenantUserContext(1, actor.ID)
+	projects, err := repo.ListProjects(actorCtx)
+	if err != nil {
+		t.Fatalf("ListProjects(actor) error = %v", err)
+	}
+	got := projectIDs(projects)
+	want := []uint32{ownedByActor.ID, memberActor.ID}
+	if !equalUint32s(got, want) {
+		t.Fatalf("actor visible projects = %v, want %v", got, want)
+	}
+	count, err := repo.CountProjects(actorCtx)
+	if err != nil {
+		t.Fatalf("CountProjects(actor) error = %v", err)
+	}
+	if count != int32(len(want)) {
+		t.Fatalf("CountProjects(actor) = %d, want %d", count, len(want))
+	}
+	if _, err = repo.FindByID(actorCtx, ownedByPeer.ID); !pb.IsProjectNotFound(err) {
+		t.Fatalf("FindByID(out of scope) error = %v, want project not found", err)
+	}
+
+	allCtx := tenantUserContext(1, allActor.ID)
+	projects, err = repo.ListProjects(allCtx)
+	if err != nil {
+		t.Fatalf("ListProjects(all) error = %v", err)
+	}
+	got = projectIDs(projects)
+	want = []uint32{ownedByActor.ID, memberActor.ID, ownedByPeer.ID, noPrincipal.ID}
+	if !equalUint32s(got, want) {
+		t.Fatalf("all-scope visible projects = %v, want %v", got, want)
 	}
 }
 
@@ -133,4 +230,26 @@ func TestProjectRepoReturnsTypedNotFoundAcrossTenants(t *testing.T) {
 	if err := repo.Delete(ctx, project.ID); !pb.IsProjectNotFound(err) {
 		t.Fatalf("cross-tenant Delete error = %v", err)
 	}
+}
+
+func projectIDs(projects []*pbCore.Project) []uint32 {
+	ids := make([]uint32, 0, len(projects))
+	for _, item := range projects {
+		ids = append(ids, item.GetId())
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
+}
+
+func equalUint32s(got []uint32, want []uint32) bool {
+	sort.Slice(want, func(i, j int) bool { return want[i] < want[j] })
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
 }

@@ -484,80 +484,17 @@ func (r *userRepo) CountUsers(ctx context.Context, opts ...listing.Option) (int3
 
 func (r *userRepo) scopedUserQuery(ctx context.Context) (*gen.UserQuery, error) {
 	query := r.Data.DB(ctx).User.Query()
-	actorID := authn.GetAuthUserID(ctx)
-	if actorID == 0 {
-		return query, nil
-	}
-	actor, err := r.Data.DB(ctx).User.Query().
-		Where(user.IDEQ(actorID)).
-		WithRoles(func(q *gen.RoleQuery) {
-			q.Where(role.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED))).
-				WithDataScopeDepts(func(dq *gen.DeptQuery) {
-					dq.Select(dept.FieldID)
-				})
-		}).
-		Only(ctx)
+	scope, err := r.resolveDataScopeUsers(ctx)
 	if err != nil {
-		if gen.IsNotFound(err) {
-			return query.Where(user.IDEQ(actorID)), nil
-		}
 		return nil, err
 	}
-	deptIDs := make(map[uint32]struct{})
-	all := false
-	includeDescendants := false
-	for _, item := range actor.Edges.Roles {
-		scope := int32(2)
-		if item.DataScope != nil {
-			scope = *item.DataScope
-		}
-		if item.IsTenantAdmin || scope == 1 {
-			all = true
-			break
-		}
-		switch scope {
-		case 3:
-			if actor.DeptID != nil {
-				deptIDs[*actor.DeptID] = struct{}{}
-			}
-		case 4:
-			if actor.DeptID != nil {
-				deptIDs[*actor.DeptID] = struct{}{}
-				includeDescendants = true
-			}
-		case 5:
-			for _, dataDept := range item.Edges.DataScopeDepts {
-				deptIDs[dataDept.ID] = struct{}{}
-			}
-		}
-	}
-	if all {
+	if scope.all {
 		return query, nil
 	}
-	if includeDescendants && actor.DeptID != nil {
-		depts, queryErr := r.Data.DB(ctx).Dept.Query().
-			Select(dept.FieldID, dept.FieldAncestors).
-			All(ctx)
-		if queryErr != nil {
-			return nil, queryErr
-		}
-		for _, item := range depts {
-			for _, ancestor := range item.Ancestors {
-				if uint32(ancestor) == *actor.DeptID {
-					deptIDs[item.ID] = struct{}{}
-					break
-				}
-			}
-		}
+	if len(scope.userIDs) == 0 {
+		return query.Where(user.IDEQ(authn.GetAuthUserID(ctx))), nil
 	}
-	ids := make([]uint32, 0, len(deptIDs))
-	for id := range deptIDs {
-		ids = append(ids, id)
-	}
-	if len(ids) == 0 {
-		return query.Where(user.IDEQ(actorID)), nil
-	}
-	return query.Where(user.Or(user.IDEQ(actorID), user.DeptIDIn(ids...))), nil
+	return query.Where(user.IDIn(scope.userIDs...)), nil
 }
 
 // Delete 软删除
