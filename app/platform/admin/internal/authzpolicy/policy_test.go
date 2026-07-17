@@ -223,6 +223,54 @@ func TestParameterControlPlaneClassification(t *testing.T) {
 	}
 }
 
+func TestConfigurationResourceBoundaryClassification(t *testing.T) {
+	t.Parallel()
+
+	tenantDictionaryOperations := []string{
+		v1.OperationDictionaryServiceListDictionaryTypes,
+		v1.OperationDictionaryServiceGetDictionaryType,
+		v1.OperationDictionaryServiceCreateDictionaryType,
+		v1.OperationDictionaryServiceUpdateDictionaryType,
+		v1.OperationDictionaryServiceDeleteDictionaryType,
+		v1.OperationDictionaryServiceListDictionaryItems,
+		v1.OperationDictionaryServiceCreateDictionaryItem,
+		v1.OperationDictionaryServiceUpdateDictionaryItem,
+		v1.OperationDictionaryServiceDeleteDictionaryItem,
+	}
+	for _, operation := range tenantDictionaryOperations {
+		if IsPlatformControlOperation(operation) {
+			t.Fatalf("tenant dictionary operation must remain tenant data-plane: %s", operation)
+		}
+	}
+
+	platformParameterOperations := []string{
+		v1.OperationParameterServiceListParameterDefinitions,
+		v1.OperationParameterServiceGetParameterDefinition,
+		v1.OperationParameterServiceCreateParameterDefinition,
+		v1.OperationParameterServiceUpdateParameterDefinition,
+		v1.OperationParameterServiceDeleteParameterDefinition,
+		v1.OperationParameterServiceListTenantParameters,
+		v1.OperationParameterServiceSetTenantParameter,
+		v1.OperationParameterServiceResetTenantParameter,
+	}
+	for _, operation := range platformParameterOperations {
+		if !IsPlatformControlOperation(operation) {
+			t.Fatalf("parameter control operation must remain platform control-plane: %s", operation)
+		}
+	}
+
+	currentTenantParameterOperations := []string{
+		v1.OperationParameterServiceListCurrentTenantParameters,
+		v1.OperationParameterServiceSetCurrentTenantParameter,
+		v1.OperationParameterServiceResetCurrentTenantParameter,
+	}
+	for _, operation := range currentTenantParameterOperations {
+		if IsPlatformControlOperation(operation) {
+			t.Fatalf("current tenant parameter operation must remain tenant data-plane: %s", operation)
+		}
+	}
+}
+
 func TestAsyncTaskOperationsRequirePlatformIdentity(t *testing.T) {
 	for _, operation := range []string{
 		v1.OperationAsyncTaskServiceListAsyncTasks,
