@@ -495,6 +495,30 @@ func (f TenantPermissionGroupMutationRuleFunc) EvalMutation(ctx context.Context,
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantPermissionGroupMutation", m)
 }
 
+// The TenantResourceQuotaUsageQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type TenantResourceQuotaUsageQueryRuleFunc func(context.Context, *gen.TenantResourceQuotaUsageQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f TenantResourceQuotaUsageQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantResourceQuotaUsageQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantResourceQuotaUsageQuery", q)
+}
+
+// The TenantResourceQuotaUsageMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type TenantResourceQuotaUsageMutationRuleFunc func(context.Context, *gen.TenantResourceQuotaUsageMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f TenantResourceQuotaUsageMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.TenantResourceQuotaUsageMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantResourceQuotaUsageMutation", m)
+}
+
 // The UserQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type UserQueryRuleFunc func(context.Context, *gen.UserQuery) error
@@ -586,6 +610,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.TenantPermissionGroupQuery:
 		return q.Filter(), nil
+	case *gen.TenantResourceQuotaUsageQuery:
+		return q.Filter(), nil
 	case *gen.UserQuery:
 		return q.Filter(), nil
 	default:
@@ -626,6 +652,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.TenantParameterOverrideMutation:
 		return m.Filter(), nil
 	case *gen.TenantPermissionGroupMutation:
+		return m.Filter(), nil
+	case *gen.TenantResourceQuotaUsageMutation:
 		return m.Filter(), nil
 	case *gen.UserMutation:
 		return m.Filter(), nil

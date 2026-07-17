@@ -19,6 +19,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
 	"errors"
@@ -105,6 +106,7 @@ func checkColumn(t, c string) error {
 			tenant.Table:                     tenant.ValidColumn,
 			tenantparameteroverride.Table:    tenantparameteroverride.ValidColumn,
 			tenantpermissiongroup.Table:      tenantpermissiongroup.ValidColumn,
+			tenantresourcequotausage.Table:   tenantresourcequotausage.ValidColumn,
 			user.Table:                       user.ValidColumn,
 		})
 	})

@@ -20,6 +20,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -30,7 +31,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 17)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 18)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   asynctask.Table,
@@ -448,6 +449,25 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   tenantresourcequotausage.Table,
+			Columns: tenantresourcequotausage.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: tenantresourcequotausage.FieldID,
+			},
+		},
+		Type: "TenantResourceQuotaUsage",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			tenantresourcequotausage.FieldCreatedAt:   {Type: field.TypeTime, Column: tenantresourcequotausage.FieldCreatedAt},
+			tenantresourcequotausage.FieldUpdatedAt:   {Type: field.TypeTime, Column: tenantresourcequotausage.FieldUpdatedAt},
+			tenantresourcequotausage.FieldTenantID:    {Type: field.TypeUint32, Column: tenantresourcequotausage.FieldTenantID},
+			tenantresourcequotausage.FieldResourceKey: {Type: field.TypeString, Column: tenantresourcequotausage.FieldResourceKey},
+			tenantresourcequotausage.FieldUsed:        {Type: field.TypeInt64, Column: tenantresourcequotausage.FieldUsed},
+			tenantresourcequotausage.FieldUpdatedBy:   {Type: field.TypeUint32, Column: tenantresourcequotausage.FieldUpdatedBy},
+		},
+	}
+	graph.Nodes[17] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -816,6 +836,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"TenantPermissionGroup",
 		"MenuPermissionGroupVersion",
+	)
+	graph.MustAddE(
+		"tenant",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tenantresourcequotausage.TenantTable,
+			Columns: []string{tenantresourcequotausage.TenantColumn},
+			Bidi:    false,
+		},
+		"TenantResourceQuotaUsage",
+		"Tenant",
 	)
 	graph.MustAddE(
 		"roles",
@@ -2942,6 +2974,90 @@ func (f *TenantPermissionGroupFilter) WhereHasVersionWith(preds ...predicate.Men
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *TenantResourceQuotaUsageQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the TenantResourceQuotaUsageQuery builder.
+func (_q *TenantResourceQuotaUsageQuery) Filter() *TenantResourceQuotaUsageFilter {
+	return &TenantResourceQuotaUsageFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *TenantResourceQuotaUsageMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the TenantResourceQuotaUsageMutation builder.
+func (m *TenantResourceQuotaUsageMutation) Filter() *TenantResourceQuotaUsageFilter {
+	return &TenantResourceQuotaUsageFilter{config: m.config, predicateAdder: m}
+}
+
+// TenantResourceQuotaUsageFilter provides a generic filtering capability at runtime for TenantResourceQuotaUsageQuery.
+type TenantResourceQuotaUsageFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *TenantResourceQuotaUsageFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *TenantResourceQuotaUsageFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(tenantresourcequotausage.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *TenantResourceQuotaUsageFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(tenantresourcequotausage.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *TenantResourceQuotaUsageFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(tenantresourcequotausage.FieldUpdatedAt))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *TenantResourceQuotaUsageFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(tenantresourcequotausage.FieldTenantID))
+}
+
+// WhereResourceKey applies the entql string predicate on the resource_key field.
+func (f *TenantResourceQuotaUsageFilter) WhereResourceKey(p entql.StringP) {
+	f.Where(p.Field(tenantresourcequotausage.FieldResourceKey))
+}
+
+// WhereUsed applies the entql int64 predicate on the used field.
+func (f *TenantResourceQuotaUsageFilter) WhereUsed(p entql.Int64P) {
+	f.Where(p.Field(tenantresourcequotausage.FieldUsed))
+}
+
+// WhereUpdatedBy applies the entql uint32 predicate on the updated_by field.
+func (f *TenantResourceQuotaUsageFilter) WhereUpdatedBy(p entql.Uint32P) {
+	f.Where(p.Field(tenantresourcequotausage.FieldUpdatedBy))
+}
+
+// WhereHasTenant applies a predicate to check if query has an edge tenant.
+func (f *TenantResourceQuotaUsageFilter) WhereHasTenant() {
+	f.Where(entql.HasEdge("tenant"))
+}
+
+// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
+func (f *TenantResourceQuotaUsageFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
+	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *UserQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -2970,7 +3086,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

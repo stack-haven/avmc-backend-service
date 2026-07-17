@@ -25,6 +25,10 @@ const (
 	TenantPermissionService_GetTenantEffectiveMenus_FullMethodName            = "/platform.admin.v1.TenantPermissionService/GetTenantEffectiveMenus"
 	TenantPermissionService_GetCurrentTenantEffectiveMenus_FullMethodName     = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
 	TenantPermissionService_GetCurrentTenantCapabilities_FullMethodName       = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantCapabilities"
+	TenantPermissionService_ListCurrentTenantResourceQuotas_FullMethodName    = "/platform.admin.v1.TenantPermissionService/ListCurrentTenantResourceQuotas"
+	TenantPermissionService_CheckCurrentTenantResourceQuota_FullMethodName    = "/platform.admin.v1.TenantPermissionService/CheckCurrentTenantResourceQuota"
+	TenantPermissionService_ConsumeCurrentTenantResourceQuota_FullMethodName  = "/platform.admin.v1.TenantPermissionService/ConsumeCurrentTenantResourceQuota"
+	TenantPermissionService_ReleaseCurrentTenantResourceQuota_FullMethodName  = "/platform.admin.v1.TenantPermissionService/ReleaseCurrentTenantResourceQuota"
 	TenantPermissionService_UpdateTenantPermissionGroupVersion_FullMethodName = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroupVersion"
 )
 
@@ -44,6 +48,10 @@ type TenantPermissionServiceClient interface {
 	GetCurrentTenantEffectiveMenus(ctx context.Context, in *v1.GetCurrentTenantEffectiveMenusRequest, opts ...grpc.CallOption) (*v1.GetTenantEffectiveMenusResponse, error)
 	// 获取当前登录租户运行时能力配置
 	GetCurrentTenantCapabilities(ctx context.Context, in *v1.GetCurrentTenantCapabilitiesRequest, opts ...grpc.CallOption) (*v1.GetCurrentTenantCapabilitiesResponse, error)
+	ListCurrentTenantResourceQuotas(ctx context.Context, in *v1.ListCurrentTenantResourceQuotasRequest, opts ...grpc.CallOption) (*v1.ListCurrentTenantResourceQuotasResponse, error)
+	CheckCurrentTenantResourceQuota(ctx context.Context, in *v1.CheckCurrentTenantResourceQuotaRequest, opts ...grpc.CallOption) (*v1.CheckCurrentTenantResourceQuotaResponse, error)
+	ConsumeCurrentTenantResourceQuota(ctx context.Context, in *v1.ConsumeCurrentTenantResourceQuotaRequest, opts ...grpc.CallOption) (*v1.ConsumeCurrentTenantResourceQuotaResponse, error)
+	ReleaseCurrentTenantResourceQuota(ctx context.Context, in *v1.ReleaseCurrentTenantResourceQuotaRequest, opts ...grpc.CallOption) (*v1.ReleaseCurrentTenantResourceQuotaResponse, error)
 	UpdateTenantPermissionGroupVersion(ctx context.Context, in *v1.UpdateTenantPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.UpdateTenantPermissionGroupVersionResponse, error)
 }
 
@@ -105,6 +113,46 @@ func (c *tenantPermissionServiceClient) GetCurrentTenantCapabilities(ctx context
 	return out, nil
 }
 
+func (c *tenantPermissionServiceClient) ListCurrentTenantResourceQuotas(ctx context.Context, in *v1.ListCurrentTenantResourceQuotasRequest, opts ...grpc.CallOption) (*v1.ListCurrentTenantResourceQuotasResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListCurrentTenantResourceQuotasResponse)
+	err := c.cc.Invoke(ctx, TenantPermissionService_ListCurrentTenantResourceQuotas_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantPermissionServiceClient) CheckCurrentTenantResourceQuota(ctx context.Context, in *v1.CheckCurrentTenantResourceQuotaRequest, opts ...grpc.CallOption) (*v1.CheckCurrentTenantResourceQuotaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.CheckCurrentTenantResourceQuotaResponse)
+	err := c.cc.Invoke(ctx, TenantPermissionService_CheckCurrentTenantResourceQuota_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantPermissionServiceClient) ConsumeCurrentTenantResourceQuota(ctx context.Context, in *v1.ConsumeCurrentTenantResourceQuotaRequest, opts ...grpc.CallOption) (*v1.ConsumeCurrentTenantResourceQuotaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ConsumeCurrentTenantResourceQuotaResponse)
+	err := c.cc.Invoke(ctx, TenantPermissionService_ConsumeCurrentTenantResourceQuota_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantPermissionServiceClient) ReleaseCurrentTenantResourceQuota(ctx context.Context, in *v1.ReleaseCurrentTenantResourceQuotaRequest, opts ...grpc.CallOption) (*v1.ReleaseCurrentTenantResourceQuotaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ReleaseCurrentTenantResourceQuotaResponse)
+	err := c.cc.Invoke(ctx, TenantPermissionService_ReleaseCurrentTenantResourceQuota_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tenantPermissionServiceClient) UpdateTenantPermissionGroupVersion(ctx context.Context, in *v1.UpdateTenantPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.UpdateTenantPermissionGroupVersionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.UpdateTenantPermissionGroupVersionResponse)
@@ -131,6 +179,10 @@ type TenantPermissionServiceServer interface {
 	GetCurrentTenantEffectiveMenus(context.Context, *v1.GetCurrentTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error)
 	// 获取当前登录租户运行时能力配置
 	GetCurrentTenantCapabilities(context.Context, *v1.GetCurrentTenantCapabilitiesRequest) (*v1.GetCurrentTenantCapabilitiesResponse, error)
+	ListCurrentTenantResourceQuotas(context.Context, *v1.ListCurrentTenantResourceQuotasRequest) (*v1.ListCurrentTenantResourceQuotasResponse, error)
+	CheckCurrentTenantResourceQuota(context.Context, *v1.CheckCurrentTenantResourceQuotaRequest) (*v1.CheckCurrentTenantResourceQuotaResponse, error)
+	ConsumeCurrentTenantResourceQuota(context.Context, *v1.ConsumeCurrentTenantResourceQuotaRequest) (*v1.ConsumeCurrentTenantResourceQuotaResponse, error)
+	ReleaseCurrentTenantResourceQuota(context.Context, *v1.ReleaseCurrentTenantResourceQuotaRequest) (*v1.ReleaseCurrentTenantResourceQuotaResponse, error)
 	UpdateTenantPermissionGroupVersion(context.Context, *v1.UpdateTenantPermissionGroupVersionRequest) (*v1.UpdateTenantPermissionGroupVersionResponse, error)
 	mustEmbedUnimplementedTenantPermissionServiceServer()
 }
@@ -156,6 +208,18 @@ func (UnimplementedTenantPermissionServiceServer) GetCurrentTenantEffectiveMenus
 }
 func (UnimplementedTenantPermissionServiceServer) GetCurrentTenantCapabilities(context.Context, *v1.GetCurrentTenantCapabilitiesRequest) (*v1.GetCurrentTenantCapabilitiesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentTenantCapabilities not implemented")
+}
+func (UnimplementedTenantPermissionServiceServer) ListCurrentTenantResourceQuotas(context.Context, *v1.ListCurrentTenantResourceQuotasRequest) (*v1.ListCurrentTenantResourceQuotasResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListCurrentTenantResourceQuotas not implemented")
+}
+func (UnimplementedTenantPermissionServiceServer) CheckCurrentTenantResourceQuota(context.Context, *v1.CheckCurrentTenantResourceQuotaRequest) (*v1.CheckCurrentTenantResourceQuotaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CheckCurrentTenantResourceQuota not implemented")
+}
+func (UnimplementedTenantPermissionServiceServer) ConsumeCurrentTenantResourceQuota(context.Context, *v1.ConsumeCurrentTenantResourceQuotaRequest) (*v1.ConsumeCurrentTenantResourceQuotaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConsumeCurrentTenantResourceQuota not implemented")
+}
+func (UnimplementedTenantPermissionServiceServer) ReleaseCurrentTenantResourceQuota(context.Context, *v1.ReleaseCurrentTenantResourceQuotaRequest) (*v1.ReleaseCurrentTenantResourceQuotaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReleaseCurrentTenantResourceQuota not implemented")
 }
 func (UnimplementedTenantPermissionServiceServer) UpdateTenantPermissionGroupVersion(context.Context, *v1.UpdateTenantPermissionGroupVersionRequest) (*v1.UpdateTenantPermissionGroupVersionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateTenantPermissionGroupVersion not implemented")
@@ -272,6 +336,78 @@ func _TenantPermissionService_GetCurrentTenantCapabilities_Handler(srv interface
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TenantPermissionService_ListCurrentTenantResourceQuotas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListCurrentTenantResourceQuotasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantPermissionServiceServer).ListCurrentTenantResourceQuotas(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantPermissionService_ListCurrentTenantResourceQuotas_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantPermissionServiceServer).ListCurrentTenantResourceQuotas(ctx, req.(*v1.ListCurrentTenantResourceQuotasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantPermissionService_CheckCurrentTenantResourceQuota_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.CheckCurrentTenantResourceQuotaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantPermissionServiceServer).CheckCurrentTenantResourceQuota(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantPermissionService_CheckCurrentTenantResourceQuota_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantPermissionServiceServer).CheckCurrentTenantResourceQuota(ctx, req.(*v1.CheckCurrentTenantResourceQuotaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantPermissionService_ConsumeCurrentTenantResourceQuota_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ConsumeCurrentTenantResourceQuotaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantPermissionServiceServer).ConsumeCurrentTenantResourceQuota(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantPermissionService_ConsumeCurrentTenantResourceQuota_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantPermissionServiceServer).ConsumeCurrentTenantResourceQuota(ctx, req.(*v1.ConsumeCurrentTenantResourceQuotaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantPermissionService_ReleaseCurrentTenantResourceQuota_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ReleaseCurrentTenantResourceQuotaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantPermissionServiceServer).ReleaseCurrentTenantResourceQuota(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantPermissionService_ReleaseCurrentTenantResourceQuota_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantPermissionServiceServer).ReleaseCurrentTenantResourceQuota(ctx, req.(*v1.ReleaseCurrentTenantResourceQuotaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TenantPermissionService_UpdateTenantPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.UpdateTenantPermissionGroupVersionRequest)
 	if err := dec(in); err != nil {
@@ -316,6 +452,22 @@ var TenantPermissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentTenantCapabilities",
 			Handler:    _TenantPermissionService_GetCurrentTenantCapabilities_Handler,
+		},
+		{
+			MethodName: "ListCurrentTenantResourceQuotas",
+			Handler:    _TenantPermissionService_ListCurrentTenantResourceQuotas_Handler,
+		},
+		{
+			MethodName: "CheckCurrentTenantResourceQuota",
+			Handler:    _TenantPermissionService_CheckCurrentTenantResourceQuota_Handler,
+		},
+		{
+			MethodName: "ConsumeCurrentTenantResourceQuota",
+			Handler:    _TenantPermissionService_ConsumeCurrentTenantResourceQuota_Handler,
+		},
+		{
+			MethodName: "ReleaseCurrentTenantResourceQuota",
+			Handler:    _TenantPermissionService_ReleaseCurrentTenantResourceQuota_Handler,
 		},
 		{
 			MethodName: "UpdateTenantPermissionGroupVersion",

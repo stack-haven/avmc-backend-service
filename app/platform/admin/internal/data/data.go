@@ -57,6 +57,7 @@ var ProviderSet = wire.NewSet(
 	NewLoginLogRepo,
 	NewSessionRepo,
 	NewParameterRepo,
+	NewResourceQuotaRepo,
 	NewAsyncTaskRepo,
 	NewPermissionCacheInvalidator,
 	NewTenantAdminPolicy,

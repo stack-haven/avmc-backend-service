@@ -121,6 +121,16 @@ func TestCurrentTenantMenusRemainTenantOperation(t *testing.T) {
 	if IsPlatformControlOperation(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities) {
 		t.Fatal("current tenant capabilities must remain available to tenant identities")
 	}
+	for _, operation := range []string{
+		v1.OperationTenantPermissionServiceCheckCurrentTenantResourceQuota,
+		v1.OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota,
+		v1.OperationTenantPermissionServiceListCurrentTenantResourceQuotas,
+		v1.OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota,
+	} {
+		if IsPlatformControlOperation(operation) {
+			t.Fatalf("current tenant resource quota operation must remain available to tenant identities: %s", operation)
+		}
+	}
 }
 
 func TestMatchProtectedOperation(t *testing.T) {
@@ -183,6 +193,11 @@ func TestAuthenticatedSelfServiceOperations(t *testing.T) {
 		{name: "my sessions", object: authz.Object(v1.OperationSessionServiceListMySessions), action: "GET", want: true},
 		{name: "current tenant capabilities", object: authz.Object(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities), action: "GET", want: true},
 		{name: "current tenant capabilities grpc", object: authz.Object(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities), action: "GetCurrentTenantCapabilities", want: true},
+		{name: "current tenant quota list", object: authz.Object(v1.OperationTenantPermissionServiceListCurrentTenantResourceQuotas), action: "GET", want: true},
+		{name: "current tenant quota check", object: authz.Object(v1.OperationTenantPermissionServiceCheckCurrentTenantResourceQuota), action: "GET", want: true},
+		{name: "current tenant quota consume", object: authz.Object(v1.OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota), action: "POST", want: true},
+		{name: "current tenant quota consume grpc", object: authz.Object(v1.OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota), action: "ConsumeCurrentTenantResourceQuota", want: true},
+		{name: "current tenant quota release", object: authz.Object(v1.OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota), action: "POST", want: true},
 		{name: "wrong action", object: authz.Object(v1.OperationAuthServiceProfile), action: "POST", want: false},
 		{name: "ordinary protected operation", object: authz.Object(v1.OperationUserServiceListUsers), action: "GET", want: false},
 	}

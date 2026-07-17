@@ -16,6 +16,7 @@ import (
 
 type menuPermissionGroupRepoStub struct {
 	current *pbCore.MenuPermissionGroup
+	caps    *pbCore.GetCurrentTenantCapabilitiesResponse
 
 	saved       *pbCore.MenuPermissionGroup
 	updated     *pbCore.MenuPermissionGroup
@@ -118,6 +119,9 @@ func (r *menuPermissionGroupRepoStub) GetTenantEffectiveMenus(_ context.Context,
 
 func (r *menuPermissionGroupRepoStub) GetTenantCapabilities(_ context.Context, tenantID uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
 	r.tenantID = tenantID
+	if r.caps != nil {
+		return r.caps, nil
+	}
 	return &pbCore.GetCurrentTenantCapabilitiesResponse{TenantId: tenantID}, nil
 }
 

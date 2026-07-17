@@ -22,6 +22,7 @@ var ProviderSet = wire.NewSet(
 	NewLoginLogUsecase,
 	NewSessionUsecase,
 	NewParameterUsecase,
+	NewResourceQuotaUsecase,
 	NewAsyncTaskHandlers,
 	NewAsyncTaskUsecase,
 )

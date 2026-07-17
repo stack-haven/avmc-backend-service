@@ -20,14 +20,20 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationTenantPermissionServiceCheckCurrentTenantResourceQuota = "/platform.admin.v1.TenantPermissionService/CheckCurrentTenantResourceQuota"
+const OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota = "/platform.admin.v1.TenantPermissionService/ConsumeCurrentTenantResourceQuota"
 const OperationTenantPermissionServiceGetCurrentTenantCapabilities = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantCapabilities"
 const OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
 const OperationTenantPermissionServiceGetTenantEffectiveMenus = "/platform.admin.v1.TenantPermissionService/GetTenantEffectiveMenus"
 const OperationTenantPermissionServiceGetTenantPermissionGroups = "/platform.admin.v1.TenantPermissionService/GetTenantPermissionGroups"
+const OperationTenantPermissionServiceListCurrentTenantResourceQuotas = "/platform.admin.v1.TenantPermissionService/ListCurrentTenantResourceQuotas"
+const OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota = "/platform.admin.v1.TenantPermissionService/ReleaseCurrentTenantResourceQuota"
 const OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroupVersion"
 const OperationTenantPermissionServiceUpdateTenantPermissionGroups = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroups"
 
 type TenantPermissionServiceHTTPServer interface {
+	CheckCurrentTenantResourceQuota(context.Context, *v1.CheckCurrentTenantResourceQuotaRequest) (*v1.CheckCurrentTenantResourceQuotaResponse, error)
+	ConsumeCurrentTenantResourceQuota(context.Context, *v1.ConsumeCurrentTenantResourceQuotaRequest) (*v1.ConsumeCurrentTenantResourceQuotaResponse, error)
 	// GetCurrentTenantCapabilities 获取当前登录租户运行时能力配置
 	GetCurrentTenantCapabilities(context.Context, *v1.GetCurrentTenantCapabilitiesRequest) (*v1.GetCurrentTenantCapabilitiesResponse, error)
 	// GetCurrentTenantEffectiveMenus 获取当前登录租户最终有效菜单树
@@ -36,6 +42,8 @@ type TenantPermissionServiceHTTPServer interface {
 	GetTenantEffectiveMenus(context.Context, *v1.GetTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error)
 	// GetTenantPermissionGroups 获取租户绑定的菜单权限组
 	GetTenantPermissionGroups(context.Context, *v1.GetTenantPermissionGroupsRequest) (*v1.GetTenantPermissionGroupsResponse, error)
+	ListCurrentTenantResourceQuotas(context.Context, *v1.ListCurrentTenantResourceQuotasRequest) (*v1.ListCurrentTenantResourceQuotasResponse, error)
+	ReleaseCurrentTenantResourceQuota(context.Context, *v1.ReleaseCurrentTenantResourceQuotaRequest) (*v1.ReleaseCurrentTenantResourceQuotaResponse, error)
 	UpdateTenantPermissionGroupVersion(context.Context, *v1.UpdateTenantPermissionGroupVersionRequest) (*v1.UpdateTenantPermissionGroupVersionResponse, error)
 	// UpdateTenantPermissionGroups 更新租户绑定的菜单权限组
 	UpdateTenantPermissionGroups(context.Context, *v1.UpdateTenantPermissionGroupsRequest) (*v1.UpdateTenantPermissionGroupsResponse, error)
@@ -48,6 +56,10 @@ func RegisterTenantPermissionServiceHTTPServer(s *http.Server, srv TenantPermiss
 	r.GET("/admin/v1/tenants/{tenant_id}/effective-menus", _TenantPermissionService_GetTenantEffectiveMenus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/current-tenant/effective-menus", _TenantPermissionService_GetCurrentTenantEffectiveMenus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/current-tenant/capabilities", _TenantPermissionService_GetCurrentTenantCapabilities0_HTTP_Handler(srv))
+	r.GET("/admin/v1/current-tenant/resource-quotas", _TenantPermissionService_ListCurrentTenantResourceQuotas0_HTTP_Handler(srv))
+	r.GET("/admin/v1/current-tenant/resource-quotas/{resource_key}:check", _TenantPermissionService_CheckCurrentTenantResourceQuota0_HTTP_Handler(srv))
+	r.POST("/admin/v1/current-tenant/resource-quotas/{resource_key}:consume", _TenantPermissionService_ConsumeCurrentTenantResourceQuota0_HTTP_Handler(srv))
+	r.POST("/admin/v1/current-tenant/resource-quotas/{resource_key}:release", _TenantPermissionService_ReleaseCurrentTenantResourceQuota0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version", _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(srv))
 }
 
@@ -158,6 +170,97 @@ func _TenantPermissionService_GetCurrentTenantCapabilities0_HTTP_Handler(srv Ten
 	}
 }
 
+func _TenantPermissionService_ListCurrentTenantResourceQuotas0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListCurrentTenantResourceQuotasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantPermissionServiceListCurrentTenantResourceQuotas)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListCurrentTenantResourceQuotas(ctx, req.(*v1.ListCurrentTenantResourceQuotasRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListCurrentTenantResourceQuotasResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantPermissionService_CheckCurrentTenantResourceQuota0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.CheckCurrentTenantResourceQuotaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantPermissionServiceCheckCurrentTenantResourceQuota)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CheckCurrentTenantResourceQuota(ctx, req.(*v1.CheckCurrentTenantResourceQuotaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.CheckCurrentTenantResourceQuotaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantPermissionService_ConsumeCurrentTenantResourceQuota0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ConsumeCurrentTenantResourceQuotaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ConsumeCurrentTenantResourceQuota(ctx, req.(*v1.ConsumeCurrentTenantResourceQuotaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ConsumeCurrentTenantResourceQuotaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantPermissionService_ReleaseCurrentTenantResourceQuota0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ReleaseCurrentTenantResourceQuotaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ReleaseCurrentTenantResourceQuota(ctx, req.(*v1.ReleaseCurrentTenantResourceQuotaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ReleaseCurrentTenantResourceQuotaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.UpdateTenantPermissionGroupVersionRequest
@@ -184,6 +287,8 @@ func _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(s
 }
 
 type TenantPermissionServiceHTTPClient interface {
+	CheckCurrentTenantResourceQuota(ctx context.Context, req *v1.CheckCurrentTenantResourceQuotaRequest, opts ...http.CallOption) (rsp *v1.CheckCurrentTenantResourceQuotaResponse, err error)
+	ConsumeCurrentTenantResourceQuota(ctx context.Context, req *v1.ConsumeCurrentTenantResourceQuotaRequest, opts ...http.CallOption) (rsp *v1.ConsumeCurrentTenantResourceQuotaResponse, err error)
 	// GetCurrentTenantCapabilities 获取当前登录租户运行时能力配置
 	GetCurrentTenantCapabilities(ctx context.Context, req *v1.GetCurrentTenantCapabilitiesRequest, opts ...http.CallOption) (rsp *v1.GetCurrentTenantCapabilitiesResponse, err error)
 	// GetCurrentTenantEffectiveMenus 获取当前登录租户最终有效菜单树
@@ -192,6 +297,8 @@ type TenantPermissionServiceHTTPClient interface {
 	GetTenantEffectiveMenus(ctx context.Context, req *v1.GetTenantEffectiveMenusRequest, opts ...http.CallOption) (rsp *v1.GetTenantEffectiveMenusResponse, err error)
 	// GetTenantPermissionGroups 获取租户绑定的菜单权限组
 	GetTenantPermissionGroups(ctx context.Context, req *v1.GetTenantPermissionGroupsRequest, opts ...http.CallOption) (rsp *v1.GetTenantPermissionGroupsResponse, err error)
+	ListCurrentTenantResourceQuotas(ctx context.Context, req *v1.ListCurrentTenantResourceQuotasRequest, opts ...http.CallOption) (rsp *v1.ListCurrentTenantResourceQuotasResponse, err error)
+	ReleaseCurrentTenantResourceQuota(ctx context.Context, req *v1.ReleaseCurrentTenantResourceQuotaRequest, opts ...http.CallOption) (rsp *v1.ReleaseCurrentTenantResourceQuotaResponse, err error)
 	UpdateTenantPermissionGroupVersion(ctx context.Context, req *v1.UpdateTenantPermissionGroupVersionRequest, opts ...http.CallOption) (rsp *v1.UpdateTenantPermissionGroupVersionResponse, err error)
 	// UpdateTenantPermissionGroups 更新租户绑定的菜单权限组
 	UpdateTenantPermissionGroups(ctx context.Context, req *v1.UpdateTenantPermissionGroupsRequest, opts ...http.CallOption) (rsp *v1.UpdateTenantPermissionGroupsResponse, err error)
@@ -203,6 +310,32 @@ type TenantPermissionServiceHTTPClientImpl struct {
 
 func NewTenantPermissionServiceHTTPClient(client *http.Client) TenantPermissionServiceHTTPClient {
 	return &TenantPermissionServiceHTTPClientImpl{client}
+}
+
+func (c *TenantPermissionServiceHTTPClientImpl) CheckCurrentTenantResourceQuota(ctx context.Context, in *v1.CheckCurrentTenantResourceQuotaRequest, opts ...http.CallOption) (*v1.CheckCurrentTenantResourceQuotaResponse, error) {
+	var out v1.CheckCurrentTenantResourceQuotaResponse
+	pattern := "/admin/v1/current-tenant/resource-quotas/{resource_key}:check"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantPermissionServiceCheckCurrentTenantResourceQuota))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantPermissionServiceHTTPClientImpl) ConsumeCurrentTenantResourceQuota(ctx context.Context, in *v1.ConsumeCurrentTenantResourceQuotaRequest, opts ...http.CallOption) (*v1.ConsumeCurrentTenantResourceQuotaResponse, error) {
+	var out v1.ConsumeCurrentTenantResourceQuotaResponse
+	pattern := "/admin/v1/current-tenant/resource-quotas/{resource_key}:consume"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // GetCurrentTenantCapabilities 获取当前登录租户运行时能力配置
@@ -255,6 +388,32 @@ func (c *TenantPermissionServiceHTTPClientImpl) GetTenantPermissionGroups(ctx co
 	opts = append(opts, http.Operation(OperationTenantPermissionServiceGetTenantPermissionGroups))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantPermissionServiceHTTPClientImpl) ListCurrentTenantResourceQuotas(ctx context.Context, in *v1.ListCurrentTenantResourceQuotasRequest, opts ...http.CallOption) (*v1.ListCurrentTenantResourceQuotasResponse, error) {
+	var out v1.ListCurrentTenantResourceQuotasResponse
+	pattern := "/admin/v1/current-tenant/resource-quotas"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantPermissionServiceListCurrentTenantResourceQuotas))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantPermissionServiceHTTPClientImpl) ReleaseCurrentTenantResourceQuota(ctx context.Context, in *v1.ReleaseCurrentTenantResourceQuotaRequest, opts ...http.CallOption) (*v1.ReleaseCurrentTenantResourceQuotaResponse, error) {
+	var out v1.ReleaseCurrentTenantResourceQuotaResponse
+	pattern := "/admin/v1/current-tenant/resource-quotas/{resource_key}:release"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

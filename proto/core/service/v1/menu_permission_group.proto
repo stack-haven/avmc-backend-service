@@ -350,3 +350,77 @@ message GetCurrentTenantCapabilitiesResponse {
   repeated uint32 group_ids = 5 [(gnostic.openapi.v3.property) = {description: "参与聚合的套餐ID"}];
   repeated TenantPermissionGroupBinding bindings = 6 [(gnostic.openapi.v3.property) = {description: "参与聚合的套餐版本绑定"}];
 }
+
+message TenantResourceQuotaUsage {
+  uint32 tenant_id = 1 [(gnostic.openapi.v3.property) = {description: "租户ID"}];
+  string resource_key = 2 [(gnostic.openapi.v3.property) = {description: "资源额度键"}];
+  int64 used = 3 [(gnostic.openapi.v3.property) = {description: "已使用额度"}];
+  int64 limit = 4 [(gnostic.openapi.v3.property) = {description: "额度上限，unlimited=true时为0"}];
+  int64 remaining = 5 [(gnostic.openapi.v3.property) = {description: "剩余额度，unlimited=true时为0"}];
+  bool unlimited = 6 [(gnostic.openapi.v3.property) = {description: "是否不限额"}];
+  optional string updated_at = 7 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+}
+
+message ListCurrentTenantResourceQuotasRequest {}
+
+message ListCurrentTenantResourceQuotasResponse {
+  repeated TenantResourceQuotaUsage items = 1;
+}
+
+message CheckCurrentTenantResourceQuotaRequest {
+  string resource_key = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$"
+    },
+    (gnostic.openapi.v3.property) = {description: "资源额度键"}
+  ];
+  int64 amount = 2 [
+    (buf.validate.field).int64.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "本次预计占用数量"}
+  ];
+}
+
+message CheckCurrentTenantResourceQuotaResponse {
+  bool allowed = 1 [(gnostic.openapi.v3.property) = {description: "是否允许占用"}];
+  TenantResourceQuotaUsage usage = 2 [(gnostic.openapi.v3.property) = {description: "当前额度使用情况"}];
+}
+
+message ConsumeCurrentTenantResourceQuotaRequest {
+  string resource_key = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$"
+    },
+    (gnostic.openapi.v3.property) = {description: "资源额度键"}
+  ];
+  int64 amount = 2 [
+    (buf.validate.field).int64.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "本次占用数量"}
+  ];
+}
+
+message ConsumeCurrentTenantResourceQuotaResponse {
+  TenantResourceQuotaUsage usage = 1 [(gnostic.openapi.v3.property) = {description: "占用后的额度使用情况"}];
+}
+
+message ReleaseCurrentTenantResourceQuotaRequest {
+  string resource_key = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$"
+    },
+    (gnostic.openapi.v3.property) = {description: "资源额度键"}
+  ];
+  int64 amount = 2 [
+    (buf.validate.field).int64.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "本次释放数量"}
+  ];
+}
+
+message ReleaseCurrentTenantResourceQuotaResponse {
+  TenantResourceQuotaUsage usage = 1 [(gnostic.openapi.v3.property) = {description: "释放后的额度使用情况"}];
+}

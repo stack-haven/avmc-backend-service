@@ -2062,6 +2062,474 @@ func (x *GetCurrentTenantCapabilitiesResponse) GetBindings() []*TenantPermission
 	return nil
 }
 
+type TenantResourceQuotaUsage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TenantId      uint32                 `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	ResourceKey   string                 `protobuf:"bytes,2,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
+	Used          int64                  `protobuf:"varint,3,opt,name=used,proto3" json:"used,omitempty"`
+	Limit         int64                  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Remaining     int64                  `protobuf:"varint,5,opt,name=remaining,proto3" json:"remaining,omitempty"`
+	Unlimited     bool                   `protobuf:"varint,6,opt,name=unlimited,proto3" json:"unlimited,omitempty"`
+	UpdatedAt     *string                `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TenantResourceQuotaUsage) Reset() {
+	*x = TenantResourceQuotaUsage{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TenantResourceQuotaUsage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TenantResourceQuotaUsage) ProtoMessage() {}
+
+func (x *TenantResourceQuotaUsage) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TenantResourceQuotaUsage.ProtoReflect.Descriptor instead.
+func (*TenantResourceQuotaUsage) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *TenantResourceQuotaUsage) GetTenantId() uint32 {
+	if x != nil {
+		return x.TenantId
+	}
+	return 0
+}
+
+func (x *TenantResourceQuotaUsage) GetResourceKey() string {
+	if x != nil {
+		return x.ResourceKey
+	}
+	return ""
+}
+
+func (x *TenantResourceQuotaUsage) GetUsed() int64 {
+	if x != nil {
+		return x.Used
+	}
+	return 0
+}
+
+func (x *TenantResourceQuotaUsage) GetLimit() int64 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *TenantResourceQuotaUsage) GetRemaining() int64 {
+	if x != nil {
+		return x.Remaining
+	}
+	return 0
+}
+
+func (x *TenantResourceQuotaUsage) GetUnlimited() bool {
+	if x != nil {
+		return x.Unlimited
+	}
+	return false
+}
+
+func (x *TenantResourceQuotaUsage) GetUpdatedAt() string {
+	if x != nil && x.UpdatedAt != nil {
+		return *x.UpdatedAt
+	}
+	return ""
+}
+
+type ListCurrentTenantResourceQuotasRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCurrentTenantResourceQuotasRequest) Reset() {
+	*x = ListCurrentTenantResourceQuotasRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCurrentTenantResourceQuotasRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCurrentTenantResourceQuotasRequest) ProtoMessage() {}
+
+func (x *ListCurrentTenantResourceQuotasRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCurrentTenantResourceQuotasRequest.ProtoReflect.Descriptor instead.
+func (*ListCurrentTenantResourceQuotasRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{33}
+}
+
+type ListCurrentTenantResourceQuotasResponse struct {
+	state         protoimpl.MessageState      `protogen:"open.v1"`
+	Items         []*TenantResourceQuotaUsage `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCurrentTenantResourceQuotasResponse) Reset() {
+	*x = ListCurrentTenantResourceQuotasResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCurrentTenantResourceQuotasResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCurrentTenantResourceQuotasResponse) ProtoMessage() {}
+
+func (x *ListCurrentTenantResourceQuotasResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCurrentTenantResourceQuotasResponse.ProtoReflect.Descriptor instead.
+func (*ListCurrentTenantResourceQuotasResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *ListCurrentTenantResourceQuotasResponse) GetItems() []*TenantResourceQuotaUsage {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type CheckCurrentTenantResourceQuotaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResourceKey   string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
+	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckCurrentTenantResourceQuotaRequest) Reset() {
+	*x = CheckCurrentTenantResourceQuotaRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckCurrentTenantResourceQuotaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckCurrentTenantResourceQuotaRequest) ProtoMessage() {}
+
+func (x *CheckCurrentTenantResourceQuotaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckCurrentTenantResourceQuotaRequest.ProtoReflect.Descriptor instead.
+func (*CheckCurrentTenantResourceQuotaRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *CheckCurrentTenantResourceQuotaRequest) GetResourceKey() string {
+	if x != nil {
+		return x.ResourceKey
+	}
+	return ""
+}
+
+func (x *CheckCurrentTenantResourceQuotaRequest) GetAmount() int64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type CheckCurrentTenantResourceQuotaResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Allowed       bool                      `protobuf:"varint,1,opt,name=allowed,proto3" json:"allowed,omitempty"`
+	Usage         *TenantResourceQuotaUsage `protobuf:"bytes,2,opt,name=usage,proto3" json:"usage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckCurrentTenantResourceQuotaResponse) Reset() {
+	*x = CheckCurrentTenantResourceQuotaResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckCurrentTenantResourceQuotaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckCurrentTenantResourceQuotaResponse) ProtoMessage() {}
+
+func (x *CheckCurrentTenantResourceQuotaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckCurrentTenantResourceQuotaResponse.ProtoReflect.Descriptor instead.
+func (*CheckCurrentTenantResourceQuotaResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *CheckCurrentTenantResourceQuotaResponse) GetAllowed() bool {
+	if x != nil {
+		return x.Allowed
+	}
+	return false
+}
+
+func (x *CheckCurrentTenantResourceQuotaResponse) GetUsage() *TenantResourceQuotaUsage {
+	if x != nil {
+		return x.Usage
+	}
+	return nil
+}
+
+type ConsumeCurrentTenantResourceQuotaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResourceKey   string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
+	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaRequest) Reset() {
+	*x = ConsumeCurrentTenantResourceQuotaRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConsumeCurrentTenantResourceQuotaRequest) ProtoMessage() {}
+
+func (x *ConsumeCurrentTenantResourceQuotaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConsumeCurrentTenantResourceQuotaRequest.ProtoReflect.Descriptor instead.
+func (*ConsumeCurrentTenantResourceQuotaRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaRequest) GetResourceKey() string {
+	if x != nil {
+		return x.ResourceKey
+	}
+	return ""
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaRequest) GetAmount() int64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type ConsumeCurrentTenantResourceQuotaResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Usage         *TenantResourceQuotaUsage `protobuf:"bytes,1,opt,name=usage,proto3" json:"usage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaResponse) Reset() {
+	*x = ConsumeCurrentTenantResourceQuotaResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConsumeCurrentTenantResourceQuotaResponse) ProtoMessage() {}
+
+func (x *ConsumeCurrentTenantResourceQuotaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConsumeCurrentTenantResourceQuotaResponse.ProtoReflect.Descriptor instead.
+func (*ConsumeCurrentTenantResourceQuotaResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaResponse) GetUsage() *TenantResourceQuotaUsage {
+	if x != nil {
+		return x.Usage
+	}
+	return nil
+}
+
+type ReleaseCurrentTenantResourceQuotaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResourceKey   string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
+	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaRequest) Reset() {
+	*x = ReleaseCurrentTenantResourceQuotaRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReleaseCurrentTenantResourceQuotaRequest) ProtoMessage() {}
+
+func (x *ReleaseCurrentTenantResourceQuotaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReleaseCurrentTenantResourceQuotaRequest.ProtoReflect.Descriptor instead.
+func (*ReleaseCurrentTenantResourceQuotaRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaRequest) GetResourceKey() string {
+	if x != nil {
+		return x.ResourceKey
+	}
+	return ""
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaRequest) GetAmount() int64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type ReleaseCurrentTenantResourceQuotaResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Usage         *TenantResourceQuotaUsage `protobuf:"bytes,1,opt,name=usage,proto3" json:"usage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaResponse) Reset() {
+	*x = ReleaseCurrentTenantResourceQuotaResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReleaseCurrentTenantResourceQuotaResponse) ProtoMessage() {}
+
+func (x *ReleaseCurrentTenantResourceQuotaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReleaseCurrentTenantResourceQuotaResponse.ProtoReflect.Descriptor instead.
+func (*ReleaseCurrentTenantResourceQuotaResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaResponse) GetUsage() *TenantResourceQuotaUsage {
+	if x != nil {
+		return x.Usage
+	}
+	return nil
+}
+
 var File_core_service_v1_menu_permission_group_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
@@ -2295,7 +2763,36 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\x1aA\n" +
 	"\x13ResourceQuotasEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01*\xbd\x01\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\xb4\x03\n" +
+	"\x18TenantResourceQuotaUsage\x12+\n" +
+	"\ttenant_id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b租户IDR\btenantId\x128\n" +
+	"\fresource_key\x18\x02 \x01(\tB\x15\xbaG\x12\x92\x02\x0f资源额度键R\vresourceKey\x12)\n" +
+	"\x04used\x18\x03 \x01(\x03B\x15\xbaG\x12\x92\x02\x0f已使用额度R\x04used\x12@\n" +
+	"\x05limit\x18\x04 \x01(\x03B*\xbaG'\x92\x02$额度上限，unlimited=true时为0R\x05limit\x12H\n" +
+	"\tremaining\x18\x05 \x01(\x03B*\xbaG'\x92\x02$剩余额度，unlimited=true时为0R\tremaining\x123\n" +
+	"\tunlimited\x18\x06 \x01(\bB\x15\xbaG\x12\x92\x02\x0f是否不限额R\tunlimited\x126\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间H\x00R\tupdatedAt\x88\x01\x01B\r\n" +
+	"\v_updated_at\"(\n" +
+	"&ListCurrentTenantResourceQuotasRequest\"j\n" +
+	"'ListCurrentTenantResourceQuotasResponse\x12?\n" +
+	"\x05items\x18\x01 \x03(\v2).core.service.v1.TenantResourceQuotaUsageR\x05items\"\xd1\x01\n" +
+	"&CheckCurrentTenantResourceQuotaRequest\x12h\n" +
+	"\fresource_key\x18\x01 \x01(\tBE\xbaG\x12\x92\x02\x0f资源额度键\xbaH-r+\x10\x01\x18d2%^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$R\vresourceKey\x12=\n" +
+	"\x06amount\x18\x02 \x01(\x03B%\xbaG\x1b\x92\x02\x18本次预计占用数量\xbaH\x04\"\x02 \x00R\x06amount\"\xbe\x01\n" +
+	"'CheckCurrentTenantResourceQuotaResponse\x122\n" +
+	"\aallowed\x18\x01 \x01(\bB\x18\xbaG\x15\x92\x02\x12是否允许占用R\aallowed\x12_\n" +
+	"\x05usage\x18\x02 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB\x1e\xbaG\x1b\x92\x02\x18当前额度使用情况R\x05usage\"\xcd\x01\n" +
+	"(ConsumeCurrentTenantResourceQuotaRequest\x12h\n" +
+	"\fresource_key\x18\x01 \x01(\tBE\xbaG\x12\x92\x02\x0f资源额度键\xbaH-r+\x10\x01\x18d2%^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$R\vresourceKey\x127\n" +
+	"\x06amount\x18\x02 \x01(\x03B\x1f\xbaG\x15\x92\x02\x12本次占用数量\xbaH\x04\"\x02 \x00R\x06amount\"\x92\x01\n" +
+	")ConsumeCurrentTenantResourceQuotaResponse\x12e\n" +
+	"\x05usage\x18\x01 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB$\xbaG!\x92\x02\x1e占用后的额度使用情况R\x05usage\"\xcd\x01\n" +
+	"(ReleaseCurrentTenantResourceQuotaRequest\x12h\n" +
+	"\fresource_key\x18\x01 \x01(\tBE\xbaG\x12\x92\x02\x0f资源额度键\xbaH-r+\x10\x01\x18d2%^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$R\vresourceKey\x127\n" +
+	"\x06amount\x18\x02 \x01(\x03B\x1f\xbaG\x15\x92\x02\x12本次释放数量\xbaH\x04\"\x02 \x00R\x06amount\"\x92\x01\n" +
+	")ReleaseCurrentTenantResourceQuotaResponse\x12e\n" +
+	"\x05usage\x18\x01 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB$\xbaG!\x92\x02\x1e释放后的额度使用情况R\x05usage*\xbd\x01\n" +
 	"\x1fMenuPermissionGroupVersionState\x123\n" +
 	"/MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED\x10\x00\x121\n" +
 	"-MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED\x10\x01\x122\n" +
@@ -2332,7 +2829,7 @@ func file_core_service_v1_menu_permission_group_proto_rawDescGZIP() []byte {
 }
 
 var file_core_service_v1_menu_permission_group_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_core_service_v1_menu_permission_group_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
+var file_core_service_v1_menu_permission_group_proto_msgTypes = make([]protoimpl.MessageInfo, 49)
 var file_core_service_v1_menu_permission_group_proto_goTypes = []any{
 	(MenuPermissionGroupVersionState)(0),               // 0: core.service.v1.MenuPermissionGroupVersionState
 	(*MenuPermissionGroup)(nil),                        // 1: core.service.v1.MenuPermissionGroup
@@ -2367,75 +2864,88 @@ var file_core_service_v1_menu_permission_group_proto_goTypes = []any{
 	(*GetCurrentTenantEffectiveMenusRequest)(nil),      // 30: core.service.v1.GetCurrentTenantEffectiveMenusRequest
 	(*GetCurrentTenantCapabilitiesRequest)(nil),        // 31: core.service.v1.GetCurrentTenantCapabilitiesRequest
 	(*GetCurrentTenantCapabilitiesResponse)(nil),       // 32: core.service.v1.GetCurrentTenantCapabilitiesResponse
-	nil,              // 33: core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
-	nil,              // 34: core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
-	nil,              // 35: core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
-	nil,              // 36: core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
-	nil,              // 37: core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
-	nil,              // 38: core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
-	nil,              // 39: core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntry
-	nil,              // 40: core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntry
-	(enum.Status)(0), // 41: enum.Status
-	(*Menu)(nil),     // 42: core.service.v1.Menu
+	(*TenantResourceQuotaUsage)(nil),                   // 33: core.service.v1.TenantResourceQuotaUsage
+	(*ListCurrentTenantResourceQuotasRequest)(nil),     // 34: core.service.v1.ListCurrentTenantResourceQuotasRequest
+	(*ListCurrentTenantResourceQuotasResponse)(nil),    // 35: core.service.v1.ListCurrentTenantResourceQuotasResponse
+	(*CheckCurrentTenantResourceQuotaRequest)(nil),     // 36: core.service.v1.CheckCurrentTenantResourceQuotaRequest
+	(*CheckCurrentTenantResourceQuotaResponse)(nil),    // 37: core.service.v1.CheckCurrentTenantResourceQuotaResponse
+	(*ConsumeCurrentTenantResourceQuotaRequest)(nil),   // 38: core.service.v1.ConsumeCurrentTenantResourceQuotaRequest
+	(*ConsumeCurrentTenantResourceQuotaResponse)(nil),  // 39: core.service.v1.ConsumeCurrentTenantResourceQuotaResponse
+	(*ReleaseCurrentTenantResourceQuotaRequest)(nil),   // 40: core.service.v1.ReleaseCurrentTenantResourceQuotaRequest
+	(*ReleaseCurrentTenantResourceQuotaResponse)(nil),  // 41: core.service.v1.ReleaseCurrentTenantResourceQuotaResponse
+	nil,              // 42: core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
+	nil,              // 43: core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
+	nil,              // 44: core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
+	nil,              // 45: core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
+	nil,              // 46: core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
+	nil,              // 47: core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
+	nil,              // 48: core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntry
+	nil,              // 49: core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntry
+	(enum.Status)(0), // 50: enum.Status
+	(*Menu)(nil),     // 51: core.service.v1.Menu
 }
 var file_core_service_v1_menu_permission_group_proto_depIdxs = []int32{
-	41, // 0: core.service.v1.MenuPermissionGroup.status:type_name -> enum.Status
-	33, // 1: core.service.v1.MenuPermissionGroup.feature_flags:type_name -> core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
-	34, // 2: core.service.v1.MenuPermissionGroup.resource_quotas:type_name -> core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
+	50, // 0: core.service.v1.MenuPermissionGroup.status:type_name -> enum.Status
+	42, // 1: core.service.v1.MenuPermissionGroup.feature_flags:type_name -> core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
+	43, // 2: core.service.v1.MenuPermissionGroup.resource_quotas:type_name -> core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
 	0,  // 3: core.service.v1.MenuPermissionGroupVersion.state:type_name -> core.service.v1.MenuPermissionGroupVersionState
-	35, // 4: core.service.v1.MenuPermissionGroupVersion.feature_flags:type_name -> core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
-	36, // 5: core.service.v1.MenuPermissionGroupVersion.resource_quotas:type_name -> core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
+	44, // 4: core.service.v1.MenuPermissionGroupVersion.feature_flags:type_name -> core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
+	45, // 5: core.service.v1.MenuPermissionGroupVersion.resource_quotas:type_name -> core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
 	1,  // 6: core.service.v1.CreateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
 	1,  // 7: core.service.v1.UpdateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
 	1,  // 8: core.service.v1.GetMenuPermissionGroupResponse.group:type_name -> core.service.v1.MenuPermissionGroup
-	41, // 9: core.service.v1.ListMenuPermissionGroupsRequest.status:type_name -> enum.Status
+	50, // 9: core.service.v1.ListMenuPermissionGroupsRequest.status:type_name -> enum.Status
 	1,  // 10: core.service.v1.ListMenuPermissionGroupsResponse.items:type_name -> core.service.v1.MenuPermissionGroup
-	41, // 11: core.service.v1.UpdateMenuPermissionGroupStatusRequest.status:type_name -> enum.Status
+	50, // 11: core.service.v1.UpdateMenuPermissionGroupStatusRequest.status:type_name -> enum.Status
 	2,  // 12: core.service.v1.ListMenuPermissionGroupVersionsResponse.items:type_name -> core.service.v1.MenuPermissionGroupVersion
-	37, // 13: core.service.v1.PublishMenuPermissionGroupVersionRequest.feature_flags:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
-	38, // 14: core.service.v1.PublishMenuPermissionGroupVersionRequest.resource_quotas:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
+	46, // 13: core.service.v1.PublishMenuPermissionGroupVersionRequest.feature_flags:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
+	47, // 14: core.service.v1.PublishMenuPermissionGroupVersionRequest.resource_quotas:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
 	2,  // 15: core.service.v1.PublishMenuPermissionGroupVersionResponse.version:type_name -> core.service.v1.MenuPermissionGroupVersion
 	2,  // 16: core.service.v1.RollbackMenuPermissionGroupVersionResponse.version:type_name -> core.service.v1.MenuPermissionGroupVersion
 	1,  // 17: core.service.v1.GetTenantPermissionGroupsResponse.groups:type_name -> core.service.v1.MenuPermissionGroup
 	21, // 18: core.service.v1.GetTenantPermissionGroupsResponse.bindings:type_name -> core.service.v1.TenantPermissionGroupBinding
 	21, // 19: core.service.v1.UpdateTenantPermissionGroupVersionResponse.binding:type_name -> core.service.v1.TenantPermissionGroupBinding
-	42, // 20: core.service.v1.GetTenantEffectiveMenusResponse.items:type_name -> core.service.v1.Menu
-	39, // 21: core.service.v1.GetCurrentTenantCapabilitiesResponse.feature_flags:type_name -> core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntry
-	40, // 22: core.service.v1.GetCurrentTenantCapabilitiesResponse.resource_quotas:type_name -> core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntry
+	51, // 20: core.service.v1.GetTenantEffectiveMenusResponse.items:type_name -> core.service.v1.Menu
+	48, // 21: core.service.v1.GetCurrentTenantCapabilitiesResponse.feature_flags:type_name -> core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntry
+	49, // 22: core.service.v1.GetCurrentTenantCapabilitiesResponse.resource_quotas:type_name -> core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntry
 	21, // 23: core.service.v1.GetCurrentTenantCapabilitiesResponse.bindings:type_name -> core.service.v1.TenantPermissionGroupBinding
-	3,  // 24: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:input_type -> core.service.v1.CreateMenuPermissionGroupRequest
-	5,  // 25: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
-	7,  // 26: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
-	9,  // 27: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:input_type -> core.service.v1.GetMenuPermissionGroupRequest
-	11, // 28: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
-	13, // 29: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
-	15, // 30: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:input_type -> core.service.v1.ListMenuPermissionGroupVersionsRequest
-	17, // 31: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:input_type -> core.service.v1.PublishMenuPermissionGroupVersionRequest
-	19, // 32: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:input_type -> core.service.v1.RollbackMenuPermissionGroupVersionRequest
-	22, // 33: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
-	24, // 34: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
-	28, // 35: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
-	30, // 36: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	26, // 37: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
-	4,  // 38: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
-	6,  // 39: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
-	8,  // 40: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
-	10, // 41: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.GetMenuPermissionGroupResponse
-	12, // 42: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
-	14, // 43: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
-	16, // 44: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:output_type -> core.service.v1.ListMenuPermissionGroupVersionsResponse
-	18, // 45: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:output_type -> core.service.v1.PublishMenuPermissionGroupVersionResponse
-	20, // 46: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:output_type -> core.service.v1.RollbackMenuPermissionGroupVersionResponse
-	23, // 47: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
-	25, // 48: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
-	29, // 49: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	29, // 50: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	27, // 51: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
-	38, // [38:52] is the sub-list for method output_type
-	24, // [24:38] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	33, // 24: core.service.v1.ListCurrentTenantResourceQuotasResponse.items:type_name -> core.service.v1.TenantResourceQuotaUsage
+	33, // 25: core.service.v1.CheckCurrentTenantResourceQuotaResponse.usage:type_name -> core.service.v1.TenantResourceQuotaUsage
+	33, // 26: core.service.v1.ConsumeCurrentTenantResourceQuotaResponse.usage:type_name -> core.service.v1.TenantResourceQuotaUsage
+	33, // 27: core.service.v1.ReleaseCurrentTenantResourceQuotaResponse.usage:type_name -> core.service.v1.TenantResourceQuotaUsage
+	3,  // 28: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:input_type -> core.service.v1.CreateMenuPermissionGroupRequest
+	5,  // 29: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
+	7,  // 30: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
+	9,  // 31: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:input_type -> core.service.v1.GetMenuPermissionGroupRequest
+	11, // 32: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
+	13, // 33: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
+	15, // 34: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:input_type -> core.service.v1.ListMenuPermissionGroupVersionsRequest
+	17, // 35: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:input_type -> core.service.v1.PublishMenuPermissionGroupVersionRequest
+	19, // 36: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:input_type -> core.service.v1.RollbackMenuPermissionGroupVersionRequest
+	22, // 37: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
+	24, // 38: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
+	28, // 39: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
+	30, // 40: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
+	26, // 41: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
+	4,  // 42: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
+	6,  // 43: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
+	8,  // 44: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
+	10, // 45: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.GetMenuPermissionGroupResponse
+	12, // 46: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
+	14, // 47: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	16, // 48: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:output_type -> core.service.v1.ListMenuPermissionGroupVersionsResponse
+	18, // 49: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:output_type -> core.service.v1.PublishMenuPermissionGroupVersionResponse
+	20, // 50: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:output_type -> core.service.v1.RollbackMenuPermissionGroupVersionResponse
+	23, // 51: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
+	25, // 52: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
+	29, // 53: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	29, // 54: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	27, // 55: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
+	42, // [42:56] is the sub-list for method output_type
+	28, // [28:42] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_menu_permission_group_proto_init() }
@@ -2458,13 +2968,14 @@ func file_core_service_v1_menu_permission_group_proto_init() {
 	file_core_service_v1_menu_permission_group_proto_msgTypes[25].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[27].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[29].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[32].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_menu_permission_group_proto_rawDesc), len(file_core_service_v1_menu_permission_group_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   40,
+			NumMessages:   49,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

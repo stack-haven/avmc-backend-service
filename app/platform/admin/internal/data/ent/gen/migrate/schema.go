@@ -821,6 +821,53 @@ var (
 			},
 		},
 	}
+	// TenantResourceQuotaUsagesColumns holds the columns for the "tenant_resource_quota_usages" table.
+	TenantResourceQuotaUsagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "resource_key", Type: field.TypeString, Size: 100, Comment: "资源额度键"},
+		{Name: "used", Type: field.TypeInt64, Comment: "已使用额度", Default: 0, SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "updated_by", Type: field.TypeUint32, Nullable: true, Comment: "最后更新人ID"},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// TenantResourceQuotaUsagesTable holds the schema information for the "tenant_resource_quota_usages" table.
+	TenantResourceQuotaUsagesTable = &schema.Table{
+		Name:       "tenant_resource_quota_usages",
+		Comment:    "租户资源额度使用量表",
+		Columns:    TenantResourceQuotaUsagesColumns,
+		PrimaryKey: []*schema.Column{TenantResourceQuotaUsagesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tenant_resource_quota_usages_tenants_tenant",
+				Columns:    []*schema.Column{TenantResourceQuotaUsagesColumns[6]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "tenantresourcequotausage_id",
+				Unique:  false,
+				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[0]},
+			},
+			{
+				Name:    "tenantresourcequotausage_tenant_id_resource_key",
+				Unique:  true,
+				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[6], TenantResourceQuotaUsagesColumns[3]},
+			},
+			{
+				Name:    "tenantresourcequotausage_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[6]},
+			},
+			{
+				Name:    "tenantresourcequotausage_resource_key",
+				Unique:  false,
+				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[3]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1057,6 +1104,7 @@ var (
 		TenantsTable,
 		TenantParameterOverridesTable,
 		TenantPermissionGroupsTable,
+		TenantResourceQuotaUsagesTable,
 		UsersTable,
 		MenuPermissionGroupMenusTable,
 		MenuPermissionGroupVersionMenusTable,
@@ -1139,6 +1187,11 @@ func init() {
 	TenantPermissionGroupsTable.ForeignKeys[1].RefTable = MenuPermissionGroupsTable
 	TenantPermissionGroupsTable.ForeignKeys[2].RefTable = MenuPermissionGroupVersionsTable
 	TenantPermissionGroupsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	TenantResourceQuotaUsagesTable.ForeignKeys[0].RefTable = TenantsTable
+	TenantResourceQuotaUsagesTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

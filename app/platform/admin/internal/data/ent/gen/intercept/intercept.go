@@ -24,6 +24,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -517,6 +518,33 @@ func (f TraverseTenantPermissionGroup) Traverse(ctx context.Context, q gen.Query
 	return fmt.Errorf("unexpected query type %T. expect *gen.TenantPermissionGroupQuery", q)
 }
 
+// The TenantResourceQuotaUsageFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TenantResourceQuotaUsageFunc func(context.Context, *gen.TenantResourceQuotaUsageQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f TenantResourceQuotaUsageFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.TenantResourceQuotaUsageQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantResourceQuotaUsageQuery", q)
+}
+
+// The TraverseTenantResourceQuotaUsage type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTenantResourceQuotaUsage func(context.Context, *gen.TenantResourceQuotaUsageQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTenantResourceQuotaUsage) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTenantResourceQuotaUsage) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantResourceQuotaUsageQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.TenantResourceQuotaUsageQuery", q)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary function as a Querier.
 type UserFunc func(context.Context, *gen.UserQuery) (gen.Value, error)
 
@@ -579,6 +607,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.TenantParameterOverrideQuery, predicate.TenantParameterOverride, tenantparameteroverride.OrderOption]{typ: gen.TypeTenantParameterOverride, tq: q}, nil
 	case *gen.TenantPermissionGroupQuery:
 		return &query[*gen.TenantPermissionGroupQuery, predicate.TenantPermissionGroup, tenantpermissiongroup.OrderOption]{typ: gen.TypeTenantPermissionGroup, tq: q}, nil
+	case *gen.TenantResourceQuotaUsageQuery:
+		return &query[*gen.TenantResourceQuotaUsageQuery, predicate.TenantResourceQuotaUsage, tenantresourcequotausage.OrderOption]{typ: gen.TypeTenantResourceQuotaUsage, tq: q}, nil
 	case *gen.UserQuery:
 		return &query[*gen.UserQuery, predicate.User, user.OrderOption]{typ: gen.TypeUser, tq: q}, nil
 	default:

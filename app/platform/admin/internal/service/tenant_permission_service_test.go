@@ -124,7 +124,44 @@ func (u tenantPermissionTestUser) GetTenant() string                      { retu
 
 func newTenantPermissionService(repo *tenantPermissionRepoStub) *TenantPermissionServiceService {
 	uc := biz.NewMenuPermissionGroupUsecase(repo, log.NewStdLogger(io.Discard))
-	return NewTenantPermissionServiceService(uc, log.NewStdLogger(io.Discard))
+	quota := biz.NewResourceQuotaUsecase(&serviceResourceQuotaRepoStub{}, repo, log.NewStdLogger(io.Discard))
+	return NewTenantPermissionServiceService(uc, quota, log.NewStdLogger(io.Discard))
+}
+
+type serviceResourceQuotaRepoStub struct {
+	usage *pbCore.TenantResourceQuotaUsage
+}
+
+func (*serviceResourceQuotaRepoStub) ListUsage(context.Context, uint32) ([]*pbCore.TenantResourceQuotaUsage, error) {
+	return nil, nil
+}
+
+func (r *serviceResourceQuotaRepoStub) GetUsage(_ context.Context, tenantID uint32, resourceKey string) (*pbCore.TenantResourceQuotaUsage, error) {
+	if r.usage != nil {
+		return r.usage, nil
+	}
+	return &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey}, nil
+}
+
+func (r *serviceResourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+	usage := &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey, Used: amount}
+	if r.usage != nil {
+		usage.Used += r.usage.GetUsed()
+	}
+	r.usage = usage
+	return usage, nil
+}
+
+func (r *serviceResourceQuotaRepoStub) Release(_ context.Context, tenantID uint32, resourceKey string, amount int64, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+	used := int64(0)
+	if r.usage != nil {
+		used = r.usage.GetUsed() - amount
+	}
+	if used < 0 {
+		used = 0
+	}
+	r.usage = &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey, Used: used}
+	return r.usage, nil
 }
 
 func TestTenantPermissionServiceGetGroupsReturnsIDsAndBindings(t *testing.T) {
@@ -286,5 +323,51 @@ func TestTenantPermissionServiceCurrentTenantCapabilities(t *testing.T) {
 
 	if _, err := service.GetCurrentTenantCapabilities(context.Background(), &pbCore.GetCurrentTenantCapabilitiesRequest{}); !errors.IsBadRequest(err) {
 		t.Fatalf("missing tenant context error = %v, want bad request", err)
+	}
+}
+
+func TestTenantPermissionServiceCurrentTenantResourceQuotas(t *testing.T) {
+	t.Parallel()
+
+	repo := &tenantPermissionRepoStub{
+		caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+			TenantId:       10,
+			ResourceQuotas: map[string]int64{"projects": 5},
+		},
+	}
+	service := newTenantPermissionService(repo)
+	ctx := authn.ContextWithAuthUser(context.Background(), tenantPermissionTestUser{subject: "7", tenant: "10"})
+
+	check, err := service.CheckCurrentTenantResourceQuota(ctx, &pbCore.CheckCurrentTenantResourceQuotaRequest{
+		ResourceKey: "projects",
+		Amount:      3,
+	})
+	if err != nil {
+		t.Fatalf("CheckCurrentTenantResourceQuota() error = %v", err)
+	}
+	if !check.GetAllowed() || check.GetUsage().GetLimit() != 5 {
+		t.Fatalf("quota check = %v", check)
+	}
+
+	consumed, err := service.ConsumeCurrentTenantResourceQuota(ctx, &pbCore.ConsumeCurrentTenantResourceQuotaRequest{
+		ResourceKey: "projects",
+		Amount:      3,
+	})
+	if err != nil {
+		t.Fatalf("ConsumeCurrentTenantResourceQuota() error = %v", err)
+	}
+	if consumed.GetUsage().GetUsed() != 3 || consumed.GetUsage().GetRemaining() != 2 {
+		t.Fatalf("quota consume = %v", consumed)
+	}
+
+	released, err := service.ReleaseCurrentTenantResourceQuota(ctx, &pbCore.ReleaseCurrentTenantResourceQuotaRequest{
+		ResourceKey: "projects",
+		Amount:      2,
+	})
+	if err != nil {
+		t.Fatalf("ReleaseCurrentTenantResourceQuota() error = %v", err)
+	}
+	if released.GetUsage().GetUsed() != 1 || released.GetUsage().GetRemaining() != 4 {
+		t.Fatalf("quota release = %v", released)
 	}
 }

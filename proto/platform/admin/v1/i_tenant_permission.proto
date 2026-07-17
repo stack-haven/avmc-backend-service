@@ -113,6 +113,82 @@ service TenantPermissionService {
     };
   }
 
+  rpc ListCurrentTenantResourceQuotas(core.service.v1.ListCurrentTenantResourceQuotasRequest) returns (core.service.v1.ListCurrentTenantResourceQuotasResponse) {
+    option (google.api.http) = {get: "/admin/v1/current-tenant/resource-quotas"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询当前租户资源额度"
+      description: "返回当前租户套餐额度定义和已使用量"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  rpc CheckCurrentTenantResourceQuota(core.service.v1.CheckCurrentTenantResourceQuotaRequest) returns (core.service.v1.CheckCurrentTenantResourceQuotaResponse) {
+    option (google.api.http) = {get: "/admin/v1/current-tenant/resource-quotas/{resource_key}:check"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "检查当前租户资源额度"
+      description: "检查本次资源占用是否会超过当前租户套餐额度"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  rpc ConsumeCurrentTenantResourceQuota(core.service.v1.ConsumeCurrentTenantResourceQuotaRequest) returns (core.service.v1.ConsumeCurrentTenantResourceQuotaResponse) {
+    option (google.api.http) = {post: "/admin/v1/current-tenant/resource-quotas/{resource_key}:consume" body: "*"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "占用当前租户资源额度"
+      description: "原子检查并占用当前租户资源额度，超额时拒绝"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  rpc ReleaseCurrentTenantResourceQuota(core.service.v1.ReleaseCurrentTenantResourceQuotaRequest) returns (core.service.v1.ReleaseCurrentTenantResourceQuotaResponse) {
+    option (google.api.http) = {post: "/admin/v1/current-tenant/resource-quotas/{resource_key}:release" body: "*"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "释放当前租户资源额度"
+      description: "释放当前租户已占用资源额度，释放后使用量不会小于0"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
   rpc UpdateTenantPermissionGroupVersion(core.service.v1.UpdateTenantPermissionGroupVersionRequest) returns (core.service.v1.UpdateTenantPermissionGroupVersionResponse) {
     option (google.api.http) = {
       put: "/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version"

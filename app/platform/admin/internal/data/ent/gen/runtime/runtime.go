@@ -19,6 +19,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/schema"
 	"context"
@@ -1388,6 +1389,57 @@ func init() {
 	tenantpermissiongroupDescID := tenantpermissiongroupMixinFields0[0].Descriptor()
 	// tenantpermissiongroup.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	tenantpermissiongroup.IDValidator = tenantpermissiongroupDescID.Validators[0].(func(uint32) error)
+	tenantresourcequotausageMixin := schema.TenantResourceQuotaUsage{}.Mixin()
+	tenantresourcequotausageMixinFields0 := tenantresourcequotausageMixin[0].Fields()
+	_ = tenantresourcequotausageMixinFields0
+	tenantresourcequotausageMixinFields1 := tenantresourcequotausageMixin[1].Fields()
+	_ = tenantresourcequotausageMixinFields1
+	tenantresourcequotausageMixinFields2 := tenantresourcequotausageMixin[2].Fields()
+	_ = tenantresourcequotausageMixinFields2
+	tenantresourcequotausageFields := schema.TenantResourceQuotaUsage{}.Fields()
+	_ = tenantresourcequotausageFields
+	// tenantresourcequotausageDescCreatedAt is the schema descriptor for created_at field.
+	tenantresourcequotausageDescCreatedAt := tenantresourcequotausageMixinFields1[0].Descriptor()
+	// tenantresourcequotausage.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tenantresourcequotausage.DefaultCreatedAt = tenantresourcequotausageDescCreatedAt.Default.(func() time.Time)
+	// tenantresourcequotausageDescUpdatedAt is the schema descriptor for updated_at field.
+	tenantresourcequotausageDescUpdatedAt := tenantresourcequotausageMixinFields2[0].Descriptor()
+	// tenantresourcequotausage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	tenantresourcequotausage.DefaultUpdatedAt = tenantresourcequotausageDescUpdatedAt.Default.(func() time.Time)
+	// tenantresourcequotausage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	tenantresourcequotausage.UpdateDefaultUpdatedAt = tenantresourcequotausageDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tenantresourcequotausageDescTenantID is the schema descriptor for tenant_id field.
+	tenantresourcequotausageDescTenantID := tenantresourcequotausageFields[0].Descriptor()
+	// tenantresourcequotausage.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	tenantresourcequotausage.TenantIDValidator = tenantresourcequotausageDescTenantID.Validators[0].(func(uint32) error)
+	// tenantresourcequotausageDescResourceKey is the schema descriptor for resource_key field.
+	tenantresourcequotausageDescResourceKey := tenantresourcequotausageFields[1].Descriptor()
+	// tenantresourcequotausage.ResourceKeyValidator is a validator for the "resource_key" field. It is called by the builders before save.
+	tenantresourcequotausage.ResourceKeyValidator = func() func(string) error {
+		validators := tenantresourcequotausageDescResourceKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(resource_key string) error {
+			for _, fn := range fns {
+				if err := fn(resource_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tenantresourcequotausageDescUsed is the schema descriptor for used field.
+	tenantresourcequotausageDescUsed := tenantresourcequotausageFields[2].Descriptor()
+	// tenantresourcequotausage.DefaultUsed holds the default value on creation for the used field.
+	tenantresourcequotausage.DefaultUsed = tenantresourcequotausageDescUsed.Default.(int64)
+	// tenantresourcequotausage.UsedValidator is a validator for the "used" field. It is called by the builders before save.
+	tenantresourcequotausage.UsedValidator = tenantresourcequotausageDescUsed.Validators[0].(func(int64) error)
+	// tenantresourcequotausageDescID is the schema descriptor for id field.
+	tenantresourcequotausageDescID := tenantresourcequotausageMixinFields0[0].Descriptor()
+	// tenantresourcequotausage.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	tenantresourcequotausage.IDValidator = tenantresourcequotausageDescID.Validators[0].(func(uint32) error)
 	userMixin := schema.User{}.Mixin()
 	user.Policy = privacy.NewPolicies(userMixin[0], schema.User{})
 	user.Hooks[0] = func(next ent.Mutator) ent.Mutator {

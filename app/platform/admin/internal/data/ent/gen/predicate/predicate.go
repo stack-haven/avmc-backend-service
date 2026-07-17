@@ -54,5 +54,8 @@ type TenantParameterOverride func(*sql.Selector)
 // TenantPermissionGroup is the predicate function for tenantpermissiongroup builders.
 type TenantPermissionGroup func(*sql.Selector)
 
+// TenantResourceQuotaUsage is the predicate function for tenantresourcequotausage builders.
+type TenantResourceQuotaUsage func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -13,12 +13,13 @@ import (
 // TenantPermissionServiceService manages tenant permission group bindings.
 type TenantPermissionServiceService struct {
 	pb.UnimplementedTenantPermissionServiceServer
-	uc  *biz.MenuPermissionGroupUsecase
-	log *log.Helper
+	uc    *biz.MenuPermissionGroupUsecase
+	quota *biz.ResourceQuotaUsecase
+	log   *log.Helper
 }
 
-func NewTenantPermissionServiceService(uc *biz.MenuPermissionGroupUsecase, logger log.Logger) *TenantPermissionServiceService {
-	return &TenantPermissionServiceService{uc: uc, log: log.NewHelper(logger)}
+func NewTenantPermissionServiceService(uc *biz.MenuPermissionGroupUsecase, quota *biz.ResourceQuotaUsecase, logger log.Logger) *TenantPermissionServiceService {
+	return &TenantPermissionServiceService{uc: uc, quota: quota, log: log.NewHelper(logger)}
 }
 
 func (s *TenantPermissionServiceService) GetTenantPermissionGroups(ctx context.Context, req *pbCore.GetTenantPermissionGroupsRequest) (*pbCore.GetTenantPermissionGroupsResponse, error) {
@@ -85,6 +86,34 @@ func (s *TenantPermissionServiceService) GetCurrentTenantCapabilities(ctx contex
 		return nil, pb.ErrorBadRequest("缺少当前租户上下文")
 	}
 	return s.uc.GetTenantCapabilities(ctx, tenantID)
+}
+
+func (s *TenantPermissionServiceService) ListCurrentTenantResourceQuotas(ctx context.Context, req *pbCore.ListCurrentTenantResourceQuotasRequest) (*pbCore.ListCurrentTenantResourceQuotasResponse, error) {
+	items, err := s.quota.ListCurrent(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ListCurrentTenantResourceQuotasResponse{Items: items}, nil
+}
+
+func (s *TenantPermissionServiceService) CheckCurrentTenantResourceQuota(ctx context.Context, req *pbCore.CheckCurrentTenantResourceQuotaRequest) (*pbCore.CheckCurrentTenantResourceQuotaResponse, error) {
+	return s.quota.CheckCurrent(ctx, req.GetResourceKey(), req.GetAmount())
+}
+
+func (s *TenantPermissionServiceService) ConsumeCurrentTenantResourceQuota(ctx context.Context, req *pbCore.ConsumeCurrentTenantResourceQuotaRequest) (*pbCore.ConsumeCurrentTenantResourceQuotaResponse, error) {
+	usage, err := s.quota.ConsumeCurrent(ctx, req.GetResourceKey(), req.GetAmount())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ConsumeCurrentTenantResourceQuotaResponse{Usage: usage}, nil
+}
+
+func (s *TenantPermissionServiceService) ReleaseCurrentTenantResourceQuota(ctx context.Context, req *pbCore.ReleaseCurrentTenantResourceQuotaRequest) (*pbCore.ReleaseCurrentTenantResourceQuotaResponse, error) {
+	usage, err := s.quota.ReleaseCurrent(ctx, req.GetResourceKey(), req.GetAmount())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ReleaseCurrentTenantResourceQuotaResponse{Usage: usage}, nil
 }
 
 func (s *TenantPermissionServiceService) UpdateTenantPermissionGroupVersion(ctx context.Context, req *pbCore.UpdateTenantPermissionGroupVersionRequest) (*pbCore.UpdateTenantPermissionGroupVersionResponse, error) {

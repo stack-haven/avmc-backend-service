@@ -4020,3 +4020,1104 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetCurrentTenantCapabilitiesResponseValidationError{}
+
+// Validate checks the field values on TenantResourceQuotaUsage with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *TenantResourceQuotaUsage) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on TenantResourceQuotaUsage with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// TenantResourceQuotaUsageMultiError, or nil if none found.
+func (m *TenantResourceQuotaUsage) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *TenantResourceQuotaUsage) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TenantId
+
+	// no validation rules for ResourceKey
+
+	// no validation rules for Used
+
+	// no validation rules for Limit
+
+	// no validation rules for Remaining
+
+	// no validation rules for Unlimited
+
+	if m.UpdatedAt != nil {
+		// no validation rules for UpdatedAt
+	}
+
+	if len(errors) > 0 {
+		return TenantResourceQuotaUsageMultiError(errors)
+	}
+
+	return nil
+}
+
+// TenantResourceQuotaUsageMultiError is an error wrapping multiple validation
+// errors returned by TenantResourceQuotaUsage.ValidateAll() if the designated
+// constraints aren't met.
+type TenantResourceQuotaUsageMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m TenantResourceQuotaUsageMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m TenantResourceQuotaUsageMultiError) AllErrors() []error { return m }
+
+// TenantResourceQuotaUsageValidationError is the validation error returned by
+// TenantResourceQuotaUsage.Validate if the designated constraints aren't met.
+type TenantResourceQuotaUsageValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TenantResourceQuotaUsageValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TenantResourceQuotaUsageValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TenantResourceQuotaUsageValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TenantResourceQuotaUsageValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TenantResourceQuotaUsageValidationError) ErrorName() string {
+	return "TenantResourceQuotaUsageValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e TenantResourceQuotaUsageValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTenantResourceQuotaUsage.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TenantResourceQuotaUsageValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TenantResourceQuotaUsageValidationError{}
+
+// Validate checks the field values on ListCurrentTenantResourceQuotasRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ListCurrentTenantResourceQuotasRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ListCurrentTenantResourceQuotasRequest with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// ListCurrentTenantResourceQuotasRequestMultiError, or nil if none found.
+func (m *ListCurrentTenantResourceQuotasRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListCurrentTenantResourceQuotasRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ListCurrentTenantResourceQuotasRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListCurrentTenantResourceQuotasRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// ListCurrentTenantResourceQuotasRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListCurrentTenantResourceQuotasRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListCurrentTenantResourceQuotasRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListCurrentTenantResourceQuotasRequestMultiError) AllErrors() []error { return m }
+
+// ListCurrentTenantResourceQuotasRequestValidationError is the validation
+// error returned by ListCurrentTenantResourceQuotasRequest.Validate if the
+// designated constraints aren't met.
+type ListCurrentTenantResourceQuotasRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListCurrentTenantResourceQuotasRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListCurrentTenantResourceQuotasRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListCurrentTenantResourceQuotasRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListCurrentTenantResourceQuotasRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListCurrentTenantResourceQuotasRequestValidationError) ErrorName() string {
+	return "ListCurrentTenantResourceQuotasRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListCurrentTenantResourceQuotasRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListCurrentTenantResourceQuotasRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListCurrentTenantResourceQuotasRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListCurrentTenantResourceQuotasRequestValidationError{}
+
+// Validate checks the field values on ListCurrentTenantResourceQuotasResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ListCurrentTenantResourceQuotasResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ListCurrentTenantResourceQuotasResponse with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// ListCurrentTenantResourceQuotasResponseMultiError, or nil if none found.
+func (m *ListCurrentTenantResourceQuotasResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListCurrentTenantResourceQuotasResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListCurrentTenantResourceQuotasResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListCurrentTenantResourceQuotasResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListCurrentTenantResourceQuotasResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListCurrentTenantResourceQuotasResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListCurrentTenantResourceQuotasResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// ListCurrentTenantResourceQuotasResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListCurrentTenantResourceQuotasResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListCurrentTenantResourceQuotasResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListCurrentTenantResourceQuotasResponseMultiError) AllErrors() []error { return m }
+
+// ListCurrentTenantResourceQuotasResponseValidationError is the validation
+// error returned by ListCurrentTenantResourceQuotasResponse.Validate if the
+// designated constraints aren't met.
+type ListCurrentTenantResourceQuotasResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListCurrentTenantResourceQuotasResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListCurrentTenantResourceQuotasResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListCurrentTenantResourceQuotasResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListCurrentTenantResourceQuotasResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListCurrentTenantResourceQuotasResponseValidationError) ErrorName() string {
+	return "ListCurrentTenantResourceQuotasResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListCurrentTenantResourceQuotasResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListCurrentTenantResourceQuotasResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListCurrentTenantResourceQuotasResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListCurrentTenantResourceQuotasResponseValidationError{}
+
+// Validate checks the field values on CheckCurrentTenantResourceQuotaRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *CheckCurrentTenantResourceQuotaRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// CheckCurrentTenantResourceQuotaRequest with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// CheckCurrentTenantResourceQuotaRequestMultiError, or nil if none found.
+func (m *CheckCurrentTenantResourceQuotaRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CheckCurrentTenantResourceQuotaRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ResourceKey
+
+	// no validation rules for Amount
+
+	if len(errors) > 0 {
+		return CheckCurrentTenantResourceQuotaRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CheckCurrentTenantResourceQuotaRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// CheckCurrentTenantResourceQuotaRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CheckCurrentTenantResourceQuotaRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CheckCurrentTenantResourceQuotaRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CheckCurrentTenantResourceQuotaRequestMultiError) AllErrors() []error { return m }
+
+// CheckCurrentTenantResourceQuotaRequestValidationError is the validation
+// error returned by CheckCurrentTenantResourceQuotaRequest.Validate if the
+// designated constraints aren't met.
+type CheckCurrentTenantResourceQuotaRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CheckCurrentTenantResourceQuotaRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CheckCurrentTenantResourceQuotaRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CheckCurrentTenantResourceQuotaRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CheckCurrentTenantResourceQuotaRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CheckCurrentTenantResourceQuotaRequestValidationError) ErrorName() string {
+	return "CheckCurrentTenantResourceQuotaRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CheckCurrentTenantResourceQuotaRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCheckCurrentTenantResourceQuotaRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CheckCurrentTenantResourceQuotaRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CheckCurrentTenantResourceQuotaRequestValidationError{}
+
+// Validate checks the field values on CheckCurrentTenantResourceQuotaResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *CheckCurrentTenantResourceQuotaResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// CheckCurrentTenantResourceQuotaResponse with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// CheckCurrentTenantResourceQuotaResponseMultiError, or nil if none found.
+func (m *CheckCurrentTenantResourceQuotaResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CheckCurrentTenantResourceQuotaResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Allowed
+
+	if all {
+		switch v := interface{}(m.GetUsage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CheckCurrentTenantResourceQuotaResponseValidationError{
+					field:  "Usage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CheckCurrentTenantResourceQuotaResponseValidationError{
+					field:  "Usage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUsage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CheckCurrentTenantResourceQuotaResponseValidationError{
+				field:  "Usage",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CheckCurrentTenantResourceQuotaResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// CheckCurrentTenantResourceQuotaResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// CheckCurrentTenantResourceQuotaResponse.ValidateAll() if the designated
+// constraints aren't met.
+type CheckCurrentTenantResourceQuotaResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CheckCurrentTenantResourceQuotaResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CheckCurrentTenantResourceQuotaResponseMultiError) AllErrors() []error { return m }
+
+// CheckCurrentTenantResourceQuotaResponseValidationError is the validation
+// error returned by CheckCurrentTenantResourceQuotaResponse.Validate if the
+// designated constraints aren't met.
+type CheckCurrentTenantResourceQuotaResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CheckCurrentTenantResourceQuotaResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CheckCurrentTenantResourceQuotaResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CheckCurrentTenantResourceQuotaResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CheckCurrentTenantResourceQuotaResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CheckCurrentTenantResourceQuotaResponseValidationError) ErrorName() string {
+	return "CheckCurrentTenantResourceQuotaResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CheckCurrentTenantResourceQuotaResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCheckCurrentTenantResourceQuotaResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CheckCurrentTenantResourceQuotaResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CheckCurrentTenantResourceQuotaResponseValidationError{}
+
+// Validate checks the field values on ConsumeCurrentTenantResourceQuotaRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ConsumeCurrentTenantResourceQuotaRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ConsumeCurrentTenantResourceQuotaRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// ConsumeCurrentTenantResourceQuotaRequestMultiError, or nil if none found.
+func (m *ConsumeCurrentTenantResourceQuotaRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ConsumeCurrentTenantResourceQuotaRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ResourceKey
+
+	// no validation rules for Amount
+
+	if len(errors) > 0 {
+		return ConsumeCurrentTenantResourceQuotaRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ConsumeCurrentTenantResourceQuotaRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// ConsumeCurrentTenantResourceQuotaRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ConsumeCurrentTenantResourceQuotaRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ConsumeCurrentTenantResourceQuotaRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ConsumeCurrentTenantResourceQuotaRequestMultiError) AllErrors() []error { return m }
+
+// ConsumeCurrentTenantResourceQuotaRequestValidationError is the validation
+// error returned by ConsumeCurrentTenantResourceQuotaRequest.Validate if the
+// designated constraints aren't met.
+type ConsumeCurrentTenantResourceQuotaRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConsumeCurrentTenantResourceQuotaRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConsumeCurrentTenantResourceQuotaRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConsumeCurrentTenantResourceQuotaRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConsumeCurrentTenantResourceQuotaRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConsumeCurrentTenantResourceQuotaRequestValidationError) ErrorName() string {
+	return "ConsumeCurrentTenantResourceQuotaRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConsumeCurrentTenantResourceQuotaRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConsumeCurrentTenantResourceQuotaRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConsumeCurrentTenantResourceQuotaRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConsumeCurrentTenantResourceQuotaRequestValidationError{}
+
+// Validate checks the field values on
+// ConsumeCurrentTenantResourceQuotaResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ConsumeCurrentTenantResourceQuotaResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ConsumeCurrentTenantResourceQuotaResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// ConsumeCurrentTenantResourceQuotaResponseMultiError, or nil if none found.
+func (m *ConsumeCurrentTenantResourceQuotaResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ConsumeCurrentTenantResourceQuotaResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetUsage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ConsumeCurrentTenantResourceQuotaResponseValidationError{
+					field:  "Usage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ConsumeCurrentTenantResourceQuotaResponseValidationError{
+					field:  "Usage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUsage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ConsumeCurrentTenantResourceQuotaResponseValidationError{
+				field:  "Usage",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ConsumeCurrentTenantResourceQuotaResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ConsumeCurrentTenantResourceQuotaResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// ConsumeCurrentTenantResourceQuotaResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ConsumeCurrentTenantResourceQuotaResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ConsumeCurrentTenantResourceQuotaResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ConsumeCurrentTenantResourceQuotaResponseMultiError) AllErrors() []error { return m }
+
+// ConsumeCurrentTenantResourceQuotaResponseValidationError is the validation
+// error returned by ConsumeCurrentTenantResourceQuotaResponse.Validate if the
+// designated constraints aren't met.
+type ConsumeCurrentTenantResourceQuotaResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConsumeCurrentTenantResourceQuotaResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConsumeCurrentTenantResourceQuotaResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConsumeCurrentTenantResourceQuotaResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConsumeCurrentTenantResourceQuotaResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConsumeCurrentTenantResourceQuotaResponseValidationError) ErrorName() string {
+	return "ConsumeCurrentTenantResourceQuotaResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConsumeCurrentTenantResourceQuotaResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConsumeCurrentTenantResourceQuotaResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConsumeCurrentTenantResourceQuotaResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConsumeCurrentTenantResourceQuotaResponseValidationError{}
+
+// Validate checks the field values on ReleaseCurrentTenantResourceQuotaRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *ReleaseCurrentTenantResourceQuotaRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ReleaseCurrentTenantResourceQuotaRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// ReleaseCurrentTenantResourceQuotaRequestMultiError, or nil if none found.
+func (m *ReleaseCurrentTenantResourceQuotaRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ReleaseCurrentTenantResourceQuotaRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ResourceKey
+
+	// no validation rules for Amount
+
+	if len(errors) > 0 {
+		return ReleaseCurrentTenantResourceQuotaRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ReleaseCurrentTenantResourceQuotaRequestMultiError is an error wrapping
+// multiple validation errors returned by
+// ReleaseCurrentTenantResourceQuotaRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ReleaseCurrentTenantResourceQuotaRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ReleaseCurrentTenantResourceQuotaRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ReleaseCurrentTenantResourceQuotaRequestMultiError) AllErrors() []error { return m }
+
+// ReleaseCurrentTenantResourceQuotaRequestValidationError is the validation
+// error returned by ReleaseCurrentTenantResourceQuotaRequest.Validate if the
+// designated constraints aren't met.
+type ReleaseCurrentTenantResourceQuotaRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ReleaseCurrentTenantResourceQuotaRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ReleaseCurrentTenantResourceQuotaRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ReleaseCurrentTenantResourceQuotaRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ReleaseCurrentTenantResourceQuotaRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ReleaseCurrentTenantResourceQuotaRequestValidationError) ErrorName() string {
+	return "ReleaseCurrentTenantResourceQuotaRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ReleaseCurrentTenantResourceQuotaRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sReleaseCurrentTenantResourceQuotaRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ReleaseCurrentTenantResourceQuotaRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ReleaseCurrentTenantResourceQuotaRequestValidationError{}
+
+// Validate checks the field values on
+// ReleaseCurrentTenantResourceQuotaResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ReleaseCurrentTenantResourceQuotaResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// ReleaseCurrentTenantResourceQuotaResponse with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// ReleaseCurrentTenantResourceQuotaResponseMultiError, or nil if none found.
+func (m *ReleaseCurrentTenantResourceQuotaResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ReleaseCurrentTenantResourceQuotaResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetUsage()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ReleaseCurrentTenantResourceQuotaResponseValidationError{
+					field:  "Usage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ReleaseCurrentTenantResourceQuotaResponseValidationError{
+					field:  "Usage",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUsage()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ReleaseCurrentTenantResourceQuotaResponseValidationError{
+				field:  "Usage",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ReleaseCurrentTenantResourceQuotaResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ReleaseCurrentTenantResourceQuotaResponseMultiError is an error wrapping
+// multiple validation errors returned by
+// ReleaseCurrentTenantResourceQuotaResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ReleaseCurrentTenantResourceQuotaResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ReleaseCurrentTenantResourceQuotaResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ReleaseCurrentTenantResourceQuotaResponseMultiError) AllErrors() []error { return m }
+
+// ReleaseCurrentTenantResourceQuotaResponseValidationError is the validation
+// error returned by ReleaseCurrentTenantResourceQuotaResponse.Validate if the
+// designated constraints aren't met.
+type ReleaseCurrentTenantResourceQuotaResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ReleaseCurrentTenantResourceQuotaResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ReleaseCurrentTenantResourceQuotaResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ReleaseCurrentTenantResourceQuotaResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ReleaseCurrentTenantResourceQuotaResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ReleaseCurrentTenantResourceQuotaResponseValidationError) ErrorName() string {
+	return "ReleaseCurrentTenantResourceQuotaResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ReleaseCurrentTenantResourceQuotaResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sReleaseCurrentTenantResourceQuotaResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ReleaseCurrentTenantResourceQuotaResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ReleaseCurrentTenantResourceQuotaResponseValidationError{}
