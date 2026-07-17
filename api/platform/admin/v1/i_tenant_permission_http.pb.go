@@ -20,6 +20,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationTenantPermissionServiceGetCurrentTenantCapabilities = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantCapabilities"
 const OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
 const OperationTenantPermissionServiceGetTenantEffectiveMenus = "/platform.admin.v1.TenantPermissionService/GetTenantEffectiveMenus"
 const OperationTenantPermissionServiceGetTenantPermissionGroups = "/platform.admin.v1.TenantPermissionService/GetTenantPermissionGroups"
@@ -27,6 +28,8 @@ const OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion = "/pla
 const OperationTenantPermissionServiceUpdateTenantPermissionGroups = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroups"
 
 type TenantPermissionServiceHTTPServer interface {
+	// GetCurrentTenantCapabilities 获取当前登录租户运行时能力配置
+	GetCurrentTenantCapabilities(context.Context, *v1.GetCurrentTenantCapabilitiesRequest) (*v1.GetCurrentTenantCapabilitiesResponse, error)
 	// GetCurrentTenantEffectiveMenus 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(context.Context, *v1.GetCurrentTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error)
 	// GetTenantEffectiveMenus 获取租户最终有效菜单树
@@ -44,6 +47,7 @@ func RegisterTenantPermissionServiceHTTPServer(s *http.Server, srv TenantPermiss
 	r.PUT("/admin/v1/tenants/{tenant_id}/permission-groups", _TenantPermissionService_UpdateTenantPermissionGroups0_HTTP_Handler(srv))
 	r.GET("/admin/v1/tenants/{tenant_id}/effective-menus", _TenantPermissionService_GetTenantEffectiveMenus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/current-tenant/effective-menus", _TenantPermissionService_GetCurrentTenantEffectiveMenus0_HTTP_Handler(srv))
+	r.GET("/admin/v1/current-tenant/capabilities", _TenantPermissionService_GetCurrentTenantCapabilities0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version", _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(srv))
 }
 
@@ -135,6 +139,25 @@ func _TenantPermissionService_GetCurrentTenantEffectiveMenus0_HTTP_Handler(srv T
 	}
 }
 
+func _TenantPermissionService_GetCurrentTenantCapabilities0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.GetCurrentTenantCapabilitiesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantPermissionServiceGetCurrentTenantCapabilities)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetCurrentTenantCapabilities(ctx, req.(*v1.GetCurrentTenantCapabilitiesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.GetCurrentTenantCapabilitiesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(srv TenantPermissionServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.UpdateTenantPermissionGroupVersionRequest
@@ -161,6 +184,8 @@ func _TenantPermissionService_UpdateTenantPermissionGroupVersion0_HTTP_Handler(s
 }
 
 type TenantPermissionServiceHTTPClient interface {
+	// GetCurrentTenantCapabilities 获取当前登录租户运行时能力配置
+	GetCurrentTenantCapabilities(ctx context.Context, req *v1.GetCurrentTenantCapabilitiesRequest, opts ...http.CallOption) (rsp *v1.GetCurrentTenantCapabilitiesResponse, err error)
 	// GetCurrentTenantEffectiveMenus 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(ctx context.Context, req *v1.GetCurrentTenantEffectiveMenusRequest, opts ...http.CallOption) (rsp *v1.GetTenantEffectiveMenusResponse, err error)
 	// GetTenantEffectiveMenus 获取租户最终有效菜单树
@@ -178,6 +203,20 @@ type TenantPermissionServiceHTTPClientImpl struct {
 
 func NewTenantPermissionServiceHTTPClient(client *http.Client) TenantPermissionServiceHTTPClient {
 	return &TenantPermissionServiceHTTPClientImpl{client}
+}
+
+// GetCurrentTenantCapabilities 获取当前登录租户运行时能力配置
+func (c *TenantPermissionServiceHTTPClientImpl) GetCurrentTenantCapabilities(ctx context.Context, in *v1.GetCurrentTenantCapabilitiesRequest, opts ...http.CallOption) (*v1.GetCurrentTenantCapabilitiesResponse, error) {
+	var out v1.GetCurrentTenantCapabilitiesResponse
+	pattern := "/admin/v1/current-tenant/capabilities"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantPermissionServiceGetCurrentTenantCapabilities))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // GetCurrentTenantEffectiveMenus 获取当前登录租户最终有效菜单树

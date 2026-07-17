@@ -93,6 +93,26 @@ service TenantPermissionService {
     };
   }
 
+  // 获取当前登录租户运行时能力配置
+  rpc GetCurrentTenantCapabilities(core.service.v1.GetCurrentTenantCapabilitiesRequest) returns (core.service.v1.GetCurrentTenantCapabilitiesResponse) {
+    option (google.api.http) = {get: "/admin/v1/current-tenant/capabilities"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取当前登录租户运行时能力配置"
+      description: "聚合当前租户绑定套餐及版本中的接口能力、功能开关和资源额度"
+      tags: ["租户权限服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
   rpc UpdateTenantPermissionGroupVersion(core.service.v1.UpdateTenantPermissionGroupVersionRequest) returns (core.service.v1.UpdateTenantPermissionGroupVersionResponse) {
     option (google.api.http) = {
       put: "/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/version"

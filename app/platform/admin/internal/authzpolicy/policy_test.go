@@ -118,6 +118,9 @@ func TestCurrentTenantMenusRemainTenantOperation(t *testing.T) {
 	if IsPlatformControlOperation(v1.OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus) {
 		t.Fatal("current tenant effective menus must remain available to tenant identities")
 	}
+	if IsPlatformControlOperation(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities) {
+		t.Fatal("current tenant capabilities must remain available to tenant identities")
+	}
 }
 
 func TestMatchProtectedOperation(t *testing.T) {
@@ -178,6 +181,8 @@ func TestAuthenticatedSelfServiceOperations(t *testing.T) {
 		{name: "logout http", object: authz.Object(v1.OperationAuthServiceLogout), action: "POST", want: true},
 		{name: "logout grpc", object: authz.Object(v1.OperationAuthServiceLogout), action: "Logout", want: true},
 		{name: "my sessions", object: authz.Object(v1.OperationSessionServiceListMySessions), action: "GET", want: true},
+		{name: "current tenant capabilities", object: authz.Object(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities), action: "GET", want: true},
+		{name: "current tenant capabilities grpc", object: authz.Object(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities), action: "GetCurrentTenantCapabilities", want: true},
 		{name: "wrong action", object: authz.Object(v1.OperationAuthServiceProfile), action: "POST", want: false},
 		{name: "ordinary protected operation", object: authz.Object(v1.OperationUserServiceListUsers), action: "GET", want: false},
 	}

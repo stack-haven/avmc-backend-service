@@ -3770,3 +3770,253 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetCurrentTenantEffectiveMenusRequestValidationError{}
+
+// Validate checks the field values on GetCurrentTenantCapabilitiesRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *GetCurrentTenantCapabilitiesRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetCurrentTenantCapabilitiesRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// GetCurrentTenantCapabilitiesRequestMultiError, or nil if none found.
+func (m *GetCurrentTenantCapabilitiesRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetCurrentTenantCapabilitiesRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetCurrentTenantCapabilitiesRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetCurrentTenantCapabilitiesRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// GetCurrentTenantCapabilitiesRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetCurrentTenantCapabilitiesRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetCurrentTenantCapabilitiesRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetCurrentTenantCapabilitiesRequestMultiError) AllErrors() []error { return m }
+
+// GetCurrentTenantCapabilitiesRequestValidationError is the validation error
+// returned by GetCurrentTenantCapabilitiesRequest.Validate if the designated
+// constraints aren't met.
+type GetCurrentTenantCapabilitiesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetCurrentTenantCapabilitiesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetCurrentTenantCapabilitiesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetCurrentTenantCapabilitiesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetCurrentTenantCapabilitiesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetCurrentTenantCapabilitiesRequestValidationError) ErrorName() string {
+	return "GetCurrentTenantCapabilitiesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetCurrentTenantCapabilitiesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetCurrentTenantCapabilitiesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetCurrentTenantCapabilitiesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetCurrentTenantCapabilitiesRequestValidationError{}
+
+// Validate checks the field values on GetCurrentTenantCapabilitiesResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *GetCurrentTenantCapabilitiesResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetCurrentTenantCapabilitiesResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// GetCurrentTenantCapabilitiesResponseMultiError, or nil if none found.
+func (m *GetCurrentTenantCapabilitiesResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetCurrentTenantCapabilitiesResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TenantId
+
+	// no validation rules for FeatureFlags
+
+	// no validation rules for ResourceQuotas
+
+	for idx, item := range m.GetBindings() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetCurrentTenantCapabilitiesResponseValidationError{
+						field:  fmt.Sprintf("Bindings[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetCurrentTenantCapabilitiesResponseValidationError{
+						field:  fmt.Sprintf("Bindings[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetCurrentTenantCapabilitiesResponseValidationError{
+					field:  fmt.Sprintf("Bindings[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetCurrentTenantCapabilitiesResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetCurrentTenantCapabilitiesResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// GetCurrentTenantCapabilitiesResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetCurrentTenantCapabilitiesResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetCurrentTenantCapabilitiesResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetCurrentTenantCapabilitiesResponseMultiError) AllErrors() []error { return m }
+
+// GetCurrentTenantCapabilitiesResponseValidationError is the validation error
+// returned by GetCurrentTenantCapabilitiesResponse.Validate if the designated
+// constraints aren't met.
+type GetCurrentTenantCapabilitiesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetCurrentTenantCapabilitiesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetCurrentTenantCapabilitiesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetCurrentTenantCapabilitiesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetCurrentTenantCapabilitiesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetCurrentTenantCapabilitiesResponseValidationError) ErrorName() string {
+	return "GetCurrentTenantCapabilitiesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetCurrentTenantCapabilitiesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetCurrentTenantCapabilitiesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetCurrentTenantCapabilitiesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetCurrentTenantCapabilitiesResponseValidationError{}

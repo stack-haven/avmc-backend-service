@@ -24,6 +24,7 @@ const (
 	TenantPermissionService_UpdateTenantPermissionGroups_FullMethodName       = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroups"
 	TenantPermissionService_GetTenantEffectiveMenus_FullMethodName            = "/platform.admin.v1.TenantPermissionService/GetTenantEffectiveMenus"
 	TenantPermissionService_GetCurrentTenantEffectiveMenus_FullMethodName     = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantEffectiveMenus"
+	TenantPermissionService_GetCurrentTenantCapabilities_FullMethodName       = "/platform.admin.v1.TenantPermissionService/GetCurrentTenantCapabilities"
 	TenantPermissionService_UpdateTenantPermissionGroupVersion_FullMethodName = "/platform.admin.v1.TenantPermissionService/UpdateTenantPermissionGroupVersion"
 )
 
@@ -41,6 +42,8 @@ type TenantPermissionServiceClient interface {
 	GetTenantEffectiveMenus(ctx context.Context, in *v1.GetTenantEffectiveMenusRequest, opts ...grpc.CallOption) (*v1.GetTenantEffectiveMenusResponse, error)
 	// 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(ctx context.Context, in *v1.GetCurrentTenantEffectiveMenusRequest, opts ...grpc.CallOption) (*v1.GetTenantEffectiveMenusResponse, error)
+	// 获取当前登录租户运行时能力配置
+	GetCurrentTenantCapabilities(ctx context.Context, in *v1.GetCurrentTenantCapabilitiesRequest, opts ...grpc.CallOption) (*v1.GetCurrentTenantCapabilitiesResponse, error)
 	UpdateTenantPermissionGroupVersion(ctx context.Context, in *v1.UpdateTenantPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.UpdateTenantPermissionGroupVersionResponse, error)
 }
 
@@ -92,6 +95,16 @@ func (c *tenantPermissionServiceClient) GetCurrentTenantEffectiveMenus(ctx conte
 	return out, nil
 }
 
+func (c *tenantPermissionServiceClient) GetCurrentTenantCapabilities(ctx context.Context, in *v1.GetCurrentTenantCapabilitiesRequest, opts ...grpc.CallOption) (*v1.GetCurrentTenantCapabilitiesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.GetCurrentTenantCapabilitiesResponse)
+	err := c.cc.Invoke(ctx, TenantPermissionService_GetCurrentTenantCapabilities_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tenantPermissionServiceClient) UpdateTenantPermissionGroupVersion(ctx context.Context, in *v1.UpdateTenantPermissionGroupVersionRequest, opts ...grpc.CallOption) (*v1.UpdateTenantPermissionGroupVersionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.UpdateTenantPermissionGroupVersionResponse)
@@ -116,6 +129,8 @@ type TenantPermissionServiceServer interface {
 	GetTenantEffectiveMenus(context.Context, *v1.GetTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error)
 	// 获取当前登录租户最终有效菜单树
 	GetCurrentTenantEffectiveMenus(context.Context, *v1.GetCurrentTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error)
+	// 获取当前登录租户运行时能力配置
+	GetCurrentTenantCapabilities(context.Context, *v1.GetCurrentTenantCapabilitiesRequest) (*v1.GetCurrentTenantCapabilitiesResponse, error)
 	UpdateTenantPermissionGroupVersion(context.Context, *v1.UpdateTenantPermissionGroupVersionRequest) (*v1.UpdateTenantPermissionGroupVersionResponse, error)
 	mustEmbedUnimplementedTenantPermissionServiceServer()
 }
@@ -138,6 +153,9 @@ func (UnimplementedTenantPermissionServiceServer) GetTenantEffectiveMenus(contex
 }
 func (UnimplementedTenantPermissionServiceServer) GetCurrentTenantEffectiveMenus(context.Context, *v1.GetCurrentTenantEffectiveMenusRequest) (*v1.GetTenantEffectiveMenusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentTenantEffectiveMenus not implemented")
+}
+func (UnimplementedTenantPermissionServiceServer) GetCurrentTenantCapabilities(context.Context, *v1.GetCurrentTenantCapabilitiesRequest) (*v1.GetCurrentTenantCapabilitiesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCurrentTenantCapabilities not implemented")
 }
 func (UnimplementedTenantPermissionServiceServer) UpdateTenantPermissionGroupVersion(context.Context, *v1.UpdateTenantPermissionGroupVersionRequest) (*v1.UpdateTenantPermissionGroupVersionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateTenantPermissionGroupVersion not implemented")
@@ -236,6 +254,24 @@ func _TenantPermissionService_GetCurrentTenantEffectiveMenus_Handler(srv interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TenantPermissionService_GetCurrentTenantCapabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetCurrentTenantCapabilitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantPermissionServiceServer).GetCurrentTenantCapabilities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantPermissionService_GetCurrentTenantCapabilities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantPermissionServiceServer).GetCurrentTenantCapabilities(ctx, req.(*v1.GetCurrentTenantCapabilitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TenantPermissionService_UpdateTenantPermissionGroupVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.UpdateTenantPermissionGroupVersionRequest)
 	if err := dec(in); err != nil {
@@ -276,6 +312,10 @@ var TenantPermissionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentTenantEffectiveMenus",
 			Handler:    _TenantPermissionService_GetCurrentTenantEffectiveMenus_Handler,
+		},
+		{
+			MethodName: "GetCurrentTenantCapabilities",
+			Handler:    _TenantPermissionService_GetCurrentTenantCapabilities_Handler,
 		},
 		{
 			MethodName: "UpdateTenantPermissionGroupVersion",

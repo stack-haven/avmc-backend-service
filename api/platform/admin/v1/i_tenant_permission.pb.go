@@ -27,7 +27,7 @@ var File_platform_admin_v1_i_tenant_permission_proto protoreflect.FileDescriptor
 
 const file_platform_admin_v1_i_tenant_permission_proto_rawDesc = "" +
 	"\n" +
-	"+platform/admin/v1/i_tenant_permission.proto\x12\x11platform.admin.v1\x1a+core/service/v1/menu_permission_group.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto2\xea\v\n" +
+	"+platform/admin/v1/i_tenant_permission.proto\x12\x11platform.admin.v1\x1a+core/service/v1/menu_permission_group.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto2\xda\x0e\n" +
 	"\x17TenantPermissionService\x12\xb1\x02\n" +
 	"\x19GetTenantPermissionGroups\x121.core.service.v1.GetTenantPermissionGroupsRequest\x1a2.core.service.v1.GetTenantPermissionGroupsResponse\"\xac\x01\xbaGr\n" +
 	"\x12租户权限服务\x12$获取租户绑定的菜单权限组\x1a$获取租户绑定的菜单权限组Z\x10\n" +
@@ -48,7 +48,12 @@ const file_platform_admin_v1_i_tenant_permission_proto_rawDesc = "" +
 	"\x12租户权限服务\x12-获取当前登录租户最终有效菜单树\x1a-获取当前登录租户最终有效菜单树Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02*\x12(/admin/v1/current-tenant/effective-menus\x12\xec\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02*\x12(/admin/v1/current-tenant/effective-menus\x12\xed\x02\n" +
+	"\x1cGetCurrentTenantCapabilities\x124.core.service.v1.GetCurrentTenantCapabilitiesRequest\x1a5.core.service.v1.GetCurrentTenantCapabilitiesResponse\"\xdf\x01\xbaG\xae\x01\n" +
+	"\x12租户权限服务\x12-获取当前登录租户运行时能力配置\x1aW聚合当前租户绑定套餐及版本中的接口能力、功能开关和资源额度Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02'\x12%/admin/v1/current-tenant/capabilities\x12\xec\x01\n" +
 	"\"UpdateTenantPermissionGroupVersion\x12:.core.service.v1.UpdateTenantPermissionGroupVersionRequest\x1a;.core.service.v1.UpdateTenantPermissionGroupVersionResponse\"M\x82\xd3\xe4\x93\x02G:\x01*\x1aB/admin/v1/tenants/{tenant_id}/permission-groups/{group_id}/versionB\xbf\x01\n" +
 	"\x15com.platform.admin.v1B\x16ITenantPermissionProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 
@@ -57,28 +62,32 @@ var file_platform_admin_v1_i_tenant_permission_proto_goTypes = []any{
 	(*v1.UpdateTenantPermissionGroupsRequest)(nil),        // 1: core.service.v1.UpdateTenantPermissionGroupsRequest
 	(*v1.GetTenantEffectiveMenusRequest)(nil),             // 2: core.service.v1.GetTenantEffectiveMenusRequest
 	(*v1.GetCurrentTenantEffectiveMenusRequest)(nil),      // 3: core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	(*v1.UpdateTenantPermissionGroupVersionRequest)(nil),  // 4: core.service.v1.UpdateTenantPermissionGroupVersionRequest
-	(*v1.GetTenantPermissionGroupsResponse)(nil),          // 5: core.service.v1.GetTenantPermissionGroupsResponse
-	(*v1.UpdateTenantPermissionGroupsResponse)(nil),       // 6: core.service.v1.UpdateTenantPermissionGroupsResponse
-	(*v1.GetTenantEffectiveMenusResponse)(nil),            // 7: core.service.v1.GetTenantEffectiveMenusResponse
-	(*v1.UpdateTenantPermissionGroupVersionResponse)(nil), // 8: core.service.v1.UpdateTenantPermissionGroupVersionResponse
+	(*v1.GetCurrentTenantCapabilitiesRequest)(nil),        // 4: core.service.v1.GetCurrentTenantCapabilitiesRequest
+	(*v1.UpdateTenantPermissionGroupVersionRequest)(nil),  // 5: core.service.v1.UpdateTenantPermissionGroupVersionRequest
+	(*v1.GetTenantPermissionGroupsResponse)(nil),          // 6: core.service.v1.GetTenantPermissionGroupsResponse
+	(*v1.UpdateTenantPermissionGroupsResponse)(nil),       // 7: core.service.v1.UpdateTenantPermissionGroupsResponse
+	(*v1.GetTenantEffectiveMenusResponse)(nil),            // 8: core.service.v1.GetTenantEffectiveMenusResponse
+	(*v1.GetCurrentTenantCapabilitiesResponse)(nil),       // 9: core.service.v1.GetCurrentTenantCapabilitiesResponse
+	(*v1.UpdateTenantPermissionGroupVersionResponse)(nil), // 10: core.service.v1.UpdateTenantPermissionGroupVersionResponse
 }
 var file_platform_admin_v1_i_tenant_permission_proto_depIdxs = []int32{
-	0, // 0: platform.admin.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
-	1, // 1: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
-	2, // 2: platform.admin.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
-	3, // 3: platform.admin.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	4, // 4: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
-	5, // 5: platform.admin.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
-	6, // 6: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
-	7, // 7: platform.admin.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	7, // 8: platform.admin.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	8, // 9: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: platform.admin.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
+	1,  // 1: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
+	2,  // 2: platform.admin.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
+	3,  // 3: platform.admin.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
+	4,  // 4: platform.admin.v1.TenantPermissionService.GetCurrentTenantCapabilities:input_type -> core.service.v1.GetCurrentTenantCapabilitiesRequest
+	5,  // 5: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
+	6,  // 6: platform.admin.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
+	7,  // 7: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
+	8,  // 8: platform.admin.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	8,  // 9: platform.admin.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	9,  // 10: platform.admin.v1.TenantPermissionService.GetCurrentTenantCapabilities:output_type -> core.service.v1.GetCurrentTenantCapabilitiesResponse
+	10, // 11: platform.admin.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_platform_admin_v1_i_tenant_permission_proto_init() }

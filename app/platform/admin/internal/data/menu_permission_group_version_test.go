@@ -218,6 +218,124 @@ func TestMenuPermissionGroupCapabilityPackageVersionSnapshots(t *testing.T) {
 	}, map[string]int64{"projects": 10, "storage": 1024})
 }
 
+func TestMenuPermissionGroupTenantCapabilitiesAggregateBoundPackages(t *testing.T) {
+	ctx := systemContext()
+	client := newTestClient(t)
+	defer client.Close()
+
+	tenant := client.Tenant.Create().
+		SetName("Capability Tenant").
+		SetCode("capability-tenant").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SaveX(ctx)
+
+	repo := NewMenuPermissionGroupRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	status := pbEnum.Status_STATUS_ENABLED
+	versioned, err := repo.Save(ctx, &pbCore.MenuPermissionGroup{
+		Name:           ptr("Runtime Versioned Package"),
+		Code:           ptr("runtime-versioned-package"),
+		Status:         &status,
+		ApiPermissions: []string{"platform.a.v1", "platform.a.v1"},
+		FeatureFlags: map[string]bool{
+			"feature_a":       false,
+			"version_feature": true,
+		},
+		ResourceQuotas: map[string]int64{
+			"projects":   3,
+			"storage_mb": 200,
+		},
+	})
+	if err != nil {
+		t.Fatalf("create versioned package: %v", err)
+	}
+	version1ID := versioned.GetCurrentVersionId()
+	if _, err = repo.PublishVersion(ctx, versioned.GetId(), &pbCore.MenuPermissionGroupVersion{
+		ApiPermissions: []string{"platform.a.current"},
+		FeatureFlags: map[string]bool{
+			"feature_a": true,
+		},
+		ResourceQuotas: map[string]int64{
+			"projects":   8,
+			"storage_mb": 100,
+		},
+	}, "current capability", 7, ""); err != nil {
+		t.Fatalf("publish current capability: %v", err)
+	}
+	current, err := repo.Save(ctx, &pbCore.MenuPermissionGroup{
+		Name:           ptr("Runtime Current Package"),
+		Code:           ptr("runtime-current-package"),
+		Status:         &status,
+		ApiPermissions: []string{"platform.b.read"},
+		FeatureFlags: map[string]bool{
+			"shared_feature": true,
+		},
+		ResourceQuotas: map[string]int64{
+			"projects": 10,
+		},
+	})
+	if err != nil {
+		t.Fatalf("create current package: %v", err)
+	}
+	disabledStatus := pbEnum.Status_STATUS_DISABLED
+	disabled, err := repo.Save(ctx, &pbCore.MenuPermissionGroup{
+		Name:           ptr("Disabled Runtime Package"),
+		Code:           ptr("disabled-runtime-package"),
+		Status:         &disabledStatus,
+		ApiPermissions: []string{"platform.disabled"},
+		FeatureFlags:   map[string]bool{"disabled_feature": true},
+		ResourceQuotas: map[string]int64{"projects": 99},
+	})
+	if err != nil {
+		t.Fatalf("create disabled package: %v", err)
+	}
+
+	if err = repo.UpdateTenantGroups(ctx, tenant.ID, []uint32{versioned.GetId(), current.GetId()}, 0); err != nil {
+		t.Fatalf("bind tenant packages: %v", err)
+	}
+	if _, err = repo.UpdateTenantGroupVersion(ctx, tenant.ID, versioned.GetId(), version1ID, false, 0); err != nil {
+		t.Fatalf("pin versioned package: %v", err)
+	}
+	client.TenantPermissionGroup.Create().
+		SetTenantID(tenant.ID).
+		SetGroupID(disabled.GetId()).
+		SetEnabled(true).
+		SaveX(ctx)
+
+	resp, err := repo.GetTenantCapabilities(ctx, tenant.ID)
+	if err != nil {
+		t.Fatalf("get tenant capabilities: %v", err)
+	}
+	if resp.GetTenantId() != tenant.ID {
+		t.Fatalf("tenant id = %d, want %d", resp.GetTenantId(), tenant.ID)
+	}
+	if !sameStringSet(resp.GetApiPermissions(), []string{"platform.a.v1", "platform.b.read"}) {
+		t.Fatalf("api permissions = %v", resp.GetApiPermissions())
+	}
+	if !reflect.DeepEqual(resp.GetFeatureFlags(), map[string]bool{
+		"feature_a":       false,
+		"shared_feature":  true,
+		"version_feature": true,
+	}) {
+		t.Fatalf("feature flags = %v", resp.GetFeatureFlags())
+	}
+	if !reflect.DeepEqual(resp.GetResourceQuotas(), map[string]int64{
+		"projects":   10,
+		"storage_mb": 200,
+	}) {
+		t.Fatalf("resource quotas = %v", resp.GetResourceQuotas())
+	}
+	if !sameUint32Set(resp.GetGroupIds(), []uint32{versioned.GetId(), current.GetId()}) {
+		t.Fatalf("group ids = %v", resp.GetGroupIds())
+	}
+	if len(resp.GetBindings()) != 2 {
+		t.Fatalf("bindings = %v, want 2 active enabled groups", resp.GetBindings())
+	}
+
+	if _, err = repo.GetTenantCapabilities(ctx, 0); err == nil {
+		t.Fatal("GetTenantCapabilities(0) error = nil, want error")
+	}
+}
+
 func assertMenuIDs(t *testing.T, repo interface {
 	GetTenantEffectiveMenuIDs(context.Context, uint32) ([]uint32, error)
 }, ctx context.Context, tenantID uint32, want []uint32) {

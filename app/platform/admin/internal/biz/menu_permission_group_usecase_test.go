@@ -116,6 +116,11 @@ func (r *menuPermissionGroupRepoStub) GetTenantEffectiveMenus(_ context.Context,
 	return []*pbCore.Menu{{Id: 100}}, nil
 }
 
+func (r *menuPermissionGroupRepoStub) GetTenantCapabilities(_ context.Context, tenantID uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
+	r.tenantID = tenantID
+	return &pbCore.GetCurrentTenantCapabilitiesResponse{TenantId: tenantID}, nil
+}
+
 func (r *menuPermissionGroupRepoStub) ValidateTenantMenuIDs(_ context.Context, menuIDs []uint32) error {
 	r.menuIDs = append([]uint32(nil), menuIDs...)
 	return nil
@@ -195,6 +200,14 @@ func TestMenuPermissionGroupUsecaseTenantBindingsAndEffectiveMenus(t *testing.T)
 	}
 	if repo.tenantID != 10 || repo.parentID != 99 || len(menus) != 1 || menus[0].GetId() != 100 {
 		t.Fatalf("effective menus = tenant:%d parent:%d menus:%v", repo.tenantID, repo.parentID, menus)
+	}
+
+	capabilities, err := uc.GetTenantCapabilities(context.Background(), 10)
+	if err != nil {
+		t.Fatalf("GetTenantCapabilities() error = %v", err)
+	}
+	if repo.tenantID != 10 || capabilities.GetTenantId() != 10 {
+		t.Fatalf("tenant capabilities = tenant:%d response:%v", repo.tenantID, capabilities)
 	}
 
 	if err := uc.ValidateTenantMenuIDs(context.Background(), []uint32{100, 101}); err != nil {

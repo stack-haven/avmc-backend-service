@@ -26,6 +26,7 @@ type MenuPermissionGroupRepo interface {
 	UpdateTenantGroups(context.Context, uint32, []uint32, uint32) error
 	GetTenantEffectiveMenuIDs(context.Context, uint32) ([]uint32, error)
 	GetTenantEffectiveMenus(context.Context, uint32, uint32) ([]*pbCore.Menu, error)
+	GetTenantCapabilities(context.Context, uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error)
 	ValidateTenantMenuIDs(context.Context, []uint32) error
 	UpdateTenantGroupVersion(context.Context, uint32, uint32, uint32, bool, uint32) (*pbCore.TenantPermissionGroupBinding, error)
 }
@@ -109,6 +110,10 @@ func (uc *MenuPermissionGroupUsecase) UpdateTenantGroups(ctx context.Context, te
 
 func (uc *MenuPermissionGroupUsecase) GetTenantEffectiveMenus(ctx context.Context, tenantID uint32, parentID uint32) ([]*pbCore.Menu, error) {
 	return uc.repo.GetTenantEffectiveMenus(ctx, tenantID, parentID)
+}
+
+func (uc *MenuPermissionGroupUsecase) GetTenantCapabilities(ctx context.Context, tenantID uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
+	return uc.repo.GetTenantCapabilities(ctx, tenantID)
 }
 
 func (uc *MenuPermissionGroupUsecase) ValidateTenantMenuIDs(ctx context.Context, menuIDs []uint32) error {

@@ -339,3 +339,14 @@ message GetCurrentTenantEffectiveMenusRequest {
     (gnostic.openapi.v3.property) = {description: "父级ID"}
   ];
 }
+
+message GetCurrentTenantCapabilitiesRequest {}
+
+message GetCurrentTenantCapabilitiesResponse {
+  uint32 tenant_id = 1 [(gnostic.openapi.v3.property) = {description: "租户ID"}];
+  repeated string api_permissions = 2 [(gnostic.openapi.v3.property) = {description: "接口能力权限码并集"}];
+  map<string, bool> feature_flags = 3 [(gnostic.openapi.v3.property) = {description: "功能开关运行时配置"}];
+  map<string, int64> resource_quotas = 4 [(gnostic.openapi.v3.property) = {description: "资源额度运行时配置"}];
+  repeated uint32 group_ids = 5 [(gnostic.openapi.v3.property) = {description: "参与聚合的套餐ID"}];
+  repeated TenantPermissionGroupBinding bindings = 6 [(gnostic.openapi.v3.property) = {description: "参与聚合的套餐版本绑定"}];
+}

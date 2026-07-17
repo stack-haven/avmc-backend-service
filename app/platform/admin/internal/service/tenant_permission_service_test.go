@@ -20,6 +20,7 @@ type tenantPermissionRepoStub struct {
 	groups   []*pbCore.MenuPermissionGroup
 	bindings []*pbCore.TenantPermissionGroupBinding
 	menus    []*pbCore.Menu
+	caps     *pbCore.GetCurrentTenantCapabilitiesResponse
 	binding  *pbCore.TenantPermissionGroupBinding
 
 	tenantID    uint32
@@ -86,6 +87,13 @@ func (r *tenantPermissionRepoStub) GetTenantEffectiveMenus(_ context.Context, te
 	r.tenantID = tenantID
 	r.parentID = parentID
 	return r.menus, nil
+}
+func (r *tenantPermissionRepoStub) GetTenantCapabilities(_ context.Context, tenantID uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
+	r.tenantID = tenantID
+	if r.caps != nil {
+		return r.caps, nil
+	}
+	return &pbCore.GetCurrentTenantCapabilitiesResponse{TenantId: tenantID}, nil
 }
 func (*tenantPermissionRepoStub) ValidateTenantMenuIDs(context.Context, []uint32) error { return nil }
 func (r *tenantPermissionRepoStub) UpdateTenantGroupVersion(_ context.Context, tenantID, groupID, versionID uint32, autoUpgrade bool, operatorID uint32) (*pbCore.TenantPermissionGroupBinding, error) {
@@ -249,6 +257,34 @@ func TestTenantPermissionServiceCurrentTenantEffectiveMenus(t *testing.T) {
 	}
 
 	if _, err := service.GetCurrentTenantEffectiveMenus(context.Background(), &pbCore.GetCurrentTenantEffectiveMenusRequest{}); !errors.IsBadRequest(err) {
+		t.Fatalf("missing tenant context error = %v, want bad request", err)
+	}
+}
+
+func TestTenantPermissionServiceCurrentTenantCapabilities(t *testing.T) {
+	t.Parallel()
+
+	repo := &tenantPermissionRepoStub{
+		caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+			TenantId:       10,
+			ApiPermissions: []string{"platform.user.list"},
+			FeatureFlags:   map[string]bool{"advanced_reports": true},
+			ResourceQuotas: map[string]int64{"projects": 10},
+			GroupIds:       []uint32{1},
+		},
+	}
+	service := newTenantPermissionService(repo)
+	ctx := authn.ContextWithAuthUser(context.Background(), tenantPermissionTestUser{subject: "7", tenant: "10"})
+
+	resp, err := service.GetCurrentTenantCapabilities(ctx, &pbCore.GetCurrentTenantCapabilitiesRequest{})
+	if err != nil {
+		t.Fatalf("GetCurrentTenantCapabilities() error = %v", err)
+	}
+	if repo.tenantID != 10 || resp.GetTenantId() != 10 || len(resp.GetApiPermissions()) != 1 {
+		t.Fatalf("tenant=%d response=%v", repo.tenantID, resp)
+	}
+
+	if _, err := service.GetCurrentTenantCapabilities(context.Background(), &pbCore.GetCurrentTenantCapabilitiesRequest{}); !errors.IsBadRequest(err) {
 		t.Fatalf("missing tenant context error = %v, want bad request", err)
 	}
 }

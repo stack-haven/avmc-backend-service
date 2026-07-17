@@ -61,6 +61,7 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions, "GET"),
 		op(v1.OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion, "POST"),
 		op(v1.OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion, "POST"),
+		op(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities, "GET"),
 		op(v1.OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus, "GET"),
 		op(v1.OperationTenantPermissionServiceGetTenantEffectiveMenus, "GET"),
 		op(v1.OperationTenantPermissionServiceGetTenantPermissionGroups, "GET"),
@@ -140,6 +141,8 @@ func IsAuthenticatedSelfServiceOperation(object authz.Object, action authz.Actio
 	case authz.Object(v1.OperationAuthServiceLogout):
 		return action == "POST" || action == authz.Action(lastSegment(string(object)))
 	case authz.Object(v1.OperationSessionServiceListMySessions):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities):
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
 	}
 	return false

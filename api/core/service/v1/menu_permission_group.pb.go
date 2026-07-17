@@ -1942,6 +1942,126 @@ func (x *GetCurrentTenantEffectiveMenusRequest) GetParentId() uint32 {
 	return 0
 }
 
+type GetCurrentTenantCapabilitiesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCurrentTenantCapabilitiesRequest) Reset() {
+	*x = GetCurrentTenantCapabilitiesRequest{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCurrentTenantCapabilitiesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCurrentTenantCapabilitiesRequest) ProtoMessage() {}
+
+func (x *GetCurrentTenantCapabilitiesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCurrentTenantCapabilitiesRequest.ProtoReflect.Descriptor instead.
+func (*GetCurrentTenantCapabilitiesRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{30}
+}
+
+type GetCurrentTenantCapabilitiesResponse struct {
+	state          protoimpl.MessageState          `protogen:"open.v1"`
+	TenantId       uint32                          `protobuf:"varint,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	ApiPermissions []string                        `protobuf:"bytes,2,rep,name=api_permissions,json=apiPermissions,proto3" json:"api_permissions,omitempty"`
+	FeatureFlags   map[string]bool                 `protobuf:"bytes,3,rep,name=feature_flags,json=featureFlags,proto3" json:"feature_flags,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	ResourceQuotas map[string]int64                `protobuf:"bytes,4,rep,name=resource_quotas,json=resourceQuotas,proto3" json:"resource_quotas,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	GroupIds       []uint32                        `protobuf:"varint,5,rep,packed,name=group_ids,json=groupIds,proto3" json:"group_ids,omitempty"`
+	Bindings       []*TenantPermissionGroupBinding `protobuf:"bytes,6,rep,name=bindings,proto3" json:"bindings,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) Reset() {
+	*x = GetCurrentTenantCapabilitiesResponse{}
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCurrentTenantCapabilitiesResponse) ProtoMessage() {}
+
+func (x *GetCurrentTenantCapabilitiesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_menu_permission_group_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCurrentTenantCapabilitiesResponse.ProtoReflect.Descriptor instead.
+func (*GetCurrentTenantCapabilitiesResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_menu_permission_group_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) GetTenantId() uint32 {
+	if x != nil {
+		return x.TenantId
+	}
+	return 0
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) GetApiPermissions() []string {
+	if x != nil {
+		return x.ApiPermissions
+	}
+	return nil
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) GetFeatureFlags() map[string]bool {
+	if x != nil {
+		return x.FeatureFlags
+	}
+	return nil
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) GetResourceQuotas() map[string]int64 {
+	if x != nil {
+		return x.ResourceQuotas
+	}
+	return nil
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) GetGroupIds() []uint32 {
+	if x != nil {
+		return x.GroupIds
+	}
+	return nil
+}
+
+func (x *GetCurrentTenantCapabilitiesResponse) GetBindings() []*TenantPermissionGroupBinding {
+	if x != nil {
+		return x.Bindings
+	}
+	return nil
+}
+
 var File_core_service_v1_menu_permission_group_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
@@ -2161,7 +2281,21 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"%GetCurrentTenantEffectiveMenusRequest\x127\n" +
 	"\tparent_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b父级ID\xbaH\x04*\x02(\x00H\x00R\bparentId\x88\x01\x01B\f\n" +
 	"\n" +
-	"_parent_id*\xbd\x01\n" +
+	"_parent_id\"%\n" +
+	"#GetCurrentTenantCapabilitiesRequest\"\xfd\x05\n" +
+	"$GetCurrentTenantCapabilitiesResponse\x12+\n" +
+	"\ttenant_id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b租户IDR\btenantId\x12J\n" +
+	"\x0fapi_permissions\x18\x02 \x03(\tB!\xbaG\x1e\x92\x02\x1b接口能力权限码并集R\x0eapiPermissions\x12\x8f\x01\n" +
+	"\rfeature_flags\x18\x03 \x03(\v2G.core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntryB!\xbaG\x1e\x92\x02\x1b功能开关运行时配置R\ffeatureFlags\x12\x95\x01\n" +
+	"\x0fresource_quotas\x18\x04 \x03(\v2I.core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntryB!\xbaG\x1e\x92\x02\x1b资源额度运行时配置R\x0eresourceQuotas\x12:\n" +
+	"\tgroup_ids\x18\x05 \x03(\rB\x1d\xbaG\x1a\x92\x02\x17参与聚合的套餐IDR\bgroupIds\x12r\n" +
+	"\bbindings\x18\x06 \x03(\v2-.core.service.v1.TenantPermissionGroupBindingB'\xbaG$\x92\x02!参与聚合的套餐版本绑定R\bbindings\x1a?\n" +
+	"\x11FeatureFlagsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\x1aA\n" +
+	"\x13ResourceQuotasEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01*\xbd\x01\n" +
 	"\x1fMenuPermissionGroupVersionState\x123\n" +
 	"/MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED\x10\x00\x121\n" +
 	"-MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED\x10\x01\x122\n" +
@@ -2198,7 +2332,7 @@ func file_core_service_v1_menu_permission_group_proto_rawDescGZIP() []byte {
 }
 
 var file_core_service_v1_menu_permission_group_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_core_service_v1_menu_permission_group_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_core_service_v1_menu_permission_group_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_core_service_v1_menu_permission_group_proto_goTypes = []any{
 	(MenuPermissionGroupVersionState)(0),               // 0: core.service.v1.MenuPermissionGroupVersionState
 	(*MenuPermissionGroup)(nil),                        // 1: core.service.v1.MenuPermissionGroup
@@ -2231,70 +2365,77 @@ var file_core_service_v1_menu_permission_group_proto_goTypes = []any{
 	(*GetTenantEffectiveMenusRequest)(nil),             // 28: core.service.v1.GetTenantEffectiveMenusRequest
 	(*GetTenantEffectiveMenusResponse)(nil),            // 29: core.service.v1.GetTenantEffectiveMenusResponse
 	(*GetCurrentTenantEffectiveMenusRequest)(nil),      // 30: core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	nil,              // 31: core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
-	nil,              // 32: core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
-	nil,              // 33: core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
-	nil,              // 34: core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
-	nil,              // 35: core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
-	nil,              // 36: core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
-	(enum.Status)(0), // 37: enum.Status
-	(*Menu)(nil),     // 38: core.service.v1.Menu
+	(*GetCurrentTenantCapabilitiesRequest)(nil),        // 31: core.service.v1.GetCurrentTenantCapabilitiesRequest
+	(*GetCurrentTenantCapabilitiesResponse)(nil),       // 32: core.service.v1.GetCurrentTenantCapabilitiesResponse
+	nil,              // 33: core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
+	nil,              // 34: core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
+	nil,              // 35: core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
+	nil,              // 36: core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
+	nil,              // 37: core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
+	nil,              // 38: core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
+	nil,              // 39: core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntry
+	nil,              // 40: core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntry
+	(enum.Status)(0), // 41: enum.Status
+	(*Menu)(nil),     // 42: core.service.v1.Menu
 }
 var file_core_service_v1_menu_permission_group_proto_depIdxs = []int32{
-	37, // 0: core.service.v1.MenuPermissionGroup.status:type_name -> enum.Status
-	31, // 1: core.service.v1.MenuPermissionGroup.feature_flags:type_name -> core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
-	32, // 2: core.service.v1.MenuPermissionGroup.resource_quotas:type_name -> core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
+	41, // 0: core.service.v1.MenuPermissionGroup.status:type_name -> enum.Status
+	33, // 1: core.service.v1.MenuPermissionGroup.feature_flags:type_name -> core.service.v1.MenuPermissionGroup.FeatureFlagsEntry
+	34, // 2: core.service.v1.MenuPermissionGroup.resource_quotas:type_name -> core.service.v1.MenuPermissionGroup.ResourceQuotasEntry
 	0,  // 3: core.service.v1.MenuPermissionGroupVersion.state:type_name -> core.service.v1.MenuPermissionGroupVersionState
-	33, // 4: core.service.v1.MenuPermissionGroupVersion.feature_flags:type_name -> core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
-	34, // 5: core.service.v1.MenuPermissionGroupVersion.resource_quotas:type_name -> core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
+	35, // 4: core.service.v1.MenuPermissionGroupVersion.feature_flags:type_name -> core.service.v1.MenuPermissionGroupVersion.FeatureFlagsEntry
+	36, // 5: core.service.v1.MenuPermissionGroupVersion.resource_quotas:type_name -> core.service.v1.MenuPermissionGroupVersion.ResourceQuotasEntry
 	1,  // 6: core.service.v1.CreateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
 	1,  // 7: core.service.v1.UpdateMenuPermissionGroupRequest.group:type_name -> core.service.v1.MenuPermissionGroup
 	1,  // 8: core.service.v1.GetMenuPermissionGroupResponse.group:type_name -> core.service.v1.MenuPermissionGroup
-	37, // 9: core.service.v1.ListMenuPermissionGroupsRequest.status:type_name -> enum.Status
+	41, // 9: core.service.v1.ListMenuPermissionGroupsRequest.status:type_name -> enum.Status
 	1,  // 10: core.service.v1.ListMenuPermissionGroupsResponse.items:type_name -> core.service.v1.MenuPermissionGroup
-	37, // 11: core.service.v1.UpdateMenuPermissionGroupStatusRequest.status:type_name -> enum.Status
+	41, // 11: core.service.v1.UpdateMenuPermissionGroupStatusRequest.status:type_name -> enum.Status
 	2,  // 12: core.service.v1.ListMenuPermissionGroupVersionsResponse.items:type_name -> core.service.v1.MenuPermissionGroupVersion
-	35, // 13: core.service.v1.PublishMenuPermissionGroupVersionRequest.feature_flags:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
-	36, // 14: core.service.v1.PublishMenuPermissionGroupVersionRequest.resource_quotas:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
+	37, // 13: core.service.v1.PublishMenuPermissionGroupVersionRequest.feature_flags:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.FeatureFlagsEntry
+	38, // 14: core.service.v1.PublishMenuPermissionGroupVersionRequest.resource_quotas:type_name -> core.service.v1.PublishMenuPermissionGroupVersionRequest.ResourceQuotasEntry
 	2,  // 15: core.service.v1.PublishMenuPermissionGroupVersionResponse.version:type_name -> core.service.v1.MenuPermissionGroupVersion
 	2,  // 16: core.service.v1.RollbackMenuPermissionGroupVersionResponse.version:type_name -> core.service.v1.MenuPermissionGroupVersion
 	1,  // 17: core.service.v1.GetTenantPermissionGroupsResponse.groups:type_name -> core.service.v1.MenuPermissionGroup
 	21, // 18: core.service.v1.GetTenantPermissionGroupsResponse.bindings:type_name -> core.service.v1.TenantPermissionGroupBinding
 	21, // 19: core.service.v1.UpdateTenantPermissionGroupVersionResponse.binding:type_name -> core.service.v1.TenantPermissionGroupBinding
-	38, // 20: core.service.v1.GetTenantEffectiveMenusResponse.items:type_name -> core.service.v1.Menu
-	3,  // 21: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:input_type -> core.service.v1.CreateMenuPermissionGroupRequest
-	5,  // 22: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
-	7,  // 23: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
-	9,  // 24: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:input_type -> core.service.v1.GetMenuPermissionGroupRequest
-	11, // 25: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
-	13, // 26: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
-	15, // 27: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:input_type -> core.service.v1.ListMenuPermissionGroupVersionsRequest
-	17, // 28: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:input_type -> core.service.v1.PublishMenuPermissionGroupVersionRequest
-	19, // 29: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:input_type -> core.service.v1.RollbackMenuPermissionGroupVersionRequest
-	22, // 30: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
-	24, // 31: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
-	28, // 32: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
-	30, // 33: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
-	26, // 34: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
-	4,  // 35: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
-	6,  // 36: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
-	8,  // 37: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
-	10, // 38: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.GetMenuPermissionGroupResponse
-	12, // 39: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
-	14, // 40: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
-	16, // 41: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:output_type -> core.service.v1.ListMenuPermissionGroupVersionsResponse
-	18, // 42: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:output_type -> core.service.v1.PublishMenuPermissionGroupVersionResponse
-	20, // 43: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:output_type -> core.service.v1.RollbackMenuPermissionGroupVersionResponse
-	23, // 44: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
-	25, // 45: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
-	29, // 46: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	29, // 47: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
-	27, // 48: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
-	35, // [35:49] is the sub-list for method output_type
-	21, // [21:35] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	42, // 20: core.service.v1.GetTenantEffectiveMenusResponse.items:type_name -> core.service.v1.Menu
+	39, // 21: core.service.v1.GetCurrentTenantCapabilitiesResponse.feature_flags:type_name -> core.service.v1.GetCurrentTenantCapabilitiesResponse.FeatureFlagsEntry
+	40, // 22: core.service.v1.GetCurrentTenantCapabilitiesResponse.resource_quotas:type_name -> core.service.v1.GetCurrentTenantCapabilitiesResponse.ResourceQuotasEntry
+	21, // 23: core.service.v1.GetCurrentTenantCapabilitiesResponse.bindings:type_name -> core.service.v1.TenantPermissionGroupBinding
+	3,  // 24: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:input_type -> core.service.v1.CreateMenuPermissionGroupRequest
+	5,  // 25: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:input_type -> core.service.v1.UpdateMenuPermissionGroupRequest
+	7,  // 26: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:input_type -> core.service.v1.DeleteMenuPermissionGroupRequest
+	9,  // 27: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:input_type -> core.service.v1.GetMenuPermissionGroupRequest
+	11, // 28: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:input_type -> core.service.v1.ListMenuPermissionGroupsRequest
+	13, // 29: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:input_type -> core.service.v1.UpdateMenuPermissionGroupStatusRequest
+	15, // 30: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:input_type -> core.service.v1.ListMenuPermissionGroupVersionsRequest
+	17, // 31: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:input_type -> core.service.v1.PublishMenuPermissionGroupVersionRequest
+	19, // 32: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:input_type -> core.service.v1.RollbackMenuPermissionGroupVersionRequest
+	22, // 33: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:input_type -> core.service.v1.GetTenantPermissionGroupsRequest
+	24, // 34: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:input_type -> core.service.v1.UpdateTenantPermissionGroupsRequest
+	28, // 35: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:input_type -> core.service.v1.GetTenantEffectiveMenusRequest
+	30, // 36: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:input_type -> core.service.v1.GetCurrentTenantEffectiveMenusRequest
+	26, // 37: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:input_type -> core.service.v1.UpdateTenantPermissionGroupVersionRequest
+	4,  // 38: core.service.v1.MenuPermissionGroupService.CreateMenuPermissionGroup:output_type -> core.service.v1.CreateMenuPermissionGroupResponse
+	6,  // 39: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroup:output_type -> core.service.v1.UpdateMenuPermissionGroupResponse
+	8,  // 40: core.service.v1.MenuPermissionGroupService.DeleteMenuPermissionGroup:output_type -> core.service.v1.DeleteMenuPermissionGroupResponse
+	10, // 41: core.service.v1.MenuPermissionGroupService.GetMenuPermissionGroup:output_type -> core.service.v1.GetMenuPermissionGroupResponse
+	12, // 42: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroups:output_type -> core.service.v1.ListMenuPermissionGroupsResponse
+	14, // 43: core.service.v1.MenuPermissionGroupService.UpdateMenuPermissionGroupStatus:output_type -> core.service.v1.UpdateMenuPermissionGroupStatusResponse
+	16, // 44: core.service.v1.MenuPermissionGroupService.ListMenuPermissionGroupVersions:output_type -> core.service.v1.ListMenuPermissionGroupVersionsResponse
+	18, // 45: core.service.v1.MenuPermissionGroupService.PublishMenuPermissionGroupVersion:output_type -> core.service.v1.PublishMenuPermissionGroupVersionResponse
+	20, // 46: core.service.v1.MenuPermissionGroupService.RollbackMenuPermissionGroupVersion:output_type -> core.service.v1.RollbackMenuPermissionGroupVersionResponse
+	23, // 47: core.service.v1.TenantPermissionService.GetTenantPermissionGroups:output_type -> core.service.v1.GetTenantPermissionGroupsResponse
+	25, // 48: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroups:output_type -> core.service.v1.UpdateTenantPermissionGroupsResponse
+	29, // 49: core.service.v1.TenantPermissionService.GetTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	29, // 50: core.service.v1.TenantPermissionService.GetCurrentTenantEffectiveMenus:output_type -> core.service.v1.GetTenantEffectiveMenusResponse
+	27, // 51: core.service.v1.TenantPermissionService.UpdateTenantPermissionGroupVersion:output_type -> core.service.v1.UpdateTenantPermissionGroupVersionResponse
+	38, // [38:52] is the sub-list for method output_type
+	24, // [24:38] is the sub-list for method input_type
+	24, // [24:24] is the sub-list for extension type_name
+	24, // [24:24] is the sub-list for extension extendee
+	0,  // [0:24] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_menu_permission_group_proto_init() }
@@ -2323,7 +2464,7 @@ func file_core_service_v1_menu_permission_group_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_menu_permission_group_proto_rawDesc), len(file_core_service_v1_menu_permission_group_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   36,
+			NumMessages:   40,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

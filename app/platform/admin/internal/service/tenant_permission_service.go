@@ -79,6 +79,14 @@ func (s *TenantPermissionServiceService) GetCurrentTenantEffectiveMenus(ctx cont
 	return &pbCore.GetTenantEffectiveMenusResponse{Items: items}, nil
 }
 
+func (s *TenantPermissionServiceService) GetCurrentTenantCapabilities(ctx context.Context, req *pbCore.GetCurrentTenantCapabilitiesRequest) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
+	tenantID := authn.GetAuthUserTenantID(ctx)
+	if tenantID == 0 {
+		return nil, pb.ErrorBadRequest("缺少当前租户上下文")
+	}
+	return s.uc.GetTenantCapabilities(ctx, tenantID)
+}
+
 func (s *TenantPermissionServiceService) UpdateTenantPermissionGroupVersion(ctx context.Context, req *pbCore.UpdateTenantPermissionGroupVersionRequest) (*pbCore.UpdateTenantPermissionGroupVersionResponse, error) {
 	binding, err := s.uc.UpdateTenantGroupVersion(
 		ctx,

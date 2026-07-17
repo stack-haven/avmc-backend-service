@@ -632,6 +632,27 @@ func copyInt64Map(values map[string]int64) map[string]int64 {
 	return result
 }
 
+func mergeFeatureFlags(target map[string]bool, source map[string]bool) {
+	for key, value := range copyBoolMap(source) {
+		if value {
+			target[key] = true
+			continue
+		}
+		if _, ok := target[key]; !ok {
+			target[key] = false
+		}
+	}
+}
+
+func mergeResourceQuotas(target map[string]int64, source map[string]int64) {
+	for key, value := range copyInt64Map(source) {
+		current, ok := target[key]
+		if !ok || value > current {
+			target[key] = value
+		}
+	}
+}
+
 func groupVersionSnapshotFromGroup(group *pbCore.MenuPermissionGroup) *pbCore.MenuPermissionGroupVersion {
 	if group == nil {
 		return &pbCore.MenuPermissionGroupVersion{}
@@ -724,6 +745,92 @@ func (r *menuPermissionGroupRepo) GetTenantGroupBindings(ctx context.Context, te
 		result = append(result, item)
 	}
 	return result, nil
+}
+
+func (r *menuPermissionGroupRepo) GetTenantCapabilities(ctx context.Context, tenantID uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
+	if tenantID == 0 {
+		return nil, pb.ErrorBadRequest("租户ID不能为空")
+	}
+	rows, err := r.Data.DB(ctx).TenantPermissionGroup.Query().
+		Where(tenantpermissiongroup.TenantIDEQ(tenantID), tenantpermissiongroup.EnabledEQ(true)).
+		WithGroup(func(q *gen.MenuPermissionGroupQuery) {
+			q.Where(menupermissiongroup.StatusEQ(int32(pbEnum.Status_STATUS_ENABLED))).
+				Select(
+					menupermissiongroup.FieldID,
+					menupermissiongroup.FieldAPIPermissions,
+					menupermissiongroup.FieldFeatureFlags,
+					menupermissiongroup.FieldResourceQuotas,
+				)
+		}).
+		WithVersion(func(q *gen.MenuPermissionGroupVersionQuery) {
+			q.Select(
+				menupermissiongroupversion.FieldID,
+				menupermissiongroupversion.FieldVersion,
+				menupermissiongroupversion.FieldAPIPermissions,
+				menupermissiongroupversion.FieldFeatureFlags,
+				menupermissiongroupversion.FieldResourceQuotas,
+			)
+		}).
+		Order(gen.Asc(tenantpermissiongroup.FieldGroupID)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	apiSet := make(map[string]struct{})
+	featureFlags := make(map[string]bool)
+	resourceQuotas := make(map[string]int64)
+	groupIDs := make([]uint32, 0, len(rows))
+	bindings := make([]*pbCore.TenantPermissionGroupBinding, 0, len(rows))
+	for _, row := range rows {
+		group, edgeErr := row.Edges.GroupOrErr()
+		if edgeErr != nil {
+			continue
+		}
+		groupIDs = append(groupIDs, row.GroupID)
+		apiPermissions := group.APIPermissions
+		flags := group.FeatureFlags
+		quotas := group.ResourceQuotas
+
+		item := &pbCore.TenantPermissionGroupBinding{
+			TenantId:    row.TenantID,
+			GroupId:     row.GroupID,
+			Enabled:     row.Enabled,
+			BoundBy:     row.BoundBy,
+			BoundAt:     convert.TimeValueToString(&row.CreatedAt, time.DateTime),
+			VersionId:   row.VersionID,
+			AutoUpgrade: &row.AutoUpgrade,
+		}
+		if version, versionErr := row.Edges.VersionOrErr(); versionErr == nil {
+			apiPermissions = version.APIPermissions
+			flags = version.FeatureFlags
+			quotas = version.ResourceQuotas
+			item.Version = &version.Version
+		}
+		for _, permission := range normalizeStringList(apiPermissions) {
+			apiSet[permission] = struct{}{}
+		}
+		mergeFeatureFlags(featureFlags, flags)
+		mergeResourceQuotas(resourceQuotas, quotas)
+		bindings = append(bindings, item)
+	}
+
+	apiPermissions := make([]string, 0, len(apiSet))
+	for permission := range apiSet {
+		apiPermissions = append(apiPermissions, permission)
+	}
+	sort.Strings(apiPermissions)
+	groupIDs = uniquePositiveIDs(groupIDs)
+	sort.Slice(groupIDs, func(i, j int) bool { return groupIDs[i] < groupIDs[j] })
+
+	return &pbCore.GetCurrentTenantCapabilitiesResponse{
+		TenantId:       tenantID,
+		ApiPermissions: apiPermissions,
+		FeatureFlags:   copyBoolMap(featureFlags),
+		ResourceQuotas: copyInt64Map(resourceQuotas),
+		GroupIds:       groupIDs,
+		Bindings:       bindings,
+	}, nil
 }
 
 func (r *menuPermissionGroupRepo) UpdateTenantGroups(ctx context.Context, tenantID uint32, groupIDs []uint32, operatorID uint32) error {
