@@ -4660,6 +4660,10 @@ func (m *ConsumeCurrentTenantResourceQuotaRequest) validate(all bool) error {
 
 	// no validation rules for Amount
 
+	if m.IdempotencyKey != nil {
+		// no validation rules for IdempotencyKey
+	}
+
 	if len(errors) > 0 {
 		return ConsumeCurrentTenantResourceQuotaRequestMultiError(errors)
 	}
@@ -4904,6 +4908,10 @@ func (m *ReleaseCurrentTenantResourceQuotaRequest) validate(all bool) error {
 	// no validation rules for ResourceKey
 
 	// no validation rules for Amount
+
+	if m.IdempotencyKey != nil {
+		// no validation rules for IdempotencyKey
+	}
 
 	if len(errors) > 0 {
 		return ReleaseCurrentTenantResourceQuotaRequestMultiError(errors)

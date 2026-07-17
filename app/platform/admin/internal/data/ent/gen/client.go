@@ -27,6 +27,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 
@@ -75,6 +76,8 @@ type Client struct {
 	TenantParameterOverride *TenantParameterOverrideClient
 	// TenantPermissionGroup is the client for interacting with the TenantPermissionGroup builders.
 	TenantPermissionGroup *TenantPermissionGroupClient
+	// TenantResourceQuotaOperation is the client for interacting with the TenantResourceQuotaOperation builders.
+	TenantResourceQuotaOperation *TenantResourceQuotaOperationClient
 	// TenantResourceQuotaUsage is the client for interacting with the TenantResourceQuotaUsage builders.
 	TenantResourceQuotaUsage *TenantResourceQuotaUsageClient
 	// User is the client for interacting with the User builders.
@@ -106,6 +109,7 @@ func (c *Client) init() {
 	c.Tenant = NewTenantClient(c.config)
 	c.TenantParameterOverride = NewTenantParameterOverrideClient(c.config)
 	c.TenantPermissionGroup = NewTenantPermissionGroupClient(c.config)
+	c.TenantResourceQuotaOperation = NewTenantResourceQuotaOperationClient(c.config)
 	c.TenantResourceQuotaUsage = NewTenantResourceQuotaUsageClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -198,26 +202,27 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                        ctx,
-		config:                     cfg,
-		AsyncTask:                  NewAsyncTaskClient(cfg),
-		Dept:                       NewDeptClient(cfg),
-		DictionaryItem:             NewDictionaryItemClient(cfg),
-		DictionaryType:             NewDictionaryTypeClient(cfg),
-		LoginLog:                   NewLoginLogClient(cfg),
-		Menu:                       NewMenuClient(cfg),
-		MenuPermissionGroup:        NewMenuPermissionGroupClient(cfg),
-		MenuPermissionGroupVersion: NewMenuPermissionGroupVersionClient(cfg),
-		OperationLog:               NewOperationLogClient(cfg),
-		ParameterDefinition:        NewParameterDefinitionClient(cfg),
-		Post:                       NewPostClient(cfg),
-		Project:                    NewProjectClient(cfg),
-		Role:                       NewRoleClient(cfg),
-		Tenant:                     NewTenantClient(cfg),
-		TenantParameterOverride:    NewTenantParameterOverrideClient(cfg),
-		TenantPermissionGroup:      NewTenantPermissionGroupClient(cfg),
-		TenantResourceQuotaUsage:   NewTenantResourceQuotaUsageClient(cfg),
-		User:                       NewUserClient(cfg),
+		ctx:                          ctx,
+		config:                       cfg,
+		AsyncTask:                    NewAsyncTaskClient(cfg),
+		Dept:                         NewDeptClient(cfg),
+		DictionaryItem:               NewDictionaryItemClient(cfg),
+		DictionaryType:               NewDictionaryTypeClient(cfg),
+		LoginLog:                     NewLoginLogClient(cfg),
+		Menu:                         NewMenuClient(cfg),
+		MenuPermissionGroup:          NewMenuPermissionGroupClient(cfg),
+		MenuPermissionGroupVersion:   NewMenuPermissionGroupVersionClient(cfg),
+		OperationLog:                 NewOperationLogClient(cfg),
+		ParameterDefinition:          NewParameterDefinitionClient(cfg),
+		Post:                         NewPostClient(cfg),
+		Project:                      NewProjectClient(cfg),
+		Role:                         NewRoleClient(cfg),
+		Tenant:                       NewTenantClient(cfg),
+		TenantParameterOverride:      NewTenantParameterOverrideClient(cfg),
+		TenantPermissionGroup:        NewTenantPermissionGroupClient(cfg),
+		TenantResourceQuotaOperation: NewTenantResourceQuotaOperationClient(cfg),
+		TenantResourceQuotaUsage:     NewTenantResourceQuotaUsageClient(cfg),
+		User:                         NewUserClient(cfg),
 	}, nil
 }
 
@@ -235,26 +240,27 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                        ctx,
-		config:                     cfg,
-		AsyncTask:                  NewAsyncTaskClient(cfg),
-		Dept:                       NewDeptClient(cfg),
-		DictionaryItem:             NewDictionaryItemClient(cfg),
-		DictionaryType:             NewDictionaryTypeClient(cfg),
-		LoginLog:                   NewLoginLogClient(cfg),
-		Menu:                       NewMenuClient(cfg),
-		MenuPermissionGroup:        NewMenuPermissionGroupClient(cfg),
-		MenuPermissionGroupVersion: NewMenuPermissionGroupVersionClient(cfg),
-		OperationLog:               NewOperationLogClient(cfg),
-		ParameterDefinition:        NewParameterDefinitionClient(cfg),
-		Post:                       NewPostClient(cfg),
-		Project:                    NewProjectClient(cfg),
-		Role:                       NewRoleClient(cfg),
-		Tenant:                     NewTenantClient(cfg),
-		TenantParameterOverride:    NewTenantParameterOverrideClient(cfg),
-		TenantPermissionGroup:      NewTenantPermissionGroupClient(cfg),
-		TenantResourceQuotaUsage:   NewTenantResourceQuotaUsageClient(cfg),
-		User:                       NewUserClient(cfg),
+		ctx:                          ctx,
+		config:                       cfg,
+		AsyncTask:                    NewAsyncTaskClient(cfg),
+		Dept:                         NewDeptClient(cfg),
+		DictionaryItem:               NewDictionaryItemClient(cfg),
+		DictionaryType:               NewDictionaryTypeClient(cfg),
+		LoginLog:                     NewLoginLogClient(cfg),
+		Menu:                         NewMenuClient(cfg),
+		MenuPermissionGroup:          NewMenuPermissionGroupClient(cfg),
+		MenuPermissionGroupVersion:   NewMenuPermissionGroupVersionClient(cfg),
+		OperationLog:                 NewOperationLogClient(cfg),
+		ParameterDefinition:          NewParameterDefinitionClient(cfg),
+		Post:                         NewPostClient(cfg),
+		Project:                      NewProjectClient(cfg),
+		Role:                         NewRoleClient(cfg),
+		Tenant:                       NewTenantClient(cfg),
+		TenantParameterOverride:      NewTenantParameterOverrideClient(cfg),
+		TenantPermissionGroup:        NewTenantPermissionGroupClient(cfg),
+		TenantResourceQuotaOperation: NewTenantResourceQuotaOperationClient(cfg),
+		TenantResourceQuotaUsage:     NewTenantResourceQuotaUsageClient(cfg),
+		User:                         NewUserClient(cfg),
 	}, nil
 }
 
@@ -287,8 +293,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.LoginLog, c.Menu,
 		c.MenuPermissionGroup, c.MenuPermissionGroupVersion, c.OperationLog,
 		c.ParameterDefinition, c.Post, c.Project, c.Role, c.Tenant,
-		c.TenantParameterOverride, c.TenantPermissionGroup, c.TenantResourceQuotaUsage,
-		c.User,
+		c.TenantParameterOverride, c.TenantPermissionGroup,
+		c.TenantResourceQuotaOperation, c.TenantResourceQuotaUsage, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -301,8 +307,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.LoginLog, c.Menu,
 		c.MenuPermissionGroup, c.MenuPermissionGroupVersion, c.OperationLog,
 		c.ParameterDefinition, c.Post, c.Project, c.Role, c.Tenant,
-		c.TenantParameterOverride, c.TenantPermissionGroup, c.TenantResourceQuotaUsage,
-		c.User,
+		c.TenantParameterOverride, c.TenantPermissionGroup,
+		c.TenantResourceQuotaOperation, c.TenantResourceQuotaUsage, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -343,6 +349,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.TenantParameterOverride.mutate(ctx, m)
 	case *TenantPermissionGroupMutation:
 		return c.TenantPermissionGroup.mutate(ctx, m)
+	case *TenantResourceQuotaOperationMutation:
+		return c.TenantResourceQuotaOperation.mutate(ctx, m)
 	case *TenantResourceQuotaUsageMutation:
 		return c.TenantResourceQuotaUsage.mutate(ctx, m)
 	case *UserMutation:
@@ -2951,6 +2959,155 @@ func (c *TenantPermissionGroupClient) mutate(ctx context.Context, m *TenantPermi
 	}
 }
 
+// TenantResourceQuotaOperationClient is a client for the TenantResourceQuotaOperation schema.
+type TenantResourceQuotaOperationClient struct {
+	config
+}
+
+// NewTenantResourceQuotaOperationClient returns a client for the TenantResourceQuotaOperation from the given config.
+func NewTenantResourceQuotaOperationClient(c config) *TenantResourceQuotaOperationClient {
+	return &TenantResourceQuotaOperationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tenantresourcequotaoperation.Hooks(f(g(h())))`.
+func (c *TenantResourceQuotaOperationClient) Use(hooks ...Hook) {
+	c.hooks.TenantResourceQuotaOperation = append(c.hooks.TenantResourceQuotaOperation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tenantresourcequotaoperation.Intercept(f(g(h())))`.
+func (c *TenantResourceQuotaOperationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TenantResourceQuotaOperation = append(c.inters.TenantResourceQuotaOperation, interceptors...)
+}
+
+// Create returns a builder for creating a TenantResourceQuotaOperation entity.
+func (c *TenantResourceQuotaOperationClient) Create() *TenantResourceQuotaOperationCreate {
+	mutation := newTenantResourceQuotaOperationMutation(c.config, OpCreate)
+	return &TenantResourceQuotaOperationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TenantResourceQuotaOperation entities.
+func (c *TenantResourceQuotaOperationClient) CreateBulk(builders ...*TenantResourceQuotaOperationCreate) *TenantResourceQuotaOperationCreateBulk {
+	return &TenantResourceQuotaOperationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TenantResourceQuotaOperationClient) MapCreateBulk(slice any, setFunc func(*TenantResourceQuotaOperationCreate, int)) *TenantResourceQuotaOperationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TenantResourceQuotaOperationCreateBulk{err: fmt.Errorf("calling to TenantResourceQuotaOperationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TenantResourceQuotaOperationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TenantResourceQuotaOperationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TenantResourceQuotaOperation.
+func (c *TenantResourceQuotaOperationClient) Update() *TenantResourceQuotaOperationUpdate {
+	mutation := newTenantResourceQuotaOperationMutation(c.config, OpUpdate)
+	return &TenantResourceQuotaOperationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TenantResourceQuotaOperationClient) UpdateOne(_m *TenantResourceQuotaOperation) *TenantResourceQuotaOperationUpdateOne {
+	mutation := newTenantResourceQuotaOperationMutation(c.config, OpUpdateOne, withTenantResourceQuotaOperation(_m))
+	return &TenantResourceQuotaOperationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TenantResourceQuotaOperationClient) UpdateOneID(id uint32) *TenantResourceQuotaOperationUpdateOne {
+	mutation := newTenantResourceQuotaOperationMutation(c.config, OpUpdateOne, withTenantResourceQuotaOperationID(id))
+	return &TenantResourceQuotaOperationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TenantResourceQuotaOperation.
+func (c *TenantResourceQuotaOperationClient) Delete() *TenantResourceQuotaOperationDelete {
+	mutation := newTenantResourceQuotaOperationMutation(c.config, OpDelete)
+	return &TenantResourceQuotaOperationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TenantResourceQuotaOperationClient) DeleteOne(_m *TenantResourceQuotaOperation) *TenantResourceQuotaOperationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TenantResourceQuotaOperationClient) DeleteOneID(id uint32) *TenantResourceQuotaOperationDeleteOne {
+	builder := c.Delete().Where(tenantresourcequotaoperation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TenantResourceQuotaOperationDeleteOne{builder}
+}
+
+// Query returns a query builder for TenantResourceQuotaOperation.
+func (c *TenantResourceQuotaOperationClient) Query() *TenantResourceQuotaOperationQuery {
+	return &TenantResourceQuotaOperationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTenantResourceQuotaOperation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TenantResourceQuotaOperation entity by its id.
+func (c *TenantResourceQuotaOperationClient) Get(ctx context.Context, id uint32) (*TenantResourceQuotaOperation, error) {
+	return c.Query().Where(tenantresourcequotaoperation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TenantResourceQuotaOperationClient) GetX(ctx context.Context, id uint32) *TenantResourceQuotaOperation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a TenantResourceQuotaOperation.
+func (c *TenantResourceQuotaOperationClient) QueryTenant(_m *TenantResourceQuotaOperation) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantresourcequotaoperation.Table, tenantresourcequotaoperation.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tenantresourcequotaoperation.TenantTable, tenantresourcequotaoperation.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TenantResourceQuotaOperationClient) Hooks() []Hook {
+	return c.hooks.TenantResourceQuotaOperation
+}
+
+// Interceptors returns the client interceptors.
+func (c *TenantResourceQuotaOperationClient) Interceptors() []Interceptor {
+	return c.inters.TenantResourceQuotaOperation
+}
+
+func (c *TenantResourceQuotaOperationClient) mutate(ctx context.Context, m *TenantResourceQuotaOperationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TenantResourceQuotaOperationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TenantResourceQuotaOperationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TenantResourceQuotaOperationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TenantResourceQuotaOperationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown TenantResourceQuotaOperation mutation op: %q", m.Op())
+	}
+}
+
 // TenantResourceQuotaUsageClient is a client for the TenantResourceQuotaUsage schema.
 type TenantResourceQuotaUsageClient struct {
 	config
@@ -3305,13 +3462,15 @@ type (
 		AsyncTask, Dept, DictionaryItem, DictionaryType, LoginLog, Menu,
 		MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
 		ParameterDefinition, Post, Project, Role, Tenant, TenantParameterOverride,
-		TenantPermissionGroup, TenantResourceQuotaUsage, User []ent.Hook
+		TenantPermissionGroup, TenantResourceQuotaOperation, TenantResourceQuotaUsage,
+		User []ent.Hook
 	}
 	inters struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, LoginLog, Menu,
 		MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
 		ParameterDefinition, Post, Project, Role, Tenant, TenantParameterOverride,
-		TenantPermissionGroup, TenantResourceQuotaUsage, User []ent.Interceptor
+		TenantPermissionGroup, TenantResourceQuotaOperation, TenantResourceQuotaUsage,
+		User []ent.Interceptor
 	}
 )
 

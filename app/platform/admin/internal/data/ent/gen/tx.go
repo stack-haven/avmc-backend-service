@@ -46,6 +46,8 @@ type Tx struct {
 	TenantParameterOverride *TenantParameterOverrideClient
 	// TenantPermissionGroup is the client for interacting with the TenantPermissionGroup builders.
 	TenantPermissionGroup *TenantPermissionGroupClient
+	// TenantResourceQuotaOperation is the client for interacting with the TenantResourceQuotaOperation builders.
+	TenantResourceQuotaOperation *TenantResourceQuotaOperationClient
 	// TenantResourceQuotaUsage is the client for interacting with the TenantResourceQuotaUsage builders.
 	TenantResourceQuotaUsage *TenantResourceQuotaUsageClient
 	// User is the client for interacting with the User builders.
@@ -197,6 +199,7 @@ func (tx *Tx) init() {
 	tx.Tenant = NewTenantClient(tx.config)
 	tx.TenantParameterOverride = NewTenantParameterOverrideClient(tx.config)
 	tx.TenantPermissionGroup = NewTenantPermissionGroupClient(tx.config)
+	tx.TenantResourceQuotaOperation = NewTenantResourceQuotaOperationClient(tx.config)
 	tx.TenantResourceQuotaUsage = NewTenantResourceQuotaUsageClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

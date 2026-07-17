@@ -5,6 +5,7 @@ import (
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/pkg/utils/convert"
 	"context"
@@ -15,6 +16,11 @@ import (
 )
 
 var _ biz.ResourceQuotaRepo = (*resourceQuotaRepo)(nil)
+
+const (
+	quotaOperationConsume = "consume"
+	quotaOperationRelease = "release"
+)
 
 type resourceQuotaRepo struct {
 	BaseRepo
@@ -69,7 +75,7 @@ func (r *resourceQuotaRepo) GetUsage(ctx context.Context, tenantID uint32, resou
 	return resourceQuotaUsageToProto(row), nil
 }
 
-func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
 	if tenantID == 0 {
 		return nil, pb.ErrorBadRequest("租户ID不能为空")
 	}
@@ -81,6 +87,19 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 		return nil, err
 	}
 	defer rollback(tx, r.Log)
+
+	if idempotencyKey != "" {
+		op, err := findQuotaOperationForUpdate(ctx, tx.Client(), tenantID, quotaOperationConsume, idempotencyKey)
+		if err != nil && !gen.IsNotFound(err) {
+			return nil, err
+		}
+		if op != nil {
+			if err = ensureQuotaOperationReplay(op, resourceKey, amount); err != nil {
+				return nil, err
+			}
+			return quotaUsageFromOperation(op), nil
+		}
+	}
 
 	row, err := findQuotaUsageForUpdate(ctx, tx.Client(), tenantID, resourceKey)
 	if err != nil && !gen.IsNotFound(err) {
@@ -118,13 +137,18 @@ func (r *resourceQuotaRepo) Consume(ctx context.Context, tenantID uint32, resour
 			return nil, err
 		}
 	}
+	if idempotencyKey != "" {
+		if err = createQuotaOperation(ctx, tx.Client(), tenantID, resourceKey, quotaOperationConsume, idempotencyKey, amount, row.Used, operatorID); err != nil {
+			return nil, err
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 	return resourceQuotaUsageToProto(row), nil
 }
 
-func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resourceKey string, amount int64, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resourceKey string, amount int64, idempotencyKey string, operatorID uint32) (*pbCore.TenantResourceQuotaUsage, error) {
 	if tenantID == 0 {
 		return nil, pb.ErrorBadRequest("租户ID不能为空")
 	}
@@ -137,10 +161,32 @@ func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resour
 	}
 	defer rollback(tx, r.Log)
 
+	if idempotencyKey != "" {
+		op, err := findQuotaOperationForUpdate(ctx, tx.Client(), tenantID, quotaOperationRelease, idempotencyKey)
+		if err != nil && !gen.IsNotFound(err) {
+			return nil, err
+		}
+		if op != nil {
+			if err = ensureQuotaOperationReplay(op, resourceKey, amount); err != nil {
+				return nil, err
+			}
+			return quotaUsageFromOperation(op), nil
+		}
+	}
+
 	row, err := findQuotaUsageForUpdate(ctx, tx.Client(), tenantID, resourceKey)
 	if err != nil {
 		if gen.IsNotFound(err) {
-			return &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey}, nil
+			usage := &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey}
+			if idempotencyKey != "" {
+				if err = createQuotaOperation(ctx, tx.Client(), tenantID, resourceKey, quotaOperationRelease, idempotencyKey, amount, 0, operatorID); err != nil {
+					return nil, err
+				}
+				if err = tx.Commit(); err != nil {
+					return nil, err
+				}
+			}
+			return usage, nil
 		}
 		return nil, err
 	}
@@ -155,6 +201,11 @@ func (r *resourceQuotaRepo) Release(ctx context.Context, tenantID uint32, resour
 	row, err = builder.Save(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if idempotencyKey != "" {
+		if err = createQuotaOperation(ctx, tx.Client(), tenantID, resourceKey, quotaOperationRelease, idempotencyKey, amount, row.Used, operatorID); err != nil {
+			return nil, err
+		}
 	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
@@ -172,4 +223,54 @@ func findQuotaUsageForUpdate(ctx context.Context, client *gen.Client, tenantID u
 		return query.Only(ctx)
 	}
 	return row, err
+}
+
+func findQuotaOperationForUpdate(ctx context.Context, client *gen.Client, tenantID uint32, operationType string, idempotencyKey string) (*gen.TenantResourceQuotaOperation, error) {
+	query := client.TenantResourceQuotaOperation.Query().Where(
+		tenantresourcequotaoperation.TenantIDEQ(tenantID),
+		tenantresourcequotaoperation.OperationTypeEQ(operationType),
+		tenantresourcequotaoperation.IdempotencyKeyEQ(idempotencyKey),
+	)
+	row, err := query.Clone().ForUpdate().Only(ctx)
+	if isSelectForUpdateUnsupported(err) {
+		return query.Only(ctx)
+	}
+	return row, err
+}
+
+func ensureQuotaOperationReplay(row *gen.TenantResourceQuotaOperation, resourceKey string, amount int64) error {
+	if row.ResourceKey != resourceKey || row.Amount != amount {
+		return errors.Conflict("RESOURCE_QUOTA_IDEMPOTENCY_CONFLICT", "资源额度幂等键已被不同请求使用")
+	}
+	return nil
+}
+
+func quotaUsageFromOperation(row *gen.TenantResourceQuotaOperation) *pbCore.TenantResourceQuotaUsage {
+	if row == nil {
+		return nil
+	}
+	return &pbCore.TenantResourceQuotaUsage{
+		TenantId:    row.TenantID,
+		ResourceKey: row.ResourceKey,
+		Used:        row.UsedAfter,
+		UpdatedAt:   convert.TimeValueToString(&row.UpdatedAt, time.DateTime),
+	}
+}
+
+func createQuotaOperation(ctx context.Context, client *gen.Client, tenantID uint32, resourceKey string, operationType string, idempotencyKey string, amount int64, usedAfter int64, operatorID uint32) error {
+	builder := client.TenantResourceQuotaOperation.Create().
+		SetTenantID(tenantID).
+		SetResourceKey(resourceKey).
+		SetOperationType(operationType).
+		SetIdempotencyKey(idempotencyKey).
+		SetAmount(amount).
+		SetUsedAfter(usedAfter)
+	if operatorID > 0 {
+		builder.SetUpdatedBy(operatorID)
+	}
+	_, err := builder.Save(ctx)
+	if err != nil && gen.IsConstraintError(err) {
+		return errors.Conflict("RESOURCE_QUOTA_IDEMPOTENCY_CONFLICT", "资源额度幂等键正在被并发使用，请重试")
+	}
+	return err
 }

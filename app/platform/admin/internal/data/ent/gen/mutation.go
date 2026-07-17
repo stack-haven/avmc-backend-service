@@ -20,6 +20,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
@@ -41,24 +42,25 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAsyncTask                  = "AsyncTask"
-	TypeDept                       = "Dept"
-	TypeDictionaryItem             = "DictionaryItem"
-	TypeDictionaryType             = "DictionaryType"
-	TypeLoginLog                   = "LoginLog"
-	TypeMenu                       = "Menu"
-	TypeMenuPermissionGroup        = "MenuPermissionGroup"
-	TypeMenuPermissionGroupVersion = "MenuPermissionGroupVersion"
-	TypeOperationLog               = "OperationLog"
-	TypeParameterDefinition        = "ParameterDefinition"
-	TypePost                       = "Post"
-	TypeProject                    = "Project"
-	TypeRole                       = "Role"
-	TypeTenant                     = "Tenant"
-	TypeTenantParameterOverride    = "TenantParameterOverride"
-	TypeTenantPermissionGroup      = "TenantPermissionGroup"
-	TypeTenantResourceQuotaUsage   = "TenantResourceQuotaUsage"
-	TypeUser                       = "User"
+	TypeAsyncTask                    = "AsyncTask"
+	TypeDept                         = "Dept"
+	TypeDictionaryItem               = "DictionaryItem"
+	TypeDictionaryType               = "DictionaryType"
+	TypeLoginLog                     = "LoginLog"
+	TypeMenu                         = "Menu"
+	TypeMenuPermissionGroup          = "MenuPermissionGroup"
+	TypeMenuPermissionGroupVersion   = "MenuPermissionGroupVersion"
+	TypeOperationLog                 = "OperationLog"
+	TypeParameterDefinition          = "ParameterDefinition"
+	TypePost                         = "Post"
+	TypeProject                      = "Project"
+	TypeRole                         = "Role"
+	TypeTenant                       = "Tenant"
+	TypeTenantParameterOverride      = "TenantParameterOverride"
+	TypeTenantPermissionGroup        = "TenantPermissionGroup"
+	TypeTenantResourceQuotaOperation = "TenantResourceQuotaOperation"
+	TypeTenantResourceQuotaUsage     = "TenantResourceQuotaUsage"
+	TypeUser                         = "User"
 )
 
 // AsyncTaskMutation represents an operation that mutates the AsyncTask nodes in the graph.
@@ -20642,6 +20644,949 @@ func (m *TenantPermissionGroupMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown TenantPermissionGroup edge %s", name)
+}
+
+// TenantResourceQuotaOperationMutation represents an operation that mutates the TenantResourceQuotaOperation nodes in the graph.
+type TenantResourceQuotaOperationMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uint32
+	created_at      *time.Time
+	updated_at      *time.Time
+	resource_key    *string
+	operation_type  *string
+	idempotency_key *string
+	amount          *int64
+	addamount       *int64
+	used_after      *int64
+	addused_after   *int64
+	updated_by      *uint32
+	addupdated_by   *int32
+	clearedFields   map[string]struct{}
+	tenant          *uint32
+	clearedtenant   bool
+	done            bool
+	oldValue        func(context.Context) (*TenantResourceQuotaOperation, error)
+	predicates      []predicate.TenantResourceQuotaOperation
+}
+
+var _ ent.Mutation = (*TenantResourceQuotaOperationMutation)(nil)
+
+// tenantresourcequotaoperationOption allows management of the mutation configuration using functional options.
+type tenantresourcequotaoperationOption func(*TenantResourceQuotaOperationMutation)
+
+// newTenantResourceQuotaOperationMutation creates new mutation for the TenantResourceQuotaOperation entity.
+func newTenantResourceQuotaOperationMutation(c config, op Op, opts ...tenantresourcequotaoperationOption) *TenantResourceQuotaOperationMutation {
+	m := &TenantResourceQuotaOperationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTenantResourceQuotaOperation,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTenantResourceQuotaOperationID sets the ID field of the mutation.
+func withTenantResourceQuotaOperationID(id uint32) tenantresourcequotaoperationOption {
+	return func(m *TenantResourceQuotaOperationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TenantResourceQuotaOperation
+		)
+		m.oldValue = func(ctx context.Context) (*TenantResourceQuotaOperation, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TenantResourceQuotaOperation.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTenantResourceQuotaOperation sets the old TenantResourceQuotaOperation of the mutation.
+func withTenantResourceQuotaOperation(node *TenantResourceQuotaOperation) tenantresourcequotaoperationOption {
+	return func(m *TenantResourceQuotaOperationMutation) {
+		m.oldValue = func(context.Context) (*TenantResourceQuotaOperation, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TenantResourceQuotaOperationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TenantResourceQuotaOperationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("gen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TenantResourceQuotaOperation entities.
+func (m *TenantResourceQuotaOperationMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TenantResourceQuotaOperationMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TenantResourceQuotaOperationMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TenantResourceQuotaOperation.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *TenantResourceQuotaOperationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *TenantResourceQuotaOperationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *TenantResourceQuotaOperationMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *TenantResourceQuotaOperationMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (m *TenantResourceQuotaOperationMutation) SetTenantID(u uint32) {
+	m.tenant = &u
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *TenantResourceQuotaOperationMutation) ResetTenantID() {
+	m.tenant = nil
+}
+
+// SetResourceKey sets the "resource_key" field.
+func (m *TenantResourceQuotaOperationMutation) SetResourceKey(s string) {
+	m.resource_key = &s
+}
+
+// ResourceKey returns the value of the "resource_key" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) ResourceKey() (r string, exists bool) {
+	v := m.resource_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceKey returns the old "resource_key" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldResourceKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceKey: %w", err)
+	}
+	return oldValue.ResourceKey, nil
+}
+
+// ResetResourceKey resets all changes to the "resource_key" field.
+func (m *TenantResourceQuotaOperationMutation) ResetResourceKey() {
+	m.resource_key = nil
+}
+
+// SetOperationType sets the "operation_type" field.
+func (m *TenantResourceQuotaOperationMutation) SetOperationType(s string) {
+	m.operation_type = &s
+}
+
+// OperationType returns the value of the "operation_type" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) OperationType() (r string, exists bool) {
+	v := m.operation_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOperationType returns the old "operation_type" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldOperationType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOperationType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOperationType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOperationType: %w", err)
+	}
+	return oldValue.OperationType, nil
+}
+
+// ResetOperationType resets all changes to the "operation_type" field.
+func (m *TenantResourceQuotaOperationMutation) ResetOperationType() {
+	m.operation_type = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *TenantResourceQuotaOperationMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldIdempotencyKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *TenantResourceQuotaOperationMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+}
+
+// SetAmount sets the "amount" field.
+func (m *TenantResourceQuotaOperationMutation) SetAmount(i int64) {
+	m.amount = &i
+	m.addamount = nil
+}
+
+// Amount returns the value of the "amount" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) Amount() (r int64, exists bool) {
+	v := m.amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmount returns the old "amount" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldAmount(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
+	}
+	return oldValue.Amount, nil
+}
+
+// AddAmount adds i to the "amount" field.
+func (m *TenantResourceQuotaOperationMutation) AddAmount(i int64) {
+	if m.addamount != nil {
+		*m.addamount += i
+	} else {
+		m.addamount = &i
+	}
+}
+
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *TenantResourceQuotaOperationMutation) AddedAmount() (r int64, exists bool) {
+	v := m.addamount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmount resets all changes to the "amount" field.
+func (m *TenantResourceQuotaOperationMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
+}
+
+// SetUsedAfter sets the "used_after" field.
+func (m *TenantResourceQuotaOperationMutation) SetUsedAfter(i int64) {
+	m.used_after = &i
+	m.addused_after = nil
+}
+
+// UsedAfter returns the value of the "used_after" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) UsedAfter() (r int64, exists bool) {
+	v := m.used_after
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUsedAfter returns the old "used_after" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldUsedAfter(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUsedAfter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUsedAfter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUsedAfter: %w", err)
+	}
+	return oldValue.UsedAfter, nil
+}
+
+// AddUsedAfter adds i to the "used_after" field.
+func (m *TenantResourceQuotaOperationMutation) AddUsedAfter(i int64) {
+	if m.addused_after != nil {
+		*m.addused_after += i
+	} else {
+		m.addused_after = &i
+	}
+}
+
+// AddedUsedAfter returns the value that was added to the "used_after" field in this mutation.
+func (m *TenantResourceQuotaOperationMutation) AddedUsedAfter() (r int64, exists bool) {
+	v := m.addused_after
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUsedAfter resets all changes to the "used_after" field.
+func (m *TenantResourceQuotaOperationMutation) ResetUsedAfter() {
+	m.used_after = nil
+	m.addused_after = nil
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (m *TenantResourceQuotaOperationMutation) SetUpdatedBy(u uint32) {
+	m.updated_by = &u
+	m.addupdated_by = nil
+}
+
+// UpdatedBy returns the value of the "updated_by" field in the mutation.
+func (m *TenantResourceQuotaOperationMutation) UpdatedBy() (r uint32, exists bool) {
+	v := m.updated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedBy returns the old "updated_by" field's value of the TenantResourceQuotaOperation entity.
+// If the TenantResourceQuotaOperation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantResourceQuotaOperationMutation) OldUpdatedBy(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
+	}
+	return oldValue.UpdatedBy, nil
+}
+
+// AddUpdatedBy adds u to the "updated_by" field.
+func (m *TenantResourceQuotaOperationMutation) AddUpdatedBy(u int32) {
+	if m.addupdated_by != nil {
+		*m.addupdated_by += u
+	} else {
+		m.addupdated_by = &u
+	}
+}
+
+// AddedUpdatedBy returns the value that was added to the "updated_by" field in this mutation.
+func (m *TenantResourceQuotaOperationMutation) AddedUpdatedBy() (r int32, exists bool) {
+	v := m.addupdated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (m *TenantResourceQuotaOperationMutation) ClearUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	m.clearedFields[tenantresourcequotaoperation.FieldUpdatedBy] = struct{}{}
+}
+
+// UpdatedByCleared returns if the "updated_by" field was cleared in this mutation.
+func (m *TenantResourceQuotaOperationMutation) UpdatedByCleared() bool {
+	_, ok := m.clearedFields[tenantresourcequotaoperation.FieldUpdatedBy]
+	return ok
+}
+
+// ResetUpdatedBy resets all changes to the "updated_by" field.
+func (m *TenantResourceQuotaOperationMutation) ResetUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	delete(m.clearedFields, tenantresourcequotaoperation.FieldUpdatedBy)
+}
+
+// ClearTenant clears the "tenant" edge to the Tenant entity.
+func (m *TenantResourceQuotaOperationMutation) ClearTenant() {
+	m.clearedtenant = true
+	m.clearedFields[tenantresourcequotaoperation.FieldTenantID] = struct{}{}
+}
+
+// TenantCleared reports if the "tenant" edge to the Tenant entity was cleared.
+func (m *TenantResourceQuotaOperationMutation) TenantCleared() bool {
+	return m.clearedtenant
+}
+
+// TenantIDs returns the "tenant" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TenantID instead. It exists only for internal usage by the builders.
+func (m *TenantResourceQuotaOperationMutation) TenantIDs() (ids []uint32) {
+	if id := m.tenant; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTenant resets all changes to the "tenant" edge.
+func (m *TenantResourceQuotaOperationMutation) ResetTenant() {
+	m.tenant = nil
+	m.clearedtenant = false
+}
+
+// Where appends a list predicates to the TenantResourceQuotaOperationMutation builder.
+func (m *TenantResourceQuotaOperationMutation) Where(ps ...predicate.TenantResourceQuotaOperation) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TenantResourceQuotaOperationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TenantResourceQuotaOperationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TenantResourceQuotaOperation, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TenantResourceQuotaOperationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TenantResourceQuotaOperationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TenantResourceQuotaOperation).
+func (m *TenantResourceQuotaOperationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TenantResourceQuotaOperationMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldUpdatedAt)
+	}
+	if m.tenant != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldTenantID)
+	}
+	if m.resource_key != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldResourceKey)
+	}
+	if m.operation_type != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldOperationType)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldIdempotencyKey)
+	}
+	if m.amount != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldAmount)
+	}
+	if m.used_after != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldUsedAfter)
+	}
+	if m.updated_by != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldUpdatedBy)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TenantResourceQuotaOperationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tenantresourcequotaoperation.FieldCreatedAt:
+		return m.CreatedAt()
+	case tenantresourcequotaoperation.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case tenantresourcequotaoperation.FieldTenantID:
+		return m.TenantID()
+	case tenantresourcequotaoperation.FieldResourceKey:
+		return m.ResourceKey()
+	case tenantresourcequotaoperation.FieldOperationType:
+		return m.OperationType()
+	case tenantresourcequotaoperation.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case tenantresourcequotaoperation.FieldAmount:
+		return m.Amount()
+	case tenantresourcequotaoperation.FieldUsedAfter:
+		return m.UsedAfter()
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		return m.UpdatedBy()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TenantResourceQuotaOperationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tenantresourcequotaoperation.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case tenantresourcequotaoperation.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case tenantresourcequotaoperation.FieldTenantID:
+		return m.OldTenantID(ctx)
+	case tenantresourcequotaoperation.FieldResourceKey:
+		return m.OldResourceKey(ctx)
+	case tenantresourcequotaoperation.FieldOperationType:
+		return m.OldOperationType(ctx)
+	case tenantresourcequotaoperation.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case tenantresourcequotaoperation.FieldAmount:
+		return m.OldAmount(ctx)
+	case tenantresourcequotaoperation.FieldUsedAfter:
+		return m.OldUsedAfter(ctx)
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		return m.OldUpdatedBy(ctx)
+	}
+	return nil, fmt.Errorf("unknown TenantResourceQuotaOperation field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantResourceQuotaOperationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tenantresourcequotaoperation.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case tenantresourcequotaoperation.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case tenantresourcequotaoperation.FieldTenantID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
+	case tenantresourcequotaoperation.FieldResourceKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceKey(v)
+		return nil
+	case tenantresourcequotaoperation.FieldOperationType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOperationType(v)
+		return nil
+	case tenantresourcequotaoperation.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case tenantresourcequotaoperation.FieldAmount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmount(v)
+		return nil
+	case tenantresourcequotaoperation.FieldUsedAfter:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUsedAfter(v)
+		return nil
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TenantResourceQuotaOperation field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TenantResourceQuotaOperationMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldAmount)
+	}
+	if m.addused_after != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldUsedAfter)
+	}
+	if m.addupdated_by != nil {
+		fields = append(fields, tenantresourcequotaoperation.FieldUpdatedBy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TenantResourceQuotaOperationMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tenantresourcequotaoperation.FieldAmount:
+		return m.AddedAmount()
+	case tenantresourcequotaoperation.FieldUsedAfter:
+		return m.AddedUsedAfter()
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		return m.AddedUpdatedBy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantResourceQuotaOperationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tenantresourcequotaoperation.FieldAmount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmount(v)
+		return nil
+	case tenantresourcequotaoperation.FieldUsedAfter:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUsedAfter(v)
+		return nil
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TenantResourceQuotaOperation numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TenantResourceQuotaOperationMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tenantresourcequotaoperation.FieldUpdatedBy) {
+		fields = append(fields, tenantresourcequotaoperation.FieldUpdatedBy)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TenantResourceQuotaOperationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TenantResourceQuotaOperationMutation) ClearField(name string) error {
+	switch name {
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		m.ClearUpdatedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantResourceQuotaOperation nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TenantResourceQuotaOperationMutation) ResetField(name string) error {
+	switch name {
+	case tenantresourcequotaoperation.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case tenantresourcequotaoperation.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case tenantresourcequotaoperation.FieldTenantID:
+		m.ResetTenantID()
+		return nil
+	case tenantresourcequotaoperation.FieldResourceKey:
+		m.ResetResourceKey()
+		return nil
+	case tenantresourcequotaoperation.FieldOperationType:
+		m.ResetOperationType()
+		return nil
+	case tenantresourcequotaoperation.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case tenantresourcequotaoperation.FieldAmount:
+		m.ResetAmount()
+		return nil
+	case tenantresourcequotaoperation.FieldUsedAfter:
+		m.ResetUsedAfter()
+		return nil
+	case tenantresourcequotaoperation.FieldUpdatedBy:
+		m.ResetUpdatedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantResourceQuotaOperation field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TenantResourceQuotaOperationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.tenant != nil {
+		edges = append(edges, tenantresourcequotaoperation.EdgeTenant)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TenantResourceQuotaOperationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tenantresourcequotaoperation.EdgeTenant:
+		if id := m.tenant; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TenantResourceQuotaOperationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TenantResourceQuotaOperationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TenantResourceQuotaOperationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedtenant {
+		edges = append(edges, tenantresourcequotaoperation.EdgeTenant)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TenantResourceQuotaOperationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tenantresourcequotaoperation.EdgeTenant:
+		return m.clearedtenant
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TenantResourceQuotaOperationMutation) ClearEdge(name string) error {
+	switch name {
+	case tenantresourcequotaoperation.EdgeTenant:
+		m.ClearTenant()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantResourceQuotaOperation unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TenantResourceQuotaOperationMutation) ResetEdge(name string) error {
+	switch name {
+	case tenantresourcequotaoperation.EdgeTenant:
+		m.ResetTenant()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantResourceQuotaOperation edge %s", name)
 }
 
 // TenantResourceQuotaUsageMutation represents an operation that mutates the TenantResourceQuotaUsage nodes in the graph.

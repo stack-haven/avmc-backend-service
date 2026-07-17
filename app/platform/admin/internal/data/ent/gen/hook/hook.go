@@ -200,6 +200,18 @@ func (f TenantPermissionGroupFunc) Mutate(ctx context.Context, m gen.Mutation) (
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantPermissionGroupMutation", m)
 }
 
+// The TenantResourceQuotaOperationFunc type is an adapter to allow the use of ordinary
+// function as TenantResourceQuotaOperation mutator.
+type TenantResourceQuotaOperationFunc func(context.Context, *gen.TenantResourceQuotaOperationMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TenantResourceQuotaOperationFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.TenantResourceQuotaOperationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantResourceQuotaOperationMutation", m)
+}
+
 // The TenantResourceQuotaUsageFunc type is an adapter to allow the use of ordinary
 // function as TenantResourceQuotaUsage mutator.
 type TenantResourceQuotaUsageFunc func(context.Context, *gen.TenantResourceQuotaUsageMutation) (gen.Value, error)

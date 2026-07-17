@@ -400,6 +400,10 @@ message ConsumeCurrentTenantResourceQuotaRequest {
     (buf.validate.field).int64.gt = 0,
     (gnostic.openapi.v3.property) = {description: "本次占用数量"}
   ];
+  optional string idempotency_key = 3 [
+    (buf.validate.field).string.max_len = 120,
+    (gnostic.openapi.v3.property) = {description: "业务幂等键，同一租户同一操作重复提交时避免重复占用"}
+  ];
 }
 
 message ConsumeCurrentTenantResourceQuotaResponse {
@@ -418,6 +422,10 @@ message ReleaseCurrentTenantResourceQuotaRequest {
   int64 amount = 2 [
     (buf.validate.field).int64.gt = 0,
     (gnostic.openapi.v3.property) = {description: "本次释放数量"}
+  ];
+  optional string idempotency_key = 3 [
+    (buf.validate.field).string.max_len = 120,
+    (gnostic.openapi.v3.property) = {description: "业务幂等键，同一租户同一操作重复提交时避免重复释放"}
   ];
 }
 

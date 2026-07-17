@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"io"
+	"strings"
 	"testing"
 
 	pbCore "backend-service/api/core/service/v1"
@@ -38,7 +39,7 @@ func (r *resourceQuotaRepoStub) GetUsage(_ context.Context, tenantID uint32, res
 	return &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey}, nil
 }
 
-func (r *resourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *resourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
 	usage, _ := r.GetUsage(context.Background(), tenantID, resourceKey)
 	if !unlimited && usage.GetUsed()+amount > limit {
 		return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "资源额度不足")
@@ -48,7 +49,7 @@ func (r *resourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, reso
 	return usage, nil
 }
 
-func (r *resourceQuotaRepoStub) Release(_ context.Context, tenantID uint32, resourceKey string, amount int64, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *resourceQuotaRepoStub) Release(_ context.Context, tenantID uint32, resourceKey string, amount int64, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
 	usage, _ := r.GetUsage(context.Background(), tenantID, resourceKey)
 	usage.Used -= amount
 	if usage.Used < 0 {
@@ -91,7 +92,7 @@ func TestResourceQuotaUsecaseConsumeCheckAndRelease(t *testing.T) {
 		t.Fatalf("check response = %v", check)
 	}
 
-	usage, err := uc.ConsumeCurrent(ctx, "projects", 3)
+	usage, err := uc.ConsumeCurrent(ctx, "projects", 3, "consume-projects-1")
 	if err != nil {
 		t.Fatalf("ConsumeCurrent() error = %v", err)
 	}
@@ -99,11 +100,11 @@ func TestResourceQuotaUsecaseConsumeCheckAndRelease(t *testing.T) {
 		t.Fatalf("usage after consume = %v", usage)
 	}
 
-	if _, err = uc.ConsumeCurrent(ctx, "projects", 3); !errors.IsForbidden(err) {
+	if _, err = uc.ConsumeCurrent(ctx, "projects", 3, "consume-projects-2"); !errors.IsForbidden(err) {
 		t.Fatalf("second consume error = %v, want quota exceeded", err)
 	}
 
-	usage, err = uc.ReleaseCurrent(ctx, "projects", 9)
+	usage, err = uc.ReleaseCurrent(ctx, "projects", 9, "release-projects-1")
 	if err != nil {
 		t.Fatalf("ReleaseCurrent() error = %v", err)
 	}
@@ -122,7 +123,7 @@ func TestResourceQuotaUsecaseTreatsMissingLimitAsUnlimited(t *testing.T) {
 		log.NewStdLogger(io.Discard),
 	)
 
-	usage, err := uc.ConsumeCurrent(ctx, "custom.metric", 100)
+	usage, err := uc.ConsumeCurrent(ctx, "custom.metric", 100, "")
 	if err != nil {
 		t.Fatalf("ConsumeCurrent() unlimited error = %v", err)
 	}
@@ -137,5 +138,23 @@ func TestResourceQuotaUsecaseRequiresTenantContext(t *testing.T) {
 	uc := NewResourceQuotaUsecase(&resourceQuotaRepoStub{}, &menuPermissionGroupRepoStub{}, log.NewStdLogger(io.Discard))
 	if _, err := uc.CheckCurrent(context.Background(), "projects", 1); !errors.IsForbidden(err) {
 		t.Fatalf("missing tenant error = %v, want forbidden", err)
+	}
+}
+
+func TestResourceQuotaUsecaseRejectsInvalidIdempotencyKey(t *testing.T) {
+	t.Parallel()
+
+	ctx := authn.ContextWithAuthUser(context.Background(), resourceQuotaTestUser{subject: "7", tenant: "10"})
+	uc := NewResourceQuotaUsecase(
+		&resourceQuotaRepoStub{},
+		&menuPermissionGroupRepoStub{caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+			TenantId:       10,
+			ResourceQuotas: map[string]int64{"projects": 5},
+		}},
+		log.NewStdLogger(io.Discard),
+	)
+
+	if _, err := uc.ConsumeCurrent(ctx, "projects", 1, strings.Repeat("x", 121)); !errors.IsBadRequest(err) {
+		t.Fatalf("ConsumeCurrent() error = %v, want bad request", err)
 	}
 }

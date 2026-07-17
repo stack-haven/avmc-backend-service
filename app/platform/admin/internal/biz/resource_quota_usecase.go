@@ -16,8 +16,8 @@ import (
 type ResourceQuotaRepo interface {
 	ListUsage(context.Context, uint32) ([]*pbCore.TenantResourceQuotaUsage, error)
 	GetUsage(context.Context, uint32, string) (*pbCore.TenantResourceQuotaUsage, error)
-	Consume(context.Context, uint32, string, int64, int64, bool, uint32) (*pbCore.TenantResourceQuotaUsage, error)
-	Release(context.Context, uint32, string, int64, uint32) (*pbCore.TenantResourceQuotaUsage, error)
+	Consume(context.Context, uint32, string, int64, int64, bool, string, uint32) (*pbCore.TenantResourceQuotaUsage, error)
+	Release(context.Context, uint32, string, int64, string, uint32) (*pbCore.TenantResourceQuotaUsage, error)
 }
 
 type ResourceQuotaUsecase struct {
@@ -95,7 +95,7 @@ func (uc *ResourceQuotaUsecase) CheckCurrent(ctx context.Context, resourceKey st
 	}, nil
 }
 
-func (uc *ResourceQuotaUsecase) ConsumeCurrent(ctx context.Context, resourceKey string, amount int64) (*pbCore.TenantResourceQuotaUsage, error) {
+func (uc *ResourceQuotaUsecase) ConsumeCurrent(ctx context.Context, resourceKey string, amount int64, idempotencyKey string) (*pbCore.TenantResourceQuotaUsage, error) {
 	tenantID, err := currentTenantID(ctx)
 	if err != nil {
 		return nil, err
@@ -107,18 +107,22 @@ func (uc *ResourceQuotaUsecase) ConsumeCurrent(ctx context.Context, resourceKey 
 	if amount <= 0 {
 		return nil, errors.BadRequest("RESOURCE_QUOTA_AMOUNT_INVALID", "资源额度数量必须大于0")
 	}
+	idempotencyKey, err = normalizeQuotaIdempotencyKey(idempotencyKey)
+	if err != nil {
+		return nil, err
+	}
 	limit, unlimited, err := uc.resourceLimit(ctx, tenantID, resourceKey)
 	if err != nil {
 		return nil, err
 	}
-	usage, err := uc.repo.Consume(ctx, tenantID, resourceKey, amount, limit, unlimited, authn.GetAuthUserID(ctx))
+	usage, err := uc.repo.Consume(ctx, tenantID, resourceKey, amount, limit, unlimited, idempotencyKey, authn.GetAuthUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
 	return applyQuotaLimit(usage, limit, unlimited), nil
 }
 
-func (uc *ResourceQuotaUsecase) ReleaseCurrent(ctx context.Context, resourceKey string, amount int64) (*pbCore.TenantResourceQuotaUsage, error) {
+func (uc *ResourceQuotaUsecase) ReleaseCurrent(ctx context.Context, resourceKey string, amount int64, idempotencyKey string) (*pbCore.TenantResourceQuotaUsage, error) {
 	tenantID, err := currentTenantID(ctx)
 	if err != nil {
 		return nil, err
@@ -130,11 +134,15 @@ func (uc *ResourceQuotaUsecase) ReleaseCurrent(ctx context.Context, resourceKey 
 	if amount <= 0 {
 		return nil, errors.BadRequest("RESOURCE_QUOTA_AMOUNT_INVALID", "资源额度数量必须大于0")
 	}
+	idempotencyKey, err = normalizeQuotaIdempotencyKey(idempotencyKey)
+	if err != nil {
+		return nil, err
+	}
 	limit, unlimited, err := uc.resourceLimit(ctx, tenantID, resourceKey)
 	if err != nil {
 		return nil, err
 	}
-	usage, err := uc.repo.Release(ctx, tenantID, resourceKey, amount, authn.GetAuthUserID(ctx))
+	usage, err := uc.repo.Release(ctx, tenantID, resourceKey, amount, idempotencyKey, authn.GetAuthUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +201,14 @@ func normalizeResourceKey(resourceKey string) (string, error) {
 		return "", errors.BadRequest("RESOURCE_QUOTA_KEY_INVALID", "资源额度键必须使用分段小写格式")
 	}
 	return resourceKey, nil
+}
+
+func normalizeQuotaIdempotencyKey(idempotencyKey string) (string, error) {
+	idempotencyKey = strings.TrimSpace(idempotencyKey)
+	if len(idempotencyKey) > 120 {
+		return "", errors.BadRequest("RESOURCE_QUOTA_IDEMPOTENCY_KEY_INVALID", "资源额度幂等键长度不能超过120")
+	}
+	return idempotencyKey, nil
 }
 
 func applyQuotaLimit(usage *pbCore.TenantResourceQuotaUsage, limit int64, unlimited bool) *pbCore.TenantResourceQuotaUsage {

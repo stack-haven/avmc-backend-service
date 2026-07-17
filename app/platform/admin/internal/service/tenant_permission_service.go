@@ -101,7 +101,7 @@ func (s *TenantPermissionServiceService) CheckCurrentTenantResourceQuota(ctx con
 }
 
 func (s *TenantPermissionServiceService) ConsumeCurrentTenantResourceQuota(ctx context.Context, req *pbCore.ConsumeCurrentTenantResourceQuotaRequest) (*pbCore.ConsumeCurrentTenantResourceQuotaResponse, error) {
-	usage, err := s.quota.ConsumeCurrent(ctx, req.GetResourceKey(), req.GetAmount())
+	usage, err := s.quota.ConsumeCurrent(ctx, req.GetResourceKey(), req.GetAmount(), req.GetIdempotencyKey())
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (s *TenantPermissionServiceService) ConsumeCurrentTenantResourceQuota(ctx c
 }
 
 func (s *TenantPermissionServiceService) ReleaseCurrentTenantResourceQuota(ctx context.Context, req *pbCore.ReleaseCurrentTenantResourceQuotaRequest) (*pbCore.ReleaseCurrentTenantResourceQuotaResponse, error) {
-	usage, err := s.quota.ReleaseCurrent(ctx, req.GetResourceKey(), req.GetAmount())
+	usage, err := s.quota.ReleaseCurrent(ctx, req.GetResourceKey(), req.GetAmount(), req.GetIdempotencyKey())
 	if err != nil {
 		return nil, err
 	}

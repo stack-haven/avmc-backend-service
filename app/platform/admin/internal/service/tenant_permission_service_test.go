@@ -143,7 +143,7 @@ func (r *serviceResourceQuotaRepoStub) GetUsage(_ context.Context, tenantID uint
 	return &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey}, nil
 }
 
-func (r *serviceResourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *serviceResourceQuotaRepoStub) Consume(_ context.Context, tenantID uint32, resourceKey string, amount int64, limit int64, unlimited bool, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
 	usage := &pbCore.TenantResourceQuotaUsage{TenantId: tenantID, ResourceKey: resourceKey, Used: amount}
 	if r.usage != nil {
 		usage.Used += r.usage.GetUsed()
@@ -152,7 +152,7 @@ func (r *serviceResourceQuotaRepoStub) Consume(_ context.Context, tenantID uint3
 	return usage, nil
 }
 
-func (r *serviceResourceQuotaRepoStub) Release(_ context.Context, tenantID uint32, resourceKey string, amount int64, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
+func (r *serviceResourceQuotaRepoStub) Release(_ context.Context, tenantID uint32, resourceKey string, amount int64, _ string, _ uint32) (*pbCore.TenantResourceQuotaUsage, error) {
 	used := int64(0)
 	if r.usage != nil {
 		used = r.usage.GetUsed() - amount

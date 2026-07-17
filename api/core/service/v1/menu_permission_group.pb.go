@@ -2339,11 +2339,12 @@ func (x *CheckCurrentTenantResourceQuotaResponse) GetUsage() *TenantResourceQuot
 }
 
 type ConsumeCurrentTenantResourceQuotaRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ResourceKey   string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
-	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ResourceKey    string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
+	Amount         int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	IdempotencyKey *string                `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3,oneof" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ConsumeCurrentTenantResourceQuotaRequest) Reset() {
@@ -2388,6 +2389,13 @@ func (x *ConsumeCurrentTenantResourceQuotaRequest) GetAmount() int64 {
 		return x.Amount
 	}
 	return 0
+}
+
+func (x *ConsumeCurrentTenantResourceQuotaRequest) GetIdempotencyKey() string {
+	if x != nil && x.IdempotencyKey != nil {
+		return *x.IdempotencyKey
+	}
+	return ""
 }
 
 type ConsumeCurrentTenantResourceQuotaResponse struct {
@@ -2435,11 +2443,12 @@ func (x *ConsumeCurrentTenantResourceQuotaResponse) GetUsage() *TenantResourceQu
 }
 
 type ReleaseCurrentTenantResourceQuotaRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ResourceKey   string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
-	Amount        int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ResourceKey    string                 `protobuf:"bytes,1,opt,name=resource_key,json=resourceKey,proto3" json:"resource_key,omitempty"`
+	Amount         int64                  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	IdempotencyKey *string                `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3,oneof" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ReleaseCurrentTenantResourceQuotaRequest) Reset() {
@@ -2484,6 +2493,13 @@ func (x *ReleaseCurrentTenantResourceQuotaRequest) GetAmount() int64 {
 		return x.Amount
 	}
 	return 0
+}
+
+func (x *ReleaseCurrentTenantResourceQuotaRequest) GetIdempotencyKey() string {
+	if x != nil && x.IdempotencyKey != nil {
+		return *x.IdempotencyKey
+	}
+	return ""
 }
 
 type ReleaseCurrentTenantResourceQuotaResponse struct {
@@ -2782,15 +2798,19 @@ const file_core_service_v1_menu_permission_group_proto_rawDesc = "" +
 	"\x06amount\x18\x02 \x01(\x03B%\xbaG\x1b\x92\x02\x18本次预计占用数量\xbaH\x04\"\x02 \x00R\x06amount\"\xbe\x01\n" +
 	"'CheckCurrentTenantResourceQuotaResponse\x122\n" +
 	"\aallowed\x18\x01 \x01(\bB\x18\xbaG\x15\x92\x02\x12是否允许占用R\aallowed\x12_\n" +
-	"\x05usage\x18\x02 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB\x1e\xbaG\x1b\x92\x02\x18当前额度使用情况R\x05usage\"\xcd\x01\n" +
+	"\x05usage\x18\x02 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB\x1e\xbaG\x1b\x92\x02\x18当前额度使用情况R\x05usage\"\xea\x02\n" +
 	"(ConsumeCurrentTenantResourceQuotaRequest\x12h\n" +
 	"\fresource_key\x18\x01 \x01(\tBE\xbaG\x12\x92\x02\x0f资源额度键\xbaH-r+\x10\x01\x18d2%^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$R\vresourceKey\x127\n" +
-	"\x06amount\x18\x02 \x01(\x03B\x1f\xbaG\x15\x92\x02\x12本次占用数量\xbaH\x04\"\x02 \x00R\x06amount\"\x92\x01\n" +
+	"\x06amount\x18\x02 \x01(\x03B\x1f\xbaG\x15\x92\x02\x12本次占用数量\xbaH\x04\"\x02 \x00R\x06amount\x12\x86\x01\n" +
+	"\x0fidempotency_key\x18\x03 \x01(\tBX\xbaGN\x92\x02K业务幂等键，同一租户同一操作重复提交时避免重复占用\xbaH\x04r\x02\x18xH\x00R\x0eidempotencyKey\x88\x01\x01B\x12\n" +
+	"\x10_idempotency_key\"\x92\x01\n" +
 	")ConsumeCurrentTenantResourceQuotaResponse\x12e\n" +
-	"\x05usage\x18\x01 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB$\xbaG!\x92\x02\x1e占用后的额度使用情况R\x05usage\"\xcd\x01\n" +
+	"\x05usage\x18\x01 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB$\xbaG!\x92\x02\x1e占用后的额度使用情况R\x05usage\"\xea\x02\n" +
 	"(ReleaseCurrentTenantResourceQuotaRequest\x12h\n" +
 	"\fresource_key\x18\x01 \x01(\tBE\xbaG\x12\x92\x02\x0f资源额度键\xbaH-r+\x10\x01\x18d2%^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)*$R\vresourceKey\x127\n" +
-	"\x06amount\x18\x02 \x01(\x03B\x1f\xbaG\x15\x92\x02\x12本次释放数量\xbaH\x04\"\x02 \x00R\x06amount\"\x92\x01\n" +
+	"\x06amount\x18\x02 \x01(\x03B\x1f\xbaG\x15\x92\x02\x12本次释放数量\xbaH\x04\"\x02 \x00R\x06amount\x12\x86\x01\n" +
+	"\x0fidempotency_key\x18\x03 \x01(\tBX\xbaGN\x92\x02K业务幂等键，同一租户同一操作重复提交时避免重复释放\xbaH\x04r\x02\x18xH\x00R\x0eidempotencyKey\x88\x01\x01B\x12\n" +
+	"\x10_idempotency_key\"\x92\x01\n" +
 	")ReleaseCurrentTenantResourceQuotaResponse\x12e\n" +
 	"\x05usage\x18\x01 \x01(\v2).core.service.v1.TenantResourceQuotaUsageB$\xbaG!\x92\x02\x1e释放后的额度使用情况R\x05usage*\xbd\x01\n" +
 	"\x1fMenuPermissionGroupVersionState\x123\n" +
@@ -2969,6 +2989,8 @@ func file_core_service_v1_menu_permission_group_proto_init() {
 	file_core_service_v1_menu_permission_group_proto_msgTypes[27].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[29].OneofWrappers = []any{}
 	file_core_service_v1_menu_permission_group_proto_msgTypes[32].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[37].OneofWrappers = []any{}
+	file_core_service_v1_menu_permission_group_proto_msgTypes[39].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

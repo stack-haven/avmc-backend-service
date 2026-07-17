@@ -495,6 +495,30 @@ func (f TenantPermissionGroupMutationRuleFunc) EvalMutation(ctx context.Context,
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantPermissionGroupMutation", m)
 }
 
+// The TenantResourceQuotaOperationQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type TenantResourceQuotaOperationQueryRuleFunc func(context.Context, *gen.TenantResourceQuotaOperationQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f TenantResourceQuotaOperationQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantResourceQuotaOperationQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantResourceQuotaOperationQuery", q)
+}
+
+// The TenantResourceQuotaOperationMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type TenantResourceQuotaOperationMutationRuleFunc func(context.Context, *gen.TenantResourceQuotaOperationMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f TenantResourceQuotaOperationMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.TenantResourceQuotaOperationMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantResourceQuotaOperationMutation", m)
+}
+
 // The TenantResourceQuotaUsageQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type TenantResourceQuotaUsageQueryRuleFunc func(context.Context, *gen.TenantResourceQuotaUsageQuery) error
@@ -610,6 +634,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.TenantPermissionGroupQuery:
 		return q.Filter(), nil
+	case *gen.TenantResourceQuotaOperationQuery:
+		return q.Filter(), nil
 	case *gen.TenantResourceQuotaUsageQuery:
 		return q.Filter(), nil
 	case *gen.UserQuery:
@@ -652,6 +678,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.TenantParameterOverrideMutation:
 		return m.Filter(), nil
 	case *gen.TenantPermissionGroupMutation:
+		return m.Filter(), nil
+	case *gen.TenantResourceQuotaOperationMutation:
 		return m.Filter(), nil
 	case *gen.TenantResourceQuotaUsageMutation:
 		return m.Filter(), nil

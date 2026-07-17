@@ -19,6 +19,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"context"
@@ -90,24 +91,25 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			asynctask.Table:                  asynctask.ValidColumn,
-			dept.Table:                       dept.ValidColumn,
-			dictionaryitem.Table:             dictionaryitem.ValidColumn,
-			dictionarytype.Table:             dictionarytype.ValidColumn,
-			loginlog.Table:                   loginlog.ValidColumn,
-			menu.Table:                       menu.ValidColumn,
-			menupermissiongroup.Table:        menupermissiongroup.ValidColumn,
-			menupermissiongroupversion.Table: menupermissiongroupversion.ValidColumn,
-			operationlog.Table:               operationlog.ValidColumn,
-			parameterdefinition.Table:        parameterdefinition.ValidColumn,
-			post.Table:                       post.ValidColumn,
-			project.Table:                    project.ValidColumn,
-			role.Table:                       role.ValidColumn,
-			tenant.Table:                     tenant.ValidColumn,
-			tenantparameteroverride.Table:    tenantparameteroverride.ValidColumn,
-			tenantpermissiongroup.Table:      tenantpermissiongroup.ValidColumn,
-			tenantresourcequotausage.Table:   tenantresourcequotausage.ValidColumn,
-			user.Table:                       user.ValidColumn,
+			asynctask.Table:                    asynctask.ValidColumn,
+			dept.Table:                         dept.ValidColumn,
+			dictionaryitem.Table:               dictionaryitem.ValidColumn,
+			dictionarytype.Table:               dictionarytype.ValidColumn,
+			loginlog.Table:                     loginlog.ValidColumn,
+			menu.Table:                         menu.ValidColumn,
+			menupermissiongroup.Table:          menupermissiongroup.ValidColumn,
+			menupermissiongroupversion.Table:   menupermissiongroupversion.ValidColumn,
+			operationlog.Table:                 operationlog.ValidColumn,
+			parameterdefinition.Table:          parameterdefinition.ValidColumn,
+			post.Table:                         post.ValidColumn,
+			project.Table:                      project.ValidColumn,
+			role.Table:                         role.ValidColumn,
+			tenant.Table:                       tenant.ValidColumn,
+			tenantparameteroverride.Table:      tenantparameteroverride.ValidColumn,
+			tenantpermissiongroup.Table:        tenantpermissiongroup.ValidColumn,
+			tenantresourcequotaoperation.Table: tenantresourcequotaoperation.ValidColumn,
+			tenantresourcequotausage.Table:     tenantresourcequotausage.ValidColumn,
+			user.Table:                         user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
