@@ -285,6 +285,23 @@ func TestAsyncTaskOperationsRequirePlatformIdentity(t *testing.T) {
 	}
 }
 
+func TestFileCenterOperationsRemainTenantDataPlane(t *testing.T) {
+	t.Parallel()
+
+	for _, operation := range []string{
+		v1.OperationFileCenterServiceCreateFileUploadSession,
+		v1.OperationFileCenterServiceConfirmFileUpload,
+		v1.OperationFileCenterServiceGetFileObject,
+		v1.OperationFileCenterServiceListFileObjects,
+		v1.OperationFileCenterServicePresignFileDownload,
+		v1.OperationFileCenterServiceDeleteFileObject,
+	} {
+		if IsPlatformControlOperation(operation) {
+			t.Fatalf("file center operation must remain tenant data-plane: %s", operation)
+		}
+	}
+}
+
 func TestPoliciesForRoleDoNotIncludeLoginWhitelist(t *testing.T) {
 	policies := PoliciesForRole("super_admin", "1")
 	for _, policy := range policies {

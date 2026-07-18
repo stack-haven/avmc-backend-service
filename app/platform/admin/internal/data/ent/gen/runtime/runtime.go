@@ -7,6 +7,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
@@ -373,6 +374,169 @@ func init() {
 	dictionarytypeDescID := dictionarytypeMixinFields0[0].Descriptor()
 	// dictionarytype.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	dictionarytype.IDValidator = dictionarytypeDescID.Validators[0].(func(uint32) error)
+	fileobjectMixin := schema.FileObject{}.Mixin()
+	fileobject.Policy = privacy.NewPolicies(fileobjectMixin[0], schema.FileObject{})
+	fileobject.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := fileobject.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	fileobjectMixinHooks1 := fileobjectMixin[1].Hooks()
+
+	fileobject.Hooks[1] = fileobjectMixinHooks1[0]
+	fileobjectMixinInters1 := fileobjectMixin[1].Interceptors()
+	fileobject.Interceptors[0] = fileobjectMixinInters1[0]
+	fileobjectMixinFields0 := fileobjectMixin[0].Fields()
+	_ = fileobjectMixinFields0
+	fileobjectFields := schema.FileObject{}.Fields()
+	_ = fileobjectFields
+	// fileobjectDescCreatedAt is the schema descriptor for created_at field.
+	fileobjectDescCreatedAt := fileobjectMixinFields0[1].Descriptor()
+	// fileobject.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fileobject.DefaultCreatedAt = fileobjectDescCreatedAt.Default.(func() time.Time)
+	// fileobjectDescUpdatedAt is the schema descriptor for updated_at field.
+	fileobjectDescUpdatedAt := fileobjectMixinFields0[2].Descriptor()
+	// fileobject.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fileobject.DefaultUpdatedAt = fileobjectDescUpdatedAt.Default.(func() time.Time)
+	// fileobject.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fileobject.UpdateDefaultUpdatedAt = fileobjectDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// fileobjectDescStatus is the schema descriptor for status field.
+	fileobjectDescStatus := fileobjectMixinFields0[3].Descriptor()
+	// fileobject.DefaultStatus holds the default value on creation for the status field.
+	fileobject.DefaultStatus = fileobjectDescStatus.Default.(int32)
+	// fileobject.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	fileobject.StatusValidator = func() func(int32) error {
+		validators := fileobjectDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileobjectDescTenantID is the schema descriptor for tenant_id field.
+	fileobjectDescTenantID := fileobjectMixinFields0[4].Descriptor()
+	// fileobject.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	fileobject.TenantIDValidator = fileobjectDescTenantID.Validators[0].(func(uint32) error)
+	// fileobjectDescFileName is the schema descriptor for file_name field.
+	fileobjectDescFileName := fileobjectFields[0].Descriptor()
+	// fileobject.FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
+	fileobject.FileNameValidator = func() func(string) error {
+		validators := fileobjectDescFileName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(file_name string) error {
+			for _, fn := range fns {
+				if err := fn(file_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileobjectDescContentType is the schema descriptor for content_type field.
+	fileobjectDescContentType := fileobjectFields[1].Descriptor()
+	// fileobject.DefaultContentType holds the default value on creation for the content_type field.
+	fileobject.DefaultContentType = fileobjectDescContentType.Default.(string)
+	// fileobject.ContentTypeValidator is a validator for the "content_type" field. It is called by the builders before save.
+	fileobject.ContentTypeValidator = fileobjectDescContentType.Validators[0].(func(string) error)
+	// fileobjectDescSize is the schema descriptor for size field.
+	fileobjectDescSize := fileobjectFields[2].Descriptor()
+	// fileobject.DefaultSize holds the default value on creation for the size field.
+	fileobject.DefaultSize = fileobjectDescSize.Default.(int64)
+	// fileobject.SizeValidator is a validator for the "size" field. It is called by the builders before save.
+	fileobject.SizeValidator = fileobjectDescSize.Validators[0].(func(int64) error)
+	// fileobjectDescSha256 is the schema descriptor for sha256 field.
+	fileobjectDescSha256 := fileobjectFields[3].Descriptor()
+	// fileobject.DefaultSha256 holds the default value on creation for the sha256 field.
+	fileobject.DefaultSha256 = fileobjectDescSha256.Default.(string)
+	// fileobject.Sha256Validator is a validator for the "sha256" field. It is called by the builders before save.
+	fileobject.Sha256Validator = fileobjectDescSha256.Validators[0].(func(string) error)
+	// fileobjectDescEtag is the schema descriptor for etag field.
+	fileobjectDescEtag := fileobjectFields[4].Descriptor()
+	// fileobject.DefaultEtag holds the default value on creation for the etag field.
+	fileobject.DefaultEtag = fileobjectDescEtag.Default.(string)
+	// fileobject.EtagValidator is a validator for the "etag" field. It is called by the builders before save.
+	fileobject.EtagValidator = fileobjectDescEtag.Validators[0].(func(string) error)
+	// fileobjectDescProvider is the schema descriptor for provider field.
+	fileobjectDescProvider := fileobjectFields[5].Descriptor()
+	// fileobject.DefaultProvider holds the default value on creation for the provider field.
+	fileobject.DefaultProvider = fileobjectDescProvider.Default.(string)
+	// fileobject.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	fileobject.ProviderValidator = fileobjectDescProvider.Validators[0].(func(string) error)
+	// fileobjectDescBucket is the schema descriptor for bucket field.
+	fileobjectDescBucket := fileobjectFields[6].Descriptor()
+	// fileobject.BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
+	fileobject.BucketValidator = func() func(string) error {
+		validators := fileobjectDescBucket.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(bucket string) error {
+			for _, fn := range fns {
+				if err := fn(bucket); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileobjectDescObjectKey is the schema descriptor for object_key field.
+	fileobjectDescObjectKey := fileobjectFields[7].Descriptor()
+	// fileobject.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
+	fileobject.ObjectKeyValidator = func() func(string) error {
+		validators := fileobjectDescObjectKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(object_key string) error {
+			for _, fn := range fns {
+				if err := fn(object_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileobjectDescBusinessType is the schema descriptor for business_type field.
+	fileobjectDescBusinessType := fileobjectFields[8].Descriptor()
+	// fileobject.DefaultBusinessType holds the default value on creation for the business_type field.
+	fileobject.DefaultBusinessType = fileobjectDescBusinessType.Default.(string)
+	// fileobject.BusinessTypeValidator is a validator for the "business_type" field. It is called by the builders before save.
+	fileobject.BusinessTypeValidator = fileobjectDescBusinessType.Validators[0].(func(string) error)
+	// fileobjectDescBusinessID is the schema descriptor for business_id field.
+	fileobjectDescBusinessID := fileobjectFields[9].Descriptor()
+	// fileobject.DefaultBusinessID holds the default value on creation for the business_id field.
+	fileobject.DefaultBusinessID = fileobjectDescBusinessID.Default.(string)
+	// fileobject.BusinessIDValidator is a validator for the "business_id" field. It is called by the builders before save.
+	fileobject.BusinessIDValidator = fileobjectDescBusinessID.Validators[0].(func(string) error)
+	// fileobjectDescVisibility is the schema descriptor for visibility field.
+	fileobjectDescVisibility := fileobjectFields[10].Descriptor()
+	// fileobject.DefaultVisibility holds the default value on creation for the visibility field.
+	fileobject.DefaultVisibility = fileobjectDescVisibility.Default.(string)
+	// fileobject.VisibilityValidator is a validator for the "visibility" field. It is called by the builders before save.
+	fileobject.VisibilityValidator = fileobjectDescVisibility.Validators[0].(func(string) error)
+	// fileobjectDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	fileobjectDescIdempotencyKey := fileobjectFields[11].Descriptor()
+	// fileobject.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	fileobject.IdempotencyKeyValidator = fileobjectDescIdempotencyKey.Validators[0].(func(string) error)
+	// fileobjectDescID is the schema descriptor for id field.
+	fileobjectDescID := fileobjectMixinFields0[0].Descriptor()
+	// fileobject.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	fileobject.IDValidator = fileobjectDescID.Validators[0].(func(uint32) error)
 	loginlogMixin := schema.LoginLog{}.Mixin()
 	loginlog.Policy = privacy.NewPolicies(loginlogMixin[2], schema.LoginLog{})
 	loginlog.Hooks[0] = func(next ent.Mutator) ent.Mutator {

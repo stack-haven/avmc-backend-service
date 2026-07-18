@@ -11,6 +11,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
@@ -193,6 +194,33 @@ func (f TraverseDictionaryType) Traverse(ctx context.Context, q gen.Query) error
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryTypeQuery", q)
+}
+
+// The FileObjectFunc type is an adapter to allow the use of ordinary function as a Querier.
+type FileObjectFunc func(context.Context, *gen.FileObjectQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f FileObjectFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.FileObjectQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.FileObjectQuery", q)
+}
+
+// The TraverseFileObject type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseFileObject func(context.Context, *gen.FileObjectQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseFileObject) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseFileObject) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.FileObjectQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.FileObjectQuery", q)
 }
 
 // The LoginLogFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -611,6 +639,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.DictionaryItemQuery, predicate.DictionaryItem, dictionaryitem.OrderOption]{typ: gen.TypeDictionaryItem, tq: q}, nil
 	case *gen.DictionaryTypeQuery:
 		return &query[*gen.DictionaryTypeQuery, predicate.DictionaryType, dictionarytype.OrderOption]{typ: gen.TypeDictionaryType, tq: q}, nil
+	case *gen.FileObjectQuery:
+		return &query[*gen.FileObjectQuery, predicate.FileObject, fileobject.OrderOption]{typ: gen.TypeFileObject, tq: q}, nil
 	case *gen.LoginLogQuery:
 		return &query[*gen.LoginLogQuery, predicate.LoginLog, loginlog.OrderOption]{typ: gen.TypeLoginLog, tq: q}, nil
 	case *gen.MenuQuery:

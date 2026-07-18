@@ -68,7 +68,7 @@ func run(logger log.Logger) error {
 	if err != nil {
 		return err
 	}
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Oss, logger)
 	if err != nil {
 		return err
 	}

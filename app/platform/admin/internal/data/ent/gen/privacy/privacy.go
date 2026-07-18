@@ -207,6 +207,30 @@ func (f DictionaryTypeMutationRuleFunc) EvalMutation(ctx context.Context, m gen.
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.DictionaryTypeMutation", m)
 }
 
+// The FileObjectQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type FileObjectQueryRuleFunc func(context.Context, *gen.FileObjectQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f FileObjectQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.FileObjectQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.FileObjectQuery", q)
+}
+
+// The FileObjectMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type FileObjectMutationRuleFunc func(context.Context, *gen.FileObjectMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f FileObjectMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.FileObjectMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.FileObjectMutation", m)
+}
+
 // The LoginLogQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type LoginLogQueryRuleFunc func(context.Context, *gen.LoginLogQuery) error
@@ -610,6 +634,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.DictionaryTypeQuery:
 		return q.Filter(), nil
+	case *gen.FileObjectQuery:
+		return q.Filter(), nil
 	case *gen.LoginLogQuery:
 		return q.Filter(), nil
 	case *gen.MenuQuery:
@@ -654,6 +680,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.DictionaryItemMutation:
 		return m.Filter(), nil
 	case *gen.DictionaryTypeMutation:
+		return m.Filter(), nil
+	case *gen.FileObjectMutation:
 		return m.Filter(), nil
 	case *gen.LoginLogMutation:
 		return m.Filter(), nil

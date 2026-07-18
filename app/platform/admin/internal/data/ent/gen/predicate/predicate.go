@@ -18,6 +18,9 @@ type DictionaryItem func(*sql.Selector)
 // DictionaryType is the predicate function for dictionarytype builders.
 type DictionaryType func(*sql.Selector)
 
+// FileObject is the predicate function for fileobject builders.
+type FileObject func(*sql.Selector)
+
 // LoginLog is the predicate function for loginlog builders.
 type LoginLog func(*sql.Selector)
 

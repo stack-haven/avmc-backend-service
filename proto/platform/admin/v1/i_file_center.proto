@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/file.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service FileCenterService {
+  rpc CreateFileUploadSession(core.service.v1.CreateFileUploadSessionRequest) returns (core.service.v1.CreateFileUploadSessionResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/files/upload-sessions"
+      body: "*"
+    };
+  }
+  rpc ConfirmFileUpload(core.service.v1.ConfirmFileUploadRequest) returns (core.service.v1.ConfirmFileUploadResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/files/{id}:confirm"
+      body: "*"
+    };
+  }
+  rpc GetFileObject(core.service.v1.GetFileObjectRequest) returns (core.service.v1.FileObject) {
+    option (google.api.http) = {get: "/admin/v1/files/{id}"};
+  }
+  rpc ListFileObjects(core.service.v1.ListFileObjectsRequest) returns (core.service.v1.ListFileObjectsResponse) {
+    option (google.api.http) = {get: "/admin/v1/files"};
+  }
+  rpc PresignFileDownload(core.service.v1.PresignFileDownloadRequest) returns (core.service.v1.PresignFileDownloadResponse) {
+    option (google.api.http) = {get: "/admin/v1/files/{id}:download-url"};
+  }
+  rpc DeleteFileObject(core.service.v1.DeleteFileObjectRequest) returns (core.service.v1.DeleteFileObjectResponse) {
+    option (google.api.http) = {delete: "/admin/v1/files/{id}"};
+  }
+}

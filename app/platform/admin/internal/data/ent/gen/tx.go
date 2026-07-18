@@ -22,6 +22,8 @@ type Tx struct {
 	DictionaryItem *DictionaryItemClient
 	// DictionaryType is the client for interacting with the DictionaryType builders.
 	DictionaryType *DictionaryTypeClient
+	// FileObject is the client for interacting with the FileObject builders.
+	FileObject *FileObjectClient
 	// LoginLog is the client for interacting with the LoginLog builders.
 	LoginLog *LoginLogClient
 	// Menu is the client for interacting with the Menu builders.
@@ -187,6 +189,7 @@ func (tx *Tx) init() {
 	tx.Dept = NewDeptClient(tx.config)
 	tx.DictionaryItem = NewDictionaryItemClient(tx.config)
 	tx.DictionaryType = NewDictionaryTypeClient(tx.config)
+	tx.FileObject = NewFileObjectClient(tx.config)
 	tx.LoginLog = NewLoginLogClient(tx.config)
 	tx.Menu = NewMenuClient(tx.config)
 	tx.MenuPermissionGroup = NewMenuPermissionGroupClient(tx.config)

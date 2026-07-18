@@ -183,6 +183,64 @@ var (
 			},
 		},
 	}
+	// FileObjectsColumns holds the columns for the "file_objects" table.
+	FileObjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "file_name", Type: field.TypeString, Size: 255, Comment: "原始文件名"},
+		{Name: "content_type", Type: field.TypeString, Size: 120, Comment: "文件MIME类型", Default: "application/octet-stream"},
+		{Name: "size", Type: field.TypeInt64, Comment: "文件大小", Default: 0},
+		{Name: "sha256", Type: field.TypeString, Size: 64, Comment: "文件SHA256", Default: ""},
+		{Name: "etag", Type: field.TypeString, Size: 120, Comment: "对象存储ETag", Default: ""},
+		{Name: "provider", Type: field.TypeString, Size: 50, Comment: "存储渠道", Default: "s3-compatible"},
+		{Name: "bucket", Type: field.TypeString, Size: 120, Comment: "存储桶"},
+		{Name: "object_key", Type: field.TypeString, Size: 500, Comment: "对象Key"},
+		{Name: "business_type", Type: field.TypeString, Size: 80, Comment: "业务类型", Default: ""},
+		{Name: "business_id", Type: field.TypeString, Size: 120, Comment: "业务ID", Default: ""},
+		{Name: "visibility", Type: field.TypeString, Size: 20, Comment: "可见性 private/public", Default: "private"},
+		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 120, Comment: "创建幂等键"},
+		{Name: "upload_expires_at", Type: field.TypeTime, Comment: "上传凭证过期时间"},
+		{Name: "confirmed_at", Type: field.TypeTime, Nullable: true, Comment: "上传确认时间"},
+		{Name: "created_by", Type: field.TypeUint32, Nullable: true, Comment: "创建人ID"},
+	}
+	// FileObjectsTable holds the schema information for the "file_objects" table.
+	FileObjectsTable = &schema.Table{
+		Name:       "file_objects",
+		Comment:    "文件中心对象元数据表",
+		Columns:    FileObjectsColumns,
+		PrimaryKey: []*schema.Column{FileObjectsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "fileobject_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{FileObjectsColumns[4]},
+			},
+			{
+				Name:    "fileobject_tenant_id_object_key",
+				Unique:  true,
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[13]},
+			},
+			{
+				Name:    "fileobject_tenant_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[17]},
+			},
+			{
+				Name:    "fileobject_tenant_id_business_type_business_id",
+				Unique:  false,
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[14], FileObjectsColumns[15]},
+			},
+			{
+				Name:    "fileobject_tenant_id_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[3], FileObjectsColumns[1]},
+			},
+		},
+	}
 	// LoginLogsColumns holds the columns for the "login_logs" table.
 	LoginLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1142,6 +1200,7 @@ var (
 		DeptsTable,
 		DictionaryItemsTable,
 		DictionaryTypesTable,
+		FileObjectsTable,
 		LoginLogsTable,
 		MenusTable,
 		MenuPermissionGroupsTable,
@@ -1182,6 +1241,10 @@ func init() {
 		Collation: "utf8mb4_bin",
 	}
 	DictionaryTypesTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	FileObjectsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
