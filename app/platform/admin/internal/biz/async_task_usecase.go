@@ -222,11 +222,15 @@ type permissionCacheInvalidationHandler struct {
 	invalidator PermissionCacheInvalidator
 }
 
-func NewAsyncTaskHandlers(repo AsyncTaskRepo, invalidator PermissionCacheInvalidator) []AsyncTaskHandler {
-	return []AsyncTaskHandler{
+func NewAsyncTaskHandlers(repo AsyncTaskRepo, invalidator PermissionCacheInvalidator, notification AsyncTaskHandler) []AsyncTaskHandler {
+	handlers := []AsyncTaskHandler{
 		&retentionCleanupHandler{repo: repo},
 		&permissionCacheInvalidationHandler{invalidator: invalidator},
 	}
+	if notification != nil {
+		handlers = append(handlers, notification)
+	}
+	return handlers
 }
 
 func (h *retentionCleanupHandler) Type() string { return AsyncTaskTypeRetentionCleanup }

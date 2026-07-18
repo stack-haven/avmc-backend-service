@@ -27,6 +27,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
@@ -312,6 +314,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	notificationMenu, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemNotification", Title: "通知中心", Path: "/system/notification", Component: "/system/notification/list", Icon: "mdi:bell-outline", Type: 2, Sort: 135,
+	}, systemMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	fileCenterMenu, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemFileCenter", Title: "文件中心", Path: "/system/file-center", Component: "/system/file-center/list", Icon: "mdi:file-cloud-outline", Type: 2, Sort: 140,
 	}, systemMenu.ID)
@@ -414,6 +422,24 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	notificationTemplateButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemNotificationTemplate", Title: "模板管理", Path: "/system/notification:template", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.NotificationService/ListNotificationTemplates",
+	}, notificationMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	notificationMessageButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemNotificationMessage", Title: "通知记录", Path: "/system/notification:message", Type: 3, Sort: 20, AuthCode: "/platform.admin.v1.NotificationService/ListNotificationMessages",
+	}, notificationMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	notificationSendButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemNotificationSend", Title: "发送站内信", Path: "/system/notification:send", Type: 3, Sort: 30, AuthCode: "/platform.admin.v1.NotificationService/SendInAppNotification",
+	}, notificationMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	storageProviderListButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemStorageProviderList", Title: "存储渠道查看", Path: "/system/storage-provider:list", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.StorageProviderService/ListStorageProviders",
 	}, storageProviderMenu.ID)
@@ -429,10 +455,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 
 	basicPermissionMenuIDs := []uint32{projectListButton.ID, roleListButton.ID, deptListButton.ID, userListButton.ID, parameterCurrentButton.ID}
 	fileCenterMenuIDs := []uint32{fileCenterMenu.ID, fileListButton.ID, fileDetailButton.ID, fileUploadButton.ID, fileContentUploadButton.ID, fileConfirmButton.ID, fileDownloadButton.ID, fileAccessLogButton.ID, fileDeleteButton.ID}
+	notificationMenuIDs := []uint32{notificationMenu.ID, notificationTemplateButton.ID, notificationMessageButton.ID, notificationSendButton.ID}
 	storageProviderMenuIDs := []uint32{storageProviderMenu.ID, storageProviderListButton.ID, storageProviderManageButton.ID}
 	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, parameterMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, asyncTaskMenu.ID, userCreateButton.ID, parameterManageButton.ID}
 	fullMenuIDs = append(fullMenuIDs, basicPermissionMenuIDs...)
 	fullMenuIDs = append(fullMenuIDs, fileCenterMenuIDs...)
+	fullMenuIDs = append(fullMenuIDs, notificationMenuIDs...)
 	fullMenuIDs = append(fullMenuIDs, storageProviderMenuIDs...)
 	basicMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, roleMenu.ID, deptMenu.ID, userMenu.ID, parameterMenu.ID}
 	basicMenuIDs = append(basicMenuIDs, basicPermissionMenuIDs...)
@@ -596,6 +624,9 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		return nil, err
 	}
 	if err := seedFileAccessLogs(ctx, client, admin.ID, tenantTwo.ID); err != nil {
+		return nil, err
+	}
+	if err := seedNotifications(ctx, client, admin.ID, vben.ID, tenantTwo.ID); err != nil {
 		return nil, err
 	}
 	if err := seedAsyncTasks(ctx, client, admin.ID); err != nil {
@@ -873,12 +904,14 @@ func mockPackageCapabilities(code string) ([]string, map[string]bool, map[string
 				"platform.admin.audit.read",
 				"platform.admin.async_task.manage",
 				"platform.admin.file.manage",
+				"platform.admin.notification.manage",
 				"platform.admin.tenant.manage",
 				"platform.admin.webhook.manage",
 			},
 			map[string]bool{
 				"advanced_reports": true,
 				"file_center":      true,
+				"notification":     true,
 				"webhook_center":   true,
 			},
 			map[string]int64{
@@ -897,6 +930,7 @@ func mockPackageCapabilities(code string) ([]string, map[string]bool, map[string
 			map[string]bool{
 				"advanced_reports": false,
 				"file_center":      false,
+				"notification":     false,
 				"webhook_center":   false,
 			},
 			map[string]int64{
@@ -1398,16 +1432,128 @@ func seedParameters(ctx context.Context, client *gen.Client, tenantOneOperator, 
 	return nil
 }
 
+func seedNotifications(ctx context.Context, client *gen.Client, tenantOneAdmin, tenantOneUser, tenantTwoUser uint32) error {
+	templates := []struct {
+		tenantID uint32
+		code     string
+		name     string
+		title    string
+		content  string
+		remark   string
+	}{
+		{1, "system.welcome", "系统欢迎通知", "欢迎使用 {{tenantName}}", "你好 {{userName}}，你的租户工作台已完成初始化。", "租户开通后发送给管理员"},
+		{1, "quota.warning", "资源额度预警", "{{resourceName}} 使用量预警", "{{resourceName}} 当前使用量已达到 {{usagePercent}}，请及时扩容或清理。", "资源额度接近上限时发送"},
+		{2, "system.welcome", "租户二欢迎通知", "欢迎使用租户二工作台", "你的租户二演示环境已准备完成。", "用于验证跨租户隔离"},
+	}
+	for _, tpl := range templates {
+		item, err := client.NotificationTemplate.Query().
+			Where(notificationtemplate.TenantIDEQ(tpl.tenantID), notificationtemplate.CodeEQ(tpl.code)).
+			Only(ctx)
+		if gen.IsNotFound(err) {
+			_, err = client.NotificationTemplate.Create().
+				SetTenantID(tpl.tenantID).
+				SetCode(tpl.code).
+				SetName(tpl.name).
+				SetChannel(int32(pbCore.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP)).
+				SetTitle(tpl.title).
+				SetContent(tpl.content).
+				SetVariableSchema(`{"type":"object"}`).
+				SetLocale("zh-CN").
+				SetStatus(1).
+				SetRemark(tpl.remark).
+				Save(ctx)
+		} else if err == nil {
+			_, err = item.Update().
+				SetName(tpl.name).
+				SetChannel(int32(pbCore.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP)).
+				SetTitle(tpl.title).
+				SetContent(tpl.content).
+				SetVariableSchema(`{"type":"object"}`).
+				SetLocale("zh-CN").
+				SetStatus(1).
+				SetRemark(tpl.remark).
+				Save(ctx)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	messages := []struct {
+		tenantID    uint32
+		recipientID uint32
+		title       string
+		content     string
+		status      pbCore.NotificationMessageStatus
+		business    string
+	}{
+		{1, tenantOneAdmin, "租户开通完成", "演示租户已完成初始化，套餐和基础角色已绑定。", pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD, "tenant"},
+		{1, tenantOneAdmin, "文件中心额度提醒", "当前文件中心已启用 files 和 storage.bytes 额度闭环。", pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD, "quota"},
+		{1, tenantOneUser, "待处理任务", "你有一条模拟异步任务需要关注。", pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_READ, "async_task"},
+		{2, tenantTwoUser, "租户二初始化完成", "租户二基础演示数据已准备完成。", pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD, "tenant"},
+	}
+	for _, msg := range messages {
+		item, err := client.NotificationMessage.Query().
+			Where(
+				notificationmessage.TenantIDEQ(msg.tenantID),
+				notificationmessage.RecipientUserIDEQ(msg.recipientID),
+				notificationmessage.TitleEQ(msg.title),
+			).
+			Only(ctx)
+		if gen.IsNotFound(err) {
+			builder := client.NotificationMessage.Create().
+				SetTenantID(msg.tenantID).
+				SetRecipientUserID(msg.recipientID).
+				SetChannel(int32(pbCore.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP)).
+				SetTitle(msg.title).
+				SetContent(msg.content).
+				SetMessageStatus(int32(msg.status)).
+				SetPriority(0).
+				SetBusinessType(msg.business).
+				SetBusinessID("mock").
+				SetSenderUserID(tenantOneAdmin).
+				SetSenderName("admin")
+			if msg.status == pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_READ {
+				builder.SetReadAt(time.Now().Add(-time.Hour))
+			}
+			_, err = builder.Save(ctx)
+		} else if err == nil {
+			update := item.Update().
+				SetChannel(int32(pbCore.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP)).
+				SetContent(msg.content).
+				SetMessageStatus(int32(msg.status)).
+				SetBusinessType(msg.business).
+				SetBusinessID("mock").
+				SetSenderUserID(tenantOneAdmin).
+				SetSenderName("admin")
+			if msg.status == pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_READ {
+				update.SetReadAt(time.Now().Add(-time.Hour))
+			} else {
+				update.ClearReadAt()
+			}
+			_, err = update.Save(ctx)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func seedAsyncTasks(ctx context.Context, client *gen.Client, operatorID uint32) error {
 	type taskSpec struct {
-		key           string
-		tenantID      *uint32
-		status        pbCore.AsyncTaskStatus
-		attempts      int32
-		scheduledAt   time.Time
-		completedAt   *time.Time
-		resultSummary string
-		lastError     string
+		key            string
+		tenantID       *uint32
+		taskType       string
+		queue          string
+		payload        string
+		payloadSummary string
+		status         pbCore.AsyncTaskStatus
+		attempts       int32
+		scheduledAt    time.Time
+		completedAt    *time.Time
+		resultSummary  string
+		lastError      string
 	}
 	now := time.Now()
 	tenantOne := uint32(1)
@@ -1432,19 +1578,40 @@ func seedAsyncTasks(ctx context.Context, client *gen.Client, operatorID uint32) 
 			key: "mock:async-task:canceled", status: pbCore.AsyncTaskStatus_ASYNC_TASK_STATUS_CANCELED,
 			scheduledAt: now.Add(-2 * time.Hour), completedAt: &canceled,
 		},
+		{
+			key: "mock:notification:in-app:welcome", tenantID: &tenantOne,
+			taskType: "notification.in_app.send", queue: "notification",
+			payload:        `{"tenantId":1,"recipientUserIds":[1],"templateCode":"system.welcome","variables":"{\"tenantName\":\"演示租户\",\"userName\":\"admin\"}","businessType":"tenant","businessId":"mock"}`,
+			payloadSummary: "站内信接收人 1 个",
+			status:         pbCore.AsyncTaskStatus_ASYNC_TASK_STATUS_SUCCEEDED,
+			attempts:       1, scheduledAt: now.Add(-90 * time.Minute), completedAt: &completed,
+			resultSummary: "已生成 1 条站内信",
+		},
 	}
 	for _, spec := range specs {
+		if spec.taskType == "" {
+			spec.taskType = "system.task_retention_cleanup"
+		}
+		if spec.queue == "" {
+			spec.queue = "maintenance"
+		}
+		if spec.payload == "" {
+			spec.payload = `{"retentionDays":30,"batchSize":500}`
+		}
+		if spec.payloadSummary == "" {
+			spec.payloadSummary = "清理 30 天前的终态任务，单批最多 500 条"
+		}
 		item, err := client.AsyncTask.Query().
 			Where(asynctask.IdempotencyKeyEQ(spec.key)).
 			Only(ctx)
 		if gen.IsNotFound(err) {
 			builder := client.AsyncTask.Create().
-				SetTaskType("system.task_retention_cleanup").
-				SetQueue("maintenance").
+				SetTaskType(spec.taskType).
+				SetQueue(spec.queue).
 				SetStatus(int32(spec.status)).
 				SetPriority(-10).
-				SetPayload(`{"retentionDays":30,"batchSize":500}`).
-				SetPayloadSummary("清理 30 天前的终态任务，单批最多 500 条").
+				SetPayload(spec.payload).
+				SetPayloadSummary(spec.payloadSummary).
 				SetIdempotencyKey(spec.key).
 				SetAttempts(spec.attempts).
 				SetMaxAttempts(3).
@@ -1461,7 +1628,11 @@ func seedAsyncTasks(ctx context.Context, client *gen.Client, operatorID uint32) 
 			_, err = builder.Save(ctx)
 		} else if err == nil {
 			update := item.Update().
+				SetTaskType(spec.taskType).
+				SetQueue(spec.queue).
 				SetStatus(int32(spec.status)).
+				SetPayload(spec.payload).
+				SetPayloadSummary(spec.payloadSummary).
 				SetAttempts(spec.attempts).
 				SetScheduledAt(spec.scheduledAt).
 				SetResultSummary(spec.resultSummary).
@@ -1778,7 +1949,22 @@ func verify(ctx context.Context, client *gen.Client) error {
 		}, 5},
 		{"async tasks", func(ctx context.Context) (int, error) {
 			return client.AsyncTask.Query().Count(ctx)
-		}, 4},
+		}, 5},
+		{"tenant 1 notification templates", func(ctx context.Context) (int, error) {
+			return client.NotificationTemplate.Query().Where(notificationtemplate.TenantIDEQ(1)).Count(ctx)
+		}, 2},
+		{"tenant 1 notification messages", func(ctx context.Context) (int, error) {
+			return client.NotificationMessage.Query().Where(notificationmessage.TenantIDEQ(1)).Count(ctx)
+		}, 3},
+		{"tenant 1 unread notification messages", func(ctx context.Context) (int, error) {
+			return client.NotificationMessage.Query().Where(
+				notificationmessage.TenantIDEQ(1),
+				notificationmessage.MessageStatusEQ(int32(pbCore.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD)),
+			).Count(ctx)
+		}, 2},
+		{"tenant 2 notification messages", func(ctx context.Context) (int, error) {
+			return client.NotificationMessage.Query().Where(notificationmessage.TenantIDEQ(2)).Count(ctx)
+		}, 1},
 		{"tenant 1 file objects", func(ctx context.Context) (int, error) {
 			return client.FileObject.Query().Where(fileobject.TenantIDEQ(1), fileobject.FileNameHasPrefix("mock_")).Count(ctx)
 		}, 4},

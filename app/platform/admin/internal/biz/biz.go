@@ -26,6 +26,8 @@ var ProviderSet = wire.NewSet(
 	NewStorageProviderUsecase,
 	NewStorageProviderResolver,
 	NewFileUsecase,
+	NewNotificationUsecase,
+	NewNotificationAsyncTaskHandler,
 	NewAsyncTaskHandlers,
 	NewAsyncTaskUsecase,
 )

@@ -13,6 +13,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
@@ -1046,6 +1048,248 @@ func init() {
 	menupermissiongroupversionDescID := menupermissiongroupversionMixinFields0[0].Descriptor()
 	// menupermissiongroupversion.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	menupermissiongroupversion.IDValidator = menupermissiongroupversionDescID.Validators[0].(func(uint32) error)
+	notificationmessageMixin := schema.NotificationMessage{}.Mixin()
+	notificationmessage.Policy = privacy.NewPolicies(notificationmessageMixin[0], schema.NotificationMessage{})
+	notificationmessage.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := notificationmessage.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	notificationmessageMixinHooks1 := notificationmessageMixin[1].Hooks()
+
+	notificationmessage.Hooks[1] = notificationmessageMixinHooks1[0]
+	notificationmessageMixinInters1 := notificationmessageMixin[1].Interceptors()
+	notificationmessage.Interceptors[0] = notificationmessageMixinInters1[0]
+	notificationmessageMixinFields0 := notificationmessageMixin[0].Fields()
+	_ = notificationmessageMixinFields0
+	notificationmessageFields := schema.NotificationMessage{}.Fields()
+	_ = notificationmessageFields
+	// notificationmessageDescCreatedAt is the schema descriptor for created_at field.
+	notificationmessageDescCreatedAt := notificationmessageMixinFields0[1].Descriptor()
+	// notificationmessage.DefaultCreatedAt holds the default value on creation for the created_at field.
+	notificationmessage.DefaultCreatedAt = notificationmessageDescCreatedAt.Default.(func() time.Time)
+	// notificationmessageDescUpdatedAt is the schema descriptor for updated_at field.
+	notificationmessageDescUpdatedAt := notificationmessageMixinFields0[2].Descriptor()
+	// notificationmessage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	notificationmessage.DefaultUpdatedAt = notificationmessageDescUpdatedAt.Default.(func() time.Time)
+	// notificationmessage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	notificationmessage.UpdateDefaultUpdatedAt = notificationmessageDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// notificationmessageDescStatus is the schema descriptor for status field.
+	notificationmessageDescStatus := notificationmessageMixinFields0[3].Descriptor()
+	// notificationmessage.DefaultStatus holds the default value on creation for the status field.
+	notificationmessage.DefaultStatus = notificationmessageDescStatus.Default.(int32)
+	// notificationmessage.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	notificationmessage.StatusValidator = func() func(int32) error {
+		validators := notificationmessageDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// notificationmessageDescTenantID is the schema descriptor for tenant_id field.
+	notificationmessageDescTenantID := notificationmessageMixinFields0[4].Descriptor()
+	// notificationmessage.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	notificationmessage.TenantIDValidator = notificationmessageDescTenantID.Validators[0].(func(uint32) error)
+	// notificationmessageDescTemplateCode is the schema descriptor for template_code field.
+	notificationmessageDescTemplateCode := notificationmessageFields[2].Descriptor()
+	// notificationmessage.DefaultTemplateCode holds the default value on creation for the template_code field.
+	notificationmessage.DefaultTemplateCode = notificationmessageDescTemplateCode.Default.(string)
+	// notificationmessage.TemplateCodeValidator is a validator for the "template_code" field. It is called by the builders before save.
+	notificationmessage.TemplateCodeValidator = notificationmessageDescTemplateCode.Validators[0].(func(string) error)
+	// notificationmessageDescChannel is the schema descriptor for channel field.
+	notificationmessageDescChannel := notificationmessageFields[3].Descriptor()
+	// notificationmessage.DefaultChannel holds the default value on creation for the channel field.
+	notificationmessage.DefaultChannel = notificationmessageDescChannel.Default.(int32)
+	// notificationmessageDescTitle is the schema descriptor for title field.
+	notificationmessageDescTitle := notificationmessageFields[4].Descriptor()
+	// notificationmessage.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	notificationmessage.TitleValidator = func() func(string) error {
+		validators := notificationmessageDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// notificationmessageDescMessageStatus is the schema descriptor for message_status field.
+	notificationmessageDescMessageStatus := notificationmessageFields[6].Descriptor()
+	// notificationmessage.DefaultMessageStatus holds the default value on creation for the message_status field.
+	notificationmessage.DefaultMessageStatus = notificationmessageDescMessageStatus.Default.(int32)
+	// notificationmessageDescPriority is the schema descriptor for priority field.
+	notificationmessageDescPriority := notificationmessageFields[7].Descriptor()
+	// notificationmessage.DefaultPriority holds the default value on creation for the priority field.
+	notificationmessage.DefaultPriority = notificationmessageDescPriority.Default.(int32)
+	// notificationmessageDescBusinessType is the schema descriptor for business_type field.
+	notificationmessageDescBusinessType := notificationmessageFields[8].Descriptor()
+	// notificationmessage.DefaultBusinessType holds the default value on creation for the business_type field.
+	notificationmessage.DefaultBusinessType = notificationmessageDescBusinessType.Default.(string)
+	// notificationmessage.BusinessTypeValidator is a validator for the "business_type" field. It is called by the builders before save.
+	notificationmessage.BusinessTypeValidator = notificationmessageDescBusinessType.Validators[0].(func(string) error)
+	// notificationmessageDescBusinessID is the schema descriptor for business_id field.
+	notificationmessageDescBusinessID := notificationmessageFields[9].Descriptor()
+	// notificationmessage.DefaultBusinessID holds the default value on creation for the business_id field.
+	notificationmessage.DefaultBusinessID = notificationmessageDescBusinessID.Default.(string)
+	// notificationmessage.BusinessIDValidator is a validator for the "business_id" field. It is called by the builders before save.
+	notificationmessage.BusinessIDValidator = notificationmessageDescBusinessID.Validators[0].(func(string) error)
+	// notificationmessageDescSenderName is the schema descriptor for sender_name field.
+	notificationmessageDescSenderName := notificationmessageFields[12].Descriptor()
+	// notificationmessage.DefaultSenderName holds the default value on creation for the sender_name field.
+	notificationmessage.DefaultSenderName = notificationmessageDescSenderName.Default.(string)
+	// notificationmessage.SenderNameValidator is a validator for the "sender_name" field. It is called by the builders before save.
+	notificationmessage.SenderNameValidator = notificationmessageDescSenderName.Validators[0].(func(string) error)
+	// notificationmessageDescID is the schema descriptor for id field.
+	notificationmessageDescID := notificationmessageMixinFields0[0].Descriptor()
+	// notificationmessage.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	notificationmessage.IDValidator = notificationmessageDescID.Validators[0].(func(uint32) error)
+	notificationtemplateMixin := schema.NotificationTemplate{}.Mixin()
+	notificationtemplate.Policy = privacy.NewPolicies(notificationtemplateMixin[0], schema.NotificationTemplate{})
+	notificationtemplate.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := notificationtemplate.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	notificationtemplateMixinHooks1 := notificationtemplateMixin[1].Hooks()
+
+	notificationtemplate.Hooks[1] = notificationtemplateMixinHooks1[0]
+	notificationtemplateMixinInters1 := notificationtemplateMixin[1].Interceptors()
+	notificationtemplate.Interceptors[0] = notificationtemplateMixinInters1[0]
+	notificationtemplateMixinFields0 := notificationtemplateMixin[0].Fields()
+	_ = notificationtemplateMixinFields0
+	notificationtemplateFields := schema.NotificationTemplate{}.Fields()
+	_ = notificationtemplateFields
+	// notificationtemplateDescCreatedAt is the schema descriptor for created_at field.
+	notificationtemplateDescCreatedAt := notificationtemplateMixinFields0[1].Descriptor()
+	// notificationtemplate.DefaultCreatedAt holds the default value on creation for the created_at field.
+	notificationtemplate.DefaultCreatedAt = notificationtemplateDescCreatedAt.Default.(func() time.Time)
+	// notificationtemplateDescUpdatedAt is the schema descriptor for updated_at field.
+	notificationtemplateDescUpdatedAt := notificationtemplateMixinFields0[2].Descriptor()
+	// notificationtemplate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	notificationtemplate.DefaultUpdatedAt = notificationtemplateDescUpdatedAt.Default.(func() time.Time)
+	// notificationtemplate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	notificationtemplate.UpdateDefaultUpdatedAt = notificationtemplateDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// notificationtemplateDescStatus is the schema descriptor for status field.
+	notificationtemplateDescStatus := notificationtemplateMixinFields0[3].Descriptor()
+	// notificationtemplate.DefaultStatus holds the default value on creation for the status field.
+	notificationtemplate.DefaultStatus = notificationtemplateDescStatus.Default.(int32)
+	// notificationtemplate.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	notificationtemplate.StatusValidator = func() func(int32) error {
+		validators := notificationtemplateDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// notificationtemplateDescTenantID is the schema descriptor for tenant_id field.
+	notificationtemplateDescTenantID := notificationtemplateMixinFields0[4].Descriptor()
+	// notificationtemplate.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	notificationtemplate.TenantIDValidator = notificationtemplateDescTenantID.Validators[0].(func(uint32) error)
+	// notificationtemplateDescCode is the schema descriptor for code field.
+	notificationtemplateDescCode := notificationtemplateFields[0].Descriptor()
+	// notificationtemplate.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	notificationtemplate.CodeValidator = func() func(string) error {
+		validators := notificationtemplateDescCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(code string) error {
+			for _, fn := range fns {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// notificationtemplateDescName is the schema descriptor for name field.
+	notificationtemplateDescName := notificationtemplateFields[1].Descriptor()
+	// notificationtemplate.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	notificationtemplate.NameValidator = func() func(string) error {
+		validators := notificationtemplateDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// notificationtemplateDescChannel is the schema descriptor for channel field.
+	notificationtemplateDescChannel := notificationtemplateFields[2].Descriptor()
+	// notificationtemplate.DefaultChannel holds the default value on creation for the channel field.
+	notificationtemplate.DefaultChannel = notificationtemplateDescChannel.Default.(int32)
+	// notificationtemplateDescTitle is the schema descriptor for title field.
+	notificationtemplateDescTitle := notificationtemplateFields[3].Descriptor()
+	// notificationtemplate.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	notificationtemplate.TitleValidator = func() func(string) error {
+		validators := notificationtemplateDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// notificationtemplateDescVariableSchema is the schema descriptor for variable_schema field.
+	notificationtemplateDescVariableSchema := notificationtemplateFields[5].Descriptor()
+	// notificationtemplate.DefaultVariableSchema holds the default value on creation for the variable_schema field.
+	notificationtemplate.DefaultVariableSchema = notificationtemplateDescVariableSchema.Default.(string)
+	// notificationtemplateDescLocale is the schema descriptor for locale field.
+	notificationtemplateDescLocale := notificationtemplateFields[6].Descriptor()
+	// notificationtemplate.DefaultLocale holds the default value on creation for the locale field.
+	notificationtemplate.DefaultLocale = notificationtemplateDescLocale.Default.(string)
+	// notificationtemplate.LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
+	notificationtemplate.LocaleValidator = notificationtemplateDescLocale.Validators[0].(func(string) error)
+	// notificationtemplateDescRemark is the schema descriptor for remark field.
+	notificationtemplateDescRemark := notificationtemplateFields[7].Descriptor()
+	// notificationtemplate.DefaultRemark holds the default value on creation for the remark field.
+	notificationtemplate.DefaultRemark = notificationtemplateDescRemark.Default.(string)
+	// notificationtemplate.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	notificationtemplate.RemarkValidator = notificationtemplateDescRemark.Validators[0].(func(string) error)
+	// notificationtemplateDescID is the schema descriptor for id field.
+	notificationtemplateDescID := notificationtemplateMixinFields0[0].Descriptor()
+	// notificationtemplate.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	notificationtemplate.IDValidator = notificationtemplateDescID.Validators[0].(func(uint32) error)
 	operationlogMixin := schema.OperationLog{}.Mixin()
 	operationlog.Policy = privacy.NewPolicies(operationlogMixin[2], schema.OperationLog{})
 	operationlog.Hooks[0] = func(next ent.Mutator) ent.Mutator {

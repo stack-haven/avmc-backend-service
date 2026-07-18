@@ -125,6 +125,18 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationFileCenterServiceListFileAccessLogs, "GET"),
 		op(v1.OperationFileCenterServicePresignFileDownload, "GET"),
 		op(v1.OperationFileCenterServiceDeleteFileObject, "DELETE"),
+		op(v1.OperationNotificationServiceListNotificationTemplates, "GET"),
+		op(v1.OperationNotificationServiceGetNotificationTemplate, "GET"),
+		op(v1.OperationNotificationServiceCreateNotificationTemplate, "POST"),
+		op(v1.OperationNotificationServiceUpdateNotificationTemplate, "PUT"),
+		op(v1.OperationNotificationServiceDeleteNotificationTemplate, "DELETE"),
+		op(v1.OperationNotificationServiceSendInAppNotification, "POST"),
+		op(v1.OperationNotificationServiceListNotificationMessages, "GET"),
+		op(v1.OperationNotificationServiceGetNotificationMessage, "GET"),
+		op(v1.OperationNotificationServiceListMyNotifications, "GET"),
+		op(v1.OperationNotificationServiceCountMyUnreadNotifications, "GET"),
+		op(v1.OperationNotificationServiceMarkNotificationRead, "POST"),
+		op(v1.OperationNotificationServiceMarkNotificationsRead, "POST"),
 		op(v1.OperationStorageProviderServiceCreateStorageProvider, "POST"),
 		op(v1.OperationStorageProviderServiceUpdateStorageProvider, "PUT"),
 		op(v1.OperationStorageProviderServiceDeleteStorageProvider, "DELETE"),
@@ -168,6 +180,12 @@ func IsAuthenticatedSelfServiceOperation(object authz.Object, action authz.Actio
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
 	case authz.Object(v1.OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota),
 		authz.Object(v1.OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota):
+		return action == "POST" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationNotificationServiceListMyNotifications),
+		authz.Object(v1.OperationNotificationServiceCountMyUnreadNotifications):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationNotificationServiceMarkNotificationRead),
+		authz.Object(v1.OperationNotificationServiceMarkNotificationsRead):
 		return action == "POST" || action == authz.Action(lastSegment(string(object)))
 	}
 	return false

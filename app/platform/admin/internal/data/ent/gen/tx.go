@@ -34,6 +34,10 @@ type Tx struct {
 	MenuPermissionGroup *MenuPermissionGroupClient
 	// MenuPermissionGroupVersion is the client for interacting with the MenuPermissionGroupVersion builders.
 	MenuPermissionGroupVersion *MenuPermissionGroupVersionClient
+	// NotificationMessage is the client for interacting with the NotificationMessage builders.
+	NotificationMessage *NotificationMessageClient
+	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
+	NotificationTemplate *NotificationTemplateClient
 	// OperationLog is the client for interacting with the OperationLog builders.
 	OperationLog *OperationLogClient
 	// ParameterDefinition is the client for interacting with the ParameterDefinition builders.
@@ -199,6 +203,8 @@ func (tx *Tx) init() {
 	tx.Menu = NewMenuClient(tx.config)
 	tx.MenuPermissionGroup = NewMenuPermissionGroupClient(tx.config)
 	tx.MenuPermissionGroupVersion = NewMenuPermissionGroupVersionClient(tx.config)
+	tx.NotificationMessage = NewNotificationMessageClient(tx.config)
+	tx.NotificationTemplate = NewNotificationTemplateClient(tx.config)
 	tx.OperationLog = NewOperationLogClient(tx.config)
 	tx.ParameterDefinition = NewParameterDefinitionClient(tx.config)
 	tx.Post = NewPostClient(tx.config)

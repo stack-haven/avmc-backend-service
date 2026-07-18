@@ -62,6 +62,7 @@ var ProviderSet = wire.NewSet(
 	NewObjectStorageClient,
 	NewFileRepo,
 	NewFileAccessLogRepo,
+	NewNotificationRepo,
 	NewAsyncTaskRepo,
 	NewPermissionCacheInvalidator,
 	NewTenantAdminPolicy,

@@ -529,6 +529,98 @@ var (
 			},
 		},
 	}
+	// NotificationMessagesColumns holds the columns for the "notification_messages" table.
+	NotificationMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "recipient_user_id", Type: field.TypeUint32, Comment: "接收用户ID"},
+		{Name: "template_id", Type: field.TypeUint32, Nullable: true, Comment: "模板ID"},
+		{Name: "template_code", Type: field.TypeString, Size: 100, Comment: "模板编码快照", Default: ""},
+		{Name: "channel", Type: field.TypeInt32, Comment: "通知渠道", Default: 1},
+		{Name: "title", Type: field.TypeString, Size: 200, Comment: "通知标题"},
+		{Name: "content", Type: field.TypeString, Size: 2147483647, Comment: "通知内容"},
+		{Name: "message_status", Type: field.TypeInt32, Comment: "消息状态", Default: 1},
+		{Name: "priority", Type: field.TypeInt32, Comment: "优先级", Default: 0},
+		{Name: "business_type", Type: field.TypeString, Size: 100, Comment: "业务类型", Default: ""},
+		{Name: "business_id", Type: field.TypeString, Size: 100, Comment: "业务ID", Default: ""},
+		{Name: "read_at", Type: field.TypeTime, Nullable: true, Comment: "阅读时间"},
+		{Name: "sender_user_id", Type: field.TypeUint32, Nullable: true, Comment: "发送人ID"},
+		{Name: "sender_name", Type: field.TypeString, Size: 100, Comment: "发送人名称快照", Default: ""},
+	}
+	// NotificationMessagesTable holds the schema information for the "notification_messages" table.
+	NotificationMessagesTable = &schema.Table{
+		Name:       "notification_messages",
+		Comment:    "站内通知消息表",
+		Columns:    NotificationMessagesColumns,
+		PrimaryKey: []*schema.Column{NotificationMessagesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "notificationmessage_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationMessagesColumns[4]},
+			},
+			{
+				Name:    "notificationmessage_tenant_id_recipient_user_id_message_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationMessagesColumns[4], NotificationMessagesColumns[6], NotificationMessagesColumns[12], NotificationMessagesColumns[1]},
+			},
+			{
+				Name:    "notificationmessage_tenant_id_business_type_business_id",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationMessagesColumns[4], NotificationMessagesColumns[14], NotificationMessagesColumns[15]},
+			},
+			{
+				Name:    "notificationmessage_tenant_id_template_code_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationMessagesColumns[4], NotificationMessagesColumns[8], NotificationMessagesColumns[1]},
+			},
+		},
+	}
+	// NotificationTemplatesColumns holds the columns for the "notification_templates" table.
+	NotificationTemplatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "code", Type: field.TypeString, Size: 100, Comment: "模板编码"},
+		{Name: "name", Type: field.TypeString, Size: 100, Comment: "模板名称"},
+		{Name: "channel", Type: field.TypeInt32, Comment: "通知渠道", Default: 1},
+		{Name: "title", Type: field.TypeString, Size: 200, Comment: "标题模板"},
+		{Name: "content", Type: field.TypeString, Size: 2147483647, Comment: "内容模板"},
+		{Name: "variable_schema", Type: field.TypeString, Size: 2147483647, Comment: "变量Schema JSON", Default: ""},
+		{Name: "locale", Type: field.TypeString, Size: 20, Comment: "语言", Default: "zh-CN"},
+		{Name: "remark", Type: field.TypeString, Size: 255, Comment: "备注", Default: ""},
+	}
+	// NotificationTemplatesTable holds the schema information for the "notification_templates" table.
+	NotificationTemplatesTable = &schema.Table{
+		Name:       "notification_templates",
+		Comment:    "通知模板表",
+		Columns:    NotificationTemplatesColumns,
+		PrimaryKey: []*schema.Column{NotificationTemplatesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "notificationtemplate_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationTemplatesColumns[4]},
+			},
+			{
+				Name:    "notificationtemplate_tenant_id_code",
+				Unique:  true,
+				Columns: []*schema.Column{NotificationTemplatesColumns[4], NotificationTemplatesColumns[6]},
+			},
+			{
+				Name:    "notificationtemplate_tenant_id_channel_status",
+				Unique:  false,
+				Columns: []*schema.Column{NotificationTemplatesColumns[4], NotificationTemplatesColumns[8], NotificationTemplatesColumns[3]},
+			},
+		},
+	}
 	// OperationLogsColumns holds the columns for the "operation_logs" table.
 	OperationLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1308,6 +1400,8 @@ var (
 		MenusTable,
 		MenuPermissionGroupsTable,
 		MenuPermissionGroupVersionsTable,
+		NotificationMessagesTable,
+		NotificationTemplatesTable,
 		OperationLogsTable,
 		ParameterDefinitionsTable,
 		PostsTable,
@@ -1372,6 +1466,14 @@ func init() {
 	}
 	MenuPermissionGroupVersionsTable.ForeignKeys[0].RefTable = MenuPermissionGroupsTable
 	MenuPermissionGroupVersionsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	NotificationMessagesTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	NotificationTemplatesTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

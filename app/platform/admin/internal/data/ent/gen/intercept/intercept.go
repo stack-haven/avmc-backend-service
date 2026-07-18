@@ -17,6 +17,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
@@ -358,6 +360,60 @@ func (f TraverseMenuPermissionGroupVersion) Traverse(ctx context.Context, q gen.
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupVersionQuery", q)
+}
+
+// The NotificationMessageFunc type is an adapter to allow the use of ordinary function as a Querier.
+type NotificationMessageFunc func(context.Context, *gen.NotificationMessageQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f NotificationMessageFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.NotificationMessageQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.NotificationMessageQuery", q)
+}
+
+// The TraverseNotificationMessage type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseNotificationMessage func(context.Context, *gen.NotificationMessageQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseNotificationMessage) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseNotificationMessage) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.NotificationMessageQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.NotificationMessageQuery", q)
+}
+
+// The NotificationTemplateFunc type is an adapter to allow the use of ordinary function as a Querier.
+type NotificationTemplateFunc func(context.Context, *gen.NotificationTemplateQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f NotificationTemplateFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.NotificationTemplateQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.NotificationTemplateQuery", q)
+}
+
+// The TraverseNotificationTemplate type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseNotificationTemplate func(context.Context, *gen.NotificationTemplateQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseNotificationTemplate) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseNotificationTemplate) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.NotificationTemplateQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.NotificationTemplateQuery", q)
 }
 
 // The OperationLogFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -707,6 +763,10 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.MenuPermissionGroupQuery, predicate.MenuPermissionGroup, menupermissiongroup.OrderOption]{typ: gen.TypeMenuPermissionGroup, tq: q}, nil
 	case *gen.MenuPermissionGroupVersionQuery:
 		return &query[*gen.MenuPermissionGroupVersionQuery, predicate.MenuPermissionGroupVersion, menupermissiongroupversion.OrderOption]{typ: gen.TypeMenuPermissionGroupVersion, tq: q}, nil
+	case *gen.NotificationMessageQuery:
+		return &query[*gen.NotificationMessageQuery, predicate.NotificationMessage, notificationmessage.OrderOption]{typ: gen.TypeNotificationMessage, tq: q}, nil
+	case *gen.NotificationTemplateQuery:
+		return &query[*gen.NotificationTemplateQuery, predicate.NotificationTemplate, notificationtemplate.OrderOption]{typ: gen.TypeNotificationTemplate, tq: q}, nil
 	case *gen.OperationLogQuery:
 		return &query[*gen.OperationLogQuery, predicate.OperationLog, operationlog.OrderOption]{typ: gen.TypeOperationLog, tq: q}, nil
 	case *gen.ParameterDefinitionQuery:

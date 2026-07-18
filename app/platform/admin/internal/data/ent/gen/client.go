@@ -21,6 +21,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
@@ -67,6 +69,10 @@ type Client struct {
 	MenuPermissionGroup *MenuPermissionGroupClient
 	// MenuPermissionGroupVersion is the client for interacting with the MenuPermissionGroupVersion builders.
 	MenuPermissionGroupVersion *MenuPermissionGroupVersionClient
+	// NotificationMessage is the client for interacting with the NotificationMessage builders.
+	NotificationMessage *NotificationMessageClient
+	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
+	NotificationTemplate *NotificationTemplateClient
 	// OperationLog is the client for interacting with the OperationLog builders.
 	OperationLog *OperationLogClient
 	// ParameterDefinition is the client for interacting with the ParameterDefinition builders.
@@ -112,6 +118,8 @@ func (c *Client) init() {
 	c.Menu = NewMenuClient(c.config)
 	c.MenuPermissionGroup = NewMenuPermissionGroupClient(c.config)
 	c.MenuPermissionGroupVersion = NewMenuPermissionGroupVersionClient(c.config)
+	c.NotificationMessage = NewNotificationMessageClient(c.config)
+	c.NotificationTemplate = NewNotificationTemplateClient(c.config)
 	c.OperationLog = NewOperationLogClient(c.config)
 	c.ParameterDefinition = NewParameterDefinitionClient(c.config)
 	c.Post = NewPostClient(c.config)
@@ -226,6 +234,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Menu:                         NewMenuClient(cfg),
 		MenuPermissionGroup:          NewMenuPermissionGroupClient(cfg),
 		MenuPermissionGroupVersion:   NewMenuPermissionGroupVersionClient(cfg),
+		NotificationMessage:          NewNotificationMessageClient(cfg),
+		NotificationTemplate:         NewNotificationTemplateClient(cfg),
 		OperationLog:                 NewOperationLogClient(cfg),
 		ParameterDefinition:          NewParameterDefinitionClient(cfg),
 		Post:                         NewPostClient(cfg),
@@ -267,6 +277,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Menu:                         NewMenuClient(cfg),
 		MenuPermissionGroup:          NewMenuPermissionGroupClient(cfg),
 		MenuPermissionGroupVersion:   NewMenuPermissionGroupVersionClient(cfg),
+		NotificationMessage:          NewNotificationMessageClient(cfg),
+		NotificationTemplate:         NewNotificationTemplateClient(cfg),
 		OperationLog:                 NewOperationLogClient(cfg),
 		ParameterDefinition:          NewParameterDefinitionClient(cfg),
 		Post:                         NewPostClient(cfg),
@@ -310,8 +322,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
 		c.FileObject, c.LoginLog, c.Menu, c.MenuPermissionGroup,
-		c.MenuPermissionGroupVersion, c.OperationLog, c.ParameterDefinition, c.Post,
-		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantParameterOverride,
+		c.MenuPermissionGroupVersion, c.NotificationMessage, c.NotificationTemplate,
+		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
+		c.StorageProvider, c.Tenant, c.TenantParameterOverride,
 		c.TenantPermissionGroup, c.TenantResourceQuotaOperation,
 		c.TenantResourceQuotaUsage, c.User,
 	} {
@@ -325,8 +338,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
 		c.FileObject, c.LoginLog, c.Menu, c.MenuPermissionGroup,
-		c.MenuPermissionGroupVersion, c.OperationLog, c.ParameterDefinition, c.Post,
-		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantParameterOverride,
+		c.MenuPermissionGroupVersion, c.NotificationMessage, c.NotificationTemplate,
+		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
+		c.StorageProvider, c.Tenant, c.TenantParameterOverride,
 		c.TenantPermissionGroup, c.TenantResourceQuotaOperation,
 		c.TenantResourceQuotaUsage, c.User,
 	} {
@@ -357,6 +371,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.MenuPermissionGroup.mutate(ctx, m)
 	case *MenuPermissionGroupVersionMutation:
 		return c.MenuPermissionGroupVersion.mutate(ctx, m)
+	case *NotificationMessageMutation:
+		return c.NotificationMessage.mutate(ctx, m)
+	case *NotificationTemplateMutation:
+		return c.NotificationTemplate.mutate(ctx, m)
 	case *OperationLogMutation:
 		return c.OperationLog.mutate(ctx, m)
 	case *ParameterDefinitionMutation:
@@ -2015,6 +2033,276 @@ func (c *MenuPermissionGroupVersionClient) mutate(ctx context.Context, m *MenuPe
 		return (&MenuPermissionGroupVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("gen: unknown MenuPermissionGroupVersion mutation op: %q", m.Op())
+	}
+}
+
+// NotificationMessageClient is a client for the NotificationMessage schema.
+type NotificationMessageClient struct {
+	config
+}
+
+// NewNotificationMessageClient returns a client for the NotificationMessage from the given config.
+func NewNotificationMessageClient(c config) *NotificationMessageClient {
+	return &NotificationMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `notificationmessage.Hooks(f(g(h())))`.
+func (c *NotificationMessageClient) Use(hooks ...Hook) {
+	c.hooks.NotificationMessage = append(c.hooks.NotificationMessage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `notificationmessage.Intercept(f(g(h())))`.
+func (c *NotificationMessageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NotificationMessage = append(c.inters.NotificationMessage, interceptors...)
+}
+
+// Create returns a builder for creating a NotificationMessage entity.
+func (c *NotificationMessageClient) Create() *NotificationMessageCreate {
+	mutation := newNotificationMessageMutation(c.config, OpCreate)
+	return &NotificationMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NotificationMessage entities.
+func (c *NotificationMessageClient) CreateBulk(builders ...*NotificationMessageCreate) *NotificationMessageCreateBulk {
+	return &NotificationMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NotificationMessageClient) MapCreateBulk(slice any, setFunc func(*NotificationMessageCreate, int)) *NotificationMessageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NotificationMessageCreateBulk{err: fmt.Errorf("calling to NotificationMessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NotificationMessageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NotificationMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NotificationMessage.
+func (c *NotificationMessageClient) Update() *NotificationMessageUpdate {
+	mutation := newNotificationMessageMutation(c.config, OpUpdate)
+	return &NotificationMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NotificationMessageClient) UpdateOne(_m *NotificationMessage) *NotificationMessageUpdateOne {
+	mutation := newNotificationMessageMutation(c.config, OpUpdateOne, withNotificationMessage(_m))
+	return &NotificationMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NotificationMessageClient) UpdateOneID(id uint32) *NotificationMessageUpdateOne {
+	mutation := newNotificationMessageMutation(c.config, OpUpdateOne, withNotificationMessageID(id))
+	return &NotificationMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NotificationMessage.
+func (c *NotificationMessageClient) Delete() *NotificationMessageDelete {
+	mutation := newNotificationMessageMutation(c.config, OpDelete)
+	return &NotificationMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NotificationMessageClient) DeleteOne(_m *NotificationMessage) *NotificationMessageDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NotificationMessageClient) DeleteOneID(id uint32) *NotificationMessageDeleteOne {
+	builder := c.Delete().Where(notificationmessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NotificationMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for NotificationMessage.
+func (c *NotificationMessageClient) Query() *NotificationMessageQuery {
+	return &NotificationMessageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNotificationMessage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NotificationMessage entity by its id.
+func (c *NotificationMessageClient) Get(ctx context.Context, id uint32) (*NotificationMessage, error) {
+	return c.Query().Where(notificationmessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NotificationMessageClient) GetX(ctx context.Context, id uint32) *NotificationMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *NotificationMessageClient) Hooks() []Hook {
+	hooks := c.hooks.NotificationMessage
+	return append(hooks[:len(hooks):len(hooks)], notificationmessage.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *NotificationMessageClient) Interceptors() []Interceptor {
+	inters := c.inters.NotificationMessage
+	return append(inters[:len(inters):len(inters)], notificationmessage.Interceptors[:]...)
+}
+
+func (c *NotificationMessageClient) mutate(ctx context.Context, m *NotificationMessageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NotificationMessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NotificationMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NotificationMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NotificationMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown NotificationMessage mutation op: %q", m.Op())
+	}
+}
+
+// NotificationTemplateClient is a client for the NotificationTemplate schema.
+type NotificationTemplateClient struct {
+	config
+}
+
+// NewNotificationTemplateClient returns a client for the NotificationTemplate from the given config.
+func NewNotificationTemplateClient(c config) *NotificationTemplateClient {
+	return &NotificationTemplateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `notificationtemplate.Hooks(f(g(h())))`.
+func (c *NotificationTemplateClient) Use(hooks ...Hook) {
+	c.hooks.NotificationTemplate = append(c.hooks.NotificationTemplate, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `notificationtemplate.Intercept(f(g(h())))`.
+func (c *NotificationTemplateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NotificationTemplate = append(c.inters.NotificationTemplate, interceptors...)
+}
+
+// Create returns a builder for creating a NotificationTemplate entity.
+func (c *NotificationTemplateClient) Create() *NotificationTemplateCreate {
+	mutation := newNotificationTemplateMutation(c.config, OpCreate)
+	return &NotificationTemplateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NotificationTemplate entities.
+func (c *NotificationTemplateClient) CreateBulk(builders ...*NotificationTemplateCreate) *NotificationTemplateCreateBulk {
+	return &NotificationTemplateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NotificationTemplateClient) MapCreateBulk(slice any, setFunc func(*NotificationTemplateCreate, int)) *NotificationTemplateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NotificationTemplateCreateBulk{err: fmt.Errorf("calling to NotificationTemplateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NotificationTemplateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NotificationTemplateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NotificationTemplate.
+func (c *NotificationTemplateClient) Update() *NotificationTemplateUpdate {
+	mutation := newNotificationTemplateMutation(c.config, OpUpdate)
+	return &NotificationTemplateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NotificationTemplateClient) UpdateOne(_m *NotificationTemplate) *NotificationTemplateUpdateOne {
+	mutation := newNotificationTemplateMutation(c.config, OpUpdateOne, withNotificationTemplate(_m))
+	return &NotificationTemplateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NotificationTemplateClient) UpdateOneID(id uint32) *NotificationTemplateUpdateOne {
+	mutation := newNotificationTemplateMutation(c.config, OpUpdateOne, withNotificationTemplateID(id))
+	return &NotificationTemplateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NotificationTemplate.
+func (c *NotificationTemplateClient) Delete() *NotificationTemplateDelete {
+	mutation := newNotificationTemplateMutation(c.config, OpDelete)
+	return &NotificationTemplateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NotificationTemplateClient) DeleteOne(_m *NotificationTemplate) *NotificationTemplateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NotificationTemplateClient) DeleteOneID(id uint32) *NotificationTemplateDeleteOne {
+	builder := c.Delete().Where(notificationtemplate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NotificationTemplateDeleteOne{builder}
+}
+
+// Query returns a query builder for NotificationTemplate.
+func (c *NotificationTemplateClient) Query() *NotificationTemplateQuery {
+	return &NotificationTemplateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNotificationTemplate},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NotificationTemplate entity by its id.
+func (c *NotificationTemplateClient) Get(ctx context.Context, id uint32) (*NotificationTemplate, error) {
+	return c.Query().Where(notificationtemplate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NotificationTemplateClient) GetX(ctx context.Context, id uint32) *NotificationTemplate {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *NotificationTemplateClient) Hooks() []Hook {
+	hooks := c.hooks.NotificationTemplate
+	return append(hooks[:len(hooks):len(hooks)], notificationtemplate.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *NotificationTemplateClient) Interceptors() []Interceptor {
+	inters := c.inters.NotificationTemplate
+	return append(inters[:len(inters):len(inters)], notificationtemplate.Interceptors[:]...)
+}
+
+func (c *NotificationTemplateClient) mutate(ctx context.Context, m *NotificationTemplateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NotificationTemplateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NotificationTemplateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NotificationTemplateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NotificationTemplateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown NotificationTemplate mutation op: %q", m.Op())
 	}
 }
 
@@ -3890,17 +4178,19 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
-		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
-		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
-		TenantParameterOverride, TenantPermissionGroup, TenantResourceQuotaOperation,
-		TenantResourceQuotaUsage, User []ent.Hook
+		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion,
+		NotificationMessage, NotificationTemplate, OperationLog, ParameterDefinition,
+		Post, Project, Role, StorageProvider, Tenant, TenantParameterOverride,
+		TenantPermissionGroup, TenantResourceQuotaOperation, TenantResourceQuotaUsage,
+		User []ent.Hook
 	}
 	inters struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
-		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
-		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
-		TenantParameterOverride, TenantPermissionGroup, TenantResourceQuotaOperation,
-		TenantResourceQuotaUsage, User []ent.Interceptor
+		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion,
+		NotificationMessage, NotificationTemplate, OperationLog, ParameterDefinition,
+		Post, Project, Role, StorageProvider, Tenant, TenantParameterOverride,
+		TenantPermissionGroup, TenantResourceQuotaOperation, TenantResourceQuotaUsage,
+		User []ent.Interceptor
 	}
 )
 

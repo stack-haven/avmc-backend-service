@@ -134,6 +134,32 @@ func (_m *MenuPermissionGroupVersionQuery) Page(ctx context.Context, page, size 
 	return rs, cnt, nil
 }
 
+func (_m *NotificationMessageQuery) Page(ctx context.Context, page, size int) ([]*NotificationMessage, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *NotificationTemplateQuery) Page(ctx context.Context, page, size int) ([]*NotificationTemplate, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
 func (_m *OperationLogQuery) Page(ctx context.Context, page, size int) ([]*OperationLog, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {

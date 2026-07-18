@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/notification.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service NotificationService {
+  rpc ListNotificationTemplates(core.service.v1.ListNotificationTemplatesRequest) returns (core.service.v1.ListNotificationTemplatesResponse) {
+    option (google.api.http) = {get: "/admin/v1/notification-templates"};
+  }
+
+  rpc GetNotificationTemplate(core.service.v1.GetNotificationTemplateRequest) returns (core.service.v1.NotificationTemplate) {
+    option (google.api.http) = {get: "/admin/v1/notification-templates/{id}"};
+  }
+
+  rpc CreateNotificationTemplate(core.service.v1.CreateNotificationTemplateRequest) returns (core.service.v1.NotificationTemplate) {
+    option (google.api.http) = {post: "/admin/v1/notification-templates" body: "template"};
+  }
+
+  rpc UpdateNotificationTemplate(core.service.v1.UpdateNotificationTemplateRequest) returns (core.service.v1.NotificationTemplate) {
+    option (google.api.http) = {put: "/admin/v1/notification-templates/{id}" body: "template"};
+  }
+
+  rpc DeleteNotificationTemplate(core.service.v1.DeleteNotificationTemplateRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/admin/v1/notification-templates/{id}"};
+  }
+
+  rpc SendInAppNotification(core.service.v1.SendInAppNotificationRequest) returns (core.service.v1.SendInAppNotificationResponse) {
+    option (google.api.http) = {post: "/admin/v1/notifications:send-in-app" body: "*"};
+  }
+
+  rpc ListNotificationMessages(core.service.v1.ListNotificationMessagesRequest) returns (core.service.v1.ListNotificationMessagesResponse) {
+    option (google.api.http) = {get: "/admin/v1/notification-messages"};
+  }
+
+  rpc GetNotificationMessage(core.service.v1.GetNotificationMessageRequest) returns (core.service.v1.NotificationMessage) {
+    option (google.api.http) = {get: "/admin/v1/notification-messages/{id}"};
+  }
+
+  rpc ListMyNotifications(core.service.v1.ListNotificationMessagesRequest) returns (core.service.v1.ListNotificationMessagesResponse) {
+    option (google.api.http) = {get: "/admin/v1/my/notifications"};
+  }
+
+  rpc CountMyUnreadNotifications(core.service.v1.CountMyUnreadNotificationsRequest) returns (core.service.v1.CountMyUnreadNotificationsResponse) {
+    option (google.api.http) = {get: "/admin/v1/my/notifications:unread-count"};
+  }
+
+  rpc MarkNotificationRead(core.service.v1.MarkNotificationReadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {post: "/admin/v1/my/notifications/{id}:read" body: "*"};
+  }
+
+  rpc MarkNotificationsRead(core.service.v1.MarkNotificationsReadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {post: "/admin/v1/my/notifications:read" body: "*"};
+  }
+}

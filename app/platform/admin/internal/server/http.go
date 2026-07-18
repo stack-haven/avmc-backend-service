@@ -61,6 +61,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	parameter *service.ParameterServiceService,
 	storageProvider *service.StorageProviderServiceService,
 	fileCenter *service.FileCenterServiceService,
+	notification *service.NotificationServiceService,
 	asyncTask *service.AsyncTaskServiceService,
 ) (*http.Server, error) {
 	if c == nil || c.Http == nil {
@@ -110,6 +111,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterParameterServiceHTTPServer(srv, parameter)
 	v1.RegisterStorageProviderServiceHTTPServer(srv, storageProvider)
 	v1.RegisterFileCenterServiceHTTPServer(srv, fileCenter)
+	v1.RegisterNotificationServiceHTTPServer(srv, notification)
 	v1.RegisterAsyncTaskServiceHTTPServer(srv, asyncTask)
 	if c.GetHttp().GetEnableSwagger() {
 		allFS := nethttp.FS(assets.OpenApiData)

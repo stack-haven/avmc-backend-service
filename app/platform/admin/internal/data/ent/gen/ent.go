@@ -13,6 +13,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
@@ -104,6 +106,8 @@ func checkColumn(t, c string) error {
 			menu.Table:                         menu.ValidColumn,
 			menupermissiongroup.Table:          menupermissiongroup.ValidColumn,
 			menupermissiongroupversion.Table:   menupermissiongroupversion.ValidColumn,
+			notificationmessage.Table:          notificationmessage.ValidColumn,
+			notificationtemplate.Table:         notificationtemplate.ValidColumn,
 			operationlog.Table:                 operationlog.ValidColumn,
 			parameterdefinition.Table:          parameterdefinition.ValidColumn,
 			post.Table:                         post.ValidColumn,

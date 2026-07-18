@@ -36,6 +36,12 @@ type MenuPermissionGroup func(*sql.Selector)
 // MenuPermissionGroupVersion is the predicate function for menupermissiongroupversion builders.
 type MenuPermissionGroupVersion func(*sql.Selector)
 
+// NotificationMessage is the predicate function for notificationmessage builders.
+type NotificationMessage func(*sql.Selector)
+
+// NotificationTemplate is the predicate function for notificationtemplate builders.
+type NotificationTemplate func(*sql.Selector)
+
 // OperationLog is the predicate function for operationlog builders.
 type OperationLog func(*sql.Selector)
 

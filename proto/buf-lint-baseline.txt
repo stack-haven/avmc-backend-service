@@ -66,6 +66,8 @@
 1 core/service/v1/menu_permission_group.proto	PACKAGE_SAME_JAVA_PACKAGE
 27 core/service/v1/menu_permission_group.proto	RPC_REQUEST_RESPONSE_UNIQUE
 1 core/service/v1/menu_permission_group.proto	RPC_RESPONSE_STANDARD_NAME
+1 core/service/v1/notification.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
+1 core/service/v1/notification.proto	PACKAGE_SAME_JAVA_PACKAGE
 1 core/service/v1/operation_log.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 core/service/v1/operation_log.proto	PACKAGE_SAME_JAVA_PACKAGE
 1 core/service/v1/parameter.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
@@ -133,6 +135,11 @@
 1 platform/admin/v1/i_menu_permission_group.proto	PACKAGE_SAME_JAVA_PACKAGE
 17 platform/admin/v1/i_menu_permission_group.proto	RPC_REQUEST_RESPONSE_UNIQUE
 1 platform/admin/v1/i_menu_permission_group.proto	RPC_RESPONSE_STANDARD_NAME
+1 platform/admin/v1/i_notification.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
+1 platform/admin/v1/i_notification.proto	PACKAGE_SAME_JAVA_PACKAGE
+10 platform/admin/v1/i_notification.proto	RPC_REQUEST_RESPONSE_UNIQUE
+1 platform/admin/v1/i_notification.proto	RPC_REQUEST_STANDARD_NAME
+8 platform/admin/v1/i_notification.proto	RPC_RESPONSE_STANDARD_NAME
 1 platform/admin/v1/i_operation_log.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 platform/admin/v1/i_operation_log.proto	PACKAGE_SAME_JAVA_PACKAGE
 1 platform/admin/v1/i_operation_log.proto	RPC_RESPONSE_STANDARD_NAME

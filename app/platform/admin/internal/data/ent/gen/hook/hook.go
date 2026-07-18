@@ -128,6 +128,30 @@ func (f MenuPermissionGroupVersionFunc) Mutate(ctx context.Context, m gen.Mutati
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.MenuPermissionGroupVersionMutation", m)
 }
 
+// The NotificationMessageFunc type is an adapter to allow the use of ordinary
+// function as NotificationMessage mutator.
+type NotificationMessageFunc func(context.Context, *gen.NotificationMessageMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NotificationMessageFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.NotificationMessageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.NotificationMessageMutation", m)
+}
+
+// The NotificationTemplateFunc type is an adapter to allow the use of ordinary
+// function as NotificationTemplate mutator.
+type NotificationTemplateFunc func(context.Context, *gen.NotificationTemplateMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NotificationTemplateFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.NotificationTemplateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.NotificationTemplateMutation", m)
+}
+
 // The OperationLogFunc type is an adapter to allow the use of ordinary
 // function as OperationLog mutator.
 type OperationLogFunc func(context.Context, *gen.OperationLogMutation) (gen.Value, error)
