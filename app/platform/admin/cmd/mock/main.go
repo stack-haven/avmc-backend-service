@@ -21,6 +21,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
@@ -401,6 +402,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	fileAccessLogButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterAccessLog", Title: "访问记录", Path: "/system/file-center:access-log", Type: 3, Sort: 35, AuthCode: "/platform.admin.v1.FileCenterService/ListFileAccessLogs",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	fileDeleteButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemFileCenterDelete", Title: "文件删除", Path: "/system/file-center:delete", Type: 3, Sort: 40, AuthCode: "/platform.admin.v1.FileCenterService/DeleteFileObject",
 	}, fileCenterMenu.ID)
@@ -421,7 +428,7 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	}
 
 	basicPermissionMenuIDs := []uint32{projectListButton.ID, roleListButton.ID, deptListButton.ID, userListButton.ID, parameterCurrentButton.ID}
-	fileCenterMenuIDs := []uint32{fileCenterMenu.ID, fileListButton.ID, fileDetailButton.ID, fileUploadButton.ID, fileContentUploadButton.ID, fileConfirmButton.ID, fileDownloadButton.ID, fileDeleteButton.ID}
+	fileCenterMenuIDs := []uint32{fileCenterMenu.ID, fileListButton.ID, fileDetailButton.ID, fileUploadButton.ID, fileContentUploadButton.ID, fileConfirmButton.ID, fileDownloadButton.ID, fileAccessLogButton.ID, fileDeleteButton.ID}
 	storageProviderMenuIDs := []uint32{storageProviderMenu.ID, storageProviderListButton.ID, storageProviderManageButton.ID}
 	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, parameterMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, asyncTaskMenu.ID, userCreateButton.ID, parameterManageButton.ID}
 	fullMenuIDs = append(fullMenuIDs, basicPermissionMenuIDs...)
@@ -586,6 +593,9 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		return nil, err
 	}
 	if err := seedFileObjects(ctx, client, defaultStorageProvider, admin.ID, tenantTwo.ID); err != nil {
+		return nil, err
+	}
+	if err := seedFileAccessLogs(ctx, client, admin.ID, tenantTwo.ID); err != nil {
 		return nil, err
 	}
 	if err := seedAsyncTasks(ctx, client, admin.ID); err != nil {
@@ -1228,6 +1238,75 @@ func ensureFileObject(ctx context.Context, client *gen.Client, provider *gen.Sto
 	return err
 }
 
+func seedFileAccessLogs(ctx context.Context, client *gen.Client, tenantOneOperator, tenantTwoOperator uint32) error {
+	files, err := client.FileObject.Query().
+		Where(fileobject.FileNameHasPrefix("mock_")).
+		Order(gen.Asc(fileobject.FieldTenantID), gen.Asc(fileobject.FieldID)).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		operatorID := tenantOneOperator
+		operatorName := "admin"
+		if file.TenantID == 2 {
+			operatorID = tenantTwoOperator
+			operatorName = "mock_tenant2"
+		}
+		if err := ensureFileAccessLog(ctx, client, file, operatorID, operatorName, "download", "success", "mock download"); err != nil {
+			return err
+		}
+		if file.Status != nil && *file.Status == 2 {
+			if err := ensureFileAccessLog(ctx, client, file, operatorID, operatorName, "preview", "success", "mock preview"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func ensureFileAccessLog(ctx context.Context, client *gen.Client, file *gen.FileObject, operatorID uint32, operatorName string, action string, result string, message string) error {
+	if file == nil {
+		return nil
+	}
+	existing, err := client.FileAccessLog.Query().
+		Where(
+			fileaccesslog.TenantIDEQ(file.TenantID),
+			fileaccesslog.FileIDEQ(file.ID),
+			fileaccesslog.ActionEQ(action),
+			fileaccesslog.MessageEQ(message),
+		).
+		Only(ctx)
+	if gen.IsNotFound(err) {
+		_, err = client.FileAccessLog.Create().
+			SetTenantID(file.TenantID).
+			SetFileID(file.ID).
+			SetFileName(file.FileName).
+			SetAction(action).
+			SetOperatorID(operatorID).
+			SetOperatorName(operatorName).
+			SetClientIP("127.0.0.1").
+			SetUserAgent("mock-seed").
+			SetResult(result).
+			SetMessage(message).
+			Save(ctx)
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	_, err = existing.Update().
+		SetFileName(file.FileName).
+		SetOperatorID(operatorID).
+		SetOperatorName(operatorName).
+		SetClientIP("127.0.0.1").
+		SetUserAgent("mock-seed").
+		SetResult(result).
+		SetMessage(message).
+		Save(ctx)
+	return err
+}
+
 func seedParameters(ctx context.Context, client *gen.Client, tenantOneOperator, tenantTwoOperator uint32) error {
 	type parameterSpec struct {
 		key               string
@@ -1705,6 +1784,12 @@ func verify(ctx context.Context, client *gen.Client) error {
 		}, 4},
 		{"tenant 2 file objects", func(ctx context.Context) (int, error) {
 			return client.FileObject.Query().Where(fileobject.TenantIDEQ(2), fileobject.FileNameHasPrefix("mock_")).Count(ctx)
+		}, 2},
+		{"tenant 1 file access logs", func(ctx context.Context) (int, error) {
+			return client.FileAccessLog.Query().Where(fileaccesslog.TenantIDEQ(1)).Count(ctx)
+		}, 4},
+		{"tenant 2 file access logs", func(ctx context.Context) (int, error) {
+			return client.FileAccessLog.Query().Where(fileaccesslog.TenantIDEQ(2)).Count(ctx)
 		}, 2},
 		{"storage providers", func(ctx context.Context) (int, error) {
 			return client.StorageProvider.Query().Where(storageprovider.CodeIn("mock-local-default", "mock-s3-compatible")).Count(ctx)

@@ -7,6 +7,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
@@ -375,6 +376,112 @@ func init() {
 	dictionarytypeDescID := dictionarytypeMixinFields0[0].Descriptor()
 	// dictionarytype.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	dictionarytype.IDValidator = dictionarytypeDescID.Validators[0].(func(uint32) error)
+	fileaccesslogMixin := schema.FileAccessLog{}.Mixin()
+	fileaccesslog.Policy = privacy.NewPolicies(fileaccesslogMixin[0], schema.FileAccessLog{})
+	fileaccesslog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := fileaccesslog.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	fileaccesslogMixinFields0 := fileaccesslogMixin[0].Fields()
+	_ = fileaccesslogMixinFields0
+	fileaccesslogFields := schema.FileAccessLog{}.Fields()
+	_ = fileaccesslogFields
+	// fileaccesslogDescCreatedAt is the schema descriptor for created_at field.
+	fileaccesslogDescCreatedAt := fileaccesslogMixinFields0[1].Descriptor()
+	// fileaccesslog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fileaccesslog.DefaultCreatedAt = fileaccesslogDescCreatedAt.Default.(func() time.Time)
+	// fileaccesslogDescUpdatedAt is the schema descriptor for updated_at field.
+	fileaccesslogDescUpdatedAt := fileaccesslogMixinFields0[2].Descriptor()
+	// fileaccesslog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fileaccesslog.DefaultUpdatedAt = fileaccesslogDescUpdatedAt.Default.(func() time.Time)
+	// fileaccesslog.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fileaccesslog.UpdateDefaultUpdatedAt = fileaccesslogDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// fileaccesslogDescStatus is the schema descriptor for status field.
+	fileaccesslogDescStatus := fileaccesslogMixinFields0[3].Descriptor()
+	// fileaccesslog.DefaultStatus holds the default value on creation for the status field.
+	fileaccesslog.DefaultStatus = fileaccesslogDescStatus.Default.(int32)
+	// fileaccesslog.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	fileaccesslog.StatusValidator = func() func(int32) error {
+		validators := fileaccesslogDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileaccesslogDescTenantID is the schema descriptor for tenant_id field.
+	fileaccesslogDescTenantID := fileaccesslogMixinFields0[4].Descriptor()
+	// fileaccesslog.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	fileaccesslog.TenantIDValidator = fileaccesslogDescTenantID.Validators[0].(func(uint32) error)
+	// fileaccesslogDescFileName is the schema descriptor for file_name field.
+	fileaccesslogDescFileName := fileaccesslogFields[1].Descriptor()
+	// fileaccesslog.DefaultFileName holds the default value on creation for the file_name field.
+	fileaccesslog.DefaultFileName = fileaccesslogDescFileName.Default.(string)
+	// fileaccesslog.FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
+	fileaccesslog.FileNameValidator = fileaccesslogDescFileName.Validators[0].(func(string) error)
+	// fileaccesslogDescAction is the schema descriptor for action field.
+	fileaccesslogDescAction := fileaccesslogFields[2].Descriptor()
+	// fileaccesslog.ActionValidator is a validator for the "action" field. It is called by the builders before save.
+	fileaccesslog.ActionValidator = func() func(string) error {
+		validators := fileaccesslogDescAction.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(action string) error {
+			for _, fn := range fns {
+				if err := fn(action); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileaccesslogDescOperatorName is the schema descriptor for operator_name field.
+	fileaccesslogDescOperatorName := fileaccesslogFields[4].Descriptor()
+	// fileaccesslog.DefaultOperatorName holds the default value on creation for the operator_name field.
+	fileaccesslog.DefaultOperatorName = fileaccesslogDescOperatorName.Default.(string)
+	// fileaccesslog.OperatorNameValidator is a validator for the "operator_name" field. It is called by the builders before save.
+	fileaccesslog.OperatorNameValidator = fileaccesslogDescOperatorName.Validators[0].(func(string) error)
+	// fileaccesslogDescClientIP is the schema descriptor for client_ip field.
+	fileaccesslogDescClientIP := fileaccesslogFields[5].Descriptor()
+	// fileaccesslog.DefaultClientIP holds the default value on creation for the client_ip field.
+	fileaccesslog.DefaultClientIP = fileaccesslogDescClientIP.Default.(string)
+	// fileaccesslog.ClientIPValidator is a validator for the "client_ip" field. It is called by the builders before save.
+	fileaccesslog.ClientIPValidator = fileaccesslogDescClientIP.Validators[0].(func(string) error)
+	// fileaccesslogDescUserAgent is the schema descriptor for user_agent field.
+	fileaccesslogDescUserAgent := fileaccesslogFields[6].Descriptor()
+	// fileaccesslog.DefaultUserAgent holds the default value on creation for the user_agent field.
+	fileaccesslog.DefaultUserAgent = fileaccesslogDescUserAgent.Default.(string)
+	// fileaccesslog.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
+	fileaccesslog.UserAgentValidator = fileaccesslogDescUserAgent.Validators[0].(func(string) error)
+	// fileaccesslogDescResult is the schema descriptor for result field.
+	fileaccesslogDescResult := fileaccesslogFields[7].Descriptor()
+	// fileaccesslog.DefaultResult holds the default value on creation for the result field.
+	fileaccesslog.DefaultResult = fileaccesslogDescResult.Default.(string)
+	// fileaccesslog.ResultValidator is a validator for the "result" field. It is called by the builders before save.
+	fileaccesslog.ResultValidator = fileaccesslogDescResult.Validators[0].(func(string) error)
+	// fileaccesslogDescMessage is the schema descriptor for message field.
+	fileaccesslogDescMessage := fileaccesslogFields[8].Descriptor()
+	// fileaccesslog.DefaultMessage holds the default value on creation for the message field.
+	fileaccesslog.DefaultMessage = fileaccesslogDescMessage.Default.(string)
+	// fileaccesslog.MessageValidator is a validator for the "message" field. It is called by the builders before save.
+	fileaccesslog.MessageValidator = fileaccesslogDescMessage.Validators[0].(func(string) error)
+	// fileaccesslogDescID is the schema descriptor for id field.
+	fileaccesslogDescID := fileaccesslogMixinFields0[0].Descriptor()
+	// fileaccesslog.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	fileaccesslog.IDValidator = fileaccesslogDescID.Validators[0].(func(uint32) error)
 	fileobjectMixin := schema.FileObject{}.Mixin()
 	fileobject.Policy = privacy.NewPolicies(fileobjectMixin[0], schema.FileObject{})
 	fileobject.Hooks[0] = func(next ent.Mutator) ent.Mutator {

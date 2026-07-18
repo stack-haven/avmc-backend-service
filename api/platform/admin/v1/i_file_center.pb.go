@@ -26,13 +26,14 @@ var File_platform_admin_v1_i_file_center_proto protoreflect.FileDescriptor
 
 const file_platform_admin_v1_i_file_center_proto_rawDesc = "" +
 	"\n" +
-	"%platform/admin/v1/i_file_center.proto\x12\x11platform.admin.v1\x1a\x1acore/service/v1/file.proto\x1a\x1cgoogle/api/annotations.proto2\x82\b\n" +
+	"%platform/admin/v1/i_file_center.proto\x12\x11platform.admin.v1\x1a\x1acore/service/v1/file.proto\x1a\x1cgoogle/api/annotations.proto2\xa1\t\n" +
 	"\x11FileCenterService\x12\xa8\x01\n" +
 	"\x17CreateFileUploadSession\x12/.core.service.v1.CreateFileUploadSessionRequest\x1a0.core.service.v1.CreateFileUploadSessionResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/admin/v1/files/upload-sessions\x12\x93\x01\n" +
 	"\x11UploadFileContent\x12).core.service.v1.UploadFileContentRequest\x1a*.core.service.v1.UploadFileContentResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}:content\x12\x93\x01\n" +
 	"\x11ConfirmFileUpload\x12).core.service.v1.ConfirmFileUploadRequest\x1a*.core.service.v1.ConfirmFileUploadResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}:confirm\x12q\n" +
 	"\rGetFileObject\x12%.core.service.v1.GetFileObjectRequest\x1a\x1b.core.service.v1.FileObject\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/admin/v1/files/{id}\x12}\n" +
-	"\x0fListFileObjects\x12'.core.service.v1.ListFileObjectsRequest\x1a(.core.service.v1.ListFileObjectsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/admin/v1/files\x12\x9b\x01\n" +
+	"\x0fListFileObjects\x12'.core.service.v1.ListFileObjectsRequest\x1a(.core.service.v1.ListFileObjectsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/admin/v1/files\x12\x9c\x01\n" +
+	"\x12ListFileAccessLogs\x12*.core.service.v1.ListFileAccessLogsRequest\x1a+.core.service.v1.ListFileAccessLogsResponse\"-\x82\xd3\xe4\x93\x02'\x12%/admin/v1/files/{file_id}/access-logs\x12\x9b\x01\n" +
 	"\x13PresignFileDownload\x12+.core.service.v1.PresignFileDownloadRequest\x1a,.core.service.v1.PresignFileDownloadResponse\")\x82\xd3\xe4\x93\x02#\x12!/admin/v1/files/{id}:download-url\x12\x85\x01\n" +
 	"\x10DeleteFileObject\x12(.core.service.v1.DeleteFileObjectRequest\x1a).core.service.v1.DeleteFileObjectResponse\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/admin/v1/files/{id}B\xb9\x01\n" +
 	"\x15com.platform.admin.v1B\x10IFileCenterProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
@@ -43,15 +44,17 @@ var file_platform_admin_v1_i_file_center_proto_goTypes = []any{
 	(*v1.ConfirmFileUploadRequest)(nil),        // 2: core.service.v1.ConfirmFileUploadRequest
 	(*v1.GetFileObjectRequest)(nil),            // 3: core.service.v1.GetFileObjectRequest
 	(*v1.ListFileObjectsRequest)(nil),          // 4: core.service.v1.ListFileObjectsRequest
-	(*v1.PresignFileDownloadRequest)(nil),      // 5: core.service.v1.PresignFileDownloadRequest
-	(*v1.DeleteFileObjectRequest)(nil),         // 6: core.service.v1.DeleteFileObjectRequest
-	(*v1.CreateFileUploadSessionResponse)(nil), // 7: core.service.v1.CreateFileUploadSessionResponse
-	(*v1.UploadFileContentResponse)(nil),       // 8: core.service.v1.UploadFileContentResponse
-	(*v1.ConfirmFileUploadResponse)(nil),       // 9: core.service.v1.ConfirmFileUploadResponse
-	(*v1.FileObject)(nil),                      // 10: core.service.v1.FileObject
-	(*v1.ListFileObjectsResponse)(nil),         // 11: core.service.v1.ListFileObjectsResponse
-	(*v1.PresignFileDownloadResponse)(nil),     // 12: core.service.v1.PresignFileDownloadResponse
-	(*v1.DeleteFileObjectResponse)(nil),        // 13: core.service.v1.DeleteFileObjectResponse
+	(*v1.ListFileAccessLogsRequest)(nil),       // 5: core.service.v1.ListFileAccessLogsRequest
+	(*v1.PresignFileDownloadRequest)(nil),      // 6: core.service.v1.PresignFileDownloadRequest
+	(*v1.DeleteFileObjectRequest)(nil),         // 7: core.service.v1.DeleteFileObjectRequest
+	(*v1.CreateFileUploadSessionResponse)(nil), // 8: core.service.v1.CreateFileUploadSessionResponse
+	(*v1.UploadFileContentResponse)(nil),       // 9: core.service.v1.UploadFileContentResponse
+	(*v1.ConfirmFileUploadResponse)(nil),       // 10: core.service.v1.ConfirmFileUploadResponse
+	(*v1.FileObject)(nil),                      // 11: core.service.v1.FileObject
+	(*v1.ListFileObjectsResponse)(nil),         // 12: core.service.v1.ListFileObjectsResponse
+	(*v1.ListFileAccessLogsResponse)(nil),      // 13: core.service.v1.ListFileAccessLogsResponse
+	(*v1.PresignFileDownloadResponse)(nil),     // 14: core.service.v1.PresignFileDownloadResponse
+	(*v1.DeleteFileObjectResponse)(nil),        // 15: core.service.v1.DeleteFileObjectResponse
 }
 var file_platform_admin_v1_i_file_center_proto_depIdxs = []int32{
 	0,  // 0: platform.admin.v1.FileCenterService.CreateFileUploadSession:input_type -> core.service.v1.CreateFileUploadSessionRequest
@@ -59,17 +62,19 @@ var file_platform_admin_v1_i_file_center_proto_depIdxs = []int32{
 	2,  // 2: platform.admin.v1.FileCenterService.ConfirmFileUpload:input_type -> core.service.v1.ConfirmFileUploadRequest
 	3,  // 3: platform.admin.v1.FileCenterService.GetFileObject:input_type -> core.service.v1.GetFileObjectRequest
 	4,  // 4: platform.admin.v1.FileCenterService.ListFileObjects:input_type -> core.service.v1.ListFileObjectsRequest
-	5,  // 5: platform.admin.v1.FileCenterService.PresignFileDownload:input_type -> core.service.v1.PresignFileDownloadRequest
-	6,  // 6: platform.admin.v1.FileCenterService.DeleteFileObject:input_type -> core.service.v1.DeleteFileObjectRequest
-	7,  // 7: platform.admin.v1.FileCenterService.CreateFileUploadSession:output_type -> core.service.v1.CreateFileUploadSessionResponse
-	8,  // 8: platform.admin.v1.FileCenterService.UploadFileContent:output_type -> core.service.v1.UploadFileContentResponse
-	9,  // 9: platform.admin.v1.FileCenterService.ConfirmFileUpload:output_type -> core.service.v1.ConfirmFileUploadResponse
-	10, // 10: platform.admin.v1.FileCenterService.GetFileObject:output_type -> core.service.v1.FileObject
-	11, // 11: platform.admin.v1.FileCenterService.ListFileObjects:output_type -> core.service.v1.ListFileObjectsResponse
-	12, // 12: platform.admin.v1.FileCenterService.PresignFileDownload:output_type -> core.service.v1.PresignFileDownloadResponse
-	13, // 13: platform.admin.v1.FileCenterService.DeleteFileObject:output_type -> core.service.v1.DeleteFileObjectResponse
-	7,  // [7:14] is the sub-list for method output_type
-	0,  // [0:7] is the sub-list for method input_type
+	5,  // 5: platform.admin.v1.FileCenterService.ListFileAccessLogs:input_type -> core.service.v1.ListFileAccessLogsRequest
+	6,  // 6: platform.admin.v1.FileCenterService.PresignFileDownload:input_type -> core.service.v1.PresignFileDownloadRequest
+	7,  // 7: platform.admin.v1.FileCenterService.DeleteFileObject:input_type -> core.service.v1.DeleteFileObjectRequest
+	8,  // 8: platform.admin.v1.FileCenterService.CreateFileUploadSession:output_type -> core.service.v1.CreateFileUploadSessionResponse
+	9,  // 9: platform.admin.v1.FileCenterService.UploadFileContent:output_type -> core.service.v1.UploadFileContentResponse
+	10, // 10: platform.admin.v1.FileCenterService.ConfirmFileUpload:output_type -> core.service.v1.ConfirmFileUploadResponse
+	11, // 11: platform.admin.v1.FileCenterService.GetFileObject:output_type -> core.service.v1.FileObject
+	12, // 12: platform.admin.v1.FileCenterService.ListFileObjects:output_type -> core.service.v1.ListFileObjectsResponse
+	13, // 13: platform.admin.v1.FileCenterService.ListFileAccessLogs:output_type -> core.service.v1.ListFileAccessLogsResponse
+	14, // 14: platform.admin.v1.FileCenterService.PresignFileDownload:output_type -> core.service.v1.PresignFileDownloadResponse
+	15, // 15: platform.admin.v1.FileCenterService.DeleteFileObject:output_type -> core.service.v1.DeleteFileObjectResponse
+	8,  // [8:16] is the sub-list for method output_type
+	0,  // [0:8] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

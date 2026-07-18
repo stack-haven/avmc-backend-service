@@ -7,6 +7,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
@@ -34,7 +35,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 21)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 22)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   asynctask.Table,
@@ -140,6 +141,32 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[4] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   fileaccesslog.Table,
+			Columns: fileaccesslog.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: fileaccesslog.FieldID,
+			},
+		},
+		Type: "FileAccessLog",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			fileaccesslog.FieldCreatedAt:    {Type: field.TypeTime, Column: fileaccesslog.FieldCreatedAt},
+			fileaccesslog.FieldUpdatedAt:    {Type: field.TypeTime, Column: fileaccesslog.FieldUpdatedAt},
+			fileaccesslog.FieldStatus:       {Type: field.TypeInt32, Column: fileaccesslog.FieldStatus},
+			fileaccesslog.FieldTenantID:     {Type: field.TypeUint32, Column: fileaccesslog.FieldTenantID},
+			fileaccesslog.FieldFileID:       {Type: field.TypeUint32, Column: fileaccesslog.FieldFileID},
+			fileaccesslog.FieldFileName:     {Type: field.TypeString, Column: fileaccesslog.FieldFileName},
+			fileaccesslog.FieldAction:       {Type: field.TypeString, Column: fileaccesslog.FieldAction},
+			fileaccesslog.FieldOperatorID:   {Type: field.TypeUint32, Column: fileaccesslog.FieldOperatorID},
+			fileaccesslog.FieldOperatorName: {Type: field.TypeString, Column: fileaccesslog.FieldOperatorName},
+			fileaccesslog.FieldClientIP:     {Type: field.TypeString, Column: fileaccesslog.FieldClientIP},
+			fileaccesslog.FieldUserAgent:    {Type: field.TypeString, Column: fileaccesslog.FieldUserAgent},
+			fileaccesslog.FieldResult:       {Type: field.TypeString, Column: fileaccesslog.FieldResult},
+			fileaccesslog.FieldMessage:      {Type: field.TypeString, Column: fileaccesslog.FieldMessage},
+		},
+	}
+	graph.Nodes[5] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   fileobject.Table,
 			Columns: fileobject.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -173,7 +200,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fileobject.FieldCreatedBy:       {Type: field.TypeUint32, Column: fileobject.FieldCreatedBy},
 		},
 	}
-	graph.Nodes[5] = &sqlgraph.Node{
+	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   loginlog.Table,
 			Columns: loginlog.Columns,
@@ -197,7 +224,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			loginlog.FieldSessionID:     {Type: field.TypeString, Column: loginlog.FieldSessionID},
 		},
 	}
-	graph.Nodes[6] = &sqlgraph.Node{
+	graph.Nodes[7] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   menu.Table,
 			Columns: menu.Columns,
@@ -242,7 +269,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			menu.FieldTitle:              {Type: field.TypeString, Column: menu.FieldTitle},
 		},
 	}
-	graph.Nodes[7] = &sqlgraph.Node{
+	graph.Nodes[8] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   menupermissiongroup.Table,
 			Columns: menupermissiongroup.Columns,
@@ -269,7 +296,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			menupermissiongroup.FieldResourceQuotas:   {Type: field.TypeJSON, Column: menupermissiongroup.FieldResourceQuotas},
 		},
 	}
-	graph.Nodes[8] = &sqlgraph.Node{
+	graph.Nodes[9] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   menupermissiongroupversion.Table,
 			Columns: menupermissiongroupversion.Columns,
@@ -294,7 +321,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			menupermissiongroupversion.FieldResourceQuotas: {Type: field.TypeJSON, Column: menupermissiongroupversion.FieldResourceQuotas},
 		},
 	}
-	graph.Nodes[9] = &sqlgraph.Node{
+	graph.Nodes[10] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   operationlog.Table,
 			Columns: operationlog.Columns,
@@ -327,7 +354,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			operationlog.FieldErrorMessage:   {Type: field.TypeString, Column: operationlog.FieldErrorMessage},
 		},
 	}
-	graph.Nodes[10] = &sqlgraph.Node{
+	graph.Nodes[11] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   parameterdefinition.Table,
 			Columns: parameterdefinition.Columns,
@@ -351,7 +378,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			parameterdefinition.FieldSort:              {Type: field.TypeInt32, Column: parameterdefinition.FieldSort},
 		},
 	}
-	graph.Nodes[11] = &sqlgraph.Node{
+	graph.Nodes[12] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   post.Table,
 			Columns: post.Columns,
@@ -372,7 +399,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			post.FieldRemark:    {Type: field.TypeString, Column: post.FieldRemark},
 		},
 	}
-	graph.Nodes[12] = &sqlgraph.Node{
+	graph.Nodes[13] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   project.Table,
 			Columns: project.Columns,
@@ -394,7 +421,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			project.FieldDescription: {Type: field.TypeString, Column: project.FieldDescription},
 		},
 	}
-	graph.Nodes[13] = &sqlgraph.Node{
+	graph.Nodes[14] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   role.Table,
 			Columns: role.Columns,
@@ -418,7 +445,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			role.FieldIsTenantAdmin:     {Type: field.TypeBool, Column: role.FieldIsTenantAdmin},
 		},
 	}
-	graph.Nodes[14] = &sqlgraph.Node{
+	graph.Nodes[15] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   storageprovider.Table,
 			Columns: storageprovider.Columns,
@@ -452,7 +479,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			storageprovider.FieldRemark:         {Type: field.TypeString, Column: storageprovider.FieldRemark},
 		},
 	}
-	graph.Nodes[15] = &sqlgraph.Node{
+	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
@@ -479,7 +506,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldCancelledAt:     {Type: field.TypeTime, Column: tenant.FieldCancelledAt},
 		},
 	}
-	graph.Nodes[16] = &sqlgraph.Node{
+	graph.Nodes[17] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantparameteroverride.Table,
 			Columns: tenantparameteroverride.Columns,
@@ -498,7 +525,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantparameteroverride.FieldUpdatedBy:    {Type: field.TypeUint32, Column: tenantparameteroverride.FieldUpdatedBy},
 		},
 	}
-	graph.Nodes[17] = &sqlgraph.Node{
+	graph.Nodes[18] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantpermissiongroup.Table,
 			Columns: tenantpermissiongroup.Columns,
@@ -519,7 +546,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantpermissiongroup.FieldAutoUpgrade: {Type: field.TypeBool, Column: tenantpermissiongroup.FieldAutoUpgrade},
 		},
 	}
-	graph.Nodes[18] = &sqlgraph.Node{
+	graph.Nodes[19] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantresourcequotaoperation.Table,
 			Columns: tenantresourcequotaoperation.Columns,
@@ -541,7 +568,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantresourcequotaoperation.FieldUpdatedBy:      {Type: field.TypeUint32, Column: tenantresourcequotaoperation.FieldUpdatedBy},
 		},
 	}
-	graph.Nodes[19] = &sqlgraph.Node{
+	graph.Nodes[20] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantresourcequotausage.Table,
 			Columns: tenantresourcequotausage.Columns,
@@ -560,7 +587,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantresourcequotausage.FieldUpdatedBy:   {Type: field.TypeUint32, Column: tenantresourcequotausage.FieldUpdatedBy},
 		},
 	}
-	graph.Nodes[20] = &sqlgraph.Node{
+	graph.Nodes[21] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -1512,6 +1539,111 @@ func (f *DictionaryTypeFilter) WhereHasItemsWith(preds ...predicate.DictionaryIt
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *FileAccessLogQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the FileAccessLogQuery builder.
+func (_q *FileAccessLogQuery) Filter() *FileAccessLogFilter {
+	return &FileAccessLogFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *FileAccessLogMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the FileAccessLogMutation builder.
+func (m *FileAccessLogMutation) Filter() *FileAccessLogFilter {
+	return &FileAccessLogFilter{config: m.config, predicateAdder: m}
+}
+
+// FileAccessLogFilter provides a generic filtering capability at runtime for FileAccessLogQuery.
+type FileAccessLogFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *FileAccessLogFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *FileAccessLogFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(fileaccesslog.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *FileAccessLogFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(fileaccesslog.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *FileAccessLogFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(fileaccesslog.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *FileAccessLogFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(fileaccesslog.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *FileAccessLogFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(fileaccesslog.FieldTenantID))
+}
+
+// WhereFileID applies the entql uint32 predicate on the file_id field.
+func (f *FileAccessLogFilter) WhereFileID(p entql.Uint32P) {
+	f.Where(p.Field(fileaccesslog.FieldFileID))
+}
+
+// WhereFileName applies the entql string predicate on the file_name field.
+func (f *FileAccessLogFilter) WhereFileName(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldFileName))
+}
+
+// WhereAction applies the entql string predicate on the action field.
+func (f *FileAccessLogFilter) WhereAction(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldAction))
+}
+
+// WhereOperatorID applies the entql uint32 predicate on the operator_id field.
+func (f *FileAccessLogFilter) WhereOperatorID(p entql.Uint32P) {
+	f.Where(p.Field(fileaccesslog.FieldOperatorID))
+}
+
+// WhereOperatorName applies the entql string predicate on the operator_name field.
+func (f *FileAccessLogFilter) WhereOperatorName(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldOperatorName))
+}
+
+// WhereClientIP applies the entql string predicate on the client_ip field.
+func (f *FileAccessLogFilter) WhereClientIP(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldClientIP))
+}
+
+// WhereUserAgent applies the entql string predicate on the user_agent field.
+func (f *FileAccessLogFilter) WhereUserAgent(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldUserAgent))
+}
+
+// WhereResult applies the entql string predicate on the result field.
+func (f *FileAccessLogFilter) WhereResult(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldResult))
+}
+
+// WhereMessage applies the entql string predicate on the message field.
+func (f *FileAccessLogFilter) WhereMessage(p entql.StringP) {
+	f.Where(p.Field(fileaccesslog.FieldMessage))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *FileObjectQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -1540,7 +1672,7 @@ type FileObjectFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *FileObjectFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1690,7 +1822,7 @@ type LoginLogFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *LoginLogFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -1785,7 +1917,7 @@ type MenuFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MenuFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2055,7 +2187,7 @@ type MenuPermissionGroupFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MenuPermissionGroupFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2221,7 +2353,7 @@ type MenuPermissionGroupVersionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MenuPermissionGroupVersionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2363,7 +2495,7 @@ type OperationLogFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *OperationLogFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2503,7 +2635,7 @@ type ParameterDefinitionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *ParameterDefinitionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2612,7 +2744,7 @@ type PostFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PostFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2692,7 +2824,7 @@ type ProjectFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *ProjectFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2791,7 +2923,7 @@ type RoleFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RoleFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -2928,7 +3060,7 @@ type StorageProviderFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *StorageProviderFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3073,7 +3205,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3197,7 +3329,7 @@ type TenantParameterOverrideFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantParameterOverrideFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3281,7 +3413,7 @@ type TenantPermissionGroupFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantPermissionGroupFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3403,7 +3535,7 @@ type TenantResourceQuotaOperationFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantResourceQuotaOperationFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3502,7 +3634,7 @@ type TenantResourceQuotaUsageFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantResourceQuotaUsageFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3586,7 +3718,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

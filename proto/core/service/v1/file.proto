@@ -15,6 +15,7 @@ service FileCenterService {
   rpc ConfirmFileUpload(ConfirmFileUploadRequest) returns (ConfirmFileUploadResponse);
   rpc GetFileObject(GetFileObjectRequest) returns (FileObject);
   rpc ListFileObjects(ListFileObjectsRequest) returns (ListFileObjectsResponse);
+  rpc ListFileAccessLogs(ListFileAccessLogsRequest) returns (ListFileAccessLogsResponse);
   rpc PresignFileDownload(PresignFileDownloadRequest) returns (PresignFileDownloadResponse);
   rpc DeleteFileObject(DeleteFileObjectRequest) returns (DeleteFileObjectResponse);
 }
@@ -55,6 +56,21 @@ message FileObject {
   optional string upload_expires_at = 18 [(gnostic.openapi.v3.property) = {description: "上传凭证过期时间"}];
   optional uint32 provider_id = 19 [(gnostic.openapi.v3.property) = {description: "存储渠道ID"}];
   optional string provider_code = 20 [(gnostic.openapi.v3.property) = {description: "存储渠道编码"}];
+}
+
+message FileAccessLog {
+  uint32 id = 1;
+  optional uint32 tenant_id = 2 [(gnostic.openapi.v3.property) = {description: "租户ID"}];
+  uint32 file_id = 3 [(gnostic.openapi.v3.property) = {description: "文件ID"}];
+  optional string file_name = 4 [(gnostic.openapi.v3.property) = {description: "文件名快照"}];
+  optional string action = 5 [(gnostic.openapi.v3.property) = {description: "访问动作：download/delete/preview"}];
+  optional uint32 operator_id = 6 [(gnostic.openapi.v3.property) = {description: "操作人ID"}];
+  optional string operator_name = 7 [(gnostic.openapi.v3.property) = {description: "操作人名称"}];
+  optional string client_ip = 8 [(gnostic.openapi.v3.property) = {description: "客户端IP"}];
+  optional string user_agent = 9 [(gnostic.openapi.v3.property) = {description: "User-Agent"}];
+  optional string result = 10 [(gnostic.openapi.v3.property) = {description: "结果：success/failure"}];
+  optional string message = 11 [(gnostic.openapi.v3.property) = {description: "结果说明"}];
+  optional string created_at = 12 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
 }
 
 message CreateFileUploadSessionRequest {
@@ -137,6 +153,39 @@ message ListFileObjectsRequest {
 
 message ListFileObjectsResponse {
   repeated FileObject items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message ListFileAccessLogsRequest {
+  string page_token = 1 [
+    json_name = "pageToken",
+    (gnostic.openapi.v3.property) = {
+      description: "当前页码"
+      default: {number: 1}
+    }
+  ];
+  int32 page_size = 2 [
+    json_name = "pageSize",
+    (gnostic.openapi.v3.property) = {
+      description: "每一页的行数"
+      default: {number: 10}
+    }
+  ];
+  optional bool no_paging = 3 [
+    json_name = "nopaging",
+    (gnostic.openapi.v3.property) = {description: "是否不分页"}
+  ];
+  uint32 file_id = 4 [(gnostic.openapi.v3.property) = {description: "文件ID"}];
+  optional string action = 5 [(buf.validate.field).string.max_len = 40];
+  optional string result = 6 [(buf.validate.field).string.max_len = 40];
+  optional string filter = 10 [(gnostic.openapi.v3.property) = {description: "筛选条件"}];
+  optional string order_by = 11 [(gnostic.openapi.v3.property) = {description: "排序字段"}];
+  int32 skip = 12 [(gnostic.openapi.v3.property) = {description: "跳过的行数"}];
+}
+
+message ListFileAccessLogsResponse {
+  repeated FileAccessLog items = 1;
   int32 total = 2;
   string next_page_token = 3;
 }

@@ -56,6 +56,18 @@ func (f DictionaryTypeFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryTypeMutation", m)
 }
 
+// The FileAccessLogFunc type is an adapter to allow the use of ordinary
+// function as FileAccessLog mutator.
+type FileAccessLogFunc func(context.Context, *gen.FileAccessLogMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FileAccessLogFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.FileAccessLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.FileAccessLogMutation", m)
+}
+
 // The FileObjectFunc type is an adapter to allow the use of ordinary
 // function as FileObject mutator.
 type FileObjectFunc func(context.Context, *gen.FileObjectMutation) (gen.Value, error)

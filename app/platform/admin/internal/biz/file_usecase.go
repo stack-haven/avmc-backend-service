@@ -17,6 +17,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/google/uuid"
 )
 
@@ -29,6 +30,8 @@ const (
 	defaultFileBucket     = "tenant-files"
 	defaultUploadTTL      = 15 * time.Minute
 	defaultDownloadTTL    = 15 * time.Minute
+	fileQuotaKey          = "files"
+	storageBytesQuotaKey  = "storage.bytes"
 )
 
 type FileRepo interface {
@@ -41,14 +44,22 @@ type FileRepo interface {
 	Delete(context.Context, uint32) error
 }
 
-type FileUsecase struct {
-	repo     FileRepo
-	resolver StorageProviderResolver
-	log      *log.Helper
+type FileAccessLogRepo interface {
+	Append(context.Context, *pbCore.FileAccessLog) error
+	List(context.Context, ...listing.Option) ([]*pbCore.FileAccessLog, error)
+	Count(context.Context, ...listing.Option) (int32, error)
 }
 
-func NewFileUsecase(repo FileRepo, resolver StorageProviderResolver, logger log.Logger) *FileUsecase {
-	return &FileUsecase{repo: repo, resolver: resolver, log: log.NewHelper(logger)}
+type FileUsecase struct {
+	repo      FileRepo
+	accessLog FileAccessLogRepo
+	resolver  StorageProviderResolver
+	quota     *ResourceQuotaUsecase
+	log       *log.Helper
+}
+
+func NewFileUsecase(repo FileRepo, accessLog FileAccessLogRepo, resolver StorageProviderResolver, quota *ResourceQuotaUsecase, logger log.Logger) *FileUsecase {
+	return &FileUsecase{repo: repo, accessLog: accessLog, resolver: resolver, quota: quota, log: log.NewHelper(logger)}
 }
 
 func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.CreateFileUploadSessionRequest) (*pbCore.CreateFileUploadSessionResponse, error) {
@@ -73,6 +84,9 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 
 	tenantID, err := currentTenantID(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if err = uc.checkUploadQuota(ctx, req.GetSize()); err != nil {
 		return nil, err
 	}
 	expiresAt := time.Now().UTC().Add(defaultUploadTTL)
@@ -144,7 +158,7 @@ func (uc *FileUsecase) UploadContent(ctx context.Context, req *pbCore.UploadFile
 	if sha256 == "" {
 		sha256 = info.ETag
 	}
-	return uc.repo.Confirm(ctx, req.GetId(), info.Size, sha256, info.ETag)
+	return uc.confirmWithQuota(ctx, file, info.Size, sha256, info.ETag)
 }
 
 func (uc *FileUsecase) ConfirmUpload(ctx context.Context, req *pbCore.ConfirmFileUploadRequest) (*pbCore.FileObject, error) {
@@ -168,7 +182,7 @@ func (uc *FileUsecase) ConfirmUpload(ctx context.Context, req *pbCore.ConfirmFil
 	if size == 0 {
 		size = file.GetSize()
 	}
-	return uc.repo.Confirm(ctx, req.GetId(), size, strings.TrimSpace(req.GetSha256()), strings.TrimSpace(req.GetEtag()))
+	return uc.confirmWithQuota(ctx, file, size, strings.TrimSpace(req.GetSha256()), strings.TrimSpace(req.GetEtag()))
 }
 
 func (uc *FileUsecase) Get(ctx context.Context, id uint32) (*pbCore.FileObject, error) {
@@ -184,6 +198,20 @@ func (uc *FileUsecase) List(ctx context.Context, opts ...listing.Option) ([]*pbC
 
 func (uc *FileUsecase) Count(ctx context.Context, opts ...listing.Option) (int32, error) {
 	return uc.repo.Count(ctx, opts...)
+}
+
+func (uc *FileUsecase) ListAccessLogs(ctx context.Context, opts ...listing.Option) ([]*pbCore.FileAccessLog, error) {
+	if uc.accessLog == nil {
+		return nil, errors.BadRequest("FILE_ACCESS_LOG_NOT_CONFIGURED", "未配置文件访问日志仓储")
+	}
+	return uc.accessLog.List(ctx, opts...)
+}
+
+func (uc *FileUsecase) CountAccessLogs(ctx context.Context, opts ...listing.Option) (int32, error) {
+	if uc.accessLog == nil {
+		return 0, errors.BadRequest("FILE_ACCESS_LOG_NOT_CONFIGURED", "未配置文件访问日志仓储")
+	}
+	return uc.accessLog.Count(ctx, opts...)
 }
 
 func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignFileDownloadRequest) (*pbCore.PresignFileDownloadResponse, error) {
@@ -207,15 +235,17 @@ func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignF
 	}
 	url, err := provider.Client.PresignGetObject(ctx, file.GetBucket(), file.GetObjectKey(), objectstorage.PresignOptions{Expires: ttl})
 	if err != nil {
+		uc.appendAccessLog(ctx, file, "download", "failure", err.Error())
 		return nil, pb.ErrorFileReadError("生成文件下载地址失败: %v", err)
 	}
+	uc.appendAccessLog(ctx, file, "download", "success", "")
 	return &pbCore.PresignFileDownloadResponse{
 		DownloadUrl: url,
 		ExpiresAt:   time.Now().UTC().Add(ttl).Format(time.DateTime),
 	}, nil
 }
 
-func (uc *FileUsecase) Delete(ctx context.Context, id uint32) error {
+func (uc *FileUsecase) Delete(ctx context.Context, id uint32, idempotencyKey string) error {
 	if id == 0 {
 		return pb.ErrorBadRequest("文件ID不能为空")
 	}
@@ -224,18 +254,152 @@ func (uc *FileUsecase) Delete(ctx context.Context, id uint32) error {
 		return err
 	}
 	if file.GetStatus() == FileStatusDeleted {
-		return nil
+		return uc.releaseFileQuota(ctx, file, idempotencyKey)
 	}
 	if file.GetBucket() != "" && file.GetObjectKey() != "" {
 		provider, resolveErr := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
 		if resolveErr != nil {
+			uc.appendAccessLog(ctx, file, "delete", "failure", resolveErr.Error())
 			return resolveErr
 		}
 		if err = provider.Client.DeleteObject(ctx, file.GetBucket(), file.GetObjectKey()); err != nil {
+			uc.appendAccessLog(ctx, file, "delete", "failure", err.Error())
 			return pb.ErrorFileDeleteError("删除对象存储文件失败: %v", err)
 		}
 	}
-	return uc.repo.Delete(ctx, id)
+	if err = uc.repo.Delete(ctx, id); err != nil {
+		uc.appendAccessLog(ctx, file, "delete", "failure", err.Error())
+		return err
+	}
+	if err = uc.releaseFileQuota(ctx, file, idempotencyKey); err != nil {
+		uc.appendAccessLog(ctx, file, "delete", "failure", err.Error())
+		return err
+	}
+	uc.appendAccessLog(ctx, file, "delete", "success", "")
+	return nil
+}
+
+func (uc *FileUsecase) checkUploadQuota(ctx context.Context, size int64) error {
+	if uc.quota == nil {
+		return nil
+	}
+	files, err := uc.quota.CheckCurrent(ctx, fileQuotaKey, 1)
+	if err != nil {
+		return err
+	}
+	if !files.GetAllowed() {
+		return errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "文件数量额度不足")
+	}
+	if size > 0 {
+		storage, err := uc.quota.CheckCurrent(ctx, storageBytesQuotaKey, size)
+		if err != nil {
+			return err
+		}
+		if !storage.GetAllowed() {
+			return errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "文件存储容量额度不足")
+		}
+	}
+	return nil
+}
+
+func (uc *FileUsecase) confirmWithQuota(ctx context.Context, file *pbCore.FileObject, size int64, sha256 string, etag string) (*pbCore.FileObject, error) {
+	if file == nil {
+		return nil, pb.ErrorFileNotFound("文件不存在")
+	}
+	var fileReservation *ResourceQuotaReservation
+	var storageReservation *ResourceQuotaReservation
+	var err error
+	if uc.quota != nil {
+		fileReservation, _, err = uc.quota.ReserveCurrent(ctx, fileQuotaKey, 1, fmt.Sprintf("file:confirm:%d:files", file.GetId()))
+		if err != nil {
+			return nil, err
+		}
+		if size > 0 {
+			storageReservation, _, err = uc.quota.ReserveCurrent(ctx, storageBytesQuotaKey, size, fmt.Sprintf("file:confirm:%d:storage.bytes", file.GetId()))
+			if err != nil {
+				releaseQuotaReservation(ctx, fileReservation, uc.log)
+				return nil, err
+			}
+		}
+	}
+	confirmed, err := uc.repo.Confirm(ctx, file.GetId(), size, sha256, etag)
+	if err != nil {
+		releaseQuotaReservation(ctx, storageReservation, uc.log)
+		releaseQuotaReservation(ctx, fileReservation, uc.log)
+		return nil, err
+	}
+	return confirmed, nil
+}
+
+func releaseQuotaReservation(ctx context.Context, reservation *ResourceQuotaReservation, logger *log.Helper) {
+	if reservation == nil || reservation.IsReplay() {
+		return
+	}
+	if _, err := reservation.Release(ctx); err != nil && logger != nil {
+		logger.Warnf("release file quota reservation failed: %v", err)
+	}
+}
+
+func (uc *FileUsecase) releaseFileQuota(ctx context.Context, file *pbCore.FileObject, idempotencyKey string) error {
+	if uc.quota == nil || file == nil || file.GetStatus() != FileStatusConfirmed {
+		return nil
+	}
+	if strings.TrimSpace(idempotencyKey) == "" {
+		idempotencyKey = fmt.Sprintf("file:delete:%d", file.GetId())
+	}
+	if _, err := uc.quota.ReleaseCurrent(ctx, fileQuotaKey, 1, idempotencyKey+":files"); err != nil {
+		return err
+	}
+	if file.GetSize() > 0 {
+		if _, err := uc.quota.ReleaseCurrent(ctx, storageBytesQuotaKey, file.GetSize(), idempotencyKey+":storage.bytes"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (uc *FileUsecase) appendAccessLog(ctx context.Context, file *pbCore.FileObject, action string, result string, message string) {
+	if uc.accessLog == nil || file == nil {
+		return
+	}
+	operatorID := authn.GetAuthUserID(ctx)
+	operatorName := ""
+	if user, ok := authn.AuthUserFromContext(ctx); ok && user != nil {
+		operatorName = user.Name()
+		if operatorName == "" {
+			operatorName = user.GetSubject()
+		}
+	}
+	clientIP, userAgent := fileRequestMeta(ctx)
+	entry := &pbCore.FileAccessLog{
+		FileId:       file.GetId(),
+		FileName:     fileStringPtr(file.GetFileName()),
+		Action:       fileStringPtr(action),
+		OperatorId:   fileUint32Ptr(operatorID),
+		OperatorName: fileStringPtr(operatorName),
+		ClientIp:     fileStringPtr(clientIP),
+		UserAgent:    fileStringPtr(userAgent),
+		Result:       fileStringPtr(result),
+		Message:      fileStringPtr(message),
+	}
+	if err := uc.accessLog.Append(ctx, entry); err != nil {
+		uc.log.Warnf("append file access log failed: %v", err)
+	}
+}
+
+func fileRequestMeta(ctx context.Context) (string, string) {
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		headers := tr.RequestHeader()
+		ip := strings.TrimSpace(headers.Get("X-Forwarded-For"))
+		if comma := strings.Index(ip, ","); comma >= 0 {
+			ip = strings.TrimSpace(ip[:comma])
+		}
+		if ip == "" {
+			ip = strings.TrimSpace(headers.Get("X-Real-IP"))
+		}
+		return ip, strings.TrimSpace(headers.Get("User-Agent"))
+	}
+	return "", ""
 }
 
 func (uc *FileUsecase) uploadSessionResponse(ctx context.Context, provider *ResolvedStorageProvider, file *pbCore.FileObject, ttl time.Duration) (*pbCore.CreateFileUploadSessionResponse, error) {

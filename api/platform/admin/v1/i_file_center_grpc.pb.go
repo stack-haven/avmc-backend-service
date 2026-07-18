@@ -25,6 +25,7 @@ const (
 	FileCenterService_ConfirmFileUpload_FullMethodName       = "/platform.admin.v1.FileCenterService/ConfirmFileUpload"
 	FileCenterService_GetFileObject_FullMethodName           = "/platform.admin.v1.FileCenterService/GetFileObject"
 	FileCenterService_ListFileObjects_FullMethodName         = "/platform.admin.v1.FileCenterService/ListFileObjects"
+	FileCenterService_ListFileAccessLogs_FullMethodName      = "/platform.admin.v1.FileCenterService/ListFileAccessLogs"
 	FileCenterService_PresignFileDownload_FullMethodName     = "/platform.admin.v1.FileCenterService/PresignFileDownload"
 	FileCenterService_DeleteFileObject_FullMethodName        = "/platform.admin.v1.FileCenterService/DeleteFileObject"
 )
@@ -38,6 +39,7 @@ type FileCenterServiceClient interface {
 	ConfirmFileUpload(ctx context.Context, in *v1.ConfirmFileUploadRequest, opts ...grpc.CallOption) (*v1.ConfirmFileUploadResponse, error)
 	GetFileObject(ctx context.Context, in *v1.GetFileObjectRequest, opts ...grpc.CallOption) (*v1.FileObject, error)
 	ListFileObjects(ctx context.Context, in *v1.ListFileObjectsRequest, opts ...grpc.CallOption) (*v1.ListFileObjectsResponse, error)
+	ListFileAccessLogs(ctx context.Context, in *v1.ListFileAccessLogsRequest, opts ...grpc.CallOption) (*v1.ListFileAccessLogsResponse, error)
 	PresignFileDownload(ctx context.Context, in *v1.PresignFileDownloadRequest, opts ...grpc.CallOption) (*v1.PresignFileDownloadResponse, error)
 	DeleteFileObject(ctx context.Context, in *v1.DeleteFileObjectRequest, opts ...grpc.CallOption) (*v1.DeleteFileObjectResponse, error)
 }
@@ -100,6 +102,16 @@ func (c *fileCenterServiceClient) ListFileObjects(ctx context.Context, in *v1.Li
 	return out, nil
 }
 
+func (c *fileCenterServiceClient) ListFileAccessLogs(ctx context.Context, in *v1.ListFileAccessLogsRequest, opts ...grpc.CallOption) (*v1.ListFileAccessLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListFileAccessLogsResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_ListFileAccessLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *fileCenterServiceClient) PresignFileDownload(ctx context.Context, in *v1.PresignFileDownloadRequest, opts ...grpc.CallOption) (*v1.PresignFileDownloadResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.PresignFileDownloadResponse)
@@ -129,6 +141,7 @@ type FileCenterServiceServer interface {
 	ConfirmFileUpload(context.Context, *v1.ConfirmFileUploadRequest) (*v1.ConfirmFileUploadResponse, error)
 	GetFileObject(context.Context, *v1.GetFileObjectRequest) (*v1.FileObject, error)
 	ListFileObjects(context.Context, *v1.ListFileObjectsRequest) (*v1.ListFileObjectsResponse, error)
+	ListFileAccessLogs(context.Context, *v1.ListFileAccessLogsRequest) (*v1.ListFileAccessLogsResponse, error)
 	PresignFileDownload(context.Context, *v1.PresignFileDownloadRequest) (*v1.PresignFileDownloadResponse, error)
 	DeleteFileObject(context.Context, *v1.DeleteFileObjectRequest) (*v1.DeleteFileObjectResponse, error)
 	mustEmbedUnimplementedFileCenterServiceServer()
@@ -155,6 +168,9 @@ func (UnimplementedFileCenterServiceServer) GetFileObject(context.Context, *v1.G
 }
 func (UnimplementedFileCenterServiceServer) ListFileObjects(context.Context, *v1.ListFileObjectsRequest) (*v1.ListFileObjectsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListFileObjects not implemented")
+}
+func (UnimplementedFileCenterServiceServer) ListFileAccessLogs(context.Context, *v1.ListFileAccessLogsRequest) (*v1.ListFileAccessLogsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListFileAccessLogs not implemented")
 }
 func (UnimplementedFileCenterServiceServer) PresignFileDownload(context.Context, *v1.PresignFileDownloadRequest) (*v1.PresignFileDownloadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PresignFileDownload not implemented")
@@ -273,6 +289,24 @@ func _FileCenterService_ListFileObjects_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileCenterService_ListFileAccessLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListFileAccessLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).ListFileAccessLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_ListFileAccessLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).ListFileAccessLogs(ctx, req.(*v1.ListFileAccessLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FileCenterService_PresignFileDownload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.PresignFileDownloadRequest)
 	if err := dec(in); err != nil {
@@ -335,6 +369,10 @@ var FileCenterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFileObjects",
 			Handler:    _FileCenterService_ListFileObjects_Handler,
+		},
+		{
+			MethodName: "ListFileAccessLogs",
+			Handler:    _FileCenterService_ListFileAccessLogs_Handler,
 		},
 		{
 			MethodName: "PresignFileDownload",

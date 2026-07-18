@@ -15,6 +15,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
@@ -54,6 +55,8 @@ type Client struct {
 	DictionaryItem *DictionaryItemClient
 	// DictionaryType is the client for interacting with the DictionaryType builders.
 	DictionaryType *DictionaryTypeClient
+	// FileAccessLog is the client for interacting with the FileAccessLog builders.
+	FileAccessLog *FileAccessLogClient
 	// FileObject is the client for interacting with the FileObject builders.
 	FileObject *FileObjectClient
 	// LoginLog is the client for interacting with the LoginLog builders.
@@ -103,6 +106,7 @@ func (c *Client) init() {
 	c.Dept = NewDeptClient(c.config)
 	c.DictionaryItem = NewDictionaryItemClient(c.config)
 	c.DictionaryType = NewDictionaryTypeClient(c.config)
+	c.FileAccessLog = NewFileAccessLogClient(c.config)
 	c.FileObject = NewFileObjectClient(c.config)
 	c.LoginLog = NewLoginLogClient(c.config)
 	c.Menu = NewMenuClient(c.config)
@@ -216,6 +220,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Dept:                         NewDeptClient(cfg),
 		DictionaryItem:               NewDictionaryItemClient(cfg),
 		DictionaryType:               NewDictionaryTypeClient(cfg),
+		FileAccessLog:                NewFileAccessLogClient(cfg),
 		FileObject:                   NewFileObjectClient(cfg),
 		LoginLog:                     NewLoginLogClient(cfg),
 		Menu:                         NewMenuClient(cfg),
@@ -256,6 +261,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Dept:                         NewDeptClient(cfg),
 		DictionaryItem:               NewDictionaryItemClient(cfg),
 		DictionaryType:               NewDictionaryTypeClient(cfg),
+		FileAccessLog:                NewFileAccessLogClient(cfg),
 		FileObject:                   NewFileObjectClient(cfg),
 		LoginLog:                     NewLoginLogClient(cfg),
 		Menu:                         NewMenuClient(cfg),
@@ -302,10 +308,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileObject,
-		c.LoginLog, c.Menu, c.MenuPermissionGroup, c.MenuPermissionGroupVersion,
-		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
-		c.StorageProvider, c.Tenant, c.TenantParameterOverride,
+		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
+		c.FileObject, c.LoginLog, c.Menu, c.MenuPermissionGroup,
+		c.MenuPermissionGroupVersion, c.OperationLog, c.ParameterDefinition, c.Post,
+		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantParameterOverride,
 		c.TenantPermissionGroup, c.TenantResourceQuotaOperation,
 		c.TenantResourceQuotaUsage, c.User,
 	} {
@@ -317,10 +323,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileObject,
-		c.LoginLog, c.Menu, c.MenuPermissionGroup, c.MenuPermissionGroupVersion,
-		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
-		c.StorageProvider, c.Tenant, c.TenantParameterOverride,
+		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
+		c.FileObject, c.LoginLog, c.Menu, c.MenuPermissionGroup,
+		c.MenuPermissionGroupVersion, c.OperationLog, c.ParameterDefinition, c.Post,
+		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantParameterOverride,
 		c.TenantPermissionGroup, c.TenantResourceQuotaOperation,
 		c.TenantResourceQuotaUsage, c.User,
 	} {
@@ -339,6 +345,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.DictionaryItem.mutate(ctx, m)
 	case *DictionaryTypeMutation:
 		return c.DictionaryType.mutate(ctx, m)
+	case *FileAccessLogMutation:
+		return c.FileAccessLog.mutate(ctx, m)
 	case *FileObjectMutation:
 		return c.FileObject.mutate(ctx, m)
 	case *LoginLogMutation:
@@ -1009,6 +1017,140 @@ func (c *DictionaryTypeClient) mutate(ctx context.Context, m *DictionaryTypeMuta
 		return (&DictionaryTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("gen: unknown DictionaryType mutation op: %q", m.Op())
+	}
+}
+
+// FileAccessLogClient is a client for the FileAccessLog schema.
+type FileAccessLogClient struct {
+	config
+}
+
+// NewFileAccessLogClient returns a client for the FileAccessLog from the given config.
+func NewFileAccessLogClient(c config) *FileAccessLogClient {
+	return &FileAccessLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `fileaccesslog.Hooks(f(g(h())))`.
+func (c *FileAccessLogClient) Use(hooks ...Hook) {
+	c.hooks.FileAccessLog = append(c.hooks.FileAccessLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `fileaccesslog.Intercept(f(g(h())))`.
+func (c *FileAccessLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FileAccessLog = append(c.inters.FileAccessLog, interceptors...)
+}
+
+// Create returns a builder for creating a FileAccessLog entity.
+func (c *FileAccessLogClient) Create() *FileAccessLogCreate {
+	mutation := newFileAccessLogMutation(c.config, OpCreate)
+	return &FileAccessLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FileAccessLog entities.
+func (c *FileAccessLogClient) CreateBulk(builders ...*FileAccessLogCreate) *FileAccessLogCreateBulk {
+	return &FileAccessLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FileAccessLogClient) MapCreateBulk(slice any, setFunc func(*FileAccessLogCreate, int)) *FileAccessLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FileAccessLogCreateBulk{err: fmt.Errorf("calling to FileAccessLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FileAccessLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FileAccessLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FileAccessLog.
+func (c *FileAccessLogClient) Update() *FileAccessLogUpdate {
+	mutation := newFileAccessLogMutation(c.config, OpUpdate)
+	return &FileAccessLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FileAccessLogClient) UpdateOne(_m *FileAccessLog) *FileAccessLogUpdateOne {
+	mutation := newFileAccessLogMutation(c.config, OpUpdateOne, withFileAccessLog(_m))
+	return &FileAccessLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FileAccessLogClient) UpdateOneID(id uint32) *FileAccessLogUpdateOne {
+	mutation := newFileAccessLogMutation(c.config, OpUpdateOne, withFileAccessLogID(id))
+	return &FileAccessLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FileAccessLog.
+func (c *FileAccessLogClient) Delete() *FileAccessLogDelete {
+	mutation := newFileAccessLogMutation(c.config, OpDelete)
+	return &FileAccessLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FileAccessLogClient) DeleteOne(_m *FileAccessLog) *FileAccessLogDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FileAccessLogClient) DeleteOneID(id uint32) *FileAccessLogDeleteOne {
+	builder := c.Delete().Where(fileaccesslog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FileAccessLogDeleteOne{builder}
+}
+
+// Query returns a query builder for FileAccessLog.
+func (c *FileAccessLogClient) Query() *FileAccessLogQuery {
+	return &FileAccessLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFileAccessLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FileAccessLog entity by its id.
+func (c *FileAccessLogClient) Get(ctx context.Context, id uint32) (*FileAccessLog, error) {
+	return c.Query().Where(fileaccesslog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FileAccessLogClient) GetX(ctx context.Context, id uint32) *FileAccessLog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *FileAccessLogClient) Hooks() []Hook {
+	hooks := c.hooks.FileAccessLog
+	return append(hooks[:len(hooks):len(hooks)], fileaccesslog.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *FileAccessLogClient) Interceptors() []Interceptor {
+	return c.inters.FileAccessLog
+}
+
+func (c *FileAccessLogClient) mutate(ctx context.Context, m *FileAccessLogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FileAccessLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FileAccessLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FileAccessLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FileAccessLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown FileAccessLog mutation op: %q", m.Op())
 	}
 }
 
@@ -3747,15 +3889,15 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AsyncTask, Dept, DictionaryItem, DictionaryType, FileObject, LoginLog, Menu,
-		MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
+		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
+		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
 		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
 		TenantParameterOverride, TenantPermissionGroup, TenantResourceQuotaOperation,
 		TenantResourceQuotaUsage, User []ent.Hook
 	}
 	inters struct {
-		AsyncTask, Dept, DictionaryItem, DictionaryType, FileObject, LoginLog, Menu,
-		MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
+		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
+		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
 		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
 		TenantParameterOverride, TenantPermissionGroup, TenantResourceQuotaOperation,
 		TenantResourceQuotaUsage, User []ent.Interceptor

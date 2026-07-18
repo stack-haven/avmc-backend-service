@@ -56,6 +56,19 @@ func (_m *DictionaryTypeQuery) Page(ctx context.Context, page, size int) ([]*Dic
 	return rs, cnt, nil
 }
 
+func (_m *FileAccessLogQuery) Page(ctx context.Context, page, size int) ([]*FileAccessLog, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
 func (_m *FileObjectQuery) Page(ctx context.Context, page, size int) ([]*FileObject, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {

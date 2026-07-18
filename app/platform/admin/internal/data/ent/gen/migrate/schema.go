@@ -183,6 +183,47 @@ var (
 			},
 		},
 	}
+	// FileAccessLogsColumns holds the columns for the "file_access_logs" table.
+	FileAccessLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "file_id", Type: field.TypeUint32, Comment: "文件ID"},
+		{Name: "file_name", Type: field.TypeString, Size: 255, Comment: "文件名快照", Default: ""},
+		{Name: "action", Type: field.TypeString, Size: 40, Comment: "访问动作 download/delete/preview"},
+		{Name: "operator_id", Type: field.TypeUint32, Nullable: true, Comment: "操作人ID"},
+		{Name: "operator_name", Type: field.TypeString, Size: 80, Comment: "操作人名称", Default: ""},
+		{Name: "client_ip", Type: field.TypeString, Size: 80, Comment: "客户端IP", Default: ""},
+		{Name: "user_agent", Type: field.TypeString, Size: 500, Comment: "User-Agent", Default: ""},
+		{Name: "result", Type: field.TypeString, Size: 40, Comment: "结果 success/failure", Default: "success"},
+		{Name: "message", Type: field.TypeString, Size: 500, Comment: "结果说明", Default: ""},
+	}
+	// FileAccessLogsTable holds the schema information for the "file_access_logs" table.
+	FileAccessLogsTable = &schema.Table{
+		Name:       "file_access_logs",
+		Comment:    "文件中心访问日志表",
+		Columns:    FileAccessLogsColumns,
+		PrimaryKey: []*schema.Column{FileAccessLogsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "fileaccesslog_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{FileAccessLogsColumns[4]},
+			},
+			{
+				Name:    "fileaccesslog_tenant_id_file_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{FileAccessLogsColumns[4], FileAccessLogsColumns[5], FileAccessLogsColumns[1]},
+			},
+			{
+				Name:    "fileaccesslog_tenant_id_action_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{FileAccessLogsColumns[4], FileAccessLogsColumns[7], FileAccessLogsColumns[1]},
+			},
+		},
+	}
 	// FileObjectsColumns holds the columns for the "file_objects" table.
 	FileObjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1261,6 +1302,7 @@ var (
 		DeptsTable,
 		DictionaryItemsTable,
 		DictionaryTypesTable,
+		FileAccessLogsTable,
 		FileObjectsTable,
 		LoginLogsTable,
 		MenusTable,
@@ -1303,6 +1345,10 @@ func init() {
 		Collation: "utf8mb4_bin",
 	}
 	DictionaryTypesTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	FileAccessLogsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

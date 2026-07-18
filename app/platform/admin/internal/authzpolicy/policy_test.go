@@ -294,6 +294,7 @@ func TestFileCenterOperationsRemainTenantDataPlane(t *testing.T) {
 		v1.OperationFileCenterServiceConfirmFileUpload,
 		v1.OperationFileCenterServiceGetFileObject,
 		v1.OperationFileCenterServiceListFileObjects,
+		v1.OperationFileCenterServiceListFileAccessLogs,
 		v1.OperationFileCenterServicePresignFileDownload,
 		v1.OperationFileCenterServiceDeleteFileObject,
 	} {

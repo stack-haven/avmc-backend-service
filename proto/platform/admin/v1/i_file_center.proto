@@ -34,6 +34,9 @@ service FileCenterService {
   rpc ListFileObjects(core.service.v1.ListFileObjectsRequest) returns (core.service.v1.ListFileObjectsResponse) {
     option (google.api.http) = {get: "/admin/v1/files"};
   }
+  rpc ListFileAccessLogs(core.service.v1.ListFileAccessLogsRequest) returns (core.service.v1.ListFileAccessLogsResponse) {
+    option (google.api.http) = {get: "/admin/v1/files/{file_id}/access-logs"};
+  }
   rpc PresignFileDownload(core.service.v1.PresignFileDownloadRequest) returns (core.service.v1.PresignFileDownloadResponse) {
     option (google.api.http) = {get: "/admin/v1/files/{id}:download-url"};
   }

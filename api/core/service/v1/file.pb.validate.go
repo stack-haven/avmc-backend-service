@@ -212,6 +212,150 @@ var _ interface {
 	ErrorName() string
 } = FileObjectValidationError{}
 
+// Validate checks the field values on FileAccessLog with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *FileAccessLog) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on FileAccessLog with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in FileAccessLogMultiError, or
+// nil if none found.
+func (m *FileAccessLog) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *FileAccessLog) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for FileId
+
+	if m.TenantId != nil {
+		// no validation rules for TenantId
+	}
+
+	if m.FileName != nil {
+		// no validation rules for FileName
+	}
+
+	if m.Action != nil {
+		// no validation rules for Action
+	}
+
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
+
+	if m.OperatorName != nil {
+		// no validation rules for OperatorName
+	}
+
+	if m.ClientIp != nil {
+		// no validation rules for ClientIp
+	}
+
+	if m.UserAgent != nil {
+		// no validation rules for UserAgent
+	}
+
+	if m.Result != nil {
+		// no validation rules for Result
+	}
+
+	if m.Message != nil {
+		// no validation rules for Message
+	}
+
+	if m.CreatedAt != nil {
+		// no validation rules for CreatedAt
+	}
+
+	if len(errors) > 0 {
+		return FileAccessLogMultiError(errors)
+	}
+
+	return nil
+}
+
+// FileAccessLogMultiError is an error wrapping multiple validation errors
+// returned by FileAccessLog.ValidateAll() if the designated constraints
+// aren't met.
+type FileAccessLogMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m FileAccessLogMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m FileAccessLogMultiError) AllErrors() []error { return m }
+
+// FileAccessLogValidationError is the validation error returned by
+// FileAccessLog.Validate if the designated constraints aren't met.
+type FileAccessLogValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e FileAccessLogValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e FileAccessLogValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e FileAccessLogValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e FileAccessLogValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e FileAccessLogValidationError) ErrorName() string { return "FileAccessLogValidationError" }
+
+// Error satisfies the builtin error interface
+func (e FileAccessLogValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sFileAccessLog.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = FileAccessLogValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = FileAccessLogValidationError{}
+
 // Validate checks the field values on CreateFileUploadSessionRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1356,6 +1500,276 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ListFileObjectsResponseValidationError{}
+
+// Validate checks the field values on ListFileAccessLogsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListFileAccessLogsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListFileAccessLogsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListFileAccessLogsRequestMultiError, or nil if none found.
+func (m *ListFileAccessLogsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListFileAccessLogsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for PageToken
+
+	// no validation rules for PageSize
+
+	// no validation rules for FileId
+
+	// no validation rules for Skip
+
+	if m.NoPaging != nil {
+		// no validation rules for NoPaging
+	}
+
+	if m.Action != nil {
+		// no validation rules for Action
+	}
+
+	if m.Result != nil {
+		// no validation rules for Result
+	}
+
+	if m.Filter != nil {
+		// no validation rules for Filter
+	}
+
+	if m.OrderBy != nil {
+		// no validation rules for OrderBy
+	}
+
+	if len(errors) > 0 {
+		return ListFileAccessLogsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListFileAccessLogsRequestMultiError is an error wrapping multiple validation
+// errors returned by ListFileAccessLogsRequest.ValidateAll() if the
+// designated constraints aren't met.
+type ListFileAccessLogsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListFileAccessLogsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListFileAccessLogsRequestMultiError) AllErrors() []error { return m }
+
+// ListFileAccessLogsRequestValidationError is the validation error returned by
+// ListFileAccessLogsRequest.Validate if the designated constraints aren't met.
+type ListFileAccessLogsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListFileAccessLogsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListFileAccessLogsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListFileAccessLogsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListFileAccessLogsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListFileAccessLogsRequestValidationError) ErrorName() string {
+	return "ListFileAccessLogsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListFileAccessLogsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListFileAccessLogsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListFileAccessLogsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListFileAccessLogsRequestValidationError{}
+
+// Validate checks the field values on ListFileAccessLogsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListFileAccessLogsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListFileAccessLogsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListFileAccessLogsResponseMultiError, or nil if none found.
+func (m *ListFileAccessLogsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListFileAccessLogsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListFileAccessLogsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListFileAccessLogsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListFileAccessLogsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Total
+
+	// no validation rules for NextPageToken
+
+	if len(errors) > 0 {
+		return ListFileAccessLogsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListFileAccessLogsResponseMultiError is an error wrapping multiple
+// validation errors returned by ListFileAccessLogsResponse.ValidateAll() if
+// the designated constraints aren't met.
+type ListFileAccessLogsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListFileAccessLogsResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListFileAccessLogsResponseMultiError) AllErrors() []error { return m }
+
+// ListFileAccessLogsResponseValidationError is the validation error returned
+// by ListFileAccessLogsResponse.Validate if the designated constraints aren't met.
+type ListFileAccessLogsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListFileAccessLogsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListFileAccessLogsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListFileAccessLogsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListFileAccessLogsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListFileAccessLogsResponseValidationError) ErrorName() string {
+	return "ListFileAccessLogsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListFileAccessLogsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListFileAccessLogsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListFileAccessLogsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListFileAccessLogsResponseValidationError{}
 
 // Validate checks the field values on PresignFileDownloadRequest with the
 // rules defined in the proto definition for this message. If any rules are

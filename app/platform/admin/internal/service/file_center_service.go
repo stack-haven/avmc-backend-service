@@ -79,12 +79,44 @@ func (s *FileCenterServiceService) ListFileObjects(ctx context.Context, req *pbC
 	return resp, nil
 }
 
+func (s *FileCenterServiceService) ListFileAccessLogs(ctx context.Context, req *pbCore.ListFileAccessLogsRequest) (*pbCore.ListFileAccessLogsResponse, error) {
+	params, err := listing.ParseParams(
+		req,
+		filtering.DeclareIdent("file_id", filtering.TypeInt),
+		filtering.DeclareIdent("action", filtering.TypeString),
+		filtering.DeclareIdent("result", filtering.TypeString),
+		filtering.DeclareIdent("created_at", filtering.TypeTimestamp),
+	)
+	if err != nil {
+		return nil, err
+	}
+	req.PageSize = int32(params.PageSize)
+	count, err := s.uc.CountAccessLogs(ctx, listing.FilterOption(params.Filter))
+	if err != nil {
+		return nil, err
+	}
+	resp := &pbCore.ListFileAccessLogsResponse{Total: count}
+	resp.Items, err = s.uc.ListAccessLogs(ctx,
+		listing.FilterOption(params.Filter),
+		listing.OrderByOption(params.OrderBy),
+		listing.LimitOption(params.PageSize),
+		listing.OffsetOption(int(params.PageToken.Offset)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Items) >= params.PageSize {
+		resp.NextPageToken = params.PageToken.Next(req).String()
+	}
+	return resp, nil
+}
+
 func (s *FileCenterServiceService) PresignFileDownload(ctx context.Context, req *pbCore.PresignFileDownloadRequest) (*pbCore.PresignFileDownloadResponse, error) {
 	return s.uc.PresignDownload(ctx, req)
 }
 
 func (s *FileCenterServiceService) DeleteFileObject(ctx context.Context, req *pbCore.DeleteFileObjectRequest) (*pbCore.DeleteFileObjectResponse, error) {
-	if err := s.uc.Delete(ctx, req.GetId()); err != nil {
+	if err := s.uc.Delete(ctx, req.GetId(), req.GetIdempotencyKey()); err != nil {
 		return nil, err
 	}
 	return &pbCore.DeleteFileObjectResponse{}, nil

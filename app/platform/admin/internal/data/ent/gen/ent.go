@@ -7,6 +7,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
@@ -97,6 +98,7 @@ func checkColumn(t, c string) error {
 			dept.Table:                         dept.ValidColumn,
 			dictionaryitem.Table:               dictionaryitem.ValidColumn,
 			dictionarytype.Table:               dictionarytype.ValidColumn,
+			fileaccesslog.Table:                fileaccesslog.ValidColumn,
 			fileobject.Table:                   fileobject.ValidColumn,
 			loginlog.Table:                     loginlog.ValidColumn,
 			menu.Table:                         menu.ValidColumn,

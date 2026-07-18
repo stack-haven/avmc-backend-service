@@ -122,6 +122,7 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationFileCenterServiceConfirmFileUpload, "POST"),
 		op(v1.OperationFileCenterServiceGetFileObject, "GET"),
 		op(v1.OperationFileCenterServiceListFileObjects, "GET"),
+		op(v1.OperationFileCenterServiceListFileAccessLogs, "GET"),
 		op(v1.OperationFileCenterServicePresignFileDownload, "GET"),
 		op(v1.OperationFileCenterServiceDeleteFileObject, "DELETE"),
 		op(v1.OperationStorageProviderServiceCreateStorageProvider, "POST"),
