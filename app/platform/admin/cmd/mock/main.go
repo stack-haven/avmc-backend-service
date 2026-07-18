@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	pbCore "backend-service/api/core/service/v1"
@@ -20,6 +21,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
@@ -135,6 +137,7 @@ func cleanupLegacyMock(ctx context.Context, dsn string) error {
 	}{
 		{"legacy mock role menus", "DELETE FROM role_menus WHERE role_id IN (SELECT id FROM roles WHERE name LIKE 'mock\\_%') OR menu_id IN (SELECT id FROM menus WHERE name LIKE 'mock\\_%')"},
 		{"legacy mock user roles", "DELETE FROM user_roles WHERE user_id IN (SELECT id FROM users WHERE name LIKE 'mock\\_%') OR role_id IN (SELECT id FROM roles WHERE name LIKE 'mock\\_%')"},
+		{"legacy mock file objects", "DELETE FROM file_objects WHERE file_name LIKE 'mock\\_%'"},
 		{"legacy mock projects", "DELETE FROM projects WHERE name LIKE 'mock\\_%'"},
 		{"legacy mock departments", "DELETE FROM depts WHERE name LIKE 'mock\\_%'"},
 		{"legacy mock posts", "DELETE FROM posts WHERE name LIKE 'mock\\_%'"},
@@ -307,6 +310,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	fileCenterMenu, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenter", Title: "文件中心", Path: "/system/file-center", Component: "/system/file-center/list", Icon: "mdi:file-cloud-outline", Type: 2, Sort: 140,
+	}, systemMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	userCreateButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemUserCreate", Title: "用户新增", Path: "/system/user:create", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.UserService/CreateUser",
 	}, userMenu.ID)
@@ -349,10 +358,48 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	fileListButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterList", Title: "文件查看", Path: "/system/file-center:list", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.FileCenterService/ListFileObjects",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	fileDetailButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterDetail", Title: "文件详情", Path: "/system/file-center:detail", Type: 3, Sort: 15, AuthCode: "/platform.admin.v1.FileCenterService/GetFileObject",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	fileUploadButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterUpload", Title: "文件上传", Path: "/system/file-center:upload", Type: 3, Sort: 20, AuthCode: "/platform.admin.v1.FileCenterService/CreateFileUploadSession",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	fileConfirmButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterConfirm", Title: "确认上传", Path: "/system/file-center:confirm", Type: 3, Sort: 25, AuthCode: "/platform.admin.v1.FileCenterService/ConfirmFileUpload",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	fileDownloadButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterDownload", Title: "文件下载", Path: "/system/file-center:download", Type: 3, Sort: 30, AuthCode: "/platform.admin.v1.FileCenterService/PresignFileDownload",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	fileDeleteButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterDelete", Title: "文件删除", Path: "/system/file-center:delete", Type: 3, Sort: 40, AuthCode: "/platform.admin.v1.FileCenterService/DeleteFileObject",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	basicPermissionMenuIDs := []uint32{projectListButton.ID, roleListButton.ID, deptListButton.ID, userListButton.ID, parameterCurrentButton.ID}
+	fileCenterMenuIDs := []uint32{fileCenterMenu.ID, fileListButton.ID, fileDetailButton.ID, fileUploadButton.ID, fileConfirmButton.ID, fileDownloadButton.ID, fileDeleteButton.ID}
 	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, parameterMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, asyncTaskMenu.ID, userCreateButton.ID, parameterManageButton.ID}
 	fullMenuIDs = append(fullMenuIDs, basicPermissionMenuIDs...)
+	fullMenuIDs = append(fullMenuIDs, fileCenterMenuIDs...)
 	basicMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, roleMenu.ID, deptMenu.ID, userMenu.ID, parameterMenu.ID}
 	basicMenuIDs = append(basicMenuIDs, basicPermissionMenuIDs...)
 
@@ -505,6 +552,9 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 		return nil, err
 	}
 	if err := seedParameters(ctx, client, admin.ID, tenantTwo.ID); err != nil {
+		return nil, err
+	}
+	if err := seedFileObjects(ctx, client, admin.ID, tenantTwo.ID); err != nil {
 		return nil, err
 	}
 	if err := seedAsyncTasks(ctx, client, admin.ID); err != nil {
@@ -781,6 +831,7 @@ func mockPackageCapabilities(code string) ([]string, map[string]bool, map[string
 		return []string{
 				"platform.admin.audit.read",
 				"platform.admin.async_task.manage",
+				"platform.admin.file.manage",
 				"platform.admin.tenant.manage",
 				"platform.admin.webhook.manage",
 			},
@@ -791,7 +842,9 @@ func mockPackageCapabilities(code string) ([]string, map[string]bool, map[string
 			},
 			map[string]int64{
 				"api_calls_per_day": 100000,
+				"files":             10000,
 				"projects":          100,
+				"storage.bytes":     107374182400,
 				"storage_mb":        102400,
 				"webhooks":          50,
 			}
@@ -807,7 +860,9 @@ func mockPackageCapabilities(code string) ([]string, map[string]bool, map[string
 			},
 			map[string]int64{
 				"api_calls_per_day": 5000,
+				"files":             0,
 				"projects":          10,
+				"storage.bytes":     0,
 				"storage_mb":        5120,
 				"webhooks":          0,
 			}
@@ -953,6 +1008,116 @@ func ensureProject(ctx context.Context, client *gen.Client, tenantID uint32, nam
 		return err
 	}
 	_, err = item.Update().SetOwnerID(ownerID).ClearMembers().AddMemberIDs(memberIDs...).Save(ctx)
+	return err
+}
+
+func seedFileObjects(ctx context.Context, client *gen.Client, tenantOneOperator, tenantTwoOperator uint32) error {
+	type fileObjectSpec struct {
+		tenantID     uint32
+		fileName     string
+		contentType  string
+		size         int64
+		sha256       string
+		businessType string
+		businessID   string
+		visibility   string
+		status       int32
+		objectKey    string
+		createdBy    uint32
+	}
+	specs := []fileObjectSpec{
+		{
+			tenantID: 1, fileName: "mock_contract_2026.pdf", contentType: "application/pdf", size: 842144,
+			sha256: strings.Repeat("a", 64), businessType: "contract", businessID: "contract-2026-001", visibility: "private", status: 2,
+			objectKey: "tenants/1/mock/contracts/mock_contract_2026.pdf", createdBy: tenantOneOperator,
+		},
+		{
+			tenantID: 1, fileName: "mock_product_import.xlsx", contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", size: 231424,
+			sha256: strings.Repeat("b", 64), businessType: "import", businessID: "import-product-001", visibility: "private", status: 2,
+			objectKey: "tenants/1/mock/imports/mock_product_import.xlsx", createdBy: tenantOneOperator,
+		},
+		{
+			tenantID: 1, fileName: "mock_public_logo.png", contentType: "image/png", size: 73412,
+			sha256: strings.Repeat("c", 64), businessType: "branding", businessID: "brand-logo", visibility: "public", status: 2,
+			objectKey: "tenants/1/mock/public/mock_public_logo.png", createdBy: tenantOneOperator,
+		},
+		{
+			tenantID: 1, fileName: "mock_pending_upload.csv", contentType: "text/csv", size: 0,
+			sha256: "", businessType: "import", businessID: "pending-import-001", visibility: "private", status: 1,
+			objectKey: "tenants/1/mock/uploads/mock_pending_upload.csv", createdBy: tenantOneOperator,
+		},
+		{
+			tenantID: 2, fileName: "mock_tenant2_invoice.pdf", contentType: "application/pdf", size: 512880,
+			sha256: strings.Repeat("d", 64), businessType: "invoice", businessID: "invoice-t2-001", visibility: "private", status: 2,
+			objectKey: "tenants/2/mock/invoices/mock_tenant2_invoice.pdf", createdBy: tenantTwoOperator,
+		},
+		{
+			tenantID: 2, fileName: "mock_tenant2_archive.zip", contentType: "application/zip", size: 2748779,
+			sha256: strings.Repeat("e", 64), businessType: "archive", businessID: "archive-t2-001", visibility: "private", status: 2,
+			objectKey: "tenants/2/mock/archive/mock_tenant2_archive.zip", createdBy: tenantTwoOperator,
+		},
+	}
+	now := time.Now()
+	for _, spec := range specs {
+		if err := ensureFileObject(ctx, client, spec.tenantID, spec.fileName, spec.contentType, spec.size, spec.sha256, spec.businessType, spec.businessID, spec.visibility, spec.status, spec.objectKey, spec.createdBy, now); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ensureFileObject(ctx context.Context, client *gen.Client, tenantID uint32, fileName, contentType string, size int64, sha256, businessType, businessID, visibility string, status int32, objectKey string, createdBy uint32, now time.Time) error {
+	item, err := client.FileObject.Query().
+		Where(fileobject.TenantIDEQ(tenantID), fileobject.ObjectKeyEQ(objectKey)).
+		Only(ctx)
+	expiresAt := now.Add(24 * time.Hour)
+	confirmedAt := now.Add(-time.Duration(tenantID) * time.Hour)
+	if gen.IsNotFound(err) {
+		builder := client.FileObject.Create().
+			SetTenantID(tenantID).
+			SetFileName(fileName).
+			SetContentType(contentType).
+			SetSize(size).
+			SetSha256(sha256).
+			SetEtag(fmt.Sprintf("mock-etag-%d-%s", tenantID, strings.TrimPrefix(fileName, "mock_"))).
+			SetProvider("s3-compatible").
+			SetBucket("tenant-files").
+			SetObjectKey(objectKey).
+			SetBusinessType(businessType).
+			SetBusinessID(businessID).
+			SetVisibility(visibility).
+			SetStatus(status).
+			SetUploadExpiresAt(expiresAt).
+			SetCreatedBy(createdBy)
+		if status == 2 {
+			builder.SetConfirmedAt(confirmedAt)
+		}
+		_, err = builder.Save(ctx)
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	update := item.Update().
+		SetFileName(fileName).
+		SetContentType(contentType).
+		SetSize(size).
+		SetSha256(sha256).
+		SetEtag(fmt.Sprintf("mock-etag-%d-%s", tenantID, strings.TrimPrefix(fileName, "mock_"))).
+		SetProvider("s3-compatible").
+		SetBucket("tenant-files").
+		SetBusinessType(businessType).
+		SetBusinessID(businessID).
+		SetVisibility(visibility).
+		SetStatus(status).
+		SetUploadExpiresAt(expiresAt).
+		SetCreatedBy(createdBy)
+	if status == 2 {
+		update.SetConfirmedAt(confirmedAt)
+	} else {
+		update.ClearConfirmedAt()
+	}
+	_, err = update.Save(ctx)
 	return err
 }
 
@@ -1428,6 +1593,12 @@ func verify(ctx context.Context, client *gen.Client) error {
 		{"async tasks", func(ctx context.Context) (int, error) {
 			return client.AsyncTask.Query().Count(ctx)
 		}, 4},
+		{"tenant 1 file objects", func(ctx context.Context) (int, error) {
+			return client.FileObject.Query().Where(fileobject.TenantIDEQ(1), fileobject.FileNameHasPrefix("mock_")).Count(ctx)
+		}, 4},
+		{"tenant 2 file objects", func(ctx context.Context) (int, error) {
+			return client.FileObject.Query().Where(fileobject.TenantIDEQ(2), fileobject.FileNameHasPrefix("mock_")).Count(ctx)
+		}, 2},
 	}
 	for _, check := range checks {
 		count, err := check.count(ctx)
