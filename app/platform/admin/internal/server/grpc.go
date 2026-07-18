@@ -45,6 +45,7 @@ func NewGRPCServer(c *conf.Server,
 	loginLog *service.LoginLogServiceService,
 	session *service.SessionServiceService,
 	parameter *service.ParameterServiceService,
+	storageProvider *service.StorageProviderServiceService,
 	fileCenter *service.FileCenterServiceService,
 	asyncTask *service.AsyncTaskServiceService,
 	authenticator *auth.AuthToken,
@@ -85,6 +86,7 @@ func NewGRPCServer(c *conf.Server,
 	v1.RegisterLoginLogServiceServer(srv, loginLog)
 	v1.RegisterSessionServiceServer(srv, session)
 	v1.RegisterParameterServiceServer(srv, parameter)
+	v1.RegisterStorageProviderServiceServer(srv, storageProvider)
 	v1.RegisterFileCenterServiceServer(srv, fileCenter)
 	v1.RegisterAsyncTaskServiceServer(srv, asyncTask)
 	return srv, nil

@@ -31,6 +31,8 @@ func (FileObject) Fields() []ent.Field {
 		field.String("sha256").Comment("文件SHA256").MaxLen(64).Default(""),
 		field.String("etag").Comment("对象存储ETag").MaxLen(120).Default(""),
 		field.String("provider").Comment("存储渠道").MaxLen(50).Default("s3-compatible"),
+		field.Uint32("provider_id").Comment("存储渠道ID快照").Optional().Nillable(),
+		field.String("provider_code").Comment("存储渠道编码快照").MaxLen(80).Default(""),
 		field.String("bucket").Comment("存储桶").MaxLen(120).NotEmpty(),
 		field.String("object_key").Comment("对象Key").MaxLen(500).NotEmpty(),
 		field.String("business_type").Comment("业务类型").MaxLen(80).Default(""),
@@ -58,6 +60,7 @@ func (FileObject) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("tenant_id", "object_key").Unique(),
 		index.Fields("tenant_id", "idempotency_key").Unique(),
+		index.Fields("provider_code", "status"),
 		index.Fields("tenant_id", "business_type", "business_id"),
 		index.Fields("tenant_id", "status", "created_at"),
 	}

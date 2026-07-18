@@ -160,6 +160,34 @@ func (_c *FileObjectCreate) SetNillableProvider(v *string) *FileObjectCreate {
 	return _c
 }
 
+// SetProviderID sets the "provider_id" field.
+func (_c *FileObjectCreate) SetProviderID(v uint32) *FileObjectCreate {
+	_c.mutation.SetProviderID(v)
+	return _c
+}
+
+// SetNillableProviderID sets the "provider_id" field if the given value is not nil.
+func (_c *FileObjectCreate) SetNillableProviderID(v *uint32) *FileObjectCreate {
+	if v != nil {
+		_c.SetProviderID(*v)
+	}
+	return _c
+}
+
+// SetProviderCode sets the "provider_code" field.
+func (_c *FileObjectCreate) SetProviderCode(v string) *FileObjectCreate {
+	_c.mutation.SetProviderCode(v)
+	return _c
+}
+
+// SetNillableProviderCode sets the "provider_code" field if the given value is not nil.
+func (_c *FileObjectCreate) SetNillableProviderCode(v *string) *FileObjectCreate {
+	if v != nil {
+		_c.SetProviderCode(*v)
+	}
+	return _c
+}
+
 // SetBucket sets the "bucket" field.
 func (_c *FileObjectCreate) SetBucket(v string) *FileObjectCreate {
 	_c.mutation.SetBucket(v)
@@ -343,6 +371,10 @@ func (_c *FileObjectCreate) defaults() error {
 		v := fileobject.DefaultProvider
 		_c.mutation.SetProvider(v)
 	}
+	if _, ok := _c.mutation.ProviderCode(); !ok {
+		v := fileobject.DefaultProviderCode
+		_c.mutation.SetProviderCode(v)
+	}
 	if _, ok := _c.mutation.BusinessType(); !ok {
 		v := fileobject.DefaultBusinessType
 		_c.mutation.SetBusinessType(v)
@@ -428,6 +460,14 @@ func (_c *FileObjectCreate) check() error {
 	if v, ok := _c.mutation.Provider(); ok {
 		if err := fileobject.ProviderValidator(v); err != nil {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`gen: validator failed for field "FileObject.provider": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ProviderCode(); !ok {
+		return &ValidationError{Name: "provider_code", err: errors.New(`gen: missing required field "FileObject.provider_code"`)}
+	}
+	if v, ok := _c.mutation.ProviderCode(); ok {
+		if err := fileobject.ProviderCodeValidator(v); err != nil {
+			return &ValidationError{Name: "provider_code", err: fmt.Errorf(`gen: validator failed for field "FileObject.provider_code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Bucket(); !ok {
@@ -559,6 +599,14 @@ func (_c *FileObjectCreate) createSpec() (*FileObject, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Provider(); ok {
 		_spec.SetField(fileobject.FieldProvider, field.TypeString, value)
 		_node.Provider = value
+	}
+	if value, ok := _c.mutation.ProviderID(); ok {
+		_spec.SetField(fileobject.FieldProviderID, field.TypeUint32, value)
+		_node.ProviderID = &value
+	}
+	if value, ok := _c.mutation.ProviderCode(); ok {
+		_spec.SetField(fileobject.FieldProviderCode, field.TypeString, value)
+		_node.ProviderCode = value
 	}
 	if value, ok := _c.mutation.Bucket(); ok {
 		_spec.SetField(fileobject.FieldBucket, field.TypeString, value)
@@ -789,6 +837,42 @@ func (u *FileObjectUpsert) SetProvider(v string) *FileObjectUpsert {
 // UpdateProvider sets the "provider" field to the value that was provided on create.
 func (u *FileObjectUpsert) UpdateProvider() *FileObjectUpsert {
 	u.SetExcluded(fileobject.FieldProvider)
+	return u
+}
+
+// SetProviderID sets the "provider_id" field.
+func (u *FileObjectUpsert) SetProviderID(v uint32) *FileObjectUpsert {
+	u.Set(fileobject.FieldProviderID, v)
+	return u
+}
+
+// UpdateProviderID sets the "provider_id" field to the value that was provided on create.
+func (u *FileObjectUpsert) UpdateProviderID() *FileObjectUpsert {
+	u.SetExcluded(fileobject.FieldProviderID)
+	return u
+}
+
+// AddProviderID adds v to the "provider_id" field.
+func (u *FileObjectUpsert) AddProviderID(v uint32) *FileObjectUpsert {
+	u.Add(fileobject.FieldProviderID, v)
+	return u
+}
+
+// ClearProviderID clears the value of the "provider_id" field.
+func (u *FileObjectUpsert) ClearProviderID() *FileObjectUpsert {
+	u.SetNull(fileobject.FieldProviderID)
+	return u
+}
+
+// SetProviderCode sets the "provider_code" field.
+func (u *FileObjectUpsert) SetProviderCode(v string) *FileObjectUpsert {
+	u.Set(fileobject.FieldProviderCode, v)
+	return u
+}
+
+// UpdateProviderCode sets the "provider_code" field to the value that was provided on create.
+func (u *FileObjectUpsert) UpdateProviderCode() *FileObjectUpsert {
+	u.SetExcluded(fileobject.FieldProviderCode)
 	return u
 }
 
@@ -1140,6 +1224,48 @@ func (u *FileObjectUpsertOne) SetProvider(v string) *FileObjectUpsertOne {
 func (u *FileObjectUpsertOne) UpdateProvider() *FileObjectUpsertOne {
 	return u.Update(func(s *FileObjectUpsert) {
 		s.UpdateProvider()
+	})
+}
+
+// SetProviderID sets the "provider_id" field.
+func (u *FileObjectUpsertOne) SetProviderID(v uint32) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetProviderID(v)
+	})
+}
+
+// AddProviderID adds v to the "provider_id" field.
+func (u *FileObjectUpsertOne) AddProviderID(v uint32) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.AddProviderID(v)
+	})
+}
+
+// UpdateProviderID sets the "provider_id" field to the value that was provided on create.
+func (u *FileObjectUpsertOne) UpdateProviderID() *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateProviderID()
+	})
+}
+
+// ClearProviderID clears the value of the "provider_id" field.
+func (u *FileObjectUpsertOne) ClearProviderID() *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.ClearProviderID()
+	})
+}
+
+// SetProviderCode sets the "provider_code" field.
+func (u *FileObjectUpsertOne) SetProviderCode(v string) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetProviderCode(v)
+	})
+}
+
+// UpdateProviderCode sets the "provider_code" field to the value that was provided on create.
+func (u *FileObjectUpsertOne) UpdateProviderCode() *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateProviderCode()
 	})
 }
 
@@ -1679,6 +1805,48 @@ func (u *FileObjectUpsertBulk) SetProvider(v string) *FileObjectUpsertBulk {
 func (u *FileObjectUpsertBulk) UpdateProvider() *FileObjectUpsertBulk {
 	return u.Update(func(s *FileObjectUpsert) {
 		s.UpdateProvider()
+	})
+}
+
+// SetProviderID sets the "provider_id" field.
+func (u *FileObjectUpsertBulk) SetProviderID(v uint32) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetProviderID(v)
+	})
+}
+
+// AddProviderID adds v to the "provider_id" field.
+func (u *FileObjectUpsertBulk) AddProviderID(v uint32) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.AddProviderID(v)
+	})
+}
+
+// UpdateProviderID sets the "provider_id" field to the value that was provided on create.
+func (u *FileObjectUpsertBulk) UpdateProviderID() *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateProviderID()
+	})
+}
+
+// ClearProviderID clears the value of the "provider_id" field.
+func (u *FileObjectUpsertBulk) ClearProviderID() *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.ClearProviderID()
+	})
+}
+
+// SetProviderCode sets the "provider_code" field.
+func (u *FileObjectUpsertBulk) SetProviderCode(v string) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetProviderCode(v)
+	})
+}
+
+// UpdateProviderCode sets the "provider_code" field to the value that was provided on create.
+func (u *FileObjectUpsertBulk) UpdateProviderCode() *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateProviderCode()
 	})
 }
 

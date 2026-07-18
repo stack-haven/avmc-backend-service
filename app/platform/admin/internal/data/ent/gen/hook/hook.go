@@ -176,6 +176,18 @@ func (f RoleFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.RoleMutation", m)
 }
 
+// The StorageProviderFunc type is an adapter to allow the use of ordinary
+// function as StorageProvider mutator.
+type StorageProviderFunc func(context.Context, *gen.StorageProviderMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StorageProviderFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.StorageProviderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.StorageProviderMutation", m)
+}
+
 // The TenantFunc type is an adapter to allow the use of ordinary
 // function as Tenant mutator.
 type TenantFunc func(context.Context, *gen.TenantMutation) (gen.Value, error)

@@ -6,11 +6,19 @@ import "core/service/v1/file.proto";
 import "google/api/annotations.proto";
 
 option go_package = "backend-service/api/platform/admin/v1;v1";
+option java_multiple_files = true;
+option java_package = "platform.admin.v1";
 
 service FileCenterService {
   rpc CreateFileUploadSession(core.service.v1.CreateFileUploadSessionRequest) returns (core.service.v1.CreateFileUploadSessionResponse) {
     option (google.api.http) = {
       post: "/admin/v1/files/upload-sessions"
+      body: "*"
+    };
+  }
+  rpc UploadFileContent(core.service.v1.UploadFileContentRequest) returns (core.service.v1.UploadFileContentResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/files/{id}:content"
       body: "*"
     };
   }

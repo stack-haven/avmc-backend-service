@@ -17,6 +17,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
@@ -106,6 +107,7 @@ func checkColumn(t, c string) error {
 			post.Table:                         post.ValidColumn,
 			project.Table:                      project.ValidColumn,
 			role.Table:                         role.ValidColumn,
+			storageprovider.Table:              storageprovider.ValidColumn,
 			tenant.Table:                       tenant.ValidColumn,
 			tenantparameteroverride.Table:      tenantparameteroverride.ValidColumn,
 			tenantpermissiongroup.Table:        tenantpermissiongroup.ValidColumn,

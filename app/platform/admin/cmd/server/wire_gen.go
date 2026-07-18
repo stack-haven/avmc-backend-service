@@ -100,22 +100,25 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	parameterRepo := data.NewParameterRepo(dataData, logger)
 	parameterUsecase := biz.NewParameterUsecase(parameterRepo, logger)
 	parameterServiceService := service.NewParameterServiceService(parameterUsecase)
+	storageProviderRepo := data.NewStorageProviderRepo(dataData, oss, logger)
+	storageProviderUsecase := biz.NewStorageProviderUsecase(storageProviderRepo, logger)
+	storageProviderServiceService := service.NewStorageProviderServiceService(storageProviderUsecase)
 	fileRepo := data.NewFileRepo(dataData, logger)
-	objectstorageClient := data.NewObjectStorageClient(oss)
-	fileUsecase := biz.NewFileUsecase(fileRepo, objectstorageClient, logger)
+	storageProviderResolver := biz.NewStorageProviderResolver(storageProviderRepo)
+	fileUsecase := biz.NewFileUsecase(fileRepo, storageProviderResolver, logger)
 	fileCenterServiceService := service.NewFileCenterServiceService(fileUsecase, logger)
 	asyncTaskRepo := data.NewAsyncTaskRepo(dataData, logger)
 	permissionCacheInvalidator := data.NewPermissionCacheInvalidator(dataData)
 	v := biz.NewAsyncTaskHandlers(asyncTaskRepo, permissionCacheInvalidator)
 	asyncTaskUsecase := biz.NewAsyncTaskUsecase(asyncTaskRepo, v, logger)
 	asyncTaskServiceService := service.NewAsyncTaskServiceService(asyncTaskUsecase)
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, tenantPermissionServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, fileCenterServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, tenantPermissionServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, tenantPermissionServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, fileCenterServiceService, asyncTaskServiceService)
+	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, tenantPermissionServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, asyncTaskServiceService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

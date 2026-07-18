@@ -188,6 +188,47 @@ func (_u *FileObjectUpdate) SetNillableProvider(v *string) *FileObjectUpdate {
 	return _u
 }
 
+// SetProviderID sets the "provider_id" field.
+func (_u *FileObjectUpdate) SetProviderID(v uint32) *FileObjectUpdate {
+	_u.mutation.ResetProviderID()
+	_u.mutation.SetProviderID(v)
+	return _u
+}
+
+// SetNillableProviderID sets the "provider_id" field if the given value is not nil.
+func (_u *FileObjectUpdate) SetNillableProviderID(v *uint32) *FileObjectUpdate {
+	if v != nil {
+		_u.SetProviderID(*v)
+	}
+	return _u
+}
+
+// AddProviderID adds value to the "provider_id" field.
+func (_u *FileObjectUpdate) AddProviderID(v int32) *FileObjectUpdate {
+	_u.mutation.AddProviderID(v)
+	return _u
+}
+
+// ClearProviderID clears the value of the "provider_id" field.
+func (_u *FileObjectUpdate) ClearProviderID() *FileObjectUpdate {
+	_u.mutation.ClearProviderID()
+	return _u
+}
+
+// SetProviderCode sets the "provider_code" field.
+func (_u *FileObjectUpdate) SetProviderCode(v string) *FileObjectUpdate {
+	_u.mutation.SetProviderCode(v)
+	return _u
+}
+
+// SetNillableProviderCode sets the "provider_code" field if the given value is not nil.
+func (_u *FileObjectUpdate) SetNillableProviderCode(v *string) *FileObjectUpdate {
+	if v != nil {
+		_u.SetProviderCode(*v)
+	}
+	return _u
+}
+
 // SetBucket sets the "bucket" field.
 func (_u *FileObjectUpdate) SetBucket(v string) *FileObjectUpdate {
 	_u.mutation.SetBucket(v)
@@ -428,6 +469,11 @@ func (_u *FileObjectUpdate) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`gen: validator failed for field "FileObject.provider": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ProviderCode(); ok {
+		if err := fileobject.ProviderCodeValidator(v); err != nil {
+			return &ValidationError{Name: "provider_code", err: fmt.Errorf(`gen: validator failed for field "FileObject.provider_code": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Bucket(); ok {
 		if err := fileobject.BucketValidator(v); err != nil {
 			return &ValidationError{Name: "bucket", err: fmt.Errorf(`gen: validator failed for field "FileObject.bucket": %w`, err)}
@@ -520,6 +566,18 @@ func (_u *FileObjectUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.Provider(); ok {
 		_spec.SetField(fileobject.FieldProvider, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ProviderID(); ok {
+		_spec.SetField(fileobject.FieldProviderID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedProviderID(); ok {
+		_spec.AddField(fileobject.FieldProviderID, field.TypeUint32, value)
+	}
+	if _u.mutation.ProviderIDCleared() {
+		_spec.ClearField(fileobject.FieldProviderID, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.ProviderCode(); ok {
+		_spec.SetField(fileobject.FieldProviderCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Bucket(); ok {
 		_spec.SetField(fileobject.FieldBucket, field.TypeString, value)
@@ -737,6 +795,47 @@ func (_u *FileObjectUpdateOne) SetProvider(v string) *FileObjectUpdateOne {
 func (_u *FileObjectUpdateOne) SetNillableProvider(v *string) *FileObjectUpdateOne {
 	if v != nil {
 		_u.SetProvider(*v)
+	}
+	return _u
+}
+
+// SetProviderID sets the "provider_id" field.
+func (_u *FileObjectUpdateOne) SetProviderID(v uint32) *FileObjectUpdateOne {
+	_u.mutation.ResetProviderID()
+	_u.mutation.SetProviderID(v)
+	return _u
+}
+
+// SetNillableProviderID sets the "provider_id" field if the given value is not nil.
+func (_u *FileObjectUpdateOne) SetNillableProviderID(v *uint32) *FileObjectUpdateOne {
+	if v != nil {
+		_u.SetProviderID(*v)
+	}
+	return _u
+}
+
+// AddProviderID adds value to the "provider_id" field.
+func (_u *FileObjectUpdateOne) AddProviderID(v int32) *FileObjectUpdateOne {
+	_u.mutation.AddProviderID(v)
+	return _u
+}
+
+// ClearProviderID clears the value of the "provider_id" field.
+func (_u *FileObjectUpdateOne) ClearProviderID() *FileObjectUpdateOne {
+	_u.mutation.ClearProviderID()
+	return _u
+}
+
+// SetProviderCode sets the "provider_code" field.
+func (_u *FileObjectUpdateOne) SetProviderCode(v string) *FileObjectUpdateOne {
+	_u.mutation.SetProviderCode(v)
+	return _u
+}
+
+// SetNillableProviderCode sets the "provider_code" field if the given value is not nil.
+func (_u *FileObjectUpdateOne) SetNillableProviderCode(v *string) *FileObjectUpdateOne {
+	if v != nil {
+		_u.SetProviderCode(*v)
 	}
 	return _u
 }
@@ -994,6 +1093,11 @@ func (_u *FileObjectUpdateOne) check() error {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`gen: validator failed for field "FileObject.provider": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ProviderCode(); ok {
+		if err := fileobject.ProviderCodeValidator(v); err != nil {
+			return &ValidationError{Name: "provider_code", err: fmt.Errorf(`gen: validator failed for field "FileObject.provider_code": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Bucket(); ok {
 		if err := fileobject.BucketValidator(v); err != nil {
 			return &ValidationError{Name: "bucket", err: fmt.Errorf(`gen: validator failed for field "FileObject.bucket": %w`, err)}
@@ -1103,6 +1207,18 @@ func (_u *FileObjectUpdateOne) sqlSave(ctx context.Context) (_node *FileObject, 
 	}
 	if value, ok := _u.mutation.Provider(); ok {
 		_spec.SetField(fileobject.FieldProvider, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ProviderID(); ok {
+		_spec.SetField(fileobject.FieldProviderID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedProviderID(); ok {
+		_spec.AddField(fileobject.FieldProviderID, field.TypeUint32, value)
+	}
+	if _u.mutation.ProviderIDCleared() {
+		_spec.ClearField(fileobject.FieldProviderID, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.ProviderCode(); ok {
+		_spec.SetField(fileobject.FieldProviderCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Bucket(); ok {
 		_spec.SetField(fileobject.FieldBucket, field.TypeString, value)

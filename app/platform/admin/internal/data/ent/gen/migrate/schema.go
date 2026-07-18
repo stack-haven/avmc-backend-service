@@ -197,6 +197,8 @@ var (
 		{Name: "sha256", Type: field.TypeString, Size: 64, Comment: "文件SHA256", Default: ""},
 		{Name: "etag", Type: field.TypeString, Size: 120, Comment: "对象存储ETag", Default: ""},
 		{Name: "provider", Type: field.TypeString, Size: 50, Comment: "存储渠道", Default: "s3-compatible"},
+		{Name: "provider_id", Type: field.TypeUint32, Nullable: true, Comment: "存储渠道ID快照"},
+		{Name: "provider_code", Type: field.TypeString, Size: 80, Comment: "存储渠道编码快照", Default: ""},
 		{Name: "bucket", Type: field.TypeString, Size: 120, Comment: "存储桶"},
 		{Name: "object_key", Type: field.TypeString, Size: 500, Comment: "对象Key"},
 		{Name: "business_type", Type: field.TypeString, Size: 80, Comment: "业务类型", Default: ""},
@@ -222,17 +224,22 @@ var (
 			{
 				Name:    "fileobject_tenant_id_object_key",
 				Unique:  true,
-				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[13]},
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[15]},
 			},
 			{
 				Name:    "fileobject_tenant_id_idempotency_key",
 				Unique:  true,
-				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[17]},
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[19]},
+			},
+			{
+				Name:    "fileobject_provider_code_status",
+				Unique:  false,
+				Columns: []*schema.Column{FileObjectsColumns[13], FileObjectsColumns[3]},
 			},
 			{
 				Name:    "fileobject_tenant_id_business_type_business_id",
 				Unique:  false,
-				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[14], FileObjectsColumns[15]},
+				Columns: []*schema.Column{FileObjectsColumns[4], FileObjectsColumns[16], FileObjectsColumns[17]},
 			},
 			{
 				Name:    "fileobject_tenant_id_status_created_at",
@@ -701,6 +708,60 @@ var (
 				Name:    "role_tenant_id_name",
 				Unique:  true,
 				Columns: []*schema.Column{RolesColumns[4], RolesColumns[6]},
+			},
+		},
+	}
+	// StorageProvidersColumns holds the columns for the "storage_providers" table.
+	StorageProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "code", Type: field.TypeString, Size: 80, Comment: "存储渠道编码"},
+		{Name: "name", Type: field.TypeString, Size: 120, Comment: "存储渠道名称"},
+		{Name: "type", Type: field.TypeString, Size: 40, Comment: "存储类型 s3-compatible/local"},
+		{Name: "endpoint", Type: field.TypeString, Size: 255, Comment: "S3 endpoint 或本地兼容地址", Default: ""},
+		{Name: "region", Type: field.TypeString, Size: 80, Comment: "S3 region", Default: ""},
+		{Name: "access_key", Type: field.TypeString, Size: 120, Comment: "访问密钥", Default: ""},
+		{Name: "secret_key", Type: field.TypeString, Size: 200, Comment: "密钥", Default: ""},
+		{Name: "session_token", Type: field.TypeString, Size: 500, Comment: "会话令牌", Default: ""},
+		{Name: "use_ssl", Type: field.TypeBool, Comment: "是否使用 SSL", Default: false},
+		{Name: "force_path_style", Type: field.TypeBool, Comment: "是否强制 path-style", Default: true},
+		{Name: "public_base_url", Type: field.TypeString, Size: 255, Comment: "公开访问或代理访问基础 URL", Default: ""},
+		{Name: "default_bucket", Type: field.TypeString, Size: 120, Comment: "默认 bucket", Default: "tenant-files"},
+		{Name: "local_base_path", Type: field.TypeString, Size: 500, Comment: "本地存储根目录", Default: ""},
+		{Name: "is_default", Type: field.TypeBool, Comment: "是否默认渠道", Default: false},
+		{Name: "health_status", Type: field.TypeString, Size: 20, Comment: "健康状态 unknown/healthy/unhealthy", Default: "unknown"},
+		{Name: "last_checked_at", Type: field.TypeTime, Nullable: true, Comment: "最后健康检查时间"},
+		{Name: "remark", Type: field.TypeString, Size: 500, Comment: "备注", Default: ""},
+	}
+	// StorageProvidersTable holds the schema information for the "storage_providers" table.
+	StorageProvidersTable = &schema.Table{
+		Name:       "storage_providers",
+		Comment:    "存储渠道配置表",
+		Columns:    StorageProvidersColumns,
+		PrimaryKey: []*schema.Column{StorageProvidersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storageprovider_id",
+				Unique:  false,
+				Columns: []*schema.Column{StorageProvidersColumns[0]},
+			},
+			{
+				Name:    "storageprovider_code",
+				Unique:  true,
+				Columns: []*schema.Column{StorageProvidersColumns[5]},
+			},
+			{
+				Name:    "storageprovider_type_status",
+				Unique:  false,
+				Columns: []*schema.Column{StorageProvidersColumns[7], StorageProvidersColumns[1]},
+			},
+			{
+				Name:    "storageprovider_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{StorageProvidersColumns[18]},
 			},
 		},
 	}
@@ -1210,6 +1271,7 @@ var (
 		PostsTable,
 		ProjectsTable,
 		RolesTable,
+		StorageProvidersTable,
 		TenantsTable,
 		TenantParameterOverridesTable,
 		TenantPermissionGroupsTable,
@@ -1285,6 +1347,10 @@ func init() {
 		Collation: "utf8mb4_bin",
 	}
 	RolesTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	StorageProvidersTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

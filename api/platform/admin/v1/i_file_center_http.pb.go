@@ -26,6 +26,7 @@ const OperationFileCenterServiceDeleteFileObject = "/platform.admin.v1.FileCente
 const OperationFileCenterServiceGetFileObject = "/platform.admin.v1.FileCenterService/GetFileObject"
 const OperationFileCenterServiceListFileObjects = "/platform.admin.v1.FileCenterService/ListFileObjects"
 const OperationFileCenterServicePresignFileDownload = "/platform.admin.v1.FileCenterService/PresignFileDownload"
+const OperationFileCenterServiceUploadFileContent = "/platform.admin.v1.FileCenterService/UploadFileContent"
 
 type FileCenterServiceHTTPServer interface {
 	ConfirmFileUpload(context.Context, *v1.ConfirmFileUploadRequest) (*v1.ConfirmFileUploadResponse, error)
@@ -34,11 +35,13 @@ type FileCenterServiceHTTPServer interface {
 	GetFileObject(context.Context, *v1.GetFileObjectRequest) (*v1.FileObject, error)
 	ListFileObjects(context.Context, *v1.ListFileObjectsRequest) (*v1.ListFileObjectsResponse, error)
 	PresignFileDownload(context.Context, *v1.PresignFileDownloadRequest) (*v1.PresignFileDownloadResponse, error)
+	UploadFileContent(context.Context, *v1.UploadFileContentRequest) (*v1.UploadFileContentResponse, error)
 }
 
 func RegisterFileCenterServiceHTTPServer(s *http.Server, srv FileCenterServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/admin/v1/files/upload-sessions", _FileCenterService_CreateFileUploadSession0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}:content", _FileCenterService_UploadFileContent0_HTTP_Handler(srv))
 	r.POST("/admin/v1/files/{id}:confirm", _FileCenterService_ConfirmFileUpload0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files/{id}", _FileCenterService_GetFileObject0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files", _FileCenterService_ListFileObjects0_HTTP_Handler(srv))
@@ -64,6 +67,31 @@ func _FileCenterService_CreateFileUploadSession0_HTTP_Handler(srv FileCenterServ
 			return err
 		}
 		reply := out.(*v1.CreateFileUploadSessionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_UploadFileContent0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UploadFileContentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceUploadFileContent)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UploadFileContent(ctx, req.(*v1.UploadFileContentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UploadFileContentResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -185,6 +213,7 @@ type FileCenterServiceHTTPClient interface {
 	GetFileObject(ctx context.Context, req *v1.GetFileObjectRequest, opts ...http.CallOption) (rsp *v1.FileObject, err error)
 	ListFileObjects(ctx context.Context, req *v1.ListFileObjectsRequest, opts ...http.CallOption) (rsp *v1.ListFileObjectsResponse, err error)
 	PresignFileDownload(ctx context.Context, req *v1.PresignFileDownloadRequest, opts ...http.CallOption) (rsp *v1.PresignFileDownloadResponse, err error)
+	UploadFileContent(ctx context.Context, req *v1.UploadFileContentRequest, opts ...http.CallOption) (rsp *v1.UploadFileContentResponse, err error)
 }
 
 type FileCenterServiceHTTPClientImpl struct {
@@ -267,6 +296,19 @@ func (c *FileCenterServiceHTTPClientImpl) PresignFileDownload(ctx context.Contex
 	opts = append(opts, http.Operation(OperationFileCenterServicePresignFileDownload))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *FileCenterServiceHTTPClientImpl) UploadFileContent(ctx context.Context, in *v1.UploadFileContentRequest, opts ...http.CallOption) (*v1.UploadFileContentResponse, error) {
+	var out v1.UploadFileContentResponse
+	pattern := "/admin/v1/files/{id}:content"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFileCenterServiceUploadFileContent))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

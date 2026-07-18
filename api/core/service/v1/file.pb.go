@@ -43,6 +43,8 @@ type FileObject struct {
 	UpdatedAt       *string                `protobuf:"bytes,16,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`
 	DeletedAt       *string                `protobuf:"bytes,17,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
 	UploadExpiresAt *string                `protobuf:"bytes,18,opt,name=upload_expires_at,json=uploadExpiresAt,proto3,oneof" json:"upload_expires_at,omitempty"`
+	ProviderId      *uint32                `protobuf:"varint,19,opt,name=provider_id,json=providerId,proto3,oneof" json:"provider_id,omitempty"`
+	ProviderCode    *string                `protobuf:"bytes,20,opt,name=provider_code,json=providerCode,proto3,oneof" json:"provider_code,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -199,6 +201,20 @@ func (x *FileObject) GetDeletedAt() string {
 func (x *FileObject) GetUploadExpiresAt() string {
 	if x != nil && x.UploadExpiresAt != nil {
 		return *x.UploadExpiresAt
+	}
+	return ""
+}
+
+func (x *FileObject) GetProviderId() uint32 {
+	if x != nil && x.ProviderId != nil {
+		return *x.ProviderId
+	}
+	return 0
+}
+
+func (x *FileObject) GetProviderCode() string {
+	if x != nil && x.ProviderCode != nil {
+		return *x.ProviderCode
 	}
 	return ""
 }
@@ -371,6 +387,118 @@ func (x *CreateFileUploadSessionResponse) GetExpiresAt() string {
 	return ""
 }
 
+type UploadFileContentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Content       []byte                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	ContentType   *string                `protobuf:"bytes,3,opt,name=content_type,json=contentType,proto3,oneof" json:"content_type,omitempty"`
+	Sha256        *string                `protobuf:"bytes,4,opt,name=sha256,proto3,oneof" json:"sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFileContentRequest) Reset() {
+	*x = UploadFileContentRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFileContentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFileContentRequest) ProtoMessage() {}
+
+func (x *UploadFileContentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFileContentRequest.ProtoReflect.Descriptor instead.
+func (*UploadFileContentRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UploadFileContentRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UploadFileContentRequest) GetContent() []byte {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+func (x *UploadFileContentRequest) GetContentType() string {
+	if x != nil && x.ContentType != nil {
+		return *x.ContentType
+	}
+	return ""
+}
+
+func (x *UploadFileContentRequest) GetSha256() string {
+	if x != nil && x.Sha256 != nil {
+		return *x.Sha256
+	}
+	return ""
+}
+
+type UploadFileContentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          *FileObject            `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFileContentResponse) Reset() {
+	*x = UploadFileContentResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFileContentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFileContentResponse) ProtoMessage() {}
+
+func (x *UploadFileContentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFileContentResponse.ProtoReflect.Descriptor instead.
+func (*UploadFileContentResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *UploadFileContentResponse) GetFile() *FileObject {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
 type ConfirmFileUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -383,7 +511,7 @@ type ConfirmFileUploadRequest struct {
 
 func (x *ConfirmFileUploadRequest) Reset() {
 	*x = ConfirmFileUploadRequest{}
-	mi := &file_core_service_v1_file_proto_msgTypes[3]
+	mi := &file_core_service_v1_file_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -395,7 +523,7 @@ func (x *ConfirmFileUploadRequest) String() string {
 func (*ConfirmFileUploadRequest) ProtoMessage() {}
 
 func (x *ConfirmFileUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[3]
+	mi := &file_core_service_v1_file_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -408,7 +536,7 @@ func (x *ConfirmFileUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmFileUploadRequest.ProtoReflect.Descriptor instead.
 func (*ConfirmFileUploadRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{3}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ConfirmFileUploadRequest) GetId() uint32 {
@@ -448,7 +576,7 @@ type ConfirmFileUploadResponse struct {
 
 func (x *ConfirmFileUploadResponse) Reset() {
 	*x = ConfirmFileUploadResponse{}
-	mi := &file_core_service_v1_file_proto_msgTypes[4]
+	mi := &file_core_service_v1_file_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -460,7 +588,7 @@ func (x *ConfirmFileUploadResponse) String() string {
 func (*ConfirmFileUploadResponse) ProtoMessage() {}
 
 func (x *ConfirmFileUploadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[4]
+	mi := &file_core_service_v1_file_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -473,7 +601,7 @@ func (x *ConfirmFileUploadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmFileUploadResponse.ProtoReflect.Descriptor instead.
 func (*ConfirmFileUploadResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{4}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ConfirmFileUploadResponse) GetFile() *FileObject {
@@ -492,7 +620,7 @@ type GetFileObjectRequest struct {
 
 func (x *GetFileObjectRequest) Reset() {
 	*x = GetFileObjectRequest{}
-	mi := &file_core_service_v1_file_proto_msgTypes[5]
+	mi := &file_core_service_v1_file_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -504,7 +632,7 @@ func (x *GetFileObjectRequest) String() string {
 func (*GetFileObjectRequest) ProtoMessage() {}
 
 func (x *GetFileObjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[5]
+	mi := &file_core_service_v1_file_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -517,7 +645,7 @@ func (x *GetFileObjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFileObjectRequest.ProtoReflect.Descriptor instead.
 func (*GetFileObjectRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{5}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetFileObjectRequest) GetId() uint32 {
@@ -545,7 +673,7 @@ type ListFileObjectsRequest struct {
 
 func (x *ListFileObjectsRequest) Reset() {
 	*x = ListFileObjectsRequest{}
-	mi := &file_core_service_v1_file_proto_msgTypes[6]
+	mi := &file_core_service_v1_file_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -557,7 +685,7 @@ func (x *ListFileObjectsRequest) String() string {
 func (*ListFileObjectsRequest) ProtoMessage() {}
 
 func (x *ListFileObjectsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[6]
+	mi := &file_core_service_v1_file_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -570,7 +698,7 @@ func (x *ListFileObjectsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFileObjectsRequest.ProtoReflect.Descriptor instead.
 func (*ListFileObjectsRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{6}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListFileObjectsRequest) GetPageToken() string {
@@ -654,7 +782,7 @@ type ListFileObjectsResponse struct {
 
 func (x *ListFileObjectsResponse) Reset() {
 	*x = ListFileObjectsResponse{}
-	mi := &file_core_service_v1_file_proto_msgTypes[7]
+	mi := &file_core_service_v1_file_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -666,7 +794,7 @@ func (x *ListFileObjectsResponse) String() string {
 func (*ListFileObjectsResponse) ProtoMessage() {}
 
 func (x *ListFileObjectsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[7]
+	mi := &file_core_service_v1_file_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -679,7 +807,7 @@ func (x *ListFileObjectsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFileObjectsResponse.ProtoReflect.Descriptor instead.
 func (*ListFileObjectsResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{7}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListFileObjectsResponse) GetItems() []*FileObject {
@@ -713,7 +841,7 @@ type PresignFileDownloadRequest struct {
 
 func (x *PresignFileDownloadRequest) Reset() {
 	*x = PresignFileDownloadRequest{}
-	mi := &file_core_service_v1_file_proto_msgTypes[8]
+	mi := &file_core_service_v1_file_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -725,7 +853,7 @@ func (x *PresignFileDownloadRequest) String() string {
 func (*PresignFileDownloadRequest) ProtoMessage() {}
 
 func (x *PresignFileDownloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[8]
+	mi := &file_core_service_v1_file_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -738,7 +866,7 @@ func (x *PresignFileDownloadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresignFileDownloadRequest.ProtoReflect.Descriptor instead.
 func (*PresignFileDownloadRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{8}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PresignFileDownloadRequest) GetId() uint32 {
@@ -765,7 +893,7 @@ type PresignFileDownloadResponse struct {
 
 func (x *PresignFileDownloadResponse) Reset() {
 	*x = PresignFileDownloadResponse{}
-	mi := &file_core_service_v1_file_proto_msgTypes[9]
+	mi := &file_core_service_v1_file_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -777,7 +905,7 @@ func (x *PresignFileDownloadResponse) String() string {
 func (*PresignFileDownloadResponse) ProtoMessage() {}
 
 func (x *PresignFileDownloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[9]
+	mi := &file_core_service_v1_file_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -790,7 +918,7 @@ func (x *PresignFileDownloadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresignFileDownloadResponse.ProtoReflect.Descriptor instead.
 func (*PresignFileDownloadResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{9}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *PresignFileDownloadResponse) GetDownloadUrl() string {
@@ -817,7 +945,7 @@ type DeleteFileObjectRequest struct {
 
 func (x *DeleteFileObjectRequest) Reset() {
 	*x = DeleteFileObjectRequest{}
-	mi := &file_core_service_v1_file_proto_msgTypes[10]
+	mi := &file_core_service_v1_file_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -829,7 +957,7 @@ func (x *DeleteFileObjectRequest) String() string {
 func (*DeleteFileObjectRequest) ProtoMessage() {}
 
 func (x *DeleteFileObjectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[10]
+	mi := &file_core_service_v1_file_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -842,7 +970,7 @@ func (x *DeleteFileObjectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFileObjectRequest.ProtoReflect.Descriptor instead.
 func (*DeleteFileObjectRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{10}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DeleteFileObjectRequest) GetId() uint32 {
@@ -867,7 +995,7 @@ type DeleteFileObjectResponse struct {
 
 func (x *DeleteFileObjectResponse) Reset() {
 	*x = DeleteFileObjectResponse{}
-	mi := &file_core_service_v1_file_proto_msgTypes[11]
+	mi := &file_core_service_v1_file_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -879,7 +1007,7 @@ func (x *DeleteFileObjectResponse) String() string {
 func (*DeleteFileObjectResponse) ProtoMessage() {}
 
 func (x *DeleteFileObjectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_file_proto_msgTypes[11]
+	mi := &file_core_service_v1_file_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -892,15 +1020,14 @@ func (x *DeleteFileObjectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFileObjectResponse.ProtoReflect.Descriptor instead.
 func (*DeleteFileObjectResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_file_proto_rawDescGZIP(), []int{11}
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{13}
 }
 
 var File_core_service_v1_file_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_file_proto_rawDesc = "" +
 	"\n" +
-	"\x1acore/service/v1/file.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\"\x9d\n" +
-	"\n" +
+	"\x1acore/service/v1/file.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\"\xbf\v\n" +
 	"\n" +
 	"FileObject\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x120\n" +
@@ -931,7 +1058,10 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"updated_at\x18\x10 \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间H\x0eR\tupdatedAt\x88\x01\x01\x126\n" +
 	"\n" +
 	"deleted_at\x18\x11 \x01(\tB\x12\xbaG\x0f\x92\x02\f删除时间H\x0fR\tdeletedAt\x88\x01\x01\x12O\n" +
-	"\x11upload_expires_at\x18\x12 \x01(\tB\x1e\xbaG\x1b\x92\x02\x18上传凭证过期时间H\x10R\x0fuploadExpiresAt\x88\x01\x01B\f\n" +
+	"\x11upload_expires_at\x18\x12 \x01(\tB\x1e\xbaG\x1b\x92\x02\x18上传凭证过期时间H\x10R\x0fuploadExpiresAt\x88\x01\x01\x12:\n" +
+	"\vprovider_id\x18\x13 \x01(\rB\x14\xbaG\x11\x92\x02\x0e存储渠道IDH\x11R\n" +
+	"providerId\x88\x01\x01\x12B\n" +
+	"\rprovider_code\x18\x14 \x01(\tB\x18\xbaG\x15\x92\x02\x12存储渠道编码H\x12R\fproviderCode\x88\x01\x01B\f\n" +
 	"\n" +
 	"_tenant_idB\f\n" +
 	"\n" +
@@ -950,7 +1080,9 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\v_created_atB\r\n" +
 	"\v_updated_atB\r\n" +
 	"\v_deleted_atB\x14\n" +
-	"\x12_upload_expires_at\"\x9b\x04\n" +
+	"\x12_upload_expires_atB\x0e\n" +
+	"\f_provider_idB\x10\n" +
+	"\x0e_provider_code\"\x9b\x04\n" +
 	"\x1eCreateFileUploadSessionRequest\x12A\n" +
 	"\tfile_name\x18\x01 \x01(\tB\x1f\xbaG\x12\x92\x02\x0f原始文件名\xbaH\ar\x05\x10\x01\x18\xff\x01H\x00R\bfileName\x88\x01\x01\x12/\n" +
 	"\fcontent_type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18xH\x01R\vcontentType\x88\x01\x01\x12 \n" +
@@ -978,7 +1110,16 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"upload_url\x18\x02 \x01(\tR\tuploadUrl\x12#\n" +
 	"\rupload_method\x18\x03 \x01(\tR\fuploadMethod\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x04 \x01(\tR\texpiresAt\"\xba\x01\n" +
+	"expires_at\x18\x04 \x01(\tR\texpiresAt\"\xd4\x01\n" +
+	"\x18UploadFileContentRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12,\n" +
+	"\acontent\x18\x02 \x01(\fB\x12\xbaG\x0f\x92\x02\f文件内容R\acontent\x12/\n" +
+	"\fcontent_type\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18xH\x00R\vcontentType\x88\x01\x01\x12$\n" +
+	"\x06sha256\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@H\x01R\x06sha256\x88\x01\x01B\x0f\n" +
+	"\r_content_typeB\t\n" +
+	"\a_sha256\"L\n" +
+	"\x19UploadFileContentResponse\x12/\n" +
+	"\x04file\x18\x01 \x01(\v2\x1b.core.service.v1.FileObjectR\x04file\"\xba\x01\n" +
 	"\x18ConfirmFileUploadRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12 \n" +
 	"\x04size\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02(\x00H\x00R\x04size\x88\x01\x01\x12$\n" +
@@ -1030,9 +1171,10 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x125\n" +
 	"\x0fidempotency_key\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18xH\x00R\x0eidempotencyKey\x88\x01\x01B\x12\n" +
 	"\x10_idempotency_key\"\x1a\n" +
-	"\x18DeleteFileObjectResponse2\x93\x05\n" +
+	"\x18DeleteFileObjectResponse2\xff\x05\n" +
 	"\x11FileCenterService\x12|\n" +
 	"\x17CreateFileUploadSession\x12/.core.service.v1.CreateFileUploadSessionRequest\x1a0.core.service.v1.CreateFileUploadSessionResponse\x12j\n" +
+	"\x11UploadFileContent\x12).core.service.v1.UploadFileContentRequest\x1a*.core.service.v1.UploadFileContentResponse\x12j\n" +
 	"\x11ConfirmFileUpload\x12).core.service.v1.ConfirmFileUploadRequest\x1a*.core.service.v1.ConfirmFileUploadResponse\x12S\n" +
 	"\rGetFileObject\x12%.core.service.v1.GetFileObjectRequest\x1a\x1b.core.service.v1.FileObject\x12d\n" +
 	"\x0fListFileObjects\x12'.core.service.v1.ListFileObjectsRequest\x1a(.core.service.v1.ListFileObjectsResponse\x12p\n" +
@@ -1052,42 +1194,47 @@ func file_core_service_v1_file_proto_rawDescGZIP() []byte {
 	return file_core_service_v1_file_proto_rawDescData
 }
 
-var file_core_service_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_core_service_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_core_service_v1_file_proto_goTypes = []any{
 	(*FileObject)(nil),                      // 0: core.service.v1.FileObject
 	(*CreateFileUploadSessionRequest)(nil),  // 1: core.service.v1.CreateFileUploadSessionRequest
 	(*CreateFileUploadSessionResponse)(nil), // 2: core.service.v1.CreateFileUploadSessionResponse
-	(*ConfirmFileUploadRequest)(nil),        // 3: core.service.v1.ConfirmFileUploadRequest
-	(*ConfirmFileUploadResponse)(nil),       // 4: core.service.v1.ConfirmFileUploadResponse
-	(*GetFileObjectRequest)(nil),            // 5: core.service.v1.GetFileObjectRequest
-	(*ListFileObjectsRequest)(nil),          // 6: core.service.v1.ListFileObjectsRequest
-	(*ListFileObjectsResponse)(nil),         // 7: core.service.v1.ListFileObjectsResponse
-	(*PresignFileDownloadRequest)(nil),      // 8: core.service.v1.PresignFileDownloadRequest
-	(*PresignFileDownloadResponse)(nil),     // 9: core.service.v1.PresignFileDownloadResponse
-	(*DeleteFileObjectRequest)(nil),         // 10: core.service.v1.DeleteFileObjectRequest
-	(*DeleteFileObjectResponse)(nil),        // 11: core.service.v1.DeleteFileObjectResponse
+	(*UploadFileContentRequest)(nil),        // 3: core.service.v1.UploadFileContentRequest
+	(*UploadFileContentResponse)(nil),       // 4: core.service.v1.UploadFileContentResponse
+	(*ConfirmFileUploadRequest)(nil),        // 5: core.service.v1.ConfirmFileUploadRequest
+	(*ConfirmFileUploadResponse)(nil),       // 6: core.service.v1.ConfirmFileUploadResponse
+	(*GetFileObjectRequest)(nil),            // 7: core.service.v1.GetFileObjectRequest
+	(*ListFileObjectsRequest)(nil),          // 8: core.service.v1.ListFileObjectsRequest
+	(*ListFileObjectsResponse)(nil),         // 9: core.service.v1.ListFileObjectsResponse
+	(*PresignFileDownloadRequest)(nil),      // 10: core.service.v1.PresignFileDownloadRequest
+	(*PresignFileDownloadResponse)(nil),     // 11: core.service.v1.PresignFileDownloadResponse
+	(*DeleteFileObjectRequest)(nil),         // 12: core.service.v1.DeleteFileObjectRequest
+	(*DeleteFileObjectResponse)(nil),        // 13: core.service.v1.DeleteFileObjectResponse
 }
 var file_core_service_v1_file_proto_depIdxs = []int32{
 	0,  // 0: core.service.v1.CreateFileUploadSessionResponse.file:type_name -> core.service.v1.FileObject
-	0,  // 1: core.service.v1.ConfirmFileUploadResponse.file:type_name -> core.service.v1.FileObject
-	0,  // 2: core.service.v1.ListFileObjectsResponse.items:type_name -> core.service.v1.FileObject
-	1,  // 3: core.service.v1.FileCenterService.CreateFileUploadSession:input_type -> core.service.v1.CreateFileUploadSessionRequest
-	3,  // 4: core.service.v1.FileCenterService.ConfirmFileUpload:input_type -> core.service.v1.ConfirmFileUploadRequest
-	5,  // 5: core.service.v1.FileCenterService.GetFileObject:input_type -> core.service.v1.GetFileObjectRequest
-	6,  // 6: core.service.v1.FileCenterService.ListFileObjects:input_type -> core.service.v1.ListFileObjectsRequest
-	8,  // 7: core.service.v1.FileCenterService.PresignFileDownload:input_type -> core.service.v1.PresignFileDownloadRequest
-	10, // 8: core.service.v1.FileCenterService.DeleteFileObject:input_type -> core.service.v1.DeleteFileObjectRequest
-	2,  // 9: core.service.v1.FileCenterService.CreateFileUploadSession:output_type -> core.service.v1.CreateFileUploadSessionResponse
-	4,  // 10: core.service.v1.FileCenterService.ConfirmFileUpload:output_type -> core.service.v1.ConfirmFileUploadResponse
-	0,  // 11: core.service.v1.FileCenterService.GetFileObject:output_type -> core.service.v1.FileObject
-	7,  // 12: core.service.v1.FileCenterService.ListFileObjects:output_type -> core.service.v1.ListFileObjectsResponse
-	9,  // 13: core.service.v1.FileCenterService.PresignFileDownload:output_type -> core.service.v1.PresignFileDownloadResponse
-	11, // 14: core.service.v1.FileCenterService.DeleteFileObject:output_type -> core.service.v1.DeleteFileObjectResponse
-	9,  // [9:15] is the sub-list for method output_type
-	3,  // [3:9] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	0,  // 1: core.service.v1.UploadFileContentResponse.file:type_name -> core.service.v1.FileObject
+	0,  // 2: core.service.v1.ConfirmFileUploadResponse.file:type_name -> core.service.v1.FileObject
+	0,  // 3: core.service.v1.ListFileObjectsResponse.items:type_name -> core.service.v1.FileObject
+	1,  // 4: core.service.v1.FileCenterService.CreateFileUploadSession:input_type -> core.service.v1.CreateFileUploadSessionRequest
+	3,  // 5: core.service.v1.FileCenterService.UploadFileContent:input_type -> core.service.v1.UploadFileContentRequest
+	5,  // 6: core.service.v1.FileCenterService.ConfirmFileUpload:input_type -> core.service.v1.ConfirmFileUploadRequest
+	7,  // 7: core.service.v1.FileCenterService.GetFileObject:input_type -> core.service.v1.GetFileObjectRequest
+	8,  // 8: core.service.v1.FileCenterService.ListFileObjects:input_type -> core.service.v1.ListFileObjectsRequest
+	10, // 9: core.service.v1.FileCenterService.PresignFileDownload:input_type -> core.service.v1.PresignFileDownloadRequest
+	12, // 10: core.service.v1.FileCenterService.DeleteFileObject:input_type -> core.service.v1.DeleteFileObjectRequest
+	2,  // 11: core.service.v1.FileCenterService.CreateFileUploadSession:output_type -> core.service.v1.CreateFileUploadSessionResponse
+	4,  // 12: core.service.v1.FileCenterService.UploadFileContent:output_type -> core.service.v1.UploadFileContentResponse
+	6,  // 13: core.service.v1.FileCenterService.ConfirmFileUpload:output_type -> core.service.v1.ConfirmFileUploadResponse
+	0,  // 14: core.service.v1.FileCenterService.GetFileObject:output_type -> core.service.v1.FileObject
+	9,  // 15: core.service.v1.FileCenterService.ListFileObjects:output_type -> core.service.v1.ListFileObjectsResponse
+	11, // 16: core.service.v1.FileCenterService.PresignFileDownload:output_type -> core.service.v1.PresignFileDownloadResponse
+	13, // 17: core.service.v1.FileCenterService.DeleteFileObject:output_type -> core.service.v1.DeleteFileObjectResponse
+	11, // [11:18] is the sub-list for method output_type
+	4,  // [4:11] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_file_proto_init() }
@@ -1098,16 +1245,17 @@ func file_core_service_v1_file_proto_init() {
 	file_core_service_v1_file_proto_msgTypes[0].OneofWrappers = []any{}
 	file_core_service_v1_file_proto_msgTypes[1].OneofWrappers = []any{}
 	file_core_service_v1_file_proto_msgTypes[3].OneofWrappers = []any{}
-	file_core_service_v1_file_proto_msgTypes[6].OneofWrappers = []any{}
+	file_core_service_v1_file_proto_msgTypes[5].OneofWrappers = []any{}
 	file_core_service_v1_file_proto_msgTypes[8].OneofWrappers = []any{}
 	file_core_service_v1_file_proto_msgTypes[10].OneofWrappers = []any{}
+	file_core_service_v1_file_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_file_proto_rawDesc), len(file_core_service_v1_file_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

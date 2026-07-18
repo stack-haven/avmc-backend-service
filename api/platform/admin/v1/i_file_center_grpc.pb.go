@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	FileCenterService_CreateFileUploadSession_FullMethodName = "/platform.admin.v1.FileCenterService/CreateFileUploadSession"
+	FileCenterService_UploadFileContent_FullMethodName       = "/platform.admin.v1.FileCenterService/UploadFileContent"
 	FileCenterService_ConfirmFileUpload_FullMethodName       = "/platform.admin.v1.FileCenterService/ConfirmFileUpload"
 	FileCenterService_GetFileObject_FullMethodName           = "/platform.admin.v1.FileCenterService/GetFileObject"
 	FileCenterService_ListFileObjects_FullMethodName         = "/platform.admin.v1.FileCenterService/ListFileObjects"
@@ -33,6 +34,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileCenterServiceClient interface {
 	CreateFileUploadSession(ctx context.Context, in *v1.CreateFileUploadSessionRequest, opts ...grpc.CallOption) (*v1.CreateFileUploadSessionResponse, error)
+	UploadFileContent(ctx context.Context, in *v1.UploadFileContentRequest, opts ...grpc.CallOption) (*v1.UploadFileContentResponse, error)
 	ConfirmFileUpload(ctx context.Context, in *v1.ConfirmFileUploadRequest, opts ...grpc.CallOption) (*v1.ConfirmFileUploadResponse, error)
 	GetFileObject(ctx context.Context, in *v1.GetFileObjectRequest, opts ...grpc.CallOption) (*v1.FileObject, error)
 	ListFileObjects(ctx context.Context, in *v1.ListFileObjectsRequest, opts ...grpc.CallOption) (*v1.ListFileObjectsResponse, error)
@@ -52,6 +54,16 @@ func (c *fileCenterServiceClient) CreateFileUploadSession(ctx context.Context, i
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.CreateFileUploadSessionResponse)
 	err := c.cc.Invoke(ctx, FileCenterService_CreateFileUploadSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) UploadFileContent(ctx context.Context, in *v1.UploadFileContentRequest, opts ...grpc.CallOption) (*v1.UploadFileContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.UploadFileContentResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_UploadFileContent_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +125,7 @@ func (c *fileCenterServiceClient) DeleteFileObject(ctx context.Context, in *v1.D
 // for forward compatibility.
 type FileCenterServiceServer interface {
 	CreateFileUploadSession(context.Context, *v1.CreateFileUploadSessionRequest) (*v1.CreateFileUploadSessionResponse, error)
+	UploadFileContent(context.Context, *v1.UploadFileContentRequest) (*v1.UploadFileContentResponse, error)
 	ConfirmFileUpload(context.Context, *v1.ConfirmFileUploadRequest) (*v1.ConfirmFileUploadResponse, error)
 	GetFileObject(context.Context, *v1.GetFileObjectRequest) (*v1.FileObject, error)
 	ListFileObjects(context.Context, *v1.ListFileObjectsRequest) (*v1.ListFileObjectsResponse, error)
@@ -130,6 +143,9 @@ type UnimplementedFileCenterServiceServer struct{}
 
 func (UnimplementedFileCenterServiceServer) CreateFileUploadSession(context.Context, *v1.CreateFileUploadSessionRequest) (*v1.CreateFileUploadSessionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateFileUploadSession not implemented")
+}
+func (UnimplementedFileCenterServiceServer) UploadFileContent(context.Context, *v1.UploadFileContentRequest) (*v1.UploadFileContentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UploadFileContent not implemented")
 }
 func (UnimplementedFileCenterServiceServer) ConfirmFileUpload(context.Context, *v1.ConfirmFileUploadRequest) (*v1.ConfirmFileUploadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ConfirmFileUpload not implemented")
@@ -181,6 +197,24 @@ func _FileCenterService_CreateFileUploadSession_Handler(srv interface{}, ctx con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileCenterServiceServer).CreateFileUploadSession(ctx, req.(*v1.CreateFileUploadSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_UploadFileContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.UploadFileContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).UploadFileContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_UploadFileContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).UploadFileContent(ctx, req.(*v1.UploadFileContentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -285,6 +319,10 @@ var FileCenterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateFileUploadSession",
 			Handler:    _FileCenterService_CreateFileUploadSession_Handler,
+		},
+		{
+			MethodName: "UploadFileContent",
+			Handler:    _FileCenterService_UploadFileContent_Handler,
 		},
 		{
 			MethodName: "ConfirmFileUpload",

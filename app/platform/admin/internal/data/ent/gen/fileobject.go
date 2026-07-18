@@ -40,6 +40,10 @@ type FileObject struct {
 	Etag string `json:"etag,omitempty"`
 	// 存储渠道
 	Provider string `json:"provider,omitempty"`
+	// 存储渠道ID快照
+	ProviderID *uint32 `json:"provider_id,omitempty"`
+	// 存储渠道编码快照
+	ProviderCode string `json:"provider_code,omitempty"`
 	// 存储桶
 	Bucket string `json:"bucket,omitempty"`
 	// 对象Key
@@ -66,9 +70,9 @@ func (*FileObject) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fileobject.FieldID, fileobject.FieldStatus, fileobject.FieldTenantID, fileobject.FieldSize, fileobject.FieldCreatedBy:
+		case fileobject.FieldID, fileobject.FieldStatus, fileobject.FieldTenantID, fileobject.FieldSize, fileobject.FieldProviderID, fileobject.FieldCreatedBy:
 			values[i] = new(sql.NullInt64)
-		case fileobject.FieldFileName, fileobject.FieldContentType, fileobject.FieldSha256, fileobject.FieldEtag, fileobject.FieldProvider, fileobject.FieldBucket, fileobject.FieldObjectKey, fileobject.FieldBusinessType, fileobject.FieldBusinessID, fileobject.FieldVisibility, fileobject.FieldIdempotencyKey:
+		case fileobject.FieldFileName, fileobject.FieldContentType, fileobject.FieldSha256, fileobject.FieldEtag, fileobject.FieldProvider, fileobject.FieldProviderCode, fileobject.FieldBucket, fileobject.FieldObjectKey, fileobject.FieldBusinessType, fileobject.FieldBusinessID, fileobject.FieldVisibility, fileobject.FieldIdempotencyKey:
 			values[i] = new(sql.NullString)
 		case fileobject.FieldCreatedAt, fileobject.FieldUpdatedAt, fileobject.FieldDeletedAt, fileobject.FieldUploadExpiresAt, fileobject.FieldConfirmedAt:
 			values[i] = new(sql.NullTime)
@@ -160,6 +164,19 @@ func (_m *FileObject) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field provider", values[i])
 			} else if value.Valid {
 				_m.Provider = value.String
+			}
+		case fileobject.FieldProviderID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_id", values[i])
+			} else if value.Valid {
+				_m.ProviderID = new(uint32)
+				*_m.ProviderID = uint32(value.Int64)
+			}
+		case fileobject.FieldProviderCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_code", values[i])
+			} else if value.Valid {
+				_m.ProviderCode = value.String
 			}
 		case fileobject.FieldBucket:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -290,6 +307,14 @@ func (_m *FileObject) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("provider=")
 	builder.WriteString(_m.Provider)
+	builder.WriteString(", ")
+	if v := _m.ProviderID; v != nil {
+		builder.WriteString("provider_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("provider_code=")
+	builder.WriteString(_m.ProviderCode)
 	builder.WriteString(", ")
 	builder.WriteString("bucket=")
 	builder.WriteString(_m.Bucket)

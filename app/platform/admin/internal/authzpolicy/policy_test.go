@@ -290,6 +290,7 @@ func TestFileCenterOperationsRemainTenantDataPlane(t *testing.T) {
 
 	for _, operation := range []string{
 		v1.OperationFileCenterServiceCreateFileUploadSession,
+		v1.OperationFileCenterServiceUploadFileContent,
 		v1.OperationFileCenterServiceConfirmFileUpload,
 		v1.OperationFileCenterServiceGetFileObject,
 		v1.OperationFileCenterServiceListFileObjects,
@@ -298,6 +299,24 @@ func TestFileCenterOperationsRemainTenantDataPlane(t *testing.T) {
 	} {
 		if IsPlatformControlOperation(operation) {
 			t.Fatalf("file center operation must remain tenant data-plane: %s", operation)
+		}
+	}
+}
+
+func TestStorageProviderOperationsRequirePlatformIdentity(t *testing.T) {
+	t.Parallel()
+
+	for _, operation := range []string{
+		v1.OperationStorageProviderServiceCreateStorageProvider,
+		v1.OperationStorageProviderServiceUpdateStorageProvider,
+		v1.OperationStorageProviderServiceDeleteStorageProvider,
+		v1.OperationStorageProviderServiceGetStorageProvider,
+		v1.OperationStorageProviderServiceListStorageProviders,
+		v1.OperationStorageProviderServiceSetDefaultStorageProvider,
+		v1.OperationStorageProviderServiceTestStorageProvider,
+	} {
+		if !IsPlatformControlOperation(operation) {
+			t.Fatalf("storage provider operation must be platform control-plane: %s", operation)
 		}
 	}
 }

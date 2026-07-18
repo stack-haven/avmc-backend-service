@@ -38,6 +38,8 @@ func fileObjectToProto(row *gen.FileObject) *pbCore.FileObject {
 		Size:            &row.Size,
 		Sha256:          &row.Sha256,
 		Provider:        &row.Provider,
+		ProviderId:      row.ProviderID,
+		ProviderCode:    &row.ProviderCode,
 		Bucket:          &row.Bucket,
 		ObjectKey:       &row.ObjectKey,
 		BusinessType:    &row.BusinessType,
@@ -65,6 +67,8 @@ func (r *fileRepo) CreateUploadSession(ctx context.Context, file *pbCore.FileObj
 		SetSize(file.GetSize()).
 		SetSha256(file.GetSha256()).
 		SetProvider(file.GetProvider()).
+		SetNillableProviderID(file.ProviderId).
+		SetProviderCode(file.GetProviderCode()).
 		SetBucket(file.GetBucket()).
 		SetObjectKey(file.GetObjectKey()).
 		SetBusinessType(file.GetBusinessType()).

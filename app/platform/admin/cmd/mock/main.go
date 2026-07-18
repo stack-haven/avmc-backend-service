@@ -31,6 +31,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
@@ -316,6 +317,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	storageProviderMenu, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemStorageProvider", Title: "存储渠道", Path: "/system/storage-provider", Component: "/system/storage-provider/list", Icon: "mdi:database-cog-outline", Type: 2, Sort: 145,
+	}, systemMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	userCreateButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemUserCreate", Title: "用户新增", Path: "/system/user:create", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.UserService/CreateUser",
 	}, userMenu.ID)
@@ -376,6 +383,12 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	fileContentUploadButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemFileCenterContentUpload", Title: "内容上传", Path: "/system/file-center:content-upload", Type: 3, Sort: 22, AuthCode: "/platform.admin.v1.FileCenterService/UploadFileContent",
+	}, fileCenterMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 	fileConfirmButton, err := ensureMenu(ctx, client, mockMenuSpec{
 		Name: "SystemFileCenterConfirm", Title: "确认上传", Path: "/system/file-center:confirm", Type: 3, Sort: 25, AuthCode: "/platform.admin.v1.FileCenterService/ConfirmFileUpload",
 	}, fileCenterMenu.ID)
@@ -394,12 +407,26 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	storageProviderListButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemStorageProviderList", Title: "存储渠道查看", Path: "/system/storage-provider:list", Type: 3, Sort: 10, AuthCode: "/platform.admin.v1.StorageProviderService/ListStorageProviders",
+	}, storageProviderMenu.ID)
+	if err != nil {
+		return nil, err
+	}
+	storageProviderManageButton, err := ensureMenu(ctx, client, mockMenuSpec{
+		Name: "SystemStorageProviderManage", Title: "存储渠道管理", Path: "/system/storage-provider:manage", Type: 3, Sort: 20, AuthCode: "/platform.admin.v1.StorageProviderService/CreateStorageProvider",
+	}, storageProviderMenu.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	basicPermissionMenuIDs := []uint32{projectListButton.ID, roleListButton.ID, deptListButton.ID, userListButton.ID, parameterCurrentButton.ID}
-	fileCenterMenuIDs := []uint32{fileCenterMenu.ID, fileListButton.ID, fileDetailButton.ID, fileUploadButton.ID, fileConfirmButton.ID, fileDownloadButton.ID, fileDeleteButton.ID}
+	fileCenterMenuIDs := []uint32{fileCenterMenu.ID, fileListButton.ID, fileDetailButton.ID, fileUploadButton.ID, fileContentUploadButton.ID, fileConfirmButton.ID, fileDownloadButton.ID, fileDeleteButton.ID}
+	storageProviderMenuIDs := []uint32{storageProviderMenu.ID, storageProviderListButton.ID, storageProviderManageButton.ID}
 	fullMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, tenantMenu.ID, roleMenu.ID, menuMenu.ID, groupMenu.ID, tenantPermissionMenu.ID, deptMenu.ID, userMenu.ID, dictionaryMenu.ID, parameterMenu.ID, operationLogMenu.ID, loginLogMenu.ID, sessionMenu.ID, asyncTaskMenu.ID, userCreateButton.ID, parameterManageButton.ID}
 	fullMenuIDs = append(fullMenuIDs, basicPermissionMenuIDs...)
 	fullMenuIDs = append(fullMenuIDs, fileCenterMenuIDs...)
+	fullMenuIDs = append(fullMenuIDs, storageProviderMenuIDs...)
 	basicMenuIDs := []uint32{systemMenu.ID, projectMenu.ID, roleMenu.ID, deptMenu.ID, userMenu.ID, parameterMenu.ID}
 	basicMenuIDs = append(basicMenuIDs, basicPermissionMenuIDs...)
 
@@ -554,7 +581,11 @@ func seed(ctx context.Context, client *gen.Client) (*mockSeedResult, error) {
 	if err := seedParameters(ctx, client, admin.ID, tenantTwo.ID); err != nil {
 		return nil, err
 	}
-	if err := seedFileObjects(ctx, client, admin.ID, tenantTwo.ID); err != nil {
+	defaultStorageProvider, err := seedStorageProviders(ctx, client)
+	if err != nil {
+		return nil, err
+	}
+	if err := seedFileObjects(ctx, client, defaultStorageProvider, admin.ID, tenantTwo.ID); err != nil {
 		return nil, err
 	}
 	if err := seedAsyncTasks(ctx, client, admin.ID); err != nil {
@@ -1011,7 +1042,71 @@ func ensureProject(ctx context.Context, client *gen.Client, tenantID uint32, nam
 	return err
 }
 
-func seedFileObjects(ctx context.Context, client *gen.Client, tenantOneOperator, tenantTwoOperator uint32) error {
+func seedStorageProviders(ctx context.Context, client *gen.Client) (*gen.StorageProvider, error) {
+	local, err := ensureStorageProvider(ctx, client, "mock-local-default", "本地默认存储", "local", "", "", "", "", "", false, true, "http://localhost:8000/admin/v1/files", "tenant-files", "/private/tmp/avmc-platform-files", true)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = ensureStorageProvider(ctx, client, "mock-s3-compatible", "S3 兼容存储示例", "s3-compatible", "http://127.0.0.1:9000", "us-east-1", "mock-access-key", "mock-secret-key", "", false, true, "http://127.0.0.1:9000", "tenant-files", "", false); err != nil {
+		return nil, err
+	}
+	return local, nil
+}
+
+func ensureStorageProvider(ctx context.Context, client *gen.Client, code, name, providerType, endpoint, region, accessKey, secretKey, sessionToken string, useSSL, forcePathStyle bool, publicBaseURL, defaultBucket, localBasePath string, isDefault bool) (*gen.StorageProvider, error) {
+	if isDefault {
+		if _, err := client.StorageProvider.Update().SetIsDefault(false).Save(ctx); err != nil {
+			return nil, err
+		}
+	}
+	item, err := client.StorageProvider.Query().Where(storageprovider.CodeEQ(code)).Only(ctx)
+	if gen.IsNotFound(err) {
+		return client.StorageProvider.Create().
+			SetCode(code).
+			SetName(name).
+			SetType(providerType).
+			SetEndpoint(endpoint).
+			SetRegion(region).
+			SetAccessKey(accessKey).
+			SetSecretKey(secretKey).
+			SetSessionToken(sessionToken).
+			SetUseSsl(useSSL).
+			SetForcePathStyle(forcePathStyle).
+			SetPublicBaseURL(publicBaseURL).
+			SetDefaultBucket(defaultBucket).
+			SetLocalBasePath(localBasePath).
+			SetStatus(1).
+			SetIsDefault(isDefault).
+			SetHealthStatus("healthy").
+			SetLastCheckedAt(time.Now()).
+			SetRemark("mock data").
+			Save(ctx)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return item.Update().
+		SetName(name).
+		SetType(providerType).
+		SetEndpoint(endpoint).
+		SetRegion(region).
+		SetAccessKey(accessKey).
+		SetSecretKey(secretKey).
+		SetSessionToken(sessionToken).
+		SetUseSsl(useSSL).
+		SetForcePathStyle(forcePathStyle).
+		SetPublicBaseURL(publicBaseURL).
+		SetDefaultBucket(defaultBucket).
+		SetLocalBasePath(localBasePath).
+		SetStatus(1).
+		SetIsDefault(isDefault).
+		SetHealthStatus("healthy").
+		SetLastCheckedAt(time.Now()).
+		SetRemark("mock data").
+		Save(ctx)
+}
+
+func seedFileObjects(ctx context.Context, client *gen.Client, provider *gen.StorageProvider, tenantOneOperator, tenantTwoOperator uint32) error {
 	type fileObjectSpec struct {
 		tenantID     uint32
 		fileName     string
@@ -1059,14 +1154,22 @@ func seedFileObjects(ctx context.Context, client *gen.Client, tenantOneOperator,
 	}
 	now := time.Now()
 	for _, spec := range specs {
-		if err := ensureFileObject(ctx, client, spec.tenantID, spec.fileName, spec.contentType, spec.size, spec.sha256, spec.businessType, spec.businessID, spec.visibility, spec.status, spec.objectKey, spec.createdBy, now); err != nil {
+		if err := ensureFileObject(ctx, client, provider, spec.tenantID, spec.fileName, spec.contentType, spec.size, spec.sha256, spec.businessType, spec.businessID, spec.visibility, spec.status, spec.objectKey, spec.createdBy, now); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func ensureFileObject(ctx context.Context, client *gen.Client, tenantID uint32, fileName, contentType string, size int64, sha256, businessType, businessID, visibility string, status int32, objectKey string, createdBy uint32, now time.Time) error {
+func ensureFileObject(ctx context.Context, client *gen.Client, provider *gen.StorageProvider, tenantID uint32, fileName, contentType string, size int64, sha256, businessType, businessID, visibility string, status int32, objectKey string, createdBy uint32, now time.Time) error {
+	providerID := uint32(0)
+	providerCode := "mock-local-default"
+	providerType := "local"
+	if provider != nil {
+		providerID = provider.ID
+		providerCode = provider.Code
+		providerType = provider.Type
+	}
 	item, err := client.FileObject.Query().
 		Where(fileobject.TenantIDEQ(tenantID), fileobject.ObjectKeyEQ(objectKey)).
 		Only(ctx)
@@ -1080,7 +1183,9 @@ func ensureFileObject(ctx context.Context, client *gen.Client, tenantID uint32, 
 			SetSize(size).
 			SetSha256(sha256).
 			SetEtag(fmt.Sprintf("mock-etag-%d-%s", tenantID, strings.TrimPrefix(fileName, "mock_"))).
-			SetProvider("s3-compatible").
+			SetProvider(providerType).
+			SetProviderID(providerID).
+			SetProviderCode(providerCode).
 			SetBucket("tenant-files").
 			SetObjectKey(objectKey).
 			SetBusinessType(businessType).
@@ -1104,7 +1209,9 @@ func ensureFileObject(ctx context.Context, client *gen.Client, tenantID uint32, 
 		SetSize(size).
 		SetSha256(sha256).
 		SetEtag(fmt.Sprintf("mock-etag-%d-%s", tenantID, strings.TrimPrefix(fileName, "mock_"))).
-		SetProvider("s3-compatible").
+		SetProvider(providerType).
+		SetProviderID(providerID).
+		SetProviderCode(providerCode).
 		SetBucket("tenant-files").
 		SetBusinessType(businessType).
 		SetBusinessID(businessID).
@@ -1598,6 +1705,9 @@ func verify(ctx context.Context, client *gen.Client) error {
 		}, 4},
 		{"tenant 2 file objects", func(ctx context.Context) (int, error) {
 			return client.FileObject.Query().Where(fileobject.TenantIDEQ(2), fileobject.FileNameHasPrefix("mock_")).Count(ctx)
+		}, 2},
+		{"storage providers", func(ctx context.Context) (int, error) {
+			return client.StorageProvider.Query().Where(storageprovider.CodeIn("mock-local-default", "mock-s3-compatible")).Count(ctx)
 		}, 2},
 	}
 	for _, check := range checks {

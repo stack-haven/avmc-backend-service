@@ -26,6 +26,14 @@ func (s *FileCenterServiceService) CreateFileUploadSession(ctx context.Context, 
 	return s.uc.CreateUploadSession(ctx, req)
 }
 
+func (s *FileCenterServiceService) UploadFileContent(ctx context.Context, req *pbCore.UploadFileContentRequest) (*pbCore.UploadFileContentResponse, error) {
+	file, err := s.uc.UploadContent(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.UploadFileContentResponse{File: file}, nil
+}
+
 func (s *FileCenterServiceService) ConfirmFileUpload(ctx context.Context, req *pbCore.ConfirmFileUploadRequest) (*pbCore.ConfirmFileUploadResponse, error) {
 	file, err := s.uc.ConfirmUpload(ctx, req)
 	if err != nil {

@@ -25,6 +25,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
@@ -73,6 +74,8 @@ type Client struct {
 	Project *ProjectClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
+	// StorageProvider is the client for interacting with the StorageProvider builders.
+	StorageProvider *StorageProviderClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
 	// TenantParameterOverride is the client for interacting with the TenantParameterOverride builders.
@@ -110,6 +113,7 @@ func (c *Client) init() {
 	c.Post = NewPostClient(c.config)
 	c.Project = NewProjectClient(c.config)
 	c.Role = NewRoleClient(c.config)
+	c.StorageProvider = NewStorageProviderClient(c.config)
 	c.Tenant = NewTenantClient(c.config)
 	c.TenantParameterOverride = NewTenantParameterOverrideClient(c.config)
 	c.TenantPermissionGroup = NewTenantPermissionGroupClient(c.config)
@@ -222,6 +226,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Post:                         NewPostClient(cfg),
 		Project:                      NewProjectClient(cfg),
 		Role:                         NewRoleClient(cfg),
+		StorageProvider:              NewStorageProviderClient(cfg),
 		Tenant:                       NewTenantClient(cfg),
 		TenantParameterOverride:      NewTenantParameterOverrideClient(cfg),
 		TenantPermissionGroup:        NewTenantPermissionGroupClient(cfg),
@@ -261,6 +266,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Post:                         NewPostClient(cfg),
 		Project:                      NewProjectClient(cfg),
 		Role:                         NewRoleClient(cfg),
+		StorageProvider:              NewStorageProviderClient(cfg),
 		Tenant:                       NewTenantClient(cfg),
 		TenantParameterOverride:      NewTenantParameterOverrideClient(cfg),
 		TenantPermissionGroup:        NewTenantPermissionGroupClient(cfg),
@@ -298,9 +304,10 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileObject,
 		c.LoginLog, c.Menu, c.MenuPermissionGroup, c.MenuPermissionGroupVersion,
-		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role, c.Tenant,
-		c.TenantParameterOverride, c.TenantPermissionGroup,
-		c.TenantResourceQuotaOperation, c.TenantResourceQuotaUsage, c.User,
+		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
+		c.StorageProvider, c.Tenant, c.TenantParameterOverride,
+		c.TenantPermissionGroup, c.TenantResourceQuotaOperation,
+		c.TenantResourceQuotaUsage, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -312,9 +319,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileObject,
 		c.LoginLog, c.Menu, c.MenuPermissionGroup, c.MenuPermissionGroupVersion,
-		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role, c.Tenant,
-		c.TenantParameterOverride, c.TenantPermissionGroup,
-		c.TenantResourceQuotaOperation, c.TenantResourceQuotaUsage, c.User,
+		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
+		c.StorageProvider, c.Tenant, c.TenantParameterOverride,
+		c.TenantPermissionGroup, c.TenantResourceQuotaOperation,
+		c.TenantResourceQuotaUsage, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -351,6 +359,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Project.mutate(ctx, m)
 	case *RoleMutation:
 		return c.Role.mutate(ctx, m)
+	case *StorageProviderMutation:
+		return c.StorageProvider.mutate(ctx, m)
 	case *TenantMutation:
 		return c.Tenant.mutate(ctx, m)
 	case *TenantParameterOverrideMutation:
@@ -2620,6 +2630,141 @@ func (c *RoleClient) mutate(ctx context.Context, m *RoleMutation) (Value, error)
 	}
 }
 
+// StorageProviderClient is a client for the StorageProvider schema.
+type StorageProviderClient struct {
+	config
+}
+
+// NewStorageProviderClient returns a client for the StorageProvider from the given config.
+func NewStorageProviderClient(c config) *StorageProviderClient {
+	return &StorageProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storageprovider.Hooks(f(g(h())))`.
+func (c *StorageProviderClient) Use(hooks ...Hook) {
+	c.hooks.StorageProvider = append(c.hooks.StorageProvider, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storageprovider.Intercept(f(g(h())))`.
+func (c *StorageProviderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StorageProvider = append(c.inters.StorageProvider, interceptors...)
+}
+
+// Create returns a builder for creating a StorageProvider entity.
+func (c *StorageProviderClient) Create() *StorageProviderCreate {
+	mutation := newStorageProviderMutation(c.config, OpCreate)
+	return &StorageProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StorageProvider entities.
+func (c *StorageProviderClient) CreateBulk(builders ...*StorageProviderCreate) *StorageProviderCreateBulk {
+	return &StorageProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StorageProviderClient) MapCreateBulk(slice any, setFunc func(*StorageProviderCreate, int)) *StorageProviderCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StorageProviderCreateBulk{err: fmt.Errorf("calling to StorageProviderClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StorageProviderCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StorageProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StorageProvider.
+func (c *StorageProviderClient) Update() *StorageProviderUpdate {
+	mutation := newStorageProviderMutation(c.config, OpUpdate)
+	return &StorageProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StorageProviderClient) UpdateOne(_m *StorageProvider) *StorageProviderUpdateOne {
+	mutation := newStorageProviderMutation(c.config, OpUpdateOne, withStorageProvider(_m))
+	return &StorageProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StorageProviderClient) UpdateOneID(id uint32) *StorageProviderUpdateOne {
+	mutation := newStorageProviderMutation(c.config, OpUpdateOne, withStorageProviderID(id))
+	return &StorageProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StorageProvider.
+func (c *StorageProviderClient) Delete() *StorageProviderDelete {
+	mutation := newStorageProviderMutation(c.config, OpDelete)
+	return &StorageProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StorageProviderClient) DeleteOne(_m *StorageProvider) *StorageProviderDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StorageProviderClient) DeleteOneID(id uint32) *StorageProviderDeleteOne {
+	builder := c.Delete().Where(storageprovider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StorageProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for StorageProvider.
+func (c *StorageProviderClient) Query() *StorageProviderQuery {
+	return &StorageProviderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStorageProvider},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StorageProvider entity by its id.
+func (c *StorageProviderClient) Get(ctx context.Context, id uint32) (*StorageProvider, error) {
+	return c.Query().Where(storageprovider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StorageProviderClient) GetX(ctx context.Context, id uint32) *StorageProvider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StorageProviderClient) Hooks() []Hook {
+	hooks := c.hooks.StorageProvider
+	return append(hooks[:len(hooks):len(hooks)], storageprovider.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *StorageProviderClient) Interceptors() []Interceptor {
+	inters := c.inters.StorageProvider
+	return append(inters[:len(inters):len(inters)], storageprovider.Interceptors[:]...)
+}
+
+func (c *StorageProviderClient) mutate(ctx context.Context, m *StorageProviderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StorageProviderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StorageProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StorageProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StorageProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown StorageProvider mutation op: %q", m.Op())
+	}
+}
+
 // TenantClient is a client for the Tenant schema.
 type TenantClient struct {
 	config
@@ -3604,16 +3749,16 @@ type (
 	hooks struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileObject, LoginLog, Menu,
 		MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
-		ParameterDefinition, Post, Project, Role, Tenant, TenantParameterOverride,
-		TenantPermissionGroup, TenantResourceQuotaOperation, TenantResourceQuotaUsage,
-		User []ent.Hook
+		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
+		TenantParameterOverride, TenantPermissionGroup, TenantResourceQuotaOperation,
+		TenantResourceQuotaUsage, User []ent.Hook
 	}
 	inters struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileObject, LoginLog, Menu,
 		MenuPermissionGroup, MenuPermissionGroupVersion, OperationLog,
-		ParameterDefinition, Post, Project, Role, Tenant, TenantParameterOverride,
-		TenantPermissionGroup, TenantResourceQuotaOperation, TenantResourceQuotaUsage,
-		User []ent.Interceptor
+		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
+		TenantParameterOverride, TenantPermissionGroup, TenantResourceQuotaOperation,
+		TenantResourceQuotaUsage, User []ent.Interceptor
 	}
 )
 

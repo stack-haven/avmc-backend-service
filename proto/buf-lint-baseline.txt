@@ -52,6 +52,10 @@
 1 core/service/v1/error_reason.proto	ENUM_ZERO_VALUE_SUFFIX
 1 core/service/v1/error_reason.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 core/service/v1/error_reason.proto	PACKAGE_SAME_JAVA_PACKAGE
+1 core/service/v1/file.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
+1 core/service/v1/file.proto	PACKAGE_SAME_JAVA_PACKAGE
+14 core/service/v1/file.proto	RPC_REQUEST_RESPONSE_UNIQUE
+1 core/service/v1/file.proto	RPC_RESPONSE_STANDARD_NAME
 1 core/service/v1/login_log.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 core/service/v1/login_log.proto	PACKAGE_SAME_JAVA_PACKAGE
 6 core/service/v1/menu.proto	IMPORT_USED
@@ -80,6 +84,10 @@
 13 core/service/v1/role.proto	RPC_REQUEST_RESPONSE_UNIQUE
 1 core/service/v1/session.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 core/service/v1/session.proto	PACKAGE_SAME_JAVA_PACKAGE
+1 core/service/v1/storage_provider.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
+1 core/service/v1/storage_provider.proto	PACKAGE_SAME_JAVA_PACKAGE
+14 core/service/v1/storage_provider.proto	RPC_REQUEST_RESPONSE_UNIQUE
+1 core/service/v1/storage_provider.proto	RPC_RESPONSE_STANDARD_NAME
 1 core/service/v1/tenant.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 core/service/v1/tenant.proto	PACKAGE_SAME_JAVA_PACKAGE
 9 core/service/v1/tenant.proto	RPC_REQUEST_RESPONSE_UNIQUE
@@ -108,6 +116,10 @@
 1 platform/admin/v1/i_dictionary.proto	PACKAGE_SAME_JAVA_PACKAGE
 7 platform/admin/v1/i_dictionary.proto	RPC_REQUEST_RESPONSE_UNIQUE
 7 platform/admin/v1/i_dictionary.proto	RPC_RESPONSE_STANDARD_NAME
+1 platform/admin/v1/i_file_center.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
+1 platform/admin/v1/i_file_center.proto	PACKAGE_SAME_JAVA_PACKAGE
+14 platform/admin/v1/i_file_center.proto	RPC_REQUEST_RESPONSE_UNIQUE
+1 platform/admin/v1/i_file_center.proto	RPC_RESPONSE_STANDARD_NAME
 1 platform/admin/v1/i_login_log.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 platform/admin/v1/i_login_log.proto	PACKAGE_SAME_JAVA_PACKAGE
 1 platform/admin/v1/i_login_log.proto	RPC_RESPONSE_STANDARD_NAME
@@ -142,6 +154,10 @@
 1 platform/admin/v1/i_role.proto	RPC_RESPONSE_STANDARD_NAME
 1 platform/admin/v1/i_session.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 platform/admin/v1/i_session.proto	PACKAGE_SAME_JAVA_PACKAGE
+1 platform/admin/v1/i_storage_provider.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
+1 platform/admin/v1/i_storage_provider.proto	PACKAGE_SAME_JAVA_PACKAGE
+14 platform/admin/v1/i_storage_provider.proto	RPC_REQUEST_RESPONSE_UNIQUE
+1 platform/admin/v1/i_storage_provider.proto	RPC_RESPONSE_STANDARD_NAME
 1 platform/admin/v1/i_tenant.proto	PACKAGE_SAME_JAVA_MULTIPLE_FILES
 1 platform/admin/v1/i_tenant.proto	PACKAGE_SAME_JAVA_PACKAGE
 9 platform/admin/v1/i_tenant.proto	RPC_REQUEST_RESPONSE_UNIQUE

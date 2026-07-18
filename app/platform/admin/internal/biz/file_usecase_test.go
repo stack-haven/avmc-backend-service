@@ -98,6 +98,8 @@ type fileStorageStub struct {
 	presignPutCalls int
 	presignGetCalls int
 	deleteCalls     int
+	providerType    string
+	resolveErr      error
 }
 
 func (*fileStorageStub) PutObject(context.Context, string, string, io.Reader, objectstorage.PutOptions) (*objectstorage.ObjectInfo, error) {
@@ -121,6 +123,30 @@ func (s *fileStorageStub) PresignPutObject(context.Context, string, string, obje
 
 func (*fileStorageStub) PublicURL(string, string) (string, error) {
 	return "", nil
+}
+
+func (s *fileStorageStub) ResolveDefault(context.Context) (*ResolvedStorageProvider, error) {
+	if s == nil || s.resolveErr != nil {
+		if s == nil {
+			return nil, errors.BadRequest("FILE_STORAGE_NOT_CONFIGURED", "未配置可用的文件存储渠道")
+		}
+		return nil, s.resolveErr
+	}
+	providerType := s.providerType
+	if providerType == "" {
+		providerType = StorageProviderTypeS3Compatible
+	}
+	return &ResolvedStorageProvider{
+		ID:            1,
+		Code:          "default-storage",
+		Type:          providerType,
+		DefaultBucket: defaultFileBucket,
+		Client:        s,
+	}, nil
+}
+
+func (s *fileStorageStub) ResolveSnapshot(context.Context, uint32, string, string) (*ResolvedStorageProvider, error) {
+	return s.ResolveDefault(context.Background())
 }
 
 func TestFileUsecaseCreateUploadSessionUsesIdempotencyReplay(t *testing.T) {
@@ -158,19 +184,12 @@ func TestFileUsecaseCreateUploadSessionUsesIdempotencyReplay(t *testing.T) {
 	}
 }
 
-func TestFileUsecaseCreateUploadSessionWorksWithoutStorageClient(t *testing.T) {
+func TestFileUsecaseCreateUploadSessionRejectsMissingStorageProvider(t *testing.T) {
 	t.Parallel()
 
 	uc := NewFileUsecase(newFileRepoStub(), nil, log.NewStdLogger(io.Discard))
-	resp, err := uc.CreateUploadSession(projectQuotaContext(), &pbCore.CreateFileUploadSessionRequest{FileName: stringPtr("avatar.png")})
-	if err != nil {
-		t.Fatalf("CreateUploadSession() error = %v", err)
-	}
-	if resp.GetUploadUrl() != "" {
-		t.Fatalf("upload url = %q, want empty when storage is not configured", resp.GetUploadUrl())
-	}
-	if resp.GetUploadMethod() != "PUT" {
-		t.Fatalf("upload method = %s, want PUT", resp.GetUploadMethod())
+	if _, err := uc.CreateUploadSession(projectQuotaContext(), &pbCore.CreateFileUploadSessionRequest{FileName: stringPtr("avatar.png")}); err == nil {
+		t.Fatal("CreateUploadSession() error = nil, want missing storage provider rejection")
 	}
 }
 

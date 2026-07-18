@@ -11,6 +11,7 @@ type Provider string
 
 const (
 	ProviderS3Compatible Provider = "s3-compatible"
+	ProviderLocal        Provider = "local"
 )
 
 type Config struct {
@@ -24,6 +25,7 @@ type Config struct {
 	ForcePathStyle bool
 	PublicBaseURL  string
 	DefaultBucket  string
+	LocalBasePath  string
 	HTTPClient     *http.Client
 }
 
@@ -56,6 +58,9 @@ type Client interface {
 func NewClient(config Config) (Client, error) {
 	if config.Provider == "" || config.Provider == ProviderS3Compatible {
 		return NewS3CompatibleClient(config)
+	}
+	if config.Provider == ProviderLocal {
+		return NewLocalClient(config)
 	}
 	return nil, ErrUnsupportedProvider
 }

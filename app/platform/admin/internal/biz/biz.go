@@ -23,6 +23,8 @@ var ProviderSet = wire.NewSet(
 	NewSessionUsecase,
 	NewParameterUsecase,
 	NewResourceQuotaUsecase,
+	NewStorageProviderUsecase,
+	NewStorageProviderResolver,
 	NewFileUsecase,
 	NewAsyncTaskHandlers,
 	NewAsyncTaskUsecase,
@@ -30,4 +32,8 @@ var ProviderSet = wire.NewSet(
 
 type Transaction interface {
 	InTx(context.Context, func(ctx context.Context) error) error
+}
+
+func NewStorageProviderResolver(repo StorageProviderRepo) StorageProviderResolver {
+	return repo
 }

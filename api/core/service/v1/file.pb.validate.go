@@ -127,6 +127,14 @@ func (m *FileObject) validate(all bool) error {
 		// no validation rules for UploadExpiresAt
 	}
 
+	if m.ProviderId != nil {
+		// no validation rules for ProviderId
+	}
+
+	if m.ProviderCode != nil {
+		// no validation rules for ProviderCode
+	}
+
 	if len(errors) > 0 {
 		return FileObjectMultiError(errors)
 	}
@@ -476,6 +484,251 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreateFileUploadSessionResponseValidationError{}
+
+// Validate checks the field values on UploadFileContentRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UploadFileContentRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UploadFileContentRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UploadFileContentRequestMultiError, or nil if none found.
+func (m *UploadFileContentRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UploadFileContentRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Content
+
+	if m.ContentType != nil {
+		// no validation rules for ContentType
+	}
+
+	if m.Sha256 != nil {
+		// no validation rules for Sha256
+	}
+
+	if len(errors) > 0 {
+		return UploadFileContentRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UploadFileContentRequestMultiError is an error wrapping multiple validation
+// errors returned by UploadFileContentRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UploadFileContentRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UploadFileContentRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UploadFileContentRequestMultiError) AllErrors() []error { return m }
+
+// UploadFileContentRequestValidationError is the validation error returned by
+// UploadFileContentRequest.Validate if the designated constraints aren't met.
+type UploadFileContentRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UploadFileContentRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UploadFileContentRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UploadFileContentRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UploadFileContentRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UploadFileContentRequestValidationError) ErrorName() string {
+	return "UploadFileContentRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UploadFileContentRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUploadFileContentRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UploadFileContentRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UploadFileContentRequestValidationError{}
+
+// Validate checks the field values on UploadFileContentResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UploadFileContentResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UploadFileContentResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UploadFileContentResponseMultiError, or nil if none found.
+func (m *UploadFileContentResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UploadFileContentResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetFile()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UploadFileContentResponseValidationError{
+					field:  "File",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UploadFileContentResponseValidationError{
+					field:  "File",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetFile()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UploadFileContentResponseValidationError{
+				field:  "File",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UploadFileContentResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UploadFileContentResponseMultiError is an error wrapping multiple validation
+// errors returned by UploadFileContentResponse.ValidateAll() if the
+// designated constraints aren't met.
+type UploadFileContentResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UploadFileContentResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UploadFileContentResponseMultiError) AllErrors() []error { return m }
+
+// UploadFileContentResponseValidationError is the validation error returned by
+// UploadFileContentResponse.Validate if the designated constraints aren't met.
+type UploadFileContentResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UploadFileContentResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UploadFileContentResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UploadFileContentResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UploadFileContentResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UploadFileContentResponseValidationError) ErrorName() string {
+	return "UploadFileContentResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UploadFileContentResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUploadFileContentResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UploadFileContentResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UploadFileContentResponseValidationError{}
 
 // Validate checks the field values on ConfirmFileUploadRequest with the rules
 // defined in the proto definition for this message. If any rules are

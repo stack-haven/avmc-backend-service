@@ -59,6 +59,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	loginLog *service.LoginLogServiceService,
 	session *service.SessionServiceService,
 	parameter *service.ParameterServiceService,
+	storageProvider *service.StorageProviderServiceService,
 	fileCenter *service.FileCenterServiceService,
 	asyncTask *service.AsyncTaskServiceService,
 ) (*http.Server, error) {
@@ -107,6 +108,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterLoginLogServiceHTTPServer(srv, loginLog)
 	v1.RegisterSessionServiceHTTPServer(srv, session)
 	v1.RegisterParameterServiceHTTPServer(srv, parameter)
+	v1.RegisterStorageProviderServiceHTTPServer(srv, storageProvider)
 	v1.RegisterFileCenterServiceHTTPServer(srv, fileCenter)
 	v1.RegisterAsyncTaskServiceHTTPServer(srv, asyncTask)
 	if c.GetHttp().GetEnableSwagger() {

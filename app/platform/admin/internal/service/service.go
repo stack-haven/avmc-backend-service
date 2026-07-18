@@ -19,6 +19,7 @@ var ProviderSet = wire.NewSet(
 	NewLoginLogServiceService,
 	NewSessionServiceService,
 	NewParameterServiceService,
+	NewStorageProviderServiceService,
 	NewFileCenterServiceService,
 	NewAsyncTaskServiceService,
 )

@@ -109,6 +109,16 @@ func Provider(v string) predicate.FileObject {
 	return predicate.FileObject(sql.FieldEQ(FieldProvider, v))
 }
 
+// ProviderID applies equality check predicate on the "provider_id" field. It's identical to ProviderIDEQ.
+func ProviderID(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldProviderID, v))
+}
+
+// ProviderCode applies equality check predicate on the "provider_code" field. It's identical to ProviderCodeEQ.
+func ProviderCode(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldProviderCode, v))
+}
+
 // Bucket applies equality check predicate on the "bucket" field. It's identical to BucketEQ.
 func Bucket(v string) predicate.FileObject {
 	return predicate.FileObject(sql.FieldEQ(FieldBucket, v))
@@ -727,6 +737,121 @@ func ProviderEqualFold(v string) predicate.FileObject {
 // ProviderContainsFold applies the ContainsFold predicate on the "provider" field.
 func ProviderContainsFold(v string) predicate.FileObject {
 	return predicate.FileObject(sql.FieldContainsFold(FieldProvider, v))
+}
+
+// ProviderIDEQ applies the EQ predicate on the "provider_id" field.
+func ProviderIDEQ(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldProviderID, v))
+}
+
+// ProviderIDNEQ applies the NEQ predicate on the "provider_id" field.
+func ProviderIDNEQ(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNEQ(FieldProviderID, v))
+}
+
+// ProviderIDIn applies the In predicate on the "provider_id" field.
+func ProviderIDIn(vs ...uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldIn(FieldProviderID, vs...))
+}
+
+// ProviderIDNotIn applies the NotIn predicate on the "provider_id" field.
+func ProviderIDNotIn(vs ...uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNotIn(FieldProviderID, vs...))
+}
+
+// ProviderIDGT applies the GT predicate on the "provider_id" field.
+func ProviderIDGT(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGT(FieldProviderID, v))
+}
+
+// ProviderIDGTE applies the GTE predicate on the "provider_id" field.
+func ProviderIDGTE(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGTE(FieldProviderID, v))
+}
+
+// ProviderIDLT applies the LT predicate on the "provider_id" field.
+func ProviderIDLT(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLT(FieldProviderID, v))
+}
+
+// ProviderIDLTE applies the LTE predicate on the "provider_id" field.
+func ProviderIDLTE(v uint32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLTE(FieldProviderID, v))
+}
+
+// ProviderIDIsNil applies the IsNil predicate on the "provider_id" field.
+func ProviderIDIsNil() predicate.FileObject {
+	return predicate.FileObject(sql.FieldIsNull(FieldProviderID))
+}
+
+// ProviderIDNotNil applies the NotNil predicate on the "provider_id" field.
+func ProviderIDNotNil() predicate.FileObject {
+	return predicate.FileObject(sql.FieldNotNull(FieldProviderID))
+}
+
+// ProviderCodeEQ applies the EQ predicate on the "provider_code" field.
+func ProviderCodeEQ(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldProviderCode, v))
+}
+
+// ProviderCodeNEQ applies the NEQ predicate on the "provider_code" field.
+func ProviderCodeNEQ(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNEQ(FieldProviderCode, v))
+}
+
+// ProviderCodeIn applies the In predicate on the "provider_code" field.
+func ProviderCodeIn(vs ...string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldIn(FieldProviderCode, vs...))
+}
+
+// ProviderCodeNotIn applies the NotIn predicate on the "provider_code" field.
+func ProviderCodeNotIn(vs ...string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNotIn(FieldProviderCode, vs...))
+}
+
+// ProviderCodeGT applies the GT predicate on the "provider_code" field.
+func ProviderCodeGT(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGT(FieldProviderCode, v))
+}
+
+// ProviderCodeGTE applies the GTE predicate on the "provider_code" field.
+func ProviderCodeGTE(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGTE(FieldProviderCode, v))
+}
+
+// ProviderCodeLT applies the LT predicate on the "provider_code" field.
+func ProviderCodeLT(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLT(FieldProviderCode, v))
+}
+
+// ProviderCodeLTE applies the LTE predicate on the "provider_code" field.
+func ProviderCodeLTE(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLTE(FieldProviderCode, v))
+}
+
+// ProviderCodeContains applies the Contains predicate on the "provider_code" field.
+func ProviderCodeContains(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldContains(FieldProviderCode, v))
+}
+
+// ProviderCodeHasPrefix applies the HasPrefix predicate on the "provider_code" field.
+func ProviderCodeHasPrefix(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldHasPrefix(FieldProviderCode, v))
+}
+
+// ProviderCodeHasSuffix applies the HasSuffix predicate on the "provider_code" field.
+func ProviderCodeHasSuffix(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldHasSuffix(FieldProviderCode, v))
+}
+
+// ProviderCodeEqualFold applies the EqualFold predicate on the "provider_code" field.
+func ProviderCodeEqualFold(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEqualFold(FieldProviderCode, v))
+}
+
+// ProviderCodeContainsFold applies the ContainsFold predicate on the "provider_code" field.
+func ProviderCodeContainsFold(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldContainsFold(FieldProviderCode, v))
 }
 
 // BucketEQ applies the EQ predicate on the "bucket" field.

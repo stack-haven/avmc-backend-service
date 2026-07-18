@@ -36,6 +36,10 @@ const (
 	FieldEtag = "etag"
 	// FieldProvider holds the string denoting the provider field in the database.
 	FieldProvider = "provider"
+	// FieldProviderID holds the string denoting the provider_id field in the database.
+	FieldProviderID = "provider_id"
+	// FieldProviderCode holds the string denoting the provider_code field in the database.
+	FieldProviderCode = "provider_code"
 	// FieldBucket holds the string denoting the bucket field in the database.
 	FieldBucket = "bucket"
 	// FieldObjectKey holds the string denoting the object_key field in the database.
@@ -72,6 +76,8 @@ var Columns = []string{
 	FieldSha256,
 	FieldEtag,
 	FieldProvider,
+	FieldProviderID,
+	FieldProviderCode,
 	FieldBucket,
 	FieldObjectKey,
 	FieldBusinessType,
@@ -136,6 +142,10 @@ var (
 	DefaultProvider string
 	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	ProviderValidator func(string) error
+	// DefaultProviderCode holds the default value on creation for the "provider_code" field.
+	DefaultProviderCode string
+	// ProviderCodeValidator is a validator for the "provider_code" field. It is called by the builders before save.
+	ProviderCodeValidator func(string) error
 	// BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
 	BucketValidator func(string) error
 	// ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
@@ -219,6 +229,16 @@ func ByEtag(opts ...sql.OrderTermOption) OrderOption {
 // ByProvider orders the results by the provider field.
 func ByProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProvider, opts...).ToFunc()
+}
+
+// ByProviderID orders the results by the provider_id field.
+func ByProviderID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderID, opts...).ToFunc()
+}
+
+// ByProviderCode orders the results by the provider_code field.
+func ByProviderCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderCode, opts...).ToFunc()
 }
 
 // ByBucket orders the results by the bucket field.

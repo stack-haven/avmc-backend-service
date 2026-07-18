@@ -6,9 +6,12 @@ import "buf/validate/validate.proto";
 import "gnostic/openapi/v3/annotations.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "core.service.v1";
 
 service FileCenterService {
   rpc CreateFileUploadSession(CreateFileUploadSessionRequest) returns (CreateFileUploadSessionResponse);
+  rpc UploadFileContent(UploadFileContentRequest) returns (UploadFileContentResponse);
   rpc ConfirmFileUpload(ConfirmFileUploadRequest) returns (ConfirmFileUploadResponse);
   rpc GetFileObject(GetFileObjectRequest) returns (FileObject);
   rpc ListFileObjects(ListFileObjectsRequest) returns (ListFileObjectsResponse);
@@ -50,6 +53,8 @@ message FileObject {
   optional string updated_at = 16 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
   optional string deleted_at = 17 [(gnostic.openapi.v3.property) = {description: "删除时间"}];
   optional string upload_expires_at = 18 [(gnostic.openapi.v3.property) = {description: "上传凭证过期时间"}];
+  optional uint32 provider_id = 19 [(gnostic.openapi.v3.property) = {description: "存储渠道ID"}];
+  optional string provider_code = 20 [(gnostic.openapi.v3.property) = {description: "存储渠道编码"}];
 }
 
 message CreateFileUploadSessionRequest {
@@ -74,6 +79,17 @@ message CreateFileUploadSessionResponse {
   string upload_url = 2;
   string upload_method = 3;
   string expires_at = 4;
+}
+
+message UploadFileContentRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  bytes content = 2 [(gnostic.openapi.v3.property) = {description: "文件内容"}];
+  optional string content_type = 3 [(buf.validate.field).string.max_len = 120];
+  optional string sha256 = 4 [(buf.validate.field).string.max_len = 64];
+}
+
+message UploadFileContentResponse {
+  FileObject file = 1;
 }
 
 message ConfirmFileUploadRequest {

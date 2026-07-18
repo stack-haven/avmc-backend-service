@@ -17,6 +17,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
@@ -475,8 +476,14 @@ func init() {
 	fileobject.DefaultProvider = fileobjectDescProvider.Default.(string)
 	// fileobject.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	fileobject.ProviderValidator = fileobjectDescProvider.Validators[0].(func(string) error)
+	// fileobjectDescProviderCode is the schema descriptor for provider_code field.
+	fileobjectDescProviderCode := fileobjectFields[7].Descriptor()
+	// fileobject.DefaultProviderCode holds the default value on creation for the provider_code field.
+	fileobject.DefaultProviderCode = fileobjectDescProviderCode.Default.(string)
+	// fileobject.ProviderCodeValidator is a validator for the "provider_code" field. It is called by the builders before save.
+	fileobject.ProviderCodeValidator = fileobjectDescProviderCode.Validators[0].(func(string) error)
 	// fileobjectDescBucket is the schema descriptor for bucket field.
-	fileobjectDescBucket := fileobjectFields[6].Descriptor()
+	fileobjectDescBucket := fileobjectFields[8].Descriptor()
 	// fileobject.BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
 	fileobject.BucketValidator = func() func(string) error {
 		validators := fileobjectDescBucket.Validators
@@ -494,7 +501,7 @@ func init() {
 		}
 	}()
 	// fileobjectDescObjectKey is the schema descriptor for object_key field.
-	fileobjectDescObjectKey := fileobjectFields[7].Descriptor()
+	fileobjectDescObjectKey := fileobjectFields[9].Descriptor()
 	// fileobject.ObjectKeyValidator is a validator for the "object_key" field. It is called by the builders before save.
 	fileobject.ObjectKeyValidator = func() func(string) error {
 		validators := fileobjectDescObjectKey.Validators
@@ -512,25 +519,25 @@ func init() {
 		}
 	}()
 	// fileobjectDescBusinessType is the schema descriptor for business_type field.
-	fileobjectDescBusinessType := fileobjectFields[8].Descriptor()
+	fileobjectDescBusinessType := fileobjectFields[10].Descriptor()
 	// fileobject.DefaultBusinessType holds the default value on creation for the business_type field.
 	fileobject.DefaultBusinessType = fileobjectDescBusinessType.Default.(string)
 	// fileobject.BusinessTypeValidator is a validator for the "business_type" field. It is called by the builders before save.
 	fileobject.BusinessTypeValidator = fileobjectDescBusinessType.Validators[0].(func(string) error)
 	// fileobjectDescBusinessID is the schema descriptor for business_id field.
-	fileobjectDescBusinessID := fileobjectFields[9].Descriptor()
+	fileobjectDescBusinessID := fileobjectFields[11].Descriptor()
 	// fileobject.DefaultBusinessID holds the default value on creation for the business_id field.
 	fileobject.DefaultBusinessID = fileobjectDescBusinessID.Default.(string)
 	// fileobject.BusinessIDValidator is a validator for the "business_id" field. It is called by the builders before save.
 	fileobject.BusinessIDValidator = fileobjectDescBusinessID.Validators[0].(func(string) error)
 	// fileobjectDescVisibility is the schema descriptor for visibility field.
-	fileobjectDescVisibility := fileobjectFields[10].Descriptor()
+	fileobjectDescVisibility := fileobjectFields[12].Descriptor()
 	// fileobject.DefaultVisibility holds the default value on creation for the visibility field.
 	fileobject.DefaultVisibility = fileobjectDescVisibility.Default.(string)
 	// fileobject.VisibilityValidator is a validator for the "visibility" field. It is called by the builders before save.
 	fileobject.VisibilityValidator = fileobjectDescVisibility.Validators[0].(func(string) error)
 	// fileobjectDescIdempotencyKey is the schema descriptor for idempotency_key field.
-	fileobjectDescIdempotencyKey := fileobjectFields[11].Descriptor()
+	fileobjectDescIdempotencyKey := fileobjectFields[13].Descriptor()
 	// fileobject.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	fileobject.IdempotencyKeyValidator = fileobjectDescIdempotencyKey.Validators[0].(func(string) error)
 	// fileobjectDescID is the schema descriptor for id field.
@@ -1362,6 +1369,181 @@ func init() {
 	roleDescID := roleMixinFields0[0].Descriptor()
 	// role.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	role.IDValidator = roleDescID.Validators[0].(func(uint32) error)
+	storageproviderMixin := schema.StorageProvider{}.Mixin()
+	storageproviderMixinHooks4 := storageproviderMixin[4].Hooks()
+	storageprovider.Hooks[0] = storageproviderMixinHooks4[0]
+	storageproviderMixinInters4 := storageproviderMixin[4].Interceptors()
+	storageprovider.Interceptors[0] = storageproviderMixinInters4[0]
+	storageproviderMixinFields0 := storageproviderMixin[0].Fields()
+	_ = storageproviderMixinFields0
+	storageproviderMixinFields1 := storageproviderMixin[1].Fields()
+	_ = storageproviderMixinFields1
+	storageproviderMixinFields2 := storageproviderMixin[2].Fields()
+	_ = storageproviderMixinFields2
+	storageproviderMixinFields3 := storageproviderMixin[3].Fields()
+	_ = storageproviderMixinFields3
+	storageproviderFields := schema.StorageProvider{}.Fields()
+	_ = storageproviderFields
+	// storageproviderDescStatus is the schema descriptor for status field.
+	storageproviderDescStatus := storageproviderMixinFields1[0].Descriptor()
+	// storageprovider.DefaultStatus holds the default value on creation for the status field.
+	storageprovider.DefaultStatus = storageproviderDescStatus.Default.(int32)
+	// storageprovider.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	storageprovider.StatusValidator = func() func(int32) error {
+		validators := storageproviderDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageproviderDescCreatedAt is the schema descriptor for created_at field.
+	storageproviderDescCreatedAt := storageproviderMixinFields2[0].Descriptor()
+	// storageprovider.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storageprovider.DefaultCreatedAt = storageproviderDescCreatedAt.Default.(func() time.Time)
+	// storageproviderDescUpdatedAt is the schema descriptor for updated_at field.
+	storageproviderDescUpdatedAt := storageproviderMixinFields3[0].Descriptor()
+	// storageprovider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	storageprovider.DefaultUpdatedAt = storageproviderDescUpdatedAt.Default.(func() time.Time)
+	// storageprovider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	storageprovider.UpdateDefaultUpdatedAt = storageproviderDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// storageproviderDescCode is the schema descriptor for code field.
+	storageproviderDescCode := storageproviderFields[0].Descriptor()
+	// storageprovider.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	storageprovider.CodeValidator = func() func(string) error {
+		validators := storageproviderDescCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(code string) error {
+			for _, fn := range fns {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageproviderDescName is the schema descriptor for name field.
+	storageproviderDescName := storageproviderFields[1].Descriptor()
+	// storageprovider.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	storageprovider.NameValidator = func() func(string) error {
+		validators := storageproviderDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageproviderDescType is the schema descriptor for type field.
+	storageproviderDescType := storageproviderFields[2].Descriptor()
+	// storageprovider.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	storageprovider.TypeValidator = func() func(string) error {
+		validators := storageproviderDescType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_type string) error {
+			for _, fn := range fns {
+				if err := fn(_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageproviderDescEndpoint is the schema descriptor for endpoint field.
+	storageproviderDescEndpoint := storageproviderFields[3].Descriptor()
+	// storageprovider.DefaultEndpoint holds the default value on creation for the endpoint field.
+	storageprovider.DefaultEndpoint = storageproviderDescEndpoint.Default.(string)
+	// storageprovider.EndpointValidator is a validator for the "endpoint" field. It is called by the builders before save.
+	storageprovider.EndpointValidator = storageproviderDescEndpoint.Validators[0].(func(string) error)
+	// storageproviderDescRegion is the schema descriptor for region field.
+	storageproviderDescRegion := storageproviderFields[4].Descriptor()
+	// storageprovider.DefaultRegion holds the default value on creation for the region field.
+	storageprovider.DefaultRegion = storageproviderDescRegion.Default.(string)
+	// storageprovider.RegionValidator is a validator for the "region" field. It is called by the builders before save.
+	storageprovider.RegionValidator = storageproviderDescRegion.Validators[0].(func(string) error)
+	// storageproviderDescAccessKey is the schema descriptor for access_key field.
+	storageproviderDescAccessKey := storageproviderFields[5].Descriptor()
+	// storageprovider.DefaultAccessKey holds the default value on creation for the access_key field.
+	storageprovider.DefaultAccessKey = storageproviderDescAccessKey.Default.(string)
+	// storageprovider.AccessKeyValidator is a validator for the "access_key" field. It is called by the builders before save.
+	storageprovider.AccessKeyValidator = storageproviderDescAccessKey.Validators[0].(func(string) error)
+	// storageproviderDescSecretKey is the schema descriptor for secret_key field.
+	storageproviderDescSecretKey := storageproviderFields[6].Descriptor()
+	// storageprovider.DefaultSecretKey holds the default value on creation for the secret_key field.
+	storageprovider.DefaultSecretKey = storageproviderDescSecretKey.Default.(string)
+	// storageprovider.SecretKeyValidator is a validator for the "secret_key" field. It is called by the builders before save.
+	storageprovider.SecretKeyValidator = storageproviderDescSecretKey.Validators[0].(func(string) error)
+	// storageproviderDescSessionToken is the schema descriptor for session_token field.
+	storageproviderDescSessionToken := storageproviderFields[7].Descriptor()
+	// storageprovider.DefaultSessionToken holds the default value on creation for the session_token field.
+	storageprovider.DefaultSessionToken = storageproviderDescSessionToken.Default.(string)
+	// storageprovider.SessionTokenValidator is a validator for the "session_token" field. It is called by the builders before save.
+	storageprovider.SessionTokenValidator = storageproviderDescSessionToken.Validators[0].(func(string) error)
+	// storageproviderDescUseSsl is the schema descriptor for use_ssl field.
+	storageproviderDescUseSsl := storageproviderFields[8].Descriptor()
+	// storageprovider.DefaultUseSsl holds the default value on creation for the use_ssl field.
+	storageprovider.DefaultUseSsl = storageproviderDescUseSsl.Default.(bool)
+	// storageproviderDescForcePathStyle is the schema descriptor for force_path_style field.
+	storageproviderDescForcePathStyle := storageproviderFields[9].Descriptor()
+	// storageprovider.DefaultForcePathStyle holds the default value on creation for the force_path_style field.
+	storageprovider.DefaultForcePathStyle = storageproviderDescForcePathStyle.Default.(bool)
+	// storageproviderDescPublicBaseURL is the schema descriptor for public_base_url field.
+	storageproviderDescPublicBaseURL := storageproviderFields[10].Descriptor()
+	// storageprovider.DefaultPublicBaseURL holds the default value on creation for the public_base_url field.
+	storageprovider.DefaultPublicBaseURL = storageproviderDescPublicBaseURL.Default.(string)
+	// storageprovider.PublicBaseURLValidator is a validator for the "public_base_url" field. It is called by the builders before save.
+	storageprovider.PublicBaseURLValidator = storageproviderDescPublicBaseURL.Validators[0].(func(string) error)
+	// storageproviderDescDefaultBucket is the schema descriptor for default_bucket field.
+	storageproviderDescDefaultBucket := storageproviderFields[11].Descriptor()
+	// storageprovider.DefaultDefaultBucket holds the default value on creation for the default_bucket field.
+	storageprovider.DefaultDefaultBucket = storageproviderDescDefaultBucket.Default.(string)
+	// storageprovider.DefaultBucketValidator is a validator for the "default_bucket" field. It is called by the builders before save.
+	storageprovider.DefaultBucketValidator = storageproviderDescDefaultBucket.Validators[0].(func(string) error)
+	// storageproviderDescLocalBasePath is the schema descriptor for local_base_path field.
+	storageproviderDescLocalBasePath := storageproviderFields[12].Descriptor()
+	// storageprovider.DefaultLocalBasePath holds the default value on creation for the local_base_path field.
+	storageprovider.DefaultLocalBasePath = storageproviderDescLocalBasePath.Default.(string)
+	// storageprovider.LocalBasePathValidator is a validator for the "local_base_path" field. It is called by the builders before save.
+	storageprovider.LocalBasePathValidator = storageproviderDescLocalBasePath.Validators[0].(func(string) error)
+	// storageproviderDescIsDefault is the schema descriptor for is_default field.
+	storageproviderDescIsDefault := storageproviderFields[13].Descriptor()
+	// storageprovider.DefaultIsDefault holds the default value on creation for the is_default field.
+	storageprovider.DefaultIsDefault = storageproviderDescIsDefault.Default.(bool)
+	// storageproviderDescHealthStatus is the schema descriptor for health_status field.
+	storageproviderDescHealthStatus := storageproviderFields[14].Descriptor()
+	// storageprovider.DefaultHealthStatus holds the default value on creation for the health_status field.
+	storageprovider.DefaultHealthStatus = storageproviderDescHealthStatus.Default.(string)
+	// storageprovider.HealthStatusValidator is a validator for the "health_status" field. It is called by the builders before save.
+	storageprovider.HealthStatusValidator = storageproviderDescHealthStatus.Validators[0].(func(string) error)
+	// storageproviderDescRemark is the schema descriptor for remark field.
+	storageproviderDescRemark := storageproviderFields[16].Descriptor()
+	// storageprovider.DefaultRemark holds the default value on creation for the remark field.
+	storageprovider.DefaultRemark = storageproviderDescRemark.Default.(string)
+	// storageprovider.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	storageprovider.RemarkValidator = storageproviderDescRemark.Validators[0].(func(string) error)
+	// storageproviderDescID is the schema descriptor for id field.
+	storageproviderDescID := storageproviderMixinFields0[0].Descriptor()
+	// storageprovider.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	storageprovider.IDValidator = storageproviderDescID.Validators[0].(func(uint32) error)
 	tenantMixin := schema.Tenant{}.Mixin()
 	tenantMixinHooks4 := tenantMixin[4].Hooks()
 	tenant.Hooks[0] = tenantMixinHooks4[0]

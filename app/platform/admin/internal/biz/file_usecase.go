@@ -1,6 +1,7 @@
 package biz
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"path"
@@ -41,13 +42,13 @@ type FileRepo interface {
 }
 
 type FileUsecase struct {
-	repo    FileRepo
-	storage objectstorage.Client
-	log     *log.Helper
+	repo     FileRepo
+	resolver StorageProviderResolver
+	log      *log.Helper
 }
 
-func NewFileUsecase(repo FileRepo, storage objectstorage.Client, logger log.Logger) *FileUsecase {
-	return &FileUsecase{repo: repo, storage: storage, log: log.NewHelper(logger)}
+func NewFileUsecase(repo FileRepo, resolver StorageProviderResolver, logger log.Logger) *FileUsecase {
+	return &FileUsecase{repo: repo, resolver: resolver, log: log.NewHelper(logger)}
 }
 
 func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.CreateFileUploadSessionRequest) (*pbCore.CreateFileUploadSessionResponse, error) {
@@ -66,7 +67,7 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 			return nil, err
 		}
 		if existing != nil {
-			return uc.uploadSessionResponse(ctx, existing, defaultUploadTTL)
+			return uc.uploadSessionResponse(ctx, nil, existing, defaultUploadTTL)
 		}
 	}
 
@@ -75,7 +76,17 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 		return nil, err
 	}
 	expiresAt := time.Now().UTC().Add(defaultUploadTTL)
-	bucket := defaultFileBucket
+	if uc.resolver == nil {
+		return nil, errors.BadRequest("FILE_STORAGE_NOT_CONFIGURED", "未配置可用的文件存储渠道")
+	}
+	provider, err := uc.resolver.ResolveDefault(ctx)
+	if err != nil {
+		return nil, err
+	}
+	bucket := provider.DefaultBucket
+	if bucket == "" {
+		bucket = defaultFileBucket
+	}
 	objectKey := buildObjectKey(tenantID, fileName)
 	file := &pbCore.FileObject{
 		TenantId:     &tenantID,
@@ -83,7 +94,9 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 		ContentType:  fileStringPtr(defaultContentType(req.GetContentType())),
 		Size:         fileInt64Ptr(req.GetSize()),
 		Sha256:       fileStringPtr(strings.TrimSpace(req.GetSha256())),
-		Provider:     fileStringPtr(string(objectstorage.ProviderS3Compatible)),
+		Provider:     fileStringPtr(provider.Type),
+		ProviderId:   fileUint32Ptr(provider.ID),
+		ProviderCode: fileStringPtr(provider.Code),
 		Bucket:       &bucket,
 		ObjectKey:    &objectKey,
 		BusinessType: fileStringPtr(strings.TrimSpace(req.GetBusinessType())),
@@ -96,7 +109,42 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 	if err != nil {
 		return nil, err
 	}
-	return uc.uploadSessionResponse(ctx, created, time.Until(expiresAt))
+	return uc.uploadSessionResponse(ctx, provider, created, time.Until(expiresAt))
+}
+
+func (uc *FileUsecase) UploadContent(ctx context.Context, req *pbCore.UploadFileContentRequest) (*pbCore.FileObject, error) {
+	if req == nil || req.GetId() == 0 {
+		return nil, pb.ErrorBadRequest("文件ID不能为空")
+	}
+	if len(req.GetContent()) == 0 {
+		return nil, pb.ErrorBadRequest("文件内容不能为空")
+	}
+	file, err := uc.repo.Get(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if file.GetStatus() == FileStatusDeleted {
+		return nil, pb.ErrorFileNotFound("文件不存在")
+	}
+	if file.GetProvider() != StorageProviderTypeLocal {
+		return nil, errors.BadRequest("FILE_UPLOAD_METHOD_UNSUPPORTED", "当前存储渠道不支持平台代理上传")
+	}
+	if expires, err := parseDateTime(file.GetUploadExpiresAt()); err == nil && !expires.IsZero() && time.Now().After(expires) {
+		return nil, errors.BadRequest("FILE_UPLOAD_SESSION_EXPIRED", "文件上传会话已过期")
+	}
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
+	}
+	info, err := provider.Client.PutObject(ctx, file.GetBucket(), file.GetObjectKey(), bytes.NewReader(req.GetContent()), objectstorage.PutOptions{ContentType: defaultContentType(req.GetContentType())})
+	if err != nil {
+		return nil, pb.ErrorFileWriteError("写入本地文件失败: %v", err)
+	}
+	sha256 := strings.TrimSpace(req.GetSha256())
+	if sha256 == "" {
+		sha256 = info.ETag
+	}
+	return uc.repo.Confirm(ctx, req.GetId(), info.Size, sha256, info.ETag)
 }
 
 func (uc *FileUsecase) ConfirmUpload(ctx context.Context, req *pbCore.ConfirmFileUploadRequest) (*pbCore.FileObject, error) {
@@ -149,14 +197,15 @@ func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignF
 	if file.GetStatus() != FileStatusConfirmed {
 		return nil, pb.ErrorFileNotFound("文件未确认或已删除")
 	}
-	if uc.storage == nil {
-		return nil, errors.BadRequest("FILE_STORAGE_NOT_CONFIGURED", "对象存储未配置")
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
 	}
 	ttl := defaultDownloadTTL
 	if req.GetExpiresSeconds() > 0 {
 		ttl = time.Duration(req.GetExpiresSeconds()) * time.Second
 	}
-	url, err := uc.storage.PresignGetObject(ctx, file.GetBucket(), file.GetObjectKey(), objectstorage.PresignOptions{Expires: ttl})
+	url, err := provider.Client.PresignGetObject(ctx, file.GetBucket(), file.GetObjectKey(), objectstorage.PresignOptions{Expires: ttl})
 	if err != nil {
 		return nil, pb.ErrorFileReadError("生成文件下载地址失败: %v", err)
 	}
@@ -177,28 +226,44 @@ func (uc *FileUsecase) Delete(ctx context.Context, id uint32) error {
 	if file.GetStatus() == FileStatusDeleted {
 		return nil
 	}
-	if uc.storage != nil && file.GetBucket() != "" && file.GetObjectKey() != "" {
-		if err = uc.storage.DeleteObject(ctx, file.GetBucket(), file.GetObjectKey()); err != nil {
+	if file.GetBucket() != "" && file.GetObjectKey() != "" {
+		provider, resolveErr := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+		if resolveErr != nil {
+			return resolveErr
+		}
+		if err = provider.Client.DeleteObject(ctx, file.GetBucket(), file.GetObjectKey()); err != nil {
 			return pb.ErrorFileDeleteError("删除对象存储文件失败: %v", err)
 		}
 	}
 	return uc.repo.Delete(ctx, id)
 }
 
-func (uc *FileUsecase) uploadSessionResponse(ctx context.Context, file *pbCore.FileObject, ttl time.Duration) (*pbCore.CreateFileUploadSessionResponse, error) {
+func (uc *FileUsecase) uploadSessionResponse(ctx context.Context, provider *ResolvedStorageProvider, file *pbCore.FileObject, ttl time.Duration) (*pbCore.CreateFileUploadSessionResponse, error) {
 	if file == nil {
 		return nil, pb.ErrorFileNotFound("文件不存在")
 	}
 	if ttl <= 0 {
 		ttl = defaultUploadTTL
 	}
-	if uc.storage == nil {
+	if provider == nil {
+		if uc.resolver == nil {
+			return nil, errors.BadRequest("FILE_STORAGE_NOT_CONFIGURED", "未配置可用的文件存储渠道")
+		}
+		var err error
+		provider, err = uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+		if err != nil {
+			return nil, err
+		}
+	}
+	if provider.Type == StorageProviderTypeLocal {
 		return &pbCore.CreateFileUploadSessionResponse{
 			File:         file,
-			UploadMethod: "PUT",
+			UploadUrl:    fmt.Sprintf("/admin/v1/files/%d:content", file.GetId()),
+			UploadMethod: "POST",
+			ExpiresAt:    time.Now().UTC().Add(ttl).Format(time.DateTime),
 		}, nil
 	}
-	uploadURL, err := uc.storage.PresignPutObject(ctx, file.GetBucket(), file.GetObjectKey(), objectstorage.PresignOptions{
+	uploadURL, err := provider.Client.PresignPutObject(ctx, file.GetBucket(), file.GetObjectKey(), objectstorage.PresignOptions{
 		ContentType: file.GetContentType(),
 		Expires:     ttl,
 	})
