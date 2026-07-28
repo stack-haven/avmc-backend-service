@@ -222,7 +222,7 @@ type permissionCacheInvalidationHandler struct {
 	invalidator PermissionCacheInvalidator
 }
 
-func NewAsyncTaskHandlers(repo AsyncTaskRepo, invalidator PermissionCacheInvalidator, notification AsyncTaskHandler) []AsyncTaskHandler {
+func NewAsyncTaskHandlers(repo AsyncTaskRepo, invalidator PermissionCacheInvalidator, notification AsyncTaskHandler, webhookRepo WebhookRepo, logger log.Logger) []AsyncTaskHandler {
 	handlers := []AsyncTaskHandler{
 		&retentionCleanupHandler{repo: repo},
 		&permissionCacheInvalidationHandler{invalidator: invalidator},
@@ -230,6 +230,7 @@ func NewAsyncTaskHandlers(repo AsyncTaskRepo, invalidator PermissionCacheInvalid
 	if notification != nil {
 		handlers = append(handlers, notification)
 	}
+	handlers = append(handlers, NewWebhookAsyncTaskHandler(webhookRepo, logger))
 	return handlers
 }
 

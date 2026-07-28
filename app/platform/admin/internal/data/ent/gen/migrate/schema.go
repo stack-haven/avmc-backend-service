@@ -1238,6 +1238,95 @@ var (
 			},
 		},
 	}
+	// WebhookDeliveryLogsColumns holds the columns for the "webhook_delivery_logs" table.
+	WebhookDeliveryLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "subscription_id", Type: field.TypeUint32, Comment: "关联的订阅ID"},
+		{Name: "event_id", Type: field.TypeString, Size: 128, Comment: "事件唯一ID"},
+		{Name: "event_type", Type: field.TypeInt32, Comment: "事件类型"},
+		{Name: "target_url", Type: field.TypeString, Size: 2048, Comment: "投递目标URL"},
+		{Name: "request_body", Type: field.TypeString, Size: 2147483647, Comment: "请求体"},
+		{Name: "response_code", Type: field.TypeInt32, Comment: "HTTP响应码", Default: 0},
+		{Name: "response_body", Type: field.TypeString, Size: 2147483647, Comment: "响应体", Default: ""},
+		{Name: "delivery_status", Type: field.TypeInt32, Comment: "投递状态: 1=PENDING 2=SUCCESS 3=FAILED", Default: 1},
+		{Name: "attempt_number", Type: field.TypeInt32, Comment: "尝试次数", Default: 1},
+		{Name: "error_message", Type: field.TypeString, Size: 1024, Comment: "错误信息", Default: ""},
+	}
+	// WebhookDeliveryLogsTable holds the schema information for the "webhook_delivery_logs" table.
+	WebhookDeliveryLogsTable = &schema.Table{
+		Name:       "webhook_delivery_logs",
+		Comment:    "Webhook投递记录表",
+		Columns:    WebhookDeliveryLogsColumns,
+		PrimaryKey: []*schema.Column{WebhookDeliveryLogsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "webhookdeliverylog_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookDeliveryLogsColumns[4]},
+			},
+			{
+				Name:    "webhookdeliverylog_tenant_id_subscription_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookDeliveryLogsColumns[4], WebhookDeliveryLogsColumns[5], WebhookDeliveryLogsColumns[1]},
+			},
+			{
+				Name:    "webhookdeliverylog_tenant_id_event_type_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookDeliveryLogsColumns[4], WebhookDeliveryLogsColumns[7], WebhookDeliveryLogsColumns[1]},
+			},
+			{
+				Name:    "webhookdeliverylog_event_id",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookDeliveryLogsColumns[6]},
+			},
+			{
+				Name:    "webhookdeliverylog_delivery_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookDeliveryLogsColumns[12], WebhookDeliveryLogsColumns[1]},
+			},
+		},
+	}
+	// WebhookSubscriptionsColumns holds the columns for the "webhook_subscriptions" table.
+	WebhookSubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Size: 100, Comment: "订阅名称"},
+		{Name: "url", Type: field.TypeString, Size: 2048, Comment: "回调URL"},
+		{Name: "secret", Type: field.TypeString, Size: 256, Comment: "HMAC签名密钥"},
+		{Name: "event_types", Type: field.TypeJSON, Comment: "订阅的事件类型列表"},
+	}
+	// WebhookSubscriptionsTable holds the schema information for the "webhook_subscriptions" table.
+	WebhookSubscriptionsTable = &schema.Table{
+		Name:       "webhook_subscriptions",
+		Comment:    "Webhook订阅表",
+		Columns:    WebhookSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{WebhookSubscriptionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "webhooksubscription_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookSubscriptionsColumns[4]},
+			},
+			{
+				Name:    "webhooksubscription_tenant_id_url",
+				Unique:  true,
+				Columns: []*schema.Column{WebhookSubscriptionsColumns[4], WebhookSubscriptionsColumns[7]},
+			},
+			{
+				Name:    "webhooksubscription_tenant_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{WebhookSubscriptionsColumns[4], WebhookSubscriptionsColumns[3]},
+			},
+		},
+	}
 	// MenuPermissionGroupMenusColumns holds the columns for the "menu_permission_group_menus" table.
 	MenuPermissionGroupMenusColumns = []*schema.Column{
 		{Name: "menu_permission_group_id", Type: field.TypeUint32, SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1414,6 +1503,8 @@ var (
 		TenantResourceQuotaOperationsTable,
 		TenantResourceQuotaUsagesTable,
 		UsersTable,
+		WebhookDeliveryLogsTable,
+		WebhookSubscriptionsTable,
 		MenuPermissionGroupMenusTable,
 		MenuPermissionGroupVersionMenusTable,
 		ProjectMembersTable,
@@ -1530,6 +1621,14 @@ func init() {
 	}
 	UsersTable.ForeignKeys[0].RefTable = DeptsTable
 	UsersTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	WebhookDeliveryLogsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	WebhookSubscriptionsTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

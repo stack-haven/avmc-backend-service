@@ -27,6 +27,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
+	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
+	"backend-service/app/platform/admin/internal/data/ent/gen/webhooksubscription"
 	"backend-service/app/platform/admin/internal/data/ent/schema"
 	"context"
 	"time"
@@ -2413,6 +2415,227 @@ func init() {
 	userDescID := userMixinFields0[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	user.IDValidator = userDescID.Validators[0].(func(uint32) error)
+	webhookdeliverylogMixin := schema.WebhookDeliveryLog{}.Mixin()
+	webhookdeliverylog.Policy = privacy.NewPolicies(webhookdeliverylogMixin[0], schema.WebhookDeliveryLog{})
+	webhookdeliverylog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := webhookdeliverylog.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	webhookdeliverylogMixinFields0 := webhookdeliverylogMixin[0].Fields()
+	_ = webhookdeliverylogMixinFields0
+	webhookdeliverylogFields := schema.WebhookDeliveryLog{}.Fields()
+	_ = webhookdeliverylogFields
+	// webhookdeliverylogDescCreatedAt is the schema descriptor for created_at field.
+	webhookdeliverylogDescCreatedAt := webhookdeliverylogMixinFields0[1].Descriptor()
+	// webhookdeliverylog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	webhookdeliverylog.DefaultCreatedAt = webhookdeliverylogDescCreatedAt.Default.(func() time.Time)
+	// webhookdeliverylogDescUpdatedAt is the schema descriptor for updated_at field.
+	webhookdeliverylogDescUpdatedAt := webhookdeliverylogMixinFields0[2].Descriptor()
+	// webhookdeliverylog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	webhookdeliverylog.DefaultUpdatedAt = webhookdeliverylogDescUpdatedAt.Default.(func() time.Time)
+	// webhookdeliverylog.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	webhookdeliverylog.UpdateDefaultUpdatedAt = webhookdeliverylogDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// webhookdeliverylogDescStatus is the schema descriptor for status field.
+	webhookdeliverylogDescStatus := webhookdeliverylogMixinFields0[3].Descriptor()
+	// webhookdeliverylog.DefaultStatus holds the default value on creation for the status field.
+	webhookdeliverylog.DefaultStatus = webhookdeliverylogDescStatus.Default.(int32)
+	// webhookdeliverylog.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	webhookdeliverylog.StatusValidator = func() func(int32) error {
+		validators := webhookdeliverylogDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhookdeliverylogDescTenantID is the schema descriptor for tenant_id field.
+	webhookdeliverylogDescTenantID := webhookdeliverylogMixinFields0[4].Descriptor()
+	// webhookdeliverylog.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	webhookdeliverylog.TenantIDValidator = webhookdeliverylogDescTenantID.Validators[0].(func(uint32) error)
+	// webhookdeliverylogDescEventID is the schema descriptor for event_id field.
+	webhookdeliverylogDescEventID := webhookdeliverylogFields[1].Descriptor()
+	// webhookdeliverylog.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	webhookdeliverylog.EventIDValidator = func() func(string) error {
+		validators := webhookdeliverylogDescEventID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(event_id string) error {
+			for _, fn := range fns {
+				if err := fn(event_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhookdeliverylogDescTargetURL is the schema descriptor for target_url field.
+	webhookdeliverylogDescTargetURL := webhookdeliverylogFields[3].Descriptor()
+	// webhookdeliverylog.TargetURLValidator is a validator for the "target_url" field. It is called by the builders before save.
+	webhookdeliverylog.TargetURLValidator = func() func(string) error {
+		validators := webhookdeliverylogDescTargetURL.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(target_url string) error {
+			for _, fn := range fns {
+				if err := fn(target_url); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhookdeliverylogDescResponseCode is the schema descriptor for response_code field.
+	webhookdeliverylogDescResponseCode := webhookdeliverylogFields[5].Descriptor()
+	// webhookdeliverylog.DefaultResponseCode holds the default value on creation for the response_code field.
+	webhookdeliverylog.DefaultResponseCode = webhookdeliverylogDescResponseCode.Default.(int32)
+	// webhookdeliverylogDescResponseBody is the schema descriptor for response_body field.
+	webhookdeliverylogDescResponseBody := webhookdeliverylogFields[6].Descriptor()
+	// webhookdeliverylog.DefaultResponseBody holds the default value on creation for the response_body field.
+	webhookdeliverylog.DefaultResponseBody = webhookdeliverylogDescResponseBody.Default.(string)
+	// webhookdeliverylogDescDeliveryStatus is the schema descriptor for delivery_status field.
+	webhookdeliverylogDescDeliveryStatus := webhookdeliverylogFields[7].Descriptor()
+	// webhookdeliverylog.DefaultDeliveryStatus holds the default value on creation for the delivery_status field.
+	webhookdeliverylog.DefaultDeliveryStatus = webhookdeliverylogDescDeliveryStatus.Default.(int32)
+	// webhookdeliverylogDescAttemptNumber is the schema descriptor for attempt_number field.
+	webhookdeliverylogDescAttemptNumber := webhookdeliverylogFields[8].Descriptor()
+	// webhookdeliverylog.DefaultAttemptNumber holds the default value on creation for the attempt_number field.
+	webhookdeliverylog.DefaultAttemptNumber = webhookdeliverylogDescAttemptNumber.Default.(int32)
+	// webhookdeliverylogDescErrorMessage is the schema descriptor for error_message field.
+	webhookdeliverylogDescErrorMessage := webhookdeliverylogFields[9].Descriptor()
+	// webhookdeliverylog.DefaultErrorMessage holds the default value on creation for the error_message field.
+	webhookdeliverylog.DefaultErrorMessage = webhookdeliverylogDescErrorMessage.Default.(string)
+	// webhookdeliverylog.ErrorMessageValidator is a validator for the "error_message" field. It is called by the builders before save.
+	webhookdeliverylog.ErrorMessageValidator = webhookdeliverylogDescErrorMessage.Validators[0].(func(string) error)
+	// webhookdeliverylogDescID is the schema descriptor for id field.
+	webhookdeliverylogDescID := webhookdeliverylogMixinFields0[0].Descriptor()
+	// webhookdeliverylog.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	webhookdeliverylog.IDValidator = webhookdeliverylogDescID.Validators[0].(func(uint32) error)
+	webhooksubscriptionMixin := schema.WebhookSubscription{}.Mixin()
+	webhooksubscription.Policy = privacy.NewPolicies(webhooksubscriptionMixin[0], schema.WebhookSubscription{})
+	webhooksubscription.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := webhooksubscription.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	webhooksubscriptionMixinHooks1 := webhooksubscriptionMixin[1].Hooks()
+
+	webhooksubscription.Hooks[1] = webhooksubscriptionMixinHooks1[0]
+	webhooksubscriptionMixinInters1 := webhooksubscriptionMixin[1].Interceptors()
+	webhooksubscription.Interceptors[0] = webhooksubscriptionMixinInters1[0]
+	webhooksubscriptionMixinFields0 := webhooksubscriptionMixin[0].Fields()
+	_ = webhooksubscriptionMixinFields0
+	webhooksubscriptionFields := schema.WebhookSubscription{}.Fields()
+	_ = webhooksubscriptionFields
+	// webhooksubscriptionDescCreatedAt is the schema descriptor for created_at field.
+	webhooksubscriptionDescCreatedAt := webhooksubscriptionMixinFields0[1].Descriptor()
+	// webhooksubscription.DefaultCreatedAt holds the default value on creation for the created_at field.
+	webhooksubscription.DefaultCreatedAt = webhooksubscriptionDescCreatedAt.Default.(func() time.Time)
+	// webhooksubscriptionDescUpdatedAt is the schema descriptor for updated_at field.
+	webhooksubscriptionDescUpdatedAt := webhooksubscriptionMixinFields0[2].Descriptor()
+	// webhooksubscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	webhooksubscription.DefaultUpdatedAt = webhooksubscriptionDescUpdatedAt.Default.(func() time.Time)
+	// webhooksubscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	webhooksubscription.UpdateDefaultUpdatedAt = webhooksubscriptionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// webhooksubscriptionDescStatus is the schema descriptor for status field.
+	webhooksubscriptionDescStatus := webhooksubscriptionMixinFields0[3].Descriptor()
+	// webhooksubscription.DefaultStatus holds the default value on creation for the status field.
+	webhooksubscription.DefaultStatus = webhooksubscriptionDescStatus.Default.(int32)
+	// webhooksubscription.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	webhooksubscription.StatusValidator = func() func(int32) error {
+		validators := webhooksubscriptionDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhooksubscriptionDescTenantID is the schema descriptor for tenant_id field.
+	webhooksubscriptionDescTenantID := webhooksubscriptionMixinFields0[4].Descriptor()
+	// webhooksubscription.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	webhooksubscription.TenantIDValidator = webhooksubscriptionDescTenantID.Validators[0].(func(uint32) error)
+	// webhooksubscriptionDescName is the schema descriptor for name field.
+	webhooksubscriptionDescName := webhooksubscriptionFields[0].Descriptor()
+	// webhooksubscription.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	webhooksubscription.NameValidator = func() func(string) error {
+		validators := webhooksubscriptionDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhooksubscriptionDescURL is the schema descriptor for url field.
+	webhooksubscriptionDescURL := webhooksubscriptionFields[1].Descriptor()
+	// webhooksubscription.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	webhooksubscription.URLValidator = func() func(string) error {
+		validators := webhooksubscriptionDescURL.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(url string) error {
+			for _, fn := range fns {
+				if err := fn(url); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhooksubscriptionDescSecret is the schema descriptor for secret field.
+	webhooksubscriptionDescSecret := webhooksubscriptionFields[2].Descriptor()
+	// webhooksubscription.SecretValidator is a validator for the "secret" field. It is called by the builders before save.
+	webhooksubscription.SecretValidator = func() func(string) error {
+		validators := webhooksubscriptionDescSecret.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(secret string) error {
+			for _, fn := range fns {
+				if err := fn(secret); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// webhooksubscriptionDescID is the schema descriptor for id field.
+	webhooksubscriptionDescID := webhooksubscriptionMixinFields0[0].Descriptor()
+	// webhooksubscription.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	webhooksubscription.IDValidator = webhooksubscriptionDescID.Validators[0].(func(uint32) error)
 }
 
 const (

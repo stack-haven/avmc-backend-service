@@ -352,7 +352,7 @@ func (r *menuRepo) CountMenus(ctx context.Context, opts ...listing.Option) (int3
 }
 
 func (r *menuRepo) ListAll(ctx context.Context) ([]*pbCore.Menu, error) {
-	res, err := r.Data.DB(ctx).Menu.Query().Order(gen.Desc(menu.FieldSort, menu.FieldID)).All(ctx)
+	res, err := r.Data.DB(ctx).Menu.Query().Order(gen.Asc(menu.FieldSort), gen.Desc(menu.FieldID)).All(ctx)
 	if err != nil {
 		if gen.IsNotFound(err) {
 			return nil, nil

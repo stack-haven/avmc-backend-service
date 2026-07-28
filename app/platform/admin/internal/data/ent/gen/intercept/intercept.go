@@ -32,6 +32,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
+	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
+	"backend-service/app/platform/admin/internal/data/ent/gen/webhooksubscription"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -740,6 +742,60 @@ func (f TraverseUser) Traverse(ctx context.Context, q gen.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *gen.UserQuery", q)
 }
 
+// The WebhookDeliveryLogFunc type is an adapter to allow the use of ordinary function as a Querier.
+type WebhookDeliveryLogFunc func(context.Context, *gen.WebhookDeliveryLogQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f WebhookDeliveryLogFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.WebhookDeliveryLogQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.WebhookDeliveryLogQuery", q)
+}
+
+// The TraverseWebhookDeliveryLog type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseWebhookDeliveryLog func(context.Context, *gen.WebhookDeliveryLogQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseWebhookDeliveryLog) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseWebhookDeliveryLog) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.WebhookDeliveryLogQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.WebhookDeliveryLogQuery", q)
+}
+
+// The WebhookSubscriptionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type WebhookSubscriptionFunc func(context.Context, *gen.WebhookSubscriptionQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f WebhookSubscriptionFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.WebhookSubscriptionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.WebhookSubscriptionQuery", q)
+}
+
+// The TraverseWebhookSubscription type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseWebhookSubscription func(context.Context, *gen.WebhookSubscriptionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseWebhookSubscription) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseWebhookSubscription) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.WebhookSubscriptionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.WebhookSubscriptionQuery", q)
+}
+
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q gen.Query) (Query, error) {
 	switch q := q.(type) {
@@ -791,6 +847,10 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.TenantResourceQuotaUsageQuery, predicate.TenantResourceQuotaUsage, tenantresourcequotausage.OrderOption]{typ: gen.TypeTenantResourceQuotaUsage, tq: q}, nil
 	case *gen.UserQuery:
 		return &query[*gen.UserQuery, predicate.User, user.OrderOption]{typ: gen.TypeUser, tq: q}, nil
+	case *gen.WebhookDeliveryLogQuery:
+		return &query[*gen.WebhookDeliveryLogQuery, predicate.WebhookDeliveryLog, webhookdeliverylog.OrderOption]{typ: gen.TypeWebhookDeliveryLog, tq: q}, nil
+	case *gen.WebhookSubscriptionQuery:
+		return &query[*gen.WebhookSubscriptionQuery, predicate.WebhookSubscription, webhooksubscription.OrderOption]{typ: gen.TypeWebhookSubscription, tq: q}, nil
 	default:
 		return nil, fmt.Errorf("unknown query type %T", q)
 	}

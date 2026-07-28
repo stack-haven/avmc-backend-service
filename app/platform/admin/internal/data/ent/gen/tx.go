@@ -62,6 +62,10 @@ type Tx struct {
 	TenantResourceQuotaUsage *TenantResourceQuotaUsageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// WebhookDeliveryLog is the client for interacting with the WebhookDeliveryLog builders.
+	WebhookDeliveryLog *WebhookDeliveryLogClient
+	// WebhookSubscription is the client for interacting with the WebhookSubscription builders.
+	WebhookSubscription *WebhookSubscriptionClient
 
 	// lazily loaded.
 	client     *Client
@@ -217,6 +221,8 @@ func (tx *Tx) init() {
 	tx.TenantResourceQuotaOperation = NewTenantResourceQuotaOperationClient(tx.config)
 	tx.TenantResourceQuotaUsage = NewTenantResourceQuotaUsageClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.WebhookDeliveryLog = NewWebhookDeliveryLogClient(tx.config)
+	tx.WebhookSubscription = NewWebhookSubscriptionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

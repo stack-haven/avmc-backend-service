@@ -315,3 +315,29 @@ func (_m *UserQuery) Page(ctx context.Context, page, size int) ([]*User, int, er
 	}
 	return rs, cnt, nil
 }
+
+func (_m *WebhookDeliveryLogQuery) Page(ctx context.Context, page, size int) ([]*WebhookDeliveryLog, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *WebhookSubscriptionQuery) Page(ctx context.Context, page, size int) ([]*WebhookSubscription, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}

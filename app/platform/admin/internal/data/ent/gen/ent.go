@@ -27,6 +27,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
+	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
+	"backend-service/app/platform/admin/internal/data/ent/gen/webhooksubscription"
 	"context"
 	"errors"
 	"fmt"
@@ -120,6 +122,8 @@ func checkColumn(t, c string) error {
 			tenantresourcequotaoperation.Table: tenantresourcequotaoperation.ValidColumn,
 			tenantresourcequotausage.Table:     tenantresourcequotausage.ValidColumn,
 			user.Table:                         user.ValidColumn,
+			webhookdeliverylog.Table:           webhookdeliverylog.ValidColumn,
+			webhooksubscription.Table:          webhooksubscription.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

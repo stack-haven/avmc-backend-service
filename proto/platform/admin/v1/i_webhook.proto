@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/webhook.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service WebhookService {
+  // Subscription management
+  rpc ListWebhookSubscriptions(core.service.v1.ListWebhookSubscriptionsRequest) returns (core.service.v1.ListWebhookSubscriptionsResponse) {
+    option (google.api.http) = {get: "/admin/v1/webhook-subscriptions"};
+  }
+
+  rpc GetWebhookSubscription(core.service.v1.GetWebhookSubscriptionRequest) returns (core.service.v1.WebhookSubscription) {
+    option (google.api.http) = {get: "/admin/v1/webhook-subscriptions/{id}"};
+  }
+
+  rpc CreateWebhookSubscription(core.service.v1.CreateWebhookSubscriptionRequest) returns (core.service.v1.WebhookSubscription) {
+    option (google.api.http) = {post: "/admin/v1/webhook-subscriptions" body: "subscription"};
+  }
+
+  rpc UpdateWebhookSubscription(core.service.v1.UpdateWebhookSubscriptionRequest) returns (core.service.v1.WebhookSubscription) {
+    option (google.api.http) = {put: "/admin/v1/webhook-subscriptions/{id}" body: "subscription"};
+  }
+
+  rpc DeleteWebhookSubscription(core.service.v1.DeleteWebhookSubscriptionRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/admin/v1/webhook-subscriptions/{id}"};
+  }
+
+  // Delivery log management
+  rpc ListWebhookDeliveryLogs(core.service.v1.ListWebhookDeliveryLogsRequest) returns (core.service.v1.ListWebhookDeliveryLogsResponse) {
+    option (google.api.http) = {get: "/admin/v1/webhook-delivery-logs"};
+  }
+
+  rpc GetWebhookDeliveryLog(core.service.v1.GetWebhookDeliveryLogRequest) returns (core.service.v1.WebhookDeliveryLog) {
+    option (google.api.http) = {get: "/admin/v1/webhook-delivery-logs/{id}"};
+  }
+
+  rpc RetryWebhookDelivery(core.service.v1.RetryWebhookDeliveryRequest) returns (core.service.v1.RetryWebhookDeliveryResponse) {
+    option (google.api.http) = {post: "/admin/v1/webhook-delivery-logs/{id}:retry" body: "*"};
+  }
+}

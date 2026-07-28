@@ -77,3 +77,9 @@ type TenantResourceQuotaUsage func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// WebhookDeliveryLog is the predicate function for webhookdeliverylog builders.
+type WebhookDeliveryLog func(*sql.Selector)
+
+// WebhookSubscription is the predicate function for webhooksubscription builders.
+type WebhookSubscription func(*sql.Selector)

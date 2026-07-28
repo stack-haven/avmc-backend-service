@@ -687,6 +687,54 @@ func (f UserMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) 
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.UserMutation", m)
 }
 
+// The WebhookDeliveryLogQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type WebhookDeliveryLogQueryRuleFunc func(context.Context, *gen.WebhookDeliveryLogQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f WebhookDeliveryLogQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.WebhookDeliveryLogQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.WebhookDeliveryLogQuery", q)
+}
+
+// The WebhookDeliveryLogMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type WebhookDeliveryLogMutationRuleFunc func(context.Context, *gen.WebhookDeliveryLogMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f WebhookDeliveryLogMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.WebhookDeliveryLogMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.WebhookDeliveryLogMutation", m)
+}
+
+// The WebhookSubscriptionQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type WebhookSubscriptionQueryRuleFunc func(context.Context, *gen.WebhookSubscriptionQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f WebhookSubscriptionQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.WebhookSubscriptionQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.WebhookSubscriptionQuery", q)
+}
+
+// The WebhookSubscriptionMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type WebhookSubscriptionMutationRuleFunc func(context.Context, *gen.WebhookSubscriptionMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f WebhookSubscriptionMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.WebhookSubscriptionMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.WebhookSubscriptionMutation", m)
+}
+
 type (
 	// Filter is the interface that wraps the Where function
 	// for filtering nodes in queries and mutations.
@@ -770,6 +818,10 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.UserQuery:
 		return q.Filter(), nil
+	case *gen.WebhookDeliveryLogQuery:
+		return q.Filter(), nil
+	case *gen.WebhookSubscriptionQuery:
+		return q.Filter(), nil
 	default:
 		return nil, Denyf("gen/privacy: unexpected query type %T for query filter", q)
 	}
@@ -824,6 +876,10 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.TenantResourceQuotaUsageMutation:
 		return m.Filter(), nil
 	case *gen.UserMutation:
+		return m.Filter(), nil
+	case *gen.WebhookDeliveryLogMutation:
+		return m.Filter(), nil
+	case *gen.WebhookSubscriptionMutation:
 		return m.Filter(), nil
 	default:
 		return nil, Denyf("gen/privacy: unexpected mutation type %T for mutation filter", m)

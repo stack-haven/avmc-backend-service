@@ -245,7 +245,7 @@ func TestAsyncTaskUsecaseEnsureMaintenanceTasks(t *testing.T) {
 
 	now := time.Date(2026, 7, 8, 9, 30, 0, 0, time.UTC)
 	repo := &taskRepoStub{}
-	uc := NewAsyncTaskUsecase(repo, NewAsyncTaskHandlers(repo, &permissionCacheInvalidatorStub{}, nil), log.NewStdLogger(io.Discard))
+	uc := NewAsyncTaskUsecase(repo, NewAsyncTaskHandlers(repo, &permissionCacheInvalidatorStub{}, nil, nil, log.DefaultLogger), log.NewStdLogger(io.Discard))
 
 	if err := uc.EnsureMaintenanceTasks(context.Background(), now); err != nil {
 		t.Fatalf("EnsureMaintenanceTasks() error = %v", err)

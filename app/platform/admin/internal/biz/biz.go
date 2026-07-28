@@ -30,6 +30,7 @@ var ProviderSet = wire.NewSet(
 	NewNotificationAsyncTaskHandler,
 	NewAsyncTaskHandlers,
 	NewAsyncTaskUsecase,
+	NewWebhookUsecase,
 )
 
 type Transaction interface {
