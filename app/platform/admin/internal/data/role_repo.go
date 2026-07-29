@@ -145,9 +145,6 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 	if err := r.validateMenuIDs(ctx, g.GetMenuIds()); err != nil {
 		return nil, err
 	}
-	if err := r.mpr.ValidateTenantMenuIDs(ctx, g.GetMenuIds()); err != nil {
-		return nil, err
-	}
 	if err := r.validateDeptIDs(ctx, g.GetDeptIds()); err != nil {
 		return nil, err
 	}
@@ -204,9 +201,6 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 	}
 	if g.MenuIds != nil {
 		if err := r.validateMenuIDs(ctx, g.MenuIds); err != nil {
-			return nil, err
-		}
-		if err := r.mpr.ValidateTenantMenuIDs(ctx, g.MenuIds); err != nil {
 			return nil, err
 		}
 	}

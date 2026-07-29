@@ -21,14 +21,6 @@ type MenuPermissionGroupRepo interface {
 	ListVersions(context.Context, uint32) ([]*pbCore.MenuPermissionGroupVersion, error)
 	PublishVersion(context.Context, uint32, *pbCore.MenuPermissionGroupVersion, string, uint32, string) (*pbCore.MenuPermissionGroupVersion, error)
 	RollbackVersion(context.Context, uint32, uint32, string, uint32) (*pbCore.MenuPermissionGroupVersion, error)
-	GetTenantGroups(context.Context, uint32) ([]*pbCore.MenuPermissionGroup, error)
-	GetTenantGroupBindings(context.Context, uint32) ([]*pbCore.TenantPermissionGroupBinding, error)
-	UpdateTenantGroups(context.Context, uint32, []uint32, uint32) error
-	GetTenantEffectiveMenuIDs(context.Context, uint32) ([]uint32, error)
-	GetTenantEffectiveMenus(context.Context, uint32, uint32) ([]*pbCore.Menu, error)
-	GetTenantCapabilities(context.Context, uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error)
-	ValidateTenantMenuIDs(context.Context, []uint32) error
-	UpdateTenantGroupVersion(context.Context, uint32, uint32, uint32, bool, uint32) (*pbCore.TenantPermissionGroupBinding, error)
 }
 
 func (uc *MenuPermissionGroupUsecase) ListVersions(ctx context.Context, groupID uint32) ([]*pbCore.MenuPermissionGroupVersion, error) {
@@ -43,11 +35,7 @@ func (uc *MenuPermissionGroupUsecase) RollbackVersion(ctx context.Context, group
 	return uc.repo.RollbackVersion(ctx, groupID, sourceVersionID, summary, operatorID)
 }
 
-func (uc *MenuPermissionGroupUsecase) UpdateTenantGroupVersion(ctx context.Context, tenantID, groupID, versionID uint32, autoUpgrade bool, operatorID uint32) (*pbCore.TenantPermissionGroupBinding, error) {
-	return uc.repo.UpdateTenantGroupVersion(ctx, tenantID, groupID, versionID, autoUpgrade, operatorID)
-}
-
-// MenuPermissionGroupUsecase contains tenant menu permission group business rules.
+// MenuPermissionGroupUsecase contains menu permission group business rules.
 type MenuPermissionGroupUsecase struct {
 	repo MenuPermissionGroupRepo
 	log  *log.Helper
@@ -96,26 +84,3 @@ func (uc *MenuPermissionGroupUsecase) UpdateStatus(ctx context.Context, id uint3
 	return uc.repo.UpdateStatus(ctx, id, status)
 }
 
-func (uc *MenuPermissionGroupUsecase) GetTenantGroups(ctx context.Context, tenantID uint32) ([]*pbCore.MenuPermissionGroup, error) {
-	return uc.repo.GetTenantGroups(ctx, tenantID)
-}
-
-func (uc *MenuPermissionGroupUsecase) GetTenantGroupBindings(ctx context.Context, tenantID uint32) ([]*pbCore.TenantPermissionGroupBinding, error) {
-	return uc.repo.GetTenantGroupBindings(ctx, tenantID)
-}
-
-func (uc *MenuPermissionGroupUsecase) UpdateTenantGroups(ctx context.Context, tenantID uint32, groupIDs []uint32, operatorID uint32) error {
-	return uc.repo.UpdateTenantGroups(ctx, tenantID, groupIDs, operatorID)
-}
-
-func (uc *MenuPermissionGroupUsecase) GetTenantEffectiveMenus(ctx context.Context, tenantID uint32, parentID uint32) ([]*pbCore.Menu, error) {
-	return uc.repo.GetTenantEffectiveMenus(ctx, tenantID, parentID)
-}
-
-func (uc *MenuPermissionGroupUsecase) GetTenantCapabilities(ctx context.Context, tenantID uint32) (*pbCore.GetCurrentTenantCapabilitiesResponse, error) {
-	return uc.repo.GetTenantCapabilities(ctx, tenantID)
-}
-
-func (uc *MenuPermissionGroupUsecase) ValidateTenantMenuIDs(ctx context.Context, menuIDs []uint32) error {
-	return uc.repo.ValidateTenantMenuIDs(ctx, menuIDs)
-}

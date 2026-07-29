@@ -6,7 +6,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
 	"errors"
 	"fmt"
@@ -236,21 +235,6 @@ func (_c *MenuPermissionGroupCreate) AddVersions(v ...*MenuPermissionGroupVersio
 		ids[i] = v[i].ID
 	}
 	return _c.AddVersionIDs(ids...)
-}
-
-// AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
-func (_c *MenuPermissionGroupCreate) AddTenantBindingIDs(ids ...uint32) *MenuPermissionGroupCreate {
-	_c.mutation.AddTenantBindingIDs(ids...)
-	return _c
-}
-
-// AddTenantBindings adds the "tenant_bindings" edges to the TenantPermissionGroup entity.
-func (_c *MenuPermissionGroupCreate) AddTenantBindings(v ...*TenantPermissionGroup) *MenuPermissionGroupCreate {
-	ids := make([]uint32, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddTenantBindingIDs(ids...)
 }
 
 // Mutation returns the MenuPermissionGroupMutation object of the builder.
@@ -521,22 +505,6 @@ func (_c *MenuPermissionGroupCreate) createSpec() (*MenuPermissionGroup, *sqlgra
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TenantBindingsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroup.TenantBindingsTable,
-			Columns: []string{menupermissiongroup.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

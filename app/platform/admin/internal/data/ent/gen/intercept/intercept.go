@@ -26,11 +26,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhooksubscription"
@@ -580,33 +576,6 @@ func (f TraverseStorageProvider) Traverse(ctx context.Context, q gen.Query) erro
 	return fmt.Errorf("unexpected query type %T. expect *gen.StorageProviderQuery", q)
 }
 
-// The TenantFunc type is an adapter to allow the use of ordinary function as a Querier.
-type TenantFunc func(context.Context, *gen.TenantQuery) (gen.Value, error)
-
-// Query calls f(ctx, q).
-func (f TenantFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.TenantQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantQuery", q)
-}
-
-// The TraverseTenant type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseTenant func(context.Context, *gen.TenantQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseTenant) Intercept(next gen.Querier) gen.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseTenant) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.TenantQuery", q)
-}
-
 // The TenantParameterOverrideFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TenantParameterOverrideFunc func(context.Context, *gen.TenantParameterOverrideQuery) (gen.Value, error)
 
@@ -632,87 +601,6 @@ func (f TraverseTenantParameterOverride) Traverse(ctx context.Context, q gen.Que
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *gen.TenantParameterOverrideQuery", q)
-}
-
-// The TenantPermissionGroupFunc type is an adapter to allow the use of ordinary function as a Querier.
-type TenantPermissionGroupFunc func(context.Context, *gen.TenantPermissionGroupQuery) (gen.Value, error)
-
-// Query calls f(ctx, q).
-func (f TenantPermissionGroupFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.TenantPermissionGroupQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantPermissionGroupQuery", q)
-}
-
-// The TraverseTenantPermissionGroup type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseTenantPermissionGroup func(context.Context, *gen.TenantPermissionGroupQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseTenantPermissionGroup) Intercept(next gen.Querier) gen.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseTenantPermissionGroup) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantPermissionGroupQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.TenantPermissionGroupQuery", q)
-}
-
-// The TenantResourceQuotaOperationFunc type is an adapter to allow the use of ordinary function as a Querier.
-type TenantResourceQuotaOperationFunc func(context.Context, *gen.TenantResourceQuotaOperationQuery) (gen.Value, error)
-
-// Query calls f(ctx, q).
-func (f TenantResourceQuotaOperationFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.TenantResourceQuotaOperationQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantResourceQuotaOperationQuery", q)
-}
-
-// The TraverseTenantResourceQuotaOperation type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseTenantResourceQuotaOperation func(context.Context, *gen.TenantResourceQuotaOperationQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseTenantResourceQuotaOperation) Intercept(next gen.Querier) gen.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseTenantResourceQuotaOperation) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantResourceQuotaOperationQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.TenantResourceQuotaOperationQuery", q)
-}
-
-// The TenantResourceQuotaUsageFunc type is an adapter to allow the use of ordinary function as a Querier.
-type TenantResourceQuotaUsageFunc func(context.Context, *gen.TenantResourceQuotaUsageQuery) (gen.Value, error)
-
-// Query calls f(ctx, q).
-func (f TenantResourceQuotaUsageFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.TenantResourceQuotaUsageQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantResourceQuotaUsageQuery", q)
-}
-
-// The TraverseTenantResourceQuotaUsage type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseTenantResourceQuotaUsage func(context.Context, *gen.TenantResourceQuotaUsageQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseTenantResourceQuotaUsage) Intercept(next gen.Querier) gen.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseTenantResourceQuotaUsage) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantResourceQuotaUsageQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.TenantResourceQuotaUsageQuery", q)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -835,16 +723,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.RoleQuery, predicate.Role, role.OrderOption]{typ: gen.TypeRole, tq: q}, nil
 	case *gen.StorageProviderQuery:
 		return &query[*gen.StorageProviderQuery, predicate.StorageProvider, storageprovider.OrderOption]{typ: gen.TypeStorageProvider, tq: q}, nil
-	case *gen.TenantQuery:
-		return &query[*gen.TenantQuery, predicate.Tenant, tenant.OrderOption]{typ: gen.TypeTenant, tq: q}, nil
 	case *gen.TenantParameterOverrideQuery:
 		return &query[*gen.TenantParameterOverrideQuery, predicate.TenantParameterOverride, tenantparameteroverride.OrderOption]{typ: gen.TypeTenantParameterOverride, tq: q}, nil
-	case *gen.TenantPermissionGroupQuery:
-		return &query[*gen.TenantPermissionGroupQuery, predicate.TenantPermissionGroup, tenantpermissiongroup.OrderOption]{typ: gen.TypeTenantPermissionGroup, tq: q}, nil
-	case *gen.TenantResourceQuotaOperationQuery:
-		return &query[*gen.TenantResourceQuotaOperationQuery, predicate.TenantResourceQuotaOperation, tenantresourcequotaoperation.OrderOption]{typ: gen.TypeTenantResourceQuotaOperation, tq: q}, nil
-	case *gen.TenantResourceQuotaUsageQuery:
-		return &query[*gen.TenantResourceQuotaUsageQuery, predicate.TenantResourceQuotaUsage, tenantresourcequotausage.OrderOption]{typ: gen.TypeTenantResourceQuotaUsage, tq: q}, nil
 	case *gen.UserQuery:
 		return &query[*gen.UserQuery, predicate.User, user.OrderOption]{typ: gen.TypeUser, tq: q}, nil
 	case *gen.WebhookDeliveryLogQuery:

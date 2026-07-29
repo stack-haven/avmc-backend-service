@@ -56,11 +56,9 @@ type MenuPermissionGroupVersionEdges struct {
 	Group *MenuPermissionGroup `json:"group,omitempty"`
 	// Menus holds the value of the menus edge.
 	Menus []*Menu `json:"menus,omitempty"`
-	// TenantBindings holds the value of the tenant_bindings edge.
-	TenantBindings []*TenantPermissionGroup `json:"tenant_bindings,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // GroupOrErr returns the Group value or an error if the edge
@@ -81,15 +79,6 @@ func (e MenuPermissionGroupVersionEdges) MenusOrErr() ([]*Menu, error) {
 		return e.Menus, nil
 	}
 	return nil, &NotLoadedError{edge: "menus"}
-}
-
-// TenantBindingsOrErr returns the TenantBindings value or an error if the edge
-// was not loaded in eager-loading.
-func (e MenuPermissionGroupVersionEdges) TenantBindingsOrErr() ([]*TenantPermissionGroup, error) {
-	if e.loadedTypes[2] {
-		return e.TenantBindings, nil
-	}
-	return nil, &NotLoadedError{edge: "tenant_bindings"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -230,11 +219,6 @@ func (_m *MenuPermissionGroupVersion) QueryGroup() *MenuPermissionGroupQuery {
 // QueryMenus queries the "menus" edge of the MenuPermissionGroupVersion entity.
 func (_m *MenuPermissionGroupVersion) QueryMenus() *MenuQuery {
 	return NewMenuPermissionGroupVersionClient(_m.config).QueryMenus(_m)
-}
-
-// QueryTenantBindings queries the "tenant_bindings" edge of the MenuPermissionGroupVersion entity.
-func (_m *MenuPermissionGroupVersion) QueryTenantBindings() *TenantPermissionGroupQuery {
-	return NewMenuPermissionGroupVersionClient(_m.config).QueryTenantBindings(_m)
 }
 
 // Update returns a builder for updating this MenuPermissionGroupVersion.

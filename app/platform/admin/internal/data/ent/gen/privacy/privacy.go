@@ -543,30 +543,6 @@ func (f StorageProviderMutationRuleFunc) EvalMutation(ctx context.Context, m gen
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.StorageProviderMutation", m)
 }
 
-// The TenantQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type TenantQueryRuleFunc func(context.Context, *gen.TenantQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f TenantQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantQuery", q)
-}
-
-// The TenantMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type TenantMutationRuleFunc func(context.Context, *gen.TenantMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f TenantMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
-	if m, ok := m.(*gen.TenantMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantMutation", m)
-}
-
 // The TenantParameterOverrideQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type TenantParameterOverrideQueryRuleFunc func(context.Context, *gen.TenantParameterOverrideQuery) error
@@ -589,78 +565,6 @@ func (f TenantParameterOverrideMutationRuleFunc) EvalMutation(ctx context.Contex
 		return f(ctx, m)
 	}
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantParameterOverrideMutation", m)
-}
-
-// The TenantPermissionGroupQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type TenantPermissionGroupQueryRuleFunc func(context.Context, *gen.TenantPermissionGroupQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f TenantPermissionGroupQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantPermissionGroupQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantPermissionGroupQuery", q)
-}
-
-// The TenantPermissionGroupMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type TenantPermissionGroupMutationRuleFunc func(context.Context, *gen.TenantPermissionGroupMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f TenantPermissionGroupMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
-	if m, ok := m.(*gen.TenantPermissionGroupMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantPermissionGroupMutation", m)
-}
-
-// The TenantResourceQuotaOperationQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type TenantResourceQuotaOperationQueryRuleFunc func(context.Context, *gen.TenantResourceQuotaOperationQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f TenantResourceQuotaOperationQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantResourceQuotaOperationQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantResourceQuotaOperationQuery", q)
-}
-
-// The TenantResourceQuotaOperationMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type TenantResourceQuotaOperationMutationRuleFunc func(context.Context, *gen.TenantResourceQuotaOperationMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f TenantResourceQuotaOperationMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
-	if m, ok := m.(*gen.TenantResourceQuotaOperationMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantResourceQuotaOperationMutation", m)
-}
-
-// The TenantResourceQuotaUsageQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type TenantResourceQuotaUsageQueryRuleFunc func(context.Context, *gen.TenantResourceQuotaUsageQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f TenantResourceQuotaUsageQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.TenantResourceQuotaUsageQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("gen/privacy: unexpected query type %T, expect *gen.TenantResourceQuotaUsageQuery", q)
-}
-
-// The TenantResourceQuotaUsageMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type TenantResourceQuotaUsageMutationRuleFunc func(context.Context, *gen.TenantResourceQuotaUsageMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f TenantResourceQuotaUsageMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
-	if m, ok := m.(*gen.TenantResourceQuotaUsageMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.TenantResourceQuotaUsageMutation", m)
 }
 
 // The UserQueryRuleFunc type is an adapter to allow the use of ordinary
@@ -806,15 +710,7 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.StorageProviderQuery:
 		return q.Filter(), nil
-	case *gen.TenantQuery:
-		return q.Filter(), nil
 	case *gen.TenantParameterOverrideQuery:
-		return q.Filter(), nil
-	case *gen.TenantPermissionGroupQuery:
-		return q.Filter(), nil
-	case *gen.TenantResourceQuotaOperationQuery:
-		return q.Filter(), nil
-	case *gen.TenantResourceQuotaUsageQuery:
 		return q.Filter(), nil
 	case *gen.UserQuery:
 		return q.Filter(), nil
@@ -865,15 +761,7 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 		return m.Filter(), nil
 	case *gen.StorageProviderMutation:
 		return m.Filter(), nil
-	case *gen.TenantMutation:
-		return m.Filter(), nil
 	case *gen.TenantParameterOverrideMutation:
-		return m.Filter(), nil
-	case *gen.TenantPermissionGroupMutation:
-		return m.Filter(), nil
-	case *gen.TenantResourceQuotaOperationMutation:
-		return m.Filter(), nil
-	case *gen.TenantResourceQuotaUsageMutation:
 		return m.Filter(), nil
 	case *gen.UserMutation:
 		return m.Filter(), nil

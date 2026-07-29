@@ -42,8 +42,6 @@ const (
 	EdgeGroup = "group"
 	// EdgeMenus holds the string denoting the menus edge name in mutations.
 	EdgeMenus = "menus"
-	// EdgeTenantBindings holds the string denoting the tenant_bindings edge name in mutations.
-	EdgeTenantBindings = "tenant_bindings"
 	// Table holds the table name of the menupermissiongroupversion in the database.
 	Table = "menu_permission_group_versions"
 	// GroupTable is the table that holds the group relation/edge.
@@ -58,13 +56,6 @@ const (
 	// MenusInverseTable is the table name for the Menu entity.
 	// It exists in this package in order to avoid circular dependency with the "menu" package.
 	MenusInverseTable = "menus"
-	// TenantBindingsTable is the table that holds the tenant_bindings relation/edge.
-	TenantBindingsTable = "tenant_permission_groups"
-	// TenantBindingsInverseTable is the table name for the TenantPermissionGroup entity.
-	// It exists in this package in order to avoid circular dependency with the "tenantpermissiongroup" package.
-	TenantBindingsInverseTable = "tenant_permission_groups"
-	// TenantBindingsColumn is the table column denoting the tenant_bindings relation/edge.
-	TenantBindingsColumn = "version_id"
 )
 
 // Columns holds all SQL columns for menupermissiongroupversion fields.
@@ -190,20 +181,6 @@ func ByMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByTenantBindingsCount orders the results by tenant_bindings count.
-func ByTenantBindingsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTenantBindingsStep(), opts...)
-	}
-}
-
-// ByTenantBindings orders the results by tenant_bindings terms.
-func ByTenantBindings(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTenantBindingsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newGroupStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -216,12 +193,5 @@ func newMenusStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MenusInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, MenusTable, MenusPrimaryKey...),
-	)
-}
-func newTenantBindingsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TenantBindingsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, TenantBindingsTable, TenantBindingsColumn),
 	)
 }

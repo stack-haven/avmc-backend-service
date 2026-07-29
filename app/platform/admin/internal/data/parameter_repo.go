@@ -17,7 +17,6 @@ import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/mixins"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
@@ -198,9 +197,6 @@ func (r *parameterRepo) ListResolved(ctx context.Context, tenantID uint32, keyFi
 		}
 	}
 	targetCtx := entviewer.NewTenantContext(ctx, tenantID)
-	if err := r.ensureTenantExists(ctx, tenantID); err != nil {
-		return nil, err
-	}
 	definitions, err := r.Data.DB(ctx).ParameterDefinition.Query().
 		Where(
 			parameterdefinition.DeletedAtIsNil(),
@@ -252,9 +248,6 @@ func (r *parameterRepo) ListResolved(ctx context.Context, tenantID uint32, keyFi
 }
 
 func (r *parameterRepo) SetOverride(ctx context.Context, tenantID uint32, key, value string, operatorID uint32) (*pb.ResolvedParameter, error) {
-	if err := r.ensureTenantExists(ctx, tenantID); err != nil {
-		return nil, err
-	}
 	definition, err := r.definitionByKey(ctx, key)
 	if err != nil {
 		return nil, err
@@ -334,19 +327,6 @@ func (r *parameterRepo) definitionByKey(ctx context.Context, key string) (*gen.P
 	return row, err
 }
 
-func (r *parameterRepo) ensureTenantExists(ctx context.Context, tenantID uint32) error {
-	systemCtx := entviewer.NewSystemContext(ctx)
-	exists, err := r.Data.DB(systemCtx).Tenant.Query().
-		Where(tenant.IDEQ(tenantID), tenant.DeletedAtIsNil()).
-		Exist(systemCtx)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return errors.NotFound("TENANT_NOT_FOUND", "租户不存在")
-	}
-	return nil
-}
 
 func parameterStatus(item *pb.ParameterDefinition) int32 {
 	if item.Status == nil || item.GetStatus() == enum.Status_STATUS_UNSPECIFIED {

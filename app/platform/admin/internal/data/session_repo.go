@@ -129,7 +129,3 @@ func (r *sessionRepo) RevokeUser(ctx context.Context, userID uint32) error {
 	}
 	return r.token.RevokeUserSessions(ctx, tenantID, userID)
 }
-
-func (r *sessionRepo) RevokeTenant(ctx context.Context, tenantID uint32) error {
-	return r.token.RevokeTenantSessions(ctx, tenantID)
-}

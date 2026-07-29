@@ -45,12 +45,10 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	checker pkgHealth.Checker,
 	operationAudit *biz.OperationLogUsecase,
 	auth *service.AuthServiceService,
-	tenant *service.TenantServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,
 	menu *service.MenuServiceService,
 	menuPermissionGroup *service.MenuPermissionGroupServiceService,
-	tenantPermission *service.TenantPermissionServiceService,
 	role *service.RoleServiceService,
 	post *service.PostServiceService,
 	project *service.ProjectServiceService,
@@ -95,12 +93,10 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	srv := http.NewServer(opts...)
 	pkgHealth.RegisterHTTP(srv, checker, 2*time.Second)
 	v1.RegisterAuthServiceHTTPServer(srv, auth)
-	v1.RegisterTenantServiceHTTPServer(srv, tenant)
 	v1.RegisterUserServiceHTTPServer(srv, user)
 	v1.RegisterDeptServiceHTTPServer(srv, dept)
 	v1.RegisterMenuServiceHTTPServer(srv, menu)
 	v1.RegisterMenuPermissionGroupServiceHTTPServer(srv, menuPermissionGroup)
-	v1.RegisterTenantPermissionServiceHTTPServer(srv, tenantPermission)
 	v1.RegisterRoleServiceHTTPServer(srv, role)
 	v1.RegisterPostServiceHTTPServer(srv, post)
 	v1.RegisterProjectServiceHTTPServer(srv, project)

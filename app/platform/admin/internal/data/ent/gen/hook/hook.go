@@ -224,18 +224,6 @@ func (f StorageProviderFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.StorageProviderMutation", m)
 }
 
-// The TenantFunc type is an adapter to allow the use of ordinary
-// function as Tenant mutator.
-type TenantFunc func(context.Context, *gen.TenantMutation) (gen.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TenantFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.TenantMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantMutation", m)
-}
-
 // The TenantParameterOverrideFunc type is an adapter to allow the use of ordinary
 // function as TenantParameterOverride mutator.
 type TenantParameterOverrideFunc func(context.Context, *gen.TenantParameterOverrideMutation) (gen.Value, error)
@@ -246,42 +234,6 @@ func (f TenantParameterOverrideFunc) Mutate(ctx context.Context, m gen.Mutation)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantParameterOverrideMutation", m)
-}
-
-// The TenantPermissionGroupFunc type is an adapter to allow the use of ordinary
-// function as TenantPermissionGroup mutator.
-type TenantPermissionGroupFunc func(context.Context, *gen.TenantPermissionGroupMutation) (gen.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TenantPermissionGroupFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.TenantPermissionGroupMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantPermissionGroupMutation", m)
-}
-
-// The TenantResourceQuotaOperationFunc type is an adapter to allow the use of ordinary
-// function as TenantResourceQuotaOperation mutator.
-type TenantResourceQuotaOperationFunc func(context.Context, *gen.TenantResourceQuotaOperationMutation) (gen.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TenantResourceQuotaOperationFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.TenantResourceQuotaOperationMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantResourceQuotaOperationMutation", m)
-}
-
-// The TenantResourceQuotaUsageFunc type is an adapter to allow the use of ordinary
-// function as TenantResourceQuotaUsage mutator.
-type TenantResourceQuotaUsageFunc func(context.Context, *gen.TenantResourceQuotaUsageMutation) (gen.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TenantResourceQuotaUsageFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.TenantResourceQuotaUsageMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantResourceQuotaUsageMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

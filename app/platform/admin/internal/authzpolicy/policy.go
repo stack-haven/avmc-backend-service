@@ -45,13 +45,6 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationMenuServiceListMenusTree, "GET"),
 		op(v1.OperationMenuServiceUpdateMenu, "PUT"),
 		op(v1.OperationMenuServiceUpdateMenuByStatus, "PUT"),
-		op(v1.OperationTenantServiceCreateTenant, "POST"),
-		op(v1.OperationTenantServiceDeleteTenant, "DELETE"),
-		op(v1.OperationTenantServiceGetTenant, "GET"),
-		op(v1.OperationTenantServiceListTenants, "GET"),
-		op(v1.OperationTenantServiceUpdateTenant, "PUT"),
-		op(v1.OperationTenantServiceUpdateTenantStatus, "PUT"),
-		op(v1.OperationTenantServiceUpdateTenantLifecycle, "PUT"),
 		op(v1.OperationMenuPermissionGroupServiceCreateMenuPermissionGroup, "POST"),
 		op(v1.OperationMenuPermissionGroupServiceDeleteMenuPermissionGroup, "DELETE"),
 		op(v1.OperationMenuPermissionGroupServiceGetMenuPermissionGroup, "GET"),
@@ -61,16 +54,6 @@ func ProtectedOperations() []Operation {
 		op(v1.OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions, "GET"),
 		op(v1.OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion, "POST"),
 		op(v1.OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion, "POST"),
-		op(v1.OperationTenantPermissionServiceCheckCurrentTenantResourceQuota, "GET"),
-		op(v1.OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota, "POST"),
-		op(v1.OperationTenantPermissionServiceListCurrentTenantResourceQuotas, "GET"),
-		op(v1.OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota, "POST"),
-		op(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities, "GET"),
-		op(v1.OperationTenantPermissionServiceGetCurrentTenantEffectiveMenus, "GET"),
-		op(v1.OperationTenantPermissionServiceGetTenantEffectiveMenus, "GET"),
-		op(v1.OperationTenantPermissionServiceGetTenantPermissionGroups, "GET"),
-		op(v1.OperationTenantPermissionServiceUpdateTenantPermissionGroups, "PUT"),
-		op(v1.OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion, "PUT"),
 		op(v1.OperationRoleServiceCreateRole, "POST"),
 		op(v1.OperationRoleServiceDeleteRole, "DELETE"),
 		op(v1.OperationRoleServiceExistRoleByName, "POST"),
@@ -173,13 +156,8 @@ func IsAuthenticatedSelfServiceOperation(object authz.Object, action authz.Actio
 		return action == "POST" || action == authz.Action(lastSegment(string(object)))
 	case authz.Object(v1.OperationSessionServiceListMySessions):
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
-	case authz.Object(v1.OperationTenantPermissionServiceGetCurrentTenantCapabilities):
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
-	case authz.Object(v1.OperationTenantPermissionServiceCheckCurrentTenantResourceQuota),
-		authz.Object(v1.OperationTenantPermissionServiceListCurrentTenantResourceQuotas):
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
-	case authz.Object(v1.OperationTenantPermissionServiceConsumeCurrentTenantResourceQuota),
-		authz.Object(v1.OperationTenantPermissionServiceReleaseCurrentTenantResourceQuota):
 		return action == "POST" || action == authz.Action(lastSegment(string(object)))
 	case authz.Object(v1.OperationNotificationServiceListMyNotifications),
 		authz.Object(v1.OperationNotificationServiceCountMyUnreadNotifications):
@@ -205,13 +183,6 @@ func IsPlatformControlOperation(operation string) bool {
 		v1.OperationMenuServiceListMenusTree,
 		v1.OperationMenuServiceUpdateMenu,
 		v1.OperationMenuServiceUpdateMenuByStatus,
-		v1.OperationTenantServiceCreateTenant,
-		v1.OperationTenantServiceDeleteTenant,
-		v1.OperationTenantServiceGetTenant,
-		v1.OperationTenantServiceListTenants,
-		v1.OperationTenantServiceUpdateTenant,
-		v1.OperationTenantServiceUpdateTenantStatus,
-		v1.OperationTenantServiceUpdateTenantLifecycle,
 		v1.OperationMenuPermissionGroupServiceCreateMenuPermissionGroup,
 		v1.OperationMenuPermissionGroupServiceDeleteMenuPermissionGroup,
 		v1.OperationMenuPermissionGroupServiceGetMenuPermissionGroup,
@@ -221,10 +192,6 @@ func IsPlatformControlOperation(operation string) bool {
 		v1.OperationMenuPermissionGroupServiceListMenuPermissionGroupVersions,
 		v1.OperationMenuPermissionGroupServicePublishMenuPermissionGroupVersion,
 		v1.OperationMenuPermissionGroupServiceRollbackMenuPermissionGroupVersion,
-		v1.OperationTenantPermissionServiceGetTenantEffectiveMenus,
-		v1.OperationTenantPermissionServiceGetTenantPermissionGroups,
-		v1.OperationTenantPermissionServiceUpdateTenantPermissionGroups,
-		v1.OperationTenantPermissionServiceUpdateTenantPermissionGroupVersion,
 		v1.OperationParameterServiceListParameterDefinitions,
 		v1.OperationParameterServiceGetParameterDefinition,
 		v1.OperationParameterServiceCreateParameterDefinition,

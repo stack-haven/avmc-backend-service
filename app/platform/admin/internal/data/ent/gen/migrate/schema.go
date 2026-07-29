@@ -898,68 +898,6 @@ var (
 			},
 		},
 	}
-	// TenantsColumns holds the columns for the "tenants" table.
-	TenantsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
-		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
-		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
-		{Name: "name", Type: field.TypeString, Size: 50, Comment: "租户名称", Default: ""},
-		{Name: "code", Type: field.TypeString, Size: 64, Comment: "租户编码", Default: ""},
-		{Name: "sort", Type: field.TypeInt32, Comment: "排序", Default: 10, SchemaType: map[string]string{"mysql": "int", "postgres": "int"}},
-		{Name: "remark", Type: field.TypeString, Size: 255, Comment: "备注", Default: ""},
-		{Name: "is_platform", Type: field.TypeBool, Comment: "是否为平台控制面租户，仅允许部署初始化流程维护", Default: false},
-		{Name: "lifecycle_status", Type: field.TypeInt32, Comment: "生命周期状态：1待开通 2正常 3暂停 4到期 5注销", Default: 2},
-		{Name: "activated_at", Type: field.TypeTime, Nullable: true, Comment: "激活时间"},
-		{Name: "expires_at", Type: field.TypeTime, Nullable: true, Comment: "到期时间"},
-		{Name: "suspended_at", Type: field.TypeTime, Nullable: true, Comment: "暂停时间"},
-		{Name: "cancelled_at", Type: field.TypeTime, Nullable: true, Comment: "注销时间"},
-	}
-	// TenantsTable holds the schema information for the "tenants" table.
-	TenantsTable = &schema.Table{
-		Name:       "tenants",
-		Comment:    "租户表",
-		Columns:    TenantsColumns,
-		PrimaryKey: []*schema.Column{TenantsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "tenant_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[0]},
-			},
-			{
-				Name:    "tenant_name",
-				Unique:  true,
-				Columns: []*schema.Column{TenantsColumns[5]},
-			},
-			{
-				Name:    "tenant_code",
-				Unique:  true,
-				Columns: []*schema.Column{TenantsColumns[6]},
-			},
-			{
-				Name:    "tenant_status",
-				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[1]},
-			},
-			{
-				Name:    "tenant_is_platform",
-				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[9]},
-			},
-			{
-				Name:    "tenant_lifecycle_status",
-				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[10]},
-			},
-			{
-				Name:    "tenant_expires_at",
-				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[12]},
-			},
-		},
-	}
 	// TenantParameterOverridesColumns holds the columns for the "tenant_parameter_overrides" table.
 	TenantParameterOverridesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1004,169 +942,6 @@ var (
 				Name:    "tenantparameteroverride_definition_id",
 				Unique:  false,
 				Columns: []*schema.Column{TenantParameterOverridesColumns[6]},
-			},
-		},
-	}
-	// TenantPermissionGroupsColumns holds the columns for the "tenant_permission_groups" table.
-	TenantPermissionGroupsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
-		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
-		{Name: "enabled", Type: field.TypeBool, Comment: "是否启用", Default: true},
-		{Name: "bound_by", Type: field.TypeUint32, Nullable: true, Comment: "绑定操作人ID"},
-		{Name: "auto_upgrade", Type: field.TypeBool, Comment: "是否自动跟随最新版本", Default: true},
-		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-		{Name: "group_id", Type: field.TypeUint32, Comment: "权限组ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-		{Name: "version_id", Type: field.TypeUint32, Nullable: true, Comment: "当前使用的套餐版本ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-	}
-	// TenantPermissionGroupsTable holds the schema information for the "tenant_permission_groups" table.
-	TenantPermissionGroupsTable = &schema.Table{
-		Name:       "tenant_permission_groups",
-		Comment:    "租户菜单权限组绑定表",
-		Columns:    TenantPermissionGroupsColumns,
-		PrimaryKey: []*schema.Column{TenantPermissionGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tenant_permission_groups_tenants_tenant",
-				Columns:    []*schema.Column{TenantPermissionGroupsColumns[6]},
-				RefColumns: []*schema.Column{TenantsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "tenant_permission_groups_menu_permission_groups_group",
-				Columns:    []*schema.Column{TenantPermissionGroupsColumns[7]},
-				RefColumns: []*schema.Column{MenuPermissionGroupsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "tenant_permission_groups_menu_permission_group_versions_version",
-				Columns:    []*schema.Column{TenantPermissionGroupsColumns[8]},
-				RefColumns: []*schema.Column{MenuPermissionGroupVersionsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "tenantpermissiongroup_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[0]},
-			},
-			{
-				Name:    "tenantpermissiongroup_tenant_id_group_id",
-				Unique:  true,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[6], TenantPermissionGroupsColumns[7]},
-			},
-			{
-				Name:    "tenantpermissiongroup_tenant_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[6]},
-			},
-			{
-				Name:    "tenantpermissiongroup_group_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[7]},
-			},
-			{
-				Name:    "tenantpermissiongroup_version_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantPermissionGroupsColumns[8]},
-			},
-		},
-	}
-	// TenantResourceQuotaOperationsColumns holds the columns for the "tenant_resource_quota_operations" table.
-	TenantResourceQuotaOperationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
-		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
-		{Name: "resource_key", Type: field.TypeString, Size: 100, Comment: "资源额度键"},
-		{Name: "operation_type", Type: field.TypeString, Size: 20, Comment: "操作类型: consume/release"},
-		{Name: "idempotency_key", Type: field.TypeString, Size: 120, Comment: "业务幂等键"},
-		{Name: "amount", Type: field.TypeInt64, Comment: "操作额度数量", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
-		{Name: "used_after", Type: field.TypeInt64, Comment: "操作完成后的已使用额度", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
-		{Name: "updated_by", Type: field.TypeUint32, Nullable: true, Comment: "操作人ID"},
-		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-	}
-	// TenantResourceQuotaOperationsTable holds the schema information for the "tenant_resource_quota_operations" table.
-	TenantResourceQuotaOperationsTable = &schema.Table{
-		Name:       "tenant_resource_quota_operations",
-		Comment:    "租户资源额度操作幂等流水表",
-		Columns:    TenantResourceQuotaOperationsColumns,
-		PrimaryKey: []*schema.Column{TenantResourceQuotaOperationsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tenant_resource_quota_operations_tenants_tenant",
-				Columns:    []*schema.Column{TenantResourceQuotaOperationsColumns[9]},
-				RefColumns: []*schema.Column{TenantsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "tenantresourcequotaoperation_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantResourceQuotaOperationsColumns[0]},
-			},
-			{
-				Name:    "tenantresourcequotaoperation_tenant_id_operation_type_idempotency_key",
-				Unique:  true,
-				Columns: []*schema.Column{TenantResourceQuotaOperationsColumns[9], TenantResourceQuotaOperationsColumns[4], TenantResourceQuotaOperationsColumns[5]},
-			},
-			{
-				Name:    "tenantresourcequotaoperation_tenant_id_resource_key",
-				Unique:  false,
-				Columns: []*schema.Column{TenantResourceQuotaOperationsColumns[9], TenantResourceQuotaOperationsColumns[3]},
-			},
-			{
-				Name:    "tenantresourcequotaoperation_idempotency_key",
-				Unique:  false,
-				Columns: []*schema.Column{TenantResourceQuotaOperationsColumns[5]},
-			},
-		},
-	}
-	// TenantResourceQuotaUsagesColumns holds the columns for the "tenant_resource_quota_usages" table.
-	TenantResourceQuotaUsagesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
-		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
-		{Name: "resource_key", Type: field.TypeString, Size: 100, Comment: "资源额度键"},
-		{Name: "used", Type: field.TypeInt64, Comment: "已使用额度", Default: 0, SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
-		{Name: "updated_by", Type: field.TypeUint32, Nullable: true, Comment: "最后更新人ID"},
-		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
-	}
-	// TenantResourceQuotaUsagesTable holds the schema information for the "tenant_resource_quota_usages" table.
-	TenantResourceQuotaUsagesTable = &schema.Table{
-		Name:       "tenant_resource_quota_usages",
-		Comment:    "租户资源额度使用量表",
-		Columns:    TenantResourceQuotaUsagesColumns,
-		PrimaryKey: []*schema.Column{TenantResourceQuotaUsagesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tenant_resource_quota_usages_tenants_tenant",
-				Columns:    []*schema.Column{TenantResourceQuotaUsagesColumns[6]},
-				RefColumns: []*schema.Column{TenantsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "tenantresourcequotausage_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[0]},
-			},
-			{
-				Name:    "tenantresourcequotausage_tenant_id_resource_key",
-				Unique:  true,
-				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[6], TenantResourceQuotaUsagesColumns[3]},
-			},
-			{
-				Name:    "tenantresourcequotausage_tenant_id",
-				Unique:  false,
-				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[6]},
-			},
-			{
-				Name:    "tenantresourcequotausage_resource_key",
-				Unique:  false,
-				Columns: []*schema.Column{TenantResourceQuotaUsagesColumns[3]},
 			},
 		},
 	}
@@ -1497,11 +1272,7 @@ var (
 		ProjectsTable,
 		RolesTable,
 		StorageProvidersTable,
-		TenantsTable,
 		TenantParameterOverridesTable,
-		TenantPermissionGroupsTable,
-		TenantResourceQuotaOperationsTable,
-		TenantResourceQuotaUsagesTable,
 		UsersTable,
 		WebhookDeliveryLogsTable,
 		WebhookSubscriptionsTable,
@@ -1593,29 +1364,8 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
-	TenantsTable.Annotation = &entsql.Annotation{
-		Charset:   "utf8mb4",
-		Collation: "utf8mb4_bin",
-	}
 	TenantParameterOverridesTable.ForeignKeys[0].RefTable = ParameterDefinitionsTable
 	TenantParameterOverridesTable.Annotation = &entsql.Annotation{
-		Charset:   "utf8mb4",
-		Collation: "utf8mb4_bin",
-	}
-	TenantPermissionGroupsTable.ForeignKeys[0].RefTable = TenantsTable
-	TenantPermissionGroupsTable.ForeignKeys[1].RefTable = MenuPermissionGroupsTable
-	TenantPermissionGroupsTable.ForeignKeys[2].RefTable = MenuPermissionGroupVersionsTable
-	TenantPermissionGroupsTable.Annotation = &entsql.Annotation{
-		Charset:   "utf8mb4",
-		Collation: "utf8mb4_bin",
-	}
-	TenantResourceQuotaOperationsTable.ForeignKeys[0].RefTable = TenantsTable
-	TenantResourceQuotaOperationsTable.Annotation = &entsql.Annotation{
-		Charset:   "utf8mb4",
-		Collation: "utf8mb4_bin",
-	}
-	TenantResourceQuotaUsagesTable.ForeignKeys[0].RefTable = TenantsTable
-	TenantResourceQuotaUsagesTable.Annotation = &entsql.Annotation{
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

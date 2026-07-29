@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"reflect"
 	"testing"
 
 	pbEnum "backend-service/api/common/enum"
@@ -185,58 +184,3 @@ func TestMenuPermissionGroupUsecaseChecksExistenceBeforeMutations(t *testing.T) 
 	}
 }
 
-func TestMenuPermissionGroupUsecaseTenantBindingsAndEffectiveMenus(t *testing.T) {
-	t.Parallel()
-
-	repo := &menuPermissionGroupRepoStub{}
-	uc := NewMenuPermissionGroupUsecase(repo, log.NewStdLogger(io.Discard))
-
-	if err := uc.UpdateTenantGroups(context.Background(), 10, []uint32{1, 2}, 7); err != nil {
-		t.Fatalf("UpdateTenantGroups() error = %v", err)
-	}
-	if repo.tenantID != 10 || repo.operatorID != 7 || !reflect.DeepEqual(repo.groupIDs, []uint32{1, 2}) {
-		t.Fatalf("tenant group update = tenant:%d groups:%v operator:%d", repo.tenantID, repo.groupIDs, repo.operatorID)
-	}
-
-	menus, err := uc.GetTenantEffectiveMenus(context.Background(), 10, 99)
-	if err != nil {
-		t.Fatalf("GetTenantEffectiveMenus() error = %v", err)
-	}
-	if repo.tenantID != 10 || repo.parentID != 99 || len(menus) != 1 || menus[0].GetId() != 100 {
-		t.Fatalf("effective menus = tenant:%d parent:%d menus:%v", repo.tenantID, repo.parentID, menus)
-	}
-
-	capabilities, err := uc.GetTenantCapabilities(context.Background(), 10)
-	if err != nil {
-		t.Fatalf("GetTenantCapabilities() error = %v", err)
-	}
-	if repo.tenantID != 10 || capabilities.GetTenantId() != 10 {
-		t.Fatalf("tenant capabilities = tenant:%d response:%v", repo.tenantID, capabilities)
-	}
-
-	if err := uc.ValidateTenantMenuIDs(context.Background(), []uint32{100, 101}); err != nil {
-		t.Fatalf("ValidateTenantMenuIDs() error = %v", err)
-	}
-	if !reflect.DeepEqual(repo.menuIDs, []uint32{100, 101}) {
-		t.Fatalf("validated menu ids = %v, want [100 101]", repo.menuIDs)
-	}
-}
-
-func TestMenuPermissionGroupUsecaseUpdateTenantGroupVersion(t *testing.T) {
-	t.Parallel()
-
-	repo := &menuPermissionGroupRepoStub{}
-	uc := NewMenuPermissionGroupUsecase(repo, log.NewStdLogger(io.Discard))
-
-	binding, err := uc.UpdateTenantGroupVersion(context.Background(), 10, 2, 8, true, 7)
-	if err != nil {
-		t.Fatalf("UpdateTenantGroupVersion() error = %v", err)
-	}
-	if binding.GetTenantId() != 10 || binding.GetGroupId() != 2 {
-		t.Fatalf("binding = %v", binding)
-	}
-	want := tenantGroupVersionArgs{tenantID: 10, groupID: 2, versionID: 8, autoUpgrade: true, operatorID: 7}
-	if repo.versionArgs != want {
-		t.Fatalf("version args = %#v, want %#v", repo.versionArgs, want)
-	}
-}

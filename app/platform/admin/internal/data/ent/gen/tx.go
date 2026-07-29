@@ -50,16 +50,8 @@ type Tx struct {
 	Role *RoleClient
 	// StorageProvider is the client for interacting with the StorageProvider builders.
 	StorageProvider *StorageProviderClient
-	// Tenant is the client for interacting with the Tenant builders.
-	Tenant *TenantClient
 	// TenantParameterOverride is the client for interacting with the TenantParameterOverride builders.
 	TenantParameterOverride *TenantParameterOverrideClient
-	// TenantPermissionGroup is the client for interacting with the TenantPermissionGroup builders.
-	TenantPermissionGroup *TenantPermissionGroupClient
-	// TenantResourceQuotaOperation is the client for interacting with the TenantResourceQuotaOperation builders.
-	TenantResourceQuotaOperation *TenantResourceQuotaOperationClient
-	// TenantResourceQuotaUsage is the client for interacting with the TenantResourceQuotaUsage builders.
-	TenantResourceQuotaUsage *TenantResourceQuotaUsageClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// WebhookDeliveryLog is the client for interacting with the WebhookDeliveryLog builders.
@@ -215,11 +207,7 @@ func (tx *Tx) init() {
 	tx.Project = NewProjectClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.StorageProvider = NewStorageProviderClient(tx.config)
-	tx.Tenant = NewTenantClient(tx.config)
 	tx.TenantParameterOverride = NewTenantParameterOverrideClient(tx.config)
-	tx.TenantPermissionGroup = NewTenantPermissionGroupClient(tx.config)
-	tx.TenantResourceQuotaOperation = NewTenantResourceQuotaOperationClient(tx.config)
-	tx.TenantResourceQuotaUsage = NewTenantResourceQuotaUsageClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.WebhookDeliveryLog = NewWebhookDeliveryLogClient(tx.config)
 	tx.WebhookSubscription = NewWebhookSubscriptionClient(tx.config)

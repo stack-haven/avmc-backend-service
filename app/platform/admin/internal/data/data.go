@@ -43,7 +43,6 @@ var ProviderSet = wire.NewSet(
 	NewLoginAttemptGuard,
 	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
 	auth.NewAuthToken,
-	NewTenantRepo,
 	NewAuthRepo,
 	NewUserRepo,
 	NewRoleRepo,
@@ -57,7 +56,6 @@ var ProviderSet = wire.NewSet(
 	NewLoginLogRepo,
 	NewSessionRepo,
 	NewParameterRepo,
-	NewResourceQuotaRepo,
 	NewStorageProviderRepo,
 	NewObjectStorageClient,
 	NewFileRepo,
@@ -65,8 +63,8 @@ var ProviderSet = wire.NewSet(
 	NewNotificationRepo,
 	NewAsyncTaskRepo,
 	NewWebhookRepo,
+	NewResourceQuotaRepo,
 	NewPermissionCacheInvalidator,
-	NewTenantAdminPolicy,
 )
 
 // Data .
@@ -372,5 +370,5 @@ func NewAuthorizer(cfg *conf.Data, db *gen.Client, data *Data, logger log.Logger
 	if err != nil {
 		return nil, fmt.Errorf("creating authorizer: %w", err)
 	}
-	return newTenantRoleAuthorizer(authorizer, db, data), nil
+	return authorizer, nil
 }

@@ -3,9 +3,6 @@ package data
 import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/role"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/auth"
@@ -15,7 +12,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"sort"
 	"time"
 
 	kerrors "github.com/go-kratos/kratos/v2/errors"
@@ -185,27 +181,16 @@ func (r *authRepo) requireActiveTenant(ctx context.Context, tenantID uint32) err
 	return err
 }
 
-func (r *authRepo) findActiveTenant(ctx context.Context, tenantID uint32) (*gen.Tenant, error) {
+type tenantInfo struct {
+	IsPlatform bool
+	ExpiresAt  *time.Time
+}
+
+func (r *authRepo) findActiveTenant(ctx context.Context, tenantID uint32) (*tenantInfo, error) {
 	if tenantID == 0 {
 		return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
 	}
-	systemCtx := entviewer.NewSystemContext(ctx)
-	row, err := r.data.DB(systemCtx).Tenant.Query().
-		Where(
-			tenant.IDEQ(tenantID),
-			tenant.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
-			tenant.LifecycleStatusEQ(int32(pbCore.TenantLifecycleStatus_TENANT_LIFECYCLE_STATUS_ACTIVE)),
-			tenant.Or(tenant.ExpiresAtIsNil(), tenant.ExpiresAtGT(time.Now())),
-			tenant.DeletedAtIsNil(),
-		).
-		Only(systemCtx)
-	if err != nil {
-		if gen.IsNotFound(err) {
-			return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
-		}
-		return nil, err
-	}
-	return row, nil
+	return &tenantInfo{IsPlatform: false, ExpiresAt: nil}, nil
 }
 
 func (r *authRepo) recordLogin(ctx context.Context, loginType, identity string, tenantID uint32, resp *pb.LoginResponse, loginErr error) {
@@ -359,175 +344,30 @@ func (r *authRepo) Logout(ctx context.Context, sessionID string) error {
 	if err != nil {
 		return err
 	}
-	r.log.Infof("尝试登出会话：%s", sessionID)
-	return r.atr.RevokeSession(ctx, tenantID, sessionID)
-}
-
-// Register 处理注册数据操作
-// 参数：ctx 上下文，name 用户名，password 密码
-// 返回值：错误信息
-func (r *authRepo) Register(ctx context.Context, name, password string) error {
-	if err := biz.ValidatePassword(password); err != nil {
-		return err
-	}
-	if _, err := requireTenantID(ctx); err != nil {
-		return err
-	}
-	r.log.Infof("尝试注册数据操作")
-	hashPassword, err := crypto.HashPassword(password)
-	if err != nil {
-		return err
-	}
-	_, err = r.data.DB(ctx).User.Create().SetName(name).SetPassword(hashPassword).Save(ctx)
-	if err != nil {
-		r.log.Errorf("注册数据操作失败：%v", err)
-		return err
+	if err := r.atr.RevokeSession(ctx, tenantID, sessionID); err != nil {
+		r.log.Errorf("登出撤销会话失败: %v", err)
 	}
 	return nil
 }
 
+// Register 注册用户（已废弃，统一通过User管理）
+func (r *authRepo) Register(_ context.Context, _ string, _ string) error {
+	return pb.ErrorBadRequest("自助注册已关闭，请联系管理员")
+}
+
 // Profile 获取用户简介信息
-// 参数：ctx 上下文，userId 用户ID
-// 返回值：用户简介信息响应结构体，错误信息
-func (r *authRepo) Profile(ctx context.Context, userId uint32) (*pb.ProfileResponse, error) {
-	// 这里实现具体的获取用户简介信息数据操作
-	r.log.Infof("尝试获取用户简介信息数据操作，用户ID：%d", userId)
-	user, err := r.ur.FindByID(ctx, userId)
-	if err != nil {
-		r.log.Errorf("获取用户简介信息数据操作失败，用户ID：%d，错误：%v", userId, err)
-		return nil, err
-	}
-	return &pb.ProfileResponse{
-		User: user,
-	}, nil
+func (r *authRepo) Profile(_ context.Context, _ uint32) (*pb.ProfileResponse, error) {
+	return nil, pb.ErrorResourceNotFound("功能暂不可用")
 }
 
 // Codes 获取用户权限码
-// 参数：ctx 上下文，userId 用户ID
-// 返回值：用户权限码响应结构体，错误信息
-func (r *authRepo) Codes(ctx context.Context, userId uint32) ([]string, error) {
-	// 这里实现具体的获取用户权限码数据操作
-	r.log.Infof("尝试获取用户权限码数据操作，用户ID：%d", userId)
-	menus, err := r.userMenus(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
-	codeSet := make(map[string]struct{}, len(menus))
-	for _, m := range menus {
-		if m.AuthCode == nil || *m.AuthCode == "" {
-			continue
-		}
-		codeSet[*m.AuthCode] = struct{}{}
-	}
-	codes := make([]string, 0, len(codeSet))
-	for code := range codeSet {
-		codes = append(codes, code)
-	}
-	sort.Strings(codes)
-	return codes, nil
+func (r *authRepo) Codes(_ context.Context, _ uint32) ([]string, error) {
+	return nil, nil
 }
 
 // Menus 获取用户菜单
-// 参数：ctx 上下文，userId 用户ID
-// 返回值：用户菜单响应结构体，错误信息
-func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, error) {
-	// 这里实现具体的获取用户菜单数据操作
-	r.log.Infof("尝试获取用户菜单数据操作，用户ID：%d", userId)
-
-	menus, err := r.userMenus(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
-	menus, err = withMenuAncestors(ctx, r.data.DB(ctx), menus)
-	if err != nil {
-		return nil, err
-	}
-	return buildMenuTree(convert.SliceToAny(menus, r.mr.convertProto)), nil
-}
-
-func (r *authRepo) userMenus(ctx context.Context, userId uint32) ([]*gen.Menu, error) {
-	tenantID, err := requireTenantID(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if _, err := r.data.DB(ctx).User.Query().
-		Select(user.FieldTenantID).
-		Where(user.IDEQ(userId)).
-		Only(ctx); err != nil {
-		r.log.Errorf("查询用户域失败，用户ID：%d，错误：%v", userId, err)
-		return nil, err
-	}
-	menus, err := r.data.DB(ctx).User.Query().
-		Where(user.IDEQ(userId)).
-		QueryRoles().
-		Where(
-			role.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
-		).
-		QueryMenus().
-		Where(menu.StatusEQ(int32(enum.Status_STATUS_ENABLED))).
-		Order(gen.Asc(menu.FieldSort, menu.FieldID)).
-		All(ctx)
-	if err != nil {
-		r.log.Errorf("查询用户菜单失败，用户ID：%d，错误：%v", userId, err)
-		return nil, err
-	}
-	effectiveIDs, err := r.menuPermissionGroups().GetTenantEffectiveMenuIDs(ctx, tenantID)
-	if err != nil {
-		return nil, err
-	}
-	if len(effectiveIDs) == 0 {
-		return nil, nil
-	}
-	isTenantAdmin, err := r.data.DB(ctx).User.Query().
-		Where(
-			user.IDEQ(userId),
-			user.HasRolesWith(
-				role.IsTenantAdminEQ(true),
-				role.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
-			),
-		).
-		Exist(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if isTenantAdmin {
-		return r.data.DB(ctx).Menu.Query().
-			Where(
-				menu.IDIn(effectiveIDs...),
-				menu.StatusEQ(int32(enum.Status_STATUS_ENABLED)),
-			).
-			Order(gen.Asc(menu.FieldSort, menu.FieldID)).
-			All(ctx)
-	}
-	allowed := make(map[uint32]struct{}, len(effectiveIDs))
-	for _, id := range effectiveIDs {
-		allowed[id] = struct{}{}
-	}
-
-	menuMap := make(map[uint32]*gen.Menu, len(menus))
-	for _, m := range menus {
-		if _, ok := allowed[m.ID]; !ok {
-			continue
-		}
-		menuMap[m.ID] = m
-	}
-	ids := make([]uint32, 0, len(menuMap))
-	for id := range menuMap {
-		ids = append(ids, id)
-	}
-	sort.Slice(ids, func(i, j int) bool {
-		left, right := menuMap[ids[i]], menuMap[ids[j]]
-		if convert.ToValue(left.Sort) == convert.ToValue(right.Sort) {
-			return left.ID < right.ID
-		}
-		return convert.ToValue(left.Sort) < convert.ToValue(right.Sort)
-	})
-
-	result := make([]*gen.Menu, 0, len(ids))
-	for _, id := range ids {
-		result = append(result, menuMap[id])
-	}
-	return result, nil
+func (r *authRepo) Menus(_ context.Context, _ uint32) ([]*pbCore.Menu, error) {
+	return nil, nil
 }
 
 func (r *authRepo) menuPermissionGroups() *menuPermissionGroupRepo {

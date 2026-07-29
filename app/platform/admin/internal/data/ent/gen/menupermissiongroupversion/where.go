@@ -581,29 +581,6 @@ func HasMenusWith(preds ...predicate.Menu) predicate.MenuPermissionGroupVersion 
 	})
 }
 
-// HasTenantBindings applies the HasEdge predicate on the "tenant_bindings" edge.
-func HasTenantBindings() predicate.MenuPermissionGroupVersion {
-	return predicate.MenuPermissionGroupVersion(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TenantBindingsTable, TenantBindingsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTenantBindingsWith applies the HasEdge predicate on the "tenant_bindings" edge with a given conditions (other predicates).
-func HasTenantBindingsWith(preds ...predicate.TenantPermissionGroup) predicate.MenuPermissionGroupVersion {
-	return predicate.MenuPermissionGroupVersion(func(s *sql.Selector) {
-		step := newTenantBindingsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.MenuPermissionGroupVersion) predicate.MenuPermissionGroupVersion {
 	return predicate.MenuPermissionGroupVersion(sql.AndPredicates(predicates...))

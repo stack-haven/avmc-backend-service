@@ -238,59 +238,7 @@ func (_m *StorageProviderQuery) Page(ctx context.Context, page, size int) ([]*St
 	return rs, cnt, nil
 }
 
-func (_m *TenantQuery) Page(ctx context.Context, page, size int) ([]*Tenant, int, error) {
-	cnt, err := _m.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	offset := size * (page - 1)
-	rs, err := _m.Offset(offset).Limit(size).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return rs, cnt, nil
-}
-
 func (_m *TenantParameterOverrideQuery) Page(ctx context.Context, page, size int) ([]*TenantParameterOverride, int, error) {
-	cnt, err := _m.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	offset := size * (page - 1)
-	rs, err := _m.Offset(offset).Limit(size).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return rs, cnt, nil
-}
-
-func (_m *TenantPermissionGroupQuery) Page(ctx context.Context, page, size int) ([]*TenantPermissionGroup, int, error) {
-	cnt, err := _m.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	offset := size * (page - 1)
-	rs, err := _m.Offset(offset).Limit(size).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return rs, cnt, nil
-}
-
-func (_m *TenantResourceQuotaOperationQuery) Page(ctx context.Context, page, size int) ([]*TenantResourceQuotaOperation, int, error) {
-	cnt, err := _m.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	offset := size * (page - 1)
-	rs, err := _m.Offset(offset).Limit(size).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return rs, cnt, nil
-}
-
-func (_m *TenantResourceQuotaUsageQuery) Page(ctx context.Context, page, size int) ([]*TenantResourceQuotaUsage, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err

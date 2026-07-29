@@ -11,7 +11,6 @@ type SessionRepo interface {
 	ListMine(context.Context, uint32, string) ([]*pb.Session, error)
 	Revoke(context.Context, string) error
 	RevokeUser(context.Context, uint32) error
-	RevokeTenant(context.Context, uint32) error
 }
 
 type SessionUsecase struct{ repo SessionRepo }

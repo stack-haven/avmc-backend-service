@@ -60,20 +60,8 @@ type Role func(*sql.Selector)
 // StorageProvider is the predicate function for storageprovider builders.
 type StorageProvider func(*sql.Selector)
 
-// Tenant is the predicate function for tenant builders.
-type Tenant func(*sql.Selector)
-
 // TenantParameterOverride is the predicate function for tenantparameteroverride builders.
 type TenantParameterOverride func(*sql.Selector)
-
-// TenantPermissionGroup is the predicate function for tenantpermissiongroup builders.
-type TenantPermissionGroup func(*sql.Selector)
-
-// TenantResourceQuotaOperation is the predicate function for tenantresourcequotaoperation builders.
-type TenantResourceQuotaOperation func(*sql.Selector)
-
-// TenantResourceQuotaUsage is the predicate function for tenantresourcequotausage builders.
-type TenantResourceQuotaUsage func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

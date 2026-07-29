@@ -31,12 +31,10 @@ func newGRPCWhiteListMatcher() selector.MatchFunc {
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(c *conf.Server,
 	auth *service.AuthServiceService,
-	tenant *service.TenantServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,
 	menu *service.MenuServiceService,
 	menuPermissionGroup *service.MenuPermissionGroupServiceService,
-	tenantPermission *service.TenantPermissionServiceService,
 	role *service.RoleServiceService,
 	post *service.PostServiceService,
 	project *service.ProjectServiceService,
@@ -73,12 +71,10 @@ func NewGRPCServer(c *conf.Server,
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterAuthServiceServer(srv, auth)
-	v1.RegisterTenantServiceServer(srv, tenant)
 	v1.RegisterUserServiceServer(srv, user)
 	v1.RegisterDeptServiceServer(srv, dept)
 	v1.RegisterMenuServiceServer(srv, menu)
 	v1.RegisterMenuPermissionGroupServiceServer(srv, menuPermissionGroup)
-	v1.RegisterTenantPermissionServiceServer(srv, tenantPermission)
 	v1.RegisterRoleServiceServer(srv, role)
 	v1.RegisterPostServiceServer(srv, post)
 	v1.RegisterProjectServiceServer(srv, project)

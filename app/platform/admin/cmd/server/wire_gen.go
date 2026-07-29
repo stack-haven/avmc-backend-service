@@ -54,17 +54,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	authUsecase := biz.NewAuthUsecase(logger, authRepo)
 	userRepo := data.NewUserRepo(dataData, logger)
 	sessionRepo := data.NewSessionRepo(authToken, logger)
-	authorizer, err := data.NewAuthorizer(confData, client, dataData, logger)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	tenantAdminPolicy := data.NewTenantAdminPolicy(dataData, authorizer)
-	userUsecase := biz.NewUserUsecase(userRepo, sessionRepo, tenantAdminPolicy, logger)
+	userUsecase := biz.NewUserUsecase(userRepo, sessionRepo, logger)
 	authServiceService := service.NewAuthServiceService(authUsecase, userUsecase, logger)
-	tenantRepo := data.NewTenantRepo(dataData, logger)
-	tenantUsecase := biz.NewTenantUsecase(tenantRepo, sessionRepo, tenantAdminPolicy, logger)
-	tenantServiceService := service.NewTenantServiceService(tenantUsecase, logger)
 	userServiceService := service.NewUserServiceService(userUsecase, logger)
 	deptRepo := data.NewDeptRepo(dataData, logger)
 	deptUsecase := biz.NewDeptUsecase(deptRepo, logger)
@@ -75,9 +66,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	menuPermissionGroupRepo := data.NewMenuPermissionGroupRepo(dataData, logger)
 	menuPermissionGroupUsecase := biz.NewMenuPermissionGroupUsecase(menuPermissionGroupRepo, logger)
 	menuPermissionGroupServiceService := service.NewMenuPermissionGroupServiceService(menuPermissionGroupUsecase, logger)
-	resourceQuotaRepo := data.NewResourceQuotaRepo(dataData, logger)
-	resourceQuotaUsecase := biz.NewResourceQuotaUsecase(resourceQuotaRepo, menuPermissionGroupRepo, logger)
-	tenantPermissionServiceService := service.NewTenantPermissionServiceService(menuPermissionGroupUsecase, resourceQuotaUsecase, logger)
 	roleRepo := data.NewRoleRepo(dataData, logger)
 	roleUsecase := biz.NewRoleUsecase(roleRepo, logger)
 	roleServiceService := service.NewRoleServiceService(roleUsecase, logger)
@@ -85,6 +73,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	postUsecase := biz.NewPostUsecase(postRepo, logger)
 	postServiceService := service.NewPostServiceService(postUsecase, logger)
 	projectRepo := data.NewProjectRepo(dataData, logger)
+	resourceQuotaRepo := data.NewResourceQuotaRepo(logger)
+	resourceQuotaUsecase := biz.NewResourceQuotaUsecase(resourceQuotaRepo, menuPermissionGroupRepo, logger)
 	projectUsecase := biz.NewProjectUsecase(projectRepo, resourceQuotaUsecase, logger)
 	projectServiceService := service.NewProjectServiceService(projectUsecase, logger)
 	dictionaryRepo := data.NewDictionaryRepo(dataData, logger)
@@ -112,19 +102,24 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	asyncTaskRepo := data.NewAsyncTaskRepo(dataData, logger)
 	notificationUsecase := biz.NewNotificationUsecase(notificationRepo, asyncTaskRepo, logger)
 	notificationServiceService := service.NewNotificationServiceService(notificationUsecase)
-	permissionCacheInvalidator := data.NewPermissionCacheInvalidator(dataData)
+	permissionCacheInvalidator := data.NewPermissionCacheInvalidator(logger)
 	asyncTaskHandler := biz.NewNotificationAsyncTaskHandler(notificationRepo)
 	webhookRepo := data.NewWebhookRepo(dataData, logger)
 	v := biz.NewAsyncTaskHandlers(asyncTaskRepo, permissionCacheInvalidator, asyncTaskHandler, webhookRepo, logger)
 	asyncTaskUsecase := biz.NewAsyncTaskUsecase(asyncTaskRepo, v, logger)
 	asyncTaskServiceService := service.NewAsyncTaskServiceService(asyncTaskUsecase)
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, tenantPermissionServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
+	authorizer, err := data.NewAuthorizer(confData, client, dataData, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, tenantPermissionServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService)
+	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, userServiceService, deptServiceService, menuServiceService, menuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

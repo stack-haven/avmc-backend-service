@@ -7,7 +7,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
 	"errors"
 	"fmt"
@@ -259,21 +258,6 @@ func (_u *MenuPermissionGroupVersionUpdate) AddMenus(v ...*Menu) *MenuPermission
 	return _u.AddMenuIDs(ids...)
 }
 
-// AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
-func (_u *MenuPermissionGroupVersionUpdate) AddTenantBindingIDs(ids ...uint32) *MenuPermissionGroupVersionUpdate {
-	_u.mutation.AddTenantBindingIDs(ids...)
-	return _u
-}
-
-// AddTenantBindings adds the "tenant_bindings" edges to the TenantPermissionGroup entity.
-func (_u *MenuPermissionGroupVersionUpdate) AddTenantBindings(v ...*TenantPermissionGroup) *MenuPermissionGroupVersionUpdate {
-	ids := make([]uint32, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddTenantBindingIDs(ids...)
-}
-
 // Mutation returns the MenuPermissionGroupVersionMutation object of the builder.
 func (_u *MenuPermissionGroupVersionUpdate) Mutation() *MenuPermissionGroupVersionMutation {
 	return _u.mutation
@@ -304,27 +288,6 @@ func (_u *MenuPermissionGroupVersionUpdate) RemoveMenus(v ...*Menu) *MenuPermiss
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMenuIDs(ids...)
-}
-
-// ClearTenantBindings clears all "tenant_bindings" edges to the TenantPermissionGroup entity.
-func (_u *MenuPermissionGroupVersionUpdate) ClearTenantBindings() *MenuPermissionGroupVersionUpdate {
-	_u.mutation.ClearTenantBindings()
-	return _u
-}
-
-// RemoveTenantBindingIDs removes the "tenant_bindings" edge to TenantPermissionGroup entities by IDs.
-func (_u *MenuPermissionGroupVersionUpdate) RemoveTenantBindingIDs(ids ...uint32) *MenuPermissionGroupVersionUpdate {
-	_u.mutation.RemoveTenantBindingIDs(ids...)
-	return _u
-}
-
-// RemoveTenantBindings removes "tenant_bindings" edges to TenantPermissionGroup entities.
-func (_u *MenuPermissionGroupVersionUpdate) RemoveTenantBindings(v ...*TenantPermissionGroup) *MenuPermissionGroupVersionUpdate {
-	ids := make([]uint32, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTenantBindingIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -530,51 +493,6 @@ func (_u *MenuPermissionGroupVersionUpdate) sqlSave(ctx context.Context) (_node 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TenantBindingsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTenantBindingsIDs(); len(nodes) > 0 && !_u.mutation.TenantBindingsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TenantBindingsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -830,21 +748,6 @@ func (_u *MenuPermissionGroupVersionUpdateOne) AddMenus(v ...*Menu) *MenuPermiss
 	return _u.AddMenuIDs(ids...)
 }
 
-// AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
-func (_u *MenuPermissionGroupVersionUpdateOne) AddTenantBindingIDs(ids ...uint32) *MenuPermissionGroupVersionUpdateOne {
-	_u.mutation.AddTenantBindingIDs(ids...)
-	return _u
-}
-
-// AddTenantBindings adds the "tenant_bindings" edges to the TenantPermissionGroup entity.
-func (_u *MenuPermissionGroupVersionUpdateOne) AddTenantBindings(v ...*TenantPermissionGroup) *MenuPermissionGroupVersionUpdateOne {
-	ids := make([]uint32, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddTenantBindingIDs(ids...)
-}
-
 // Mutation returns the MenuPermissionGroupVersionMutation object of the builder.
 func (_u *MenuPermissionGroupVersionUpdateOne) Mutation() *MenuPermissionGroupVersionMutation {
 	return _u.mutation
@@ -875,27 +778,6 @@ func (_u *MenuPermissionGroupVersionUpdateOne) RemoveMenus(v ...*Menu) *MenuPerm
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMenuIDs(ids...)
-}
-
-// ClearTenantBindings clears all "tenant_bindings" edges to the TenantPermissionGroup entity.
-func (_u *MenuPermissionGroupVersionUpdateOne) ClearTenantBindings() *MenuPermissionGroupVersionUpdateOne {
-	_u.mutation.ClearTenantBindings()
-	return _u
-}
-
-// RemoveTenantBindingIDs removes the "tenant_bindings" edge to TenantPermissionGroup entities by IDs.
-func (_u *MenuPermissionGroupVersionUpdateOne) RemoveTenantBindingIDs(ids ...uint32) *MenuPermissionGroupVersionUpdateOne {
-	_u.mutation.RemoveTenantBindingIDs(ids...)
-	return _u
-}
-
-// RemoveTenantBindings removes "tenant_bindings" edges to TenantPermissionGroup entities.
-func (_u *MenuPermissionGroupVersionUpdateOne) RemoveTenantBindings(v ...*TenantPermissionGroup) *MenuPermissionGroupVersionUpdateOne {
-	ids := make([]uint32, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTenantBindingIDs(ids...)
 }
 
 // Where appends a list predicates to the MenuPermissionGroupVersionUpdate builder.
@@ -1131,51 +1013,6 @@ func (_u *MenuPermissionGroupVersionUpdateOne) sqlSave(ctx context.Context) (_no
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.TenantBindingsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTenantBindingsIDs(); len(nodes) > 0 && !_u.mutation.TenantBindingsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TenantBindingsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

@@ -54,8 +54,6 @@ func (MenuPermissionGroup) Edges() []ent.Edge {
 			Unique(),
 		edge.From("versions", MenuPermissionGroupVersion.Type).
 			Ref("group"),
-		edge.From("tenant_bindings", TenantPermissionGroup.Type).
-			Ref("group"),
 	}
 }
 

@@ -225,24 +225,8 @@ func (uc *ResourceQuotaUsecase) resourceLimit(ctx context.Context, tenantID uint
 }
 
 func (uc *ResourceQuotaUsecase) tenantResourceLimits(ctx context.Context, tenantID uint32) (map[string]int64, error) {
-	capabilities, err := uc.packages.GetTenantCapabilities(ctx, tenantID)
-	if err != nil {
-		return nil, err
-	}
-	limits := make(map[string]int64, len(capabilities.GetResourceQuotas()))
-	for key, limit := range capabilities.GetResourceQuotas() {
-		normalized, err := normalizeResourceKey(key)
-		if err != nil {
-			continue
-		}
-		if limit < 0 {
-			limit = 0
-		}
-		if current, ok := limits[normalized]; !ok || limit > current {
-			limits[normalized] = limit
-		}
-	}
-	return limits, nil
+	// TODO: re-implement when tenant-package binding system is rebuilt
+	return nil, nil
 }
 
 func currentTenantID(ctx context.Context) (uint32, error) {

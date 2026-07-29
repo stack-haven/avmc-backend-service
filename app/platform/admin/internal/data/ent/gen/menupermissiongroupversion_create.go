@@ -6,7 +6,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
 	"context"
 	"errors"
 	"fmt"
@@ -177,21 +176,6 @@ func (_c *MenuPermissionGroupVersionCreate) AddMenus(v ...*Menu) *MenuPermission
 		ids[i] = v[i].ID
 	}
 	return _c.AddMenuIDs(ids...)
-}
-
-// AddTenantBindingIDs adds the "tenant_bindings" edge to the TenantPermissionGroup entity by IDs.
-func (_c *MenuPermissionGroupVersionCreate) AddTenantBindingIDs(ids ...uint32) *MenuPermissionGroupVersionCreate {
-	_c.mutation.AddTenantBindingIDs(ids...)
-	return _c
-}
-
-// AddTenantBindings adds the "tenant_bindings" edges to the TenantPermissionGroup entity.
-func (_c *MenuPermissionGroupVersionCreate) AddTenantBindings(v ...*TenantPermissionGroup) *MenuPermissionGroupVersionCreate {
-	ids := make([]uint32, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddTenantBindingIDs(ids...)
 }
 
 // Mutation returns the MenuPermissionGroupVersionMutation object of the builder.
@@ -386,22 +370,6 @@ func (_c *MenuPermissionGroupVersionCreate) createSpec() (*MenuPermissionGroupVe
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menu.FieldID, field.TypeUint32),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TenantBindingsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tenantpermissiongroup.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

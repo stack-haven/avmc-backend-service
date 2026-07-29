@@ -22,11 +22,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantpermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotaoperation"
-	"backend-service/app/platform/admin/internal/data/ent/gen/tenantresourcequotausage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhooksubscription"
@@ -39,7 +35,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 26)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 22)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   asynctask.Table,
@@ -542,33 +538,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[18] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   tenant.Table,
-			Columns: tenant.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint32,
-				Column: tenant.FieldID,
-			},
-		},
-		Type: "Tenant",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			tenant.FieldStatus:          {Type: field.TypeInt32, Column: tenant.FieldStatus},
-			tenant.FieldCreatedAt:       {Type: field.TypeTime, Column: tenant.FieldCreatedAt},
-			tenant.FieldUpdatedAt:       {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
-			tenant.FieldDeletedAt:       {Type: field.TypeTime, Column: tenant.FieldDeletedAt},
-			tenant.FieldName:            {Type: field.TypeString, Column: tenant.FieldName},
-			tenant.FieldCode:            {Type: field.TypeString, Column: tenant.FieldCode},
-			tenant.FieldSort:            {Type: field.TypeInt32, Column: tenant.FieldSort},
-			tenant.FieldRemark:          {Type: field.TypeString, Column: tenant.FieldRemark},
-			tenant.FieldIsPlatform:      {Type: field.TypeBool, Column: tenant.FieldIsPlatform},
-			tenant.FieldLifecycleStatus: {Type: field.TypeInt32, Column: tenant.FieldLifecycleStatus},
-			tenant.FieldActivatedAt:     {Type: field.TypeTime, Column: tenant.FieldActivatedAt},
-			tenant.FieldExpiresAt:       {Type: field.TypeTime, Column: tenant.FieldExpiresAt},
-			tenant.FieldSuspendedAt:     {Type: field.TypeTime, Column: tenant.FieldSuspendedAt},
-			tenant.FieldCancelledAt:     {Type: field.TypeTime, Column: tenant.FieldCancelledAt},
-		},
-	}
-	graph.Nodes[19] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantparameteroverride.Table,
 			Columns: tenantparameteroverride.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -586,69 +555,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantparameteroverride.FieldUpdatedBy:    {Type: field.TypeUint32, Column: tenantparameteroverride.FieldUpdatedBy},
 		},
 	}
-	graph.Nodes[20] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   tenantpermissiongroup.Table,
-			Columns: tenantpermissiongroup.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint32,
-				Column: tenantpermissiongroup.FieldID,
-			},
-		},
-		Type: "TenantPermissionGroup",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			tenantpermissiongroup.FieldCreatedAt:   {Type: field.TypeTime, Column: tenantpermissiongroup.FieldCreatedAt},
-			tenantpermissiongroup.FieldUpdatedAt:   {Type: field.TypeTime, Column: tenantpermissiongroup.FieldUpdatedAt},
-			tenantpermissiongroup.FieldTenantID:    {Type: field.TypeUint32, Column: tenantpermissiongroup.FieldTenantID},
-			tenantpermissiongroup.FieldGroupID:     {Type: field.TypeUint32, Column: tenantpermissiongroup.FieldGroupID},
-			tenantpermissiongroup.FieldEnabled:     {Type: field.TypeBool, Column: tenantpermissiongroup.FieldEnabled},
-			tenantpermissiongroup.FieldBoundBy:     {Type: field.TypeUint32, Column: tenantpermissiongroup.FieldBoundBy},
-			tenantpermissiongroup.FieldVersionID:   {Type: field.TypeUint32, Column: tenantpermissiongroup.FieldVersionID},
-			tenantpermissiongroup.FieldAutoUpgrade: {Type: field.TypeBool, Column: tenantpermissiongroup.FieldAutoUpgrade},
-		},
-	}
-	graph.Nodes[21] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   tenantresourcequotaoperation.Table,
-			Columns: tenantresourcequotaoperation.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint32,
-				Column: tenantresourcequotaoperation.FieldID,
-			},
-		},
-		Type: "TenantResourceQuotaOperation",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			tenantresourcequotaoperation.FieldCreatedAt:      {Type: field.TypeTime, Column: tenantresourcequotaoperation.FieldCreatedAt},
-			tenantresourcequotaoperation.FieldUpdatedAt:      {Type: field.TypeTime, Column: tenantresourcequotaoperation.FieldUpdatedAt},
-			tenantresourcequotaoperation.FieldTenantID:       {Type: field.TypeUint32, Column: tenantresourcequotaoperation.FieldTenantID},
-			tenantresourcequotaoperation.FieldResourceKey:    {Type: field.TypeString, Column: tenantresourcequotaoperation.FieldResourceKey},
-			tenantresourcequotaoperation.FieldOperationType:  {Type: field.TypeString, Column: tenantresourcequotaoperation.FieldOperationType},
-			tenantresourcequotaoperation.FieldIdempotencyKey: {Type: field.TypeString, Column: tenantresourcequotaoperation.FieldIdempotencyKey},
-			tenantresourcequotaoperation.FieldAmount:         {Type: field.TypeInt64, Column: tenantresourcequotaoperation.FieldAmount},
-			tenantresourcequotaoperation.FieldUsedAfter:      {Type: field.TypeInt64, Column: tenantresourcequotaoperation.FieldUsedAfter},
-			tenantresourcequotaoperation.FieldUpdatedBy:      {Type: field.TypeUint32, Column: tenantresourcequotaoperation.FieldUpdatedBy},
-		},
-	}
-	graph.Nodes[22] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   tenantresourcequotausage.Table,
-			Columns: tenantresourcequotausage.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUint32,
-				Column: tenantresourcequotausage.FieldID,
-			},
-		},
-		Type: "TenantResourceQuotaUsage",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			tenantresourcequotausage.FieldCreatedAt:   {Type: field.TypeTime, Column: tenantresourcequotausage.FieldCreatedAt},
-			tenantresourcequotausage.FieldUpdatedAt:   {Type: field.TypeTime, Column: tenantresourcequotausage.FieldUpdatedAt},
-			tenantresourcequotausage.FieldTenantID:    {Type: field.TypeUint32, Column: tenantresourcequotausage.FieldTenantID},
-			tenantresourcequotausage.FieldResourceKey: {Type: field.TypeString, Column: tenantresourcequotausage.FieldResourceKey},
-			tenantresourcequotausage.FieldUsed:        {Type: field.TypeInt64, Column: tenantresourcequotausage.FieldUsed},
-			tenantresourcequotausage.FieldUpdatedBy:   {Type: field.TypeUint32, Column: tenantresourcequotausage.FieldUpdatedBy},
-		},
-	}
-	graph.Nodes[23] = &sqlgraph.Node{
+	graph.Nodes[19] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -683,7 +590,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldDeptID:      {Type: field.TypeUint32, Column: user.FieldDeptID},
 		},
 	}
-	graph.Nodes[24] = &sqlgraph.Node{
+	graph.Nodes[20] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   webhookdeliverylog.Table,
 			Columns: webhookdeliverylog.Columns,
@@ -710,7 +617,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			webhookdeliverylog.FieldErrorMessage:   {Type: field.TypeString, Column: webhookdeliverylog.FieldErrorMessage},
 		},
 	}
-	graph.Nodes[25] = &sqlgraph.Node{
+	graph.Nodes[21] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   webhooksubscription.Table,
 			Columns: webhooksubscription.Columns,
@@ -901,18 +808,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"MenuPermissionGroupVersion",
 	)
 	graph.MustAddE(
-		"tenant_bindings",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroup.TenantBindingsTable,
-			Columns: []string{menupermissiongroup.TenantBindingsColumn},
-			Bidi:    false,
-		},
-		"MenuPermissionGroup",
-		"TenantPermissionGroup",
-	)
-	graph.MustAddE(
 		"group",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -935,18 +830,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"MenuPermissionGroupVersion",
 		"Menu",
-	)
-	graph.MustAddE(
-		"tenant_bindings",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   menupermissiongroupversion.TenantBindingsTable,
-			Columns: []string{menupermissiongroupversion.TenantBindingsColumn},
-			Bidi:    false,
-		},
-		"MenuPermissionGroupVersion",
-		"TenantPermissionGroup",
 	)
 	graph.MustAddE(
 		"tenant_overrides",
@@ -1009,18 +892,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"User",
 	)
 	graph.MustAddE(
-		"permission_group_bindings",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   tenant.PermissionGroupBindingsTable,
-			Columns: []string{tenant.PermissionGroupBindingsColumn},
-			Bidi:    false,
-		},
-		"Tenant",
-		"TenantPermissionGroup",
-	)
-	graph.MustAddE(
 		"definition",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -1031,66 +902,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"TenantParameterOverride",
 		"ParameterDefinition",
-	)
-	graph.MustAddE(
-		"tenant",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tenantpermissiongroup.TenantTable,
-			Columns: []string{tenantpermissiongroup.TenantColumn},
-			Bidi:    false,
-		},
-		"TenantPermissionGroup",
-		"Tenant",
-	)
-	graph.MustAddE(
-		"group",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tenantpermissiongroup.GroupTable,
-			Columns: []string{tenantpermissiongroup.GroupColumn},
-			Bidi:    false,
-		},
-		"TenantPermissionGroup",
-		"MenuPermissionGroup",
-	)
-	graph.MustAddE(
-		"version",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tenantpermissiongroup.VersionTable,
-			Columns: []string{tenantpermissiongroup.VersionColumn},
-			Bidi:    false,
-		},
-		"TenantPermissionGroup",
-		"MenuPermissionGroupVersion",
-	)
-	graph.MustAddE(
-		"tenant",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tenantresourcequotaoperation.TenantTable,
-			Columns: []string{tenantresourcequotaoperation.TenantColumn},
-			Bidi:    false,
-		},
-		"TenantResourceQuotaOperation",
-		"Tenant",
-	)
-	graph.MustAddE(
-		"tenant",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tenantresourcequotausage.TenantTable,
-			Columns: []string{tenantresourcequotausage.TenantColumn},
-			Bidi:    false,
-		},
-		"TenantResourceQuotaUsage",
-		"Tenant",
 	)
 	graph.MustAddE(
 		"roles",
@@ -2420,20 +2231,6 @@ func (f *MenuPermissionGroupFilter) WhereHasVersionsWith(preds ...predicate.Menu
 	})))
 }
 
-// WhereHasTenantBindings applies a predicate to check if query has an edge tenant_bindings.
-func (f *MenuPermissionGroupFilter) WhereHasTenantBindings() {
-	f.Where(entql.HasEdge("tenant_bindings"))
-}
-
-// WhereHasTenantBindingsWith applies a predicate to check if query has an edge tenant_bindings with a given conditions (other predicates).
-func (f *MenuPermissionGroupFilter) WhereHasTenantBindingsWith(preds ...predicate.TenantPermissionGroup) {
-	f.Where(entql.HasEdgeWith("tenant_bindings", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
 // addPredicate implements the predicateAdder interface.
 func (_q *MenuPermissionGroupVersionQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
@@ -2556,20 +2353,6 @@ func (f *MenuPermissionGroupVersionFilter) WhereHasMenus() {
 // WhereHasMenusWith applies a predicate to check if query has an edge menus with a given conditions (other predicates).
 func (f *MenuPermissionGroupVersionFilter) WhereHasMenusWith(preds ...predicate.Menu) {
 	f.Where(entql.HasEdgeWith("menus", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// WhereHasTenantBindings applies a predicate to check if query has an edge tenant_bindings.
-func (f *MenuPermissionGroupVersionFilter) WhereHasTenantBindings() {
-	f.Where(entql.HasEdge("tenant_bindings"))
-}
-
-// WhereHasTenantBindingsWith applies a predicate to check if query has an edge tenant_bindings with a given conditions (other predicates).
-func (f *MenuPermissionGroupVersionFilter) WhereHasTenantBindingsWith(preds ...predicate.TenantPermissionGroup) {
-	f.Where(entql.HasEdgeWith("tenant_bindings", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}
@@ -3522,130 +3305,6 @@ func (f *StorageProviderFilter) WhereRemark(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *TenantQuery) addPredicate(pred func(s *sql.Selector)) {
-	_q.predicates = append(_q.predicates, pred)
-}
-
-// Filter returns a Filter implementation to apply filters on the TenantQuery builder.
-func (_q *TenantQuery) Filter() *TenantFilter {
-	return &TenantFilter{config: _q.config, predicateAdder: _q}
-}
-
-// addPredicate implements the predicateAdder interface.
-func (m *TenantMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the TenantMutation builder.
-func (m *TenantMutation) Filter() *TenantFilter {
-	return &TenantFilter{config: m.config, predicateAdder: m}
-}
-
-// TenantFilter provides a generic filtering capability at runtime for TenantQuery.
-type TenantFilter struct {
-	predicateAdder
-	config
-}
-
-// Where applies the entql predicate on the query filter.
-func (f *TenantFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
-			s.AddError(err)
-		}
-	})
-}
-
-// WhereID applies the entql uint32 predicate on the id field.
-func (f *TenantFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(tenant.FieldID))
-}
-
-// WhereStatus applies the entql int32 predicate on the status field.
-func (f *TenantFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(tenant.FieldStatus))
-}
-
-// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *TenantFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldCreatedAt))
-}
-
-// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *TenantFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldUpdatedAt))
-}
-
-// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
-func (f *TenantFilter) WhereDeletedAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldDeletedAt))
-}
-
-// WhereName applies the entql string predicate on the name field.
-func (f *TenantFilter) WhereName(p entql.StringP) {
-	f.Where(p.Field(tenant.FieldName))
-}
-
-// WhereCode applies the entql string predicate on the code field.
-func (f *TenantFilter) WhereCode(p entql.StringP) {
-	f.Where(p.Field(tenant.FieldCode))
-}
-
-// WhereSort applies the entql int32 predicate on the sort field.
-func (f *TenantFilter) WhereSort(p entql.Int32P) {
-	f.Where(p.Field(tenant.FieldSort))
-}
-
-// WhereRemark applies the entql string predicate on the remark field.
-func (f *TenantFilter) WhereRemark(p entql.StringP) {
-	f.Where(p.Field(tenant.FieldRemark))
-}
-
-// WhereIsPlatform applies the entql bool predicate on the is_platform field.
-func (f *TenantFilter) WhereIsPlatform(p entql.BoolP) {
-	f.Where(p.Field(tenant.FieldIsPlatform))
-}
-
-// WhereLifecycleStatus applies the entql int32 predicate on the lifecycle_status field.
-func (f *TenantFilter) WhereLifecycleStatus(p entql.Int32P) {
-	f.Where(p.Field(tenant.FieldLifecycleStatus))
-}
-
-// WhereActivatedAt applies the entql time.Time predicate on the activated_at field.
-func (f *TenantFilter) WhereActivatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldActivatedAt))
-}
-
-// WhereExpiresAt applies the entql time.Time predicate on the expires_at field.
-func (f *TenantFilter) WhereExpiresAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldExpiresAt))
-}
-
-// WhereSuspendedAt applies the entql time.Time predicate on the suspended_at field.
-func (f *TenantFilter) WhereSuspendedAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldSuspendedAt))
-}
-
-// WhereCancelledAt applies the entql time.Time predicate on the cancelled_at field.
-func (f *TenantFilter) WhereCancelledAt(p entql.TimeP) {
-	f.Where(p.Field(tenant.FieldCancelledAt))
-}
-
-// WhereHasPermissionGroupBindings applies a predicate to check if query has an edge permission_group_bindings.
-func (f *TenantFilter) WhereHasPermissionGroupBindings() {
-	f.Where(entql.HasEdge("permission_group_bindings"))
-}
-
-// WhereHasPermissionGroupBindingsWith applies a predicate to check if query has an edge permission_group_bindings with a given conditions (other predicates).
-func (f *TenantFilter) WhereHasPermissionGroupBindingsWith(preds ...predicate.TenantPermissionGroup) {
-	f.Where(entql.HasEdgeWith("permission_group_bindings", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// addPredicate implements the predicateAdder interface.
 func (_q *TenantParameterOverrideQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -3674,7 +3333,7 @@ type TenantParameterOverrideFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantParameterOverrideFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3730,311 +3389,6 @@ func (f *TenantParameterOverrideFilter) WhereHasDefinitionWith(preds ...predicat
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *TenantPermissionGroupQuery) addPredicate(pred func(s *sql.Selector)) {
-	_q.predicates = append(_q.predicates, pred)
-}
-
-// Filter returns a Filter implementation to apply filters on the TenantPermissionGroupQuery builder.
-func (_q *TenantPermissionGroupQuery) Filter() *TenantPermissionGroupFilter {
-	return &TenantPermissionGroupFilter{config: _q.config, predicateAdder: _q}
-}
-
-// addPredicate implements the predicateAdder interface.
-func (m *TenantPermissionGroupMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the TenantPermissionGroupMutation builder.
-func (m *TenantPermissionGroupMutation) Filter() *TenantPermissionGroupFilter {
-	return &TenantPermissionGroupFilter{config: m.config, predicateAdder: m}
-}
-
-// TenantPermissionGroupFilter provides a generic filtering capability at runtime for TenantPermissionGroupQuery.
-type TenantPermissionGroupFilter struct {
-	predicateAdder
-	config
-}
-
-// Where applies the entql predicate on the query filter.
-func (f *TenantPermissionGroupFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
-			s.AddError(err)
-		}
-	})
-}
-
-// WhereID applies the entql uint32 predicate on the id field.
-func (f *TenantPermissionGroupFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(tenantpermissiongroup.FieldID))
-}
-
-// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *TenantPermissionGroupFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenantpermissiongroup.FieldCreatedAt))
-}
-
-// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *TenantPermissionGroupFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenantpermissiongroup.FieldUpdatedAt))
-}
-
-// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *TenantPermissionGroupFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(tenantpermissiongroup.FieldTenantID))
-}
-
-// WhereGroupID applies the entql uint32 predicate on the group_id field.
-func (f *TenantPermissionGroupFilter) WhereGroupID(p entql.Uint32P) {
-	f.Where(p.Field(tenantpermissiongroup.FieldGroupID))
-}
-
-// WhereEnabled applies the entql bool predicate on the enabled field.
-func (f *TenantPermissionGroupFilter) WhereEnabled(p entql.BoolP) {
-	f.Where(p.Field(tenantpermissiongroup.FieldEnabled))
-}
-
-// WhereBoundBy applies the entql uint32 predicate on the bound_by field.
-func (f *TenantPermissionGroupFilter) WhereBoundBy(p entql.Uint32P) {
-	f.Where(p.Field(tenantpermissiongroup.FieldBoundBy))
-}
-
-// WhereVersionID applies the entql uint32 predicate on the version_id field.
-func (f *TenantPermissionGroupFilter) WhereVersionID(p entql.Uint32P) {
-	f.Where(p.Field(tenantpermissiongroup.FieldVersionID))
-}
-
-// WhereAutoUpgrade applies the entql bool predicate on the auto_upgrade field.
-func (f *TenantPermissionGroupFilter) WhereAutoUpgrade(p entql.BoolP) {
-	f.Where(p.Field(tenantpermissiongroup.FieldAutoUpgrade))
-}
-
-// WhereHasTenant applies a predicate to check if query has an edge tenant.
-func (f *TenantPermissionGroupFilter) WhereHasTenant() {
-	f.Where(entql.HasEdge("tenant"))
-}
-
-// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
-func (f *TenantPermissionGroupFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
-	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// WhereHasGroup applies a predicate to check if query has an edge group.
-func (f *TenantPermissionGroupFilter) WhereHasGroup() {
-	f.Where(entql.HasEdge("group"))
-}
-
-// WhereHasGroupWith applies a predicate to check if query has an edge group with a given conditions (other predicates).
-func (f *TenantPermissionGroupFilter) WhereHasGroupWith(preds ...predicate.MenuPermissionGroup) {
-	f.Where(entql.HasEdgeWith("group", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// WhereHasVersion applies a predicate to check if query has an edge version.
-func (f *TenantPermissionGroupFilter) WhereHasVersion() {
-	f.Where(entql.HasEdge("version"))
-}
-
-// WhereHasVersionWith applies a predicate to check if query has an edge version with a given conditions (other predicates).
-func (f *TenantPermissionGroupFilter) WhereHasVersionWith(preds ...predicate.MenuPermissionGroupVersion) {
-	f.Where(entql.HasEdgeWith("version", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// addPredicate implements the predicateAdder interface.
-func (_q *TenantResourceQuotaOperationQuery) addPredicate(pred func(s *sql.Selector)) {
-	_q.predicates = append(_q.predicates, pred)
-}
-
-// Filter returns a Filter implementation to apply filters on the TenantResourceQuotaOperationQuery builder.
-func (_q *TenantResourceQuotaOperationQuery) Filter() *TenantResourceQuotaOperationFilter {
-	return &TenantResourceQuotaOperationFilter{config: _q.config, predicateAdder: _q}
-}
-
-// addPredicate implements the predicateAdder interface.
-func (m *TenantResourceQuotaOperationMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the TenantResourceQuotaOperationMutation builder.
-func (m *TenantResourceQuotaOperationMutation) Filter() *TenantResourceQuotaOperationFilter {
-	return &TenantResourceQuotaOperationFilter{config: m.config, predicateAdder: m}
-}
-
-// TenantResourceQuotaOperationFilter provides a generic filtering capability at runtime for TenantResourceQuotaOperationQuery.
-type TenantResourceQuotaOperationFilter struct {
-	predicateAdder
-	config
-}
-
-// Where applies the entql predicate on the query filter.
-func (f *TenantResourceQuotaOperationFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
-			s.AddError(err)
-		}
-	})
-}
-
-// WhereID applies the entql uint32 predicate on the id field.
-func (f *TenantResourceQuotaOperationFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldID))
-}
-
-// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *TenantResourceQuotaOperationFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldCreatedAt))
-}
-
-// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *TenantResourceQuotaOperationFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldUpdatedAt))
-}
-
-// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *TenantResourceQuotaOperationFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldTenantID))
-}
-
-// WhereResourceKey applies the entql string predicate on the resource_key field.
-func (f *TenantResourceQuotaOperationFilter) WhereResourceKey(p entql.StringP) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldResourceKey))
-}
-
-// WhereOperationType applies the entql string predicate on the operation_type field.
-func (f *TenantResourceQuotaOperationFilter) WhereOperationType(p entql.StringP) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldOperationType))
-}
-
-// WhereIdempotencyKey applies the entql string predicate on the idempotency_key field.
-func (f *TenantResourceQuotaOperationFilter) WhereIdempotencyKey(p entql.StringP) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldIdempotencyKey))
-}
-
-// WhereAmount applies the entql int64 predicate on the amount field.
-func (f *TenantResourceQuotaOperationFilter) WhereAmount(p entql.Int64P) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldAmount))
-}
-
-// WhereUsedAfter applies the entql int64 predicate on the used_after field.
-func (f *TenantResourceQuotaOperationFilter) WhereUsedAfter(p entql.Int64P) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldUsedAfter))
-}
-
-// WhereUpdatedBy applies the entql uint32 predicate on the updated_by field.
-func (f *TenantResourceQuotaOperationFilter) WhereUpdatedBy(p entql.Uint32P) {
-	f.Where(p.Field(tenantresourcequotaoperation.FieldUpdatedBy))
-}
-
-// WhereHasTenant applies a predicate to check if query has an edge tenant.
-func (f *TenantResourceQuotaOperationFilter) WhereHasTenant() {
-	f.Where(entql.HasEdge("tenant"))
-}
-
-// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
-func (f *TenantResourceQuotaOperationFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
-	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// addPredicate implements the predicateAdder interface.
-func (_q *TenantResourceQuotaUsageQuery) addPredicate(pred func(s *sql.Selector)) {
-	_q.predicates = append(_q.predicates, pred)
-}
-
-// Filter returns a Filter implementation to apply filters on the TenantResourceQuotaUsageQuery builder.
-func (_q *TenantResourceQuotaUsageQuery) Filter() *TenantResourceQuotaUsageFilter {
-	return &TenantResourceQuotaUsageFilter{config: _q.config, predicateAdder: _q}
-}
-
-// addPredicate implements the predicateAdder interface.
-func (m *TenantResourceQuotaUsageMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the TenantResourceQuotaUsageMutation builder.
-func (m *TenantResourceQuotaUsageMutation) Filter() *TenantResourceQuotaUsageFilter {
-	return &TenantResourceQuotaUsageFilter{config: m.config, predicateAdder: m}
-}
-
-// TenantResourceQuotaUsageFilter provides a generic filtering capability at runtime for TenantResourceQuotaUsageQuery.
-type TenantResourceQuotaUsageFilter struct {
-	predicateAdder
-	config
-}
-
-// Where applies the entql predicate on the query filter.
-func (f *TenantResourceQuotaUsageFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[22].Type, p, s); err != nil {
-			s.AddError(err)
-		}
-	})
-}
-
-// WhereID applies the entql uint32 predicate on the id field.
-func (f *TenantResourceQuotaUsageFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(tenantresourcequotausage.FieldID))
-}
-
-// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *TenantResourceQuotaUsageFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenantresourcequotausage.FieldCreatedAt))
-}
-
-// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *TenantResourceQuotaUsageFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(tenantresourcequotausage.FieldUpdatedAt))
-}
-
-// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *TenantResourceQuotaUsageFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(tenantresourcequotausage.FieldTenantID))
-}
-
-// WhereResourceKey applies the entql string predicate on the resource_key field.
-func (f *TenantResourceQuotaUsageFilter) WhereResourceKey(p entql.StringP) {
-	f.Where(p.Field(tenantresourcequotausage.FieldResourceKey))
-}
-
-// WhereUsed applies the entql int64 predicate on the used field.
-func (f *TenantResourceQuotaUsageFilter) WhereUsed(p entql.Int64P) {
-	f.Where(p.Field(tenantresourcequotausage.FieldUsed))
-}
-
-// WhereUpdatedBy applies the entql uint32 predicate on the updated_by field.
-func (f *TenantResourceQuotaUsageFilter) WhereUpdatedBy(p entql.Uint32P) {
-	f.Where(p.Field(tenantresourcequotausage.FieldUpdatedBy))
-}
-
-// WhereHasTenant applies a predicate to check if query has an edge tenant.
-func (f *TenantResourceQuotaUsageFilter) WhereHasTenant() {
-	f.Where(entql.HasEdge("tenant"))
-}
-
-// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
-func (f *TenantResourceQuotaUsageFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
-	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
-}
-
-// addPredicate implements the predicateAdder interface.
 func (_q *UserQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -4063,7 +3417,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[23].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -4269,7 +3623,7 @@ type WebhookDeliveryLogFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *WebhookDeliveryLogFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[24].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -4379,7 +3733,7 @@ type WebhookSubscriptionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *WebhookSubscriptionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[25].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
