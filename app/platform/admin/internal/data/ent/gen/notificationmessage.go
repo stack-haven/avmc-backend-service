@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 站内通知消息表
+// 通知消息表
 type NotificationMessage struct {
 	config `json:"-"`
 	// ID of the ent.

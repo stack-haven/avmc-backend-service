@@ -48,9 +48,9 @@ type Role struct {
 
 // RoleEdges holds the relations/edges for other nodes in the graph.
 type RoleEdges struct {
-	// Menus holds the value of the menus edge.
+	// 角色菜单关联表
 	Menus []*Menu `json:"menus,omitempty"`
-	// DataScopeDepts holds the value of the data_scope_depts edge.
+	// 角色数据权限部门关联表
 	DataScopeDepts []*Dept `json:"data_scope_depts,omitempty"`
 	// Users holds the value of the users edge.
 	Users []*User `json:"users,omitempty"`

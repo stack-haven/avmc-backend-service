@@ -4,10 +4,11 @@ import (
 	"context"
 	"strconv"
 
+	"google.golang.org/protobuf/types/known/emptypb"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type DictionaryServiceService struct {
@@ -24,7 +25,10 @@ func (s *DictionaryServiceService) ListDictionaryTypes(ctx context.Context, req 
 		return nil, err
 	}
 	resp := &pbCore.ListDictionaryTypesResponse{Items: items, Total: total}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}

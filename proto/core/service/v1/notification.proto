@@ -27,12 +27,12 @@ message NotificationTemplate {
   optional uint32 tenant_id = 2;
   string code = 3 [(buf.validate.field).string = {min_len: 1, max_len: 100, pattern: "^[A-Za-z][A-Za-z0-9_.-]*$"}];
   string name = 4 [(buf.validate.field).string = {min_len: 1, max_len: 100}];
-  NotificationChannel channel = 5 [(buf.validate.field).enum.defined_only = true];
+  NotificationChannel channel = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   string title = 6 [(buf.validate.field).string = {min_len: 1, max_len: 200}];
   string content = 7 [(buf.validate.field).string = {min_len: 1, max_len: 4000}];
   optional string variable_schema = 8 [(buf.validate.field).string.max_len = 4000];
   optional string locale = 9 [(buf.validate.field).string.max_len = 20];
-  optional enum.Status status = 10 [(buf.validate.field).enum.defined_only = true];
+  optional enum.Status status = 10 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional string remark = 11 [(buf.validate.field).string.max_len = 255];
   optional string created_at = 12;
   optional string updated_at = 13;
@@ -44,10 +44,10 @@ message NotificationMessage {
   uint32 recipient_user_id = 3;
   optional uint32 template_id = 4;
   optional string template_code = 5;
-  NotificationChannel channel = 6 [(buf.validate.field).enum.defined_only = true];
+  NotificationChannel channel = 6 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   string title = 7 [(buf.validate.field).string = {min_len: 1, max_len: 200}];
   string content = 8 [(buf.validate.field).string = {min_len: 1, max_len: 4000}];
-  NotificationMessageStatus status = 9 [(buf.validate.field).enum.defined_only = true];
+  NotificationMessageStatus status = 9 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional int32 priority = 10 [(buf.validate.field).int32 = {gte: -100, lte: 100}];
   optional string business_type = 11 [(buf.validate.field).string.max_len = 100];
   optional string business_id = 12 [(buf.validate.field).string.max_len = 100];
@@ -62,8 +62,8 @@ message ListNotificationTemplatesRequest {
   string page_token = 1;
   int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
   optional string keyword = 3 [(buf.validate.field).string.max_len = 100];
-  optional NotificationChannel channel = 4 [(buf.validate.field).enum.defined_only = true];
-  optional enum.Status status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional NotificationChannel channel = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional enum.Status status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
 }
 
 message ListNotificationTemplatesResponse {
@@ -109,9 +109,9 @@ message ListNotificationMessagesRequest {
   string page_token = 1;
   int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
   optional uint32 recipient_user_id = 3 [(buf.validate.field).uint32.gt = 0];
-  optional NotificationMessageStatus status = 4 [(buf.validate.field).enum.defined_only = true];
+  optional NotificationMessageStatus status = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional string business_type = 5 [(buf.validate.field).string.max_len = 100];
-  optional NotificationChannel channel = 6 [(buf.validate.field).enum.defined_only = true];
+  optional NotificationChannel channel = 6 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
 }
 
 message ListNotificationMessagesResponse {

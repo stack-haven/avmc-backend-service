@@ -1,18 +1,19 @@
 package server
 
 import (
-	v1 "backend-service/api/platform/admin/v1"
-	"backend-service/app/platform/admin/internal/biz"
-	"backend-service/app/platform/admin/internal/conf"
-	"backend-service/app/platform/admin/internal/service"
-	"backend-service/pkg/auth"
-	authzEngine "backend-service/pkg/auth/authz"
 	"context"
 	"fmt"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+
+	v1 "backend-service/api/platform/admin/v1"
+	"backend-service/app/platform/admin/internal/biz"
+	"backend-service/app/platform/admin/internal/conf"
+	"backend-service/app/platform/admin/internal/service"
+	"backend-service/pkg/auth"
+	authzEngine "backend-service/pkg/auth/authz"
 )
 
 func newGRPCWhiteListMatcher() selector.MatchFunc {
@@ -31,10 +32,11 @@ func newGRPCWhiteListMatcher() selector.MatchFunc {
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(c *conf.Server,
 	auth *service.AuthServiceService,
+	tenant *service.TenantServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,
 	menu *service.MenuServiceService,
-	menuPermissionGroup *service.MenuPermissionGroupServiceService,
+	tenantMenuPermissionGroup *service.TenantMenuPermissionGroupServiceService,
 	role *service.RoleServiceService,
 	post *service.PostServiceService,
 	project *service.ProjectServiceService,
@@ -71,10 +73,11 @@ func NewGRPCServer(c *conf.Server,
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterAuthServiceServer(srv, auth)
+	v1.RegisterTenantServiceServer(srv, tenant)
 	v1.RegisterUserServiceServer(srv, user)
 	v1.RegisterDeptServiceServer(srv, dept)
 	v1.RegisterMenuServiceServer(srv, menu)
-	v1.RegisterMenuPermissionGroupServiceServer(srv, menuPermissionGroup)
+	v1.RegisterTenantMenuPermissionGroupServiceServer(srv, tenantMenuPermissionGroup)
 	v1.RegisterRoleServiceServer(srv, role)
 	v1.RegisterPostServiceServer(srv, post)
 	v1.RegisterProjectServiceServer(srv, project)

@@ -1091,14 +1091,15 @@ const file_core_service_v1_async_task_proto_rawDesc = "" +
 	"\f_lease_ownerB\x13\n" +
 	"\x11_lease_expires_atB\r\n" +
 	"\v_created_atB\r\n" +
-	"\v_updated_at\"\xd2\x02\n" +
+	"\v_updated_at\"\xd4\x02\n" +
 	"\x15ListAsyncTasksRequest\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x01 \x01(\tR\tpageToken\x12&\n" +
 	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\bpageSize\x12)\n" +
 	"\ttenant_id\x18\x03 \x01(\rB\a\xbaH\x04*\x02 \x00H\x00R\btenantId\x88\x01\x01\x12)\n" +
-	"\ttask_type\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18dH\x01R\btaskType\x88\x01\x01\x12G\n" +
-	"\x06status\x18\x05 \x01(\x0e2 .core.service.v1.AsyncTaskStatusB\b\xbaH\x05\x82\x01\x02\x10\x01H\x02R\x06status\x88\x01\x01\x12\"\n" +
+	"\ttask_type\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18dH\x01R\btaskType\x88\x01\x01\x12I\n" +
+	"\x06status\x18\x05 \x01(\x0e2 .core.service.v1.AsyncTaskStatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x02R\x06status\x88\x01\x01\x12\"\n" +
 	"\x05queue\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x182H\x03R\x05queue\x88\x01\x01B\f\n" +
 	"\n" +
 	"_tenant_idB\f\n" +

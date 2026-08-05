@@ -108,32 +108,6 @@ func (_m *MenuQuery) Page(ctx context.Context, page, size int) ([]*Menu, int, er
 	return rs, cnt, nil
 }
 
-func (_m *MenuPermissionGroupQuery) Page(ctx context.Context, page, size int) ([]*MenuPermissionGroup, int, error) {
-	cnt, err := _m.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	offset := size * (page - 1)
-	rs, err := _m.Offset(offset).Limit(size).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return rs, cnt, nil
-}
-
-func (_m *MenuPermissionGroupVersionQuery) Page(ctx context.Context, page, size int) ([]*MenuPermissionGroupVersion, int, error) {
-	cnt, err := _m.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	offset := size * (page - 1)
-	rs, err := _m.Offset(offset).Limit(size).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return rs, cnt, nil
-}
-
 func (_m *NotificationMessageQuery) Page(ctx context.Context, page, size int) ([]*NotificationMessage, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
@@ -226,6 +200,45 @@ func (_m *RoleQuery) Page(ctx context.Context, page, size int) ([]*Role, int, er
 }
 
 func (_m *StorageProviderQuery) Page(ctx context.Context, page, size int) ([]*StorageProvider, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *TenantQuery) Page(ctx context.Context, page, size int) ([]*Tenant, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *TenantMenuPermissionGroupQuery) Page(ctx context.Context, page, size int) ([]*TenantMenuPermissionGroup, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *TenantMenuPermissionGroupVersionQuery) Page(ctx context.Context, page, size int) ([]*TenantMenuPermissionGroupVersion, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err

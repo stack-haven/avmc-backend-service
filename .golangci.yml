@@ -1,0 +1,155 @@
+# Ark Tech Platform — Unified Go Lint Configuration
+# Last updated: 2026-07-30
+#
+# 渐进式引入策略:
+#   Phase 1 (立即):  启用所有 [P0] 规则 + forbidigo，CI 阻断
+#   Phase 2 (2周内): 启用 [P1] 规则，CI 阻断
+#   Phase 3 (1月内): 启用 [P2] 规则，CI 阻断
+#
+# Usage:
+#   make lint            # 检查
+#   make lint-fix        # 自动修复
+#   make security-check  # 安全扫描
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+  go: "1.24"
+
+linters:
+  enable:
+    # ── P0: 安全 + 正确性 ──
+    - govet            # go vet — 已在使用，保持
+    - errcheck         # 未处理的 error 返回值
+    - staticcheck      # 增强静态分析
+    - gosec            # 安全漏洞扫描
+    - nilerr           # 返回 nil 而不是正确 error
+    - errorlint        # error wrapping/比较问题
+    - forbidigo        # 禁止特定函数调用
+
+    # ── P1: 代码质量（2周内启用）──
+    - gocritic         # 代码风格与性能诊断
+    - unconvert        # 不必要的类型转换
+    - prealloc         # 可预分配的 slice
+    - makezero         # 非零长度 slice append
+    - copyloopvar      # 循环变量复制 (Go 1.22+)
+    - gocognit         # 函数复杂度控制
+    - unconvert        # 不必要的类型转换
+
+    # ── P2: 风格统一（1月内启用）──
+    - revive           # golint 替代，高度可定制
+    - gci              # import 分组排序
+    - nakedret         # 裸 return（大函数可读性差）
+    - dupword          # 重复单词
+    - testifylint      # testify 断言规范
+
+linters-settings:
+  # ── P0 ──
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  gosec:
+    severity: medium
+    confidence: high
+    excludes:
+      - G104      # auditing err check 已由 errcheck 覆盖
+    config:
+      G306: "0640"
+
+  forbidigo:
+    forbid:
+      - p: ^fmt\.Print(ln|f)?$
+        msg: "Use go-kratos log.Helper or structured logging instead of fmt.Print*"
+      - p: ^os\.Exit$
+        msg: "Use graceful shutdown in cmd/server instead of os.Exit in business code"
+      - p: ^panic$
+        msg: "Do not use panic in biz/data layer; return errors instead"
+
+  # ── P1 ──
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+    disabled-checks:
+      - ifElseChain          # 项目中有合理的长 switch/if-else
+      - commentFormatting    # 早期中文注释多，先禁用
+
+  gocognit:
+    min-complexity: 25
+
+  # ── P2 ──
+  revive:
+    severity: warning
+    rules:
+      - name: exported
+      - name: context-as-argument
+      - name: error-return
+      - name: error-strings
+      - name: var-naming
+      - name: package-comments
+      - name: receiver-naming
+      - name: indent-error-flow
+      - name: range-val-address
+      - name: superfluous-else
+
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(backend-service)
+    skip-generated: true
+
+  testifylint:
+    enable-all: true
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
+
+  exclude-dirs:
+    - api
+    - vendor
+    - third_party
+
+  exclude-files:
+    - wire_gen\.go$
+    - .*\.pb\.go$
+    - .*\.pb\.validate\.go$
+    - .*_gen\.go$
+
+  exclude-rules:
+    # Ent schema 允许特殊字段命名
+    - path: internal/data/ent/schema/
+      linters:
+        - revive
+        - gosec
+
+    # Ent gen 生成代码
+    - path: internal/data/ent/gen/
+      linters:
+        - revive
+        - gosec
+        - staticcheck
+        - errcheck
+        - forbidigo
+
+    # 测试文件放宽复杂度
+    - path: _test\.go$
+      linters:
+        - gocognit
+        - forbidigo
+        - errcheck
+
+    # 早期中文注释兼容期（Phase 2 移除此条）
+    - path: internal/(biz|service|data)/
+      linters:
+        - revive
+      text: "exported.*should have comment"
+
+output:
+  formats:
+    - format: colored-line-number
+  sort-results: true

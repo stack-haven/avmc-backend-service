@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/tenant_menu_permission_group.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+// 菜单权限组服务
+service TenantMenuPermissionGroupService {
+  // 获取菜单权限组列表
+  rpc ListTenantMenuPermissionGroups(core.service.v1.ListTenantMenuPermissionGroupsRequest) returns (core.service.v1.ListTenantMenuPermissionGroupsResponse) {
+    option (google.api.http) = {get: "/admin/v1/tenant-menu-permission-groups"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单权限组列表"
+      description: "获取菜单权限组列表"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 获取菜单权限组
+  rpc GetTenantMenuPermissionGroup(core.service.v1.GetTenantMenuPermissionGroupRequest) returns (core.service.v1.TenantMenuPermissionGroup) {
+    option (google.api.http) = {get: "/admin/v1/tenant-menu-permission-groups/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取菜单权限组"
+      description: "获取菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 创建菜单权限组
+  rpc CreateTenantMenuPermissionGroup(core.service.v1.CreateTenantMenuPermissionGroupRequest) returns (core.service.v1.CreateTenantMenuPermissionGroupResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/tenant-menu-permission-groups"
+      body: "group"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建菜单权限组"
+      description: "创建菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新菜单权限组
+  rpc UpdateTenantMenuPermissionGroup(core.service.v1.UpdateTenantMenuPermissionGroupRequest) returns (core.service.v1.UpdateTenantMenuPermissionGroupResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/tenant-menu-permission-groups/{id}"
+      body: "group"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新菜单权限组"
+      description: "更新菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 删除菜单权限组
+  rpc DeleteTenantMenuPermissionGroup(core.service.v1.DeleteTenantMenuPermissionGroupRequest) returns (core.service.v1.DeleteTenantMenuPermissionGroupResponse) {
+    option (google.api.http) = {delete: "/admin/v1/tenant-menu-permission-groups/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除菜单权限组"
+      description: "删除菜单权限组"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  // 更新菜单权限组状态
+  rpc UpdateTenantMenuPermissionGroupStatus(core.service.v1.UpdateTenantMenuPermissionGroupStatusRequest) returns (core.service.v1.UpdateTenantMenuPermissionGroupStatusResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/tenant-menu-permission-groups/status-update/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新菜单权限组状态"
+      description: "更新菜单权限组状态"
+      tags: ["菜单权限组服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  rpc ListTenantMenuPermissionGroupVersions(core.service.v1.ListTenantMenuPermissionGroupVersionsRequest) returns (core.service.v1.ListTenantMenuPermissionGroupVersionsResponse) {
+    option (google.api.http) = {get: "/admin/v1/tenant-menu-permission-groups/{group_id}/versions"};
+  }
+
+  rpc PublishTenantMenuPermissionGroupVersion(core.service.v1.PublishTenantMenuPermissionGroupVersionRequest) returns (core.service.v1.PublishTenantMenuPermissionGroupVersionResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/tenant-menu-permission-groups/{group_id}/versions:publish"
+      body: "*"
+    };
+  }
+
+  rpc RollbackTenantMenuPermissionGroupVersion(core.service.v1.RollbackTenantMenuPermissionGroupVersionRequest) returns (core.service.v1.RollbackTenantMenuPermissionGroupVersionResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/tenant-menu-permission-groups/{group_id}/versions:rollback"
+      body: "*"
+    };
+  }
+}

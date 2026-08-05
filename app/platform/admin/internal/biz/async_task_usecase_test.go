@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	pb "backend-service/api/core/service/v1"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+
+	pb "backend-service/api/core/service/v1"
 )
 
 type panicTaskHandler struct{}
@@ -93,11 +93,11 @@ func (r *taskRepoStub) Claim(context.Context, string, string, time.Duration) (*A
 	r.claimed = nil
 	return item, nil
 }
-func (r *taskRepoStub) Complete(_ context.Context, id uint32, _ string, _ string) error {
+func (r *taskRepoStub) Complete(_ context.Context, id uint32, _, _ string) error {
 	r.completedID = id
 	return nil
 }
-func (r *taskRepoStub) Fail(_ context.Context, id uint32, _ string, reason string, _ time.Time) error {
+func (r *taskRepoStub) Fail(_ context.Context, id uint32, _, reason string, _ time.Time) error {
 	r.failed = true
 	r.failedID = id
 	r.failReason = reason

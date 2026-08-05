@@ -17,9 +17,9 @@ type ParameterDefinition struct{ ent.Schema }
 
 func (ParameterDefinition) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_parameter_definitions"},
 		entsql.WithComments(true),
-		schema.Comment("平台参数定义表"),
+		schema.Comment("参数定义表"),
 	}
 }
 

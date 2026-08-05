@@ -3,14 +3,14 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"go.einride.tech/aip/fieldmask"
-	"go.einride.tech/aip/filtering"
 )
 
 // UserServiceService 用户服务
@@ -67,18 +67,12 @@ func parseUserListParams(req *pbCore.ListUsersRequest) (listing.Params, error) {
 
 // GetUser 获取用户详情
 func (s *UserServiceService) GetUser(ctx context.Context, req *pbCore.GetUserRequest) (*pbCore.User, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
-	}
 	s.log.Infof("获取用户详情 ID: %d", req.GetId())
 	return s.uuc.Get(ctx, req.GetId())
 }
 
 // CreateUser 创建用户
 func (s *UserServiceService) CreateUser(ctx context.Context, req *pbCore.CreateUserRequest) (*pbCore.CreateUserResponse, error) {
-	if req.GetUser() == nil {
-		return nil, pb.ErrorUserInvalidId("用户信息不能为空")
-	}
 	s.log.Infof("创建用户")
 	_, err := s.uuc.Create(ctx, req.GetUser())
 	if err != nil {
@@ -89,9 +83,6 @@ func (s *UserServiceService) CreateUser(ctx context.Context, req *pbCore.CreateU
 
 // UpdateUser 更新用户
 func (s *UserServiceService) UpdateUser(ctx context.Context, req *pbCore.UpdateUserRequest) (*pbCore.UpdateUserResponse, error) {
-	if req.GetId() == 0 || req.GetUser() == nil {
-		return nil, pb.ErrorUserInvalidId("用户ID和信息不能为空")
-	}
 	existing, err := s.GetUser(ctx, &pbCore.GetUserRequest{Id: req.GetId()})
 	if err != nil {
 		return nil, err
@@ -109,9 +100,6 @@ func (s *UserServiceService) UpdateUser(ctx context.Context, req *pbCore.UpdateU
 
 // DeleteUser 删除用户
 func (s *UserServiceService) DeleteUser(ctx context.Context, req *pbCore.DeleteUserRequest) (*pbCore.DeleteUserResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorUserInvalidId("用户ID不能为空")
-	}
 	s.log.Infof("删除用户 ID: %d", req.GetId())
 	if err := s.uuc.Delete(ctx, req.GetId()); err != nil {
 		return nil, err
@@ -143,12 +131,12 @@ func (s *UserServiceService) ListUsers(ctx context.Context, req *pbCore.ListUser
 		return nil, err
 	}
 	req.PageSize = int32(params.PageSize)
-	count, err := s.uuc.CountUsers(ctx, listing.FilterOption(params.Filter))
+	count, err := s.uuc.CountUsersByDept(ctx, req.GetDeptId(), req.GetIncludeChildDepts(), listing.FilterOption(params.Filter))
 	if err != nil {
 		return nil, err
 	}
 	resp := pbCore.ListUsersResponse{Total: count}
-	resp.Items, err = s.uuc.ListUsers(ctx,
+	resp.Items, err = s.uuc.ListUsersByDept(ctx, req.GetDeptId(), req.GetIncludeChildDepts(),
 		listing.FilterOption(params.Filter), listing.OrderByOption(params.OrderBy),
 		listing.LimitOption(params.PageSize), listing.OffsetOption(int(params.PageToken.Offset)),
 	)

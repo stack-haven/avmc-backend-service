@@ -7,12 +7,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/proto"
+
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/objectstorage"
-
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 type fileRepoStub struct {
@@ -36,15 +37,15 @@ func newFileRepoStub() *fileRepoStub {
 
 func (r *fileRepoStub) CreateUploadSession(_ context.Context, file *pbCore.FileObject, idempotencyKey string, expiresAt time.Time) (*pbCore.FileObject, error) {
 	r.createCalls++
-	created := *file
+	created := proto.Clone(file).(*pbCore.FileObject) //nolint:errcheck // proto.Clone does not return error
 	created.Id = r.nextID
 	created.UploadExpiresAt = stringPtr(expiresAt.UTC().Format(time.DateTime))
 	r.nextID++
-	r.byID[created.Id] = &created
+	r.byID[created.Id] = created
 	if idempotencyKey != "" {
-		r.byIdempotency[idempotencyKey] = &created
+		r.byIdempotency[idempotencyKey] = created
 	}
-	return &created, nil
+	return created, nil
 }
 
 func (r *fileRepoStub) Get(_ context.Context, id uint32) (*pbCore.FileObject, error) {
@@ -73,7 +74,7 @@ func (*fileRepoStub) Count(context.Context, ...listing.Option) (int32, error) {
 	return 0, nil
 }
 
-func (r *fileRepoStub) Confirm(_ context.Context, id uint32, size int64, sha256 string, etag string) (*pbCore.FileObject, error) {
+func (r *fileRepoStub) Confirm(_ context.Context, id uint32, size int64, sha256, etag string) (*pbCore.FileObject, error) {
 	r.confirmCalls++
 	file := r.byID[id]
 	if file == nil {
@@ -107,8 +108,8 @@ type fileAccessLogRepoStub struct {
 }
 
 func (r *fileAccessLogRepoStub) Append(_ context.Context, value *pbCore.FileAccessLog) error {
-	copy := *value
-	r.items = append(r.items, &copy)
+	cloned := proto.Clone(value).(*pbCore.FileAccessLog) //nolint:errcheck // proto.Clone does not return error
+	r.items = append(r.items, cloned)
 	return nil
 }
 
@@ -264,7 +265,7 @@ func TestFileUsecaseConfirmConsumesFileQuotas(t *testing.T) {
 	quotaRepo := &resourceQuotaRepoStub{}
 	quota := NewResourceQuotaUsecase(
 		quotaRepo,
-		&menuPermissionGroupRepoStub{caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
+		&TenantMenuPermissionGroupRepoStub{caps: &pbCore.GetCurrentTenantCapabilitiesResponse{
 			TenantId:       10,
 			ResourceQuotas: map[string]int64{fileQuotaKey: 2, storageBytesQuotaKey: 100},
 		}},

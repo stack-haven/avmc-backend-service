@@ -4,16 +4,15 @@ import (
 	"flag"
 	"os"
 
-	"backend-service/app/platform/admin/internal/runtimeconfig"
-	"backend-service/app/platform/admin/internal/server"
-
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-
 	_ "go.uber.org/automaxprocs"
+
+	"backend-service/app/platform/admin/internal/runtimeconfig"
+	"backend-service/app/platform/admin/internal/server"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -25,16 +24,22 @@ var (
 	// flagconf is the config flag.
 	flagconf string
 
-	id, _ = os.Hostname()
+	hostID string
 )
 
 func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+
+	var err error
+	hostID, err = os.Hostname()
+	if err != nil {
+		hostID = "unknown"
+	}
 }
 
 func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, worker *server.AsyncTaskWorker) *kratos.App {
 	return kratos.New(
-		kratos.ID(id),
+		kratos.ID(hostID),
 		kratos.Name(Name),
 		kratos.Version(Version),
 		kratos.Metadata(map[string]string{}),
@@ -52,7 +57,7 @@ func main() {
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
-		"service.id", id,
+		"service.id", hostID,
 		"service.name", Name,
 		"service.version", Version,
 		"trace.id", tracing.TraceID(),

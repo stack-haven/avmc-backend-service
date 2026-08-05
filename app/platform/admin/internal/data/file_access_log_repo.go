@@ -51,7 +51,7 @@ func (r *fileAccessLogRepo) Append(ctx context.Context, value *pbCore.FileAccess
 	if value == nil || value.GetFileId() == 0 {
 		return pb.ErrorBadRequest("文件访问日志缺少文件ID")
 	}
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	builder := r.Data.DB(ctx).FileAccessLog.Create().
@@ -75,7 +75,7 @@ func (r *fileAccessLogRepo) Append(ctx context.Context, value *pbCore.FileAccess
 }
 
 func (r *fileAccessLogRepo) List(ctx context.Context, opts ...listing.Option) ([]*pbCore.FileAccessLog, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	options := applyFileListOptions(opts...)
@@ -88,11 +88,11 @@ func (r *fileAccessLogRepo) List(ctx context.Context, opts ...listing.Option) ([
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(rows, fileAccessLogToProto), nil
+	return convert.SliceToAny(rows, fileAccessLogToProto), nil
 }
 
 func (r *fileAccessLogRepo) Count(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	options := applyFileListOptions(opts...)

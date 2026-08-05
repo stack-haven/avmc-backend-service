@@ -90,30 +90,30 @@ const (
 	// EdgePermissionGroupVersions holds the string denoting the permission_group_versions edge name in mutations.
 	EdgePermissionGroupVersions = "permission_group_versions"
 	// Table holds the table name of the menu in the database.
-	Table = "menus"
+	Table = "system_menus"
 	// ParentTable is the table that holds the parent relation/edge.
-	ParentTable = "menus"
+	ParentTable = "system_menus"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "parent_id"
 	// ChildrenTable is the table that holds the children relation/edge.
-	ChildrenTable = "menus"
+	ChildrenTable = "system_menus"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "parent_id"
 	// RolesTable is the table that holds the roles relation/edge. The primary key declared below.
-	RolesTable = "role_menus"
+	RolesTable = "system_role_menus"
 	// RolesInverseTable is the table name for the Role entity.
 	// It exists in this package in order to avoid circular dependency with the "role" package.
-	RolesInverseTable = "roles"
+	RolesInverseTable = "system_roles"
 	// PermissionGroupsTable is the table that holds the permission_groups relation/edge. The primary key declared below.
-	PermissionGroupsTable = "menu_permission_group_menus"
-	// PermissionGroupsInverseTable is the table name for the MenuPermissionGroup entity.
-	// It exists in this package in order to avoid circular dependency with the "menupermissiongroup" package.
-	PermissionGroupsInverseTable = "menu_permission_groups"
+	PermissionGroupsTable = "system_tenant_menu_permission_group_menus"
+	// PermissionGroupsInverseTable is the table name for the TenantMenuPermissionGroup entity.
+	// It exists in this package in order to avoid circular dependency with the "tenantmenupermissiongroup" package.
+	PermissionGroupsInverseTable = "system_tenant_menu_permission_groups"
 	// PermissionGroupVersionsTable is the table that holds the permission_group_versions relation/edge. The primary key declared below.
-	PermissionGroupVersionsTable = "menu_permission_group_version_menus"
-	// PermissionGroupVersionsInverseTable is the table name for the MenuPermissionGroupVersion entity.
-	// It exists in this package in order to avoid circular dependency with the "menupermissiongroupversion" package.
-	PermissionGroupVersionsInverseTable = "menu_permission_group_versions"
+	PermissionGroupVersionsTable = "system_tenant_menu_permission_group_version_menus"
+	// PermissionGroupVersionsInverseTable is the table name for the TenantMenuPermissionGroupVersion entity.
+	// It exists in this package in order to avoid circular dependency with the "tenantmenupermissiongroupversion" package.
+	PermissionGroupVersionsInverseTable = "system_tenant_menu_permission_group_versions"
 )
 
 // Columns holds all SQL columns for menu fields.
@@ -159,10 +159,10 @@ var (
 	RolesPrimaryKey = []string{"role_id", "menu_id"}
 	// PermissionGroupsPrimaryKey and PermissionGroupsColumn2 are the table columns denoting the
 	// primary key for the permission_groups relation (M2M).
-	PermissionGroupsPrimaryKey = []string{"menu_permission_group_id", "menu_id"}
+	PermissionGroupsPrimaryKey = []string{"tenant_menu_permission_group_id", "menu_id"}
 	// PermissionGroupVersionsPrimaryKey and PermissionGroupVersionsColumn2 are the table columns denoting the
 	// primary key for the permission_group_versions relation (M2M).
-	PermissionGroupVersionsPrimaryKey = []string{"menu_permission_group_version_id", "menu_id"}
+	PermissionGroupVersionsPrimaryKey = []string{"tenant_menu_permission_group_version_id", "menu_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

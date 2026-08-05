@@ -1,21 +1,14 @@
 package data
 
 import (
-	stdsql "database/sql"
 	"io"
 	"testing"
 
 	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
-	"backend-service/app/platform/admin/internal/data/ent/gen"
-	"backend-service/app/platform/admin/internal/data/ent/gen/enttest"
 
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/schema"
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -159,10 +152,11 @@ func TestRoleRepoProtectsTenantAdminRole(t *testing.T) {
 		SaveX(ctx)
 	repo := NewRoleRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 
+	disabled := pbEnum.Status_STATUS_DISABLED
 	if _, err := repo.Update(ctx, &pbCore.Role{
 		Id:     adminRole.ID,
 		Name:   ptr("changed-admin"),
-		Status: ptr(pbCoreStatusDisabled()),
+		Status: &disabled,
 	}); err == nil {
 		t.Fatal("tenant admin role update unexpectedly succeeded")
 	}

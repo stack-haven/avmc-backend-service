@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 文件中心访问日志表
+// 文件访问日志表
 type FileAccessLog struct {
 	config `json:"-"`
 	// ID of the ent.

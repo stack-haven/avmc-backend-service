@@ -1,14 +1,8 @@
 package server
 
 import (
-	v1 "backend-service/api/platform/admin/v1"
-	"backend-service/app/platform/admin/cmd/server/assets"
-	"backend-service/app/platform/admin/internal/biz"
-	"backend-service/app/platform/admin/internal/conf"
-	"backend-service/app/platform/admin/internal/service"
 	"context"
 	"fmt"
-
 	nethttp "net/http"
 	"time"
 
@@ -17,8 +11,12 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/gorilla/handlers"
 
+	v1 "backend-service/api/platform/admin/v1"
+	"backend-service/app/platform/admin/cmd/server/assets"
+	"backend-service/app/platform/admin/internal/biz"
+	"backend-service/app/platform/admin/internal/conf"
+	"backend-service/app/platform/admin/internal/service"
 	"backend-service/pkg/auth"
-
 	authzEngine "backend-service/pkg/auth/authz"
 	pkgHealth "backend-service/pkg/health"
 )
@@ -31,6 +29,7 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 	whiteList[v1.OperationAuthServiceLoginByEmail] = true
 	whiteList[v1.OperationAuthServiceLoginByUsername] = true
 	whiteList[v1.OperationAuthServiceRefreshToken] = true
+	whiteList[v1.OperationTenantServiceListTenantSimples] = true
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false
@@ -45,10 +44,11 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	checker pkgHealth.Checker,
 	operationAudit *biz.OperationLogUsecase,
 	auth *service.AuthServiceService,
+	tenant *service.TenantServiceService,
 	user *service.UserServiceService,
 	dept *service.DeptServiceService,
 	menu *service.MenuServiceService,
-	menuPermissionGroup *service.MenuPermissionGroupServiceService,
+	tenantMenuPermissionGroup *service.TenantMenuPermissionGroupServiceService,
 	role *service.RoleServiceService,
 	post *service.PostServiceService,
 	project *service.ProjectServiceService,
@@ -93,10 +93,11 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	srv := http.NewServer(opts...)
 	pkgHealth.RegisterHTTP(srv, checker, 2*time.Second)
 	v1.RegisterAuthServiceHTTPServer(srv, auth)
+	v1.RegisterTenantServiceHTTPServer(srv, tenant)
 	v1.RegisterUserServiceHTTPServer(srv, user)
 	v1.RegisterDeptServiceHTTPServer(srv, dept)
 	v1.RegisterMenuServiceHTTPServer(srv, menu)
-	v1.RegisterMenuPermissionGroupServiceHTTPServer(srv, menuPermissionGroup)
+	v1.RegisterTenantMenuPermissionGroupServiceHTTPServer(srv, tenantMenuPermissionGroup)
 	v1.RegisterRoleServiceHTTPServer(srv, role)
 	v1.RegisterPostServiceHTTPServer(srv, post)
 	v1.RegisterProjectServiceHTTPServer(srv, project)
@@ -110,7 +111,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterNotificationServiceHTTPServer(srv, notification)
 	v1.RegisterAsyncTaskServiceHTTPServer(srv, asyncTask)
 	if c.GetHttp().GetEnableSwagger() {
-		allFS := nethttp.FS(assets.OpenApiData)
+		allFS := nethttp.FS(assets.OpenAPIData)
 		// swagger-ui: http://127.0.0.1:8000/docs/swagger-ui
 		// swagger-ui: http://127.0.0.1:8000/docs/openapi.yaml
 		srv.HandlePrefix("/docs", nethttp.StripPrefix("/docs/", nethttp.FileServer(allFS)))

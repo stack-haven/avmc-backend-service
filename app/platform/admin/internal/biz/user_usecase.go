@@ -1,16 +1,15 @@
 package biz
 
 import (
-	pbEnum "backend-service/api/common/enum"
-	pb "backend-service/api/platform/admin/v1"
 	"context"
 
-	pbCore "backend-service/api/core/service/v1"
+	"github.com/go-kratos/kratos/v2/log"
 
+	pbEnum "backend-service/api/common/enum"
+	pbCore "backend-service/api/core/service/v1"
+	pb "backend-service/api/platform/admin/v1"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/crypto"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // UserRepo is a User repo.
@@ -22,6 +21,8 @@ type UserRepo interface {
 	ListByPhone(context.Context, string) ([]*pbCore.User, error)
 	ListUsers(context.Context, ...listing.Option) ([]*pbCore.User, error)
 	CountUsers(context.Context, ...listing.Option) (int32, error)
+	ListUsersByDept(context.Context, uint32, bool, ...listing.Option) ([]*pbCore.User, error)
+	CountUsersByDept(context.Context, uint32, bool, ...listing.Option) (int32, error)
 	ListAll(context.Context) ([]*pbCore.User, error)
 	ListPageSimple(context.Context, ...listing.Option) ([]*pbCore.User, error)
 	Delete(context.Context, uint32) error
@@ -172,4 +173,12 @@ func (uc *UserUsecase) ListUsers(ctx context.Context, opts ...listing.Option) ([
 // CountUsers 用户计数
 func (uc *UserUsecase) CountUsers(ctx context.Context, opts ...listing.Option) (int32, error) {
 	return uc.repo.CountUsers(ctx, opts...)
+}
+
+func (uc *UserUsecase) ListUsersByDept(ctx context.Context, deptID uint32, includeChildren bool, opts ...listing.Option) ([]*pbCore.User, error) {
+	return uc.repo.ListUsersByDept(ctx, deptID, includeChildren, opts...)
+}
+
+func (uc *UserUsecase) CountUsersByDept(ctx context.Context, deptID uint32, includeChildren bool, opts ...listing.Option) (int32, error) {
+	return uc.repo.CountUsersByDept(ctx, deptID, includeChildren, opts...)
 }

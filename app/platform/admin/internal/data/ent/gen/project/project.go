@@ -36,12 +36,12 @@ const (
 	// EdgeMembers holds the string denoting the members edge name in mutations.
 	EdgeMembers = "members"
 	// Table holds the table name of the project in the database.
-	Table = "projects"
+	Table = "system_projects"
 	// MembersTable is the table that holds the members relation/edge. The primary key declared below.
-	MembersTable = "project_members"
+	MembersTable = "system_project_members"
 	// MembersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	MembersInverseTable = "users"
+	MembersInverseTable = "system_users"
 )
 
 // Columns holds all SQL columns for project fields.

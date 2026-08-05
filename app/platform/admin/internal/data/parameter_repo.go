@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -20,6 +19,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/mixins"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
+	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/utils/convert"
 )
 
 const (
@@ -50,8 +51,8 @@ func parameterDefinitionProto(row *gen.ParameterDefinition) *pb.ParameterDefinit
 		TenantOverridable: row.TenantOverridable,
 		Status:            &status,
 		Sort:              &sort,
-		CreatedAt:         strTime(row.CreatedAt),
-		UpdatedAt:         strTime(row.UpdatedAt),
+		CreatedAt:         convert.TimeValueToString(&row.CreatedAt, time.DateTime),
+		UpdatedAt:         convert.TimeValueToString(&row.UpdatedAt, time.DateTime),
 	}
 }
 
@@ -73,11 +74,8 @@ func (r *parameterRepo) ListDefinitions(ctx context.Context, req *pb.ListParamet
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.
 		Order(gen.Asc(parameterdefinition.FieldSort), gen.Asc(parameterdefinition.FieldID)).
 		Offset(offset).
@@ -238,7 +236,7 @@ func (r *parameterRepo) ListResolved(ctx context.Context, tenantID uint32, keyFi
 			Source:            source,
 			TenantOverridable: definition.TenantOverridable,
 			Description:       &description,
-			UpdatedAt:         strTime(updatedAt),
+			UpdatedAt:         convert.TimeValueToString(&updatedAt, time.DateTime),
 		})
 	}
 	if keyFilter == "" {
@@ -326,7 +324,6 @@ func (r *parameterRepo) definitionByKey(ctx context.Context, key string) (*gen.P
 	}
 	return row, err
 }
-
 
 func parameterStatus(item *pb.ParameterDefinition) int32 {
 	if item.Status == nil || item.GetStatus() == enum.Status_STATUS_UNSPECIFIED {

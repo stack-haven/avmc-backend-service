@@ -31,7 +31,7 @@ const (
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
 	// Table holds the table name of the post in the database.
-	Table = "posts"
+	Table = "system_posts"
 )
 
 // Columns holds all SQL columns for post fields.
@@ -47,7 +47,7 @@ var Columns = []string{
 	FieldRemark,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "posts"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "system_posts"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_posts",

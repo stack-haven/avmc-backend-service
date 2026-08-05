@@ -779,10 +779,12 @@ type ListUsersRequest struct {
 	// 当前页码
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// 是否不分页
-	NoPaging *bool        `protobuf:"varint,3,opt,name=no_paging,json=nopaging,proto3,oneof" json:"no_paging,omitempty"`
-	Name     *string      `protobuf:"bytes,4,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Remark   *string      `protobuf:"bytes,5,opt,name=remark,proto3,oneof" json:"remark,omitempty"`
-	Status   *enum.Status `protobuf:"varint,6,opt,name=status,proto3,enum=enum.Status,oneof" json:"status,omitempty"`
+	NoPaging          *bool        `protobuf:"varint,3,opt,name=no_paging,json=nopaging,proto3,oneof" json:"no_paging,omitempty"`
+	Name              *string      `protobuf:"bytes,4,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Remark            *string      `protobuf:"bytes,5,opt,name=remark,proto3,oneof" json:"remark,omitempty"`
+	Status            *enum.Status `protobuf:"varint,6,opt,name=status,proto3,enum=enum.Status,oneof" json:"status,omitempty"`
+	DeptId            *uint32      `protobuf:"varint,7,opt,name=dept_id,json=deptId,proto3,oneof" json:"dept_id,omitempty"`
+	IncludeChildDepts *bool        `protobuf:"varint,8,opt,name=include_child_depts,json=includeChildDepts,proto3,oneof" json:"include_child_depts,omitempty"`
 	// Optional. The standard list filter.
 	// Supported fields:
 	//   - `name` (i.e. `name="John Doe"`)
@@ -879,6 +881,20 @@ func (x *ListUsersRequest) GetStatus() enum.Status {
 		return *x.Status
 	}
 	return enum.Status(0)
+}
+
+func (x *ListUsersRequest) GetDeptId() uint32 {
+	if x != nil && x.DeptId != nil {
+		return *x.DeptId
+	}
+	return 0
+}
+
+func (x *ListUsersRequest) GetIncludeChildDepts() bool {
+	if x != nil && x.IncludeChildDepts != nil {
+		return *x.IncludeChildDepts
+	}
+	return false
 }
 
 func (x *ListUsersRequest) GetFilter() string {
@@ -1252,22 +1268,22 @@ var File_core_service_v1_user_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x1acore/service/v1/user.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\"common/pagination/pagination.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/protobuf/any.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\xbe\v\n" +
+	"\x1acore/service/v1/user.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\"common/pagination/pagination.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/protobuf/any.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\xc2\v\n" +
 	"\x04User\x12\x1e\n" +
 	"\x02id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b用户IDR\x02id\x121\n" +
 	"\x04name\x18\x02 \x01(\tB\x18\xbaG\f\x92\x02\t用户名\xbaH\x06r\x04\x10\x03\x18 H\x00R\x04name\x88\x01\x01\x126\n" +
-	"\bpassword\x18\x03 \x01(\tB\x15\xbaG\t\x92\x02\x06密码\xbaH\x06r\x04\x10\f\x18HH\x01R\bpassword\x88\x01\x01\x126\n" +
+	"\bpassword\x18\x03 \x01(\tB\x15\xbaG\t\x92\x02\x06密码\xbaH\x06r\x04\x10\x06\x18HH\x01R\bpassword\x88\x01\x01\x126\n" +
 	"\bnickname\x18\x04 \x01(\tB\x15\xbaG\t\x92\x02\x06昵称\xbaH\x06r\x04\x10\x01\x18\n" +
 	"H\x02R\bnickname\x88\x01\x01\x12<\n" +
 	"\brealname\x18\x05 \x01(\tB\x1b\xbaG\x0f\x92\x02\f真实姓名\xbaH\x06r\x04\x10\x02\x18\n" +
 	"H\x03R\brealname\x88\x01\x01\x12\xcc\x02\n" +
-	"\bbirthday\x18\x06 \x01(\tB\xaa\x02\xbaG\t\x92\x02\x06生日\xbaH\x9a\x02r\x97\x022\x94\x02^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$H\x04R\bbirthday\x88\x01\x01\x12T\n" +
-	"\x06gender\x18\a \x01(\x0e2\f.enum.GenderB)\xbaG\x1e\x92\x02\x1b性别 0 未知 1 男 2 女\xbaH\x05\x82\x01\x02\x10\x01H\x05R\x06gender\x88\x01\x01\x12@\n" +
+	"\bbirthday\x18\x06 \x01(\tB\xaa\x02\xbaG\t\x92\x02\x06生日\xbaH\x9a\x02r\x97\x022\x94\x02^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$H\x04R\bbirthday\x88\x01\x01\x12V\n" +
+	"\x06gender\x18\a \x01(\x0e2\f.enum.GenderB+\xbaG\x1e\x92\x02\x1b性别 0 未知 1 男 2 女\xbaH\a\x82\x01\x04\x10\x01 \x00H\x05R\x06gender\x88\x01\x01\x12@\n" +
 	"\x05phone\x18\b \x01(\tB%\xbaG\f\x92\x02\t手机号\xbaH\x13r\x112\f^1[0-9]{10}$\x98\x01\vH\x06R\x05phone\x88\x01\x01\x124\n" +
 	"\x05email\x18\t \x01(\tB\x19\xbaG\x0f\x92\x02\f电子邮箱\xbaH\x04r\x02`\x01H\aR\x05email\x88\x01\x01\x12)\n" +
 	"\x06avatar\x18\n" +
-	" \x01(\tB\f\xbaG\t\x92\x02\x06头像H\bR\x06avatar\x88\x01\x01\x12Z\n" +
-	"\x06status\x18\v \x01(\x0e2\f.enum.StatusB/\xbaG$\x92\x02!状态 0 未知 1 启用 2 禁用\xbaH\x05\x82\x01\x02\x10\x01H\tR\x06status\x88\x01\x01\x126\n" +
+	" \x01(\tB\f\xbaG\t\x92\x02\x06头像H\bR\x06avatar\x88\x01\x01\x12\\\n" +
+	"\x06status\x18\v \x01(\x0e2\f.enum.StatusB1\xbaG$\x92\x02!状态 0 未知 1 启用 2 禁用\xbaH\a\x82\x01\x04\x10\x01 \x00H\tR\x06status\x88\x01\x01\x126\n" +
 	"\n" +
 	"created_at\x18\f \x01(\tB\x12\xbaG\x0f\x92\x02\f创建时间H\n" +
 	"R\tcreatedAt\x88\x01\x01\x126\n" +
@@ -1321,24 +1337,29 @@ const file_core_service_v1_user_proto_rawDesc = "" +
 	"\x15GetUserByPhoneRequest\x12.\n" +
 	"\x05phone\x18\x01 \x01(\tB\x18\xbaG\f\x92\x02\t手机号\xbaH\x06r\x04\x10\x01\x18\vR\x05phone\"<\n" +
 	"\x0fGetUserResponse\x12)\n" +
-	"\x04user\x18\x01 \x01(\v2\x15.core.service.v1.UserR\x04user\"\xd3\x04\n" +
+	"\x04user\x18\x01 \x01(\v2\x15.core.service.v1.UserR\x04user\"\x8f\x06\n" +
 	"\x10ListUsersRequest\x12A\n" +
 	"\tpage_size\x18\x01 \x01(\x05B$\xbaG!\x8a\x02\t\t\x00\x00\x00\x00\x00\x004@\x92\x02\x12每一页的行数R\bpageSize\x12=\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tB\x1e\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00\xf0?\x92\x02\f当前页码R\tpageToken\x127\n" +
 	"\tno_paging\x18\x03 \x01(\bB\x15\xbaG\x12\x92\x02\x0f是否不分页H\x00R\bnopaging\x88\x01\x01\x12(\n" +
 	"\x04name\x18\x04 \x01(\tB\x0f\xbaG\f\x92\x02\t用户名H\x01R\x04name\x88\x01\x01\x12)\n" +
-	"\x06remark\x18\x05 \x01(\tB\f\xbaG\t\x92\x02\x06备注H\x02R\x06remark\x88\x01\x01\x12Z\n" +
-	"\x06status\x18\x06 \x01(\x0e2\f.enum.StatusB/\xbaG$\x92\x02!状态 0 未知 1 启用 2 禁用\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x06status\x88\x01\x01\x12/\n" +
+	"\x06remark\x18\x05 \x01(\tB\f\xbaG\t\x92\x02\x06备注H\x02R\x06remark\x88\x01\x01\x12\\\n" +
+	"\x06status\x18\x06 \x01(\x0e2\f.enum.StatusB1\xbaG$\x92\x02!状态 0 未知 1 启用 2 禁用\xbaH\a\x82\x01\x04\x10\x01 \x00H\x03R\x06status\x88\x01\x01\x129\n" +
+	"\adept_id\x18\a \x01(\rB\x1b\xbaG\x11\x92\x02\x0e所属部门ID\xbaH\x04*\x02 \x00H\x04R\x06deptId\x88\x01\x01\x12Y\n" +
+	"\x13include_child_depts\x18\b \x01(\bB$\xbaG!\x92\x02\x1e是否包含下级部门用户H\x05R\x11includeChildDepts\x88\x01\x01\x12/\n" +
 	"\x06filter\x18\n" +
-	" \x01(\tB\x12\xbaG\x0f\x92\x02\f筛选条件H\x04R\x06filter\x88\x01\x01\x122\n" +
-	"\border_by\x18\v \x01(\tB\x12\xbaG\x0f\x92\x02\f排序字段H\x05R\aorderBy\x88\x01\x01\x12)\n" +
+	" \x01(\tB\x12\xbaG\x0f\x92\x02\f筛选条件H\x06R\x06filter\x88\x01\x01\x122\n" +
+	"\border_by\x18\v \x01(\tB\x12\xbaG\x0f\x92\x02\f排序字段H\aR\aorderBy\x88\x01\x01\x12)\n" +
 	"\x04skip\x18\f \x01(\x05B\x15\xbaG\x12\x92\x02\x0f跳过的行数R\x04skipB\f\n" +
 	"\n" +
 	"_no_pagingB\a\n" +
 	"\x05_nameB\t\n" +
 	"\a_remarkB\t\n" +
-	"\a_statusB\t\n" +
+	"\a_statusB\n" +
+	"\n" +
+	"\b_dept_idB\x16\n" +
+	"\x14_include_child_deptsB\t\n" +
 	"\a_filterB\v\n" +
 	"\t_order_by\"~\n" +
 	"\x11ListUsersResponse\x12+\n" +
@@ -1347,17 +1368,17 @@ const file_core_service_v1_user_proto_rawDesc = "" +
 	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"x\n" +
 	"\x15VerifyPasswordRequest\x12,\n" +
 	"\x04name\x18\x01 \x01(\tB\x18\xbaG\f\x92\x02\t用户名\xbaH\x06r\x04\x10\x03\x18 R\x04name\x121\n" +
-	"\bpassword\x18\x02 \x01(\tB\x15\xbaG\t\x92\x02\x06密码\xbaH\x06r\x04\x10\f\x18HR\bpassword\"Q\n" +
+	"\bpassword\x18\x02 \x01(\tB\x15\xbaG\t\x92\x02\x06密码\xbaH\x06r\x04\x10\x06\x18HR\bpassword\"Q\n" +
 	"\x16VerifyPasswordResponse\x127\n" +
 	"\x06result\x18\x01 \x01(\x0e2\x1f.core.service.v1.VerifyPasswordR\x06result\"A\n" +
 	"\x11UserExistsRequest\x12,\n" +
 	"\x04name\x18\x01 \x01(\tB\x18\xbaG\f\x92\x02\t用户名\xbaH\x06r\x04\x10\x02\x18\n" +
 	"R\x04name\"*\n" +
 	"\x12UserExistsResponse\x12\x14\n" +
-	"\x05exist\x18\x01 \x01(\bR\x05exist\"\xf9\x01\n" +
+	"\x05exist\x18\x01 \x01(\bR\x05exist\"\xfb\x01\n" +
 	"\x19UpdateUserByStatusRequest\x12%\n" +
-	"\x02id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b用户ID\xbaH\x04*\x02 \x00R\x02id\x12Z\n" +
-	"\x06status\x18\x02 \x01(\x0e2\f.enum.StatusB/\xbaG$\x92\x02!状态 0 未知 1 启用 2 禁用\xbaH\x05\x82\x01\x02\x10\x01H\x00R\x06status\x88\x01\x01\x12>\n" +
+	"\x02id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b用户ID\xbaH\x04*\x02 \x00R\x02id\x12\\\n" +
+	"\x06status\x18\x02 \x01(\x0e2\f.enum.StatusB1\xbaG$\x92\x02!状态 0 未知 1 启用 2 禁用\xbaH\a\x82\x01\x04\x10\x01 \x00H\x00R\x06status\x88\x01\x01\x12>\n" +
 	"\voperator_id\x18\x03 \x01(\rB\x18\xbaG\x0e\x92\x02\v操作人ID\xbaH\x04*\x02 \x00H\x01R\n" +
 	"operatorId\x88\x01\x01B\t\n" +
 	"\a_statusB\x0e\n" +

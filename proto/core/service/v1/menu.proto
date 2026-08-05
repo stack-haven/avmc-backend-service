@@ -116,7 +116,7 @@ message Menu {
   ];
   // 菜单类型
   optional MenuType type = 10 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {
       description: "菜单类型"
       default: {number: 1}
@@ -124,7 +124,7 @@ message Menu {
   ];
   // 菜单状态 1 启用 2 禁用
   optional enum.Status status = 11 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {
       description: "菜单状态 1 启用 2 禁用"
       default: {number: 1}
@@ -171,7 +171,7 @@ message MenuMeta {
   ];
   // 徽标颜色
   optional BadgeVariants badge_variants = 7 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "徽标颜色"}
   ];
   // 在菜单中隐藏下级
@@ -303,7 +303,7 @@ message ListMenusRequest {
   optional string name = 4 [(buf.validate.field).string.max_len = 20];
   // 菜单状态
   optional enum.Status status = 5 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "菜单状态 0 未知 1 启用 2 禁用"}
   ];
 

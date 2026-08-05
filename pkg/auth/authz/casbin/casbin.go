@@ -346,6 +346,12 @@ func (a *CasbinAuthorizer) RemovePolicies(ctx context.Context, policies []authz.
 	return removed, nil
 }
 
+// RemoveFilteredPolicy removes policies matching the given field values.
+// fieldIndex is 0-based: 0=sub, 1=obj, 2=act, 3=tenant, 4=eft.
+func (a *CasbinAuthorizer) RemoveFilteredPolicy(ctx context.Context, fieldIndex int, fieldValues ...string) (bool, error) {
+	return a.enforcer.RemoveFilteredPolicy(fieldIndex, fieldValues...)
+}
+
 // GetAllSubjects 获取所有主体
 func (a *CasbinAuthorizer) GetAllSubjects(ctx context.Context) ([]authz.Subject, error) {
 	// 获取所有主体

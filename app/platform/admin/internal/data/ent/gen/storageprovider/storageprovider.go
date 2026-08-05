@@ -57,7 +57,7 @@ const (
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
 	// Table holds the table name of the storageprovider in the database.
-	Table = "storage_providers"
+	Table = "system_storage_providers"
 )
 
 // Columns holds all SQL columns for storageprovider fields.

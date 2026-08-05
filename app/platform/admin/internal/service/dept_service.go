@@ -3,14 +3,14 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"go.einride.tech/aip/fieldmask"
-	"go.einride.tech/aip/filtering"
 )
 
 // DeptServiceService 部门服务结构体
@@ -71,9 +71,6 @@ func (s *DeptServiceService) ListDepts(ctx context.Context, req *pbCore.ListDept
 // 参数：ctx 上下文，req 获取部门请求
 // 返回值：部门详情，错误信息
 func (s *DeptServiceService) GetDept(ctx context.Context, req *pbCore.GetDeptRequest) (*pbCore.Dept, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorDeptInvalidId("部门ID不能为空")
-	}
 	s.log.Infof("获取部门详情，部门ID：%v", req.GetId())
 	return s.duc.Get(ctx, req.GetId())
 }
@@ -82,9 +79,6 @@ func (s *DeptServiceService) GetDept(ctx context.Context, req *pbCore.GetDeptReq
 // 参数：ctx 上下文，req 创建部门请求
 // 返回值：创建部门响应，错误信息
 func (s *DeptServiceService) CreateDept(ctx context.Context, req *pbCore.CreateDeptRequest) (*pbCore.CreateDeptResponse, error) {
-	if req.GetDept() == nil {
-		return nil, pb.ErrorDeptInvalidId("部门信息不能为空")
-	}
 	s.log.Infof("创建部门，部门名称：%s", req.GetDept().GetName())
 	_, err := s.duc.Create(ctx, req.Dept)
 	if err != nil {
@@ -97,12 +91,6 @@ func (s *DeptServiceService) CreateDept(ctx context.Context, req *pbCore.CreateD
 // 参数：ctx 上下文，req 更新部门请求
 // 返回值：更新部门响应，错误信息
 func (s *DeptServiceService) UpdateDept(ctx context.Context, req *pbCore.UpdateDeptRequest) (*pbCore.UpdateDeptResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorDeptInvalidId("部门ID不能为空")
-	}
-	if req.GetDept() == nil {
-		return nil, pb.ErrorDeptInvalidId("部门信息不能为空")
-	}
 	existing, err := s.GetDept(ctx, &pbCore.GetDeptRequest{Id: req.GetId()})
 	if err != nil {
 		return nil, err
@@ -121,15 +109,24 @@ func (s *DeptServiceService) UpdateDept(ctx context.Context, req *pbCore.UpdateD
 // 参数：ctx 上下文，req 删除部门请求
 // 返回值：删除部门响应，错误信息
 func (s *DeptServiceService) DeleteDept(ctx context.Context, req *pbCore.DeleteDeptRequest) (*pbCore.DeleteDeptResponse, error) {
-	if req.Id == 0 {
-		return nil, pb.ErrorDeptInvalidId("部门ID不能为空")
-	}
 	s.log.Infof("删除部门，部门ID：%v", req.Id)
 	err := s.duc.Delete(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
 	return &pbCore.DeleteDeptResponse{}, nil
+}
+
+func (s *DeptServiceService) GetDeptDeleteImpact(ctx context.Context, req *pbCore.GetDeptDeleteImpactRequest) (*pbCore.GetDeptDeleteImpactResponse, error) {
+	return s.duc.GetDeleteImpact(ctx, req.GetId())
+}
+
+func (s *DeptServiceService) TransferAndDeleteDept(ctx context.Context, req *pbCore.TransferAndDeleteDeptRequest) (*pbCore.TransferAndDeleteDeptResponse, error) {
+	count, err := s.duc.TransferAndDelete(ctx, req.GetId(), req.GetTargetDeptId())
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.TransferAndDeleteDeptResponse{TransferredUserCount: count}, nil
 }
 
 // ListDeptTree 处理部门树形列表请求

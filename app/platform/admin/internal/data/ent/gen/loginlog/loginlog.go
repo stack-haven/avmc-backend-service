@@ -37,7 +37,7 @@ const (
 	// FieldSessionID holds the string denoting the session_id field in the database.
 	FieldSessionID = "session_id"
 	// Table holds the table name of the loginlog in the database.
-	Table = "login_logs"
+	Table = "system_login_logs"
 )
 
 // Columns holds all SQL columns for loginlog fields.

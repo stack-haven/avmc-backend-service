@@ -97,9 +97,9 @@ type MenuEdges struct {
 	// Roles holds the value of the roles edge.
 	Roles []*Role `json:"roles,omitempty"`
 	// PermissionGroups holds the value of the permission_groups edge.
-	PermissionGroups []*MenuPermissionGroup `json:"permission_groups,omitempty"`
+	PermissionGroups []*TenantMenuPermissionGroup `json:"permission_groups,omitempty"`
 	// PermissionGroupVersions holds the value of the permission_group_versions edge.
-	PermissionGroupVersions []*MenuPermissionGroupVersion `json:"permission_group_versions,omitempty"`
+	PermissionGroupVersions []*TenantMenuPermissionGroupVersion `json:"permission_group_versions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [5]bool
@@ -136,7 +136,7 @@ func (e MenuEdges) RolesOrErr() ([]*Role, error) {
 
 // PermissionGroupsOrErr returns the PermissionGroups value or an error if the edge
 // was not loaded in eager-loading.
-func (e MenuEdges) PermissionGroupsOrErr() ([]*MenuPermissionGroup, error) {
+func (e MenuEdges) PermissionGroupsOrErr() ([]*TenantMenuPermissionGroup, error) {
 	if e.loadedTypes[3] {
 		return e.PermissionGroups, nil
 	}
@@ -145,7 +145,7 @@ func (e MenuEdges) PermissionGroupsOrErr() ([]*MenuPermissionGroup, error) {
 
 // PermissionGroupVersionsOrErr returns the PermissionGroupVersions value or an error if the edge
 // was not loaded in eager-loading.
-func (e MenuEdges) PermissionGroupVersionsOrErr() ([]*MenuPermissionGroupVersion, error) {
+func (e MenuEdges) PermissionGroupVersionsOrErr() ([]*TenantMenuPermissionGroupVersion, error) {
 	if e.loadedTypes[4] {
 		return e.PermissionGroupVersions, nil
 	}
@@ -436,12 +436,12 @@ func (_m *Menu) QueryRoles() *RoleQuery {
 }
 
 // QueryPermissionGroups queries the "permission_groups" edge of the Menu entity.
-func (_m *Menu) QueryPermissionGroups() *MenuPermissionGroupQuery {
+func (_m *Menu) QueryPermissionGroups() *TenantMenuPermissionGroupQuery {
 	return NewMenuClient(_m.config).QueryPermissionGroups(_m)
 }
 
 // QueryPermissionGroupVersions queries the "permission_group_versions" edge of the Menu entity.
-func (_m *Menu) QueryPermissionGroupVersions() *MenuPermissionGroupVersionQuery {
+func (_m *Menu) QueryPermissionGroupVersions() *TenantMenuPermissionGroupVersionQuery {
 	return NewMenuClient(_m.config).QueryPermissionGroupVersions(_m)
 }
 

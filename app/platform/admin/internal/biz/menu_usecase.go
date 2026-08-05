@@ -3,16 +3,11 @@ package biz
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
-
-	"github.com/go-kratos/kratos/v2/log"
-)
-
-var (
-// ErrMenuNotFound is user not found.
-// ErrMenuNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
 // MenuRepo is a Greater repo.
@@ -102,17 +97,11 @@ func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMe
 	if err != nil {
 		return nil, err
 	}
-	tree := make([]*pbCore.Menu, 0)
-
-	tree, err = convert.ToTree(menus, pid, func(parent *pbCore.Menu, childrens ...*pbCore.Menu) error {
+	tree, err := convert.ToTree(menus, pid, func(parent *pbCore.Menu, childrens ...*pbCore.Menu) error {
 		parent.Children = append(parent.Children, childrens...)
 		return nil
 	})
-	// tree, err = convert.ToTreeWith(
-	// 	menus, pid, func(item *pbCore.Menu) uint32 { return item.Id }, func(item *pbCore.Menu) uint32 { return *item.ParentId }, func(parent *pbCore.Menu, children ...*pbCore.Menu) error {
-	// 		parent.Children = append(parent.Children, children...)
-	// 		return nil
-	// 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -124,10 +113,7 @@ func (uc *MenuUsecase) ListTree(ctx context.Context, pid uint32) (*pbCore.ListMe
 // 返回值：错误信息
 func (uc *MenuUsecase) Delete(ctx context.Context, id uint32) error {
 	uc.log.WithContext(ctx).Infof("DeleteMenu: %v", id)
-	// _, err := uc.repo.FindByID(ctx, id)
-	// if err != nil {
-	// 	return err
-	// }
+
 	return uc.repo.Delete(ctx, id)
 }
 

@@ -59,7 +59,7 @@ const (
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// Table holds the table name of the fileobject in the database.
-	Table = "file_objects"
+	Table = "system_file_objects"
 )
 
 // Columns holds all SQL columns for fileobject fields.

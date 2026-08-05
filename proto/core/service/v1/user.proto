@@ -71,7 +71,7 @@ message User {
   ];
   optional string password = 3 [
     (buf.validate.field).string = {
-      min_len: 12
+      min_len: 6
       max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "密码"}
@@ -95,7 +95,7 @@ message User {
     (gnostic.openapi.v3.property) = {description: "生日"}
   ];
   optional enum.Gender gender = 7 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "性别 0 未知 1 男 2 女"}
   ];
   optional string phone = 8 [
@@ -109,7 +109,7 @@ message User {
   ];
   optional string avatar = 10 [(gnostic.openapi.v3.property) = {description: "头像"}];
   optional enum.Status status = 11 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "状态 0 未知 1 启用 2 禁用"}
   ];
   optional string created_at = 12 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
@@ -133,8 +133,7 @@ message CreateUserRequest {
 message CreateUserResponse {}
 
 message UpdateUserRequest {
-  uint32 id = 1 [
-    (buf.validate.field).uint32.gt = 0,
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "用户ID"}
   ];
   User user = 2 [
@@ -222,8 +221,15 @@ message ListUsersRequest {
   optional string name = 4 [(gnostic.openapi.v3.property) = {description: "用户名"}];
   optional string remark = 5 [(gnostic.openapi.v3.property) = {description: "备注"}];
   optional enum.Status status = 6 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "状态 0 未知 1 启用 2 禁用"}
+  ];
+  optional uint32 dept_id = 7 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "所属部门ID"}
+  ];
+  optional bool include_child_depts = 8 [
+    (gnostic.openapi.v3.property) = {description: "是否包含下级部门用户"}
   ];
 
   // Optional. The standard list filter.
@@ -267,7 +273,7 @@ message VerifyPasswordRequest {
   ];
   string password = 2 [
     (buf.validate.field).string = {
-      min_len: 12
+      min_len: 6
       max_len: 72
     },
     (gnostic.openapi.v3.property) = {description: "密码"}
@@ -302,7 +308,10 @@ message UpdateUserByStatusRequest {
     (gnostic.openapi.v3.property) = {description: "用户ID"}
   ];
   optional enum.Status status = 2 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    },
     (gnostic.openapi.v3.property) = {description: "状态 0 未知 1 启用 2 禁用"}
   ];
   optional uint32 operator_id = 3 [

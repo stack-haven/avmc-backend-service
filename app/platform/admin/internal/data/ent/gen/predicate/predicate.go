@@ -30,12 +30,6 @@ type LoginLog func(*sql.Selector)
 // Menu is the predicate function for menu builders.
 type Menu func(*sql.Selector)
 
-// MenuPermissionGroup is the predicate function for menupermissiongroup builders.
-type MenuPermissionGroup func(*sql.Selector)
-
-// MenuPermissionGroupVersion is the predicate function for menupermissiongroupversion builders.
-type MenuPermissionGroupVersion func(*sql.Selector)
-
 // NotificationMessage is the predicate function for notificationmessage builders.
 type NotificationMessage func(*sql.Selector)
 
@@ -59,6 +53,15 @@ type Role func(*sql.Selector)
 
 // StorageProvider is the predicate function for storageprovider builders.
 type StorageProvider func(*sql.Selector)
+
+// Tenant is the predicate function for tenant builders.
+type Tenant func(*sql.Selector)
+
+// TenantMenuPermissionGroup is the predicate function for tenantmenupermissiongroup builders.
+type TenantMenuPermissionGroup func(*sql.Selector)
+
+// TenantMenuPermissionGroupVersion is the predicate function for tenantmenupermissiongroupversion builders.
+type TenantMenuPermissionGroupVersion func(*sql.Selector)
 
 // TenantParameterOverride is the predicate function for tenantparameteroverride builders.
 type TenantParameterOverride func(*sql.Selector)

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	pbCore "backend-service/api/core/service/v1"
-	pb "backend-service/api/platform/admin/v1"
-	"backend-service/pkg/objectstorage"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/proto"
+
+	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/objectstorage"
 )
 
 const (
@@ -66,10 +66,10 @@ func (uc *StorageProviderUsecase) Create(ctx context.Context, item *pbCore.Stora
 
 func (uc *StorageProviderUsecase) Update(ctx context.Context, id uint32, item *pbCore.StorageProvider) (*pbCore.StorageProvider, error) {
 	if id == 0 {
-		return nil, pb.ErrorBadRequest("存储渠道ID不能为空")
+		return nil, errors.BadRequest("STORAGE_PROVIDER_ID_REQUIRED", "存储渠道ID不能为空")
 	}
 	if item == nil {
-		return nil, pb.ErrorBadRequest("存储渠道不能为空")
+		return nil, errors.BadRequest("STORAGE_PROVIDER_REQUIRED", "存储渠道不能为空")
 	}
 	item.Id = id
 	if err := validateStorageProvider(item, false); err != nil {
@@ -80,14 +80,14 @@ func (uc *StorageProviderUsecase) Update(ctx context.Context, id uint32, item *p
 
 func (uc *StorageProviderUsecase) Delete(ctx context.Context, id uint32) error {
 	if id == 0 {
-		return pb.ErrorBadRequest("存储渠道ID不能为空")
+		return errors.BadRequest("STORAGE_PROVIDER_ID_REQUIRED", "存储渠道ID不能为空")
 	}
 	return uc.repo.Delete(ctx, id)
 }
 
 func (uc *StorageProviderUsecase) Get(ctx context.Context, id uint32) (*pbCore.StorageProvider, error) {
 	if id == 0 {
-		return nil, pb.ErrorBadRequest("存储渠道ID不能为空")
+		return nil, errors.BadRequest("STORAGE_PROVIDER_ID_REQUIRED", "存储渠道ID不能为空")
 	}
 	return uc.repo.Get(ctx, id)
 }
@@ -101,7 +101,7 @@ func (uc *StorageProviderUsecase) List(ctx context.Context, req *pbCore.ListStor
 
 func (uc *StorageProviderUsecase) SetDefault(ctx context.Context, id uint32) (*pbCore.StorageProvider, error) {
 	if id == 0 {
-		return nil, pb.ErrorBadRequest("存储渠道ID不能为空")
+		return nil, errors.BadRequest("STORAGE_PROVIDER_ID_REQUIRED", "存储渠道ID不能为空")
 	}
 	return uc.repo.SetDefault(ctx, id)
 }
@@ -109,10 +109,15 @@ func (uc *StorageProviderUsecase) SetDefault(ctx context.Context, id uint32) (*p
 func (uc *StorageProviderUsecase) Test(ctx context.Context, id uint32, item *pbCore.StorageProvider) (*pbCore.TestStorageProviderResponse, error) {
 	if id > 0 {
 		if _, err := uc.repo.ResolveSnapshot(ctx, id, "", ""); err != nil {
-			_ = uc.repo.MarkHealth(ctx, id, "unhealthy")
+			if markErr := uc.repo.MarkHealth(ctx, id, "unhealthy"); markErr != nil {
+				uc.log.WithContext(ctx).Warnf("mark storage provider unhealthy failed: %v", markErr)
+			}
+			//nolint:nilerr // Test wraps error into response, not propagation
 			return &pbCore.TestStorageProviderResponse{Healthy: false, Message: err.Error()}, nil
 		}
-		_ = uc.repo.MarkHealth(ctx, id, "healthy")
+		if err := uc.repo.MarkHealth(ctx, id, "healthy"); err != nil {
+			uc.log.WithContext(ctx).Warnf("mark storage provider healthy failed: %v", err)
+		}
 		return &pbCore.TestStorageProviderResponse{Healthy: true, Message: "ok"}, nil
 	}
 	if err := validateStorageProvider(item, true); err != nil {
@@ -120,6 +125,7 @@ func (uc *StorageProviderUsecase) Test(ctx context.Context, id uint32, item *pbC
 	}
 	provider := normalizeStorageProvider(item, true)
 	if _, err := uc.repo.BuildClient(ctx, provider); err != nil {
+		//nolint:nilerr // Test wraps error into response, not propagation
 		return &pbCore.TestStorageProviderResponse{Healthy: false, Message: err.Error()}, nil
 	}
 	return &pbCore.TestStorageProviderResponse{Healthy: true, Message: "ok"}, nil
@@ -127,26 +133,26 @@ func (uc *StorageProviderUsecase) Test(ctx context.Context, id uint32, item *pbC
 
 func validateStorageProvider(item *pbCore.StorageProvider, create bool) error {
 	if item == nil {
-		return pb.ErrorBadRequest("存储渠道不能为空")
+		return errors.BadRequest("STORAGE_PROVIDER_REQUIRED", "存储渠道不能为空")
 	}
 	if strings.TrimSpace(item.GetCode()) == "" {
-		return pb.ErrorBadRequest("存储渠道编码不能为空")
+		return errors.BadRequest("STORAGE_PROVIDER_CODE_REQUIRED", "存储渠道编码不能为空")
 	}
 	if strings.TrimSpace(item.GetName()) == "" {
-		return pb.ErrorBadRequest("存储渠道名称不能为空")
+		return errors.BadRequest("STORAGE_PROVIDER_NAME_REQUIRED", "存储渠道名称不能为空")
 	}
 	providerType := normalizeStorageProviderType(item.GetType())
 	switch providerType {
 	case StorageProviderTypeS3Compatible:
 		if strings.TrimSpace(item.GetEndpoint()) == "" {
-			return pb.ErrorBadRequest("S3 endpoint 不能为空")
+			return errors.BadRequest("STORAGE_PROVIDER_ENDPOINT_REQUIRED", "S3 endpoint 不能为空")
 		}
 		if create && strings.TrimSpace(item.GetSecretKey()) == "" {
-			return pb.ErrorBadRequest("S3 secret key 不能为空")
+			return errors.BadRequest("STORAGE_PROVIDER_SECRET_KEY_REQUIRED", "S3 secret key 不能为空")
 		}
 	case StorageProviderTypeLocal:
 		if strings.TrimSpace(item.GetLocalBasePath()) == "" {
-			return pb.ErrorBadRequest("本地存储根目录不能为空")
+			return errors.BadRequest("STORAGE_PROVIDER_LOCAL_PATH_REQUIRED", "本地存储根目录不能为空")
 		}
 	default:
 		return errors.BadRequest("STORAGE_PROVIDER_TYPE_UNSUPPORTED", fmt.Sprintf("不支持的存储类型: %s", item.GetType()))
@@ -155,7 +161,7 @@ func validateStorageProvider(item *pbCore.StorageProvider, create bool) error {
 }
 
 func normalizeStorageProvider(item *pbCore.StorageProvider, create bool) *pbCore.StorageProvider {
-	clone := *item
+	clone := proto.Clone(item).(*pbCore.StorageProvider) //nolint:errcheck // proto.Clone does not return error
 	clone.Code = strings.TrimSpace(clone.Code)
 	clone.Name = strings.TrimSpace(clone.Name)
 	clone.Type = normalizeStorageProviderType(clone.Type)
@@ -171,7 +177,7 @@ func normalizeStorageProvider(item *pbCore.StorageProvider, create bool) *pbCore
 	if !create && strings.TrimSpace(clone.GetSessionToken()) == "" {
 		clone.SessionToken = nil
 	}
-	return &clone
+	return clone
 }
 
 func normalizeStorageProviderType(value string) string {

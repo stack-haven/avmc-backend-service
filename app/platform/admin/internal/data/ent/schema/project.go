@@ -21,6 +21,7 @@ func (Project) Annotations() []schema.Annotation {
 		entsql.Annotation{
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
+			Table:     "system_projects",
 		},
 		entsql.WithComments(true),
 		schema.Comment("项目表"),
@@ -40,7 +41,7 @@ func (Project) Fields() []ent.Field {
 // Edges of the Project.
 func (Project) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("members", User.Type),
+		edge.To("members", User.Type).StorageKey(edge.Table("system_project_members")).Comment("项目成员关联表"),
 	}
 }
 

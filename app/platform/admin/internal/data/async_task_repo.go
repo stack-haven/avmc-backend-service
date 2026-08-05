@@ -13,6 +13,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
+	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -85,20 +87,6 @@ func asyncTaskProto(row *gen.AsyncTask) *pb.AsyncTask {
 	return result
 }
 
-func setOptionalString(target **string, value string) {
-	if value != "" {
-		v := value
-		*target = &v
-	}
-}
-
-func setOptionalTime(target **string, value *time.Time) {
-	if value != nil {
-		formatted := value.Format(timeFormat)
-		*target = &formatted
-	}
-}
-
 func (r *asyncTaskRepo) Enqueue(ctx context.Context, spec *biz.AsyncTaskSpec) (*pb.AsyncTask, error) {
 	ctx = entviewer.NewSystemContext(ctx)
 	idempotencyKey := scopedTaskIdempotencyKey(spec)
@@ -161,14 +149,8 @@ func (r *asyncTaskRepo) List(ctx context.Context, req *pb.ListAsyncTasksRequest)
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 {
-		size = 20
-	}
-	offset, err := strconv.Atoi(req.GetPageToken())
-	if err != nil || offset < 0 {
-		offset = 0
-	}
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.
 		Order(gen.Desc(asynctask.FieldCreatedAt)).
 		Offset(offset).
@@ -177,7 +159,7 @@ func (r *asyncTaskRepo) List(ctx context.Context, req *pb.ListAsyncTasksRequest)
 	if err != nil {
 		return nil, 0, err
 	}
-	return ConvertSlice(rows, asyncTaskProto), int32(total), nil
+	return convert.SliceToAny(rows, asyncTaskProto), int32(total), nil
 }
 
 func (r *asyncTaskRepo) Stats(ctx context.Context, req *pb.GetAsyncTaskStatsRequest) (*pb.AsyncTaskStats, error) {

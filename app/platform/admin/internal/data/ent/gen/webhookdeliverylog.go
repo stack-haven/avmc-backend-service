@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Webhook投递记录表
+// Webhook投递日志表
 type WebhookDeliveryLog struct {
 	config `json:"-"`
 	// ID of the ent.

@@ -45,7 +45,7 @@ message Post {
   ];
   // 岗位状态 0 未知 1 启用 2 禁用
   optional enum.Status status = 3 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {
       description: "岗位状态"
       default: {number: 1}
@@ -87,8 +87,7 @@ message CreatePostResponse {}
 
 // 更新岗位请求
 message UpdatePostRequest {
-  uint32 id = 1 [
-    (buf.validate.field).uint32.gt = 0,
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "岗位ID"}
   ];
   Post post = 2 [
@@ -164,7 +163,7 @@ message ListPostsRequest {
   optional string name = 4 [(buf.validate.field).string.max_len = 20];
   // 岗位状态
   optional enum.Status status = 5 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "岗位状态 0 未知 1 启用 2 禁用"}
   ];
   // 岗位描述

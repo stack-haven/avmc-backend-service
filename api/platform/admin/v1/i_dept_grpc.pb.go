@@ -20,13 +20,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DeptService_ListDepts_FullMethodName          = "/platform.admin.v1.DeptService/ListDepts"
-	DeptService_ListDeptsTree_FullMethodName      = "/platform.admin.v1.DeptService/ListDeptsTree"
-	DeptService_GetDept_FullMethodName            = "/platform.admin.v1.DeptService/GetDept"
-	DeptService_CreateDept_FullMethodName         = "/platform.admin.v1.DeptService/CreateDept"
-	DeptService_UpdateDept_FullMethodName         = "/platform.admin.v1.DeptService/UpdateDept"
-	DeptService_DeleteDept_FullMethodName         = "/platform.admin.v1.DeptService/DeleteDept"
-	DeptService_UpdateDeptByStatus_FullMethodName = "/platform.admin.v1.DeptService/UpdateDeptByStatus"
+	DeptService_ListDepts_FullMethodName             = "/platform.admin.v1.DeptService/ListDepts"
+	DeptService_ListDeptsTree_FullMethodName         = "/platform.admin.v1.DeptService/ListDeptsTree"
+	DeptService_GetDept_FullMethodName               = "/platform.admin.v1.DeptService/GetDept"
+	DeptService_CreateDept_FullMethodName            = "/platform.admin.v1.DeptService/CreateDept"
+	DeptService_UpdateDept_FullMethodName            = "/platform.admin.v1.DeptService/UpdateDept"
+	DeptService_DeleteDept_FullMethodName            = "/platform.admin.v1.DeptService/DeleteDept"
+	DeptService_GetDeptDeleteImpact_FullMethodName   = "/platform.admin.v1.DeptService/GetDeptDeleteImpact"
+	DeptService_TransferAndDeleteDept_FullMethodName = "/platform.admin.v1.DeptService/TransferAndDeleteDept"
+	DeptService_UpdateDeptByStatus_FullMethodName    = "/platform.admin.v1.DeptService/UpdateDeptByStatus"
 )
 
 // DeptServiceClient is the client API for DeptService service.
@@ -47,6 +49,10 @@ type DeptServiceClient interface {
 	UpdateDept(ctx context.Context, in *v1.UpdateDeptRequest, opts ...grpc.CallOption) (*v1.UpdateDeptResponse, error)
 	// 删除部门
 	DeleteDept(ctx context.Context, in *v1.DeleteDeptRequest, opts ...grpc.CallOption) (*v1.DeleteDeptResponse, error)
+	// 获取删除部门前的影响范围
+	GetDeptDeleteImpact(ctx context.Context, in *v1.GetDeptDeleteImpactRequest, opts ...grpc.CallOption) (*v1.GetDeptDeleteImpactResponse, error)
+	// 转移部门人员并删除部门
+	TransferAndDeleteDept(ctx context.Context, in *v1.TransferAndDeleteDeptRequest, opts ...grpc.CallOption) (*v1.TransferAndDeleteDeptResponse, error)
 	// 更新部门状态
 	UpdateDeptByStatus(ctx context.Context, in *v1.UpdateDeptByStatusRequest, opts ...grpc.CallOption) (*v1.UpdateDeptByStatusResponse, error)
 }
@@ -119,6 +125,26 @@ func (c *deptServiceClient) DeleteDept(ctx context.Context, in *v1.DeleteDeptReq
 	return out, nil
 }
 
+func (c *deptServiceClient) GetDeptDeleteImpact(ctx context.Context, in *v1.GetDeptDeleteImpactRequest, opts ...grpc.CallOption) (*v1.GetDeptDeleteImpactResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.GetDeptDeleteImpactResponse)
+	err := c.cc.Invoke(ctx, DeptService_GetDeptDeleteImpact_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deptServiceClient) TransferAndDeleteDept(ctx context.Context, in *v1.TransferAndDeleteDeptRequest, opts ...grpc.CallOption) (*v1.TransferAndDeleteDeptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.TransferAndDeleteDeptResponse)
+	err := c.cc.Invoke(ctx, DeptService_TransferAndDeleteDept_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deptServiceClient) UpdateDeptByStatus(ctx context.Context, in *v1.UpdateDeptByStatusRequest, opts ...grpc.CallOption) (*v1.UpdateDeptByStatusResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.UpdateDeptByStatusResponse)
@@ -147,6 +173,10 @@ type DeptServiceServer interface {
 	UpdateDept(context.Context, *v1.UpdateDeptRequest) (*v1.UpdateDeptResponse, error)
 	// 删除部门
 	DeleteDept(context.Context, *v1.DeleteDeptRequest) (*v1.DeleteDeptResponse, error)
+	// 获取删除部门前的影响范围
+	GetDeptDeleteImpact(context.Context, *v1.GetDeptDeleteImpactRequest) (*v1.GetDeptDeleteImpactResponse, error)
+	// 转移部门人员并删除部门
+	TransferAndDeleteDept(context.Context, *v1.TransferAndDeleteDeptRequest) (*v1.TransferAndDeleteDeptResponse, error)
 	// 更新部门状态
 	UpdateDeptByStatus(context.Context, *v1.UpdateDeptByStatusRequest) (*v1.UpdateDeptByStatusResponse, error)
 	mustEmbedUnimplementedDeptServiceServer()
@@ -176,6 +206,12 @@ func (UnimplementedDeptServiceServer) UpdateDept(context.Context, *v1.UpdateDept
 }
 func (UnimplementedDeptServiceServer) DeleteDept(context.Context, *v1.DeleteDeptRequest) (*v1.DeleteDeptResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDept not implemented")
+}
+func (UnimplementedDeptServiceServer) GetDeptDeleteImpact(context.Context, *v1.GetDeptDeleteImpactRequest) (*v1.GetDeptDeleteImpactResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDeptDeleteImpact not implemented")
+}
+func (UnimplementedDeptServiceServer) TransferAndDeleteDept(context.Context, *v1.TransferAndDeleteDeptRequest) (*v1.TransferAndDeleteDeptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TransferAndDeleteDept not implemented")
 }
 func (UnimplementedDeptServiceServer) UpdateDeptByStatus(context.Context, *v1.UpdateDeptByStatusRequest) (*v1.UpdateDeptByStatusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateDeptByStatus not implemented")
@@ -309,6 +345,42 @@ func _DeptService_DeleteDept_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeptService_GetDeptDeleteImpact_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetDeptDeleteImpactRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeptServiceServer).GetDeptDeleteImpact(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeptService_GetDeptDeleteImpact_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeptServiceServer).GetDeptDeleteImpact(ctx, req.(*v1.GetDeptDeleteImpactRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeptService_TransferAndDeleteDept_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.TransferAndDeleteDeptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeptServiceServer).TransferAndDeleteDept(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeptService_TransferAndDeleteDept_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeptServiceServer).TransferAndDeleteDept(ctx, req.(*v1.TransferAndDeleteDeptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeptService_UpdateDeptByStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.UpdateDeptByStatusRequest)
 	if err := dec(in); err != nil {
@@ -357,6 +429,14 @@ var DeptService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDept",
 			Handler:    _DeptService_DeleteDept_Handler,
+		},
+		{
+			MethodName: "GetDeptDeleteImpact",
+			Handler:    _DeptService_GetDeptDeleteImpact_Handler,
+		},
+		{
+			MethodName: "TransferAndDeleteDept",
+			Handler:    _DeptService_TransferAndDeleteDept_Handler,
 		},
 		{
 			MethodName: "UpdateDeptByStatus",

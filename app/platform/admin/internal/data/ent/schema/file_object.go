@@ -17,9 +17,9 @@ type FileObject struct {
 
 func (FileObject) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_file_objects"},
 		entsql.WithComments(true),
-		schema.Comment("文件中心对象元数据表"),
+		schema.Comment("文件对象表"),
 	}
 }
 

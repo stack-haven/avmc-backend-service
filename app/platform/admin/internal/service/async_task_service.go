@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
@@ -11,11 +13,12 @@ import (
 
 type AsyncTaskServiceService struct {
 	pb.UnimplementedAsyncTaskServiceServer
-	uc *biz.AsyncTaskUsecase
+	uc  *biz.AsyncTaskUsecase
+	log *log.Helper
 }
 
-func NewAsyncTaskServiceService(uc *biz.AsyncTaskUsecase) *AsyncTaskServiceService {
-	return &AsyncTaskServiceService{uc: uc}
+func NewAsyncTaskServiceService(uc *biz.AsyncTaskUsecase, logger log.Logger) *AsyncTaskServiceService {
+	return &AsyncTaskServiceService{uc: uc, log: log.NewHelper(logger)}
 }
 
 func (s *AsyncTaskServiceService) ListAsyncTasks(ctx context.Context, req *pbCore.ListAsyncTasksRequest) (*pbCore.ListAsyncTasksResponse, error) {
@@ -24,7 +27,10 @@ func (s *AsyncTaskServiceService) ListAsyncTasks(ctx context.Context, req *pbCor
 		return nil, err
 	}
 	resp := &pbCore.ListAsyncTasksResponse{Items: items, Total: total}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}

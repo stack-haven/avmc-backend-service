@@ -24,14 +24,14 @@ var _ biz.RoleRepo = (*roleRepo)(nil)
 
 type roleRepo struct {
 	BaseRepo
-	mpr *menuPermissionGroupRepo
+	mpr *tenantMenuPermissionGroupRepo
 }
 
 // NewRoleRepo 创建角色仓库
 func NewRoleRepo(data *Data, logger log.Logger) biz.RoleRepo {
 	return &roleRepo{
 		BaseRepo: NewBaseRepo(data, logger),
-		mpr:      NewMenuPermissionGroupRepo(data, logger).(*menuPermissionGroupRepo),
+		mpr:      NewTenantMenuPermissionGroupRepo(data, logger).(*tenantMenuPermissionGroupRepo),
 	}
 }
 
@@ -57,6 +57,11 @@ func (r *roleRepo) validateMenuIDs(ctx context.Context, menuIDs []uint32) error 
 	}
 	if count != len(ids) {
 		return pb.ErrorRolePermissionInvalid("存在无效菜单ID")
+	}
+	if r.mpr != nil {
+		if err := r.mpr.ValidateTenantMenuIDs(ctx, ids); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -180,7 +185,9 @@ func (r *roleRepo) Save(ctx context.Context, g *pbCore.Role) (*pbCore.Role, erro
 		return nil, err
 	}
 	r.bumpTenantAuthorizationVersion(ctx, tenantID)
-	return r.entToProto(res), nil
+	result := r.entToProto(res)
+	SyncRolePolicies(ctx, r.Data.DB(ctx), r.Data.authorizer, tenantID, res.ID)
+	return result, nil
 }
 
 // Update 更新角色
@@ -261,13 +268,15 @@ func (r *roleRepo) Update(ctx context.Context, g *pbCore.Role) (*pbCore.Role, er
 		return nil, err
 	}
 	r.bumpTenantAuthorizationVersion(ctx, tenantID)
-	return r.entToProto(res), nil
+	result := r.entToProto(res)
+	SyncRolePolicies(ctx, r.Data.DB(ctx), r.Data.authorizer, tenantID, res.ID)
+	return result, nil
 }
 
 // FindByID 根据 ID 查询
 func (r *roleRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Role, error) {
 	r.Log.Infof("查询角色 ID: %d", id)
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Role.Query().
@@ -335,6 +344,7 @@ func (r *roleRepo) Delete(ctx context.Context, id uint32) error {
 		return err
 	}
 	r.bumpTenantAuthorizationVersion(ctx, tenantID)
+	RemoveRolePolicies(ctx, r.Data.authorizer, tenantID, id)
 	return nil
 }
 
@@ -348,7 +358,7 @@ func findRoleForUpdate(ctx context.Context, client *gen.Client, id uint32) (*gen
 
 // ListAll 查询所有角色
 func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Role.Query().
@@ -363,12 +373,12 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // CountRoles 角色计数
 func (r *roleRepo) CountRoles(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	o := listing.Options{}
@@ -387,7 +397,7 @@ func (r *roleRepo) CountRoles(ctx context.Context, opts ...listing.Option) (int3
 
 // ListRoles 分页查询角色
 func (r *roleRepo) ListRoles(ctx context.Context, opts ...listing.Option) ([]*pbCore.Role, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	o := listing.Options{Limit: 20}
@@ -415,7 +425,7 @@ func (r *roleRepo) ListRoles(ctx context.Context, opts ...listing.Option) ([]*pb
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // ExistByName 判断角色名是否存在
@@ -423,7 +433,7 @@ func (r *roleRepo) ExistByName(ctx context.Context, name string, excludeID uint3
 	if name == "" {
 		return false, nil
 	}
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return false, err
 	}
 	builder := r.Data.DB(ctx).Role.Query()

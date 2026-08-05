@@ -140,7 +140,7 @@ func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Proj
 		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
 	}
 	r.Log.Infof("保存项目: %s", g.GetName())
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	if err := r.validateUsersInTenant(ctx, g.GetOwnerId(), g.GetMemberIds()); err != nil {
@@ -185,7 +185,7 @@ func (r *projectRepo) Save(ctx context.Context, g *pbCore.Project) (*pbCore.Proj
 }
 
 func (r *projectRepo) GetProjectExistByName(ctx context.Context, name string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Name(name)).Select(project.FieldID).First(ctx)
@@ -199,7 +199,7 @@ func (r *projectRepo) GetProjectExistByName(ctx context.Context, name string) (u
 }
 
 func (r *projectRepo) GetProjectExistByCode(ctx context.Context, code string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entProject, err := r.Data.DB(ctx).Project.Query().Where(project.Code(code)).Select(project.FieldID).First(ctx)
@@ -217,7 +217,7 @@ func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Pr
 		return nil, pb.ErrorProjectInvalidId("项目ID和名称不能为空")
 	}
 	r.Log.Infof("更新项目: %d", g.GetId())
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	if err := r.validateUsersInTenant(ctx, g.GetOwnerId(), g.GetMemberIds()); err != nil {
@@ -275,7 +275,7 @@ func (r *projectRepo) Update(ctx context.Context, g *pbCore.Project) (*pbCore.Pr
 
 func (r *projectRepo) UpdateStatus(ctx context.Context, id uint32, status int32) error {
 	r.Log.Infof("更新项目状态 ID: %d, status: %d", id, status)
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	err := r.Data.DB(ctx).Project.UpdateOneID(id).SetStatus(status).Exec(ctx)
@@ -286,7 +286,7 @@ func (r *projectRepo) UpdateStatus(ctx context.Context, id uint32, status int32)
 }
 
 func (r *projectRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Project, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	query, err := r.scopedProjectQuery(ctx)
@@ -311,7 +311,7 @@ func (r *projectRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Project,
 }
 
 func (r *projectRepo) Delete(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	err := r.Data.DB(ctx).Project.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
@@ -322,7 +322,7 @@ func (r *projectRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 func (r *projectRepo) CountProjects(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	o := listing.Options{}
@@ -344,7 +344,7 @@ func (r *projectRepo) CountProjects(ctx context.Context, opts ...listing.Option)
 }
 
 func (r *projectRepo) ListProjects(ctx context.Context, opts ...listing.Option) ([]*pbCore.Project, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	o := listing.Options{Limit: 20}

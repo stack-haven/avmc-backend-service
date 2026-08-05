@@ -97,6 +97,14 @@ type Options struct {
 	OrderBy ordering.OrderBy
 	Offset  int
 	Limit   int
+	Name    string
+}
+
+// NameOption sets the tenant name for fuzzy matching.
+func NameOption(name string) Option {
+	return func(o *Options) {
+		o.Name = name
+	}
 }
 
 // FilterOption sets the AIP filter.
@@ -144,6 +152,18 @@ func NormalizePageSize(size int32) int {
 		return MaxPageSize
 	}
 	return int(size)
+}
+
+// PageOffset parses an integer page token string to an offset. Returns 0 for empty or invalid input.
+func PageOffset(token string) int {
+	if token == "" {
+		return 0
+	}
+	offset, err := strconv.Atoi(token)
+	if err != nil || offset < 0 {
+		return 0
+	}
+	return offset
 }
 
 func DefaultOrderBy(field ordering.Field) ordering.OrderBy {

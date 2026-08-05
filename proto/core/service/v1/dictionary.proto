@@ -11,7 +11,7 @@ message DictionaryType {
   uint32 id = 1;
   string name = 2 [(buf.validate.field).string = {min_len: 1, max_len: 50}];
   string code = 3 [(buf.validate.field).string = {min_len: 1, max_len: 50, pattern: "^[A-Za-z][A-Za-z0-9_.-]*$"}];
-  optional enum.Status status = 4 [(buf.validate.field).enum.defined_only = true];
+  optional enum.Status status = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional int32 sort = 5 [(buf.validate.field).int32 = {gte: 0, lte: 9999}];
   optional string remark = 6 [(buf.validate.field).string.max_len = 255];
   repeated DictionaryItem items = 7;
@@ -24,7 +24,7 @@ message DictionaryItem {
   uint32 type_id = 2 [(buf.validate.field).uint32.gt = 0];
   string label = 3 [(buf.validate.field).string = {min_len: 1, max_len: 50}];
   string value = 4 [(buf.validate.field).string = {min_len: 1, max_len: 100}];
-  optional enum.Status status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional enum.Status status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional int32 sort = 6 [(buf.validate.field).int32 = {gte: 0, lte: 9999}];
   optional string color = 7 [(buf.validate.field).string.max_len = 32];
   optional string remark = 8 [(buf.validate.field).string.max_len = 255];
@@ -37,7 +37,7 @@ message ListDictionaryTypesRequest {
   int32 page_size = 2;
   optional string name = 3;
   optional string code = 4;
-  optional enum.Status status = 5;
+  optional enum.Status status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
 }
 message ListDictionaryTypesResponse {
   repeated DictionaryType items = 1;
@@ -53,7 +53,7 @@ message UpdateDictionaryTypeRequest {
 message DeleteDictionaryTypeRequest { uint32 id = 1 [(buf.validate.field).uint32.gt = 0]; }
 message ListDictionaryItemsRequest {
   uint32 type_id = 1 [(buf.validate.field).uint32.gt = 0];
-  optional enum.Status status = 2;
+  optional enum.Status status = 2 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
 }
 message ListDictionaryItemsResponse { repeated DictionaryItem items = 1; }
 message CreateDictionaryItemRequest { DictionaryItem item = 1 [(buf.validate.field).required = true]; }

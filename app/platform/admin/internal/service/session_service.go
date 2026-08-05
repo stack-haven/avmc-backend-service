@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
@@ -12,11 +14,12 @@ import (
 
 type SessionServiceService struct {
 	pb.UnimplementedSessionServiceServer
-	uc *biz.SessionUsecase
+	uc  *biz.SessionUsecase
+	log *log.Helper
 }
 
-func NewSessionServiceService(uc *biz.SessionUsecase) *SessionServiceService {
-	return &SessionServiceService{uc: uc}
+func NewSessionServiceService(uc *biz.SessionUsecase, logger log.Logger) *SessionServiceService {
+	return &SessionServiceService{uc: uc, log: log.NewHelper(logger)}
 }
 
 func currentSessionID(ctx context.Context) string {
@@ -30,7 +33,10 @@ func (s *SessionServiceService) ListSessions(ctx context.Context, req *pbCore.Li
 		return nil, err
 	}
 	resp := &pbCore.ListSessionsResponse{Items: items, Total: total}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}

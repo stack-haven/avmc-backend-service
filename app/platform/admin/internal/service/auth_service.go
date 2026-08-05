@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // AuthServiceService 认证服务结构体
@@ -38,7 +38,6 @@ func (s *AuthServiceService) LoginPassword(ctx context.Context, req *pb.LoginPas
 		resp *pb.LoginResponse
 	)
 	loginPassword := req.GetPassword()
-	// resp, err = s.auc.LoginByUsername(ctx, req.GetUsername(), loginPassword, req.GetTenantId())
 	switch v := req.Identity.(type) {
 	case *pb.LoginPasswordRequest_Username:
 		resp, err = s.auc.LoginByUsername(ctx, v.Username, loginPassword, req.GetTenantId())

@@ -40,12 +40,12 @@ const (
 	// EdgeTenantOverrides holds the string denoting the tenant_overrides edge name in mutations.
 	EdgeTenantOverrides = "tenant_overrides"
 	// Table holds the table name of the parameterdefinition in the database.
-	Table = "parameter_definitions"
+	Table = "system_parameter_definitions"
 	// TenantOverridesTable is the table that holds the tenant_overrides relation/edge.
-	TenantOverridesTable = "tenant_parameter_overrides"
+	TenantOverridesTable = "system_tenant_parameter_overrides"
 	// TenantOverridesInverseTable is the table name for the TenantParameterOverride entity.
 	// It exists in this package in order to avoid circular dependency with the "tenantparameteroverride" package.
-	TenantOverridesInverseTable = "tenant_parameter_overrides"
+	TenantOverridesInverseTable = "system_tenant_parameter_overrides"
 	// TenantOverridesColumn is the table column denoting the tenant_overrides relation/edge.
 	TenantOverridesColumn = "definition_id"
 )

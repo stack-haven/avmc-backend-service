@@ -58,7 +58,7 @@ func (r *fileRepo) CreateUploadSession(ctx context.Context, file *pbCore.FileObj
 	if file == nil || file.GetFileName() == "" {
 		return nil, pb.ErrorBadRequest("文件名不能为空")
 	}
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	builder := r.Data.DB(ctx).FileObject.Create().
@@ -96,7 +96,7 @@ func (r *fileRepo) FindByIdempotencyKey(ctx context.Context, idempotencyKey stri
 	if idempotencyKey == "" {
 		return nil, nil
 	}
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).FileObject.Query().
@@ -112,7 +112,7 @@ func (r *fileRepo) FindByIdempotencyKey(ctx context.Context, idempotencyKey stri
 }
 
 func (r *fileRepo) Get(ctx context.Context, id uint32) (*pbCore.FileObject, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).FileObject.Get(ctx, id)
@@ -126,7 +126,7 @@ func (r *fileRepo) Get(ctx context.Context, id uint32) (*pbCore.FileObject, erro
 }
 
 func (r *fileRepo) List(ctx context.Context, opts ...listing.Option) ([]*pbCore.FileObject, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	query := r.Data.DB(ctx).FileObject.Query()
@@ -140,11 +140,11 @@ func (r *fileRepo) List(ctx context.Context, opts ...listing.Option) ([]*pbCore.
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(rows, fileObjectToProto), nil
+	return convert.SliceToAny(rows, fileObjectToProto), nil
 }
 
 func (r *fileRepo) Count(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	query := r.Data.DB(ctx).FileObject.Query()
@@ -166,7 +166,7 @@ func applyFileListOptions(opts ...listing.Option) listing.Options {
 }
 
 func (r *fileRepo) Confirm(ctx context.Context, id uint32, size int64, sha256 string, etag string) (*pbCore.FileObject, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	builder := r.Data.DB(ctx).FileObject.UpdateOneID(id).
@@ -192,7 +192,7 @@ func (r *fileRepo) Confirm(ctx context.Context, id uint32, size int64, sha256 st
 }
 
 func (r *fileRepo) Delete(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	err := r.Data.DB(ctx).FileObject.UpdateOneID(id).

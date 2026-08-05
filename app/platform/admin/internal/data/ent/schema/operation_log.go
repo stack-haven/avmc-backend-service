@@ -14,7 +14,7 @@ import (
 type OperationLog struct{ ent.Schema }
 
 func (OperationLog) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"}, entsql.WithComments(true), schema.Comment("不可变操作审计日志表")}
+	return []schema.Annotation{entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_operation_logs"}, entsql.WithComments(true), schema.Comment("操作审计日志表")}
 }
 func (OperationLog) Fields() []ent.Field {
 	return []ent.Field{

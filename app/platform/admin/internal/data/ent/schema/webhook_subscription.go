@@ -15,7 +15,7 @@ type WebhookSubscription struct{ ent.Schema }
 
 func (WebhookSubscription) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_webhook_subscriptions"},
 		entsql.WithComments(true),
 		schema.Comment("Webhook订阅表"),
 	}
@@ -41,7 +41,6 @@ func (WebhookSubscription) Mixin() []ent.Mixin {
 
 func (WebhookSubscription) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("tenant_id", "url").Unique(),
 		index.Fields("tenant_id", "status"),
 	}
 }

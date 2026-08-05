@@ -2,13 +2,13 @@ package data
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	pb "backend-service/api/core/service/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
+	"backend-service/pkg/aip/listing"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -85,11 +85,8 @@ func (r *loginLogRepo) List(ctx context.Context, req *pb.ListLoginLogsRequest) (
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(loginlog.FieldCreatedAt)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err

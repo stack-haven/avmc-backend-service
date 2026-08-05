@@ -1411,7 +1411,7 @@ var File_core_service_v1_parameter_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_parameter_proto_rawDesc = "" +
 	"\n" +
-	"\x1fcore/service/v1/parameter.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\"\xcc\x04\n" +
+	"\x1fcore/service/v1/parameter.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\"\xce\x04\n" +
 	"\x13ParameterDefinition\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12B\n" +
 	"\x03key\x18\x02 \x01(\tB0\xbaH-r+\x10\x03\x18d2%^[a-z][a-z0-9]*(\\.[a-z][a-z0-9_-]*)+$R\x03key\x12\x1d\n" +
@@ -1421,8 +1421,9 @@ const file_core_service_v1_parameter_proto_rawDesc = "" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\tvalueType\x12.\n" +
 	"\rdefault_value\x18\x05 \x01(\tB\t\xbaH\x06r\x04\x18\x80\x80\x01R\fdefaultValue\x12/\n" +
 	"\vdescription\x18\x06 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03H\x00R\vdescription\x88\x01\x01\x12-\n" +
-	"\x12tenant_overridable\x18\a \x01(\bR\x11tenantOverridable\x123\n" +
-	"\x06status\x18\b \x01(\x0e2\f.enum.StatusB\b\xbaH\x05\x82\x01\x02\x10\x01H\x01R\x06status\x88\x01\x01\x12#\n" +
+	"\x12tenant_overridable\x18\a \x01(\bR\x11tenantOverridable\x125\n" +
+	"\x06status\x18\b \x01(\x0e2\f.enum.StatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x01R\x06status\x88\x01\x01\x12#\n" +
 	"\x04sort\x18\t \x01(\x05B\n" +
 	"\xbaH\a\x1a\x05\x18\x8fN(\x00H\x02R\x04sort\x88\x01\x01\x12\"\n" +
 	"\n" +
@@ -1448,16 +1449,18 @@ const file_core_service_v1_parameter_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\tH\x01R\tupdatedAt\x88\x01\x01B\x0e\n" +
 	"\f_descriptionB\r\n" +
-	"\v_updated_at\"\xdd\x02\n" +
+	"\v_updated_at\"\xe1\x02\n" +
 	"\x1fListParameterDefinitionsRequest\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x01 \x01(\tR\tpageToken\x12&\n" +
 	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\bpageSize\x12\x1e\n" +
 	"\x03key\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18dH\x00R\x03key\x88\x01\x01\x12 \n" +
-	"\x04name\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18dH\x01R\x04name\x88\x01\x01\x12Q\n" +
+	"\x04name\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18dH\x01R\x04name\x88\x01\x01\x12S\n" +
 	"\n" +
-	"value_type\x18\x05 \x01(\x0e2#.core.service.v1.ParameterValueTypeB\b\xbaH\x05\x82\x01\x02\x10\x01H\x02R\tvalueType\x88\x01\x01\x123\n" +
-	"\x06status\x18\x06 \x01(\x0e2\f.enum.StatusB\b\xbaH\x05\x82\x01\x02\x10\x01H\x03R\x06status\x88\x01\x01B\x06\n" +
+	"value_type\x18\x05 \x01(\x0e2#.core.service.v1.ParameterValueTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x02R\tvalueType\x88\x01\x01\x125\n" +
+	"\x06status\x18\x06 \x01(\x0e2\f.enum.StatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x03R\x06status\x88\x01\x01B\x06\n" +
 	"\x04_keyB\a\n" +
 	"\x05_nameB\r\n" +
 	"\v_value_typeB\t\n" +

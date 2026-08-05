@@ -30,10 +30,6 @@ type Tx struct {
 	LoginLog *LoginLogClient
 	// Menu is the client for interacting with the Menu builders.
 	Menu *MenuClient
-	// MenuPermissionGroup is the client for interacting with the MenuPermissionGroup builders.
-	MenuPermissionGroup *MenuPermissionGroupClient
-	// MenuPermissionGroupVersion is the client for interacting with the MenuPermissionGroupVersion builders.
-	MenuPermissionGroupVersion *MenuPermissionGroupVersionClient
 	// NotificationMessage is the client for interacting with the NotificationMessage builders.
 	NotificationMessage *NotificationMessageClient
 	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
@@ -50,6 +46,12 @@ type Tx struct {
 	Role *RoleClient
 	// StorageProvider is the client for interacting with the StorageProvider builders.
 	StorageProvider *StorageProviderClient
+	// Tenant is the client for interacting with the Tenant builders.
+	Tenant *TenantClient
+	// TenantMenuPermissionGroup is the client for interacting with the TenantMenuPermissionGroup builders.
+	TenantMenuPermissionGroup *TenantMenuPermissionGroupClient
+	// TenantMenuPermissionGroupVersion is the client for interacting with the TenantMenuPermissionGroupVersion builders.
+	TenantMenuPermissionGroupVersion *TenantMenuPermissionGroupVersionClient
 	// TenantParameterOverride is the client for interacting with the TenantParameterOverride builders.
 	TenantParameterOverride *TenantParameterOverrideClient
 	// User is the client for interacting with the User builders.
@@ -197,8 +199,6 @@ func (tx *Tx) init() {
 	tx.FileObject = NewFileObjectClient(tx.config)
 	tx.LoginLog = NewLoginLogClient(tx.config)
 	tx.Menu = NewMenuClient(tx.config)
-	tx.MenuPermissionGroup = NewMenuPermissionGroupClient(tx.config)
-	tx.MenuPermissionGroupVersion = NewMenuPermissionGroupVersionClient(tx.config)
 	tx.NotificationMessage = NewNotificationMessageClient(tx.config)
 	tx.NotificationTemplate = NewNotificationTemplateClient(tx.config)
 	tx.OperationLog = NewOperationLogClient(tx.config)
@@ -207,6 +207,9 @@ func (tx *Tx) init() {
 	tx.Project = NewProjectClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.StorageProvider = NewStorageProviderClient(tx.config)
+	tx.Tenant = NewTenantClient(tx.config)
+	tx.TenantMenuPermissionGroup = NewTenantMenuPermissionGroupClient(tx.config)
+	tx.TenantMenuPermissionGroupVersion = NewTenantMenuPermissionGroupVersionClient(tx.config)
 	tx.TenantParameterOverride = NewTenantParameterOverrideClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.WebhookDeliveryLog = NewWebhookDeliveryLogClient(tx.config)

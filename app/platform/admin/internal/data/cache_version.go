@@ -10,7 +10,7 @@ func (r *menuRepo) bumpMenuVersion(ctx context.Context) {
 
 // bumpTenantPackageVersion increments the tenant package version cache.
 // This invalidates cached effective menus when tenant-package bindings change.
-func (r *menuPermissionGroupRepo) bumpTenantPackageVersion(ctx context.Context, tenantID uint32) {
+func (r *tenantMenuPermissionGroupRepo) bumpTenantPackageVersion(ctx context.Context, tenantID uint32) {
 	// TODO: re-implement when cache infrastructure is re-established
 }
 

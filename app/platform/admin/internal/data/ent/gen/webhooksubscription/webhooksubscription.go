@@ -33,7 +33,7 @@ const (
 	// FieldEventTypes holds the string denoting the event_types field in the database.
 	FieldEventTypes = "event_types"
 	// Table holds the table name of the webhooksubscription in the database.
-	Table = "webhook_subscriptions"
+	Table = "system_webhook_subscriptions"
 )
 
 // Columns holds all SQL columns for webhooksubscription fields.

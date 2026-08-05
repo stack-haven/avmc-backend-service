@@ -44,22 +44,22 @@ const (
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
 	// Table holds the table name of the role in the database.
-	Table = "roles"
+	Table = "system_roles"
 	// MenusTable is the table that holds the menus relation/edge. The primary key declared below.
-	MenusTable = "role_menus"
+	MenusTable = "system_role_menus"
 	// MenusInverseTable is the table name for the Menu entity.
 	// It exists in this package in order to avoid circular dependency with the "menu" package.
-	MenusInverseTable = "menus"
+	MenusInverseTable = "system_menus"
 	// DataScopeDeptsTable is the table that holds the data_scope_depts relation/edge. The primary key declared below.
-	DataScopeDeptsTable = "role_data_scope_depts"
+	DataScopeDeptsTable = "system_role_data_scope_depts"
 	// DataScopeDeptsInverseTable is the table name for the Dept entity.
 	// It exists in this package in order to avoid circular dependency with the "dept" package.
-	DataScopeDeptsInverseTable = "depts"
+	DataScopeDeptsInverseTable = "system_depts"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
-	UsersTable = "user_roles"
+	UsersTable = "system_user_roles"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UsersInverseTable = "users"
+	UsersInverseTable = "system_users"
 )
 
 // Columns holds all SQL columns for role fields.

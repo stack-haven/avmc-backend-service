@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
+
 	"backend-service/api/common/enum"
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/auth/authn"
-
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 const AsyncTaskTypeNotificationInApp = "notification.in_app.send"
@@ -195,7 +195,7 @@ func (h *notificationInAppHandler) Handle(ctx context.Context, raw json.RawMessa
 	if payload.TenantID == 0 || len(payload.RecipientUserIDs) == 0 {
 		return "", fmt.Errorf("tenant id and recipients are required")
 	}
-	title, content, templateID, templateCode, err := h.resolveContent(ctx, payload)
+	title, content, templateID, templateCode, err := h.resolveContent(ctx, &payload)
 	if err != nil {
 		return "", err
 	}
@@ -227,7 +227,7 @@ func (h *notificationInAppHandler) Handle(ctx context.Context, raw json.RawMessa
 	return fmt.Sprintf("已生成 %d 条站内信", count), nil
 }
 
-func (h *notificationInAppHandler) resolveContent(ctx context.Context, payload inAppNotificationPayload) (string, string, *uint32, string, error) {
+func (h *notificationInAppHandler) resolveContent(ctx context.Context, payload *inAppNotificationPayload) (string, string, *uint32, string, error) { //nolint:gocritic // return types clear from callers
 	title := payload.Title
 	content := payload.Content
 	var templateID *uint32

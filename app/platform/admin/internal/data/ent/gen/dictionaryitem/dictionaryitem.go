@@ -40,12 +40,12 @@ const (
 	// EdgeType holds the string denoting the type edge name in mutations.
 	EdgeType = "type"
 	// Table holds the table name of the dictionaryitem in the database.
-	Table = "dictionary_items"
+	Table = "system_dictionary_items"
 	// TypeTable is the table that holds the type relation/edge.
-	TypeTable = "dictionary_items"
+	TypeTable = "system_dictionary_items"
 	// TypeInverseTable is the table name for the DictionaryType entity.
 	// It exists in this package in order to avoid circular dependency with the "dictionarytype" package.
-	TypeInverseTable = "dictionary_types"
+	TypeInverseTable = "system_dictionary_types"
 	// TypeColumn is the table column denoting the type relation/edge.
 	TypeColumn = "type_id"
 )

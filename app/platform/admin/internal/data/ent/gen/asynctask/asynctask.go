@@ -54,7 +54,7 @@ const (
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// Table holds the table name of the asynctask in the database.
-	Table = "async_tasks"
+	Table = "system_async_tasks"
 )
 
 // Columns holds all SQL columns for asynctask fields.

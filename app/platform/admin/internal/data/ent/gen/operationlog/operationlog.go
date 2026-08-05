@@ -55,7 +55,7 @@ const (
 	// FieldErrorMessage holds the string denoting the error_message field in the database.
 	FieldErrorMessage = "error_message"
 	// Table holds the table name of the operationlog in the database.
-	Table = "operation_logs"
+	Table = "system_operation_logs"
 )
 
 // Columns holds all SQL columns for operationlog fields.

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	pb "backend-service/api/core/service/v1"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+
+	pb "backend-service/api/core/service/v1"
 )
 
 const (
@@ -145,7 +145,7 @@ func (uc *AsyncTaskUsecase) RunOne(ctx context.Context, workerID, queue string, 
 	} else {
 		result, runErr := uc.callHandler(ctx, handler, execution.Payload)
 		if runErr == nil {
-			if err = uc.repo.Complete(ctx, task.GetId(), workerID, truncateTaskText(result, 1000)); err != nil {
+			if err := uc.repo.Complete(ctx, task.GetId(), workerID, truncateTaskText(result, 1000)); err != nil {
 				return true, err
 			}
 			return true, nil
@@ -173,8 +173,11 @@ func (uc *AsyncTaskUsecase) callHandler(ctx context.Context, handler AsyncTaskHa
 }
 
 func (uc *AsyncTaskUsecase) EnsureMaintenanceTasks(ctx context.Context, now time.Time) error {
-	payload, _ := json.Marshal(retentionCleanupPayload{RetentionDays: 30, BatchSize: 500})
-	_, err := uc.Enqueue(ctx, &AsyncTaskSpec{
+	payload, err := json.Marshal(retentionCleanupPayload{RetentionDays: 30, BatchSize: 500})
+	if err != nil {
+		return fmt.Errorf("marshal retention cleanup payload: %w", err)
+	}
+	_, err = uc.Enqueue(ctx, &AsyncTaskSpec{
 		TaskType:       AsyncTaskTypeRetentionCleanup,
 		Queue:          "maintenance",
 		Priority:       -10,

@@ -6,12 +6,13 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
+
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 type menuRepoServiceStub struct {
@@ -64,9 +65,7 @@ func (r *menuRepoServiceStub) ExistByPath(_ context.Context, req *pbCore.ExistMe
 }
 
 func cloneMenu(menu *pbCore.Menu) *pbCore.Menu {
-	clone := *menu
-	clone.Children = append([]*pbCore.Menu(nil), menu.Children...)
-	return &clone
+	return proto.Clone(menu).(*pbCore.Menu) //nolint:errcheck // proto.Clone does not return error
 }
 
 func newMenuServiceForTest(repo *menuRepoServiceStub) *MenuServiceService {

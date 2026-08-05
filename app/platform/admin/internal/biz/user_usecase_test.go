@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	pbCore "backend-service/api/core/service/v1"
-	"backend-service/pkg/aip/listing"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/proto"
+
+	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
 )
 
 type stubUserRepo struct {
@@ -66,7 +66,13 @@ func (*stubUserRepo) ListUsers(context.Context, ...listing.Option) ([]*pbCore.Us
 	return nil, nil
 }
 func (*stubUserRepo) CountUsers(context.Context, ...listing.Option) (int32, error) { return 0, nil }
-func (*stubUserRepo) ListAll(context.Context) ([]*pbCore.User, error)              { return nil, nil }
+func (*stubUserRepo) ListUsersByDept(context.Context, uint32, bool, ...listing.Option) ([]*pbCore.User, error) {
+	return nil, nil
+}
+func (*stubUserRepo) CountUsersByDept(context.Context, uint32, bool, ...listing.Option) (int32, error) {
+	return 0, nil
+}
+func (*stubUserRepo) ListAll(context.Context) ([]*pbCore.User, error) { return nil, nil }
 func (*stubUserRepo) ListPageSimple(context.Context, ...listing.Option) ([]*pbCore.User, error) {
 	return nil, nil
 }

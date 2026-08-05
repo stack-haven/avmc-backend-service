@@ -1034,7 +1034,7 @@ var File_core_service_v1_webhook_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_webhook_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcore/service/v1/webhook.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xac\x03\n" +
+	"\x1dcore/service/v1/webhook.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xae\x03\n" +
 	"\x13WebhookSubscription\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12 \n" +
 	"\ttenant_id\x18\x02 \x01(\rH\x00R\btenantId\x88\x01\x01\x12\x1d\n" +
@@ -1045,8 +1045,9 @@ const file_core_service_v1_webhook_proto_rawDesc = "" +
 	"\xbaH\ar\x05\x10\x10\x18\x80\x02R\x06secret\x12N\n" +
 	"\vevent_types\x18\x06 \x03(\x0e2!.core.service.v1.WebhookEventTypeB\n" +
 	"\xbaH\a\x92\x01\x04\b\x01\x10\x14R\n" +
-	"eventTypes\x123\n" +
-	"\x06status\x18\a \x01(\x0e2\f.enum.StatusB\b\xbaH\x05\x82\x01\x02\x10\x01H\x01R\x06status\x88\x01\x01\x12\"\n" +
+	"eventTypes\x125\n" +
+	"\x06status\x18\a \x01(\x0e2\f.enum.StatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x01R\x06status\x88\x01\x01\x12\"\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tH\x02R\tcreatedAt\x88\x01\x01\x12\"\n" +
 	"\n" +
@@ -1055,15 +1056,17 @@ const file_core_service_v1_webhook_proto_rawDesc = "" +
 	"_tenant_idB\t\n" +
 	"\a_statusB\r\n" +
 	"\v_created_atB\r\n" +
-	"\v_updated_at\"\xbc\x02\n" +
+	"\v_updated_at\"\xc0\x02\n" +
 	"\x1fListWebhookSubscriptionsRequest\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x01 \x01(\tR\tpageToken\x12&\n" +
 	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\bpageSize\x12&\n" +
-	"\akeyword\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18dH\x00R\akeyword\x88\x01\x01\x12O\n" +
+	"\akeyword\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18dH\x00R\akeyword\x88\x01\x01\x12Q\n" +
 	"\n" +
-	"event_type\x18\x04 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\b\xbaH\x05\x82\x01\x02\x10\x01H\x01R\teventType\x88\x01\x01\x123\n" +
-	"\x06status\x18\x05 \x01(\x0e2\f.enum.StatusB\b\xbaH\x05\x82\x01\x02\x10\x01H\x02R\x06status\x88\x01\x01B\n" +
+	"event_type\x18\x04 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x01R\teventType\x88\x01\x01\x125\n" +
+	"\x06status\x18\x05 \x01(\x0e2\f.enum.StatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x02R\x06status\x88\x01\x01B\n" +
 	"\n" +
 	"\b_keywordB\r\n" +
 	"\v_event_typeB\t\n" +
@@ -1080,22 +1083,24 @@ const file_core_service_v1_webhook_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12P\n" +
 	"\fsubscription\x18\x02 \x01(\v2$.core.service.v1.WebhookSubscriptionB\x06\xbaH\x03\xc8\x01\x01R\fsubscription\";\n" +
 	" DeleteWebhookSubscriptionRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\xbb\x05\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\xbf\x05\n" +
 	"\x12WebhookDeliveryLog\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\rR\btenantId\x12'\n" +
 	"\x0fsubscription_id\x18\x03 \x01(\rR\x0esubscriptionId\x12%\n" +
 	"\bevent_id\x18\x04 \x01(\tB\n" +
-	"\xbaH\ar\x05\x10\x01\x18\x80\x01R\aeventId\x12J\n" +
+	"\xbaH\ar\x05\x10\x01\x18\x80\x01R\aeventId\x12L\n" +
 	"\n" +
-	"event_type\x18\x05 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\teventType\x12'\n" +
+	"event_type\x18\x05 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\teventType\x12'\n" +
 	"\n" +
 	"target_url\x18\x06 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x10R\ttargetUrl\x12,\n" +
 	"\frequest_body\x18\a \x01(\tB\t\xbaH\x06r\x04\x18\x80\x80\x04R\vrequestBody\x12(\n" +
 	"\rresponse_code\x18\b \x01(\x05H\x00R\fresponseCode\x88\x01\x01\x123\n" +
-	"\rresponse_body\x18\t \x01(\tB\t\xbaH\x06r\x04\x18\x80\x80\x04H\x01R\fresponseBody\x88\x01\x01\x12Y\n" +
+	"\rresponse_body\x18\t \x01(\tB\t\xbaH\x06r\x04\x18\x80\x80\x04H\x01R\fresponseBody\x88\x01\x01\x12[\n" +
 	"\x0fdelivery_status\x18\n" +
-	" \x01(\x0e2&.core.service.v1.WebhookDeliveryStatusB\b\xbaH\x05\x82\x01\x02\x10\x01R\x0edeliveryStatus\x12.\n" +
+	" \x01(\x0e2&.core.service.v1.WebhookDeliveryStatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x0edeliveryStatus\x12.\n" +
 	"\x0eattempt_number\x18\v \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\rattemptNumber\x122\n" +
 	"\rerror_message\x18\f \x01(\tB\b\xbaH\x05r\x03\x18\x80\bH\x02R\ferrorMessage\x88\x01\x01\x12\"\n" +
 	"\n" +
@@ -1103,15 +1108,17 @@ const file_core_service_v1_webhook_proto_rawDesc = "" +
 	"\x0e_response_codeB\x10\n" +
 	"\x0e_response_bodyB\x10\n" +
 	"\x0e_error_messageB\r\n" +
-	"\v_created_at\"\xfd\x02\n" +
+	"\v_created_at\"\x81\x03\n" +
 	"\x1eListWebhookDeliveryLogsRequest\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x01 \x01(\tR\tpageToken\x12&\n" +
 	"\tpage_size\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\bpageSize\x12,\n" +
-	"\x0fsubscription_id\x18\x03 \x01(\rH\x00R\x0esubscriptionId\x88\x01\x01\x12O\n" +
+	"\x0fsubscription_id\x18\x03 \x01(\rH\x00R\x0esubscriptionId\x88\x01\x01\x12Q\n" +
 	"\n" +
-	"event_type\x18\x04 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\b\xbaH\x05\x82\x01\x02\x10\x01H\x01R\teventType\x88\x01\x01\x12^\n" +
-	"\x0fdelivery_status\x18\x05 \x01(\x0e2&.core.service.v1.WebhookDeliveryStatusB\b\xbaH\x05\x82\x01\x02\x10\x01H\x02R\x0edeliveryStatus\x88\x01\x01B\x12\n" +
+	"event_type\x18\x04 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x01R\teventType\x88\x01\x01\x12`\n" +
+	"\x0fdelivery_status\x18\x05 \x01(\x0e2&.core.service.v1.WebhookDeliveryStatusB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00H\x02R\x0edeliveryStatus\x88\x01\x01B\x12\n" +
 	"\x10_subscription_idB\r\n" +
 	"\v_event_typeB\x12\n" +
 	"\x10_delivery_status\"\x9a\x01\n" +
@@ -1124,10 +1131,11 @@ const file_core_service_v1_webhook_proto_rawDesc = "" +
 	"\x1bRetryWebhookDeliveryRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"M\n" +
 	"\x1cRetryWebhookDeliveryResponse\x12-\n" +
-	"\x13new_delivery_log_id\x18\x01 \x01(\rR\x10newDeliveryLogId\"\xb6\x01\n" +
-	"\x1aPublishWebhookEventRequest\x12J\n" +
+	"\x13new_delivery_log_id\x18\x01 \x01(\rR\x10newDeliveryLogId\"\xb8\x01\n" +
+	"\x1aPublishWebhookEventRequest\x12L\n" +
 	"\n" +
-	"event_type\x18\x01 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\b\xbaH\x05\x82\x01\x02\x10\x01R\teventType\x12%\n" +
+	"event_type\x18\x01 \x01(\x0e2!.core.service.v1.WebhookEventTypeB\n" +
+	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\teventType\x12%\n" +
 	"\bevent_id\x18\x02 \x01(\tB\n" +
 	"\xbaH\ar\x05\x10\x01\x18\x80\x01R\aeventId\x12%\n" +
 	"\apayload\x18\x03 \x01(\tB\v\xbaH\br\x06\x10\x01\x18\x80\x80\x04R\apayload*\x8a\x02\n" +

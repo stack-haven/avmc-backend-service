@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 平台参数定义表
+// 参数定义表
 type ParameterDefinition struct {
 	config `json:"-"`
 	// ID of the ent.

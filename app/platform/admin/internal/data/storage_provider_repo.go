@@ -3,7 +3,6 @@ package data
 import (
 	"context"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/objectstorage"
 	"backend-service/pkg/utils/convert"
 
@@ -214,16 +214,13 @@ func (r *storageProviderRepo) List(ctx context.Context, req *pbCore.ListStorageP
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(storageprovider.FieldIsDefault), gen.Asc(storageprovider.FieldID)).Offset(offset).Limit(size).All(systemCtx)
 	if err != nil {
 		return nil, 0, err
 	}
-	return ConvertSlice(rows, func(row *gen.StorageProvider) *pbCore.StorageProvider {
+	return convert.SliceToAny(rows, func(row *gen.StorageProvider) *pbCore.StorageProvider {
 		return storageProviderProto(row, false)
 	}), int32(total), nil
 }

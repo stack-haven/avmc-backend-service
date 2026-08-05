@@ -47,7 +47,7 @@ message Role {
   ];
   // 角色状态 0 未知 1 启用 2 禁用
   optional enum.Status status = 3 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {
       description: "角色状态 0 未知 1 启用 2 禁用"
       default: {number: 1}
@@ -120,8 +120,7 @@ message CreateRoleResponse {}
 
 // 更新角色请求
 message UpdateRoleRequest {
-  uint32 id = 1 [
-    (buf.validate.field).uint32.gt = 0,
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0,
     (gnostic.openapi.v3.property) = {description: "角色ID"}
   ];
   Role role = 2 [
@@ -198,7 +197,7 @@ message ListRolesRequest {
   optional string name = 4 [(buf.validate.field).string.max_len = 20];
   // 角色状态
   optional enum.Status status = 5 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "角色状态 0 未知 1 启用 2 禁用"}
   ];
   // 角色描述
@@ -265,7 +264,10 @@ message UpdateRoleByStatusRequest {
     (gnostic.openapi.v3.property) = {description: "角色ID"}
   ];
   optional enum.Status status = 2 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    },
     (gnostic.openapi.v3.property) = {description: "角色状态 0 未知 1 启用 2 禁用"}
   ];
   optional uint32 operator_id = 3 [

@@ -3,14 +3,14 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/fieldmask"
+	"go.einride.tech/aip/filtering"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"go.einride.tech/aip/fieldmask"
-	"go.einride.tech/aip/filtering"
 )
 
 // RoleServiceService 角色服务
@@ -60,18 +60,12 @@ func (s *RoleServiceService) ListRoles(ctx context.Context, req *pbCore.ListRole
 
 // GetRole 获取角色详情
 func (s *RoleServiceService) GetRole(ctx context.Context, req *pbCore.GetRoleRequest) (*pbCore.Role, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorRoleInvalidId("角色ID不能为空")
-	}
 	s.log.Infof("获取角色详情 ID: %d", req.GetId())
 	return s.ruc.Get(ctx, req.GetId())
 }
 
 // CreateRole 创建角色
 func (s *RoleServiceService) CreateRole(ctx context.Context, req *pbCore.CreateRoleRequest) (*pbCore.CreateRoleResponse, error) {
-	if req.GetRole() == nil {
-		return nil, pb.ErrorRoleInvalidId("角色信息不能为空")
-	}
 	s.log.Infof("创建角色: %v", req.GetRole().GetName())
 	_, err := s.ruc.Create(ctx, req.GetRole())
 	if err != nil {
@@ -82,9 +76,6 @@ func (s *RoleServiceService) CreateRole(ctx context.Context, req *pbCore.CreateR
 
 // UpdateRole 更新角色
 func (s *RoleServiceService) UpdateRole(ctx context.Context, req *pbCore.UpdateRoleRequest) (*pbCore.UpdateRoleResponse, error) {
-	if req.GetId() == 0 || req.GetRole() == nil {
-		return nil, pb.ErrorRoleInvalidId("角色ID和信息不能为空")
-	}
 	existing, err := s.GetRole(ctx, &pbCore.GetRoleRequest{Id: req.GetId()})
 	if err != nil {
 		return nil, err
@@ -102,9 +93,6 @@ func (s *RoleServiceService) UpdateRole(ctx context.Context, req *pbCore.UpdateR
 
 // DeleteRole 删除角色
 func (s *RoleServiceService) DeleteRole(ctx context.Context, req *pbCore.DeleteRoleRequest) (*pbCore.DeleteRoleResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorRoleInvalidId("角色ID不能为空")
-	}
 	s.log.Infof("删除角色 ID: %d", req.GetId())
 	if err := s.ruc.Delete(ctx, req.GetId()); err != nil {
 		return nil, err
@@ -127,12 +115,6 @@ func (s *RoleServiceService) ExistRoleByName(ctx context.Context, req *pbCore.Ex
 
 // UpdateRoleByStatus 更新角色状态
 func (s *RoleServiceService) UpdateRoleByStatus(ctx context.Context, req *pbCore.UpdateRoleByStatusRequest) (*pbCore.UpdateRoleByStatusResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorRoleInvalidId("角色ID不能为空")
-	}
-	if req.GetStatus() == 0 {
-		return nil, pb.ErrorRoleStatusCannotBeEmpty("角色状态不能为空")
-	}
 	s.log.Infof("更新角色状态 ID: %d, status: %d", req.GetId(), req.GetStatus())
 	_, err := s.ruc.UpdateStatus(ctx, req.GetId(), int32(req.GetStatus()))
 	if err != nil {

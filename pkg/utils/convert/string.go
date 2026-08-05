@@ -1,9 +1,8 @@
 package convert
 
-// String 包提供字符串与其他类型转换的工具函数。
-
 import (
 	"strconv"
+	"strings"
 )
 
 // StringToUint 将字符串转换为 uint 类型。若转换失败，返回 0。
@@ -18,5 +17,12 @@ func StringToUint(id string) uint {
 		return 0
 	}
 	return uint(idInt)
+}
 
+// DefaultString returns value if it is non-empty (after trimming spaces), otherwise returns fallback.
+func DefaultString(value, fallback string) string {
+	if strings.TrimSpace(value) == "" {
+		return fallback
+	}
+	return value
 }

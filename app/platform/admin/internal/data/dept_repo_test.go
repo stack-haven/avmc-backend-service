@@ -7,6 +7,7 @@ import (
 	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
+	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -54,7 +55,11 @@ func TestDeptRepoRejectsHierarchyCycle(t *testing.T) {
 
 	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 	ctx := tenantContext(1)
-	parent, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("parent")})
+	root, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("root")})
+	if err != nil {
+		t.Fatalf("save root: %v", err)
+	}
+	parent, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("parent"), ParentId: ptr(root.GetId())})
 	if err != nil {
 		t.Fatalf("save parent: %v", err)
 	}
@@ -78,7 +83,11 @@ func TestDeptRepoProtectsChildrenOnDelete(t *testing.T) {
 	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
 	ctx := tenantContext(1)
 
-	parent, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("parent")})
+	root, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("root")})
+	if err != nil {
+		t.Fatalf("save root: %v", err)
+	}
+	parent, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("parent"), ParentId: ptr(root.GetId())})
 	if err != nil {
 		t.Fatalf("save parent: %v", err)
 	}
@@ -172,4 +181,64 @@ func TestDeptRepoListReturnsAncestors(t *testing.T) {
 		}
 	}
 	t.Fatal("child department not found")
+}
+
+func TestDeptRepoTransferAndDeleteMovesUsersAtomically(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	ctx := tenantContext(1)
+	root, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("root")})
+	source, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("source"), ParentId: ptr(root.GetId())})
+	target, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("target"), ParentId: ptr(root.GetId())})
+	member := client.User.Create().
+		SetName("transfer-user").
+		SetPassword("hashed-password").
+		SetStatus(int32(pbEnum.Status_STATUS_ENABLED)).
+		SetDeptID(source.GetId()).
+		SaveX(ctx)
+
+	impact, err := repo.GetDeleteImpact(ctx, source.GetId())
+	if err != nil {
+		t.Fatalf("GetDeleteImpact() error = %v", err)
+	}
+	if !impact.GetRequiresUserTransfer() || impact.GetDirectUserCount() != 1 {
+		t.Fatalf("impact = %+v", impact)
+	}
+
+	count, err := repo.TransferAndDelete(ctx, source.GetId(), target.GetId())
+	if err != nil {
+		t.Fatalf("TransferAndDelete() error = %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("transferred count = %d, want 1", count)
+	}
+	updated := client.User.GetX(ctx, member.ID)
+	if updated.DeptID == nil || *updated.DeptID != target.GetId() {
+		t.Fatalf("user dept = %v, want %d", updated.DeptID, target.GetId())
+	}
+	if client.Dept.Query().Where(dept.IDEQ(source.GetId())).ExistX(ctx) {
+		t.Fatal("source department still visible after delete")
+	}
+}
+
+func TestDeptRepoTransferAndDeleteRejectsChildrenAndCrossTenantTarget(t *testing.T) {
+	client := newTestClient(t)
+	defer client.Close()
+	repo := NewDeptRepo(&Data{db: client}, log.NewStdLogger(io.Discard))
+	ctx := tenantContext(1)
+	root, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("root")})
+	source, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("source"), ParentId: ptr(root.GetId())})
+	if _, err := repo.Save(ctx, &pbCore.Dept{Name: ptr("child"), ParentId: ptr(source.GetId())}); err != nil {
+		t.Fatal(err)
+	}
+	targetTwo, _ := repo.Save(tenantContext(2), &pbCore.Dept{Name: ptr("tenant-two-root")})
+
+	if _, err := repo.TransferAndDelete(ctx, source.GetId(), root.GetId()); !pb.IsDeptCannotDeleteWithChildren(err) {
+		t.Fatalf("children error = %v", err)
+	}
+	leaf, _ := repo.Save(ctx, &pbCore.Dept{Name: ptr("leaf"), ParentId: ptr(root.GetId())})
+	if _, err := repo.TransferAndDelete(ctx, leaf.GetId(), targetTwo.GetId()); !pb.IsBadRequest(err) {
+		t.Fatalf("cross-tenant target error = %v", err)
+	}
 }

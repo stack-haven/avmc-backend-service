@@ -6,11 +6,12 @@ import (
 	"sort"
 	"strings"
 
-	pbCore "backend-service/api/core/service/v1"
-	"backend-service/pkg/auth/authn"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/proto"
+
+	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/auth/authn"
 )
 
 type ResourceQuotaRepo interface {
@@ -22,7 +23,7 @@ type ResourceQuotaRepo interface {
 
 type ResourceQuotaUsecase struct {
 	repo     ResourceQuotaRepo
-	packages MenuPermissionGroupRepo
+	packages TenantMenuPermissionGroupRepo
 	log      *log.Helper
 }
 
@@ -34,7 +35,7 @@ type ResourceQuotaReservation struct {
 	replay                bool
 }
 
-func NewResourceQuotaUsecase(repo ResourceQuotaRepo, packages MenuPermissionGroupRepo, logger log.Logger) *ResourceQuotaUsecase {
+func NewResourceQuotaUsecase(repo ResourceQuotaRepo, packages TenantMenuPermissionGroupRepo, logger log.Logger) *ResourceQuotaUsecase {
 	return &ResourceQuotaUsecase{repo: repo, packages: packages, log: log.NewHelper(logger)}
 }
 
@@ -209,7 +210,7 @@ func (r *ResourceQuotaReservation) Release(ctx context.Context) (*pbCore.TenantR
 	return r.uc.ReleaseCurrent(ctx, r.resourceKey, r.amount, r.releaseIdempotencyKey)
 }
 
-func (uc *ResourceQuotaUsecase) resourceLimit(ctx context.Context, tenantID uint32, resourceKey string) (int64, bool, error) {
+func (uc *ResourceQuotaUsecase) resourceLimit(ctx context.Context, tenantID uint32, resourceKey string) (limit int64, unlimited bool, err error) {
 	limits, err := uc.tenantResourceLimits(ctx, tenantID)
 	if err != nil {
 		return 0, false, err
@@ -259,7 +260,7 @@ func applyQuotaLimit(usage *pbCore.TenantResourceQuotaUsage, limit int64, unlimi
 	if usage == nil {
 		usage = &pbCore.TenantResourceQuotaUsage{}
 	}
-	result := *usage
+	result := proto.Clone(usage).(*pbCore.TenantResourceQuotaUsage) //nolint:errcheck // proto.Clone does not return error
 	if result.Used < 0 {
 		result.Used = 0
 	}
@@ -267,7 +268,7 @@ func applyQuotaLimit(usage *pbCore.TenantResourceQuotaUsage, limit int64, unlimi
 	if unlimited {
 		result.Limit = 0
 		result.Remaining = 0
-		return &result
+		return result
 	}
 	if limit < 0 {
 		limit = 0
@@ -277,5 +278,5 @@ func applyQuotaLimit(usage *pbCore.TenantResourceQuotaUsage, limit int64, unlimi
 	if result.Remaining < 0 {
 		result.Remaining = 0
 	}
-	return &result
+	return result
 }

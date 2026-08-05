@@ -142,6 +142,19 @@ service DeptService {
     };
   }
 
+  // 获取删除部门前的影响范围
+  rpc GetDeptDeleteImpact(core.service.v1.GetDeptDeleteImpactRequest) returns (core.service.v1.GetDeptDeleteImpactResponse) {
+    option (google.api.http) = {get: "/admin/v1/depts/{id}/delete-impact"};
+  }
+
+  // 转移部门人员并删除部门
+  rpc TransferAndDeleteDept(core.service.v1.TransferAndDeleteDeptRequest) returns (core.service.v1.TransferAndDeleteDeptResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/depts/{id}:transfer-and-delete"
+      body: "*"
+    };
+  }
+
   // 更新部门状态
   rpc UpdateDeptByStatus(core.service.v1.UpdateDeptByStatusRequest) returns (core.service.v1.UpdateDeptByStatusResponse) {
     option (google.api.http) = {

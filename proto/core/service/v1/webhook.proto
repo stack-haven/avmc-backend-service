@@ -43,7 +43,7 @@ message WebhookSubscription {
   string url = 4 [(buf.validate.field).string = {min_len: 1, max_len: 2048}];
   string secret = 5 [(buf.validate.field).string = {min_len: 16, max_len: 256}];
   repeated WebhookEventType event_types = 6 [(buf.validate.field).repeated = {min_items: 1, max_items: 20}];
-  optional enum.Status status = 7 [(buf.validate.field).enum.defined_only = true];
+  optional enum.Status status = 7 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional string created_at = 8;
   optional string updated_at = 9;
 }
@@ -56,8 +56,8 @@ message ListWebhookSubscriptionsRequest {
   string page_token = 1;
   int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
   optional string keyword = 3 [(buf.validate.field).string.max_len = 100];
-  optional WebhookEventType event_type = 4 [(buf.validate.field).enum.defined_only = true];
-  optional enum.Status status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional WebhookEventType event_type = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional enum.Status status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
 }
 
 message ListWebhookSubscriptionsResponse {
@@ -92,12 +92,12 @@ message WebhookDeliveryLog {
   uint32 tenant_id = 2;
   uint32 subscription_id = 3;
   string event_id = 4 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
-  WebhookEventType event_type = 5 [(buf.validate.field).enum.defined_only = true];
+  WebhookEventType event_type = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   string target_url = 6 [(buf.validate.field).string.max_len = 2048];
   string request_body = 7 [(buf.validate.field).string.max_len = 65536];
   optional int32 response_code = 8;
   optional string response_body = 9 [(buf.validate.field).string.max_len = 65536];
-  WebhookDeliveryStatus delivery_status = 10 [(buf.validate.field).enum.defined_only = true];
+  WebhookDeliveryStatus delivery_status = 10 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   int32 attempt_number = 11 [(buf.validate.field).int32.gte = 1];
   optional string error_message = 12 [(buf.validate.field).string.max_len = 1024];
   optional string created_at = 13;
@@ -111,8 +111,8 @@ message ListWebhookDeliveryLogsRequest {
   string page_token = 1;
   int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
   optional uint32 subscription_id = 3;
-  optional WebhookEventType event_type = 4 [(buf.validate.field).enum.defined_only = true];
-  optional WebhookDeliveryStatus delivery_status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional WebhookEventType event_type = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional WebhookDeliveryStatus delivery_status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
 }
 
 message ListWebhookDeliveryLogsResponse {
@@ -138,7 +138,7 @@ message RetryWebhookDeliveryResponse {
 // =============================================================================
 
 message PublishWebhookEventRequest {
-  WebhookEventType event_type = 1 [(buf.validate.field).enum.defined_only = true];
+  WebhookEventType event_type = 1 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   string event_id = 2 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
   string payload = 3 [(buf.validate.field).string = {min_len: 1, max_len: 65536}];
 }

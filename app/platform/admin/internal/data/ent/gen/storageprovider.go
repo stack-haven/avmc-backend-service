@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 存储渠道配置表
+// 存储渠道表
 type StorageProvider struct {
 	config `json:"-"`
 	// ID of the ent.

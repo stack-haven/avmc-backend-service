@@ -20,6 +20,7 @@ func (Post) Annotations() []schema.Annotation {
 		entsql.Annotation{
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
+			Table:     "system_posts",
 		},
 		entsql.WithComments(true),
 		schema.Comment("岗位表"),

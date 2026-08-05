@@ -14,7 +14,7 @@ import (
 type DictionaryType struct{ ent.Schema }
 
 func (DictionaryType) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"}, entsql.WithComments(true), schema.Comment("租户数据字典类型表")}
+	return []schema.Annotation{entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_dictionary_types"}, entsql.WithComments(true), schema.Comment("租户数据字典类型表")}
 }
 func (DictionaryType) Fields() []ent.Field {
 	return []ent.Field{

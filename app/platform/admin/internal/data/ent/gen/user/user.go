@@ -68,31 +68,31 @@ const (
 	// EdgeProjects holds the string denoting the projects edge name in mutations.
 	EdgeProjects = "projects"
 	// Table holds the table name of the user in the database.
-	Table = "users"
+	Table = "system_users"
 	// RolesTable is the table that holds the roles relation/edge. The primary key declared below.
-	RolesTable = "user_roles"
+	RolesTable = "system_user_roles"
 	// RolesInverseTable is the table name for the Role entity.
 	// It exists in this package in order to avoid circular dependency with the "role" package.
-	RolesInverseTable = "roles"
+	RolesInverseTable = "system_roles"
 	// PostsTable is the table that holds the posts relation/edge.
-	PostsTable = "posts"
+	PostsTable = "system_posts"
 	// PostsInverseTable is the table name for the Post entity.
 	// It exists in this package in order to avoid circular dependency with the "post" package.
-	PostsInverseTable = "posts"
+	PostsInverseTable = "system_posts"
 	// PostsColumn is the table column denoting the posts relation/edge.
 	PostsColumn = "user_posts"
 	// DeptTable is the table that holds the dept relation/edge.
-	DeptTable = "users"
+	DeptTable = "system_users"
 	// DeptInverseTable is the table name for the Dept entity.
 	// It exists in this package in order to avoid circular dependency with the "dept" package.
-	DeptInverseTable = "depts"
+	DeptInverseTable = "system_depts"
 	// DeptColumn is the table column denoting the dept relation/edge.
 	DeptColumn = "dept_id"
 	// ProjectsTable is the table that holds the projects relation/edge. The primary key declared below.
-	ProjectsTable = "project_members"
+	ProjectsTable = "system_project_members"
 	// ProjectsInverseTable is the table name for the Project entity.
 	// It exists in this package in order to avoid circular dependency with the "project" package.
-	ProjectsInverseTable = "projects"
+	ProjectsInverseTable = "system_projects"
 )
 
 // Columns holds all SQL columns for user fields.

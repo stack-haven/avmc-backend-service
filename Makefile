@@ -59,12 +59,32 @@ build:
 .PHONY: fmt-check
 # verify Go source formatting
 fmt-check:
-	@test -z "$$(gofmt -l $$(find . -name '*.go' -not -path './vendor/*'))" || \
-		(echo "Go files must be formatted with gofmt:"; gofmt -l $$(find . -name '*.go' -not -path './vendor/*'); exit 1)
+	@test -z "$$(gofmt -l $$(find . -name '*.go' -not -path './vendor/*' -not -path './api/*' -not -path '*/ent/gen/*'))" || \
+		(echo "Go files must be formatted with gofmt:"; gofmt -l $$(find . -name '*.go' -not -path './vendor/*' -not -path './api/*' -not -path '*/ent/gen/*'); exit 1)
+
+.PHONY: lint
+# run golangci-lint (P0 rules only in Phase 1, expand in Phase 2/3)
+lint:
+	@golangci-lint run --timeout 5m ./...
+
+.PHONY: lint-fix
+# auto-fix lint issues where supported
+lint-fix:
+	@golangci-lint run --fix --timeout 5m ./...
+
+.PHONY: lint-new
+# lint only new changes relative to HEAD (for incremental adoption)
+lint-new:
+	@golangci-lint run --new --timeout 5m ./...
+
+.PHONY: security-check
+# run dedicated security scan
+security-check:
+	@gosec -quiet -fmt=colored-line-number ./...
 
 .PHONY: check
 # run the required local quality gate
-check: fmt-check
+check: fmt-check lint
 	go vet ./...
 	go test -timeout 90s ./...
 	git diff --check

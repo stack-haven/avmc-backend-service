@@ -17,7 +17,7 @@ type TenantParameterOverride struct{ ent.Schema }
 
 func (TenantParameterOverride) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_tenant_parameter_overrides"},
 		entsql.WithComments(true),
 		schema.Comment("租户参数覆盖表"),
 	}

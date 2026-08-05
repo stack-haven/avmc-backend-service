@@ -4,20 +4,22 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/types/known/emptypb"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
-
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type NotificationServiceService struct {
 	pb.UnimplementedNotificationServiceServer
-	uc *biz.NotificationUsecase
+	uc  *biz.NotificationUsecase
+	log *log.Helper
 }
 
-func NewNotificationServiceService(uc *biz.NotificationUsecase) *NotificationServiceService {
-	return &NotificationServiceService{uc: uc}
+func NewNotificationServiceService(uc *biz.NotificationUsecase, logger log.Logger) *NotificationServiceService {
+	return &NotificationServiceService{uc: uc, log: log.NewHelper(logger)}
 }
 
 func (s *NotificationServiceService) ListNotificationTemplates(ctx context.Context, req *pbCore.ListNotificationTemplatesRequest) (*pbCore.ListNotificationTemplatesResponse, error) {
@@ -26,7 +28,10 @@ func (s *NotificationServiceService) ListNotificationTemplates(ctx context.Conte
 		return nil, err
 	}
 	resp := &pbCore.ListNotificationTemplatesResponse{Items: items, Total: total}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}
@@ -104,7 +109,10 @@ func notificationMessageListResponse(req *pbCore.ListNotificationMessagesRequest
 	if req == nil {
 		return resp
 	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}

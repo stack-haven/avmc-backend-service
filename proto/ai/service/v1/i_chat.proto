@@ -195,7 +195,7 @@ message Chat {
     (gnostic.openapi.v3.property) = {description: "对话名"}
   ];
   optional enum.Status status = 11 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "状态 0 未知 1 启用 2 禁用"}
   ];
   optional string created_at = 12 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
@@ -283,7 +283,7 @@ message ListChatsRequest {
     (gnostic.openapi.v3.property) = {description: "是否不分页"}
   ];
   optional enum.Status status = 6 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "状态 0 未知 1 启用 2 禁用"}
   ];
 
@@ -324,7 +324,7 @@ message UpdateChatByStatusRequest {
     (gnostic.openapi.v3.property) = {description: "对话ID"}
   ];
   optional enum.Status status = 2 [
-    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
     (gnostic.openapi.v3.property) = {description: "状态 0 未知 1 启用 2 禁用"}
   ];
   optional uint32 operator_id = 3 [

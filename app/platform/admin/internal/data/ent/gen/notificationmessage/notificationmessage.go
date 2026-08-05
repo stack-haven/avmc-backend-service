@@ -51,7 +51,7 @@ const (
 	// FieldSenderName holds the string denoting the sender_name field in the database.
 	FieldSenderName = "sender_name"
 	// Table holds the table name of the notificationmessage in the database.
-	Table = "notification_messages"
+	Table = "system_notification_messages"
 )
 
 // Columns holds all SQL columns for notificationmessage fields.

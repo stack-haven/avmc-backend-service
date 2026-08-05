@@ -15,7 +15,7 @@ type NotificationTemplate struct{ ent.Schema }
 
 func (NotificationTemplate) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_notification_templates"},
 		entsql.WithComments(true),
 		schema.Comment("通知模板表"),
 	}

@@ -17,9 +17,9 @@ type FileAccessLog struct {
 
 func (FileAccessLog) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_file_access_logs"},
 		entsql.WithComments(true),
-		schema.Comment("文件中心访问日志表"),
+		schema.Comment("文件访问日志表"),
 	}
 }
 

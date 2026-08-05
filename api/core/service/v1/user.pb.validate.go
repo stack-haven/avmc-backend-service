@@ -1395,6 +1395,14 @@ func (m *ListUsersRequest) validate(all bool) error {
 		// no validation rules for Status
 	}
 
+	if m.DeptId != nil {
+		// no validation rules for DeptId
+	}
+
+	if m.IncludeChildDepts != nil {
+		// no validation rules for IncludeChildDepts
+	}
+
 	if m.Filter != nil {
 		// no validation rules for Filter
 	}

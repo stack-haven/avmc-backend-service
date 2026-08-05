@@ -110,7 +110,7 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 	}
 	r.Log.Infof("保存部门: %s", g.GetName())
 	entDept := r.convertEnt(g)
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	ancestors, err := r.resolveAncestors(ctx, 0, g.GetParentId())
@@ -149,7 +149,7 @@ func (r *deptRepo) Save(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, erro
 }
 
 func (r *deptRepo) GetDeptExistByName(ctx context.Context, name string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entDept, err := r.Data.DB(ctx).Dept.Query().Where(dept.Name(name)).Select(dept.FieldID).First(ctx)
@@ -167,7 +167,7 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 		return nil, pb.ErrorDeptInvalidId("部门ID和名称不能为空")
 	}
 	entDept := r.convertEnt(g)
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	ancestors, err := r.resolveAncestors(ctx, g.GetId(), g.GetParentId())
@@ -240,7 +240,7 @@ func (r *deptRepo) Update(ctx context.Context, g *pbCore.Dept) (*pbCore.Dept, er
 }
 
 func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Dept.Query().
@@ -255,8 +255,18 @@ func (r *deptRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Dept, error
 }
 
 func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
+	}
+	item, err := r.Data.DB(ctx).Dept.Query().Where(dept.IDEQ(id)).Select(dept.FieldID, dept.FieldParentID).Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return pb.ErrorDeptNotFound("部门不存在")
+		}
+		return err
+	}
+	if item.ParentID == nil || *item.ParentID == 0 {
+		return kerrors.Conflict("PROTECTED_ROOT_DEPT", "组织根部门不可删除")
 	}
 	hasChildren, err := r.Data.DB(ctx).Dept.Query().
 		Where(dept.ParentIDEQ(id)).
@@ -286,8 +296,92 @@ func (r *deptRepo) Delete(ctx context.Context, id uint32) error {
 	return err
 }
 
+func (r *deptRepo) GetDeleteImpact(ctx context.Context, id uint32) (*pbCore.GetDeptDeleteImpactResponse, error) {
+	if _, err := r.RequireTenantID(ctx); err != nil {
+		return nil, err
+	}
+	item, err := r.Data.DB(ctx).Dept.Query().
+		Where(dept.IDEQ(id)).
+		WithUsers().
+		WithChildren().
+		WithDataScopeRoles().
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorDeptNotFound("部门不存在")
+		}
+		return nil, err
+	}
+	userCount := uint32(len(item.Edges.Users))
+	hasChildren := len(item.Edges.Children) > 0
+	isProtectedRoot := item.ParentID == nil || *item.ParentID == 0
+	hasDataScopeRoles := len(item.Edges.DataScopeRoles) > 0
+	name := ""
+	if item.Name != nil {
+		name = *item.Name
+	}
+	return &pbCore.GetDeptDeleteImpactResponse{
+		Id:                   item.ID,
+		Name:                 name,
+		DirectUserCount:      userCount,
+		HasChildren:          hasChildren,
+		IsProtectedRoot:      isProtectedRoot,
+		HasDataScopeRoles:    hasDataScopeRoles,
+		CanDeleteDirectly:    userCount == 0 && !hasChildren && !isProtectedRoot && !hasDataScopeRoles,
+		RequiresUserTransfer: userCount > 0 && !hasChildren && !isProtectedRoot && !hasDataScopeRoles,
+	}, nil
+}
+
+func (r *deptRepo) TransferAndDelete(ctx context.Context, id, targetDeptID uint32) (uint32, error) {
+	if _, err := r.RequireTenantID(ctx); err != nil {
+		return 0, err
+	}
+	if id == targetDeptID {
+		return 0, pb.ErrorBadRequest("接收部门不能是待删除部门")
+	}
+	var transferred uint32
+	err := r.Data.InTx(ctx, func(txCtx context.Context) error {
+		client := r.Data.DB(txCtx)
+		source, err := client.Dept.Query().Where(dept.IDEQ(id)).WithChildren().WithDataScopeRoles().Only(txCtx)
+		if err != nil {
+			if gen.IsNotFound(err) {
+				return pb.ErrorDeptNotFound("待删除部门不存在")
+			}
+			return err
+		}
+		if source.ParentID == nil || *source.ParentID == 0 {
+			return kerrors.Conflict("PROTECTED_ROOT_DEPT", "组织根部门不可删除")
+		}
+		if len(source.Edges.Children) > 0 {
+			return pb.ErrorDeptCannotDeleteWithChildren("存在下级部门，请先处理下级部门")
+		}
+		if len(source.Edges.DataScopeRoles) > 0 {
+			return kerrors.Conflict("DEPT_DATA_SCOPE_IN_USE", "部门仍被角色数据范围引用，请先调整角色")
+		}
+		if _, err = client.Dept.Query().Where(dept.IDEQ(targetDeptID)).Only(txCtx); err != nil {
+			if gen.IsNotFound(err) {
+				return pb.ErrorBadRequest("接收部门不存在或不属于当前租户")
+			}
+			return err
+		}
+		count, err := client.User.Query().Where(user.DeptIDEQ(id)).Count(txCtx)
+		if err != nil {
+			return err
+		}
+		if _, err = client.User.Update().Where(user.DeptIDEQ(id)).SetDeptID(targetDeptID).Save(txCtx); err != nil {
+			return err
+		}
+		if err = client.Dept.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(txCtx); err != nil {
+			return err
+		}
+		transferred = uint32(count)
+		return nil
+	})
+	return transferred, err
+}
+
 func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Dept.Query().Where(dept.NameContains(name)).All(ctx)
@@ -298,7 +392,7 @@ func (r *deptRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Dept,
 }
 
 func (r *deptRepo) CountDepts(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	o := listing.Options{}
@@ -316,7 +410,7 @@ func (r *deptRepo) CountDepts(ctx context.Context, opts ...listing.Option) (int3
 }
 
 func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Dept.Query().
@@ -325,11 +419,47 @@ func (r *deptRepo) ListAll(ctx context.Context) ([]*pbCore.Dept, error) {
 	if err != nil {
 		return nil, err
 	}
-	return convert.SliceToAny(res, r.convertProto), nil
+	items := convert.SliceToAny(res, r.convertProto)
+	users, err := r.Data.DB(ctx).User.Query().Select(user.FieldDeptID).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	direct := make(map[uint32]uint32)
+	for _, item := range users {
+		if item.DeptID != nil {
+			direct[*item.DeptID]++
+		}
+	}
+	byID := make(map[uint32]*pbCore.Dept, len(items))
+	for _, item := range items {
+		item.DirectUserCount = direct[item.GetId()]
+		item.TotalUserCount = item.DirectUserCount
+		byID[item.GetId()] = item
+	}
+	for _, item := range items {
+		if item.DirectUserCount == 0 {
+			continue
+		}
+		parentID := item.GetParentId()
+		visited := map[uint32]struct{}{item.GetId(): {}}
+		for parentID != 0 {
+			if _, exists := visited[parentID]; exists {
+				break
+			}
+			visited[parentID] = struct{}{}
+			parent := byID[parentID]
+			if parent == nil {
+				break
+			}
+			parent.TotalUserCount += item.DirectUserCount
+			parentID = parent.GetParentId()
+		}
+	}
+	return items, nil
 }
 
 func (r *deptRepo) ListDepts(ctx context.Context, opts ...listing.Option) ([]*pbCore.Dept, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	o := listing.Options{Limit: 20}

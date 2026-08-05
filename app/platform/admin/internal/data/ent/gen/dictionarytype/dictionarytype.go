@@ -36,12 +36,12 @@ const (
 	// EdgeItems holds the string denoting the items edge name in mutations.
 	EdgeItems = "items"
 	// Table holds the table name of the dictionarytype in the database.
-	Table = "dictionary_types"
+	Table = "system_dictionary_types"
 	// ItemsTable is the table that holds the items relation/edge.
-	ItemsTable = "dictionary_items"
+	ItemsTable = "system_dictionary_items"
 	// ItemsInverseTable is the table name for the DictionaryItem entity.
 	// It exists in this package in order to avoid circular dependency with the "dictionaryitem" package.
-	ItemsInverseTable = "dictionary_items"
+	ItemsInverseTable = "system_dictionary_items"
 	// ItemsColumn is the table column denoting the items relation/edge.
 	ItemsColumn = "type_id"
 )

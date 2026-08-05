@@ -87,7 +87,7 @@ func (r *postRepo) Save(ctx context.Context, g *pbCore.Post) (*pbCore.Post, erro
 }
 
 func (r *postRepo) GetPostExistByName(ctx context.Context, name string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entPost, err := r.Data.DB(ctx).Post.Query().Where(post.Name(name)).Select(post.FieldID).First(ctx)
@@ -105,7 +105,7 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 		return nil, pb.ErrorPostInvalidId("岗位ID和名称不能为空")
 	}
 	entPost := r.convertEnt(g)
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	id, err := r.GetPostExistByName(ctx, *entPost.Name)
@@ -132,7 +132,7 @@ func (r *postRepo) Update(ctx context.Context, g *pbCore.Post) (*pbCore.Post, er
 }
 
 func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Post.Query().Where(post.IDEQ(id)).Only(ctx)
@@ -146,7 +146,7 @@ func (r *postRepo) FindByID(ctx context.Context, id uint32) (*pbCore.Post, error
 }
 
 func (r *postRepo) Delete(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	err := r.Data.DB(ctx).Post.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
@@ -157,7 +157,7 @@ func (r *postRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Post.Query().Where(post.NameContains(name)).All(ctx)
@@ -168,7 +168,7 @@ func (r *postRepo) ListByName(ctx context.Context, name string) ([]*pbCore.Post,
 }
 
 func (r *postRepo) CountPosts(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	o := listing.Options{}
@@ -186,7 +186,7 @@ func (r *postRepo) CountPosts(ctx context.Context, opts ...listing.Option) (int3
 }
 
 func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	res, err := r.Data.DB(ctx).Post.Query().
@@ -199,7 +199,7 @@ func (r *postRepo) ListAll(ctx context.Context) ([]*pbCore.Post, error) {
 }
 
 func (r *postRepo) ListPosts(ctx context.Context, opts ...listing.Option) ([]*pbCore.Post, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	o := listing.Options{Limit: 20}
@@ -220,7 +220,7 @@ func (r *postRepo) ListPosts(ctx context.Context, opts ...listing.Option) ([]*pb
 
 func (r *postRepo) ListPage(ctx context.Context, req *pbCore.ListPostsRequest) (*pbCore.ListPostsResponse, error) {
 	r.Log.Infof("查询岗位列表分页，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	count, err := r.Data.DB(ctx).Post.Query().Select(post.FieldID).Where(post.DeletedAtIsNil()).Count(ctx)

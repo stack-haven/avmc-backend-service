@@ -5,11 +5,11 @@ import (
 	"io"
 	"testing"
 
-	pb "backend-service/api/core/service/v1"
-	"backend-service/pkg/auth/authn"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+
+	pb "backend-service/api/core/service/v1"
+	"backend-service/pkg/auth/authn"
 )
 
 func TestValidateParameterDefinition(t *testing.T) {
@@ -101,7 +101,7 @@ func (r *parameterRepoStub) ListResolved(_ context.Context, tenantID uint32, key
 	r.key = key
 	return []*pb.ResolvedParameter{{Key: key}}, nil
 }
-func (r *parameterRepoStub) SetOverride(_ context.Context, tenantID uint32, key string, value string, operatorID uint32) (*pb.ResolvedParameter, error) {
+func (r *parameterRepoStub) SetOverride(_ context.Context, tenantID uint32, key, value string, operatorID uint32) (*pb.ResolvedParameter, error) {
 	r.tenantID = tenantID
 	r.key = key
 	r.value = value

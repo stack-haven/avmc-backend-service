@@ -11,8 +11,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
@@ -21,6 +19,9 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
@@ -94,28 +95,29 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			asynctask.Table:                  asynctask.ValidColumn,
-			dept.Table:                       dept.ValidColumn,
-			dictionaryitem.Table:             dictionaryitem.ValidColumn,
-			dictionarytype.Table:             dictionarytype.ValidColumn,
-			fileaccesslog.Table:              fileaccesslog.ValidColumn,
-			fileobject.Table:                 fileobject.ValidColumn,
-			loginlog.Table:                   loginlog.ValidColumn,
-			menu.Table:                       menu.ValidColumn,
-			menupermissiongroup.Table:        menupermissiongroup.ValidColumn,
-			menupermissiongroupversion.Table: menupermissiongroupversion.ValidColumn,
-			notificationmessage.Table:        notificationmessage.ValidColumn,
-			notificationtemplate.Table:       notificationtemplate.ValidColumn,
-			operationlog.Table:               operationlog.ValidColumn,
-			parameterdefinition.Table:        parameterdefinition.ValidColumn,
-			post.Table:                       post.ValidColumn,
-			project.Table:                    project.ValidColumn,
-			role.Table:                       role.ValidColumn,
-			storageprovider.Table:            storageprovider.ValidColumn,
-			tenantparameteroverride.Table:    tenantparameteroverride.ValidColumn,
-			user.Table:                       user.ValidColumn,
-			webhookdeliverylog.Table:         webhookdeliverylog.ValidColumn,
-			webhooksubscription.Table:        webhooksubscription.ValidColumn,
+			asynctask.Table:                        asynctask.ValidColumn,
+			dept.Table:                             dept.ValidColumn,
+			dictionaryitem.Table:                   dictionaryitem.ValidColumn,
+			dictionarytype.Table:                   dictionarytype.ValidColumn,
+			fileaccesslog.Table:                    fileaccesslog.ValidColumn,
+			fileobject.Table:                       fileobject.ValidColumn,
+			loginlog.Table:                         loginlog.ValidColumn,
+			menu.Table:                             menu.ValidColumn,
+			notificationmessage.Table:              notificationmessage.ValidColumn,
+			notificationtemplate.Table:             notificationtemplate.ValidColumn,
+			operationlog.Table:                     operationlog.ValidColumn,
+			parameterdefinition.Table:              parameterdefinition.ValidColumn,
+			post.Table:                             post.ValidColumn,
+			project.Table:                          project.ValidColumn,
+			role.Table:                             role.ValidColumn,
+			storageprovider.Table:                  storageprovider.ValidColumn,
+			tenant.Table:                           tenant.ValidColumn,
+			tenantmenupermissiongroup.Table:        tenantmenupermissiongroup.ValidColumn,
+			tenantmenupermissiongroupversion.Table: tenantmenupermissiongroupversion.ValidColumn,
+			tenantparameteroverride.Table:          tenantparameteroverride.ValidColumn,
+			user.Table:                             user.ValidColumn,
+			webhookdeliverylog.Table:               webhookdeliverylog.ValidColumn,
+			webhooksubscription.Table:              webhooksubscription.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

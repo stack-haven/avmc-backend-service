@@ -72,9 +72,9 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Roles holds the value of the roles edge.
+	// 用户角色关联表
 	Roles []*Role `json:"roles,omitempty"`
-	// Posts holds the value of the posts edge.
+	// 用户岗位关联表
 	Posts []*Post `json:"posts,omitempty"`
 	// Dept holds the value of the dept edge.
 	Dept *Dept `json:"dept,omitempty"`

@@ -63,7 +63,7 @@ func withMenuAncestors(ctx context.Context, client *gen.Client, menus []*gen.Men
 	sort.Slice(ids, func(i, j int) bool {
 		left, right := menuMap[ids[i]], menuMap[ids[j]]
 		if convert.ToValue(left.Sort) == convert.ToValue(right.Sort) {
-			return left.ID < right.ID
+			return left.ID > right.ID
 		}
 		return convert.ToValue(left.Sort) < convert.ToValue(right.Sort)
 	})

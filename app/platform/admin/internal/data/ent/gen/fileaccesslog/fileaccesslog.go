@@ -41,7 +41,7 @@ const (
 	// FieldMessage holds the string denoting the message field in the database.
 	FieldMessage = "message"
 	// Table holds the table name of the fileaccesslog in the database.
-	Table = "file_access_logs"
+	Table = "system_file_access_logs"
 )
 
 // Columns holds all SQL columns for fileaccesslog fields.

@@ -11,8 +11,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
@@ -22,6 +20,9 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
@@ -45,28 +46,29 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAsyncTask                  = "AsyncTask"
-	TypeDept                       = "Dept"
-	TypeDictionaryItem             = "DictionaryItem"
-	TypeDictionaryType             = "DictionaryType"
-	TypeFileAccessLog              = "FileAccessLog"
-	TypeFileObject                 = "FileObject"
-	TypeLoginLog                   = "LoginLog"
-	TypeMenu                       = "Menu"
-	TypeMenuPermissionGroup        = "MenuPermissionGroup"
-	TypeMenuPermissionGroupVersion = "MenuPermissionGroupVersion"
-	TypeNotificationMessage        = "NotificationMessage"
-	TypeNotificationTemplate       = "NotificationTemplate"
-	TypeOperationLog               = "OperationLog"
-	TypeParameterDefinition        = "ParameterDefinition"
-	TypePost                       = "Post"
-	TypeProject                    = "Project"
-	TypeRole                       = "Role"
-	TypeStorageProvider            = "StorageProvider"
-	TypeTenantParameterOverride    = "TenantParameterOverride"
-	TypeUser                       = "User"
-	TypeWebhookDeliveryLog         = "WebhookDeliveryLog"
-	TypeWebhookSubscription        = "WebhookSubscription"
+	TypeAsyncTask                        = "AsyncTask"
+	TypeDept                             = "Dept"
+	TypeDictionaryItem                   = "DictionaryItem"
+	TypeDictionaryType                   = "DictionaryType"
+	TypeFileAccessLog                    = "FileAccessLog"
+	TypeFileObject                       = "FileObject"
+	TypeLoginLog                         = "LoginLog"
+	TypeMenu                             = "Menu"
+	TypeNotificationMessage              = "NotificationMessage"
+	TypeNotificationTemplate             = "NotificationTemplate"
+	TypeOperationLog                     = "OperationLog"
+	TypeParameterDefinition              = "ParameterDefinition"
+	TypePost                             = "Post"
+	TypeProject                          = "Project"
+	TypeRole                             = "Role"
+	TypeStorageProvider                  = "StorageProvider"
+	TypeTenant                           = "Tenant"
+	TypeTenantMenuPermissionGroup        = "TenantMenuPermissionGroup"
+	TypeTenantMenuPermissionGroupVersion = "TenantMenuPermissionGroupVersion"
+	TypeTenantParameterOverride          = "TenantParameterOverride"
+	TypeUser                             = "User"
+	TypeWebhookDeliveryLog               = "WebhookDeliveryLog"
+	TypeWebhookSubscription              = "WebhookSubscription"
 )
 
 // AsyncTaskMutation represents an operation that mutates the AsyncTask nodes in the graph.
@@ -10729,7 +10731,7 @@ func (m *MenuMutation) ResetRoles() {
 	m.removedroles = nil
 }
 
-// AddPermissionGroupIDs adds the "permission_groups" edge to the MenuPermissionGroup entity by ids.
+// AddPermissionGroupIDs adds the "permission_groups" edge to the TenantMenuPermissionGroup entity by ids.
 func (m *MenuMutation) AddPermissionGroupIDs(ids ...uint32) {
 	if m.permission_groups == nil {
 		m.permission_groups = make(map[uint32]struct{})
@@ -10739,17 +10741,17 @@ func (m *MenuMutation) AddPermissionGroupIDs(ids ...uint32) {
 	}
 }
 
-// ClearPermissionGroups clears the "permission_groups" edge to the MenuPermissionGroup entity.
+// ClearPermissionGroups clears the "permission_groups" edge to the TenantMenuPermissionGroup entity.
 func (m *MenuMutation) ClearPermissionGroups() {
 	m.clearedpermission_groups = true
 }
 
-// PermissionGroupsCleared reports if the "permission_groups" edge to the MenuPermissionGroup entity was cleared.
+// PermissionGroupsCleared reports if the "permission_groups" edge to the TenantMenuPermissionGroup entity was cleared.
 func (m *MenuMutation) PermissionGroupsCleared() bool {
 	return m.clearedpermission_groups
 }
 
-// RemovePermissionGroupIDs removes the "permission_groups" edge to the MenuPermissionGroup entity by IDs.
+// RemovePermissionGroupIDs removes the "permission_groups" edge to the TenantMenuPermissionGroup entity by IDs.
 func (m *MenuMutation) RemovePermissionGroupIDs(ids ...uint32) {
 	if m.removedpermission_groups == nil {
 		m.removedpermission_groups = make(map[uint32]struct{})
@@ -10760,7 +10762,7 @@ func (m *MenuMutation) RemovePermissionGroupIDs(ids ...uint32) {
 	}
 }
 
-// RemovedPermissionGroups returns the removed IDs of the "permission_groups" edge to the MenuPermissionGroup entity.
+// RemovedPermissionGroups returns the removed IDs of the "permission_groups" edge to the TenantMenuPermissionGroup entity.
 func (m *MenuMutation) RemovedPermissionGroupsIDs() (ids []uint32) {
 	for id := range m.removedpermission_groups {
 		ids = append(ids, id)
@@ -10783,7 +10785,7 @@ func (m *MenuMutation) ResetPermissionGroups() {
 	m.removedpermission_groups = nil
 }
 
-// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the MenuPermissionGroupVersion entity by ids.
+// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the TenantMenuPermissionGroupVersion entity by ids.
 func (m *MenuMutation) AddPermissionGroupVersionIDs(ids ...uint32) {
 	if m.permission_group_versions == nil {
 		m.permission_group_versions = make(map[uint32]struct{})
@@ -10793,17 +10795,17 @@ func (m *MenuMutation) AddPermissionGroupVersionIDs(ids ...uint32) {
 	}
 }
 
-// ClearPermissionGroupVersions clears the "permission_group_versions" edge to the MenuPermissionGroupVersion entity.
+// ClearPermissionGroupVersions clears the "permission_group_versions" edge to the TenantMenuPermissionGroupVersion entity.
 func (m *MenuMutation) ClearPermissionGroupVersions() {
 	m.clearedpermission_group_versions = true
 }
 
-// PermissionGroupVersionsCleared reports if the "permission_group_versions" edge to the MenuPermissionGroupVersion entity was cleared.
+// PermissionGroupVersionsCleared reports if the "permission_group_versions" edge to the TenantMenuPermissionGroupVersion entity was cleared.
 func (m *MenuMutation) PermissionGroupVersionsCleared() bool {
 	return m.clearedpermission_group_versions
 }
 
-// RemovePermissionGroupVersionIDs removes the "permission_group_versions" edge to the MenuPermissionGroupVersion entity by IDs.
+// RemovePermissionGroupVersionIDs removes the "permission_group_versions" edge to the TenantMenuPermissionGroupVersion entity by IDs.
 func (m *MenuMutation) RemovePermissionGroupVersionIDs(ids ...uint32) {
 	if m.removedpermission_group_versions == nil {
 		m.removedpermission_group_versions = make(map[uint32]struct{})
@@ -10814,7 +10816,7 @@ func (m *MenuMutation) RemovePermissionGroupVersionIDs(ids ...uint32) {
 	}
 }
 
-// RemovedPermissionGroupVersions returns the removed IDs of the "permission_group_versions" edge to the MenuPermissionGroupVersion entity.
+// RemovedPermissionGroupVersions returns the removed IDs of the "permission_group_versions" edge to the TenantMenuPermissionGroupVersion entity.
 func (m *MenuMutation) RemovedPermissionGroupVersionsIDs() (ids []uint32) {
 	for id := range m.removedpermission_group_versions {
 		ids = append(ids, id)
@@ -11805,2801 +11807,6 @@ func (m *MenuMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Menu edge %s", name)
-}
-
-// MenuPermissionGroupMutation represents an operation that mutates the MenuPermissionGroup nodes in the graph.
-type MenuPermissionGroupMutation struct {
-	config
-	op                     Op
-	typ                    string
-	id                     *uint32
-	status                 *int32
-	addstatus              *int32
-	created_at             *time.Time
-	updated_at             *time.Time
-	deleted_at             *time.Time
-	name                   *string
-	code                   *string
-	is_system              *bool
-	sort                   *int32
-	addsort                *int32
-	description            *string
-	remark                 *string
-	api_permissions        *[]string
-	appendapi_permissions  []string
-	feature_flags          *map[string]bool
-	resource_quotas        *map[string]int64
-	clearedFields          map[string]struct{}
-	menus                  map[uint32]struct{}
-	removedmenus           map[uint32]struct{}
-	clearedmenus           bool
-	current_version        *uint32
-	clearedcurrent_version bool
-	versions               map[uint32]struct{}
-	removedversions        map[uint32]struct{}
-	clearedversions        bool
-	done                   bool
-	oldValue               func(context.Context) (*MenuPermissionGroup, error)
-	predicates             []predicate.MenuPermissionGroup
-}
-
-var _ ent.Mutation = (*MenuPermissionGroupMutation)(nil)
-
-// menupermissiongroupOption allows management of the mutation configuration using functional options.
-type menupermissiongroupOption func(*MenuPermissionGroupMutation)
-
-// newMenuPermissionGroupMutation creates new mutation for the MenuPermissionGroup entity.
-func newMenuPermissionGroupMutation(c config, op Op, opts ...menupermissiongroupOption) *MenuPermissionGroupMutation {
-	m := &MenuPermissionGroupMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeMenuPermissionGroup,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withMenuPermissionGroupID sets the ID field of the mutation.
-func withMenuPermissionGroupID(id uint32) menupermissiongroupOption {
-	return func(m *MenuPermissionGroupMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *MenuPermissionGroup
-		)
-		m.oldValue = func(ctx context.Context) (*MenuPermissionGroup, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().MenuPermissionGroup.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withMenuPermissionGroup sets the old MenuPermissionGroup of the mutation.
-func withMenuPermissionGroup(node *MenuPermissionGroup) menupermissiongroupOption {
-	return func(m *MenuPermissionGroupMutation) {
-		m.oldValue = func(context.Context) (*MenuPermissionGroup, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m MenuPermissionGroupMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m MenuPermissionGroupMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("gen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of MenuPermissionGroup entities.
-func (m *MenuPermissionGroupMutation) SetID(id uint32) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *MenuPermissionGroupMutation) ID() (id uint32, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *MenuPermissionGroupMutation) IDs(ctx context.Context) ([]uint32, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uint32{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().MenuPermissionGroup.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetStatus sets the "status" field.
-func (m *MenuPermissionGroupMutation) SetStatus(i int32) {
-	m.status = &i
-	m.addstatus = nil
-}
-
-// Status returns the value of the "status" field in the mutation.
-func (m *MenuPermissionGroupMutation) Status() (r int32, exists bool) {
-	v := m.status
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStatus returns the old "status" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldStatus(ctx context.Context) (v *int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatus requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
-	}
-	return oldValue.Status, nil
-}
-
-// AddStatus adds i to the "status" field.
-func (m *MenuPermissionGroupMutation) AddStatus(i int32) {
-	if m.addstatus != nil {
-		*m.addstatus += i
-	} else {
-		m.addstatus = &i
-	}
-}
-
-// AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *MenuPermissionGroupMutation) AddedStatus() (r int32, exists bool) {
-	v := m.addstatus
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetStatus resets all changes to the "status" field.
-func (m *MenuPermissionGroupMutation) ResetStatus() {
-	m.status = nil
-	m.addstatus = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *MenuPermissionGroupMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *MenuPermissionGroupMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *MenuPermissionGroupMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *MenuPermissionGroupMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *MenuPermissionGroupMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *MenuPermissionGroupMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (m *MenuPermissionGroupMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *MenuPermissionGroupMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *MenuPermissionGroupMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[menupermissiongroup.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *MenuPermissionGroupMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroup.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *MenuPermissionGroupMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, menupermissiongroup.FieldDeletedAt)
-}
-
-// SetName sets the "name" field.
-func (m *MenuPermissionGroupMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *MenuPermissionGroupMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *MenuPermissionGroupMutation) ResetName() {
-	m.name = nil
-}
-
-// SetCode sets the "code" field.
-func (m *MenuPermissionGroupMutation) SetCode(s string) {
-	m.code = &s
-}
-
-// Code returns the value of the "code" field in the mutation.
-func (m *MenuPermissionGroupMutation) Code() (r string, exists bool) {
-	v := m.code
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCode returns the old "code" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldCode(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCode is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCode requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCode: %w", err)
-	}
-	return oldValue.Code, nil
-}
-
-// ResetCode resets all changes to the "code" field.
-func (m *MenuPermissionGroupMutation) ResetCode() {
-	m.code = nil
-}
-
-// SetIsSystem sets the "is_system" field.
-func (m *MenuPermissionGroupMutation) SetIsSystem(b bool) {
-	m.is_system = &b
-}
-
-// IsSystem returns the value of the "is_system" field in the mutation.
-func (m *MenuPermissionGroupMutation) IsSystem() (r bool, exists bool) {
-	v := m.is_system
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsSystem returns the old "is_system" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldIsSystem(ctx context.Context) (v *bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsSystem is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsSystem requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsSystem: %w", err)
-	}
-	return oldValue.IsSystem, nil
-}
-
-// ResetIsSystem resets all changes to the "is_system" field.
-func (m *MenuPermissionGroupMutation) ResetIsSystem() {
-	m.is_system = nil
-}
-
-// SetSort sets the "sort" field.
-func (m *MenuPermissionGroupMutation) SetSort(i int32) {
-	m.sort = &i
-	m.addsort = nil
-}
-
-// Sort returns the value of the "sort" field in the mutation.
-func (m *MenuPermissionGroupMutation) Sort() (r int32, exists bool) {
-	v := m.sort
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSort returns the old "sort" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldSort(ctx context.Context) (v *int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSort is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSort requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSort: %w", err)
-	}
-	return oldValue.Sort, nil
-}
-
-// AddSort adds i to the "sort" field.
-func (m *MenuPermissionGroupMutation) AddSort(i int32) {
-	if m.addsort != nil {
-		*m.addsort += i
-	} else {
-		m.addsort = &i
-	}
-}
-
-// AddedSort returns the value that was added to the "sort" field in this mutation.
-func (m *MenuPermissionGroupMutation) AddedSort() (r int32, exists bool) {
-	v := m.addsort
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSort resets all changes to the "sort" field.
-func (m *MenuPermissionGroupMutation) ResetSort() {
-	m.sort = nil
-	m.addsort = nil
-}
-
-// SetDescription sets the "description" field.
-func (m *MenuPermissionGroupMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *MenuPermissionGroupMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldDescription(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *MenuPermissionGroupMutation) ResetDescription() {
-	m.description = nil
-}
-
-// SetRemark sets the "remark" field.
-func (m *MenuPermissionGroupMutation) SetRemark(s string) {
-	m.remark = &s
-}
-
-// Remark returns the value of the "remark" field in the mutation.
-func (m *MenuPermissionGroupMutation) Remark() (r string, exists bool) {
-	v := m.remark
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRemark returns the old "remark" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldRemark(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRemark requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
-	}
-	return oldValue.Remark, nil
-}
-
-// ResetRemark resets all changes to the "remark" field.
-func (m *MenuPermissionGroupMutation) ResetRemark() {
-	m.remark = nil
-}
-
-// SetCurrentVersionID sets the "current_version_id" field.
-func (m *MenuPermissionGroupMutation) SetCurrentVersionID(u uint32) {
-	m.current_version = &u
-}
-
-// CurrentVersionID returns the value of the "current_version_id" field in the mutation.
-func (m *MenuPermissionGroupMutation) CurrentVersionID() (r uint32, exists bool) {
-	v := m.current_version
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCurrentVersionID returns the old "current_version_id" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldCurrentVersionID(ctx context.Context) (v *uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCurrentVersionID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCurrentVersionID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCurrentVersionID: %w", err)
-	}
-	return oldValue.CurrentVersionID, nil
-}
-
-// ClearCurrentVersionID clears the value of the "current_version_id" field.
-func (m *MenuPermissionGroupMutation) ClearCurrentVersionID() {
-	m.current_version = nil
-	m.clearedFields[menupermissiongroup.FieldCurrentVersionID] = struct{}{}
-}
-
-// CurrentVersionIDCleared returns if the "current_version_id" field was cleared in this mutation.
-func (m *MenuPermissionGroupMutation) CurrentVersionIDCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroup.FieldCurrentVersionID]
-	return ok
-}
-
-// ResetCurrentVersionID resets all changes to the "current_version_id" field.
-func (m *MenuPermissionGroupMutation) ResetCurrentVersionID() {
-	m.current_version = nil
-	delete(m.clearedFields, menupermissiongroup.FieldCurrentVersionID)
-}
-
-// SetAPIPermissions sets the "api_permissions" field.
-func (m *MenuPermissionGroupMutation) SetAPIPermissions(s []string) {
-	m.api_permissions = &s
-	m.appendapi_permissions = nil
-}
-
-// APIPermissions returns the value of the "api_permissions" field in the mutation.
-func (m *MenuPermissionGroupMutation) APIPermissions() (r []string, exists bool) {
-	v := m.api_permissions
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAPIPermissions returns the old "api_permissions" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldAPIPermissions(ctx context.Context) (v []string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAPIPermissions is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAPIPermissions requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAPIPermissions: %w", err)
-	}
-	return oldValue.APIPermissions, nil
-}
-
-// AppendAPIPermissions adds s to the "api_permissions" field.
-func (m *MenuPermissionGroupMutation) AppendAPIPermissions(s []string) {
-	m.appendapi_permissions = append(m.appendapi_permissions, s...)
-}
-
-// AppendedAPIPermissions returns the list of values that were appended to the "api_permissions" field in this mutation.
-func (m *MenuPermissionGroupMutation) AppendedAPIPermissions() ([]string, bool) {
-	if len(m.appendapi_permissions) == 0 {
-		return nil, false
-	}
-	return m.appendapi_permissions, true
-}
-
-// ClearAPIPermissions clears the value of the "api_permissions" field.
-func (m *MenuPermissionGroupMutation) ClearAPIPermissions() {
-	m.api_permissions = nil
-	m.appendapi_permissions = nil
-	m.clearedFields[menupermissiongroup.FieldAPIPermissions] = struct{}{}
-}
-
-// APIPermissionsCleared returns if the "api_permissions" field was cleared in this mutation.
-func (m *MenuPermissionGroupMutation) APIPermissionsCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroup.FieldAPIPermissions]
-	return ok
-}
-
-// ResetAPIPermissions resets all changes to the "api_permissions" field.
-func (m *MenuPermissionGroupMutation) ResetAPIPermissions() {
-	m.api_permissions = nil
-	m.appendapi_permissions = nil
-	delete(m.clearedFields, menupermissiongroup.FieldAPIPermissions)
-}
-
-// SetFeatureFlags sets the "feature_flags" field.
-func (m *MenuPermissionGroupMutation) SetFeatureFlags(value map[string]bool) {
-	m.feature_flags = &value
-}
-
-// FeatureFlags returns the value of the "feature_flags" field in the mutation.
-func (m *MenuPermissionGroupMutation) FeatureFlags() (r map[string]bool, exists bool) {
-	v := m.feature_flags
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFeatureFlags returns the old "feature_flags" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldFeatureFlags(ctx context.Context) (v map[string]bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFeatureFlags is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFeatureFlags requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFeatureFlags: %w", err)
-	}
-	return oldValue.FeatureFlags, nil
-}
-
-// ClearFeatureFlags clears the value of the "feature_flags" field.
-func (m *MenuPermissionGroupMutation) ClearFeatureFlags() {
-	m.feature_flags = nil
-	m.clearedFields[menupermissiongroup.FieldFeatureFlags] = struct{}{}
-}
-
-// FeatureFlagsCleared returns if the "feature_flags" field was cleared in this mutation.
-func (m *MenuPermissionGroupMutation) FeatureFlagsCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroup.FieldFeatureFlags]
-	return ok
-}
-
-// ResetFeatureFlags resets all changes to the "feature_flags" field.
-func (m *MenuPermissionGroupMutation) ResetFeatureFlags() {
-	m.feature_flags = nil
-	delete(m.clearedFields, menupermissiongroup.FieldFeatureFlags)
-}
-
-// SetResourceQuotas sets the "resource_quotas" field.
-func (m *MenuPermissionGroupMutation) SetResourceQuotas(value map[string]int64) {
-	m.resource_quotas = &value
-}
-
-// ResourceQuotas returns the value of the "resource_quotas" field in the mutation.
-func (m *MenuPermissionGroupMutation) ResourceQuotas() (r map[string]int64, exists bool) {
-	v := m.resource_quotas
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceQuotas returns the old "resource_quotas" field's value of the MenuPermissionGroup entity.
-// If the MenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupMutation) OldResourceQuotas(ctx context.Context) (v map[string]int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceQuotas is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceQuotas requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceQuotas: %w", err)
-	}
-	return oldValue.ResourceQuotas, nil
-}
-
-// ClearResourceQuotas clears the value of the "resource_quotas" field.
-func (m *MenuPermissionGroupMutation) ClearResourceQuotas() {
-	m.resource_quotas = nil
-	m.clearedFields[menupermissiongroup.FieldResourceQuotas] = struct{}{}
-}
-
-// ResourceQuotasCleared returns if the "resource_quotas" field was cleared in this mutation.
-func (m *MenuPermissionGroupMutation) ResourceQuotasCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroup.FieldResourceQuotas]
-	return ok
-}
-
-// ResetResourceQuotas resets all changes to the "resource_quotas" field.
-func (m *MenuPermissionGroupMutation) ResetResourceQuotas() {
-	m.resource_quotas = nil
-	delete(m.clearedFields, menupermissiongroup.FieldResourceQuotas)
-}
-
-// AddMenuIDs adds the "menus" edge to the Menu entity by ids.
-func (m *MenuPermissionGroupMutation) AddMenuIDs(ids ...uint32) {
-	if m.menus == nil {
-		m.menus = make(map[uint32]struct{})
-	}
-	for i := range ids {
-		m.menus[ids[i]] = struct{}{}
-	}
-}
-
-// ClearMenus clears the "menus" edge to the Menu entity.
-func (m *MenuPermissionGroupMutation) ClearMenus() {
-	m.clearedmenus = true
-}
-
-// MenusCleared reports if the "menus" edge to the Menu entity was cleared.
-func (m *MenuPermissionGroupMutation) MenusCleared() bool {
-	return m.clearedmenus
-}
-
-// RemoveMenuIDs removes the "menus" edge to the Menu entity by IDs.
-func (m *MenuPermissionGroupMutation) RemoveMenuIDs(ids ...uint32) {
-	if m.removedmenus == nil {
-		m.removedmenus = make(map[uint32]struct{})
-	}
-	for i := range ids {
-		delete(m.menus, ids[i])
-		m.removedmenus[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMenus returns the removed IDs of the "menus" edge to the Menu entity.
-func (m *MenuPermissionGroupMutation) RemovedMenusIDs() (ids []uint32) {
-	for id := range m.removedmenus {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// MenusIDs returns the "menus" edge IDs in the mutation.
-func (m *MenuPermissionGroupMutation) MenusIDs() (ids []uint32) {
-	for id := range m.menus {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetMenus resets all changes to the "menus" edge.
-func (m *MenuPermissionGroupMutation) ResetMenus() {
-	m.menus = nil
-	m.clearedmenus = false
-	m.removedmenus = nil
-}
-
-// ClearCurrentVersion clears the "current_version" edge to the MenuPermissionGroupVersion entity.
-func (m *MenuPermissionGroupMutation) ClearCurrentVersion() {
-	m.clearedcurrent_version = true
-	m.clearedFields[menupermissiongroup.FieldCurrentVersionID] = struct{}{}
-}
-
-// CurrentVersionCleared reports if the "current_version" edge to the MenuPermissionGroupVersion entity was cleared.
-func (m *MenuPermissionGroupMutation) CurrentVersionCleared() bool {
-	return m.CurrentVersionIDCleared() || m.clearedcurrent_version
-}
-
-// CurrentVersionIDs returns the "current_version" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CurrentVersionID instead. It exists only for internal usage by the builders.
-func (m *MenuPermissionGroupMutation) CurrentVersionIDs() (ids []uint32) {
-	if id := m.current_version; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetCurrentVersion resets all changes to the "current_version" edge.
-func (m *MenuPermissionGroupMutation) ResetCurrentVersion() {
-	m.current_version = nil
-	m.clearedcurrent_version = false
-}
-
-// AddVersionIDs adds the "versions" edge to the MenuPermissionGroupVersion entity by ids.
-func (m *MenuPermissionGroupMutation) AddVersionIDs(ids ...uint32) {
-	if m.versions == nil {
-		m.versions = make(map[uint32]struct{})
-	}
-	for i := range ids {
-		m.versions[ids[i]] = struct{}{}
-	}
-}
-
-// ClearVersions clears the "versions" edge to the MenuPermissionGroupVersion entity.
-func (m *MenuPermissionGroupMutation) ClearVersions() {
-	m.clearedversions = true
-}
-
-// VersionsCleared reports if the "versions" edge to the MenuPermissionGroupVersion entity was cleared.
-func (m *MenuPermissionGroupMutation) VersionsCleared() bool {
-	return m.clearedversions
-}
-
-// RemoveVersionIDs removes the "versions" edge to the MenuPermissionGroupVersion entity by IDs.
-func (m *MenuPermissionGroupMutation) RemoveVersionIDs(ids ...uint32) {
-	if m.removedversions == nil {
-		m.removedversions = make(map[uint32]struct{})
-	}
-	for i := range ids {
-		delete(m.versions, ids[i])
-		m.removedversions[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedVersions returns the removed IDs of the "versions" edge to the MenuPermissionGroupVersion entity.
-func (m *MenuPermissionGroupMutation) RemovedVersionsIDs() (ids []uint32) {
-	for id := range m.removedversions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// VersionsIDs returns the "versions" edge IDs in the mutation.
-func (m *MenuPermissionGroupMutation) VersionsIDs() (ids []uint32) {
-	for id := range m.versions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetVersions resets all changes to the "versions" edge.
-func (m *MenuPermissionGroupMutation) ResetVersions() {
-	m.versions = nil
-	m.clearedversions = false
-	m.removedversions = nil
-}
-
-// Where appends a list predicates to the MenuPermissionGroupMutation builder.
-func (m *MenuPermissionGroupMutation) Where(ps ...predicate.MenuPermissionGroup) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the MenuPermissionGroupMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *MenuPermissionGroupMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.MenuPermissionGroup, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *MenuPermissionGroupMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *MenuPermissionGroupMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (MenuPermissionGroup).
-func (m *MenuPermissionGroupMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *MenuPermissionGroupMutation) Fields() []string {
-	fields := make([]string, 0, 14)
-	if m.status != nil {
-		fields = append(fields, menupermissiongroup.FieldStatus)
-	}
-	if m.created_at != nil {
-		fields = append(fields, menupermissiongroup.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, menupermissiongroup.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, menupermissiongroup.FieldDeletedAt)
-	}
-	if m.name != nil {
-		fields = append(fields, menupermissiongroup.FieldName)
-	}
-	if m.code != nil {
-		fields = append(fields, menupermissiongroup.FieldCode)
-	}
-	if m.is_system != nil {
-		fields = append(fields, menupermissiongroup.FieldIsSystem)
-	}
-	if m.sort != nil {
-		fields = append(fields, menupermissiongroup.FieldSort)
-	}
-	if m.description != nil {
-		fields = append(fields, menupermissiongroup.FieldDescription)
-	}
-	if m.remark != nil {
-		fields = append(fields, menupermissiongroup.FieldRemark)
-	}
-	if m.current_version != nil {
-		fields = append(fields, menupermissiongroup.FieldCurrentVersionID)
-	}
-	if m.api_permissions != nil {
-		fields = append(fields, menupermissiongroup.FieldAPIPermissions)
-	}
-	if m.feature_flags != nil {
-		fields = append(fields, menupermissiongroup.FieldFeatureFlags)
-	}
-	if m.resource_quotas != nil {
-		fields = append(fields, menupermissiongroup.FieldResourceQuotas)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *MenuPermissionGroupMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case menupermissiongroup.FieldStatus:
-		return m.Status()
-	case menupermissiongroup.FieldCreatedAt:
-		return m.CreatedAt()
-	case menupermissiongroup.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case menupermissiongroup.FieldDeletedAt:
-		return m.DeletedAt()
-	case menupermissiongroup.FieldName:
-		return m.Name()
-	case menupermissiongroup.FieldCode:
-		return m.Code()
-	case menupermissiongroup.FieldIsSystem:
-		return m.IsSystem()
-	case menupermissiongroup.FieldSort:
-		return m.Sort()
-	case menupermissiongroup.FieldDescription:
-		return m.Description()
-	case menupermissiongroup.FieldRemark:
-		return m.Remark()
-	case menupermissiongroup.FieldCurrentVersionID:
-		return m.CurrentVersionID()
-	case menupermissiongroup.FieldAPIPermissions:
-		return m.APIPermissions()
-	case menupermissiongroup.FieldFeatureFlags:
-		return m.FeatureFlags()
-	case menupermissiongroup.FieldResourceQuotas:
-		return m.ResourceQuotas()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *MenuPermissionGroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case menupermissiongroup.FieldStatus:
-		return m.OldStatus(ctx)
-	case menupermissiongroup.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case menupermissiongroup.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case menupermissiongroup.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
-	case menupermissiongroup.FieldName:
-		return m.OldName(ctx)
-	case menupermissiongroup.FieldCode:
-		return m.OldCode(ctx)
-	case menupermissiongroup.FieldIsSystem:
-		return m.OldIsSystem(ctx)
-	case menupermissiongroup.FieldSort:
-		return m.OldSort(ctx)
-	case menupermissiongroup.FieldDescription:
-		return m.OldDescription(ctx)
-	case menupermissiongroup.FieldRemark:
-		return m.OldRemark(ctx)
-	case menupermissiongroup.FieldCurrentVersionID:
-		return m.OldCurrentVersionID(ctx)
-	case menupermissiongroup.FieldAPIPermissions:
-		return m.OldAPIPermissions(ctx)
-	case menupermissiongroup.FieldFeatureFlags:
-		return m.OldFeatureFlags(ctx)
-	case menupermissiongroup.FieldResourceQuotas:
-		return m.OldResourceQuotas(ctx)
-	}
-	return nil, fmt.Errorf("unknown MenuPermissionGroup field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *MenuPermissionGroupMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case menupermissiongroup.FieldStatus:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStatus(v)
-		return nil
-	case menupermissiongroup.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case menupermissiongroup.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case menupermissiongroup.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
-	case menupermissiongroup.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case menupermissiongroup.FieldCode:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCode(v)
-		return nil
-	case menupermissiongroup.FieldIsSystem:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsSystem(v)
-		return nil
-	case menupermissiongroup.FieldSort:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSort(v)
-		return nil
-	case menupermissiongroup.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
-		return nil
-	case menupermissiongroup.FieldRemark:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRemark(v)
-		return nil
-	case menupermissiongroup.FieldCurrentVersionID:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCurrentVersionID(v)
-		return nil
-	case menupermissiongroup.FieldAPIPermissions:
-		v, ok := value.([]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAPIPermissions(v)
-		return nil
-	case menupermissiongroup.FieldFeatureFlags:
-		v, ok := value.(map[string]bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFeatureFlags(v)
-		return nil
-	case menupermissiongroup.FieldResourceQuotas:
-		v, ok := value.(map[string]int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceQuotas(v)
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroup field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *MenuPermissionGroupMutation) AddedFields() []string {
-	var fields []string
-	if m.addstatus != nil {
-		fields = append(fields, menupermissiongroup.FieldStatus)
-	}
-	if m.addsort != nil {
-		fields = append(fields, menupermissiongroup.FieldSort)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *MenuPermissionGroupMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case menupermissiongroup.FieldStatus:
-		return m.AddedStatus()
-	case menupermissiongroup.FieldSort:
-		return m.AddedSort()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *MenuPermissionGroupMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case menupermissiongroup.FieldStatus:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddStatus(v)
-		return nil
-	case menupermissiongroup.FieldSort:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSort(v)
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroup numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *MenuPermissionGroupMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(menupermissiongroup.FieldDeletedAt) {
-		fields = append(fields, menupermissiongroup.FieldDeletedAt)
-	}
-	if m.FieldCleared(menupermissiongroup.FieldCurrentVersionID) {
-		fields = append(fields, menupermissiongroup.FieldCurrentVersionID)
-	}
-	if m.FieldCleared(menupermissiongroup.FieldAPIPermissions) {
-		fields = append(fields, menupermissiongroup.FieldAPIPermissions)
-	}
-	if m.FieldCleared(menupermissiongroup.FieldFeatureFlags) {
-		fields = append(fields, menupermissiongroup.FieldFeatureFlags)
-	}
-	if m.FieldCleared(menupermissiongroup.FieldResourceQuotas) {
-		fields = append(fields, menupermissiongroup.FieldResourceQuotas)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *MenuPermissionGroupMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *MenuPermissionGroupMutation) ClearField(name string) error {
-	switch name {
-	case menupermissiongroup.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	case menupermissiongroup.FieldCurrentVersionID:
-		m.ClearCurrentVersionID()
-		return nil
-	case menupermissiongroup.FieldAPIPermissions:
-		m.ClearAPIPermissions()
-		return nil
-	case menupermissiongroup.FieldFeatureFlags:
-		m.ClearFeatureFlags()
-		return nil
-	case menupermissiongroup.FieldResourceQuotas:
-		m.ClearResourceQuotas()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroup nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *MenuPermissionGroupMutation) ResetField(name string) error {
-	switch name {
-	case menupermissiongroup.FieldStatus:
-		m.ResetStatus()
-		return nil
-	case menupermissiongroup.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case menupermissiongroup.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case menupermissiongroup.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
-	case menupermissiongroup.FieldName:
-		m.ResetName()
-		return nil
-	case menupermissiongroup.FieldCode:
-		m.ResetCode()
-		return nil
-	case menupermissiongroup.FieldIsSystem:
-		m.ResetIsSystem()
-		return nil
-	case menupermissiongroup.FieldSort:
-		m.ResetSort()
-		return nil
-	case menupermissiongroup.FieldDescription:
-		m.ResetDescription()
-		return nil
-	case menupermissiongroup.FieldRemark:
-		m.ResetRemark()
-		return nil
-	case menupermissiongroup.FieldCurrentVersionID:
-		m.ResetCurrentVersionID()
-		return nil
-	case menupermissiongroup.FieldAPIPermissions:
-		m.ResetAPIPermissions()
-		return nil
-	case menupermissiongroup.FieldFeatureFlags:
-		m.ResetFeatureFlags()
-		return nil
-	case menupermissiongroup.FieldResourceQuotas:
-		m.ResetResourceQuotas()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroup field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *MenuPermissionGroupMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.menus != nil {
-		edges = append(edges, menupermissiongroup.EdgeMenus)
-	}
-	if m.current_version != nil {
-		edges = append(edges, menupermissiongroup.EdgeCurrentVersion)
-	}
-	if m.versions != nil {
-		edges = append(edges, menupermissiongroup.EdgeVersions)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *MenuPermissionGroupMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case menupermissiongroup.EdgeMenus:
-		ids := make([]ent.Value, 0, len(m.menus))
-		for id := range m.menus {
-			ids = append(ids, id)
-		}
-		return ids
-	case menupermissiongroup.EdgeCurrentVersion:
-		if id := m.current_version; id != nil {
-			return []ent.Value{*id}
-		}
-	case menupermissiongroup.EdgeVersions:
-		ids := make([]ent.Value, 0, len(m.versions))
-		for id := range m.versions {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *MenuPermissionGroupMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removedmenus != nil {
-		edges = append(edges, menupermissiongroup.EdgeMenus)
-	}
-	if m.removedversions != nil {
-		edges = append(edges, menupermissiongroup.EdgeVersions)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *MenuPermissionGroupMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case menupermissiongroup.EdgeMenus:
-		ids := make([]ent.Value, 0, len(m.removedmenus))
-		for id := range m.removedmenus {
-			ids = append(ids, id)
-		}
-		return ids
-	case menupermissiongroup.EdgeVersions:
-		ids := make([]ent.Value, 0, len(m.removedversions))
-		for id := range m.removedversions {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *MenuPermissionGroupMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.clearedmenus {
-		edges = append(edges, menupermissiongroup.EdgeMenus)
-	}
-	if m.clearedcurrent_version {
-		edges = append(edges, menupermissiongroup.EdgeCurrentVersion)
-	}
-	if m.clearedversions {
-		edges = append(edges, menupermissiongroup.EdgeVersions)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *MenuPermissionGroupMutation) EdgeCleared(name string) bool {
-	switch name {
-	case menupermissiongroup.EdgeMenus:
-		return m.clearedmenus
-	case menupermissiongroup.EdgeCurrentVersion:
-		return m.clearedcurrent_version
-	case menupermissiongroup.EdgeVersions:
-		return m.clearedversions
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *MenuPermissionGroupMutation) ClearEdge(name string) error {
-	switch name {
-	case menupermissiongroup.EdgeCurrentVersion:
-		m.ClearCurrentVersion()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroup unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *MenuPermissionGroupMutation) ResetEdge(name string) error {
-	switch name {
-	case menupermissiongroup.EdgeMenus:
-		m.ResetMenus()
-		return nil
-	case menupermissiongroup.EdgeCurrentVersion:
-		m.ResetCurrentVersion()
-		return nil
-	case menupermissiongroup.EdgeVersions:
-		m.ResetVersions()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroup edge %s", name)
-}
-
-// MenuPermissionGroupVersionMutation represents an operation that mutates the MenuPermissionGroupVersion nodes in the graph.
-type MenuPermissionGroupVersionMutation struct {
-	config
-	op                    Op
-	typ                   string
-	id                    *uint32
-	created_at            *time.Time
-	version               *int32
-	addversion            *int32
-	state                 *int32
-	addstate              *int32
-	change_summary        *string
-	created_by            *uint32
-	addcreated_by         *int32
-	published_by          *uint32
-	addpublished_by       *int32
-	effective_at          *time.Time
-	published_at          *time.Time
-	api_permissions       *[]string
-	appendapi_permissions []string
-	feature_flags         *map[string]bool
-	resource_quotas       *map[string]int64
-	clearedFields         map[string]struct{}
-	group                 *uint32
-	clearedgroup          bool
-	menus                 map[uint32]struct{}
-	removedmenus          map[uint32]struct{}
-	clearedmenus          bool
-	done                  bool
-	oldValue              func(context.Context) (*MenuPermissionGroupVersion, error)
-	predicates            []predicate.MenuPermissionGroupVersion
-}
-
-var _ ent.Mutation = (*MenuPermissionGroupVersionMutation)(nil)
-
-// menupermissiongroupversionOption allows management of the mutation configuration using functional options.
-type menupermissiongroupversionOption func(*MenuPermissionGroupVersionMutation)
-
-// newMenuPermissionGroupVersionMutation creates new mutation for the MenuPermissionGroupVersion entity.
-func newMenuPermissionGroupVersionMutation(c config, op Op, opts ...menupermissiongroupversionOption) *MenuPermissionGroupVersionMutation {
-	m := &MenuPermissionGroupVersionMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeMenuPermissionGroupVersion,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withMenuPermissionGroupVersionID sets the ID field of the mutation.
-func withMenuPermissionGroupVersionID(id uint32) menupermissiongroupversionOption {
-	return func(m *MenuPermissionGroupVersionMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *MenuPermissionGroupVersion
-		)
-		m.oldValue = func(ctx context.Context) (*MenuPermissionGroupVersion, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().MenuPermissionGroupVersion.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withMenuPermissionGroupVersion sets the old MenuPermissionGroupVersion of the mutation.
-func withMenuPermissionGroupVersion(node *MenuPermissionGroupVersion) menupermissiongroupversionOption {
-	return func(m *MenuPermissionGroupVersionMutation) {
-		m.oldValue = func(context.Context) (*MenuPermissionGroupVersion, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m MenuPermissionGroupVersionMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m MenuPermissionGroupVersionMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("gen: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of MenuPermissionGroupVersion entities.
-func (m *MenuPermissionGroupVersionMutation) SetID(id uint32) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *MenuPermissionGroupVersionMutation) ID() (id uint32, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *MenuPermissionGroupVersionMutation) IDs(ctx context.Context) ([]uint32, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uint32{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().MenuPermissionGroupVersion.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *MenuPermissionGroupVersionMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *MenuPermissionGroupVersionMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetGroupID sets the "group_id" field.
-func (m *MenuPermissionGroupVersionMutation) SetGroupID(u uint32) {
-	m.group = &u
-}
-
-// GroupID returns the value of the "group_id" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) GroupID() (r uint32, exists bool) {
-	v := m.group
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldGroupID returns the old "group_id" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldGroupID(ctx context.Context) (v uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldGroupID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
-	}
-	return oldValue.GroupID, nil
-}
-
-// ResetGroupID resets all changes to the "group_id" field.
-func (m *MenuPermissionGroupVersionMutation) ResetGroupID() {
-	m.group = nil
-}
-
-// SetVersion sets the "version" field.
-func (m *MenuPermissionGroupVersionMutation) SetVersion(i int32) {
-	m.version = &i
-	m.addversion = nil
-}
-
-// Version returns the value of the "version" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) Version() (r int32, exists bool) {
-	v := m.version
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldVersion returns the old "version" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldVersion(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVersion requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
-	}
-	return oldValue.Version, nil
-}
-
-// AddVersion adds i to the "version" field.
-func (m *MenuPermissionGroupVersionMutation) AddVersion(i int32) {
-	if m.addversion != nil {
-		*m.addversion += i
-	} else {
-		m.addversion = &i
-	}
-}
-
-// AddedVersion returns the value that was added to the "version" field in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedVersion() (r int32, exists bool) {
-	v := m.addversion
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetVersion resets all changes to the "version" field.
-func (m *MenuPermissionGroupVersionMutation) ResetVersion() {
-	m.version = nil
-	m.addversion = nil
-}
-
-// SetState sets the "state" field.
-func (m *MenuPermissionGroupVersionMutation) SetState(i int32) {
-	m.state = &i
-	m.addstate = nil
-}
-
-// State returns the value of the "state" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) State() (r int32, exists bool) {
-	v := m.state
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldState returns the old "state" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldState(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldState is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldState requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldState: %w", err)
-	}
-	return oldValue.State, nil
-}
-
-// AddState adds i to the "state" field.
-func (m *MenuPermissionGroupVersionMutation) AddState(i int32) {
-	if m.addstate != nil {
-		*m.addstate += i
-	} else {
-		m.addstate = &i
-	}
-}
-
-// AddedState returns the value that was added to the "state" field in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedState() (r int32, exists bool) {
-	v := m.addstate
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetState resets all changes to the "state" field.
-func (m *MenuPermissionGroupVersionMutation) ResetState() {
-	m.state = nil
-	m.addstate = nil
-}
-
-// SetChangeSummary sets the "change_summary" field.
-func (m *MenuPermissionGroupVersionMutation) SetChangeSummary(s string) {
-	m.change_summary = &s
-}
-
-// ChangeSummary returns the value of the "change_summary" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) ChangeSummary() (r string, exists bool) {
-	v := m.change_summary
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldChangeSummary returns the old "change_summary" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldChangeSummary(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldChangeSummary is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldChangeSummary requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldChangeSummary: %w", err)
-	}
-	return oldValue.ChangeSummary, nil
-}
-
-// ResetChangeSummary resets all changes to the "change_summary" field.
-func (m *MenuPermissionGroupVersionMutation) ResetChangeSummary() {
-	m.change_summary = nil
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (m *MenuPermissionGroupVersionMutation) SetCreatedBy(u uint32) {
-	m.created_by = &u
-	m.addcreated_by = nil
-}
-
-// CreatedBy returns the value of the "created_by" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) CreatedBy() (r uint32, exists bool) {
-	v := m.created_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedBy returns the old "created_by" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldCreatedBy(ctx context.Context) (v *uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
-	}
-	return oldValue.CreatedBy, nil
-}
-
-// AddCreatedBy adds u to the "created_by" field.
-func (m *MenuPermissionGroupVersionMutation) AddCreatedBy(u int32) {
-	if m.addcreated_by != nil {
-		*m.addcreated_by += u
-	} else {
-		m.addcreated_by = &u
-	}
-}
-
-// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedCreatedBy() (r int32, exists bool) {
-	v := m.addcreated_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (m *MenuPermissionGroupVersionMutation) ClearCreatedBy() {
-	m.created_by = nil
-	m.addcreated_by = nil
-	m.clearedFields[menupermissiongroupversion.FieldCreatedBy] = struct{}{}
-}
-
-// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) CreatedByCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldCreatedBy]
-	return ok
-}
-
-// ResetCreatedBy resets all changes to the "created_by" field.
-func (m *MenuPermissionGroupVersionMutation) ResetCreatedBy() {
-	m.created_by = nil
-	m.addcreated_by = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldCreatedBy)
-}
-
-// SetPublishedBy sets the "published_by" field.
-func (m *MenuPermissionGroupVersionMutation) SetPublishedBy(u uint32) {
-	m.published_by = &u
-	m.addpublished_by = nil
-}
-
-// PublishedBy returns the value of the "published_by" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) PublishedBy() (r uint32, exists bool) {
-	v := m.published_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPublishedBy returns the old "published_by" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldPublishedBy(ctx context.Context) (v *uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublishedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublishedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublishedBy: %w", err)
-	}
-	return oldValue.PublishedBy, nil
-}
-
-// AddPublishedBy adds u to the "published_by" field.
-func (m *MenuPermissionGroupVersionMutation) AddPublishedBy(u int32) {
-	if m.addpublished_by != nil {
-		*m.addpublished_by += u
-	} else {
-		m.addpublished_by = &u
-	}
-}
-
-// AddedPublishedBy returns the value that was added to the "published_by" field in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedPublishedBy() (r int32, exists bool) {
-	v := m.addpublished_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearPublishedBy clears the value of the "published_by" field.
-func (m *MenuPermissionGroupVersionMutation) ClearPublishedBy() {
-	m.published_by = nil
-	m.addpublished_by = nil
-	m.clearedFields[menupermissiongroupversion.FieldPublishedBy] = struct{}{}
-}
-
-// PublishedByCleared returns if the "published_by" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) PublishedByCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldPublishedBy]
-	return ok
-}
-
-// ResetPublishedBy resets all changes to the "published_by" field.
-func (m *MenuPermissionGroupVersionMutation) ResetPublishedBy() {
-	m.published_by = nil
-	m.addpublished_by = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldPublishedBy)
-}
-
-// SetEffectiveAt sets the "effective_at" field.
-func (m *MenuPermissionGroupVersionMutation) SetEffectiveAt(t time.Time) {
-	m.effective_at = &t
-}
-
-// EffectiveAt returns the value of the "effective_at" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) EffectiveAt() (r time.Time, exists bool) {
-	v := m.effective_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEffectiveAt returns the old "effective_at" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldEffectiveAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEffectiveAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEffectiveAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEffectiveAt: %w", err)
-	}
-	return oldValue.EffectiveAt, nil
-}
-
-// ClearEffectiveAt clears the value of the "effective_at" field.
-func (m *MenuPermissionGroupVersionMutation) ClearEffectiveAt() {
-	m.effective_at = nil
-	m.clearedFields[menupermissiongroupversion.FieldEffectiveAt] = struct{}{}
-}
-
-// EffectiveAtCleared returns if the "effective_at" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) EffectiveAtCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldEffectiveAt]
-	return ok
-}
-
-// ResetEffectiveAt resets all changes to the "effective_at" field.
-func (m *MenuPermissionGroupVersionMutation) ResetEffectiveAt() {
-	m.effective_at = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldEffectiveAt)
-}
-
-// SetPublishedAt sets the "published_at" field.
-func (m *MenuPermissionGroupVersionMutation) SetPublishedAt(t time.Time) {
-	m.published_at = &t
-}
-
-// PublishedAt returns the value of the "published_at" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) PublishedAt() (r time.Time, exists bool) {
-	v := m.published_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPublishedAt returns the old "published_at" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldPublishedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublishedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublishedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublishedAt: %w", err)
-	}
-	return oldValue.PublishedAt, nil
-}
-
-// ClearPublishedAt clears the value of the "published_at" field.
-func (m *MenuPermissionGroupVersionMutation) ClearPublishedAt() {
-	m.published_at = nil
-	m.clearedFields[menupermissiongroupversion.FieldPublishedAt] = struct{}{}
-}
-
-// PublishedAtCleared returns if the "published_at" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) PublishedAtCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldPublishedAt]
-	return ok
-}
-
-// ResetPublishedAt resets all changes to the "published_at" field.
-func (m *MenuPermissionGroupVersionMutation) ResetPublishedAt() {
-	m.published_at = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldPublishedAt)
-}
-
-// SetAPIPermissions sets the "api_permissions" field.
-func (m *MenuPermissionGroupVersionMutation) SetAPIPermissions(s []string) {
-	m.api_permissions = &s
-	m.appendapi_permissions = nil
-}
-
-// APIPermissions returns the value of the "api_permissions" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) APIPermissions() (r []string, exists bool) {
-	v := m.api_permissions
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAPIPermissions returns the old "api_permissions" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldAPIPermissions(ctx context.Context) (v []string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAPIPermissions is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAPIPermissions requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAPIPermissions: %w", err)
-	}
-	return oldValue.APIPermissions, nil
-}
-
-// AppendAPIPermissions adds s to the "api_permissions" field.
-func (m *MenuPermissionGroupVersionMutation) AppendAPIPermissions(s []string) {
-	m.appendapi_permissions = append(m.appendapi_permissions, s...)
-}
-
-// AppendedAPIPermissions returns the list of values that were appended to the "api_permissions" field in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AppendedAPIPermissions() ([]string, bool) {
-	if len(m.appendapi_permissions) == 0 {
-		return nil, false
-	}
-	return m.appendapi_permissions, true
-}
-
-// ClearAPIPermissions clears the value of the "api_permissions" field.
-func (m *MenuPermissionGroupVersionMutation) ClearAPIPermissions() {
-	m.api_permissions = nil
-	m.appendapi_permissions = nil
-	m.clearedFields[menupermissiongroupversion.FieldAPIPermissions] = struct{}{}
-}
-
-// APIPermissionsCleared returns if the "api_permissions" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) APIPermissionsCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldAPIPermissions]
-	return ok
-}
-
-// ResetAPIPermissions resets all changes to the "api_permissions" field.
-func (m *MenuPermissionGroupVersionMutation) ResetAPIPermissions() {
-	m.api_permissions = nil
-	m.appendapi_permissions = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldAPIPermissions)
-}
-
-// SetFeatureFlags sets the "feature_flags" field.
-func (m *MenuPermissionGroupVersionMutation) SetFeatureFlags(value map[string]bool) {
-	m.feature_flags = &value
-}
-
-// FeatureFlags returns the value of the "feature_flags" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) FeatureFlags() (r map[string]bool, exists bool) {
-	v := m.feature_flags
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFeatureFlags returns the old "feature_flags" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldFeatureFlags(ctx context.Context) (v map[string]bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFeatureFlags is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFeatureFlags requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFeatureFlags: %w", err)
-	}
-	return oldValue.FeatureFlags, nil
-}
-
-// ClearFeatureFlags clears the value of the "feature_flags" field.
-func (m *MenuPermissionGroupVersionMutation) ClearFeatureFlags() {
-	m.feature_flags = nil
-	m.clearedFields[menupermissiongroupversion.FieldFeatureFlags] = struct{}{}
-}
-
-// FeatureFlagsCleared returns if the "feature_flags" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) FeatureFlagsCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldFeatureFlags]
-	return ok
-}
-
-// ResetFeatureFlags resets all changes to the "feature_flags" field.
-func (m *MenuPermissionGroupVersionMutation) ResetFeatureFlags() {
-	m.feature_flags = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldFeatureFlags)
-}
-
-// SetResourceQuotas sets the "resource_quotas" field.
-func (m *MenuPermissionGroupVersionMutation) SetResourceQuotas(value map[string]int64) {
-	m.resource_quotas = &value
-}
-
-// ResourceQuotas returns the value of the "resource_quotas" field in the mutation.
-func (m *MenuPermissionGroupVersionMutation) ResourceQuotas() (r map[string]int64, exists bool) {
-	v := m.resource_quotas
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceQuotas returns the old "resource_quotas" field's value of the MenuPermissionGroupVersion entity.
-// If the MenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenuPermissionGroupVersionMutation) OldResourceQuotas(ctx context.Context) (v map[string]int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceQuotas is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceQuotas requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceQuotas: %w", err)
-	}
-	return oldValue.ResourceQuotas, nil
-}
-
-// ClearResourceQuotas clears the value of the "resource_quotas" field.
-func (m *MenuPermissionGroupVersionMutation) ClearResourceQuotas() {
-	m.resource_quotas = nil
-	m.clearedFields[menupermissiongroupversion.FieldResourceQuotas] = struct{}{}
-}
-
-// ResourceQuotasCleared returns if the "resource_quotas" field was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) ResourceQuotasCleared() bool {
-	_, ok := m.clearedFields[menupermissiongroupversion.FieldResourceQuotas]
-	return ok
-}
-
-// ResetResourceQuotas resets all changes to the "resource_quotas" field.
-func (m *MenuPermissionGroupVersionMutation) ResetResourceQuotas() {
-	m.resource_quotas = nil
-	delete(m.clearedFields, menupermissiongroupversion.FieldResourceQuotas)
-}
-
-// ClearGroup clears the "group" edge to the MenuPermissionGroup entity.
-func (m *MenuPermissionGroupVersionMutation) ClearGroup() {
-	m.clearedgroup = true
-	m.clearedFields[menupermissiongroupversion.FieldGroupID] = struct{}{}
-}
-
-// GroupCleared reports if the "group" edge to the MenuPermissionGroup entity was cleared.
-func (m *MenuPermissionGroupVersionMutation) GroupCleared() bool {
-	return m.clearedgroup
-}
-
-// GroupIDs returns the "group" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// GroupID instead. It exists only for internal usage by the builders.
-func (m *MenuPermissionGroupVersionMutation) GroupIDs() (ids []uint32) {
-	if id := m.group; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetGroup resets all changes to the "group" edge.
-func (m *MenuPermissionGroupVersionMutation) ResetGroup() {
-	m.group = nil
-	m.clearedgroup = false
-}
-
-// AddMenuIDs adds the "menus" edge to the Menu entity by ids.
-func (m *MenuPermissionGroupVersionMutation) AddMenuIDs(ids ...uint32) {
-	if m.menus == nil {
-		m.menus = make(map[uint32]struct{})
-	}
-	for i := range ids {
-		m.menus[ids[i]] = struct{}{}
-	}
-}
-
-// ClearMenus clears the "menus" edge to the Menu entity.
-func (m *MenuPermissionGroupVersionMutation) ClearMenus() {
-	m.clearedmenus = true
-}
-
-// MenusCleared reports if the "menus" edge to the Menu entity was cleared.
-func (m *MenuPermissionGroupVersionMutation) MenusCleared() bool {
-	return m.clearedmenus
-}
-
-// RemoveMenuIDs removes the "menus" edge to the Menu entity by IDs.
-func (m *MenuPermissionGroupVersionMutation) RemoveMenuIDs(ids ...uint32) {
-	if m.removedmenus == nil {
-		m.removedmenus = make(map[uint32]struct{})
-	}
-	for i := range ids {
-		delete(m.menus, ids[i])
-		m.removedmenus[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMenus returns the removed IDs of the "menus" edge to the Menu entity.
-func (m *MenuPermissionGroupVersionMutation) RemovedMenusIDs() (ids []uint32) {
-	for id := range m.removedmenus {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// MenusIDs returns the "menus" edge IDs in the mutation.
-func (m *MenuPermissionGroupVersionMutation) MenusIDs() (ids []uint32) {
-	for id := range m.menus {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetMenus resets all changes to the "menus" edge.
-func (m *MenuPermissionGroupVersionMutation) ResetMenus() {
-	m.menus = nil
-	m.clearedmenus = false
-	m.removedmenus = nil
-}
-
-// Where appends a list predicates to the MenuPermissionGroupVersionMutation builder.
-func (m *MenuPermissionGroupVersionMutation) Where(ps ...predicate.MenuPermissionGroupVersion) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the MenuPermissionGroupVersionMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *MenuPermissionGroupVersionMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.MenuPermissionGroupVersion, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *MenuPermissionGroupVersionMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *MenuPermissionGroupVersionMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (MenuPermissionGroupVersion).
-func (m *MenuPermissionGroupVersionMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *MenuPermissionGroupVersionMutation) Fields() []string {
-	fields := make([]string, 0, 12)
-	if m.created_at != nil {
-		fields = append(fields, menupermissiongroupversion.FieldCreatedAt)
-	}
-	if m.group != nil {
-		fields = append(fields, menupermissiongroupversion.FieldGroupID)
-	}
-	if m.version != nil {
-		fields = append(fields, menupermissiongroupversion.FieldVersion)
-	}
-	if m.state != nil {
-		fields = append(fields, menupermissiongroupversion.FieldState)
-	}
-	if m.change_summary != nil {
-		fields = append(fields, menupermissiongroupversion.FieldChangeSummary)
-	}
-	if m.created_by != nil {
-		fields = append(fields, menupermissiongroupversion.FieldCreatedBy)
-	}
-	if m.published_by != nil {
-		fields = append(fields, menupermissiongroupversion.FieldPublishedBy)
-	}
-	if m.effective_at != nil {
-		fields = append(fields, menupermissiongroupversion.FieldEffectiveAt)
-	}
-	if m.published_at != nil {
-		fields = append(fields, menupermissiongroupversion.FieldPublishedAt)
-	}
-	if m.api_permissions != nil {
-		fields = append(fields, menupermissiongroupversion.FieldAPIPermissions)
-	}
-	if m.feature_flags != nil {
-		fields = append(fields, menupermissiongroupversion.FieldFeatureFlags)
-	}
-	if m.resource_quotas != nil {
-		fields = append(fields, menupermissiongroupversion.FieldResourceQuotas)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *MenuPermissionGroupVersionMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case menupermissiongroupversion.FieldCreatedAt:
-		return m.CreatedAt()
-	case menupermissiongroupversion.FieldGroupID:
-		return m.GroupID()
-	case menupermissiongroupversion.FieldVersion:
-		return m.Version()
-	case menupermissiongroupversion.FieldState:
-		return m.State()
-	case menupermissiongroupversion.FieldChangeSummary:
-		return m.ChangeSummary()
-	case menupermissiongroupversion.FieldCreatedBy:
-		return m.CreatedBy()
-	case menupermissiongroupversion.FieldPublishedBy:
-		return m.PublishedBy()
-	case menupermissiongroupversion.FieldEffectiveAt:
-		return m.EffectiveAt()
-	case menupermissiongroupversion.FieldPublishedAt:
-		return m.PublishedAt()
-	case menupermissiongroupversion.FieldAPIPermissions:
-		return m.APIPermissions()
-	case menupermissiongroupversion.FieldFeatureFlags:
-		return m.FeatureFlags()
-	case menupermissiongroupversion.FieldResourceQuotas:
-		return m.ResourceQuotas()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *MenuPermissionGroupVersionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case menupermissiongroupversion.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case menupermissiongroupversion.FieldGroupID:
-		return m.OldGroupID(ctx)
-	case menupermissiongroupversion.FieldVersion:
-		return m.OldVersion(ctx)
-	case menupermissiongroupversion.FieldState:
-		return m.OldState(ctx)
-	case menupermissiongroupversion.FieldChangeSummary:
-		return m.OldChangeSummary(ctx)
-	case menupermissiongroupversion.FieldCreatedBy:
-		return m.OldCreatedBy(ctx)
-	case menupermissiongroupversion.FieldPublishedBy:
-		return m.OldPublishedBy(ctx)
-	case menupermissiongroupversion.FieldEffectiveAt:
-		return m.OldEffectiveAt(ctx)
-	case menupermissiongroupversion.FieldPublishedAt:
-		return m.OldPublishedAt(ctx)
-	case menupermissiongroupversion.FieldAPIPermissions:
-		return m.OldAPIPermissions(ctx)
-	case menupermissiongroupversion.FieldFeatureFlags:
-		return m.OldFeatureFlags(ctx)
-	case menupermissiongroupversion.FieldResourceQuotas:
-		return m.OldResourceQuotas(ctx)
-	}
-	return nil, fmt.Errorf("unknown MenuPermissionGroupVersion field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *MenuPermissionGroupVersionMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case menupermissiongroupversion.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case menupermissiongroupversion.FieldGroupID:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetGroupID(v)
-		return nil
-	case menupermissiongroupversion.FieldVersion:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetVersion(v)
-		return nil
-	case menupermissiongroupversion.FieldState:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetState(v)
-		return nil
-	case menupermissiongroupversion.FieldChangeSummary:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetChangeSummary(v)
-		return nil
-	case menupermissiongroupversion.FieldCreatedBy:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedBy(v)
-		return nil
-	case menupermissiongroupversion.FieldPublishedBy:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublishedBy(v)
-		return nil
-	case menupermissiongroupversion.FieldEffectiveAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEffectiveAt(v)
-		return nil
-	case menupermissiongroupversion.FieldPublishedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublishedAt(v)
-		return nil
-	case menupermissiongroupversion.FieldAPIPermissions:
-		v, ok := value.([]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAPIPermissions(v)
-		return nil
-	case menupermissiongroupversion.FieldFeatureFlags:
-		v, ok := value.(map[string]bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFeatureFlags(v)
-		return nil
-	case menupermissiongroupversion.FieldResourceQuotas:
-		v, ok := value.(map[string]int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceQuotas(v)
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroupVersion field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedFields() []string {
-	var fields []string
-	if m.addversion != nil {
-		fields = append(fields, menupermissiongroupversion.FieldVersion)
-	}
-	if m.addstate != nil {
-		fields = append(fields, menupermissiongroupversion.FieldState)
-	}
-	if m.addcreated_by != nil {
-		fields = append(fields, menupermissiongroupversion.FieldCreatedBy)
-	}
-	if m.addpublished_by != nil {
-		fields = append(fields, menupermissiongroupversion.FieldPublishedBy)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *MenuPermissionGroupVersionMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case menupermissiongroupversion.FieldVersion:
-		return m.AddedVersion()
-	case menupermissiongroupversion.FieldState:
-		return m.AddedState()
-	case menupermissiongroupversion.FieldCreatedBy:
-		return m.AddedCreatedBy()
-	case menupermissiongroupversion.FieldPublishedBy:
-		return m.AddedPublishedBy()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *MenuPermissionGroupVersionMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case menupermissiongroupversion.FieldVersion:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddVersion(v)
-		return nil
-	case menupermissiongroupversion.FieldState:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddState(v)
-		return nil
-	case menupermissiongroupversion.FieldCreatedBy:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCreatedBy(v)
-		return nil
-	case menupermissiongroupversion.FieldPublishedBy:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPublishedBy(v)
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroupVersion numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *MenuPermissionGroupVersionMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(menupermissiongroupversion.FieldCreatedBy) {
-		fields = append(fields, menupermissiongroupversion.FieldCreatedBy)
-	}
-	if m.FieldCleared(menupermissiongroupversion.FieldPublishedBy) {
-		fields = append(fields, menupermissiongroupversion.FieldPublishedBy)
-	}
-	if m.FieldCleared(menupermissiongroupversion.FieldEffectiveAt) {
-		fields = append(fields, menupermissiongroupversion.FieldEffectiveAt)
-	}
-	if m.FieldCleared(menupermissiongroupversion.FieldPublishedAt) {
-		fields = append(fields, menupermissiongroupversion.FieldPublishedAt)
-	}
-	if m.FieldCleared(menupermissiongroupversion.FieldAPIPermissions) {
-		fields = append(fields, menupermissiongroupversion.FieldAPIPermissions)
-	}
-	if m.FieldCleared(menupermissiongroupversion.FieldFeatureFlags) {
-		fields = append(fields, menupermissiongroupversion.FieldFeatureFlags)
-	}
-	if m.FieldCleared(menupermissiongroupversion.FieldResourceQuotas) {
-		fields = append(fields, menupermissiongroupversion.FieldResourceQuotas)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *MenuPermissionGroupVersionMutation) ClearField(name string) error {
-	switch name {
-	case menupermissiongroupversion.FieldCreatedBy:
-		m.ClearCreatedBy()
-		return nil
-	case menupermissiongroupversion.FieldPublishedBy:
-		m.ClearPublishedBy()
-		return nil
-	case menupermissiongroupversion.FieldEffectiveAt:
-		m.ClearEffectiveAt()
-		return nil
-	case menupermissiongroupversion.FieldPublishedAt:
-		m.ClearPublishedAt()
-		return nil
-	case menupermissiongroupversion.FieldAPIPermissions:
-		m.ClearAPIPermissions()
-		return nil
-	case menupermissiongroupversion.FieldFeatureFlags:
-		m.ClearFeatureFlags()
-		return nil
-	case menupermissiongroupversion.FieldResourceQuotas:
-		m.ClearResourceQuotas()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroupVersion nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *MenuPermissionGroupVersionMutation) ResetField(name string) error {
-	switch name {
-	case menupermissiongroupversion.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case menupermissiongroupversion.FieldGroupID:
-		m.ResetGroupID()
-		return nil
-	case menupermissiongroupversion.FieldVersion:
-		m.ResetVersion()
-		return nil
-	case menupermissiongroupversion.FieldState:
-		m.ResetState()
-		return nil
-	case menupermissiongroupversion.FieldChangeSummary:
-		m.ResetChangeSummary()
-		return nil
-	case menupermissiongroupversion.FieldCreatedBy:
-		m.ResetCreatedBy()
-		return nil
-	case menupermissiongroupversion.FieldPublishedBy:
-		m.ResetPublishedBy()
-		return nil
-	case menupermissiongroupversion.FieldEffectiveAt:
-		m.ResetEffectiveAt()
-		return nil
-	case menupermissiongroupversion.FieldPublishedAt:
-		m.ResetPublishedAt()
-		return nil
-	case menupermissiongroupversion.FieldAPIPermissions:
-		m.ResetAPIPermissions()
-		return nil
-	case menupermissiongroupversion.FieldFeatureFlags:
-		m.ResetFeatureFlags()
-		return nil
-	case menupermissiongroupversion.FieldResourceQuotas:
-		m.ResetResourceQuotas()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroupVersion field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.group != nil {
-		edges = append(edges, menupermissiongroupversion.EdgeGroup)
-	}
-	if m.menus != nil {
-		edges = append(edges, menupermissiongroupversion.EdgeMenus)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *MenuPermissionGroupVersionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case menupermissiongroupversion.EdgeGroup:
-		if id := m.group; id != nil {
-			return []ent.Value{*id}
-		}
-	case menupermissiongroupversion.EdgeMenus:
-		ids := make([]ent.Value, 0, len(m.menus))
-		for id := range m.menus {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *MenuPermissionGroupVersionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedmenus != nil {
-		edges = append(edges, menupermissiongroupversion.EdgeMenus)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *MenuPermissionGroupVersionMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case menupermissiongroupversion.EdgeMenus:
-		ids := make([]ent.Value, 0, len(m.removedmenus))
-		for id := range m.removedmenus {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedgroup {
-		edges = append(edges, menupermissiongroupversion.EdgeGroup)
-	}
-	if m.clearedmenus {
-		edges = append(edges, menupermissiongroupversion.EdgeMenus)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *MenuPermissionGroupVersionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case menupermissiongroupversion.EdgeGroup:
-		return m.clearedgroup
-	case menupermissiongroupversion.EdgeMenus:
-		return m.clearedmenus
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *MenuPermissionGroupVersionMutation) ClearEdge(name string) error {
-	switch name {
-	case menupermissiongroupversion.EdgeGroup:
-		m.ClearGroup()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroupVersion unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *MenuPermissionGroupVersionMutation) ResetEdge(name string) error {
-	switch name {
-	case menupermissiongroupversion.EdgeGroup:
-		m.ResetGroup()
-		return nil
-	case menupermissiongroupversion.EdgeMenus:
-		m.ResetMenus()
-		return nil
-	}
-	return fmt.Errorf("unknown MenuPermissionGroupVersion edge %s", name)
 }
 
 // NotificationMessageMutation represents an operation that mutates the NotificationMessage nodes in the graph.
@@ -24538,6 +21745,4124 @@ func (m *StorageProviderMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *StorageProviderMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown StorageProvider edge %s", name)
+}
+
+// TenantMutation represents an operation that mutates the Tenant nodes in the graph.
+type TenantMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uint32
+	created_at          *time.Time
+	updated_at          *time.Time
+	deleted_at          *time.Time
+	name                *string
+	code                *string
+	sort                *int32
+	addsort             *int32
+	remark              *string
+	is_platform         *bool
+	lifecycle_status    *int32
+	addlifecycle_status *int32
+	activated_at        *time.Time
+	expires_at          *time.Time
+	suspended_at        *time.Time
+	cancelled_at        *time.Time
+	clearedFields       map[string]struct{}
+	groups              map[uint32]struct{}
+	removedgroups       map[uint32]struct{}
+	clearedgroups       bool
+	done                bool
+	oldValue            func(context.Context) (*Tenant, error)
+	predicates          []predicate.Tenant
+}
+
+var _ ent.Mutation = (*TenantMutation)(nil)
+
+// tenantOption allows management of the mutation configuration using functional options.
+type tenantOption func(*TenantMutation)
+
+// newTenantMutation creates new mutation for the Tenant entity.
+func newTenantMutation(c config, op Op, opts ...tenantOption) *TenantMutation {
+	m := &TenantMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTenant,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTenantID sets the ID field of the mutation.
+func withTenantID(id uint32) tenantOption {
+	return func(m *TenantMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Tenant
+		)
+		m.oldValue = func(ctx context.Context) (*Tenant, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Tenant.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTenant sets the old Tenant of the mutation.
+func withTenant(node *Tenant) tenantOption {
+	return func(m *TenantMutation) {
+		m.oldValue = func(context.Context) (*Tenant, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TenantMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TenantMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("gen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Tenant entities.
+func (m *TenantMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TenantMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TenantMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Tenant.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *TenantMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *TenantMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *TenantMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *TenantMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *TenantMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *TenantMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *TenantMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *TenantMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *TenantMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[tenant.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *TenantMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[tenant.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *TenantMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, tenant.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *TenantMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TenantMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TenantMutation) ResetName() {
+	m.name = nil
+}
+
+// SetCode sets the "code" field.
+func (m *TenantMutation) SetCode(s string) {
+	m.code = &s
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *TenantMutation) Code() (r string, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *TenantMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetSort sets the "sort" field.
+func (m *TenantMutation) SetSort(i int32) {
+	m.sort = &i
+	m.addsort = nil
+}
+
+// Sort returns the value of the "sort" field in the mutation.
+func (m *TenantMutation) Sort() (r int32, exists bool) {
+	v := m.sort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSort returns the old "sort" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldSort(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSort: %w", err)
+	}
+	return oldValue.Sort, nil
+}
+
+// AddSort adds i to the "sort" field.
+func (m *TenantMutation) AddSort(i int32) {
+	if m.addsort != nil {
+		*m.addsort += i
+	} else {
+		m.addsort = &i
+	}
+}
+
+// AddedSort returns the value that was added to the "sort" field in this mutation.
+func (m *TenantMutation) AddedSort() (r int32, exists bool) {
+	v := m.addsort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSort resets all changes to the "sort" field.
+func (m *TenantMutation) ResetSort() {
+	m.sort = nil
+	m.addsort = nil
+}
+
+// SetRemark sets the "remark" field.
+func (m *TenantMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *TenantMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldRemark(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *TenantMutation) ResetRemark() {
+	m.remark = nil
+}
+
+// SetIsPlatform sets the "is_platform" field.
+func (m *TenantMutation) SetIsPlatform(b bool) {
+	m.is_platform = &b
+}
+
+// IsPlatform returns the value of the "is_platform" field in the mutation.
+func (m *TenantMutation) IsPlatform() (r bool, exists bool) {
+	v := m.is_platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsPlatform returns the old "is_platform" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldIsPlatform(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsPlatform: %w", err)
+	}
+	return oldValue.IsPlatform, nil
+}
+
+// ResetIsPlatform resets all changes to the "is_platform" field.
+func (m *TenantMutation) ResetIsPlatform() {
+	m.is_platform = nil
+}
+
+// SetLifecycleStatus sets the "lifecycle_status" field.
+func (m *TenantMutation) SetLifecycleStatus(i int32) {
+	m.lifecycle_status = &i
+	m.addlifecycle_status = nil
+}
+
+// LifecycleStatus returns the value of the "lifecycle_status" field in the mutation.
+func (m *TenantMutation) LifecycleStatus() (r int32, exists bool) {
+	v := m.lifecycle_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLifecycleStatus returns the old "lifecycle_status" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldLifecycleStatus(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLifecycleStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLifecycleStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLifecycleStatus: %w", err)
+	}
+	return oldValue.LifecycleStatus, nil
+}
+
+// AddLifecycleStatus adds i to the "lifecycle_status" field.
+func (m *TenantMutation) AddLifecycleStatus(i int32) {
+	if m.addlifecycle_status != nil {
+		*m.addlifecycle_status += i
+	} else {
+		m.addlifecycle_status = &i
+	}
+}
+
+// AddedLifecycleStatus returns the value that was added to the "lifecycle_status" field in this mutation.
+func (m *TenantMutation) AddedLifecycleStatus() (r int32, exists bool) {
+	v := m.addlifecycle_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLifecycleStatus resets all changes to the "lifecycle_status" field.
+func (m *TenantMutation) ResetLifecycleStatus() {
+	m.lifecycle_status = nil
+	m.addlifecycle_status = nil
+}
+
+// SetActivatedAt sets the "activated_at" field.
+func (m *TenantMutation) SetActivatedAt(t time.Time) {
+	m.activated_at = &t
+}
+
+// ActivatedAt returns the value of the "activated_at" field in the mutation.
+func (m *TenantMutation) ActivatedAt() (r time.Time, exists bool) {
+	v := m.activated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActivatedAt returns the old "activated_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldActivatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActivatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActivatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActivatedAt: %w", err)
+	}
+	return oldValue.ActivatedAt, nil
+}
+
+// ClearActivatedAt clears the value of the "activated_at" field.
+func (m *TenantMutation) ClearActivatedAt() {
+	m.activated_at = nil
+	m.clearedFields[tenant.FieldActivatedAt] = struct{}{}
+}
+
+// ActivatedAtCleared returns if the "activated_at" field was cleared in this mutation.
+func (m *TenantMutation) ActivatedAtCleared() bool {
+	_, ok := m.clearedFields[tenant.FieldActivatedAt]
+	return ok
+}
+
+// ResetActivatedAt resets all changes to the "activated_at" field.
+func (m *TenantMutation) ResetActivatedAt() {
+	m.activated_at = nil
+	delete(m.clearedFields, tenant.FieldActivatedAt)
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *TenantMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *TenantMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (m *TenantMutation) ClearExpiresAt() {
+	m.expires_at = nil
+	m.clearedFields[tenant.FieldExpiresAt] = struct{}{}
+}
+
+// ExpiresAtCleared returns if the "expires_at" field was cleared in this mutation.
+func (m *TenantMutation) ExpiresAtCleared() bool {
+	_, ok := m.clearedFields[tenant.FieldExpiresAt]
+	return ok
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *TenantMutation) ResetExpiresAt() {
+	m.expires_at = nil
+	delete(m.clearedFields, tenant.FieldExpiresAt)
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (m *TenantMutation) SetSuspendedAt(t time.Time) {
+	m.suspended_at = &t
+}
+
+// SuspendedAt returns the value of the "suspended_at" field in the mutation.
+func (m *TenantMutation) SuspendedAt() (r time.Time, exists bool) {
+	v := m.suspended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSuspendedAt returns the old "suspended_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldSuspendedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSuspendedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSuspendedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSuspendedAt: %w", err)
+	}
+	return oldValue.SuspendedAt, nil
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (m *TenantMutation) ClearSuspendedAt() {
+	m.suspended_at = nil
+	m.clearedFields[tenant.FieldSuspendedAt] = struct{}{}
+}
+
+// SuspendedAtCleared returns if the "suspended_at" field was cleared in this mutation.
+func (m *TenantMutation) SuspendedAtCleared() bool {
+	_, ok := m.clearedFields[tenant.FieldSuspendedAt]
+	return ok
+}
+
+// ResetSuspendedAt resets all changes to the "suspended_at" field.
+func (m *TenantMutation) ResetSuspendedAt() {
+	m.suspended_at = nil
+	delete(m.clearedFields, tenant.FieldSuspendedAt)
+}
+
+// SetCancelledAt sets the "cancelled_at" field.
+func (m *TenantMutation) SetCancelledAt(t time.Time) {
+	m.cancelled_at = &t
+}
+
+// CancelledAt returns the value of the "cancelled_at" field in the mutation.
+func (m *TenantMutation) CancelledAt() (r time.Time, exists bool) {
+	v := m.cancelled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCancelledAt returns the old "cancelled_at" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldCancelledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCancelledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCancelledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCancelledAt: %w", err)
+	}
+	return oldValue.CancelledAt, nil
+}
+
+// ClearCancelledAt clears the value of the "cancelled_at" field.
+func (m *TenantMutation) ClearCancelledAt() {
+	m.cancelled_at = nil
+	m.clearedFields[tenant.FieldCancelledAt] = struct{}{}
+}
+
+// CancelledAtCleared returns if the "cancelled_at" field was cleared in this mutation.
+func (m *TenantMutation) CancelledAtCleared() bool {
+	_, ok := m.clearedFields[tenant.FieldCancelledAt]
+	return ok
+}
+
+// ResetCancelledAt resets all changes to the "cancelled_at" field.
+func (m *TenantMutation) ResetCancelledAt() {
+	m.cancelled_at = nil
+	delete(m.clearedFields, tenant.FieldCancelledAt)
+}
+
+// AddGroupIDs adds the "groups" edge to the TenantMenuPermissionGroup entity by ids.
+func (m *TenantMutation) AddGroupIDs(ids ...uint32) {
+	if m.groups == nil {
+		m.groups = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.groups[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGroups clears the "groups" edge to the TenantMenuPermissionGroup entity.
+func (m *TenantMutation) ClearGroups() {
+	m.clearedgroups = true
+}
+
+// GroupsCleared reports if the "groups" edge to the TenantMenuPermissionGroup entity was cleared.
+func (m *TenantMutation) GroupsCleared() bool {
+	return m.clearedgroups
+}
+
+// RemoveGroupIDs removes the "groups" edge to the TenantMenuPermissionGroup entity by IDs.
+func (m *TenantMutation) RemoveGroupIDs(ids ...uint32) {
+	if m.removedgroups == nil {
+		m.removedgroups = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.groups, ids[i])
+		m.removedgroups[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGroups returns the removed IDs of the "groups" edge to the TenantMenuPermissionGroup entity.
+func (m *TenantMutation) RemovedGroupsIDs() (ids []uint32) {
+	for id := range m.removedgroups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GroupsIDs returns the "groups" edge IDs in the mutation.
+func (m *TenantMutation) GroupsIDs() (ids []uint32) {
+	for id := range m.groups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGroups resets all changes to the "groups" edge.
+func (m *TenantMutation) ResetGroups() {
+	m.groups = nil
+	m.clearedgroups = false
+	m.removedgroups = nil
+}
+
+// Where appends a list predicates to the TenantMutation builder.
+func (m *TenantMutation) Where(ps ...predicate.Tenant) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TenantMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TenantMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Tenant, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TenantMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TenantMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Tenant).
+func (m *TenantMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TenantMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.created_at != nil {
+		fields = append(fields, tenant.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, tenant.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, tenant.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, tenant.FieldName)
+	}
+	if m.code != nil {
+		fields = append(fields, tenant.FieldCode)
+	}
+	if m.sort != nil {
+		fields = append(fields, tenant.FieldSort)
+	}
+	if m.remark != nil {
+		fields = append(fields, tenant.FieldRemark)
+	}
+	if m.is_platform != nil {
+		fields = append(fields, tenant.FieldIsPlatform)
+	}
+	if m.lifecycle_status != nil {
+		fields = append(fields, tenant.FieldLifecycleStatus)
+	}
+	if m.activated_at != nil {
+		fields = append(fields, tenant.FieldActivatedAt)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, tenant.FieldExpiresAt)
+	}
+	if m.suspended_at != nil {
+		fields = append(fields, tenant.FieldSuspendedAt)
+	}
+	if m.cancelled_at != nil {
+		fields = append(fields, tenant.FieldCancelledAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TenantMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tenant.FieldCreatedAt:
+		return m.CreatedAt()
+	case tenant.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case tenant.FieldDeletedAt:
+		return m.DeletedAt()
+	case tenant.FieldName:
+		return m.Name()
+	case tenant.FieldCode:
+		return m.Code()
+	case tenant.FieldSort:
+		return m.Sort()
+	case tenant.FieldRemark:
+		return m.Remark()
+	case tenant.FieldIsPlatform:
+		return m.IsPlatform()
+	case tenant.FieldLifecycleStatus:
+		return m.LifecycleStatus()
+	case tenant.FieldActivatedAt:
+		return m.ActivatedAt()
+	case tenant.FieldExpiresAt:
+		return m.ExpiresAt()
+	case tenant.FieldSuspendedAt:
+		return m.SuspendedAt()
+	case tenant.FieldCancelledAt:
+		return m.CancelledAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TenantMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tenant.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case tenant.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case tenant.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case tenant.FieldName:
+		return m.OldName(ctx)
+	case tenant.FieldCode:
+		return m.OldCode(ctx)
+	case tenant.FieldSort:
+		return m.OldSort(ctx)
+	case tenant.FieldRemark:
+		return m.OldRemark(ctx)
+	case tenant.FieldIsPlatform:
+		return m.OldIsPlatform(ctx)
+	case tenant.FieldLifecycleStatus:
+		return m.OldLifecycleStatus(ctx)
+	case tenant.FieldActivatedAt:
+		return m.OldActivatedAt(ctx)
+	case tenant.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	case tenant.FieldSuspendedAt:
+		return m.OldSuspendedAt(ctx)
+	case tenant.FieldCancelledAt:
+		return m.OldCancelledAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Tenant field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tenant.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case tenant.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case tenant.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case tenant.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case tenant.FieldCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case tenant.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSort(v)
+		return nil
+	case tenant.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
+	case tenant.FieldIsPlatform:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsPlatform(v)
+		return nil
+	case tenant.FieldLifecycleStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLifecycleStatus(v)
+		return nil
+	case tenant.FieldActivatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActivatedAt(v)
+		return nil
+	case tenant.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	case tenant.FieldSuspendedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSuspendedAt(v)
+		return nil
+	case tenant.FieldCancelledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCancelledAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Tenant field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TenantMutation) AddedFields() []string {
+	var fields []string
+	if m.addsort != nil {
+		fields = append(fields, tenant.FieldSort)
+	}
+	if m.addlifecycle_status != nil {
+		fields = append(fields, tenant.FieldLifecycleStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TenantMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tenant.FieldSort:
+		return m.AddedSort()
+	case tenant.FieldLifecycleStatus:
+		return m.AddedLifecycleStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tenant.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSort(v)
+		return nil
+	case tenant.FieldLifecycleStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLifecycleStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Tenant numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TenantMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tenant.FieldDeletedAt) {
+		fields = append(fields, tenant.FieldDeletedAt)
+	}
+	if m.FieldCleared(tenant.FieldActivatedAt) {
+		fields = append(fields, tenant.FieldActivatedAt)
+	}
+	if m.FieldCleared(tenant.FieldExpiresAt) {
+		fields = append(fields, tenant.FieldExpiresAt)
+	}
+	if m.FieldCleared(tenant.FieldSuspendedAt) {
+		fields = append(fields, tenant.FieldSuspendedAt)
+	}
+	if m.FieldCleared(tenant.FieldCancelledAt) {
+		fields = append(fields, tenant.FieldCancelledAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TenantMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TenantMutation) ClearField(name string) error {
+	switch name {
+	case tenant.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case tenant.FieldActivatedAt:
+		m.ClearActivatedAt()
+		return nil
+	case tenant.FieldExpiresAt:
+		m.ClearExpiresAt()
+		return nil
+	case tenant.FieldSuspendedAt:
+		m.ClearSuspendedAt()
+		return nil
+	case tenant.FieldCancelledAt:
+		m.ClearCancelledAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Tenant nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TenantMutation) ResetField(name string) error {
+	switch name {
+	case tenant.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case tenant.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case tenant.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case tenant.FieldName:
+		m.ResetName()
+		return nil
+	case tenant.FieldCode:
+		m.ResetCode()
+		return nil
+	case tenant.FieldSort:
+		m.ResetSort()
+		return nil
+	case tenant.FieldRemark:
+		m.ResetRemark()
+		return nil
+	case tenant.FieldIsPlatform:
+		m.ResetIsPlatform()
+		return nil
+	case tenant.FieldLifecycleStatus:
+		m.ResetLifecycleStatus()
+		return nil
+	case tenant.FieldActivatedAt:
+		m.ResetActivatedAt()
+		return nil
+	case tenant.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	case tenant.FieldSuspendedAt:
+		m.ResetSuspendedAt()
+		return nil
+	case tenant.FieldCancelledAt:
+		m.ResetCancelledAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Tenant field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TenantMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.groups != nil {
+		edges = append(edges, tenant.EdgeGroups)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TenantMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tenant.EdgeGroups:
+		ids := make([]ent.Value, 0, len(m.groups))
+		for id := range m.groups {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TenantMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedgroups != nil {
+		edges = append(edges, tenant.EdgeGroups)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TenantMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case tenant.EdgeGroups:
+		ids := make([]ent.Value, 0, len(m.removedgroups))
+		for id := range m.removedgroups {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TenantMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedgroups {
+		edges = append(edges, tenant.EdgeGroups)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TenantMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tenant.EdgeGroups:
+		return m.clearedgroups
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TenantMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Tenant unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TenantMutation) ResetEdge(name string) error {
+	switch name {
+	case tenant.EdgeGroups:
+		m.ResetGroups()
+		return nil
+	}
+	return fmt.Errorf("unknown Tenant edge %s", name)
+}
+
+// TenantMenuPermissionGroupMutation represents an operation that mutates the TenantMenuPermissionGroup nodes in the graph.
+type TenantMenuPermissionGroupMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *uint32
+	status                 *int32
+	addstatus              *int32
+	created_at             *time.Time
+	updated_at             *time.Time
+	deleted_at             *time.Time
+	name                   *string
+	code                   *string
+	is_system              *bool
+	sort                   *int32
+	addsort                *int32
+	description            *string
+	remark                 *string
+	api_permissions        *[]string
+	appendapi_permissions  []string
+	feature_flags          *map[string]bool
+	resource_quotas        *map[string]int64
+	clearedFields          map[string]struct{}
+	menus                  map[uint32]struct{}
+	removedmenus           map[uint32]struct{}
+	clearedmenus           bool
+	current_version        *uint32
+	clearedcurrent_version bool
+	versions               map[uint32]struct{}
+	removedversions        map[uint32]struct{}
+	clearedversions        bool
+	tenants                map[uint32]struct{}
+	removedtenants         map[uint32]struct{}
+	clearedtenants         bool
+	done                   bool
+	oldValue               func(context.Context) (*TenantMenuPermissionGroup, error)
+	predicates             []predicate.TenantMenuPermissionGroup
+}
+
+var _ ent.Mutation = (*TenantMenuPermissionGroupMutation)(nil)
+
+// tenantmenupermissiongroupOption allows management of the mutation configuration using functional options.
+type tenantmenupermissiongroupOption func(*TenantMenuPermissionGroupMutation)
+
+// newTenantMenuPermissionGroupMutation creates new mutation for the TenantMenuPermissionGroup entity.
+func newTenantMenuPermissionGroupMutation(c config, op Op, opts ...tenantmenupermissiongroupOption) *TenantMenuPermissionGroupMutation {
+	m := &TenantMenuPermissionGroupMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTenantMenuPermissionGroup,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTenantMenuPermissionGroupID sets the ID field of the mutation.
+func withTenantMenuPermissionGroupID(id uint32) tenantmenupermissiongroupOption {
+	return func(m *TenantMenuPermissionGroupMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TenantMenuPermissionGroup
+		)
+		m.oldValue = func(ctx context.Context) (*TenantMenuPermissionGroup, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TenantMenuPermissionGroup.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTenantMenuPermissionGroup sets the old TenantMenuPermissionGroup of the mutation.
+func withTenantMenuPermissionGroup(node *TenantMenuPermissionGroup) tenantmenupermissiongroupOption {
+	return func(m *TenantMenuPermissionGroupMutation) {
+		m.oldValue = func(context.Context) (*TenantMenuPermissionGroup, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TenantMenuPermissionGroupMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TenantMenuPermissionGroupMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("gen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TenantMenuPermissionGroup entities.
+func (m *TenantMenuPermissionGroupMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TenantMenuPermissionGroupMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TenantMenuPermissionGroupMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TenantMenuPermissionGroup.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStatus sets the "status" field.
+func (m *TenantMenuPermissionGroupMutation) SetStatus(i int32) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) Status() (r int32, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldStatus(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *TenantMenuPermissionGroupMutation) AddStatus(i int32) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *TenantMenuPermissionGroupMutation) AddedStatus() (r int32, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *TenantMenuPermissionGroupMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *TenantMenuPermissionGroupMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *TenantMenuPermissionGroupMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *TenantMenuPermissionGroupMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *TenantMenuPermissionGroupMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *TenantMenuPermissionGroupMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *TenantMenuPermissionGroupMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[tenantmenupermissiongroup.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroup.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *TenantMenuPermissionGroupMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, tenantmenupermissiongroup.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *TenantMenuPermissionGroupMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TenantMenuPermissionGroupMutation) ResetName() {
+	m.name = nil
+}
+
+// SetCode sets the "code" field.
+func (m *TenantMenuPermissionGroupMutation) SetCode(s string) {
+	m.code = &s
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) Code() (r string, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *TenantMenuPermissionGroupMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetIsSystem sets the "is_system" field.
+func (m *TenantMenuPermissionGroupMutation) SetIsSystem(b bool) {
+	m.is_system = &b
+}
+
+// IsSystem returns the value of the "is_system" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) IsSystem() (r bool, exists bool) {
+	v := m.is_system
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsSystem returns the old "is_system" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldIsSystem(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsSystem is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsSystem requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsSystem: %w", err)
+	}
+	return oldValue.IsSystem, nil
+}
+
+// ResetIsSystem resets all changes to the "is_system" field.
+func (m *TenantMenuPermissionGroupMutation) ResetIsSystem() {
+	m.is_system = nil
+}
+
+// SetSort sets the "sort" field.
+func (m *TenantMenuPermissionGroupMutation) SetSort(i int32) {
+	m.sort = &i
+	m.addsort = nil
+}
+
+// Sort returns the value of the "sort" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) Sort() (r int32, exists bool) {
+	v := m.sort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSort returns the old "sort" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldSort(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSort: %w", err)
+	}
+	return oldValue.Sort, nil
+}
+
+// AddSort adds i to the "sort" field.
+func (m *TenantMenuPermissionGroupMutation) AddSort(i int32) {
+	if m.addsort != nil {
+		*m.addsort += i
+	} else {
+		m.addsort = &i
+	}
+}
+
+// AddedSort returns the value that was added to the "sort" field in this mutation.
+func (m *TenantMenuPermissionGroupMutation) AddedSort() (r int32, exists bool) {
+	v := m.addsort
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSort resets all changes to the "sort" field.
+func (m *TenantMenuPermissionGroupMutation) ResetSort() {
+	m.sort = nil
+	m.addsort = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *TenantMenuPermissionGroupMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldDescription(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *TenantMenuPermissionGroupMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetRemark sets the "remark" field.
+func (m *TenantMenuPermissionGroupMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldRemark(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *TenantMenuPermissionGroupMutation) ResetRemark() {
+	m.remark = nil
+}
+
+// SetCurrentVersionID sets the "current_version_id" field.
+func (m *TenantMenuPermissionGroupMutation) SetCurrentVersionID(u uint32) {
+	m.current_version = &u
+}
+
+// CurrentVersionID returns the value of the "current_version_id" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) CurrentVersionID() (r uint32, exists bool) {
+	v := m.current_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrentVersionID returns the old "current_version_id" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldCurrentVersionID(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrentVersionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrentVersionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrentVersionID: %w", err)
+	}
+	return oldValue.CurrentVersionID, nil
+}
+
+// ClearCurrentVersionID clears the value of the "current_version_id" field.
+func (m *TenantMenuPermissionGroupMutation) ClearCurrentVersionID() {
+	m.current_version = nil
+	m.clearedFields[tenantmenupermissiongroup.FieldCurrentVersionID] = struct{}{}
+}
+
+// CurrentVersionIDCleared returns if the "current_version_id" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) CurrentVersionIDCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroup.FieldCurrentVersionID]
+	return ok
+}
+
+// ResetCurrentVersionID resets all changes to the "current_version_id" field.
+func (m *TenantMenuPermissionGroupMutation) ResetCurrentVersionID() {
+	m.current_version = nil
+	delete(m.clearedFields, tenantmenupermissiongroup.FieldCurrentVersionID)
+}
+
+// SetAPIPermissions sets the "api_permissions" field.
+func (m *TenantMenuPermissionGroupMutation) SetAPIPermissions(s []string) {
+	m.api_permissions = &s
+	m.appendapi_permissions = nil
+}
+
+// APIPermissions returns the value of the "api_permissions" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) APIPermissions() (r []string, exists bool) {
+	v := m.api_permissions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIPermissions returns the old "api_permissions" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldAPIPermissions(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIPermissions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIPermissions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIPermissions: %w", err)
+	}
+	return oldValue.APIPermissions, nil
+}
+
+// AppendAPIPermissions adds s to the "api_permissions" field.
+func (m *TenantMenuPermissionGroupMutation) AppendAPIPermissions(s []string) {
+	m.appendapi_permissions = append(m.appendapi_permissions, s...)
+}
+
+// AppendedAPIPermissions returns the list of values that were appended to the "api_permissions" field in this mutation.
+func (m *TenantMenuPermissionGroupMutation) AppendedAPIPermissions() ([]string, bool) {
+	if len(m.appendapi_permissions) == 0 {
+		return nil, false
+	}
+	return m.appendapi_permissions, true
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (m *TenantMenuPermissionGroupMutation) ClearAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	m.clearedFields[tenantmenupermissiongroup.FieldAPIPermissions] = struct{}{}
+}
+
+// APIPermissionsCleared returns if the "api_permissions" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) APIPermissionsCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroup.FieldAPIPermissions]
+	return ok
+}
+
+// ResetAPIPermissions resets all changes to the "api_permissions" field.
+func (m *TenantMenuPermissionGroupMutation) ResetAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	delete(m.clearedFields, tenantmenupermissiongroup.FieldAPIPermissions)
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (m *TenantMenuPermissionGroupMutation) SetFeatureFlags(value map[string]bool) {
+	m.feature_flags = &value
+}
+
+// FeatureFlags returns the value of the "feature_flags" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) FeatureFlags() (r map[string]bool, exists bool) {
+	v := m.feature_flags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeatureFlags returns the old "feature_flags" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldFeatureFlags(ctx context.Context) (v map[string]bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeatureFlags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeatureFlags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeatureFlags: %w", err)
+	}
+	return oldValue.FeatureFlags, nil
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (m *TenantMenuPermissionGroupMutation) ClearFeatureFlags() {
+	m.feature_flags = nil
+	m.clearedFields[tenantmenupermissiongroup.FieldFeatureFlags] = struct{}{}
+}
+
+// FeatureFlagsCleared returns if the "feature_flags" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) FeatureFlagsCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroup.FieldFeatureFlags]
+	return ok
+}
+
+// ResetFeatureFlags resets all changes to the "feature_flags" field.
+func (m *TenantMenuPermissionGroupMutation) ResetFeatureFlags() {
+	m.feature_flags = nil
+	delete(m.clearedFields, tenantmenupermissiongroup.FieldFeatureFlags)
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (m *TenantMenuPermissionGroupMutation) SetResourceQuotas(value map[string]int64) {
+	m.resource_quotas = &value
+}
+
+// ResourceQuotas returns the value of the "resource_quotas" field in the mutation.
+func (m *TenantMenuPermissionGroupMutation) ResourceQuotas() (r map[string]int64, exists bool) {
+	v := m.resource_quotas
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceQuotas returns the old "resource_quotas" field's value of the TenantMenuPermissionGroup entity.
+// If the TenantMenuPermissionGroup object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupMutation) OldResourceQuotas(ctx context.Context) (v map[string]int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceQuotas is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceQuotas requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceQuotas: %w", err)
+	}
+	return oldValue.ResourceQuotas, nil
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (m *TenantMenuPermissionGroupMutation) ClearResourceQuotas() {
+	m.resource_quotas = nil
+	m.clearedFields[tenantmenupermissiongroup.FieldResourceQuotas] = struct{}{}
+}
+
+// ResourceQuotasCleared returns if the "resource_quotas" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) ResourceQuotasCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroup.FieldResourceQuotas]
+	return ok
+}
+
+// ResetResourceQuotas resets all changes to the "resource_quotas" field.
+func (m *TenantMenuPermissionGroupMutation) ResetResourceQuotas() {
+	m.resource_quotas = nil
+	delete(m.clearedFields, tenantmenupermissiongroup.FieldResourceQuotas)
+}
+
+// AddMenuIDs adds the "menus" edge to the Menu entity by ids.
+func (m *TenantMenuPermissionGroupMutation) AddMenuIDs(ids ...uint32) {
+	if m.menus == nil {
+		m.menus = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.menus[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMenus clears the "menus" edge to the Menu entity.
+func (m *TenantMenuPermissionGroupMutation) ClearMenus() {
+	m.clearedmenus = true
+}
+
+// MenusCleared reports if the "menus" edge to the Menu entity was cleared.
+func (m *TenantMenuPermissionGroupMutation) MenusCleared() bool {
+	return m.clearedmenus
+}
+
+// RemoveMenuIDs removes the "menus" edge to the Menu entity by IDs.
+func (m *TenantMenuPermissionGroupMutation) RemoveMenuIDs(ids ...uint32) {
+	if m.removedmenus == nil {
+		m.removedmenus = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.menus, ids[i])
+		m.removedmenus[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMenus returns the removed IDs of the "menus" edge to the Menu entity.
+func (m *TenantMenuPermissionGroupMutation) RemovedMenusIDs() (ids []uint32) {
+	for id := range m.removedmenus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MenusIDs returns the "menus" edge IDs in the mutation.
+func (m *TenantMenuPermissionGroupMutation) MenusIDs() (ids []uint32) {
+	for id := range m.menus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMenus resets all changes to the "menus" edge.
+func (m *TenantMenuPermissionGroupMutation) ResetMenus() {
+	m.menus = nil
+	m.clearedmenus = false
+	m.removedmenus = nil
+}
+
+// ClearCurrentVersion clears the "current_version" edge to the TenantMenuPermissionGroupVersion entity.
+func (m *TenantMenuPermissionGroupMutation) ClearCurrentVersion() {
+	m.clearedcurrent_version = true
+	m.clearedFields[tenantmenupermissiongroup.FieldCurrentVersionID] = struct{}{}
+}
+
+// CurrentVersionCleared reports if the "current_version" edge to the TenantMenuPermissionGroupVersion entity was cleared.
+func (m *TenantMenuPermissionGroupMutation) CurrentVersionCleared() bool {
+	return m.CurrentVersionIDCleared() || m.clearedcurrent_version
+}
+
+// CurrentVersionIDs returns the "current_version" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CurrentVersionID instead. It exists only for internal usage by the builders.
+func (m *TenantMenuPermissionGroupMutation) CurrentVersionIDs() (ids []uint32) {
+	if id := m.current_version; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCurrentVersion resets all changes to the "current_version" edge.
+func (m *TenantMenuPermissionGroupMutation) ResetCurrentVersion() {
+	m.current_version = nil
+	m.clearedcurrent_version = false
+}
+
+// AddVersionIDs adds the "versions" edge to the TenantMenuPermissionGroupVersion entity by ids.
+func (m *TenantMenuPermissionGroupMutation) AddVersionIDs(ids ...uint32) {
+	if m.versions == nil {
+		m.versions = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.versions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearVersions clears the "versions" edge to the TenantMenuPermissionGroupVersion entity.
+func (m *TenantMenuPermissionGroupMutation) ClearVersions() {
+	m.clearedversions = true
+}
+
+// VersionsCleared reports if the "versions" edge to the TenantMenuPermissionGroupVersion entity was cleared.
+func (m *TenantMenuPermissionGroupMutation) VersionsCleared() bool {
+	return m.clearedversions
+}
+
+// RemoveVersionIDs removes the "versions" edge to the TenantMenuPermissionGroupVersion entity by IDs.
+func (m *TenantMenuPermissionGroupMutation) RemoveVersionIDs(ids ...uint32) {
+	if m.removedversions == nil {
+		m.removedversions = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.versions, ids[i])
+		m.removedversions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedVersions returns the removed IDs of the "versions" edge to the TenantMenuPermissionGroupVersion entity.
+func (m *TenantMenuPermissionGroupMutation) RemovedVersionsIDs() (ids []uint32) {
+	for id := range m.removedversions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// VersionsIDs returns the "versions" edge IDs in the mutation.
+func (m *TenantMenuPermissionGroupMutation) VersionsIDs() (ids []uint32) {
+	for id := range m.versions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetVersions resets all changes to the "versions" edge.
+func (m *TenantMenuPermissionGroupMutation) ResetVersions() {
+	m.versions = nil
+	m.clearedversions = false
+	m.removedversions = nil
+}
+
+// AddTenantIDs adds the "tenants" edge to the Tenant entity by ids.
+func (m *TenantMenuPermissionGroupMutation) AddTenantIDs(ids ...uint32) {
+	if m.tenants == nil {
+		m.tenants = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.tenants[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTenants clears the "tenants" edge to the Tenant entity.
+func (m *TenantMenuPermissionGroupMutation) ClearTenants() {
+	m.clearedtenants = true
+}
+
+// TenantsCleared reports if the "tenants" edge to the Tenant entity was cleared.
+func (m *TenantMenuPermissionGroupMutation) TenantsCleared() bool {
+	return m.clearedtenants
+}
+
+// RemoveTenantIDs removes the "tenants" edge to the Tenant entity by IDs.
+func (m *TenantMenuPermissionGroupMutation) RemoveTenantIDs(ids ...uint32) {
+	if m.removedtenants == nil {
+		m.removedtenants = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.tenants, ids[i])
+		m.removedtenants[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTenants returns the removed IDs of the "tenants" edge to the Tenant entity.
+func (m *TenantMenuPermissionGroupMutation) RemovedTenantsIDs() (ids []uint32) {
+	for id := range m.removedtenants {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TenantsIDs returns the "tenants" edge IDs in the mutation.
+func (m *TenantMenuPermissionGroupMutation) TenantsIDs() (ids []uint32) {
+	for id := range m.tenants {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTenants resets all changes to the "tenants" edge.
+func (m *TenantMenuPermissionGroupMutation) ResetTenants() {
+	m.tenants = nil
+	m.clearedtenants = false
+	m.removedtenants = nil
+}
+
+// Where appends a list predicates to the TenantMenuPermissionGroupMutation builder.
+func (m *TenantMenuPermissionGroupMutation) Where(ps ...predicate.TenantMenuPermissionGroup) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TenantMenuPermissionGroupMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TenantMenuPermissionGroupMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TenantMenuPermissionGroup, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TenantMenuPermissionGroupMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TenantMenuPermissionGroupMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TenantMenuPermissionGroup).
+func (m *TenantMenuPermissionGroupMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TenantMenuPermissionGroupMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.status != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldStatus)
+	}
+	if m.created_at != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldName)
+	}
+	if m.code != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldCode)
+	}
+	if m.is_system != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldIsSystem)
+	}
+	if m.sort != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldSort)
+	}
+	if m.description != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldDescription)
+	}
+	if m.remark != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldRemark)
+	}
+	if m.current_version != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldCurrentVersionID)
+	}
+	if m.api_permissions != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldAPIPermissions)
+	}
+	if m.feature_flags != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldFeatureFlags)
+	}
+	if m.resource_quotas != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldResourceQuotas)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TenantMenuPermissionGroupMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tenantmenupermissiongroup.FieldStatus:
+		return m.Status()
+	case tenantmenupermissiongroup.FieldCreatedAt:
+		return m.CreatedAt()
+	case tenantmenupermissiongroup.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case tenantmenupermissiongroup.FieldDeletedAt:
+		return m.DeletedAt()
+	case tenantmenupermissiongroup.FieldName:
+		return m.Name()
+	case tenantmenupermissiongroup.FieldCode:
+		return m.Code()
+	case tenantmenupermissiongroup.FieldIsSystem:
+		return m.IsSystem()
+	case tenantmenupermissiongroup.FieldSort:
+		return m.Sort()
+	case tenantmenupermissiongroup.FieldDescription:
+		return m.Description()
+	case tenantmenupermissiongroup.FieldRemark:
+		return m.Remark()
+	case tenantmenupermissiongroup.FieldCurrentVersionID:
+		return m.CurrentVersionID()
+	case tenantmenupermissiongroup.FieldAPIPermissions:
+		return m.APIPermissions()
+	case tenantmenupermissiongroup.FieldFeatureFlags:
+		return m.FeatureFlags()
+	case tenantmenupermissiongroup.FieldResourceQuotas:
+		return m.ResourceQuotas()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TenantMenuPermissionGroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tenantmenupermissiongroup.FieldStatus:
+		return m.OldStatus(ctx)
+	case tenantmenupermissiongroup.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case tenantmenupermissiongroup.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case tenantmenupermissiongroup.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case tenantmenupermissiongroup.FieldName:
+		return m.OldName(ctx)
+	case tenantmenupermissiongroup.FieldCode:
+		return m.OldCode(ctx)
+	case tenantmenupermissiongroup.FieldIsSystem:
+		return m.OldIsSystem(ctx)
+	case tenantmenupermissiongroup.FieldSort:
+		return m.OldSort(ctx)
+	case tenantmenupermissiongroup.FieldDescription:
+		return m.OldDescription(ctx)
+	case tenantmenupermissiongroup.FieldRemark:
+		return m.OldRemark(ctx)
+	case tenantmenupermissiongroup.FieldCurrentVersionID:
+		return m.OldCurrentVersionID(ctx)
+	case tenantmenupermissiongroup.FieldAPIPermissions:
+		return m.OldAPIPermissions(ctx)
+	case tenantmenupermissiongroup.FieldFeatureFlags:
+		return m.OldFeatureFlags(ctx)
+	case tenantmenupermissiongroup.FieldResourceQuotas:
+		return m.OldResourceQuotas(ctx)
+	}
+	return nil, fmt.Errorf("unknown TenantMenuPermissionGroup field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantMenuPermissionGroupMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tenantmenupermissiongroup.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case tenantmenupermissiongroup.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case tenantmenupermissiongroup.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case tenantmenupermissiongroup.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case tenantmenupermissiongroup.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case tenantmenupermissiongroup.FieldCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case tenantmenupermissiongroup.FieldIsSystem:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsSystem(v)
+		return nil
+	case tenantmenupermissiongroup.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSort(v)
+		return nil
+	case tenantmenupermissiongroup.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case tenantmenupermissiongroup.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
+	case tenantmenupermissiongroup.FieldCurrentVersionID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrentVersionID(v)
+		return nil
+	case tenantmenupermissiongroup.FieldAPIPermissions:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIPermissions(v)
+		return nil
+	case tenantmenupermissiongroup.FieldFeatureFlags:
+		v, ok := value.(map[string]bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeatureFlags(v)
+		return nil
+	case tenantmenupermissiongroup.FieldResourceQuotas:
+		v, ok := value.(map[string]int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceQuotas(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroup field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TenantMenuPermissionGroupMutation) AddedFields() []string {
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldStatus)
+	}
+	if m.addsort != nil {
+		fields = append(fields, tenantmenupermissiongroup.FieldSort)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TenantMenuPermissionGroupMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tenantmenupermissiongroup.FieldStatus:
+		return m.AddedStatus()
+	case tenantmenupermissiongroup.FieldSort:
+		return m.AddedSort()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantMenuPermissionGroupMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tenantmenupermissiongroup.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	case tenantmenupermissiongroup.FieldSort:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSort(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroup numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TenantMenuPermissionGroupMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tenantmenupermissiongroup.FieldDeletedAt) {
+		fields = append(fields, tenantmenupermissiongroup.FieldDeletedAt)
+	}
+	if m.FieldCleared(tenantmenupermissiongroup.FieldCurrentVersionID) {
+		fields = append(fields, tenantmenupermissiongroup.FieldCurrentVersionID)
+	}
+	if m.FieldCleared(tenantmenupermissiongroup.FieldAPIPermissions) {
+		fields = append(fields, tenantmenupermissiongroup.FieldAPIPermissions)
+	}
+	if m.FieldCleared(tenantmenupermissiongroup.FieldFeatureFlags) {
+		fields = append(fields, tenantmenupermissiongroup.FieldFeatureFlags)
+	}
+	if m.FieldCleared(tenantmenupermissiongroup.FieldResourceQuotas) {
+		fields = append(fields, tenantmenupermissiongroup.FieldResourceQuotas)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TenantMenuPermissionGroupMutation) ClearField(name string) error {
+	switch name {
+	case tenantmenupermissiongroup.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case tenantmenupermissiongroup.FieldCurrentVersionID:
+		m.ClearCurrentVersionID()
+		return nil
+	case tenantmenupermissiongroup.FieldAPIPermissions:
+		m.ClearAPIPermissions()
+		return nil
+	case tenantmenupermissiongroup.FieldFeatureFlags:
+		m.ClearFeatureFlags()
+		return nil
+	case tenantmenupermissiongroup.FieldResourceQuotas:
+		m.ClearResourceQuotas()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroup nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TenantMenuPermissionGroupMutation) ResetField(name string) error {
+	switch name {
+	case tenantmenupermissiongroup.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case tenantmenupermissiongroup.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case tenantmenupermissiongroup.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case tenantmenupermissiongroup.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case tenantmenupermissiongroup.FieldName:
+		m.ResetName()
+		return nil
+	case tenantmenupermissiongroup.FieldCode:
+		m.ResetCode()
+		return nil
+	case tenantmenupermissiongroup.FieldIsSystem:
+		m.ResetIsSystem()
+		return nil
+	case tenantmenupermissiongroup.FieldSort:
+		m.ResetSort()
+		return nil
+	case tenantmenupermissiongroup.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case tenantmenupermissiongroup.FieldRemark:
+		m.ResetRemark()
+		return nil
+	case tenantmenupermissiongroup.FieldCurrentVersionID:
+		m.ResetCurrentVersionID()
+		return nil
+	case tenantmenupermissiongroup.FieldAPIPermissions:
+		m.ResetAPIPermissions()
+		return nil
+	case tenantmenupermissiongroup.FieldFeatureFlags:
+		m.ResetFeatureFlags()
+		return nil
+	case tenantmenupermissiongroup.FieldResourceQuotas:
+		m.ResetResourceQuotas()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroup field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TenantMenuPermissionGroupMutation) AddedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.menus != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeMenus)
+	}
+	if m.current_version != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeCurrentVersion)
+	}
+	if m.versions != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeVersions)
+	}
+	if m.tenants != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeTenants)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TenantMenuPermissionGroupMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tenantmenupermissiongroup.EdgeMenus:
+		ids := make([]ent.Value, 0, len(m.menus))
+		for id := range m.menus {
+			ids = append(ids, id)
+		}
+		return ids
+	case tenantmenupermissiongroup.EdgeCurrentVersion:
+		if id := m.current_version; id != nil {
+			return []ent.Value{*id}
+		}
+	case tenantmenupermissiongroup.EdgeVersions:
+		ids := make([]ent.Value, 0, len(m.versions))
+		for id := range m.versions {
+			ids = append(ids, id)
+		}
+		return ids
+	case tenantmenupermissiongroup.EdgeTenants:
+		ids := make([]ent.Value, 0, len(m.tenants))
+		for id := range m.tenants {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TenantMenuPermissionGroupMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.removedmenus != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeMenus)
+	}
+	if m.removedversions != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeVersions)
+	}
+	if m.removedtenants != nil {
+		edges = append(edges, tenantmenupermissiongroup.EdgeTenants)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TenantMenuPermissionGroupMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case tenantmenupermissiongroup.EdgeMenus:
+		ids := make([]ent.Value, 0, len(m.removedmenus))
+		for id := range m.removedmenus {
+			ids = append(ids, id)
+		}
+		return ids
+	case tenantmenupermissiongroup.EdgeVersions:
+		ids := make([]ent.Value, 0, len(m.removedversions))
+		for id := range m.removedversions {
+			ids = append(ids, id)
+		}
+		return ids
+	case tenantmenupermissiongroup.EdgeTenants:
+		ids := make([]ent.Value, 0, len(m.removedtenants))
+		for id := range m.removedtenants {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.clearedmenus {
+		edges = append(edges, tenantmenupermissiongroup.EdgeMenus)
+	}
+	if m.clearedcurrent_version {
+		edges = append(edges, tenantmenupermissiongroup.EdgeCurrentVersion)
+	}
+	if m.clearedversions {
+		edges = append(edges, tenantmenupermissiongroup.EdgeVersions)
+	}
+	if m.clearedtenants {
+		edges = append(edges, tenantmenupermissiongroup.EdgeTenants)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TenantMenuPermissionGroupMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tenantmenupermissiongroup.EdgeMenus:
+		return m.clearedmenus
+	case tenantmenupermissiongroup.EdgeCurrentVersion:
+		return m.clearedcurrent_version
+	case tenantmenupermissiongroup.EdgeVersions:
+		return m.clearedversions
+	case tenantmenupermissiongroup.EdgeTenants:
+		return m.clearedtenants
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TenantMenuPermissionGroupMutation) ClearEdge(name string) error {
+	switch name {
+	case tenantmenupermissiongroup.EdgeCurrentVersion:
+		m.ClearCurrentVersion()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroup unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TenantMenuPermissionGroupMutation) ResetEdge(name string) error {
+	switch name {
+	case tenantmenupermissiongroup.EdgeMenus:
+		m.ResetMenus()
+		return nil
+	case tenantmenupermissiongroup.EdgeCurrentVersion:
+		m.ResetCurrentVersion()
+		return nil
+	case tenantmenupermissiongroup.EdgeVersions:
+		m.ResetVersions()
+		return nil
+	case tenantmenupermissiongroup.EdgeTenants:
+		m.ResetTenants()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroup edge %s", name)
+}
+
+// TenantMenuPermissionGroupVersionMutation represents an operation that mutates the TenantMenuPermissionGroupVersion nodes in the graph.
+type TenantMenuPermissionGroupVersionMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *uint32
+	created_at            *time.Time
+	version               *int32
+	addversion            *int32
+	state                 *int32
+	addstate              *int32
+	change_summary        *string
+	created_by            *uint32
+	addcreated_by         *int32
+	published_by          *uint32
+	addpublished_by       *int32
+	effective_at          *time.Time
+	published_at          *time.Time
+	api_permissions       *[]string
+	appendapi_permissions []string
+	feature_flags         *map[string]bool
+	resource_quotas       *map[string]int64
+	clearedFields         map[string]struct{}
+	group                 *uint32
+	clearedgroup          bool
+	menus                 map[uint32]struct{}
+	removedmenus          map[uint32]struct{}
+	clearedmenus          bool
+	done                  bool
+	oldValue              func(context.Context) (*TenantMenuPermissionGroupVersion, error)
+	predicates            []predicate.TenantMenuPermissionGroupVersion
+}
+
+var _ ent.Mutation = (*TenantMenuPermissionGroupVersionMutation)(nil)
+
+// tenantmenupermissiongroupversionOption allows management of the mutation configuration using functional options.
+type tenantmenupermissiongroupversionOption func(*TenantMenuPermissionGroupVersionMutation)
+
+// newTenantMenuPermissionGroupVersionMutation creates new mutation for the TenantMenuPermissionGroupVersion entity.
+func newTenantMenuPermissionGroupVersionMutation(c config, op Op, opts ...tenantmenupermissiongroupversionOption) *TenantMenuPermissionGroupVersionMutation {
+	m := &TenantMenuPermissionGroupVersionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTenantMenuPermissionGroupVersion,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTenantMenuPermissionGroupVersionID sets the ID field of the mutation.
+func withTenantMenuPermissionGroupVersionID(id uint32) tenantmenupermissiongroupversionOption {
+	return func(m *TenantMenuPermissionGroupVersionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TenantMenuPermissionGroupVersion
+		)
+		m.oldValue = func(ctx context.Context) (*TenantMenuPermissionGroupVersion, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TenantMenuPermissionGroupVersion.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTenantMenuPermissionGroupVersion sets the old TenantMenuPermissionGroupVersion of the mutation.
+func withTenantMenuPermissionGroupVersion(node *TenantMenuPermissionGroupVersion) tenantmenupermissiongroupversionOption {
+	return func(m *TenantMenuPermissionGroupVersionMutation) {
+		m.oldValue = func(context.Context) (*TenantMenuPermissionGroupVersion, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TenantMenuPermissionGroupVersionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TenantMenuPermissionGroupVersionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("gen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TenantMenuPermissionGroupVersion entities.
+func (m *TenantMenuPermissionGroupVersionMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TenantMenuPermissionGroupVersionMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TenantMenuPermissionGroupVersion.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetGroupID(u uint32) {
+	m.group = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) GroupID() (r uint32, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldGroupID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetGroupID() {
+	m.group = nil
+}
+
+// SetVersion sets the "version" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetVersion(i int32) {
+	m.version = &i
+	m.addversion = nil
+}
+
+// Version returns the value of the "version" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) Version() (r int32, exists bool) {
+	v := m.version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersion returns the old "version" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldVersion(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
+	}
+	return oldValue.Version, nil
+}
+
+// AddVersion adds i to the "version" field.
+func (m *TenantMenuPermissionGroupVersionMutation) AddVersion(i int32) {
+	if m.addversion != nil {
+		*m.addversion += i
+	} else {
+		m.addversion = &i
+	}
+}
+
+// AddedVersion returns the value that was added to the "version" field in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedVersion() (r int32, exists bool) {
+	v := m.addversion
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVersion resets all changes to the "version" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetVersion() {
+	m.version = nil
+	m.addversion = nil
+}
+
+// SetState sets the "state" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetState(i int32) {
+	m.state = &i
+	m.addstate = nil
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) State() (r int32, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldState(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// AddState adds i to the "state" field.
+func (m *TenantMenuPermissionGroupVersionMutation) AddState(i int32) {
+	if m.addstate != nil {
+		*m.addstate += i
+	} else {
+		m.addstate = &i
+	}
+}
+
+// AddedState returns the value that was added to the "state" field in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedState() (r int32, exists bool) {
+	v := m.addstate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetState() {
+	m.state = nil
+	m.addstate = nil
+}
+
+// SetChangeSummary sets the "change_summary" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetChangeSummary(s string) {
+	m.change_summary = &s
+}
+
+// ChangeSummary returns the value of the "change_summary" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) ChangeSummary() (r string, exists bool) {
+	v := m.change_summary
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChangeSummary returns the old "change_summary" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldChangeSummary(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChangeSummary is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChangeSummary requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChangeSummary: %w", err)
+	}
+	return oldValue.ChangeSummary, nil
+}
+
+// ResetChangeSummary resets all changes to the "change_summary" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetChangeSummary() {
+	m.change_summary = nil
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetCreatedBy(u uint32) {
+	m.created_by = &u
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) CreatedBy() (r uint32, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldCreatedBy(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds u to the "created_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) AddCreatedBy(u int32) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += u
+	} else {
+		m.addcreated_by = &u
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedCreatedBy() (r int32, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldCreatedBy)
+}
+
+// SetPublishedBy sets the "published_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetPublishedBy(u uint32) {
+	m.published_by = &u
+	m.addpublished_by = nil
+}
+
+// PublishedBy returns the value of the "published_by" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) PublishedBy() (r uint32, exists bool) {
+	v := m.published_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishedBy returns the old "published_by" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldPublishedBy(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishedBy: %w", err)
+	}
+	return oldValue.PublishedBy, nil
+}
+
+// AddPublishedBy adds u to the "published_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) AddPublishedBy(u int32) {
+	if m.addpublished_by != nil {
+		*m.addpublished_by += u
+	} else {
+		m.addpublished_by = &u
+	}
+}
+
+// AddedPublishedBy returns the value that was added to the "published_by" field in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedPublishedBy() (r int32, exists bool) {
+	v := m.addpublished_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPublishedBy clears the value of the "published_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearPublishedBy() {
+	m.published_by = nil
+	m.addpublished_by = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldPublishedBy] = struct{}{}
+}
+
+// PublishedByCleared returns if the "published_by" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) PublishedByCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldPublishedBy]
+	return ok
+}
+
+// ResetPublishedBy resets all changes to the "published_by" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetPublishedBy() {
+	m.published_by = nil
+	m.addpublished_by = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldPublishedBy)
+}
+
+// SetEffectiveAt sets the "effective_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetEffectiveAt(t time.Time) {
+	m.effective_at = &t
+}
+
+// EffectiveAt returns the value of the "effective_at" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) EffectiveAt() (r time.Time, exists bool) {
+	v := m.effective_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEffectiveAt returns the old "effective_at" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldEffectiveAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEffectiveAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEffectiveAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEffectiveAt: %w", err)
+	}
+	return oldValue.EffectiveAt, nil
+}
+
+// ClearEffectiveAt clears the value of the "effective_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearEffectiveAt() {
+	m.effective_at = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldEffectiveAt] = struct{}{}
+}
+
+// EffectiveAtCleared returns if the "effective_at" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) EffectiveAtCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldEffectiveAt]
+	return ok
+}
+
+// ResetEffectiveAt resets all changes to the "effective_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetEffectiveAt() {
+	m.effective_at = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldEffectiveAt)
+}
+
+// SetPublishedAt sets the "published_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetPublishedAt(t time.Time) {
+	m.published_at = &t
+}
+
+// PublishedAt returns the value of the "published_at" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) PublishedAt() (r time.Time, exists bool) {
+	v := m.published_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishedAt returns the old "published_at" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldPublishedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishedAt: %w", err)
+	}
+	return oldValue.PublishedAt, nil
+}
+
+// ClearPublishedAt clears the value of the "published_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearPublishedAt() {
+	m.published_at = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldPublishedAt] = struct{}{}
+}
+
+// PublishedAtCleared returns if the "published_at" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) PublishedAtCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldPublishedAt]
+	return ok
+}
+
+// ResetPublishedAt resets all changes to the "published_at" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetPublishedAt() {
+	m.published_at = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldPublishedAt)
+}
+
+// SetAPIPermissions sets the "api_permissions" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetAPIPermissions(s []string) {
+	m.api_permissions = &s
+	m.appendapi_permissions = nil
+}
+
+// APIPermissions returns the value of the "api_permissions" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) APIPermissions() (r []string, exists bool) {
+	v := m.api_permissions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIPermissions returns the old "api_permissions" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldAPIPermissions(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIPermissions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIPermissions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIPermissions: %w", err)
+	}
+	return oldValue.APIPermissions, nil
+}
+
+// AppendAPIPermissions adds s to the "api_permissions" field.
+func (m *TenantMenuPermissionGroupVersionMutation) AppendAPIPermissions(s []string) {
+	m.appendapi_permissions = append(m.appendapi_permissions, s...)
+}
+
+// AppendedAPIPermissions returns the list of values that were appended to the "api_permissions" field in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AppendedAPIPermissions() ([]string, bool) {
+	if len(m.appendapi_permissions) == 0 {
+		return nil, false
+	}
+	return m.appendapi_permissions, true
+}
+
+// ClearAPIPermissions clears the value of the "api_permissions" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldAPIPermissions] = struct{}{}
+}
+
+// APIPermissionsCleared returns if the "api_permissions" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) APIPermissionsCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldAPIPermissions]
+	return ok
+}
+
+// ResetAPIPermissions resets all changes to the "api_permissions" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetAPIPermissions() {
+	m.api_permissions = nil
+	m.appendapi_permissions = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldAPIPermissions)
+}
+
+// SetFeatureFlags sets the "feature_flags" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetFeatureFlags(value map[string]bool) {
+	m.feature_flags = &value
+}
+
+// FeatureFlags returns the value of the "feature_flags" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) FeatureFlags() (r map[string]bool, exists bool) {
+	v := m.feature_flags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeatureFlags returns the old "feature_flags" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldFeatureFlags(ctx context.Context) (v map[string]bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeatureFlags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeatureFlags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeatureFlags: %w", err)
+	}
+	return oldValue.FeatureFlags, nil
+}
+
+// ClearFeatureFlags clears the value of the "feature_flags" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearFeatureFlags() {
+	m.feature_flags = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldFeatureFlags] = struct{}{}
+}
+
+// FeatureFlagsCleared returns if the "feature_flags" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) FeatureFlagsCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldFeatureFlags]
+	return ok
+}
+
+// ResetFeatureFlags resets all changes to the "feature_flags" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetFeatureFlags() {
+	m.feature_flags = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldFeatureFlags)
+}
+
+// SetResourceQuotas sets the "resource_quotas" field.
+func (m *TenantMenuPermissionGroupVersionMutation) SetResourceQuotas(value map[string]int64) {
+	m.resource_quotas = &value
+}
+
+// ResourceQuotas returns the value of the "resource_quotas" field in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) ResourceQuotas() (r map[string]int64, exists bool) {
+	v := m.resource_quotas
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceQuotas returns the old "resource_quotas" field's value of the TenantMenuPermissionGroupVersion entity.
+// If the TenantMenuPermissionGroupVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMenuPermissionGroupVersionMutation) OldResourceQuotas(ctx context.Context) (v map[string]int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceQuotas is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceQuotas requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceQuotas: %w", err)
+	}
+	return oldValue.ResourceQuotas, nil
+}
+
+// ClearResourceQuotas clears the value of the "resource_quotas" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearResourceQuotas() {
+	m.resource_quotas = nil
+	m.clearedFields[tenantmenupermissiongroupversion.FieldResourceQuotas] = struct{}{}
+}
+
+// ResourceQuotasCleared returns if the "resource_quotas" field was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) ResourceQuotasCleared() bool {
+	_, ok := m.clearedFields[tenantmenupermissiongroupversion.FieldResourceQuotas]
+	return ok
+}
+
+// ResetResourceQuotas resets all changes to the "resource_quotas" field.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetResourceQuotas() {
+	m.resource_quotas = nil
+	delete(m.clearedFields, tenantmenupermissiongroupversion.FieldResourceQuotas)
+}
+
+// ClearGroup clears the "group" edge to the TenantMenuPermissionGroup entity.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearGroup() {
+	m.clearedgroup = true
+	m.clearedFields[tenantmenupermissiongroupversion.FieldGroupID] = struct{}{}
+}
+
+// GroupCleared reports if the "group" edge to the TenantMenuPermissionGroup entity was cleared.
+func (m *TenantMenuPermissionGroupVersionMutation) GroupCleared() bool {
+	return m.clearedgroup
+}
+
+// GroupIDs returns the "group" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GroupID instead. It exists only for internal usage by the builders.
+func (m *TenantMenuPermissionGroupVersionMutation) GroupIDs() (ids []uint32) {
+	if id := m.group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGroup resets all changes to the "group" edge.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetGroup() {
+	m.group = nil
+	m.clearedgroup = false
+}
+
+// AddMenuIDs adds the "menus" edge to the Menu entity by ids.
+func (m *TenantMenuPermissionGroupVersionMutation) AddMenuIDs(ids ...uint32) {
+	if m.menus == nil {
+		m.menus = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		m.menus[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMenus clears the "menus" edge to the Menu entity.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearMenus() {
+	m.clearedmenus = true
+}
+
+// MenusCleared reports if the "menus" edge to the Menu entity was cleared.
+func (m *TenantMenuPermissionGroupVersionMutation) MenusCleared() bool {
+	return m.clearedmenus
+}
+
+// RemoveMenuIDs removes the "menus" edge to the Menu entity by IDs.
+func (m *TenantMenuPermissionGroupVersionMutation) RemoveMenuIDs(ids ...uint32) {
+	if m.removedmenus == nil {
+		m.removedmenus = make(map[uint32]struct{})
+	}
+	for i := range ids {
+		delete(m.menus, ids[i])
+		m.removedmenus[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMenus returns the removed IDs of the "menus" edge to the Menu entity.
+func (m *TenantMenuPermissionGroupVersionMutation) RemovedMenusIDs() (ids []uint32) {
+	for id := range m.removedmenus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MenusIDs returns the "menus" edge IDs in the mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) MenusIDs() (ids []uint32) {
+	for id := range m.menus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMenus resets all changes to the "menus" edge.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetMenus() {
+	m.menus = nil
+	m.clearedmenus = false
+	m.removedmenus = nil
+}
+
+// Where appends a list predicates to the TenantMenuPermissionGroupVersionMutation builder.
+func (m *TenantMenuPermissionGroupVersionMutation) Where(ps ...predicate.TenantMenuPermissionGroupVersion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TenantMenuPermissionGroupVersionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TenantMenuPermissionGroupVersionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TenantMenuPermissionGroupVersion, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TenantMenuPermissionGroupVersionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TenantMenuPermissionGroupVersionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TenantMenuPermissionGroupVersion).
+func (m *TenantMenuPermissionGroupVersionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TenantMenuPermissionGroupVersionMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldCreatedAt)
+	}
+	if m.group != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldGroupID)
+	}
+	if m.version != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldVersion)
+	}
+	if m.state != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldState)
+	}
+	if m.change_summary != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldChangeSummary)
+	}
+	if m.created_by != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldCreatedBy)
+	}
+	if m.published_by != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldPublishedBy)
+	}
+	if m.effective_at != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldEffectiveAt)
+	}
+	if m.published_at != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldPublishedAt)
+	}
+	if m.api_permissions != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldAPIPermissions)
+	}
+	if m.feature_flags != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldFeatureFlags)
+	}
+	if m.resource_quotas != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldResourceQuotas)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TenantMenuPermissionGroupVersionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldCreatedAt:
+		return m.CreatedAt()
+	case tenantmenupermissiongroupversion.FieldGroupID:
+		return m.GroupID()
+	case tenantmenupermissiongroupversion.FieldVersion:
+		return m.Version()
+	case tenantmenupermissiongroupversion.FieldState:
+		return m.State()
+	case tenantmenupermissiongroupversion.FieldChangeSummary:
+		return m.ChangeSummary()
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		return m.CreatedBy()
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		return m.PublishedBy()
+	case tenantmenupermissiongroupversion.FieldEffectiveAt:
+		return m.EffectiveAt()
+	case tenantmenupermissiongroupversion.FieldPublishedAt:
+		return m.PublishedAt()
+	case tenantmenupermissiongroupversion.FieldAPIPermissions:
+		return m.APIPermissions()
+	case tenantmenupermissiongroupversion.FieldFeatureFlags:
+		return m.FeatureFlags()
+	case tenantmenupermissiongroupversion.FieldResourceQuotas:
+		return m.ResourceQuotas()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TenantMenuPermissionGroupVersionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case tenantmenupermissiongroupversion.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case tenantmenupermissiongroupversion.FieldVersion:
+		return m.OldVersion(ctx)
+	case tenantmenupermissiongroupversion.FieldState:
+		return m.OldState(ctx)
+	case tenantmenupermissiongroupversion.FieldChangeSummary:
+		return m.OldChangeSummary(ctx)
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		return m.OldPublishedBy(ctx)
+	case tenantmenupermissiongroupversion.FieldEffectiveAt:
+		return m.OldEffectiveAt(ctx)
+	case tenantmenupermissiongroupversion.FieldPublishedAt:
+		return m.OldPublishedAt(ctx)
+	case tenantmenupermissiongroupversion.FieldAPIPermissions:
+		return m.OldAPIPermissions(ctx)
+	case tenantmenupermissiongroupversion.FieldFeatureFlags:
+		return m.OldFeatureFlags(ctx)
+	case tenantmenupermissiongroupversion.FieldResourceQuotas:
+		return m.OldResourceQuotas(ctx)
+	}
+	return nil, fmt.Errorf("unknown TenantMenuPermissionGroupVersion field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantMenuPermissionGroupVersionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldGroupID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldVersion:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersion(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldState:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldChangeSummary:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChangeSummary(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishedBy(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldEffectiveAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEffectiveAt(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishedAt(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldAPIPermissions:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIPermissions(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldFeatureFlags:
+		v, ok := value.(map[string]bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeatureFlags(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldResourceQuotas:
+		v, ok := value.(map[string]int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceQuotas(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroupVersion field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedFields() []string {
+	var fields []string
+	if m.addversion != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldVersion)
+	}
+	if m.addstate != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldState)
+	}
+	if m.addcreated_by != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldCreatedBy)
+	}
+	if m.addpublished_by != nil {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldPublishedBy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldVersion:
+		return m.AddedVersion()
+	case tenantmenupermissiongroupversion.FieldState:
+		return m.AddedState()
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		return m.AddedPublishedBy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TenantMenuPermissionGroupVersionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldVersion:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVersion(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldState:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddState(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPublishedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroupVersion numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldCreatedBy) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldCreatedBy)
+	}
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldPublishedBy) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldPublishedBy)
+	}
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldEffectiveAt) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldEffectiveAt)
+	}
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldPublishedAt) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldPublishedAt)
+	}
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldAPIPermissions) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldAPIPermissions)
+	}
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldFeatureFlags) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldFeatureFlags)
+	}
+	if m.FieldCleared(tenantmenupermissiongroupversion.FieldResourceQuotas) {
+		fields = append(fields, tenantmenupermissiongroupversion.FieldResourceQuotas)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearField(name string) error {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		m.ClearCreatedBy()
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		m.ClearPublishedBy()
+		return nil
+	case tenantmenupermissiongroupversion.FieldEffectiveAt:
+		m.ClearEffectiveAt()
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedAt:
+		m.ClearPublishedAt()
+		return nil
+	case tenantmenupermissiongroupversion.FieldAPIPermissions:
+		m.ClearAPIPermissions()
+		return nil
+	case tenantmenupermissiongroupversion.FieldFeatureFlags:
+		m.ClearFeatureFlags()
+		return nil
+	case tenantmenupermissiongroupversion.FieldResourceQuotas:
+		m.ClearResourceQuotas()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroupVersion nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetField(name string) error {
+	switch name {
+	case tenantmenupermissiongroupversion.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case tenantmenupermissiongroupversion.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case tenantmenupermissiongroupversion.FieldVersion:
+		m.ResetVersion()
+		return nil
+	case tenantmenupermissiongroupversion.FieldState:
+		m.ResetState()
+		return nil
+	case tenantmenupermissiongroupversion.FieldChangeSummary:
+		m.ResetChangeSummary()
+		return nil
+	case tenantmenupermissiongroupversion.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedBy:
+		m.ResetPublishedBy()
+		return nil
+	case tenantmenupermissiongroupversion.FieldEffectiveAt:
+		m.ResetEffectiveAt()
+		return nil
+	case tenantmenupermissiongroupversion.FieldPublishedAt:
+		m.ResetPublishedAt()
+		return nil
+	case tenantmenupermissiongroupversion.FieldAPIPermissions:
+		m.ResetAPIPermissions()
+		return nil
+	case tenantmenupermissiongroupversion.FieldFeatureFlags:
+		m.ResetFeatureFlags()
+		return nil
+	case tenantmenupermissiongroupversion.FieldResourceQuotas:
+		m.ResetResourceQuotas()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroupVersion field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.group != nil {
+		edges = append(edges, tenantmenupermissiongroupversion.EdgeGroup)
+	}
+	if m.menus != nil {
+		edges = append(edges, tenantmenupermissiongroupversion.EdgeMenus)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tenantmenupermissiongroupversion.EdgeGroup:
+		if id := m.group; id != nil {
+			return []ent.Value{*id}
+		}
+	case tenantmenupermissiongroupversion.EdgeMenus:
+		ids := make([]ent.Value, 0, len(m.menus))
+		for id := range m.menus {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedmenus != nil {
+		edges = append(edges, tenantmenupermissiongroupversion.EdgeMenus)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case tenantmenupermissiongroupversion.EdgeMenus:
+		ids := make([]ent.Value, 0, len(m.removedmenus))
+		for id := range m.removedmenus {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedgroup {
+		edges = append(edges, tenantmenupermissiongroupversion.EdgeGroup)
+	}
+	if m.clearedmenus {
+		edges = append(edges, tenantmenupermissiongroupversion.EdgeMenus)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TenantMenuPermissionGroupVersionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tenantmenupermissiongroupversion.EdgeGroup:
+		return m.clearedgroup
+	case tenantmenupermissiongroupversion.EdgeMenus:
+		return m.clearedmenus
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TenantMenuPermissionGroupVersionMutation) ClearEdge(name string) error {
+	switch name {
+	case tenantmenupermissiongroupversion.EdgeGroup:
+		m.ClearGroup()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroupVersion unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TenantMenuPermissionGroupVersionMutation) ResetEdge(name string) error {
+	switch name {
+	case tenantmenupermissiongroupversion.EdgeGroup:
+		m.ResetGroup()
+		return nil
+	case tenantmenupermissiongroupversion.EdgeMenus:
+		m.ResetMenus()
+		return nil
+	}
+	return fmt.Errorf("unknown TenantMenuPermissionGroupVersion edge %s", name)
 }
 
 // TenantParameterOverrideMutation represents an operation that mutates the TenantParameterOverride nodes in the graph.

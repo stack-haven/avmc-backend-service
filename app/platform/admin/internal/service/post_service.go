@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/filtering"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"go.einride.tech/aip/filtering"
 )
 
 // PostServiceService 岗位服务结构体
@@ -70,9 +70,6 @@ func (s *PostServiceService) ListPosts(ctx context.Context, req *pbCore.ListPost
 // 参数：ctx 上下文，req 获取岗位请求
 // 返回值：岗位详情，错误信息
 func (s *PostServiceService) GetPost(ctx context.Context, req *pbCore.GetPostRequest) (*pbCore.Post, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorPostInvalidId("岗位ID不能为空")
-	}
 	s.log.Infof("获取岗位详情，岗位ID：%v", req.GetId())
 	return s.puc.Get(ctx, req.GetId())
 }
@@ -81,9 +78,6 @@ func (s *PostServiceService) GetPost(ctx context.Context, req *pbCore.GetPostReq
 // 参数：ctx 上下文，req 创建岗位请求
 // 返回值：创建岗位响应，错误信息
 func (s *PostServiceService) CreatePost(ctx context.Context, req *pbCore.CreatePostRequest) (*pbCore.CreatePostResponse, error) {
-	if req.GetPost() == nil {
-		return nil, pb.ErrorPostInvalidId("岗位信息不能为空")
-	}
 	s.log.Infof("创建岗位，岗位名称：%s", req.GetPost().GetName())
 	_, err := s.puc.Create(ctx, req.Post)
 	if err != nil {
@@ -96,12 +90,6 @@ func (s *PostServiceService) CreatePost(ctx context.Context, req *pbCore.CreateP
 // 参数：ctx 上下文，req 更新岗位请求
 // 返回值：更新岗位响应，错误信息
 func (s *PostServiceService) UpdatePost(ctx context.Context, req *pbCore.UpdatePostRequest) (*pbCore.UpdatePostResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorPostInvalidId("岗位ID不能为空")
-	}
-	if req.GetPost() == nil {
-		return nil, pb.ErrorPostInvalidId("岗位信息不能为空")
-	}
 	s.log.Infof("更新岗位，岗位ID：%v", req.GetId())
 	req.Post.Id = req.GetId()
 	_, err := s.puc.Update(ctx, req.GetPost())
@@ -115,9 +103,6 @@ func (s *PostServiceService) UpdatePost(ctx context.Context, req *pbCore.UpdateP
 // 参数：ctx 上下文，req 删除岗位请求
 // 返回值：删除岗位响应，错误信息
 func (s *PostServiceService) DeletePost(ctx context.Context, req *pbCore.DeletePostRequest) (*pbCore.DeletePostResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorPostInvalidId("岗位ID不能为空")
-	}
 	s.log.Infof("删除岗位，岗位ID：%v", req.GetId())
 	err := s.puc.Delete(ctx, req.GetId())
 	if err != nil {

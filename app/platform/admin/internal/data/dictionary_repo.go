@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -14,6 +13,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
+	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/utils/convert"
 )
 
 type dictionaryRepo struct{ BaseRepo }
@@ -26,17 +27,15 @@ func dictionaryTypeProto(row *gen.DictionaryType) *pb.DictionaryType {
 	if row.Status != nil {
 		status = enum.Status(*row.Status)
 	}
-	return &pb.DictionaryType{Id: row.ID, Name: row.Name, Code: row.Code, Status: &status, Sort: &row.Sort, Remark: &row.Remark, CreatedAt: strTime(row.CreatedAt), UpdatedAt: strTime(row.UpdatedAt)}
+	return &pb.DictionaryType{Id: row.ID, Name: row.Name, Code: row.Code, Status: &status, Sort: &row.Sort, Remark: &row.Remark, CreatedAt: convert.TimeValueToString(&row.CreatedAt, time.DateTime), UpdatedAt: convert.TimeValueToString(&row.UpdatedAt, time.DateTime)}
 }
 func dictionaryItemProto(row *gen.DictionaryItem) *pb.DictionaryItem {
 	status := enum.Status(0)
 	if row.Status != nil {
 		status = enum.Status(*row.Status)
 	}
-	return &pb.DictionaryItem{Id: row.ID, TypeId: row.TypeID, Label: row.Label, Value: row.Value, Status: &status, Sort: &row.Sort, Color: &row.Color, Remark: &row.Remark, CreatedAt: strTime(row.CreatedAt), UpdatedAt: strTime(row.UpdatedAt)}
+	return &pb.DictionaryItem{Id: row.ID, TypeId: row.TypeID, Label: row.Label, Value: row.Value, Status: &status, Sort: &row.Sort, Color: &row.Color, Remark: &row.Remark, CreatedAt: convert.TimeValueToString(&row.CreatedAt, time.DateTime), UpdatedAt: convert.TimeValueToString(&row.UpdatedAt, time.DateTime)}
 }
-func strTime(value time.Time) *string { formatted := value.Format(time.DateTime); return &formatted }
-
 func (r *dictionaryRepo) ListTypes(ctx context.Context, req *pb.ListDictionaryTypesRequest) ([]*pb.DictionaryType, int32, error) {
 	query := r.Data.DB(ctx).DictionaryType.Query().Where(dictionarytype.DeletedAtIsNil())
 	if req.Name != nil {
@@ -52,11 +51,8 @@ func (r *dictionaryRepo) ListTypes(ctx context.Context, req *pb.ListDictionaryTy
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.WithItems(func(q *gen.DictionaryItemQuery) {
 		q.Where(dictionaryitem.DeletedAtIsNil()).Order(gen.Asc(dictionaryitem.FieldSort), gen.Asc(dictionaryitem.FieldID))
 	}).Order(gen.Asc(dictionarytype.FieldSort), gen.Desc(dictionarytype.FieldID)).Offset(offset).Limit(size).All(ctx)

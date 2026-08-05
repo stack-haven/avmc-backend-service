@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 文件中心对象元数据表
+// 文件对象表
 type FileObject struct {
 	config `json:"-"`
 	// ID of the ent.

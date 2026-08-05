@@ -23,6 +23,7 @@ func (Menu) Annotations() []schema.Annotation {
 		entsql.Annotation{
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
+			Table:     "system_menus",
 		},
 		entsql.WithComments(true),
 		schema.Comment("菜单表"),
@@ -73,9 +74,9 @@ func (Menu) Edges() []ent.Edge {
 			Field("parent_id"),
 		edge.From("roles", Role.Type).
 			Ref("menus"),
-		edge.From("permission_groups", MenuPermissionGroup.Type).
+		edge.From("permission_groups", TenantMenuPermissionGroup.Type).
 			Ref("menus"),
-		edge.From("permission_group_versions", MenuPermissionGroupVersion.Type).
+		edge.From("permission_group_versions", TenantMenuPermissionGroupVersion.Type).
 			Ref("menus"),
 	}
 }

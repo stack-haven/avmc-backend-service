@@ -55,7 +55,7 @@ message ListAsyncTasksRequest {
   ];
   optional uint32 tenant_id = 3 [(buf.validate.field).uint32.gt = 0];
   optional string task_type = 4 [(buf.validate.field).string.max_len = 100];
-  optional AsyncTaskStatus status = 5 [(buf.validate.field).enum.defined_only = true];
+  optional AsyncTaskStatus status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
   optional string queue = 6 [(buf.validate.field).string.max_len = 50];
 }
 

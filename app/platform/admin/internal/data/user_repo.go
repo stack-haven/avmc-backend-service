@@ -221,6 +221,7 @@ func (r *userRepo) Save(ctx context.Context, g *pbCore.User) (*pbCore.User, erro
 	}
 	if len(g.GetRoleIds()) > 0 {
 		r.bumpTenantAuthorizationVersion(ctx, tenantID)
+		SyncUserRoles(ctx, r.Data.DB(ctx), r.Data.authorizer, tenantID, res.ID, g.GetRoleIds())
 	}
 	return r.entToProto(res), nil
 }
@@ -298,6 +299,7 @@ func (r *userRepo) Update(ctx context.Context, g *pbCore.User) (*pbCore.User, er
 		return nil, err
 	}
 	r.bumpTenantAuthorizationVersion(ctx, tenantID)
+	SyncUserRoles(ctx, r.Data.DB(ctx), r.Data.authorizer, tenantID, g.GetId(), g.GetRoleIds())
 	return r.entToProto(res), nil
 }
 
@@ -311,7 +313,7 @@ func (r *userRepo) loadUserWithRoles(ctx context.Context, client *gen.Client, id
 // FindByID 通过 ID 查询 — 显式 Select 排除 password、deleted_at 等敏感/非必要字段
 func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error) {
 	r.Log.Infof("查询用户 ID: %d", id)
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	query, err := r.scopedUserQuery(ctx)
@@ -343,7 +345,7 @@ func (r *userRepo) FindByID(ctx context.Context, id uint32) (*pbCore.User, error
 
 // ListByName 按用户名模糊查询
 func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	query, err := r.scopedUserQuery(ctx)
@@ -358,12 +360,12 @@ func (r *userRepo) ListByName(ctx context.Context, name string) ([]*pbCore.User,
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // ListByPhone 按手机号查询
 func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.User, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	query, err := r.scopedUserQuery(ctx)
@@ -377,12 +379,12 @@ func (r *userRepo) ListByPhone(ctx context.Context, phone string) ([]*pbCore.Use
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // ListAll 查询所有用户
 func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	query, err := r.scopedUserQuery(ctx)
@@ -397,12 +399,12 @@ func (r *userRepo) ListAll(ctx context.Context) ([]*pbCore.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // ListPageSimple 用户简单列表分页
 func (r *userRepo) ListPageSimple(ctx context.Context, opts ...listing.Option) ([]*pbCore.User, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	o := listing.Options{Limit: 20}
@@ -424,12 +426,12 @@ func (r *userRepo) ListPageSimple(ctx context.Context, opts ...listing.Option) (
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // ListUsers 用户完整列表分页
 func (r *userRepo) ListUsers(ctx context.Context, opts ...listing.Option) ([]*pbCore.User, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	o := listing.Options{Limit: 20}
@@ -456,12 +458,12 @@ func (r *userRepo) ListUsers(ctx context.Context, opts ...listing.Option) ([]*pb
 	if err != nil {
 		return nil, err
 	}
-	return ConvertSlice(res, r.entToProto), nil
+	return convert.SliceToAny(res, r.entToProto), nil
 }
 
 // CountUsers 用户计数
 func (r *userRepo) CountUsers(ctx context.Context, opts ...listing.Option) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	o := listing.Options{}
@@ -482,6 +484,99 @@ func (r *userRepo) CountUsers(ctx context.Context, opts ...listing.Option) (int3
 	return int32(count), nil
 }
 
+func (r *userRepo) deptScopeIDs(ctx context.Context, deptID uint32, includeChildren bool) ([]uint32, error) {
+	if deptID == 0 {
+		return nil, nil
+	}
+	items, err := r.Data.DB(ctx).Dept.Query().
+		Select(dept.FieldID, dept.FieldParentID, dept.FieldAncestors).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := []uint32{deptID}
+	found := false
+	parents := make(map[uint32]uint32, len(items))
+	for _, item := range items {
+		if item.ParentID != nil {
+			parents[item.ID] = *item.ParentID
+		}
+		if item.ID == deptID {
+			found = true
+		}
+	}
+	if !found {
+		return nil, pb.ErrorBadRequest("筛选部门不存在或不属于当前租户")
+	}
+	if includeChildren {
+		for _, item := range items {
+			current := parents[item.ID]
+			visited := map[uint32]struct{}{item.ID: {}}
+			for current != 0 {
+				if current == deptID {
+					ids = append(ids, item.ID)
+					break
+				}
+				if _, exists := visited[current]; exists {
+					break
+				}
+				visited[current] = struct{}{}
+				current = parents[current]
+			}
+		}
+	}
+	return uniqueUint32(ids), nil
+}
+
+func (r *userRepo) ListUsersByDept(ctx context.Context, deptID uint32, includeChildren bool, opts ...listing.Option) ([]*pbCore.User, error) {
+	if deptID == 0 {
+		return r.ListUsers(ctx, opts...)
+	}
+	ids, err := r.deptScopeIDs(ctx, deptID, includeChildren)
+	if err != nil {
+		return nil, err
+	}
+	o := listing.Options{Limit: 20}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res, err := query.
+		Select(user.FieldID, user.FieldName, user.FieldEmail, user.FieldNickname, user.FieldRealname, user.FieldBirthday, user.FieldGender, user.FieldPhone, user.FieldAvatar, user.FieldStatus, user.FieldTenantID, user.FieldDeptID, user.FieldCreatedAt, user.FieldUpdatedAt).
+		WithRoles().
+		Where(ents.ApplyFilter(o.Filter), user.DeptIDIn(ids...)).
+		Order(ents.ApplyOrderBy(o.OrderBy)).
+		Offset(o.Offset).Limit(o.Limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convert.SliceToAny(res, r.entToProto), nil
+}
+
+func (r *userRepo) CountUsersByDept(ctx context.Context, deptID uint32, includeChildren bool, opts ...listing.Option) (int32, error) {
+	if deptID == 0 {
+		return r.CountUsers(ctx, opts...)
+	}
+	ids, err := r.deptScopeIDs(ctx, deptID, includeChildren)
+	if err != nil {
+		return 0, err
+	}
+	o := listing.Options{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	query, err := r.scopedUserQuery(ctx)
+	if err != nil {
+		return 0, err
+	}
+	count, err := query.Where(ents.ApplyFilter(o.Filter), user.DeptIDIn(ids...)).Count(ctx)
+	return int32(count), err
+}
+
 func (r *userRepo) scopedUserQuery(ctx context.Context) (*gen.UserQuery, error) {
 	query := r.Data.DB(ctx).User.Query()
 	scope, err := r.resolveDataScopeUsers(ctx)
@@ -499,7 +594,7 @@ func (r *userRepo) scopedUserQuery(ctx context.Context) (*gen.UserQuery, error) 
 
 // Delete 软删除
 func (r *userRepo) Delete(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	tx, err := r.Data.DB(ctx).Tx(ctx)
@@ -591,7 +686,7 @@ func findUserForUpdate(ctx context.Context, client *gen.Client, id uint32) (*gen
 
 // ExistByName 检查用户名是否存在
 func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entUser, err := r.Data.DB(ctx).User.Query().
@@ -608,7 +703,7 @@ func (r *userRepo) ExistByName(ctx context.Context, name string) (uint32, error)
 
 // ExistByPhone 检查手机号是否存在
 func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entUser, err := r.Data.DB(ctx).User.Query().
@@ -625,7 +720,7 @@ func (r *userRepo) ExistByPhone(ctx context.Context, phone string) (uint32, erro
 
 // ExistByEmail 检查邮箱是否存在
 func (r *userRepo) ExistByEmail(ctx context.Context, email string) (uint32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	entUser, err := r.Data.DB(ctx).User.Query().

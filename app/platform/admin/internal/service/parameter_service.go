@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
@@ -11,11 +13,12 @@ import (
 
 type ParameterServiceService struct {
 	pb.UnimplementedParameterServiceServer
-	uc *biz.ParameterUsecase
+	uc  *biz.ParameterUsecase
+	log *log.Helper
 }
 
-func NewParameterServiceService(uc *biz.ParameterUsecase) *ParameterServiceService {
-	return &ParameterServiceService{uc: uc}
+func NewParameterServiceService(uc *biz.ParameterUsecase, logger log.Logger) *ParameterServiceService {
+	return &ParameterServiceService{uc: uc, log: log.NewHelper(logger)}
 }
 
 func (s *ParameterServiceService) ListParameterDefinitions(ctx context.Context, req *pbCore.ListParameterDefinitionsRequest) (*pbCore.ListParameterDefinitionsResponse, error) {
@@ -24,7 +27,10 @@ func (s *ParameterServiceService) ListParameterDefinitions(ctx context.Context, 
 		return nil, err
 	}
 	resp := &pbCore.ListParameterDefinitionsResponse{Items: items, Total: total}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}

@@ -104,30 +104,6 @@ func (f MenuFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.MenuMutation", m)
 }
 
-// The MenuPermissionGroupFunc type is an adapter to allow the use of ordinary
-// function as MenuPermissionGroup mutator.
-type MenuPermissionGroupFunc func(context.Context, *gen.MenuPermissionGroupMutation) (gen.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f MenuPermissionGroupFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.MenuPermissionGroupMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.MenuPermissionGroupMutation", m)
-}
-
-// The MenuPermissionGroupVersionFunc type is an adapter to allow the use of ordinary
-// function as MenuPermissionGroupVersion mutator.
-type MenuPermissionGroupVersionFunc func(context.Context, *gen.MenuPermissionGroupVersionMutation) (gen.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f MenuPermissionGroupVersionFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.MenuPermissionGroupVersionMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.MenuPermissionGroupVersionMutation", m)
-}
-
 // The NotificationMessageFunc type is an adapter to allow the use of ordinary
 // function as NotificationMessage mutator.
 type NotificationMessageFunc func(context.Context, *gen.NotificationMessageMutation) (gen.Value, error)
@@ -222,6 +198,42 @@ func (f StorageProviderFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Va
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.StorageProviderMutation", m)
+}
+
+// The TenantFunc type is an adapter to allow the use of ordinary
+// function as Tenant mutator.
+type TenantFunc func(context.Context, *gen.TenantMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TenantFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.TenantMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantMutation", m)
+}
+
+// The TenantMenuPermissionGroupFunc type is an adapter to allow the use of ordinary
+// function as TenantMenuPermissionGroup mutator.
+type TenantMenuPermissionGroupFunc func(context.Context, *gen.TenantMenuPermissionGroupMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TenantMenuPermissionGroupFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.TenantMenuPermissionGroupMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantMenuPermissionGroupMutation", m)
+}
+
+// The TenantMenuPermissionGroupVersionFunc type is an adapter to allow the use of ordinary
+// function as TenantMenuPermissionGroupVersion mutator.
+type TenantMenuPermissionGroupVersionFunc func(context.Context, *gen.TenantMenuPermissionGroupVersionMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TenantMenuPermissionGroupVersionFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.TenantMenuPermissionGroupVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.TenantMenuPermissionGroupVersionMutation", m)
 }
 
 // The TenantParameterOverrideFunc type is an adapter to allow the use of ordinary

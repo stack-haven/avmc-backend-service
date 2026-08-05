@@ -9,16 +9,15 @@ import (
 	"strings"
 	"time"
 
-	pbCore "backend-service/api/core/service/v1"
-	pb "backend-service/api/platform/admin/v1"
-	"backend-service/pkg/aip/listing"
-	"backend-service/pkg/auth/authn"
-	"backend-service/pkg/objectstorage"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/google/uuid"
+
+	pbCore "backend-service/api/core/service/v1"
+	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/objectstorage"
 )
 
 const (
@@ -64,11 +63,11 @@ func NewFileUsecase(repo FileRepo, accessLog FileAccessLogRepo, resolver Storage
 
 func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.CreateFileUploadSessionRequest) (*pbCore.CreateFileUploadSessionResponse, error) {
 	if req == nil {
-		return nil, pb.ErrorBadRequest("上传请求不能为空")
+		return nil, errors.BadRequest("FILE_UPLOAD_REQUEST_REQUIRED", "上传请求不能为空")
 	}
 	fileName := strings.TrimSpace(req.GetFileName())
 	if fileName == "" {
-		return nil, pb.ErrorBadRequest("文件名不能为空")
+		return nil, errors.BadRequest("FILE_NAME_REQUIRED", "文件名不能为空")
 	}
 	visibility := normalizeFileVisibility(req.GetVisibility())
 	idempotencyKey := strings.TrimSpace(req.GetIdempotencyKey())
@@ -86,7 +85,7 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 	if err != nil {
 		return nil, err
 	}
-	if err = uc.checkUploadQuota(ctx, req.GetSize()); err != nil {
+	if err := uc.checkUploadQuota(ctx, req.GetSize()); err != nil {
 		return nil, err
 	}
 	expiresAt := time.Now().UTC().Add(defaultUploadTTL)
@@ -128,17 +127,17 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 
 func (uc *FileUsecase) UploadContent(ctx context.Context, req *pbCore.UploadFileContentRequest) (*pbCore.FileObject, error) {
 	if req == nil || req.GetId() == 0 {
-		return nil, pb.ErrorBadRequest("文件ID不能为空")
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
 	}
 	if len(req.GetContent()) == 0 {
-		return nil, pb.ErrorBadRequest("文件内容不能为空")
+		return nil, errors.BadRequest("FILE_CONTENT_REQUIRED", "文件内容不能为空")
 	}
 	file, err := uc.repo.Get(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
 	if file.GetStatus() == FileStatusDeleted {
-		return nil, pb.ErrorFileNotFound("文件不存在")
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件不存在")
 	}
 	if file.GetProvider() != StorageProviderTypeLocal {
 		return nil, errors.BadRequest("FILE_UPLOAD_METHOD_UNSUPPORTED", "当前存储渠道不支持平台代理上传")
@@ -152,7 +151,7 @@ func (uc *FileUsecase) UploadContent(ctx context.Context, req *pbCore.UploadFile
 	}
 	info, err := provider.Client.PutObject(ctx, file.GetBucket(), file.GetObjectKey(), bytes.NewReader(req.GetContent()), objectstorage.PutOptions{ContentType: defaultContentType(req.GetContentType())})
 	if err != nil {
-		return nil, pb.ErrorFileWriteError("写入本地文件失败: %v", err)
+		return nil, errors.InternalServer("FILE_WRITE_ERROR", fmt.Sprintf("写入本地文件失败: %v", err))
 	}
 	sha256 := strings.TrimSpace(req.GetSha256())
 	if sha256 == "" {
@@ -163,14 +162,14 @@ func (uc *FileUsecase) UploadContent(ctx context.Context, req *pbCore.UploadFile
 
 func (uc *FileUsecase) ConfirmUpload(ctx context.Context, req *pbCore.ConfirmFileUploadRequest) (*pbCore.FileObject, error) {
 	if req == nil || req.GetId() == 0 {
-		return nil, pb.ErrorBadRequest("文件ID不能为空")
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
 	}
 	file, err := uc.repo.Get(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
 	if file.GetStatus() == FileStatusDeleted {
-		return nil, pb.ErrorFileNotFound("文件不存在")
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件不存在")
 	}
 	if file.GetStatus() == FileStatusConfirmed {
 		return file, nil
@@ -187,7 +186,7 @@ func (uc *FileUsecase) ConfirmUpload(ctx context.Context, req *pbCore.ConfirmFil
 
 func (uc *FileUsecase) Get(ctx context.Context, id uint32) (*pbCore.FileObject, error) {
 	if id == 0 {
-		return nil, pb.ErrorBadRequest("文件ID不能为空")
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
 	}
 	return uc.repo.Get(ctx, id)
 }
@@ -216,14 +215,14 @@ func (uc *FileUsecase) CountAccessLogs(ctx context.Context, opts ...listing.Opti
 
 func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignFileDownloadRequest) (*pbCore.PresignFileDownloadResponse, error) {
 	if req == nil || req.GetId() == 0 {
-		return nil, pb.ErrorBadRequest("文件ID不能为空")
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
 	}
 	file, err := uc.repo.Get(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
 	if file.GetStatus() != FileStatusConfirmed {
-		return nil, pb.ErrorFileNotFound("文件未确认或已删除")
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件未确认或已删除")
 	}
 	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
 	if err != nil {
@@ -236,7 +235,7 @@ func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignF
 	url, err := provider.Client.PresignGetObject(ctx, file.GetBucket(), file.GetObjectKey(), objectstorage.PresignOptions{Expires: ttl})
 	if err != nil {
 		uc.appendAccessLog(ctx, file, "download", "failure", err.Error())
-		return nil, pb.ErrorFileReadError("生成文件下载地址失败: %v", err)
+		return nil, errors.InternalServer("FILE_READ_ERROR", fmt.Sprintf("生成文件下载地址失败: %v", err))
 	}
 	uc.appendAccessLog(ctx, file, "download", "success", "")
 	return &pbCore.PresignFileDownloadResponse{
@@ -247,7 +246,7 @@ func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignF
 
 func (uc *FileUsecase) Delete(ctx context.Context, id uint32, idempotencyKey string) error {
 	if id == 0 {
-		return pb.ErrorBadRequest("文件ID不能为空")
+		return errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
 	}
 	file, err := uc.repo.Get(ctx, id)
 	if err != nil {
@@ -264,7 +263,7 @@ func (uc *FileUsecase) Delete(ctx context.Context, id uint32, idempotencyKey str
 		}
 		if err = provider.Client.DeleteObject(ctx, file.GetBucket(), file.GetObjectKey()); err != nil {
 			uc.appendAccessLog(ctx, file, "delete", "failure", err.Error())
-			return pb.ErrorFileDeleteError("删除对象存储文件失败: %v", err)
+			return errors.InternalServer("FILE_DELETE_ERROR", fmt.Sprintf("删除对象存储文件失败: %v", err))
 		}
 	}
 	if err = uc.repo.Delete(ctx, id); err != nil {
@@ -302,9 +301,9 @@ func (uc *FileUsecase) checkUploadQuota(ctx context.Context, size int64) error {
 	return nil
 }
 
-func (uc *FileUsecase) confirmWithQuota(ctx context.Context, file *pbCore.FileObject, size int64, sha256 string, etag string) (*pbCore.FileObject, error) {
+func (uc *FileUsecase) confirmWithQuota(ctx context.Context, file *pbCore.FileObject, size int64, sha256, etag string) (*pbCore.FileObject, error) {
 	if file == nil {
-		return nil, pb.ErrorFileNotFound("文件不存在")
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件不存在")
 	}
 	var fileReservation *ResourceQuotaReservation
 	var storageReservation *ResourceQuotaReservation
@@ -358,7 +357,7 @@ func (uc *FileUsecase) releaseFileQuota(ctx context.Context, file *pbCore.FileOb
 	return nil
 }
 
-func (uc *FileUsecase) appendAccessLog(ctx context.Context, file *pbCore.FileObject, action string, result string, message string) {
+func (uc *FileUsecase) appendAccessLog(ctx context.Context, file *pbCore.FileObject, action, result, message string) {
 	if uc.accessLog == nil || file == nil {
 		return
 	}
@@ -387,7 +386,7 @@ func (uc *FileUsecase) appendAccessLog(ctx context.Context, file *pbCore.FileObj
 	}
 }
 
-func fileRequestMeta(ctx context.Context) (string, string) {
+func fileRequestMeta(ctx context.Context) (ip, userAgent string) {
 	if tr, ok := transport.FromServerContext(ctx); ok {
 		headers := tr.RequestHeader()
 		ip := strings.TrimSpace(headers.Get("X-Forwarded-For"))
@@ -404,7 +403,7 @@ func fileRequestMeta(ctx context.Context) (string, string) {
 
 func (uc *FileUsecase) uploadSessionResponse(ctx context.Context, provider *ResolvedStorageProvider, file *pbCore.FileObject, ttl time.Duration) (*pbCore.CreateFileUploadSessionResponse, error) {
 	if file == nil {
-		return nil, pb.ErrorFileNotFound("文件不存在")
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件不存在")
 	}
 	if ttl <= 0 {
 		ttl = defaultUploadTTL
@@ -432,7 +431,7 @@ func (uc *FileUsecase) uploadSessionResponse(ctx context.Context, provider *Reso
 		Expires:     ttl,
 	})
 	if err != nil {
-		return nil, pb.ErrorFileWriteError("生成文件上传地址失败: %v", err)
+		return nil, errors.InternalServer("FILE_WRITE_ERROR", fmt.Sprintf("生成文件上传地址失败: %v", err))
 	}
 	return &pbCore.CreateFileUploadSessionResponse{
 		File:         file,

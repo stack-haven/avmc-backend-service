@@ -96,6 +96,10 @@ func (m *Dept) validate(all bool) error {
 
 	}
 
+	// no validation rules for DirectUserCount
+
+	// no validation rules for TotalUserCount
+
 	if m.Name != nil {
 		// no validation rules for Name
 	}
@@ -919,6 +923,445 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteDeptResponseValidationError{}
+
+// Validate checks the field values on GetDeptDeleteImpactRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetDeptDeleteImpactRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetDeptDeleteImpactRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetDeptDeleteImpactRequestMultiError, or nil if none found.
+func (m *GetDeptDeleteImpactRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetDeptDeleteImpactRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return GetDeptDeleteImpactRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetDeptDeleteImpactRequestMultiError is an error wrapping multiple
+// validation errors returned by GetDeptDeleteImpactRequest.ValidateAll() if
+// the designated constraints aren't met.
+type GetDeptDeleteImpactRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetDeptDeleteImpactRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetDeptDeleteImpactRequestMultiError) AllErrors() []error { return m }
+
+// GetDeptDeleteImpactRequestValidationError is the validation error returned
+// by GetDeptDeleteImpactRequest.Validate if the designated constraints aren't met.
+type GetDeptDeleteImpactRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetDeptDeleteImpactRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetDeptDeleteImpactRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetDeptDeleteImpactRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetDeptDeleteImpactRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetDeptDeleteImpactRequestValidationError) ErrorName() string {
+	return "GetDeptDeleteImpactRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetDeptDeleteImpactRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetDeptDeleteImpactRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetDeptDeleteImpactRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetDeptDeleteImpactRequestValidationError{}
+
+// Validate checks the field values on GetDeptDeleteImpactResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetDeptDeleteImpactResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetDeptDeleteImpactResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetDeptDeleteImpactResponseMultiError, or nil if none found.
+func (m *GetDeptDeleteImpactResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetDeptDeleteImpactResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for DirectUserCount
+
+	// no validation rules for HasChildren
+
+	// no validation rules for IsProtectedRoot
+
+	// no validation rules for HasDataScopeRoles
+
+	// no validation rules for CanDeleteDirectly
+
+	// no validation rules for RequiresUserTransfer
+
+	if len(errors) > 0 {
+		return GetDeptDeleteImpactResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetDeptDeleteImpactResponseMultiError is an error wrapping multiple
+// validation errors returned by GetDeptDeleteImpactResponse.ValidateAll() if
+// the designated constraints aren't met.
+type GetDeptDeleteImpactResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetDeptDeleteImpactResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetDeptDeleteImpactResponseMultiError) AllErrors() []error { return m }
+
+// GetDeptDeleteImpactResponseValidationError is the validation error returned
+// by GetDeptDeleteImpactResponse.Validate if the designated constraints
+// aren't met.
+type GetDeptDeleteImpactResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetDeptDeleteImpactResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetDeptDeleteImpactResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetDeptDeleteImpactResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetDeptDeleteImpactResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetDeptDeleteImpactResponseValidationError) ErrorName() string {
+	return "GetDeptDeleteImpactResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetDeptDeleteImpactResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetDeptDeleteImpactResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetDeptDeleteImpactResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetDeptDeleteImpactResponseValidationError{}
+
+// Validate checks the field values on TransferAndDeleteDeptRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *TransferAndDeleteDeptRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on TransferAndDeleteDeptRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// TransferAndDeleteDeptRequestMultiError, or nil if none found.
+func (m *TransferAndDeleteDeptRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *TransferAndDeleteDeptRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for TargetDeptId
+
+	if m.OperatorId != nil {
+		// no validation rules for OperatorId
+	}
+
+	if len(errors) > 0 {
+		return TransferAndDeleteDeptRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// TransferAndDeleteDeptRequestMultiError is an error wrapping multiple
+// validation errors returned by TransferAndDeleteDeptRequest.ValidateAll() if
+// the designated constraints aren't met.
+type TransferAndDeleteDeptRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m TransferAndDeleteDeptRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m TransferAndDeleteDeptRequestMultiError) AllErrors() []error { return m }
+
+// TransferAndDeleteDeptRequestValidationError is the validation error returned
+// by TransferAndDeleteDeptRequest.Validate if the designated constraints
+// aren't met.
+type TransferAndDeleteDeptRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TransferAndDeleteDeptRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TransferAndDeleteDeptRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TransferAndDeleteDeptRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TransferAndDeleteDeptRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TransferAndDeleteDeptRequestValidationError) ErrorName() string {
+	return "TransferAndDeleteDeptRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e TransferAndDeleteDeptRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTransferAndDeleteDeptRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TransferAndDeleteDeptRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TransferAndDeleteDeptRequestValidationError{}
+
+// Validate checks the field values on TransferAndDeleteDeptResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *TransferAndDeleteDeptResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on TransferAndDeleteDeptResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// TransferAndDeleteDeptResponseMultiError, or nil if none found.
+func (m *TransferAndDeleteDeptResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *TransferAndDeleteDeptResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TransferredUserCount
+
+	if len(errors) > 0 {
+		return TransferAndDeleteDeptResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// TransferAndDeleteDeptResponseMultiError is an error wrapping multiple
+// validation errors returned by TransferAndDeleteDeptResponse.ValidateAll()
+// if the designated constraints aren't met.
+type TransferAndDeleteDeptResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m TransferAndDeleteDeptResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m TransferAndDeleteDeptResponseMultiError) AllErrors() []error { return m }
+
+// TransferAndDeleteDeptResponseValidationError is the validation error
+// returned by TransferAndDeleteDeptResponse.Validate if the designated
+// constraints aren't met.
+type TransferAndDeleteDeptResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TransferAndDeleteDeptResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TransferAndDeleteDeptResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TransferAndDeleteDeptResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TransferAndDeleteDeptResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TransferAndDeleteDeptResponseValidationError) ErrorName() string {
+	return "TransferAndDeleteDeptResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e TransferAndDeleteDeptResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTransferAndDeleteDeptResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TransferAndDeleteDeptResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TransferAndDeleteDeptResponseValidationError{}
 
 // Validate checks the field values on GetDeptRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first

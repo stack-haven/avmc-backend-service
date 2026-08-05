@@ -21,6 +21,7 @@ func (Dept) Annotations() []schema.Annotation {
 		entsql.Annotation{
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
+			Table:     "system_depts",
 		},
 		entsql.WithComments(true),
 		schema.Comment("部门表"),

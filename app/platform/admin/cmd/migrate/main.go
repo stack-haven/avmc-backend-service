@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	"backend-service/app/platform/admin/internal/data"
 	"backend-service/app/platform/admin/internal/runtimeconfig"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 var flagconf string
@@ -23,7 +23,7 @@ func main() {
 	logger := log.NewStdLogger(os.Stdout)
 	if err := run(context.Background(), logger); err != nil {
 		fmt.Fprintf(os.Stderr, "admin migration failed: %v\n", err)
-		os.Exit(1)
+		os.Exit(1) //nolint:forbidigo // CLI tool exit
 	}
 }
 

@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +12,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
+	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -44,8 +45,8 @@ func notificationTemplateProto(row *gen.NotificationTemplate) *pb.NotificationTe
 		Locale:         &row.Locale,
 		Status:         &status,
 		Remark:         &row.Remark,
-		CreatedAt:      strTime(row.CreatedAt),
-		UpdatedAt:      strTime(row.UpdatedAt),
+		CreatedAt:      convert.TimeValueToString(&row.CreatedAt, time.DateTime),
+		UpdatedAt:      convert.TimeValueToString(&row.UpdatedAt, time.DateTime),
 	}
 	return result
 }
@@ -69,15 +70,15 @@ func notificationMessageProto(row *gen.NotificationMessage) *pb.NotificationMess
 		BusinessId:      &row.BusinessID,
 		SenderUserId:    row.SenderUserID,
 		SenderName:      &row.SenderName,
-		CreatedAt:       strTime(row.CreatedAt),
-		UpdatedAt:       strTime(row.UpdatedAt),
+		CreatedAt:       convert.TimeValueToString(&row.CreatedAt, time.DateTime),
+		UpdatedAt:       convert.TimeValueToString(&row.UpdatedAt, time.DateTime),
 	}
 	setOptionalTime(&result.ReadAt, row.ReadAt)
 	return result
 }
 
 func (r *notificationRepo) ListTemplates(ctx context.Context, req *pb.ListNotificationTemplatesRequest) ([]*pb.NotificationTemplate, int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, 0, err
 	}
 	if req == nil {
@@ -101,30 +102,21 @@ func (r *notificationRepo) ListTemplates(ctx context.Context, req *pb.ListNotifi
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, err := strconv.Atoi(req.GetPageToken())
-	if err != nil || offset < 0 {
-		offset = 0
-	}
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(notificationtemplate.FieldCreatedAt)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
-	return ConvertSlice(rows, notificationTemplateProto), int32(total), nil
+	return convert.SliceToAny(rows, notificationTemplateProto), int32(total), nil
 }
 
 func (r *notificationRepo) GetTemplate(ctx context.Context, id uint32) (*pb.NotificationTemplate, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).NotificationTemplate.Get(ctx, id)
-	if gen.IsNotFound(err) {
-		return nil, errors.NotFound("NOTIFICATION_TEMPLATE_NOT_FOUND", "通知模板不存在")
-	}
-	if err != nil {
+	if err = r.MapNotFound(err, "NOTIFICATION_TEMPLATE_NOT_FOUND", "通知模板不存在"); err != nil {
 		return nil, err
 	}
 	return notificationTemplateProto(row), nil
@@ -152,7 +144,7 @@ func (r *notificationRepo) GetEnabledTemplateByCode(ctx context.Context, tenantI
 }
 
 func (r *notificationRepo) CreateTemplate(ctx context.Context, value *pb.NotificationTemplate) (*pb.NotificationTemplate, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).NotificationTemplate.Create().
@@ -162,21 +154,18 @@ func (r *notificationRepo) CreateTemplate(ctx context.Context, value *pb.Notific
 		SetTitle(value.GetTitle()).
 		SetContent(value.GetContent()).
 		SetVariableSchema(value.GetVariableSchema()).
-		SetLocale(defaultString(value.GetLocale(), "zh-CN")).
+		SetLocale(convert.DefaultString(value.GetLocale(), "zh-CN")).
 		SetStatus(int32(value.GetStatus())).
 		SetRemark(value.GetRemark()).
 		Save(ctx)
-	if gen.IsConstraintError(err) {
-		return nil, errors.Conflict("NOTIFICATION_TEMPLATE_CODE_EXISTS", "通知模板编码已存在")
-	}
-	if err != nil {
+	if err = r.MapConstraint(err, "NOTIFICATION_TEMPLATE_CODE_EXISTS", "通知模板编码已存在"); err != nil {
 		return nil, err
 	}
 	return notificationTemplateProto(row), nil
 }
 
 func (r *notificationRepo) UpdateTemplate(ctx context.Context, value *pb.NotificationTemplate) (*pb.NotificationTemplate, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).NotificationTemplate.UpdateOneID(value.GetId()).
@@ -186,27 +175,24 @@ func (r *notificationRepo) UpdateTemplate(ctx context.Context, value *pb.Notific
 		SetTitle(value.GetTitle()).
 		SetContent(value.GetContent()).
 		SetVariableSchema(value.GetVariableSchema()).
-		SetLocale(defaultString(value.GetLocale(), "zh-CN")).
+		SetLocale(convert.DefaultString(value.GetLocale(), "zh-CN")).
 		SetStatus(int32(value.GetStatus())).
 		SetRemark(value.GetRemark()).
 		Save(ctx)
-	if gen.IsConstraintError(err) {
-		return nil, errors.Conflict("NOTIFICATION_TEMPLATE_CODE_EXISTS", "通知模板编码已存在")
+	if err = r.MapConstraint(err, "NOTIFICATION_TEMPLATE_CODE_EXISTS", "通知模板编码已存在"); err != nil {
+		return nil, err
 	}
-	if gen.IsNotFound(err) {
-		return nil, errors.NotFound("NOTIFICATION_TEMPLATE_NOT_FOUND", "通知模板不存在")
-	}
-	if err != nil {
+	if err = r.MapNotFound(err, "NOTIFICATION_TEMPLATE_NOT_FOUND", "通知模板不存在"); err != nil {
 		return nil, err
 	}
 	return notificationTemplateProto(row), nil
 }
 
 func (r *notificationRepo) DeleteTemplate(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
-	err := r.Data.DB(ctx).NotificationTemplate.UpdateOneID(id).SetDeletedAt(time.Now()).Exec(ctx)
+	err := r.Data.DB(ctx).NotificationTemplate.DeleteOneID(id).Exec(ctx)
 	if gen.IsNotFound(err) {
 		return errors.NotFound("NOTIFICATION_TEMPLATE_NOT_FOUND", "通知模板不存在")
 	}
@@ -254,7 +240,7 @@ func (r *notificationRepo) CreateMessages(ctx context.Context, values []*pb.Noti
 }
 
 func (r *notificationRepo) ListMessages(ctx context.Context, req *pb.ListNotificationMessagesRequest) ([]*pb.NotificationMessage, int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, 0, err
 	}
 	if req == nil {
@@ -277,23 +263,17 @@ func (r *notificationRepo) ListMessages(ctx context.Context, req *pb.ListNotific
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, err := strconv.Atoi(req.GetPageToken())
-	if err != nil || offset < 0 {
-		offset = 0
-	}
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(notificationmessage.FieldCreatedAt)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
-	return ConvertSlice(rows, notificationMessageProto), int32(total), nil
+	return convert.SliceToAny(rows, notificationMessageProto), int32(total), nil
 }
 
 func (r *notificationRepo) GetMessage(ctx context.Context, id uint32) (*pb.NotificationMessage, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).NotificationMessage.Get(ctx, id)
@@ -307,7 +287,7 @@ func (r *notificationRepo) GetMessage(ctx context.Context, id uint32) (*pb.Notif
 }
 
 func (r *notificationRepo) CountUnread(ctx context.Context, recipientUserID uint32) (int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return 0, err
 	}
 	count, err := r.Data.DB(ctx).NotificationMessage.Query().
@@ -323,7 +303,7 @@ func (r *notificationRepo) CountUnread(ctx context.Context, recipientUserID uint
 }
 
 func (r *notificationRepo) MarkRead(ctx context.Context, ids []uint32, recipientUserID uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	now := time.Now()
@@ -339,11 +319,4 @@ func (r *notificationRepo) MarkRead(ctx context.Context, ids []uint32, recipient
 	}
 	_, err := query.Save(ctx)
 	return err
-}
-
-func defaultString(value string, fallback string) string {
-	if strings.TrimSpace(value) == "" {
-		return fallback
-	}
-	return value
 }

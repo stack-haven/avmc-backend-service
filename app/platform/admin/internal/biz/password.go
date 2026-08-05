@@ -7,14 +7,14 @@ import (
 )
 
 const (
-	minPasswordLength = 12
+	minPasswordLength = 6
 	maxPasswordLength = 72
 )
 
 func ValidatePassword(password string) error {
 	length := len([]rune(password))
 	if length < minPasswordLength || length > maxPasswordLength {
-		return errors.BadRequest("USER_PASSWORD_TOO_WEAK", "密码长度必须在 12 到 72 个字符之间")
+		return errors.BadRequest("USER_PASSWORD_TOO_WEAK", "密码长度必须在 6 到 72 个字符之间")
 	}
 	var upper, lower, digit, symbol bool
 	for _, r := range password {

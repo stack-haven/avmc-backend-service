@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 不可变操作审计日志表
+// 操作审计日志表
 type OperationLog struct {
 	config `json:"-"`
 	// ID of the ent.

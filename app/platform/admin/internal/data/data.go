@@ -43,11 +43,12 @@ var ProviderSet = wire.NewSet(
 	NewLoginAttemptGuard,
 	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
 	auth.NewAuthToken,
+	NewTenantRepo,
 	NewAuthRepo,
 	NewUserRepo,
 	NewRoleRepo,
 	NewMenuRepo,
-	NewMenuPermissionGroupRepo,
+	NewTenantMenuPermissionGroupRepo,
 	NewPostRepo,
 	NewDeptRepo,
 	NewProjectRepo,
@@ -71,6 +72,7 @@ var ProviderSet = wire.NewSet(
 type Data struct {
 	db                    *gen.Client
 	rdb                   *redis.Client
+	authorizer            authzEngine.Authorizer
 	permissionCacheBypass sync.Map
 	authorizationCache    sync.Map
 	authorizationStats    tenantAuthorizationCacheStats
@@ -370,5 +372,6 @@ func NewAuthorizer(cfg *conf.Data, db *gen.Client, data *Data, logger log.Logger
 	if err != nil {
 		return nil, fmt.Errorf("creating authorizer: %w", err)
 	}
+	data.authorizer = authorizer
 	return authorizer, nil
 }

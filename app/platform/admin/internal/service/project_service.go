@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"go.einride.tech/aip/filtering"
+
 	pbCore "backend-service/api/core/service/v1"
 	pb "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"go.einride.tech/aip/filtering"
 )
 
 // ProjectServiceService 项目服务结构体
@@ -64,21 +64,12 @@ func (s *ProjectServiceService) ListProjects(ctx context.Context, req *pbCore.Li
 
 // GetProject handles get project requests.
 func (s *ProjectServiceService) GetProject(ctx context.Context, req *pbCore.GetProjectRequest) (*pbCore.Project, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorProjectInvalidId("项目ID不能为空")
-	}
 	s.log.Infof("获取项目详情，项目ID：%v", req.GetId())
 	return s.puc.Get(ctx, req.GetId())
 }
 
 // CreateProject handles create project requests.
 func (s *ProjectServiceService) CreateProject(ctx context.Context, req *pbCore.CreateProjectRequest) (*pbCore.CreateProjectResponse, error) {
-	if req.GetProject() == nil {
-		return nil, pb.ErrorProjectInvalidId("项目信息不能为空")
-	}
-	if req.GetProject().GetName() == "" {
-		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
-	}
 	s.log.Infof("创建项目，项目名称：%s", req.GetProject().GetName())
 	_, err := s.puc.Create(ctx, req.Project)
 	if err != nil {
@@ -89,15 +80,6 @@ func (s *ProjectServiceService) CreateProject(ctx context.Context, req *pbCore.C
 
 // UpdateProject handles update project requests.
 func (s *ProjectServiceService) UpdateProject(ctx context.Context, req *pbCore.UpdateProjectRequest) (*pbCore.UpdateProjectResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorProjectInvalidId("项目ID不能为空")
-	}
-	if req.GetProject() == nil {
-		return nil, pb.ErrorProjectInvalidId("项目信息不能为空")
-	}
-	if req.GetProject().GetName() == "" {
-		return nil, pb.ErrorProjectNameCannotBeEmpty("项目名称不能为空")
-	}
 	s.log.Infof("更新项目，项目ID：%v", req.GetId())
 	req.Project.Id = req.GetId()
 	_, err := s.puc.Update(ctx, req.GetProject())
@@ -109,9 +91,6 @@ func (s *ProjectServiceService) UpdateProject(ctx context.Context, req *pbCore.U
 
 // DeleteProject handles delete project requests.
 func (s *ProjectServiceService) DeleteProject(ctx context.Context, req *pbCore.DeleteProjectRequest) (*pbCore.DeleteProjectResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorProjectInvalidId("项目ID不能为空")
-	}
 	s.log.Infof("删除项目，项目ID：%v", req.GetId())
 	err := s.puc.Delete(ctx, req.GetId())
 	if err != nil {
@@ -122,12 +101,6 @@ func (s *ProjectServiceService) DeleteProject(ctx context.Context, req *pbCore.D
 
 // UpdateProjectByStatus handles project status update requests.
 func (s *ProjectServiceService) UpdateProjectByStatus(ctx context.Context, req *pbCore.UpdateProjectByStatusRequest) (*pbCore.UpdateProjectByStatusResponse, error) {
-	if req.GetId() == 0 {
-		return nil, pb.ErrorProjectInvalidId("项目ID不能为空")
-	}
-	if req.GetStatus() < 1 || req.GetStatus() > 2 {
-		return nil, pb.ErrorProjectStatusInvalid("项目状态无效")
-	}
 	s.log.Infof("更新项目状态，项目ID：%v，状态：%v", req.GetId(), req.GetStatus())
 	err := s.puc.UpdateStatus(ctx, req.GetId(), req.GetStatus())
 	if err != nil {

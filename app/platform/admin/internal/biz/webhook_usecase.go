@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"backend-service/api/common/enum"
-	pb "backend-service/api/core/service/v1"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+
+	"backend-service/api/common/enum"
+	pb "backend-service/api/core/service/v1"
 )
 
 const (
@@ -44,10 +44,10 @@ type WebhookRepo interface {
 
 // WebhookUsecase handles webhook subscription management and event publishing.
 type WebhookUsecase struct {
-	repo      WebhookRepo
-	tasks     AsyncTaskRepo
-	httpDo    func(ctx context.Context, req *http.Request) (*http.Response, error)
-	log       *log.Helper
+	repo   WebhookRepo
+	tasks  AsyncTaskRepo
+	httpDo func(ctx context.Context, req *http.Request) (*http.Response, error)
+	log    *log.Helper
 }
 
 func NewWebhookUsecase(repo WebhookRepo, tasks AsyncTaskRepo, logger log.Logger) *WebhookUsecase {
@@ -103,7 +103,7 @@ func (uc *WebhookUsecase) CreateSubscription(ctx context.Context, sub *pb.Webhoo
 		return nil, err
 	}
 	_ = tenantID
-	if existing != nil && len(existing) >= MaxWebhookSubscriptions {
+	if len(existing) >= MaxWebhookSubscriptions {
 		return nil, errors.BadRequest("WEBHOOK_SUBSCRIPTION_LIMIT", fmt.Sprintf("每个租户最多 %d 个 Webhook 订阅", MaxWebhookSubscriptions))
 	}
 
@@ -284,11 +284,11 @@ type webhookDeliveryHandler struct {
 func NewWebhookAsyncTaskHandler(repo WebhookRepo, logger log.Logger) AsyncTaskHandler {
 	client := &http.Client{Timeout: WebhookDeliveryTimeout}
 	return &webhookDeliveryHandler{
-		repo:   repo,
+		repo: repo,
 		httpDo: func(ctx context.Context, req *http.Request) (*http.Response, error) {
 			return client.Do(req.WithContext(ctx))
 		},
-		log:    log.NewHelper(log.With(logger, "module", "handler/webhook-deliver")),
+		log: log.NewHelper(log.With(logger, "module", "handler/webhook-deliver")),
 	}
 }
 
@@ -302,14 +302,14 @@ func (h *webhookDeliveryHandler) Handle(ctx context.Context, raw json.RawMessage
 
 	// Create delivery log entry
 	logEntry := &pb.WebhookDeliveryLog{
-		TenantId:        payload.TenantID,
-		SubscriptionId:  payload.SubscriptionID,
-		EventId:         payload.EventID,
-		EventType:       pb.WebhookEventType(payload.EventType),
-		TargetUrl:       payload.TargetURL,
-		RequestBody:     payload.Payload,
-		DeliveryStatus:  pb.WebhookDeliveryStatus_WEBHOOK_DELIVERY_STATUS_PENDING,
-		AttemptNumber:   1,
+		TenantId:       payload.TenantID,
+		SubscriptionId: payload.SubscriptionID,
+		EventId:        payload.EventID,
+		EventType:      pb.WebhookEventType(payload.EventType),
+		TargetUrl:      payload.TargetURL,
+		RequestBody:    payload.Payload,
+		DeliveryStatus: pb.WebhookDeliveryStatus_WEBHOOK_DELIVERY_STATUS_PENDING,
+		AttemptNumber:  1,
 	}
 	created, err := h.repo.CreateDeliveryLog(ctx, logEntry)
 	if err != nil {
@@ -339,7 +339,10 @@ func (h *webhookDeliveryHandler) Handle(ctx context.Context, raw json.RawMessage
 	}
 	defer resp.Body.Close()
 
-	responseBody, _ := io.ReadAll(io.LimitReader(resp.Body, 65536))
+	responseBody, readErr := io.ReadAll(io.LimitReader(resp.Body, 65536))
+	if readErr != nil {
+		h.log.Warnf("read webhook response body: %v", readErr)
+	}
 
 	created.ResponseCode = toInt32(resp.StatusCode)
 	created.ResponseBody = toStrPtr(string(responseBody))
@@ -368,7 +371,7 @@ func (h *webhookDeliveryHandler) failDelivery(ctx context.Context, logEntry *pb.
 // Helpers
 // ---------------------------------------------------------------------------
 
-func hmacSHA256(secret string, payload string) string {
+func hmacSHA256(secret, payload string) string {
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte(payload))
 	return "sha256=" + hex.EncodeToString(mac.Sum(nil))

@@ -15,9 +15,9 @@ type WebhookDeliveryLog struct{ ent.Schema }
 
 func (WebhookDeliveryLog) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_webhook_delivery_logs"},
 		entsql.WithComments(true),
-		schema.Comment("Webhook投递记录表"),
+		schema.Comment("Webhook投递日志表"),
 	}
 }
 

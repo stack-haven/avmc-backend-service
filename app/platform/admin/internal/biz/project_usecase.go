@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // ProjectRepo is a project repo.
@@ -99,7 +99,7 @@ func (uc *ProjectUsecase) Delete(ctx context.Context, id uint32) error {
 	if err != nil {
 		return err
 	}
-	if err = uc.repo.Delete(ctx, id); err != nil {
+	if err := uc.repo.Delete(ctx, id); err != nil {
 		return err
 	}
 	if uc.quota == nil {

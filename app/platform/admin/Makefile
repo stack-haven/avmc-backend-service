@@ -81,9 +81,17 @@ migrate:
 policy:
 	@go run ./cmd/policy -conf ./configs
 
+.PHONY: kill
+# kill running platform admin server and release ports 8000/9000
+kill:
+	@pkill -f "cmd/server/main.go" || true
+	@for port in 8000 9000; do \
+		lsof -ti :$$port 2>/dev/null | xargs -r kill -9 2>/dev/null || true; \
+	done
+
 .PHONY: mock
 mock:
-	@go run ./cmd/mock -conf ./configs
+	@go run -tags mock ./cmd/mock -conf ./configs
 
 .PHONY: demo
 demo:

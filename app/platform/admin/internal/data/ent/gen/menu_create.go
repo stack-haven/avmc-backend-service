@@ -4,9 +4,9 @@ package gen
 
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroupversion"
 	"context"
 	"errors"
 	"fmt"
@@ -514,14 +514,14 @@ func (_c *MenuCreate) AddRoles(v ...*Role) *MenuCreate {
 	return _c.AddRoleIDs(ids...)
 }
 
-// AddPermissionGroupIDs adds the "permission_groups" edge to the MenuPermissionGroup entity by IDs.
+// AddPermissionGroupIDs adds the "permission_groups" edge to the TenantMenuPermissionGroup entity by IDs.
 func (_c *MenuCreate) AddPermissionGroupIDs(ids ...uint32) *MenuCreate {
 	_c.mutation.AddPermissionGroupIDs(ids...)
 	return _c
 }
 
-// AddPermissionGroups adds the "permission_groups" edges to the MenuPermissionGroup entity.
-func (_c *MenuCreate) AddPermissionGroups(v ...*MenuPermissionGroup) *MenuCreate {
+// AddPermissionGroups adds the "permission_groups" edges to the TenantMenuPermissionGroup entity.
+func (_c *MenuCreate) AddPermissionGroups(v ...*TenantMenuPermissionGroup) *MenuCreate {
 	ids := make([]uint32, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -529,14 +529,14 @@ func (_c *MenuCreate) AddPermissionGroups(v ...*MenuPermissionGroup) *MenuCreate
 	return _c.AddPermissionGroupIDs(ids...)
 }
 
-// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the MenuPermissionGroupVersion entity by IDs.
+// AddPermissionGroupVersionIDs adds the "permission_group_versions" edge to the TenantMenuPermissionGroupVersion entity by IDs.
 func (_c *MenuCreate) AddPermissionGroupVersionIDs(ids ...uint32) *MenuCreate {
 	_c.mutation.AddPermissionGroupVersionIDs(ids...)
 	return _c
 }
 
-// AddPermissionGroupVersions adds the "permission_group_versions" edges to the MenuPermissionGroupVersion entity.
-func (_c *MenuCreate) AddPermissionGroupVersions(v ...*MenuPermissionGroupVersion) *MenuCreate {
+// AddPermissionGroupVersions adds the "permission_group_versions" edges to the TenantMenuPermissionGroupVersion entity.
+func (_c *MenuCreate) AddPermissionGroupVersions(v ...*TenantMenuPermissionGroupVersion) *MenuCreate {
 	ids := make([]uint32, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -1030,7 +1030,7 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			Columns: menu.PermissionGroupsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroup.FieldID, field.TypeUint32),
+				IDSpec: sqlgraph.NewFieldSpec(tenantmenupermissiongroup.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {
@@ -1046,7 +1046,7 @@ func (_c *MenuCreate) createSpec() (*Menu, *sqlgraph.CreateSpec) {
 			Columns: menu.PermissionGroupVersionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(menupermissiongroupversion.FieldID, field.TypeUint32),
+				IDSpec: sqlgraph.NewFieldSpec(tenantmenupermissiongroupversion.FieldID, field.TypeUint32),
 			},
 		}
 		for _, k := range nodes {

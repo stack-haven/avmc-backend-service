@@ -55,9 +55,11 @@ type Dept struct {
 	// 子级
 	Children []*Dept `protobuf:"bytes,10,rep,name=children,proto3" json:"children,omitempty"`
 	// 祖籍
-	Ancestors     []uint32 `protobuf:"varint,11,rep,packed,name=ancestors,proto3" json:"ancestors,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Ancestors       []uint32 `protobuf:"varint,11,rep,packed,name=ancestors,proto3" json:"ancestors,omitempty"`
+	DirectUserCount uint32   `protobuf:"varint,12,opt,name=direct_user_count,json=directUserCount,proto3" json:"direct_user_count,omitempty"`
+	TotalUserCount  uint32   `protobuf:"varint,13,opt,name=total_user_count,json=totalUserCount,proto3" json:"total_user_count,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Dept) Reset() {
@@ -165,6 +167,20 @@ func (x *Dept) GetAncestors() []uint32 {
 		return x.Ancestors
 	}
 	return nil
+}
+
+func (x *Dept) GetDirectUserCount() uint32 {
+	if x != nil {
+		return x.DirectUserCount
+	}
+	return 0
+}
+
+func (x *Dept) GetTotalUserCount() uint32 {
+	if x != nil {
+		return x.TotalUserCount
+	}
+	return 0
 }
 
 // 创建部门请求
@@ -454,6 +470,254 @@ func (*DeleteDeptResponse) Descriptor() ([]byte, []int) {
 	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{6}
 }
 
+type GetDeptDeleteImpactRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDeptDeleteImpactRequest) Reset() {
+	*x = GetDeptDeleteImpactRequest{}
+	mi := &file_core_service_v1_dept_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDeptDeleteImpactRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDeptDeleteImpactRequest) ProtoMessage() {}
+
+func (x *GetDeptDeleteImpactRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_dept_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDeptDeleteImpactRequest.ProtoReflect.Descriptor instead.
+func (*GetDeptDeleteImpactRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetDeptDeleteImpactRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetDeptDeleteImpactResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Id                   uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                 string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	DirectUserCount      uint32                 `protobuf:"varint,3,opt,name=direct_user_count,json=directUserCount,proto3" json:"direct_user_count,omitempty"`
+	HasChildren          bool                   `protobuf:"varint,4,opt,name=has_children,json=hasChildren,proto3" json:"has_children,omitempty"`
+	IsProtectedRoot      bool                   `protobuf:"varint,5,opt,name=is_protected_root,json=isProtectedRoot,proto3" json:"is_protected_root,omitempty"`
+	HasDataScopeRoles    bool                   `protobuf:"varint,6,opt,name=has_data_scope_roles,json=hasDataScopeRoles,proto3" json:"has_data_scope_roles,omitempty"`
+	CanDeleteDirectly    bool                   `protobuf:"varint,7,opt,name=can_delete_directly,json=canDeleteDirectly,proto3" json:"can_delete_directly,omitempty"`
+	RequiresUserTransfer bool                   `protobuf:"varint,8,opt,name=requires_user_transfer,json=requiresUserTransfer,proto3" json:"requires_user_transfer,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetDeptDeleteImpactResponse) Reset() {
+	*x = GetDeptDeleteImpactResponse{}
+	mi := &file_core_service_v1_dept_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDeptDeleteImpactResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDeptDeleteImpactResponse) ProtoMessage() {}
+
+func (x *GetDeptDeleteImpactResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_dept_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDeptDeleteImpactResponse.ProtoReflect.Descriptor instead.
+func (*GetDeptDeleteImpactResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetDeptDeleteImpactResponse) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GetDeptDeleteImpactResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GetDeptDeleteImpactResponse) GetDirectUserCount() uint32 {
+	if x != nil {
+		return x.DirectUserCount
+	}
+	return 0
+}
+
+func (x *GetDeptDeleteImpactResponse) GetHasChildren() bool {
+	if x != nil {
+		return x.HasChildren
+	}
+	return false
+}
+
+func (x *GetDeptDeleteImpactResponse) GetIsProtectedRoot() bool {
+	if x != nil {
+		return x.IsProtectedRoot
+	}
+	return false
+}
+
+func (x *GetDeptDeleteImpactResponse) GetHasDataScopeRoles() bool {
+	if x != nil {
+		return x.HasDataScopeRoles
+	}
+	return false
+}
+
+func (x *GetDeptDeleteImpactResponse) GetCanDeleteDirectly() bool {
+	if x != nil {
+		return x.CanDeleteDirectly
+	}
+	return false
+}
+
+func (x *GetDeptDeleteImpactResponse) GetRequiresUserTransfer() bool {
+	if x != nil {
+		return x.RequiresUserTransfer
+	}
+	return false
+}
+
+type TransferAndDeleteDeptRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TargetDeptId  uint32                 `protobuf:"varint,2,opt,name=target_dept_id,json=targetDeptId,proto3" json:"target_dept_id,omitempty"`
+	OperatorId    *uint32                `protobuf:"varint,3,opt,name=operator_id,json=operatorId,proto3,oneof" json:"operator_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferAndDeleteDeptRequest) Reset() {
+	*x = TransferAndDeleteDeptRequest{}
+	mi := &file_core_service_v1_dept_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferAndDeleteDeptRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferAndDeleteDeptRequest) ProtoMessage() {}
+
+func (x *TransferAndDeleteDeptRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_dept_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferAndDeleteDeptRequest.ProtoReflect.Descriptor instead.
+func (*TransferAndDeleteDeptRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *TransferAndDeleteDeptRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *TransferAndDeleteDeptRequest) GetTargetDeptId() uint32 {
+	if x != nil {
+		return x.TargetDeptId
+	}
+	return 0
+}
+
+func (x *TransferAndDeleteDeptRequest) GetOperatorId() uint32 {
+	if x != nil && x.OperatorId != nil {
+		return *x.OperatorId
+	}
+	return 0
+}
+
+type TransferAndDeleteDeptResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	TransferredUserCount uint32                 `protobuf:"varint,1,opt,name=transferred_user_count,json=transferredUserCount,proto3" json:"transferred_user_count,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *TransferAndDeleteDeptResponse) Reset() {
+	*x = TransferAndDeleteDeptResponse{}
+	mi := &file_core_service_v1_dept_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferAndDeleteDeptResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferAndDeleteDeptResponse) ProtoMessage() {}
+
+func (x *TransferAndDeleteDeptResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_dept_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferAndDeleteDeptResponse.ProtoReflect.Descriptor instead.
+func (*TransferAndDeleteDeptResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *TransferAndDeleteDeptResponse) GetTransferredUserCount() uint32 {
+	if x != nil {
+		return x.TransferredUserCount
+	}
+	return 0
+}
+
 // 获取部门请求
 type GetDeptRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -464,7 +728,7 @@ type GetDeptRequest struct {
 
 func (x *GetDeptRequest) Reset() {
 	*x = GetDeptRequest{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[7]
+	mi := &file_core_service_v1_dept_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -476,7 +740,7 @@ func (x *GetDeptRequest) String() string {
 func (*GetDeptRequest) ProtoMessage() {}
 
 func (x *GetDeptRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[7]
+	mi := &file_core_service_v1_dept_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -489,7 +753,7 @@ func (x *GetDeptRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDeptRequest.ProtoReflect.Descriptor instead.
 func (*GetDeptRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{7}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetDeptRequest) GetId() uint32 {
@@ -509,7 +773,7 @@ type GetDeptResponse struct {
 
 func (x *GetDeptResponse) Reset() {
 	*x = GetDeptResponse{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[8]
+	mi := &file_core_service_v1_dept_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -521,7 +785,7 @@ func (x *GetDeptResponse) String() string {
 func (*GetDeptResponse) ProtoMessage() {}
 
 func (x *GetDeptResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[8]
+	mi := &file_core_service_v1_dept_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -534,7 +798,7 @@ func (x *GetDeptResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDeptResponse.ProtoReflect.Descriptor instead.
 func (*GetDeptResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{8}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetDeptResponse) GetDept() *Dept {
@@ -587,7 +851,7 @@ type ListDeptsRequest struct {
 
 func (x *ListDeptsRequest) Reset() {
 	*x = ListDeptsRequest{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[9]
+	mi := &file_core_service_v1_dept_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -599,7 +863,7 @@ func (x *ListDeptsRequest) String() string {
 func (*ListDeptsRequest) ProtoMessage() {}
 
 func (x *ListDeptsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[9]
+	mi := &file_core_service_v1_dept_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -612,7 +876,7 @@ func (x *ListDeptsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeptsRequest.ProtoReflect.Descriptor instead.
 func (*ListDeptsRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{9}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListDeptsRequest) GetPageToken() string {
@@ -690,7 +954,7 @@ type ListDeptsResponse struct {
 
 func (x *ListDeptsResponse) Reset() {
 	*x = ListDeptsResponse{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[10]
+	mi := &file_core_service_v1_dept_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -702,7 +966,7 @@ func (x *ListDeptsResponse) String() string {
 func (*ListDeptsResponse) ProtoMessage() {}
 
 func (x *ListDeptsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[10]
+	mi := &file_core_service_v1_dept_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -715,7 +979,7 @@ func (x *ListDeptsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeptsResponse.ProtoReflect.Descriptor instead.
 func (*ListDeptsResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{10}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListDeptsResponse) GetItems() []*Dept {
@@ -750,7 +1014,7 @@ type UpdateDeptByStatusRequest struct {
 
 func (x *UpdateDeptByStatusRequest) Reset() {
 	*x = UpdateDeptByStatusRequest{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[11]
+	mi := &file_core_service_v1_dept_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -762,7 +1026,7 @@ func (x *UpdateDeptByStatusRequest) String() string {
 func (*UpdateDeptByStatusRequest) ProtoMessage() {}
 
 func (x *UpdateDeptByStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[11]
+	mi := &file_core_service_v1_dept_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -775,7 +1039,7 @@ func (x *UpdateDeptByStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDeptByStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDeptByStatusRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{11}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateDeptByStatusRequest) GetId() uint32 {
@@ -801,7 +1065,7 @@ type UpdateDeptByStatusResponse struct {
 
 func (x *UpdateDeptByStatusResponse) Reset() {
 	*x = UpdateDeptByStatusResponse{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[12]
+	mi := &file_core_service_v1_dept_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -813,7 +1077,7 @@ func (x *UpdateDeptByStatusResponse) String() string {
 func (*UpdateDeptByStatusResponse) ProtoMessage() {}
 
 func (x *UpdateDeptByStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[12]
+	mi := &file_core_service_v1_dept_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -826,7 +1090,7 @@ func (x *UpdateDeptByStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDeptByStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateDeptByStatusResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{12}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{16}
 }
 
 // 查询部门树形列表请求
@@ -839,7 +1103,7 @@ type ListDeptsTreeRequest struct {
 
 func (x *ListDeptsTreeRequest) Reset() {
 	*x = ListDeptsTreeRequest{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[13]
+	mi := &file_core_service_v1_dept_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -851,7 +1115,7 @@ func (x *ListDeptsTreeRequest) String() string {
 func (*ListDeptsTreeRequest) ProtoMessage() {}
 
 func (x *ListDeptsTreeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[13]
+	mi := &file_core_service_v1_dept_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -864,7 +1128,7 @@ func (x *ListDeptsTreeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeptsTreeRequest.ProtoReflect.Descriptor instead.
 func (*ListDeptsTreeRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{13}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListDeptsTreeRequest) GetParentId() uint32 {
@@ -884,7 +1148,7 @@ type ListDeptsTreeResponse struct {
 
 func (x *ListDeptsTreeResponse) Reset() {
 	*x = ListDeptsTreeResponse{}
-	mi := &file_core_service_v1_dept_proto_msgTypes[14]
+	mi := &file_core_service_v1_dept_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -896,7 +1160,7 @@ func (x *ListDeptsTreeResponse) String() string {
 func (*ListDeptsTreeResponse) ProtoMessage() {}
 
 func (x *ListDeptsTreeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_dept_proto_msgTypes[14]
+	mi := &file_core_service_v1_dept_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -909,7 +1173,7 @@ func (x *ListDeptsTreeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeptsTreeResponse.ProtoReflect.Descriptor instead.
 func (*ListDeptsTreeResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{14}
+	return file_core_service_v1_dept_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ListDeptsTreeResponse) GetItems() []*Dept {
@@ -923,14 +1187,14 @@ var File_core_service_v1_dept_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_dept_proto_rawDesc = "" +
 	"\n" +
-	"\x1acore/service/v1/dept.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\"common/pagination/pagination.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/protobuf/any.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\xf6\x05\n" +
+	"\x1acore/service/v1/dept.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/enum/enum.proto\x1a\"common/pagination/pagination.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/protobuf/any.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17validate/validate.proto\"\x91\a\n" +
 	"\x04Dept\x12\x1e\n" +
 	"\x02id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b部门IDR\x02id\x124\n" +
 	"\x04name\x18\x02 \x01(\tB\x1b\xbaG\x0f\x92\x02\f部门名称\xbaH\x06r\x04\x10\x01\x18\x14H\x00R\x04name\x88\x01\x01\x12:\n" +
 	"\tparent_id\x18\x03 \x01(\rB\x18\xbaG\x0e\x92\x02\v父部门ID\xbaH\x04*\x02(\x00H\x01R\bparentId\x88\x01\x01\x12=\n" +
 	"\tleader_id\x18\x04 \x01(\rB\x1b\xbaG\x11\x92\x02\x0e部门领导ID\xbaH\x04*\x02 \x00H\x02R\bleaderId\x88\x01\x01\x12@\n" +
-	"\x04sort\x18\x05 \x01(\x05B'\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00$@\x92\x02\f排序字段\xbaH\x06\x1a\x04\x18d(\x00H\x03R\x04sort\x88\x01\x01\x12c\n" +
-	"\x06status\x18\x06 \x01(\x0e2\f.enum.StatusB8\xbaG-\x8a\x02\t\t\x00\x00\x00\x00\x00\x00\xf0?\x92\x02\x1e部门状态 1 启用 2 禁用\xbaH\x05\x82\x01\x02\x10\x01H\x04R\x06status\x88\x01\x01\x127\n" +
+	"\x04sort\x18\x05 \x01(\x05B'\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00$@\x92\x02\f排序字段\xbaH\x06\x1a\x04\x18d(\x00H\x03R\x04sort\x88\x01\x01\x12e\n" +
+	"\x06status\x18\x06 \x01(\x0e2\f.enum.StatusB:\xbaG-\x8a\x02\t\t\x00\x00\x00\x00\x00\x00\xf0?\x92\x02\x1e部门状态 1 启用 2 禁用\xbaH\a\x82\x01\x04\x10\x01 \x00H\x04R\x06status\x88\x01\x01\x127\n" +
 	"\x06remark\x18\a \x01(\tB\x1a\xbaG\x0f\x92\x02\f部门描述\xbaH\x05r\x03\x18\xc8\x01H\x05R\x06remark\x88\x01\x01\x126\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tB\x12\xbaG\x0f\x92\x02\f创建时间H\x06R\tcreatedAt\x88\x01\x01\x126\n" +
@@ -938,7 +1202,9 @@ const file_core_service_v1_dept_proto_rawDesc = "" +
 	"updated_at\x18\t \x01(\tB\x12\xbaG\x0f\x92\x02\f更新时间H\aR\tupdatedAt\x88\x01\x01\x12?\n" +
 	"\bchildren\x18\n" +
 	" \x03(\v2\x15.core.service.v1.DeptB\f\xbaG\t\x92\x02\x06子级R\bchildren\x12*\n" +
-	"\tancestors\x18\v \x03(\rB\f\xbaG\t\x92\x02\x06祖籍R\tancestorsB\a\n" +
+	"\tancestors\x18\v \x03(\rB\f\xbaG\t\x92\x02\x06祖籍R\tancestors\x12G\n" +
+	"\x11direct_user_count\x18\f \x01(\rB\x1b\xbaG\x18\x92\x02\x15直接归属用户数R\x0fdirectUserCount\x12N\n" +
+	"\x10total_user_count\x18\r \x01(\rB$\xbaG!\x92\x02\x1e包含下级部门的用户数R\x0etotalUserCountB\a\n" +
 	"\x05_nameB\f\n" +
 	"\n" +
 	"_parent_idB\f\n" +
@@ -969,18 +1235,37 @@ const file_core_service_v1_dept_proto_rawDesc = "" +
 	"\voperator_id\x18\x02 \x01(\rB\x18\xbaG\x0e\x92\x02\v操作人ID\xbaH\x04*\x02 \x00H\x00R\n" +
 	"operatorId\x88\x01\x01B\x0e\n" +
 	"\f_operator_id\"\x14\n" +
-	"\x12DeleteDeptResponse\"7\n" +
+	"\x12DeleteDeptResponse\"5\n" +
+	"\x1aGetDeptDeleteImpactRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\xd3\x02\n" +
+	"\x1bGetDeptDeleteImpactResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12*\n" +
+	"\x11direct_user_count\x18\x03 \x01(\rR\x0fdirectUserCount\x12!\n" +
+	"\fhas_children\x18\x04 \x01(\bR\vhasChildren\x12*\n" +
+	"\x11is_protected_root\x18\x05 \x01(\bR\x0fisProtectedRoot\x12/\n" +
+	"\x14has_data_scope_roles\x18\x06 \x01(\bR\x11hasDataScopeRoles\x12.\n" +
+	"\x13can_delete_directly\x18\a \x01(\bR\x11canDeleteDirectly\x124\n" +
+	"\x16requires_user_transfer\x18\b \x01(\bR\x14requiresUserTransfer\"\xa5\x01\n" +
+	"\x1cTransferAndDeleteDeptRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12-\n" +
+	"\x0etarget_dept_id\x18\x02 \x01(\rB\a\xbaH\x04*\x02 \x00R\ftargetDeptId\x12-\n" +
+	"\voperator_id\x18\x03 \x01(\rB\a\xbaH\x04*\x02 \x00H\x00R\n" +
+	"operatorId\x88\x01\x01B\x0e\n" +
+	"\f_operator_id\"U\n" +
+	"\x1dTransferAndDeleteDeptResponse\x124\n" +
+	"\x16transferred_user_count\x18\x01 \x01(\rR\x14transferredUserCount\"7\n" +
 	"\x0eGetDeptRequest\x12%\n" +
 	"\x02id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b部门ID\xbaH\x04*\x02 \x00R\x02id\"P\n" +
 	"\x0fGetDeptResponse\x12=\n" +
-	"\x04dept\x18\x01 \x01(\v2\x15.core.service.v1.DeptB\x12\xbaG\x0f\x92\x02\f部门信息R\x04dept\"\xdf\x04\n" +
+	"\x04dept\x18\x01 \x01(\v2\x15.core.service.v1.DeptB\x12\xbaG\x0f\x92\x02\f部门信息R\x04dept\"\xe1\x04\n" +
 	"\x10ListDeptsRequest\x12=\n" +
 	"\n" +
 	"page_token\x18\x01 \x01(\tB\x1e\xbaG\x1b\x8a\x02\t\t\x00\x00\x00\x00\x00\x00\xf0?\x92\x02\f当前页码R\tpageToken\x12A\n" +
 	"\tpage_size\x18\x02 \x01(\x05B$\xbaG!\x8a\x02\t\t\x00\x00\x00\x00\x00\x00$@\x92\x02\x12每一页的行数R\bpageSize\x127\n" +
 	"\tno_paging\x18\x03 \x01(\bB\x15\xbaG\x12\x92\x02\x0f是否不分页H\x00R\bnopaging\x88\x01\x01\x12 \n" +
-	"\x04name\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18\x14H\x01R\x04name\x88\x01\x01\x12`\n" +
-	"\x06status\x18\x05 \x01(\x0e2\f.enum.StatusB5\xbaG*\x92\x02'部门状态 0 未知 1 启用 2 禁用\xbaH\x05\x82\x01\x02\x10\x01H\x02R\x06status\x88\x01\x01\x127\n" +
+	"\x04name\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18\x14H\x01R\x04name\x88\x01\x01\x12b\n" +
+	"\x06status\x18\x05 \x01(\x0e2\f.enum.StatusB7\xbaG*\x92\x02'部门状态 0 未知 1 启用 2 禁用\xbaH\a\x82\x01\x04\x10\x01 \x00H\x02R\x06status\x88\x01\x01\x127\n" +
 	"\x06remark\x18\x06 \x01(\tB\x1a\xbaG\x0f\x92\x02\f部门描述\xbaH\x05r\x03\x18\xc8\x01H\x03R\x06remark\x88\x01\x01\x12/\n" +
 	"\x06filter\x18\n" +
 	" \x01(\tB\x12\xbaG\x0f\x92\x02\f筛选条件H\x04R\x06filter\x88\x01\x01\x122\n" +
@@ -1032,50 +1317,54 @@ func file_core_service_v1_dept_proto_rawDescGZIP() []byte {
 	return file_core_service_v1_dept_proto_rawDescData
 }
 
-var file_core_service_v1_dept_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_core_service_v1_dept_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_core_service_v1_dept_proto_goTypes = []any{
-	(*Dept)(nil),                       // 0: core.service.v1.Dept
-	(*CreateDeptRequest)(nil),          // 1: core.service.v1.CreateDeptRequest
-	(*CreateDeptResponse)(nil),         // 2: core.service.v1.CreateDeptResponse
-	(*UpdateDeptRequest)(nil),          // 3: core.service.v1.UpdateDeptRequest
-	(*UpdateDeptResponse)(nil),         // 4: core.service.v1.UpdateDeptResponse
-	(*DeleteDeptRequest)(nil),          // 5: core.service.v1.DeleteDeptRequest
-	(*DeleteDeptResponse)(nil),         // 6: core.service.v1.DeleteDeptResponse
-	(*GetDeptRequest)(nil),             // 7: core.service.v1.GetDeptRequest
-	(*GetDeptResponse)(nil),            // 8: core.service.v1.GetDeptResponse
-	(*ListDeptsRequest)(nil),           // 9: core.service.v1.ListDeptsRequest
-	(*ListDeptsResponse)(nil),          // 10: core.service.v1.ListDeptsResponse
-	(*UpdateDeptByStatusRequest)(nil),  // 11: core.service.v1.UpdateDeptByStatusRequest
-	(*UpdateDeptByStatusResponse)(nil), // 12: core.service.v1.UpdateDeptByStatusResponse
-	(*ListDeptsTreeRequest)(nil),       // 13: core.service.v1.ListDeptsTreeRequest
-	(*ListDeptsTreeResponse)(nil),      // 14: core.service.v1.ListDeptsTreeResponse
-	(enum.Status)(0),                   // 15: enum.Status
-	(*fieldmaskpb.FieldMask)(nil),      // 16: google.protobuf.FieldMask
+	(*Dept)(nil),                          // 0: core.service.v1.Dept
+	(*CreateDeptRequest)(nil),             // 1: core.service.v1.CreateDeptRequest
+	(*CreateDeptResponse)(nil),            // 2: core.service.v1.CreateDeptResponse
+	(*UpdateDeptRequest)(nil),             // 3: core.service.v1.UpdateDeptRequest
+	(*UpdateDeptResponse)(nil),            // 4: core.service.v1.UpdateDeptResponse
+	(*DeleteDeptRequest)(nil),             // 5: core.service.v1.DeleteDeptRequest
+	(*DeleteDeptResponse)(nil),            // 6: core.service.v1.DeleteDeptResponse
+	(*GetDeptDeleteImpactRequest)(nil),    // 7: core.service.v1.GetDeptDeleteImpactRequest
+	(*GetDeptDeleteImpactResponse)(nil),   // 8: core.service.v1.GetDeptDeleteImpactResponse
+	(*TransferAndDeleteDeptRequest)(nil),  // 9: core.service.v1.TransferAndDeleteDeptRequest
+	(*TransferAndDeleteDeptResponse)(nil), // 10: core.service.v1.TransferAndDeleteDeptResponse
+	(*GetDeptRequest)(nil),                // 11: core.service.v1.GetDeptRequest
+	(*GetDeptResponse)(nil),               // 12: core.service.v1.GetDeptResponse
+	(*ListDeptsRequest)(nil),              // 13: core.service.v1.ListDeptsRequest
+	(*ListDeptsResponse)(nil),             // 14: core.service.v1.ListDeptsResponse
+	(*UpdateDeptByStatusRequest)(nil),     // 15: core.service.v1.UpdateDeptByStatusRequest
+	(*UpdateDeptByStatusResponse)(nil),    // 16: core.service.v1.UpdateDeptByStatusResponse
+	(*ListDeptsTreeRequest)(nil),          // 17: core.service.v1.ListDeptsTreeRequest
+	(*ListDeptsTreeResponse)(nil),         // 18: core.service.v1.ListDeptsTreeResponse
+	(enum.Status)(0),                      // 19: enum.Status
+	(*fieldmaskpb.FieldMask)(nil),         // 20: google.protobuf.FieldMask
 }
 var file_core_service_v1_dept_proto_depIdxs = []int32{
-	15, // 0: core.service.v1.Dept.status:type_name -> enum.Status
+	19, // 0: core.service.v1.Dept.status:type_name -> enum.Status
 	0,  // 1: core.service.v1.Dept.children:type_name -> core.service.v1.Dept
 	0,  // 2: core.service.v1.CreateDeptRequest.dept:type_name -> core.service.v1.Dept
 	0,  // 3: core.service.v1.UpdateDeptRequest.dept:type_name -> core.service.v1.Dept
-	16, // 4: core.service.v1.UpdateDeptRequest.update_mask:type_name -> google.protobuf.FieldMask
+	20, // 4: core.service.v1.UpdateDeptRequest.update_mask:type_name -> google.protobuf.FieldMask
 	0,  // 5: core.service.v1.GetDeptResponse.dept:type_name -> core.service.v1.Dept
-	15, // 6: core.service.v1.ListDeptsRequest.status:type_name -> enum.Status
+	19, // 6: core.service.v1.ListDeptsRequest.status:type_name -> enum.Status
 	0,  // 7: core.service.v1.ListDeptsResponse.items:type_name -> core.service.v1.Dept
 	0,  // 8: core.service.v1.ListDeptsTreeResponse.items:type_name -> core.service.v1.Dept
 	1,  // 9: core.service.v1.DeptService.CreateDept:input_type -> core.service.v1.CreateDeptRequest
 	3,  // 10: core.service.v1.DeptService.UpdateDept:input_type -> core.service.v1.UpdateDeptRequest
 	5,  // 11: core.service.v1.DeptService.DeleteDept:input_type -> core.service.v1.DeleteDeptRequest
-	7,  // 12: core.service.v1.DeptService.GetDept:input_type -> core.service.v1.GetDeptRequest
-	9,  // 13: core.service.v1.DeptService.ListDepts:input_type -> core.service.v1.ListDeptsRequest
-	13, // 14: core.service.v1.DeptService.ListDeptsTree:input_type -> core.service.v1.ListDeptsTreeRequest
-	11, // 15: core.service.v1.DeptService.UpdateDeptByStatus:input_type -> core.service.v1.UpdateDeptByStatusRequest
+	11, // 12: core.service.v1.DeptService.GetDept:input_type -> core.service.v1.GetDeptRequest
+	13, // 13: core.service.v1.DeptService.ListDepts:input_type -> core.service.v1.ListDeptsRequest
+	17, // 14: core.service.v1.DeptService.ListDeptsTree:input_type -> core.service.v1.ListDeptsTreeRequest
+	15, // 15: core.service.v1.DeptService.UpdateDeptByStatus:input_type -> core.service.v1.UpdateDeptByStatusRequest
 	2,  // 16: core.service.v1.DeptService.CreateDept:output_type -> core.service.v1.CreateDeptResponse
 	4,  // 17: core.service.v1.DeptService.UpdateDept:output_type -> core.service.v1.UpdateDeptResponse
 	6,  // 18: core.service.v1.DeptService.DeleteDept:output_type -> core.service.v1.DeleteDeptResponse
-	8,  // 19: core.service.v1.DeptService.GetDept:output_type -> core.service.v1.GetDeptResponse
-	10, // 20: core.service.v1.DeptService.ListDepts:output_type -> core.service.v1.ListDeptsResponse
-	14, // 21: core.service.v1.DeptService.ListDeptsTree:output_type -> core.service.v1.ListDeptsTreeResponse
-	12, // 22: core.service.v1.DeptService.UpdateDeptByStatus:output_type -> core.service.v1.UpdateDeptByStatusResponse
+	12, // 19: core.service.v1.DeptService.GetDept:output_type -> core.service.v1.GetDeptResponse
+	14, // 20: core.service.v1.DeptService.ListDepts:output_type -> core.service.v1.ListDeptsResponse
+	18, // 21: core.service.v1.DeptService.ListDeptsTree:output_type -> core.service.v1.ListDeptsTreeResponse
+	16, // 22: core.service.v1.DeptService.UpdateDeptByStatus:output_type -> core.service.v1.UpdateDeptByStatusResponse
 	16, // [16:23] is the sub-list for method output_type
 	9,  // [9:16] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
@@ -1094,13 +1383,14 @@ func file_core_service_v1_dept_proto_init() {
 	file_core_service_v1_dept_proto_msgTypes[5].OneofWrappers = []any{}
 	file_core_service_v1_dept_proto_msgTypes[9].OneofWrappers = []any{}
 	file_core_service_v1_dept_proto_msgTypes[13].OneofWrappers = []any{}
+	file_core_service_v1_dept_proto_msgTypes[17].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_dept_proto_rawDesc), len(file_core_service_v1_dept_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

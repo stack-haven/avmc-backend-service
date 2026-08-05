@@ -18,9 +18,9 @@ type StorageProvider struct {
 
 func (StorageProvider) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_storage_providers"},
 		entsql.WithComments(true),
-		schema.Comment("存储渠道配置表"),
+		schema.Comment("存储渠道表"),
 	}
 }
 

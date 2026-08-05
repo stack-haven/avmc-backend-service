@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 不可变登录安全日志表
+// 登录日志表
 type LoginLog struct {
 	config `json:"-"`
 	// ID of the ent.

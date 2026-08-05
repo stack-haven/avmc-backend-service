@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
-	pb "backend-service/api/core/service/v1"
-	"backend-service/pkg/auth/authn"
-
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+
+	pb "backend-service/api/core/service/v1"
+	"backend-service/pkg/auth/authn"
 )
 
 type ParameterRepo interface {

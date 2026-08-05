@@ -30,12 +30,12 @@ const (
 	// EdgeDefinition holds the string denoting the definition edge name in mutations.
 	EdgeDefinition = "definition"
 	// Table holds the table name of the tenantparameteroverride in the database.
-	Table = "tenant_parameter_overrides"
+	Table = "system_tenant_parameter_overrides"
 	// DefinitionTable is the table that holds the definition relation/edge.
-	DefinitionTable = "tenant_parameter_overrides"
+	DefinitionTable = "system_tenant_parameter_overrides"
 	// DefinitionInverseTable is the table name for the ParameterDefinition entity.
 	// It exists in this package in order to avoid circular dependency with the "parameterdefinition" package.
-	DefinitionInverseTable = "parameter_definitions"
+	DefinitionInverseTable = "system_parameter_definitions"
 	// DefinitionColumn is the table column denoting the definition relation/edge.
 	DefinitionColumn = "definition_id"
 )

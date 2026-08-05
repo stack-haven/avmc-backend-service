@@ -23,6 +23,7 @@ func (User) Annotations() []schema.Annotation {
 		entsql.Annotation{
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
+			Table:     "system_users",
 		},
 		entsql.WithComments(true),
 		schema.Comment("用户表"),
@@ -55,8 +56,8 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("roles", Role.Type),
-		edge.To("posts", Post.Type),
+		edge.To("roles", Role.Type).StorageKey(edge.Table("system_user_roles")).Comment("用户角色关联表"),
+		edge.To("posts", Post.Type).Comment("用户岗位关联表"),
 		edge.From("dept", Dept.Type).
 			Ref("users").
 			Field("dept_id").

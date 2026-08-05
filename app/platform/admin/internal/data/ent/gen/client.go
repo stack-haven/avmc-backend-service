@@ -19,8 +19,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
@@ -29,6 +27,9 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
@@ -63,10 +64,6 @@ type Client struct {
 	LoginLog *LoginLogClient
 	// Menu is the client for interacting with the Menu builders.
 	Menu *MenuClient
-	// MenuPermissionGroup is the client for interacting with the MenuPermissionGroup builders.
-	MenuPermissionGroup *MenuPermissionGroupClient
-	// MenuPermissionGroupVersion is the client for interacting with the MenuPermissionGroupVersion builders.
-	MenuPermissionGroupVersion *MenuPermissionGroupVersionClient
 	// NotificationMessage is the client for interacting with the NotificationMessage builders.
 	NotificationMessage *NotificationMessageClient
 	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
@@ -83,6 +80,12 @@ type Client struct {
 	Role *RoleClient
 	// StorageProvider is the client for interacting with the StorageProvider builders.
 	StorageProvider *StorageProviderClient
+	// Tenant is the client for interacting with the Tenant builders.
+	Tenant *TenantClient
+	// TenantMenuPermissionGroup is the client for interacting with the TenantMenuPermissionGroup builders.
+	TenantMenuPermissionGroup *TenantMenuPermissionGroupClient
+	// TenantMenuPermissionGroupVersion is the client for interacting with the TenantMenuPermissionGroupVersion builders.
+	TenantMenuPermissionGroupVersion *TenantMenuPermissionGroupVersionClient
 	// TenantParameterOverride is the client for interacting with the TenantParameterOverride builders.
 	TenantParameterOverride *TenantParameterOverrideClient
 	// User is the client for interacting with the User builders.
@@ -110,8 +113,6 @@ func (c *Client) init() {
 	c.FileObject = NewFileObjectClient(c.config)
 	c.LoginLog = NewLoginLogClient(c.config)
 	c.Menu = NewMenuClient(c.config)
-	c.MenuPermissionGroup = NewMenuPermissionGroupClient(c.config)
-	c.MenuPermissionGroupVersion = NewMenuPermissionGroupVersionClient(c.config)
 	c.NotificationMessage = NewNotificationMessageClient(c.config)
 	c.NotificationTemplate = NewNotificationTemplateClient(c.config)
 	c.OperationLog = NewOperationLogClient(c.config)
@@ -120,6 +121,9 @@ func (c *Client) init() {
 	c.Project = NewProjectClient(c.config)
 	c.Role = NewRoleClient(c.config)
 	c.StorageProvider = NewStorageProviderClient(c.config)
+	c.Tenant = NewTenantClient(c.config)
+	c.TenantMenuPermissionGroup = NewTenantMenuPermissionGroupClient(c.config)
+	c.TenantMenuPermissionGroupVersion = NewTenantMenuPermissionGroupVersionClient(c.config)
 	c.TenantParameterOverride = NewTenantParameterOverrideClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.WebhookDeliveryLog = NewWebhookDeliveryLogClient(c.config)
@@ -214,30 +218,31 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                        ctx,
-		config:                     cfg,
-		AsyncTask:                  NewAsyncTaskClient(cfg),
-		Dept:                       NewDeptClient(cfg),
-		DictionaryItem:             NewDictionaryItemClient(cfg),
-		DictionaryType:             NewDictionaryTypeClient(cfg),
-		FileAccessLog:              NewFileAccessLogClient(cfg),
-		FileObject:                 NewFileObjectClient(cfg),
-		LoginLog:                   NewLoginLogClient(cfg),
-		Menu:                       NewMenuClient(cfg),
-		MenuPermissionGroup:        NewMenuPermissionGroupClient(cfg),
-		MenuPermissionGroupVersion: NewMenuPermissionGroupVersionClient(cfg),
-		NotificationMessage:        NewNotificationMessageClient(cfg),
-		NotificationTemplate:       NewNotificationTemplateClient(cfg),
-		OperationLog:               NewOperationLogClient(cfg),
-		ParameterDefinition:        NewParameterDefinitionClient(cfg),
-		Post:                       NewPostClient(cfg),
-		Project:                    NewProjectClient(cfg),
-		Role:                       NewRoleClient(cfg),
-		StorageProvider:            NewStorageProviderClient(cfg),
-		TenantParameterOverride:    NewTenantParameterOverrideClient(cfg),
-		User:                       NewUserClient(cfg),
-		WebhookDeliveryLog:         NewWebhookDeliveryLogClient(cfg),
-		WebhookSubscription:        NewWebhookSubscriptionClient(cfg),
+		ctx:                              ctx,
+		config:                           cfg,
+		AsyncTask:                        NewAsyncTaskClient(cfg),
+		Dept:                             NewDeptClient(cfg),
+		DictionaryItem:                   NewDictionaryItemClient(cfg),
+		DictionaryType:                   NewDictionaryTypeClient(cfg),
+		FileAccessLog:                    NewFileAccessLogClient(cfg),
+		FileObject:                       NewFileObjectClient(cfg),
+		LoginLog:                         NewLoginLogClient(cfg),
+		Menu:                             NewMenuClient(cfg),
+		NotificationMessage:              NewNotificationMessageClient(cfg),
+		NotificationTemplate:             NewNotificationTemplateClient(cfg),
+		OperationLog:                     NewOperationLogClient(cfg),
+		ParameterDefinition:              NewParameterDefinitionClient(cfg),
+		Post:                             NewPostClient(cfg),
+		Project:                          NewProjectClient(cfg),
+		Role:                             NewRoleClient(cfg),
+		StorageProvider:                  NewStorageProviderClient(cfg),
+		Tenant:                           NewTenantClient(cfg),
+		TenantMenuPermissionGroup:        NewTenantMenuPermissionGroupClient(cfg),
+		TenantMenuPermissionGroupVersion: NewTenantMenuPermissionGroupVersionClient(cfg),
+		TenantParameterOverride:          NewTenantParameterOverrideClient(cfg),
+		User:                             NewUserClient(cfg),
+		WebhookDeliveryLog:               NewWebhookDeliveryLogClient(cfg),
+		WebhookSubscription:              NewWebhookSubscriptionClient(cfg),
 	}, nil
 }
 
@@ -255,30 +260,31 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                        ctx,
-		config:                     cfg,
-		AsyncTask:                  NewAsyncTaskClient(cfg),
-		Dept:                       NewDeptClient(cfg),
-		DictionaryItem:             NewDictionaryItemClient(cfg),
-		DictionaryType:             NewDictionaryTypeClient(cfg),
-		FileAccessLog:              NewFileAccessLogClient(cfg),
-		FileObject:                 NewFileObjectClient(cfg),
-		LoginLog:                   NewLoginLogClient(cfg),
-		Menu:                       NewMenuClient(cfg),
-		MenuPermissionGroup:        NewMenuPermissionGroupClient(cfg),
-		MenuPermissionGroupVersion: NewMenuPermissionGroupVersionClient(cfg),
-		NotificationMessage:        NewNotificationMessageClient(cfg),
-		NotificationTemplate:       NewNotificationTemplateClient(cfg),
-		OperationLog:               NewOperationLogClient(cfg),
-		ParameterDefinition:        NewParameterDefinitionClient(cfg),
-		Post:                       NewPostClient(cfg),
-		Project:                    NewProjectClient(cfg),
-		Role:                       NewRoleClient(cfg),
-		StorageProvider:            NewStorageProviderClient(cfg),
-		TenantParameterOverride:    NewTenantParameterOverrideClient(cfg),
-		User:                       NewUserClient(cfg),
-		WebhookDeliveryLog:         NewWebhookDeliveryLogClient(cfg),
-		WebhookSubscription:        NewWebhookSubscriptionClient(cfg),
+		ctx:                              ctx,
+		config:                           cfg,
+		AsyncTask:                        NewAsyncTaskClient(cfg),
+		Dept:                             NewDeptClient(cfg),
+		DictionaryItem:                   NewDictionaryItemClient(cfg),
+		DictionaryType:                   NewDictionaryTypeClient(cfg),
+		FileAccessLog:                    NewFileAccessLogClient(cfg),
+		FileObject:                       NewFileObjectClient(cfg),
+		LoginLog:                         NewLoginLogClient(cfg),
+		Menu:                             NewMenuClient(cfg),
+		NotificationMessage:              NewNotificationMessageClient(cfg),
+		NotificationTemplate:             NewNotificationTemplateClient(cfg),
+		OperationLog:                     NewOperationLogClient(cfg),
+		ParameterDefinition:              NewParameterDefinitionClient(cfg),
+		Post:                             NewPostClient(cfg),
+		Project:                          NewProjectClient(cfg),
+		Role:                             NewRoleClient(cfg),
+		StorageProvider:                  NewStorageProviderClient(cfg),
+		Tenant:                           NewTenantClient(cfg),
+		TenantMenuPermissionGroup:        NewTenantMenuPermissionGroupClient(cfg),
+		TenantMenuPermissionGroupVersion: NewTenantMenuPermissionGroupVersionClient(cfg),
+		TenantParameterOverride:          NewTenantParameterOverrideClient(cfg),
+		User:                             NewUserClient(cfg),
+		WebhookDeliveryLog:               NewWebhookDeliveryLogClient(cfg),
+		WebhookSubscription:              NewWebhookSubscriptionClient(cfg),
 	}, nil
 }
 
@@ -309,11 +315,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
-		c.FileObject, c.LoginLog, c.Menu, c.MenuPermissionGroup,
-		c.MenuPermissionGroupVersion, c.NotificationMessage, c.NotificationTemplate,
-		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
-		c.StorageProvider, c.TenantParameterOverride, c.User, c.WebhookDeliveryLog,
-		c.WebhookSubscription,
+		c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
+		c.NotificationTemplate, c.OperationLog, c.ParameterDefinition, c.Post,
+		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantMenuPermissionGroup,
+		c.TenantMenuPermissionGroupVersion, c.TenantParameterOverride, c.User,
+		c.WebhookDeliveryLog, c.WebhookSubscription,
 	} {
 		n.Use(hooks...)
 	}
@@ -324,11 +330,11 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
-		c.FileObject, c.LoginLog, c.Menu, c.MenuPermissionGroup,
-		c.MenuPermissionGroupVersion, c.NotificationMessage, c.NotificationTemplate,
-		c.OperationLog, c.ParameterDefinition, c.Post, c.Project, c.Role,
-		c.StorageProvider, c.TenantParameterOverride, c.User, c.WebhookDeliveryLog,
-		c.WebhookSubscription,
+		c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
+		c.NotificationTemplate, c.OperationLog, c.ParameterDefinition, c.Post,
+		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantMenuPermissionGroup,
+		c.TenantMenuPermissionGroupVersion, c.TenantParameterOverride, c.User,
+		c.WebhookDeliveryLog, c.WebhookSubscription,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -353,10 +359,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LoginLog.mutate(ctx, m)
 	case *MenuMutation:
 		return c.Menu.mutate(ctx, m)
-	case *MenuPermissionGroupMutation:
-		return c.MenuPermissionGroup.mutate(ctx, m)
-	case *MenuPermissionGroupVersionMutation:
-		return c.MenuPermissionGroupVersion.mutate(ctx, m)
 	case *NotificationMessageMutation:
 		return c.NotificationMessage.mutate(ctx, m)
 	case *NotificationTemplateMutation:
@@ -373,6 +375,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Role.mutate(ctx, m)
 	case *StorageProviderMutation:
 		return c.StorageProvider.mutate(ctx, m)
+	case *TenantMutation:
+		return c.Tenant.mutate(ctx, m)
+	case *TenantMenuPermissionGroupMutation:
+		return c.TenantMenuPermissionGroup.mutate(ctx, m)
+	case *TenantMenuPermissionGroupVersionMutation:
+		return c.TenantMenuPermissionGroupVersion.mutate(ctx, m)
 	case *TenantParameterOverrideMutation:
 		return c.TenantParameterOverride.mutate(ctx, m)
 	case *UserMutation:
@@ -1580,13 +1588,13 @@ func (c *MenuClient) QueryRoles(_m *Menu) *RoleQuery {
 }
 
 // QueryPermissionGroups queries the permission_groups edge of a Menu.
-func (c *MenuClient) QueryPermissionGroups(_m *Menu) *MenuPermissionGroupQuery {
-	query := (&MenuPermissionGroupClient{config: c.config}).Query()
+func (c *MenuClient) QueryPermissionGroups(_m *Menu) *TenantMenuPermissionGroupQuery {
+	query := (&TenantMenuPermissionGroupClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menu.Table, menu.FieldID, id),
-			sqlgraph.To(menupermissiongroup.Table, menupermissiongroup.FieldID),
+			sqlgraph.To(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, menu.PermissionGroupsTable, menu.PermissionGroupsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -1596,13 +1604,13 @@ func (c *MenuClient) QueryPermissionGroups(_m *Menu) *MenuPermissionGroupQuery {
 }
 
 // QueryPermissionGroupVersions queries the permission_group_versions edge of a Menu.
-func (c *MenuClient) QueryPermissionGroupVersions(_m *Menu) *MenuPermissionGroupVersionQuery {
-	query := (&MenuPermissionGroupVersionClient{config: c.config}).Query()
+func (c *MenuClient) QueryPermissionGroupVersions(_m *Menu) *TenantMenuPermissionGroupVersionQuery {
+	query := (&TenantMenuPermissionGroupVersionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menu.Table, menu.FieldID, id),
-			sqlgraph.To(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID),
+			sqlgraph.To(tenantmenupermissiongroupversion.Table, tenantmenupermissiongroupversion.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, menu.PermissionGroupVersionsTable, menu.PermissionGroupVersionsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -1635,354 +1643,6 @@ func (c *MenuClient) mutate(ctx context.Context, m *MenuMutation) (Value, error)
 		return (&MenuDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("gen: unknown Menu mutation op: %q", m.Op())
-	}
-}
-
-// MenuPermissionGroupClient is a client for the MenuPermissionGroup schema.
-type MenuPermissionGroupClient struct {
-	config
-}
-
-// NewMenuPermissionGroupClient returns a client for the MenuPermissionGroup from the given config.
-func NewMenuPermissionGroupClient(c config) *MenuPermissionGroupClient {
-	return &MenuPermissionGroupClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `menupermissiongroup.Hooks(f(g(h())))`.
-func (c *MenuPermissionGroupClient) Use(hooks ...Hook) {
-	c.hooks.MenuPermissionGroup = append(c.hooks.MenuPermissionGroup, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `menupermissiongroup.Intercept(f(g(h())))`.
-func (c *MenuPermissionGroupClient) Intercept(interceptors ...Interceptor) {
-	c.inters.MenuPermissionGroup = append(c.inters.MenuPermissionGroup, interceptors...)
-}
-
-// Create returns a builder for creating a MenuPermissionGroup entity.
-func (c *MenuPermissionGroupClient) Create() *MenuPermissionGroupCreate {
-	mutation := newMenuPermissionGroupMutation(c.config, OpCreate)
-	return &MenuPermissionGroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of MenuPermissionGroup entities.
-func (c *MenuPermissionGroupClient) CreateBulk(builders ...*MenuPermissionGroupCreate) *MenuPermissionGroupCreateBulk {
-	return &MenuPermissionGroupCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *MenuPermissionGroupClient) MapCreateBulk(slice any, setFunc func(*MenuPermissionGroupCreate, int)) *MenuPermissionGroupCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &MenuPermissionGroupCreateBulk{err: fmt.Errorf("calling to MenuPermissionGroupClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*MenuPermissionGroupCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &MenuPermissionGroupCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for MenuPermissionGroup.
-func (c *MenuPermissionGroupClient) Update() *MenuPermissionGroupUpdate {
-	mutation := newMenuPermissionGroupMutation(c.config, OpUpdate)
-	return &MenuPermissionGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *MenuPermissionGroupClient) UpdateOne(_m *MenuPermissionGroup) *MenuPermissionGroupUpdateOne {
-	mutation := newMenuPermissionGroupMutation(c.config, OpUpdateOne, withMenuPermissionGroup(_m))
-	return &MenuPermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *MenuPermissionGroupClient) UpdateOneID(id uint32) *MenuPermissionGroupUpdateOne {
-	mutation := newMenuPermissionGroupMutation(c.config, OpUpdateOne, withMenuPermissionGroupID(id))
-	return &MenuPermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for MenuPermissionGroup.
-func (c *MenuPermissionGroupClient) Delete() *MenuPermissionGroupDelete {
-	mutation := newMenuPermissionGroupMutation(c.config, OpDelete)
-	return &MenuPermissionGroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *MenuPermissionGroupClient) DeleteOne(_m *MenuPermissionGroup) *MenuPermissionGroupDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *MenuPermissionGroupClient) DeleteOneID(id uint32) *MenuPermissionGroupDeleteOne {
-	builder := c.Delete().Where(menupermissiongroup.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &MenuPermissionGroupDeleteOne{builder}
-}
-
-// Query returns a query builder for MenuPermissionGroup.
-func (c *MenuPermissionGroupClient) Query() *MenuPermissionGroupQuery {
-	return &MenuPermissionGroupQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeMenuPermissionGroup},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a MenuPermissionGroup entity by its id.
-func (c *MenuPermissionGroupClient) Get(ctx context.Context, id uint32) (*MenuPermissionGroup, error) {
-	return c.Query().Where(menupermissiongroup.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *MenuPermissionGroupClient) GetX(ctx context.Context, id uint32) *MenuPermissionGroup {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryMenus queries the menus edge of a MenuPermissionGroup.
-func (c *MenuPermissionGroupClient) QueryMenus(_m *MenuPermissionGroup) *MenuQuery {
-	query := (&MenuClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(menupermissiongroup.Table, menupermissiongroup.FieldID, id),
-			sqlgraph.To(menu.Table, menu.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, menupermissiongroup.MenusTable, menupermissiongroup.MenusPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryCurrentVersion queries the current_version edge of a MenuPermissionGroup.
-func (c *MenuPermissionGroupClient) QueryCurrentVersion(_m *MenuPermissionGroup) *MenuPermissionGroupVersionQuery {
-	query := (&MenuPermissionGroupVersionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(menupermissiongroup.Table, menupermissiongroup.FieldID, id),
-			sqlgraph.To(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, menupermissiongroup.CurrentVersionTable, menupermissiongroup.CurrentVersionColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryVersions queries the versions edge of a MenuPermissionGroup.
-func (c *MenuPermissionGroupClient) QueryVersions(_m *MenuPermissionGroup) *MenuPermissionGroupVersionQuery {
-	query := (&MenuPermissionGroupVersionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(menupermissiongroup.Table, menupermissiongroup.FieldID, id),
-			sqlgraph.To(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, menupermissiongroup.VersionsTable, menupermissiongroup.VersionsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *MenuPermissionGroupClient) Hooks() []Hook {
-	hooks := c.hooks.MenuPermissionGroup
-	return append(hooks[:len(hooks):len(hooks)], menupermissiongroup.Hooks[:]...)
-}
-
-// Interceptors returns the client interceptors.
-func (c *MenuPermissionGroupClient) Interceptors() []Interceptor {
-	inters := c.inters.MenuPermissionGroup
-	return append(inters[:len(inters):len(inters)], menupermissiongroup.Interceptors[:]...)
-}
-
-func (c *MenuPermissionGroupClient) mutate(ctx context.Context, m *MenuPermissionGroupMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&MenuPermissionGroupCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&MenuPermissionGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&MenuPermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&MenuPermissionGroupDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("gen: unknown MenuPermissionGroup mutation op: %q", m.Op())
-	}
-}
-
-// MenuPermissionGroupVersionClient is a client for the MenuPermissionGroupVersion schema.
-type MenuPermissionGroupVersionClient struct {
-	config
-}
-
-// NewMenuPermissionGroupVersionClient returns a client for the MenuPermissionGroupVersion from the given config.
-func NewMenuPermissionGroupVersionClient(c config) *MenuPermissionGroupVersionClient {
-	return &MenuPermissionGroupVersionClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `menupermissiongroupversion.Hooks(f(g(h())))`.
-func (c *MenuPermissionGroupVersionClient) Use(hooks ...Hook) {
-	c.hooks.MenuPermissionGroupVersion = append(c.hooks.MenuPermissionGroupVersion, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `menupermissiongroupversion.Intercept(f(g(h())))`.
-func (c *MenuPermissionGroupVersionClient) Intercept(interceptors ...Interceptor) {
-	c.inters.MenuPermissionGroupVersion = append(c.inters.MenuPermissionGroupVersion, interceptors...)
-}
-
-// Create returns a builder for creating a MenuPermissionGroupVersion entity.
-func (c *MenuPermissionGroupVersionClient) Create() *MenuPermissionGroupVersionCreate {
-	mutation := newMenuPermissionGroupVersionMutation(c.config, OpCreate)
-	return &MenuPermissionGroupVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of MenuPermissionGroupVersion entities.
-func (c *MenuPermissionGroupVersionClient) CreateBulk(builders ...*MenuPermissionGroupVersionCreate) *MenuPermissionGroupVersionCreateBulk {
-	return &MenuPermissionGroupVersionCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *MenuPermissionGroupVersionClient) MapCreateBulk(slice any, setFunc func(*MenuPermissionGroupVersionCreate, int)) *MenuPermissionGroupVersionCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &MenuPermissionGroupVersionCreateBulk{err: fmt.Errorf("calling to MenuPermissionGroupVersionClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*MenuPermissionGroupVersionCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &MenuPermissionGroupVersionCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for MenuPermissionGroupVersion.
-func (c *MenuPermissionGroupVersionClient) Update() *MenuPermissionGroupVersionUpdate {
-	mutation := newMenuPermissionGroupVersionMutation(c.config, OpUpdate)
-	return &MenuPermissionGroupVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *MenuPermissionGroupVersionClient) UpdateOne(_m *MenuPermissionGroupVersion) *MenuPermissionGroupVersionUpdateOne {
-	mutation := newMenuPermissionGroupVersionMutation(c.config, OpUpdateOne, withMenuPermissionGroupVersion(_m))
-	return &MenuPermissionGroupVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *MenuPermissionGroupVersionClient) UpdateOneID(id uint32) *MenuPermissionGroupVersionUpdateOne {
-	mutation := newMenuPermissionGroupVersionMutation(c.config, OpUpdateOne, withMenuPermissionGroupVersionID(id))
-	return &MenuPermissionGroupVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for MenuPermissionGroupVersion.
-func (c *MenuPermissionGroupVersionClient) Delete() *MenuPermissionGroupVersionDelete {
-	mutation := newMenuPermissionGroupVersionMutation(c.config, OpDelete)
-	return &MenuPermissionGroupVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *MenuPermissionGroupVersionClient) DeleteOne(_m *MenuPermissionGroupVersion) *MenuPermissionGroupVersionDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *MenuPermissionGroupVersionClient) DeleteOneID(id uint32) *MenuPermissionGroupVersionDeleteOne {
-	builder := c.Delete().Where(menupermissiongroupversion.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &MenuPermissionGroupVersionDeleteOne{builder}
-}
-
-// Query returns a query builder for MenuPermissionGroupVersion.
-func (c *MenuPermissionGroupVersionClient) Query() *MenuPermissionGroupVersionQuery {
-	return &MenuPermissionGroupVersionQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeMenuPermissionGroupVersion},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a MenuPermissionGroupVersion entity by its id.
-func (c *MenuPermissionGroupVersionClient) Get(ctx context.Context, id uint32) (*MenuPermissionGroupVersion, error) {
-	return c.Query().Where(menupermissiongroupversion.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *MenuPermissionGroupVersionClient) GetX(ctx context.Context, id uint32) *MenuPermissionGroupVersion {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryGroup queries the group edge of a MenuPermissionGroupVersion.
-func (c *MenuPermissionGroupVersionClient) QueryGroup(_m *MenuPermissionGroupVersion) *MenuPermissionGroupQuery {
-	query := (&MenuPermissionGroupClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID, id),
-			sqlgraph.To(menupermissiongroup.Table, menupermissiongroup.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, menupermissiongroupversion.GroupTable, menupermissiongroupversion.GroupColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryMenus queries the menus edge of a MenuPermissionGroupVersion.
-func (c *MenuPermissionGroupVersionClient) QueryMenus(_m *MenuPermissionGroupVersion) *MenuQuery {
-	query := (&MenuClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(menupermissiongroupversion.Table, menupermissiongroupversion.FieldID, id),
-			sqlgraph.To(menu.Table, menu.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, menupermissiongroupversion.MenusTable, menupermissiongroupversion.MenusPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *MenuPermissionGroupVersionClient) Hooks() []Hook {
-	return c.hooks.MenuPermissionGroupVersion
-}
-
-// Interceptors returns the client interceptors.
-func (c *MenuPermissionGroupVersionClient) Interceptors() []Interceptor {
-	return c.inters.MenuPermissionGroupVersion
-}
-
-func (c *MenuPermissionGroupVersionClient) mutate(ctx context.Context, m *MenuPermissionGroupVersionMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&MenuPermissionGroupVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&MenuPermissionGroupVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&MenuPermissionGroupVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&MenuPermissionGroupVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("gen: unknown MenuPermissionGroupVersion mutation op: %q", m.Op())
 	}
 }
 
@@ -3145,6 +2805,521 @@ func (c *StorageProviderClient) mutate(ctx context.Context, m *StorageProviderMu
 	}
 }
 
+// TenantClient is a client for the Tenant schema.
+type TenantClient struct {
+	config
+}
+
+// NewTenantClient returns a client for the Tenant from the given config.
+func NewTenantClient(c config) *TenantClient {
+	return &TenantClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tenant.Hooks(f(g(h())))`.
+func (c *TenantClient) Use(hooks ...Hook) {
+	c.hooks.Tenant = append(c.hooks.Tenant, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tenant.Intercept(f(g(h())))`.
+func (c *TenantClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Tenant = append(c.inters.Tenant, interceptors...)
+}
+
+// Create returns a builder for creating a Tenant entity.
+func (c *TenantClient) Create() *TenantCreate {
+	mutation := newTenantMutation(c.config, OpCreate)
+	return &TenantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Tenant entities.
+func (c *TenantClient) CreateBulk(builders ...*TenantCreate) *TenantCreateBulk {
+	return &TenantCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TenantClient) MapCreateBulk(slice any, setFunc func(*TenantCreate, int)) *TenantCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TenantCreateBulk{err: fmt.Errorf("calling to TenantClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TenantCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TenantCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Tenant.
+func (c *TenantClient) Update() *TenantUpdate {
+	mutation := newTenantMutation(c.config, OpUpdate)
+	return &TenantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TenantClient) UpdateOne(_m *Tenant) *TenantUpdateOne {
+	mutation := newTenantMutation(c.config, OpUpdateOne, withTenant(_m))
+	return &TenantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TenantClient) UpdateOneID(id uint32) *TenantUpdateOne {
+	mutation := newTenantMutation(c.config, OpUpdateOne, withTenantID(id))
+	return &TenantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Tenant.
+func (c *TenantClient) Delete() *TenantDelete {
+	mutation := newTenantMutation(c.config, OpDelete)
+	return &TenantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TenantClient) DeleteOne(_m *Tenant) *TenantDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TenantClient) DeleteOneID(id uint32) *TenantDeleteOne {
+	builder := c.Delete().Where(tenant.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TenantDeleteOne{builder}
+}
+
+// Query returns a query builder for Tenant.
+func (c *TenantClient) Query() *TenantQuery {
+	return &TenantQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTenant},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Tenant entity by its id.
+func (c *TenantClient) Get(ctx context.Context, id uint32) (*Tenant, error) {
+	return c.Query().Where(tenant.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TenantClient) GetX(ctx context.Context, id uint32) *Tenant {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGroups queries the groups edge of a Tenant.
+func (c *TenantClient) QueryGroups(_m *Tenant) *TenantMenuPermissionGroupQuery {
+	query := (&TenantMenuPermissionGroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, tenant.GroupsTable, tenant.GroupsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TenantClient) Hooks() []Hook {
+	hooks := c.hooks.Tenant
+	return append(hooks[:len(hooks):len(hooks)], tenant.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *TenantClient) Interceptors() []Interceptor {
+	inters := c.inters.Tenant
+	return append(inters[:len(inters):len(inters)], tenant.Interceptors[:]...)
+}
+
+func (c *TenantClient) mutate(ctx context.Context, m *TenantMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TenantCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TenantUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TenantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TenantDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown Tenant mutation op: %q", m.Op())
+	}
+}
+
+// TenantMenuPermissionGroupClient is a client for the TenantMenuPermissionGroup schema.
+type TenantMenuPermissionGroupClient struct {
+	config
+}
+
+// NewTenantMenuPermissionGroupClient returns a client for the TenantMenuPermissionGroup from the given config.
+func NewTenantMenuPermissionGroupClient(c config) *TenantMenuPermissionGroupClient {
+	return &TenantMenuPermissionGroupClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tenantmenupermissiongroup.Hooks(f(g(h())))`.
+func (c *TenantMenuPermissionGroupClient) Use(hooks ...Hook) {
+	c.hooks.TenantMenuPermissionGroup = append(c.hooks.TenantMenuPermissionGroup, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tenantmenupermissiongroup.Intercept(f(g(h())))`.
+func (c *TenantMenuPermissionGroupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TenantMenuPermissionGroup = append(c.inters.TenantMenuPermissionGroup, interceptors...)
+}
+
+// Create returns a builder for creating a TenantMenuPermissionGroup entity.
+func (c *TenantMenuPermissionGroupClient) Create() *TenantMenuPermissionGroupCreate {
+	mutation := newTenantMenuPermissionGroupMutation(c.config, OpCreate)
+	return &TenantMenuPermissionGroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TenantMenuPermissionGroup entities.
+func (c *TenantMenuPermissionGroupClient) CreateBulk(builders ...*TenantMenuPermissionGroupCreate) *TenantMenuPermissionGroupCreateBulk {
+	return &TenantMenuPermissionGroupCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TenantMenuPermissionGroupClient) MapCreateBulk(slice any, setFunc func(*TenantMenuPermissionGroupCreate, int)) *TenantMenuPermissionGroupCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TenantMenuPermissionGroupCreateBulk{err: fmt.Errorf("calling to TenantMenuPermissionGroupClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TenantMenuPermissionGroupCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TenantMenuPermissionGroupCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) Update() *TenantMenuPermissionGroupUpdate {
+	mutation := newTenantMenuPermissionGroupMutation(c.config, OpUpdate)
+	return &TenantMenuPermissionGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TenantMenuPermissionGroupClient) UpdateOne(_m *TenantMenuPermissionGroup) *TenantMenuPermissionGroupUpdateOne {
+	mutation := newTenantMenuPermissionGroupMutation(c.config, OpUpdateOne, withTenantMenuPermissionGroup(_m))
+	return &TenantMenuPermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TenantMenuPermissionGroupClient) UpdateOneID(id uint32) *TenantMenuPermissionGroupUpdateOne {
+	mutation := newTenantMenuPermissionGroupMutation(c.config, OpUpdateOne, withTenantMenuPermissionGroupID(id))
+	return &TenantMenuPermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) Delete() *TenantMenuPermissionGroupDelete {
+	mutation := newTenantMenuPermissionGroupMutation(c.config, OpDelete)
+	return &TenantMenuPermissionGroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TenantMenuPermissionGroupClient) DeleteOne(_m *TenantMenuPermissionGroup) *TenantMenuPermissionGroupDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TenantMenuPermissionGroupClient) DeleteOneID(id uint32) *TenantMenuPermissionGroupDeleteOne {
+	builder := c.Delete().Where(tenantmenupermissiongroup.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TenantMenuPermissionGroupDeleteOne{builder}
+}
+
+// Query returns a query builder for TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) Query() *TenantMenuPermissionGroupQuery {
+	return &TenantMenuPermissionGroupQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTenantMenuPermissionGroup},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TenantMenuPermissionGroup entity by its id.
+func (c *TenantMenuPermissionGroupClient) Get(ctx context.Context, id uint32) (*TenantMenuPermissionGroup, error) {
+	return c.Query().Where(tenantmenupermissiongroup.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TenantMenuPermissionGroupClient) GetX(ctx context.Context, id uint32) *TenantMenuPermissionGroup {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMenus queries the menus edge of a TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) QueryMenus(_m *TenantMenuPermissionGroup) *MenuQuery {
+	query := (&MenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID, id),
+			sqlgraph.To(menu.Table, menu.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, tenantmenupermissiongroup.MenusTable, tenantmenupermissiongroup.MenusPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCurrentVersion queries the current_version edge of a TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) QueryCurrentVersion(_m *TenantMenuPermissionGroup) *TenantMenuPermissionGroupVersionQuery {
+	query := (&TenantMenuPermissionGroupVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID, id),
+			sqlgraph.To(tenantmenupermissiongroupversion.Table, tenantmenupermissiongroupversion.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tenantmenupermissiongroup.CurrentVersionTable, tenantmenupermissiongroup.CurrentVersionColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVersions queries the versions edge of a TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) QueryVersions(_m *TenantMenuPermissionGroup) *TenantMenuPermissionGroupVersionQuery {
+	query := (&TenantMenuPermissionGroupVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID, id),
+			sqlgraph.To(tenantmenupermissiongroupversion.Table, tenantmenupermissiongroupversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tenantmenupermissiongroup.VersionsTable, tenantmenupermissiongroup.VersionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTenants queries the tenants edge of a TenantMenuPermissionGroup.
+func (c *TenantMenuPermissionGroupClient) QueryTenants(_m *TenantMenuPermissionGroup) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, tenantmenupermissiongroup.TenantsTable, tenantmenupermissiongroup.TenantsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TenantMenuPermissionGroupClient) Hooks() []Hook {
+	hooks := c.hooks.TenantMenuPermissionGroup
+	return append(hooks[:len(hooks):len(hooks)], tenantmenupermissiongroup.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *TenantMenuPermissionGroupClient) Interceptors() []Interceptor {
+	inters := c.inters.TenantMenuPermissionGroup
+	return append(inters[:len(inters):len(inters)], tenantmenupermissiongroup.Interceptors[:]...)
+}
+
+func (c *TenantMenuPermissionGroupClient) mutate(ctx context.Context, m *TenantMenuPermissionGroupMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TenantMenuPermissionGroupCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TenantMenuPermissionGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TenantMenuPermissionGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TenantMenuPermissionGroupDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown TenantMenuPermissionGroup mutation op: %q", m.Op())
+	}
+}
+
+// TenantMenuPermissionGroupVersionClient is a client for the TenantMenuPermissionGroupVersion schema.
+type TenantMenuPermissionGroupVersionClient struct {
+	config
+}
+
+// NewTenantMenuPermissionGroupVersionClient returns a client for the TenantMenuPermissionGroupVersion from the given config.
+func NewTenantMenuPermissionGroupVersionClient(c config) *TenantMenuPermissionGroupVersionClient {
+	return &TenantMenuPermissionGroupVersionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tenantmenupermissiongroupversion.Hooks(f(g(h())))`.
+func (c *TenantMenuPermissionGroupVersionClient) Use(hooks ...Hook) {
+	c.hooks.TenantMenuPermissionGroupVersion = append(c.hooks.TenantMenuPermissionGroupVersion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tenantmenupermissiongroupversion.Intercept(f(g(h())))`.
+func (c *TenantMenuPermissionGroupVersionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TenantMenuPermissionGroupVersion = append(c.inters.TenantMenuPermissionGroupVersion, interceptors...)
+}
+
+// Create returns a builder for creating a TenantMenuPermissionGroupVersion entity.
+func (c *TenantMenuPermissionGroupVersionClient) Create() *TenantMenuPermissionGroupVersionCreate {
+	mutation := newTenantMenuPermissionGroupVersionMutation(c.config, OpCreate)
+	return &TenantMenuPermissionGroupVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TenantMenuPermissionGroupVersion entities.
+func (c *TenantMenuPermissionGroupVersionClient) CreateBulk(builders ...*TenantMenuPermissionGroupVersionCreate) *TenantMenuPermissionGroupVersionCreateBulk {
+	return &TenantMenuPermissionGroupVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TenantMenuPermissionGroupVersionClient) MapCreateBulk(slice any, setFunc func(*TenantMenuPermissionGroupVersionCreate, int)) *TenantMenuPermissionGroupVersionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TenantMenuPermissionGroupVersionCreateBulk{err: fmt.Errorf("calling to TenantMenuPermissionGroupVersionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TenantMenuPermissionGroupVersionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TenantMenuPermissionGroupVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TenantMenuPermissionGroupVersion.
+func (c *TenantMenuPermissionGroupVersionClient) Update() *TenantMenuPermissionGroupVersionUpdate {
+	mutation := newTenantMenuPermissionGroupVersionMutation(c.config, OpUpdate)
+	return &TenantMenuPermissionGroupVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TenantMenuPermissionGroupVersionClient) UpdateOne(_m *TenantMenuPermissionGroupVersion) *TenantMenuPermissionGroupVersionUpdateOne {
+	mutation := newTenantMenuPermissionGroupVersionMutation(c.config, OpUpdateOne, withTenantMenuPermissionGroupVersion(_m))
+	return &TenantMenuPermissionGroupVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TenantMenuPermissionGroupVersionClient) UpdateOneID(id uint32) *TenantMenuPermissionGroupVersionUpdateOne {
+	mutation := newTenantMenuPermissionGroupVersionMutation(c.config, OpUpdateOne, withTenantMenuPermissionGroupVersionID(id))
+	return &TenantMenuPermissionGroupVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TenantMenuPermissionGroupVersion.
+func (c *TenantMenuPermissionGroupVersionClient) Delete() *TenantMenuPermissionGroupVersionDelete {
+	mutation := newTenantMenuPermissionGroupVersionMutation(c.config, OpDelete)
+	return &TenantMenuPermissionGroupVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TenantMenuPermissionGroupVersionClient) DeleteOne(_m *TenantMenuPermissionGroupVersion) *TenantMenuPermissionGroupVersionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TenantMenuPermissionGroupVersionClient) DeleteOneID(id uint32) *TenantMenuPermissionGroupVersionDeleteOne {
+	builder := c.Delete().Where(tenantmenupermissiongroupversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TenantMenuPermissionGroupVersionDeleteOne{builder}
+}
+
+// Query returns a query builder for TenantMenuPermissionGroupVersion.
+func (c *TenantMenuPermissionGroupVersionClient) Query() *TenantMenuPermissionGroupVersionQuery {
+	return &TenantMenuPermissionGroupVersionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTenantMenuPermissionGroupVersion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TenantMenuPermissionGroupVersion entity by its id.
+func (c *TenantMenuPermissionGroupVersionClient) Get(ctx context.Context, id uint32) (*TenantMenuPermissionGroupVersion, error) {
+	return c.Query().Where(tenantmenupermissiongroupversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TenantMenuPermissionGroupVersionClient) GetX(ctx context.Context, id uint32) *TenantMenuPermissionGroupVersion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGroup queries the group edge of a TenantMenuPermissionGroupVersion.
+func (c *TenantMenuPermissionGroupVersionClient) QueryGroup(_m *TenantMenuPermissionGroupVersion) *TenantMenuPermissionGroupQuery {
+	query := (&TenantMenuPermissionGroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantmenupermissiongroupversion.Table, tenantmenupermissiongroupversion.FieldID, id),
+			sqlgraph.To(tenantmenupermissiongroup.Table, tenantmenupermissiongroup.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tenantmenupermissiongroupversion.GroupTable, tenantmenupermissiongroupversion.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMenus queries the menus edge of a TenantMenuPermissionGroupVersion.
+func (c *TenantMenuPermissionGroupVersionClient) QueryMenus(_m *TenantMenuPermissionGroupVersion) *MenuQuery {
+	query := (&MenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenantmenupermissiongroupversion.Table, tenantmenupermissiongroupversion.FieldID, id),
+			sqlgraph.To(menu.Table, menu.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, tenantmenupermissiongroupversion.MenusTable, tenantmenupermissiongroupversion.MenusPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TenantMenuPermissionGroupVersionClient) Hooks() []Hook {
+	return c.hooks.TenantMenuPermissionGroupVersion
+}
+
+// Interceptors returns the client interceptors.
+func (c *TenantMenuPermissionGroupVersionClient) Interceptors() []Interceptor {
+	return c.inters.TenantMenuPermissionGroupVersion
+}
+
+func (c *TenantMenuPermissionGroupVersionClient) mutate(ctx context.Context, m *TenantMenuPermissionGroupVersionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TenantMenuPermissionGroupVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TenantMenuPermissionGroupVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TenantMenuPermissionGroupVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TenantMenuPermissionGroupVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown TenantMenuPermissionGroupVersion mutation op: %q", m.Op())
+	}
+}
+
 // TenantParameterOverrideClient is a client for the TenantParameterOverride schema.
 type TenantParameterOverrideClient struct {
 	config
@@ -3767,17 +3942,19 @@ func (c *WebhookSubscriptionClient) mutate(ctx context.Context, m *WebhookSubscr
 type (
 	hooks struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
-		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion,
-		NotificationMessage, NotificationTemplate, OperationLog, ParameterDefinition,
-		Post, Project, Role, StorageProvider, TenantParameterOverride, User,
-		WebhookDeliveryLog, WebhookSubscription []ent.Hook
+		LoginLog, Menu, NotificationMessage, NotificationTemplate, OperationLog,
+		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
+		TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
+		TenantParameterOverride, User, WebhookDeliveryLog,
+		WebhookSubscription []ent.Hook
 	}
 	inters struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
-		LoginLog, Menu, MenuPermissionGroup, MenuPermissionGroupVersion,
-		NotificationMessage, NotificationTemplate, OperationLog, ParameterDefinition,
-		Post, Project, Role, StorageProvider, TenantParameterOverride, User,
-		WebhookDeliveryLog, WebhookSubscription []ent.Interceptor
+		LoginLog, Menu, NotificationMessage, NotificationTemplate, OperationLog,
+		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
+		TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
+		TenantParameterOverride, User, WebhookDeliveryLog,
+		WebhookSubscription []ent.Interceptor
 	}
 )
 

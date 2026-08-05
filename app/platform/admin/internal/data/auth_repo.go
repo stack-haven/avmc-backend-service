@@ -3,6 +3,7 @@ package data
 import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
+	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/auth"
@@ -34,7 +35,8 @@ type authRepo struct {
 	atr   *auth.AuthToken
 	ur    *userRepo
 	mr    *menuRepo
-	mpr   *menuPermissionGroupRepo
+	mpr   *tenantMenuPermissionGroupRepo
+	rr    *roleRepo
 	guard loginattempt.Guard
 	llr   biz.LoginLogRepo
 }
@@ -49,7 +51,8 @@ func NewAuthRepo(data *Data, atr *auth.AuthToken, guard loginattempt.Guard, logi
 		atr:   atr,
 		ur:    NewUserRepo(data, logger).(*userRepo),
 		mr:    NewMenuRepo(data, logger).(*menuRepo),
-		mpr:   NewMenuPermissionGroupRepo(data, logger).(*menuPermissionGroupRepo),
+		mpr:   NewTenantMenuPermissionGroupRepo(data, logger).(*tenantMenuPermissionGroupRepo),
+		rr:    NewRoleRepo(data, logger).(*roleRepo),
 		guard: guard,
 		llr:   loginLogs,
 	}
@@ -356,28 +359,88 @@ func (r *authRepo) Register(_ context.Context, _ string, _ string) error {
 }
 
 // Profile 获取用户简介信息
-func (r *authRepo) Profile(_ context.Context, _ uint32) (*pb.ProfileResponse, error) {
-	return nil, pb.ErrorResourceNotFound("功能暂不可用")
+func (r *authRepo) Profile(ctx context.Context, userID uint32) (*pb.ProfileResponse, error) {
+	u, err := r.ur.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	// Collect role info from user's role IDs
+	var roleNames []string
+	var primaryRole *pbCore.Role
+	if u != nil && len(u.GetRoleIds()) > 0 {
+		for _, roleID := range u.GetRoleIds() {
+			role, roleErr := r.rr.FindByID(ctx, roleID)
+			if roleErr != nil {
+				continue
+			}
+			roleNames = append(roleNames, role.GetName())
+			if primaryRole == nil {
+				primaryRole = role
+			}
+		}
+	}
+	return &pb.ProfileResponse{
+		User:  u,
+		Role:  primaryRole,
+		Roles: roleNames,
+	}, nil
 }
 
 // Codes 获取用户权限码
-func (r *authRepo) Codes(_ context.Context, _ uint32) ([]string, error) {
-	return nil, nil
+func (r *authRepo) Codes(ctx context.Context, userId uint32) ([]string, error) {
+	u, err := r.data.DB(ctx).User.Query().
+		Where(user.IDEQ(userId), user.StatusEQ(int32(enum.Status_STATUS_ENABLED))).
+		WithRoles(func(q *gen.RoleQuery) {
+			q.WithMenus(func(q *gen.MenuQuery) {
+				q.Select(menu.FieldAuthCode)
+			})
+		}).
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	seen := make(map[string]bool)
+	var codes []string
+	for _, rl := range u.Edges.Roles {
+		for _, m := range rl.Edges.Menus {
+			code := convert.ToValue(m.AuthCode)
+			if code != "" && !seen[code] {
+				seen[code] = true
+				codes = append(codes, code)
+			}
+		}
+	}
+	return codes, nil
 }
 
 // Menus 获取用户菜单
-func (r *authRepo) Menus(_ context.Context, _ uint32) ([]*pbCore.Menu, error) {
-	return nil, nil
+func (r *authRepo) Menus(ctx context.Context, userId uint32) ([]*pbCore.Menu, error) {
+	menus, err := r.data.DB(ctx).Menu.Query().
+		Where(menu.StatusEQ(int32(enum.Status_STATUS_ENABLED))).
+		Order(gen.Asc(menu.FieldSort), gen.Desc(menu.FieldID)).
+		All(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	protoMenus := convert.SliceToAny(menus, r.mr.convertProto)
+	return buildMenuTree(protoMenus), nil
 }
 
-func (r *authRepo) menuPermissionGroups() *menuPermissionGroupRepo {
+func (r *authRepo) TenantMenuPermissionGroups() *tenantMenuPermissionGroupRepo {
 	if r.mpr != nil {
 		return r.mpr
 	}
 	if r.mr == nil {
 		r.mr = &menuRepo{BaseRepo: BaseRepo{Data: r.data, Log: r.log}}
 	}
-	r.mpr = &menuPermissionGroupRepo{
+	r.mpr = &tenantMenuPermissionGroupRepo{
 		BaseRepo: BaseRepo{Data: r.data, Log: r.log},
 		mr:       r.mr,
 	}

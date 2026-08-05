@@ -3,15 +3,10 @@ package biz
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-)
-
-var (
-// ErrPostNotFound is user not found.
-// ErrPostNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
 // PostRepo is a Greater repo.

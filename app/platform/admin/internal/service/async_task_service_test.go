@@ -7,11 +7,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/platform/admin/internal/biz"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
+
+var discardLogger = log.NewStdLogger(io.Discard)
 
 type asyncTaskRepoStub struct {
 	listReq   *pbCore.ListAsyncTasksRequest
@@ -85,6 +87,13 @@ func (noopTaskHandler) Handle(context.Context, json.RawMessage) (string, error) 
 
 func ptrString(value string) *string { return &value }
 
+func newTestAsyncTaskService(repo biz.AsyncTaskRepo) *AsyncTaskServiceService {
+	return NewAsyncTaskServiceService(
+		biz.NewAsyncTaskUsecase(repo, []biz.AsyncTaskHandler{noopTaskHandler{}}, discardLogger),
+		discardLogger,
+	)
+}
+
 func TestAsyncTaskServiceListSetsNextPageToken(t *testing.T) {
 	t.Parallel()
 
@@ -92,7 +101,7 @@ func TestAsyncTaskServiceListSetsNextPageToken(t *testing.T) {
 		listItems: []*pbCore.AsyncTask{{Id: 1}, {Id: 2}},
 		listTotal: 5,
 	}
-	service := NewAsyncTaskServiceService(biz.NewAsyncTaskUsecase(repo, []biz.AsyncTaskHandler{noopTaskHandler{}}, log.NewStdLogger(io.Discard)))
+	service := newTestAsyncTaskService(repo)
 
 	resp, err := service.ListAsyncTasks(context.Background(), &pbCore.ListAsyncTasksRequest{PageToken: "2"})
 	if err != nil {
@@ -112,7 +121,7 @@ func TestAsyncTaskServiceGetStats(t *testing.T) {
 	repo := &asyncTaskRepoStub{
 		stats: &pbCore.AsyncTaskStats{Total: 9, PendingOverdue: 2},
 	}
-	service := NewAsyncTaskServiceService(biz.NewAsyncTaskUsecase(repo, []biz.AsyncTaskHandler{noopTaskHandler{}}, log.NewStdLogger(io.Discard)))
+	service := newTestAsyncTaskService(repo)
 
 	resp, err := service.GetAsyncTaskStats(context.Background(), &pbCore.GetAsyncTaskStatsRequest{Queue: ptrString("maintenance"), PendingOverdueSeconds: 60})
 	if err != nil {
@@ -130,7 +139,7 @@ func TestAsyncTaskServiceCommands(t *testing.T) {
 	t.Parallel()
 
 	repo := &asyncTaskRepoStub{getTask: &pbCore.AsyncTask{Id: 7}, retryTask: &pbCore.AsyncTask{Id: 8}}
-	service := NewAsyncTaskServiceService(biz.NewAsyncTaskUsecase(repo, []biz.AsyncTaskHandler{noopTaskHandler{}}, log.NewStdLogger(io.Discard)))
+	service := newTestAsyncTaskService(repo)
 
 	got, err := service.GetAsyncTask(context.Background(), &pbCore.GetAsyncTaskRequest{Id: 7})
 	if err != nil {

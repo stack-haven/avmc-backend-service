@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -12,6 +11,7 @@ import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
+	"backend-service/pkg/aip/listing"
 )
 
 type operationLogRepo struct{ BaseRepo }
@@ -65,11 +65,8 @@ func (r *operationLogRepo) List(ctx context.Context, req *pb.ListOperationLogsRe
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(operationlog.FieldCreatedAt)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err

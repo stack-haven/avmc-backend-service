@@ -3,16 +3,12 @@ package biz
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	pbCore "backend-service/api/core/service/v1"
+	pb "backend-service/api/platform/admin/v1"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
-
-	"github.com/go-kratos/kratos/v2/log"
-)
-
-var (
-// ErrDeptNotFound is user not found.
-// ErrDeptNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
 // DeptRepo is a Greater repo.
@@ -24,6 +20,8 @@ type DeptRepo interface {
 	ListAll(context.Context) ([]*pbCore.Dept, error)
 	ListDepts(context.Context, ...listing.Option) ([]*pbCore.Dept, error) // 新增的方法用于分页查询部门
 	Delete(context.Context, uint32) error
+	GetDeleteImpact(context.Context, uint32) (*pbCore.GetDeptDeleteImpactResponse, error)
+	TransferAndDelete(context.Context, uint32, uint32) (uint32, error)
 }
 
 // DeptUsecase is a Dept usecase.
@@ -104,6 +102,18 @@ func (uc *DeptUsecase) Delete(ctx context.Context, id uint32) error {
 	return uc.repo.Delete(ctx, id)
 }
 
+func (uc *DeptUsecase) GetDeleteImpact(ctx context.Context, id uint32) (*pbCore.GetDeptDeleteImpactResponse, error) {
+	return uc.repo.GetDeleteImpact(ctx, id)
+}
+
+func (uc *DeptUsecase) TransferAndDelete(ctx context.Context, id, targetDeptID uint32) (uint32, error) {
+	uc.log.WithContext(ctx).Infof("TransferAndDeleteDept: %d -> %d", id, targetDeptID)
+	if id == targetDeptID {
+		return 0, pb.ErrorBadRequest("接收部门不能是待删除部门")
+	}
+	return uc.repo.TransferAndDelete(ctx, id, targetDeptID)
+}
+
 // ListTree 处理获取菜单树形列表请求
 // 参数：ctx 上下文，pagination 分页请求
 // 返回值：菜单树形列表响应，错误信息
@@ -112,9 +122,7 @@ func (uc *DeptUsecase) ListDeptsTree(ctx context.Context, pid uint32) (*pbCore.L
 	if err != nil {
 		return nil, err
 	}
-	tree := make([]*pbCore.Dept, 0)
-
-	tree, err = convert.ToTree(menus, pid, func(parent *pbCore.Dept, childrens ...*pbCore.Dept) error {
+	tree, err := convert.ToTree(menus, pid, func(parent *pbCore.Dept, childrens ...*pbCore.Dept) error {
 		parent.Children = append(parent.Children, childrens...)
 		return nil
 	})

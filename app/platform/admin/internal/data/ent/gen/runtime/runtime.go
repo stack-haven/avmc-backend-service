@@ -11,8 +11,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
@@ -21,6 +19,9 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
@@ -904,148 +905,6 @@ func init() {
 	menuDescID := menuMixinFields0[0].Descriptor()
 	// menu.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	menu.IDValidator = menuDescID.Validators[0].(func(uint32) error)
-	menupermissiongroupMixin := schema.MenuPermissionGroup{}.Mixin()
-	menupermissiongroupMixinHooks4 := menupermissiongroupMixin[4].Hooks()
-	menupermissiongroup.Hooks[0] = menupermissiongroupMixinHooks4[0]
-	menupermissiongroupMixinInters4 := menupermissiongroupMixin[4].Interceptors()
-	menupermissiongroup.Interceptors[0] = menupermissiongroupMixinInters4[0]
-	menupermissiongroupMixinFields0 := menupermissiongroupMixin[0].Fields()
-	_ = menupermissiongroupMixinFields0
-	menupermissiongroupMixinFields1 := menupermissiongroupMixin[1].Fields()
-	_ = menupermissiongroupMixinFields1
-	menupermissiongroupMixinFields2 := menupermissiongroupMixin[2].Fields()
-	_ = menupermissiongroupMixinFields2
-	menupermissiongroupMixinFields3 := menupermissiongroupMixin[3].Fields()
-	_ = menupermissiongroupMixinFields3
-	menupermissiongroupFields := schema.MenuPermissionGroup{}.Fields()
-	_ = menupermissiongroupFields
-	// menupermissiongroupDescStatus is the schema descriptor for status field.
-	menupermissiongroupDescStatus := menupermissiongroupMixinFields1[0].Descriptor()
-	// menupermissiongroup.DefaultStatus holds the default value on creation for the status field.
-	menupermissiongroup.DefaultStatus = menupermissiongroupDescStatus.Default.(int32)
-	// menupermissiongroup.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	menupermissiongroup.StatusValidator = func() func(int32) error {
-		validators := menupermissiongroupDescStatus.Validators
-		fns := [...]func(int32) error{
-			validators[0].(func(int32) error),
-			validators[1].(func(int32) error),
-		}
-		return func(status int32) error {
-			for _, fn := range fns {
-				if err := fn(status); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// menupermissiongroupDescCreatedAt is the schema descriptor for created_at field.
-	menupermissiongroupDescCreatedAt := menupermissiongroupMixinFields2[0].Descriptor()
-	// menupermissiongroup.DefaultCreatedAt holds the default value on creation for the created_at field.
-	menupermissiongroup.DefaultCreatedAt = menupermissiongroupDescCreatedAt.Default.(func() time.Time)
-	// menupermissiongroupDescUpdatedAt is the schema descriptor for updated_at field.
-	menupermissiongroupDescUpdatedAt := menupermissiongroupMixinFields3[0].Descriptor()
-	// menupermissiongroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	menupermissiongroup.DefaultUpdatedAt = menupermissiongroupDescUpdatedAt.Default.(func() time.Time)
-	// menupermissiongroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	menupermissiongroup.UpdateDefaultUpdatedAt = menupermissiongroupDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// menupermissiongroupDescName is the schema descriptor for name field.
-	menupermissiongroupDescName := menupermissiongroupFields[0].Descriptor()
-	// menupermissiongroup.DefaultName holds the default value on creation for the name field.
-	menupermissiongroup.DefaultName = menupermissiongroupDescName.Default.(string)
-	// menupermissiongroup.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	menupermissiongroup.NameValidator = func() func(string) error {
-		validators := menupermissiongroupDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// menupermissiongroupDescCode is the schema descriptor for code field.
-	menupermissiongroupDescCode := menupermissiongroupFields[1].Descriptor()
-	// menupermissiongroup.DefaultCode holds the default value on creation for the code field.
-	menupermissiongroup.DefaultCode = menupermissiongroupDescCode.Default.(string)
-	// menupermissiongroup.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	menupermissiongroup.CodeValidator = func() func(string) error {
-		validators := menupermissiongroupDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// menupermissiongroupDescIsSystem is the schema descriptor for is_system field.
-	menupermissiongroupDescIsSystem := menupermissiongroupFields[2].Descriptor()
-	// menupermissiongroup.DefaultIsSystem holds the default value on creation for the is_system field.
-	menupermissiongroup.DefaultIsSystem = menupermissiongroupDescIsSystem.Default.(bool)
-	// menupermissiongroupDescSort is the schema descriptor for sort field.
-	menupermissiongroupDescSort := menupermissiongroupFields[3].Descriptor()
-	// menupermissiongroup.DefaultSort holds the default value on creation for the sort field.
-	menupermissiongroup.DefaultSort = menupermissiongroupDescSort.Default.(int32)
-	// menupermissiongroupDescDescription is the schema descriptor for description field.
-	menupermissiongroupDescDescription := menupermissiongroupFields[4].Descriptor()
-	// menupermissiongroup.DefaultDescription holds the default value on creation for the description field.
-	menupermissiongroup.DefaultDescription = menupermissiongroupDescDescription.Default.(string)
-	// menupermissiongroup.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
-	menupermissiongroup.DescriptionValidator = menupermissiongroupDescDescription.Validators[0].(func(string) error)
-	// menupermissiongroupDescRemark is the schema descriptor for remark field.
-	menupermissiongroupDescRemark := menupermissiongroupFields[5].Descriptor()
-	// menupermissiongroup.DefaultRemark holds the default value on creation for the remark field.
-	menupermissiongroup.DefaultRemark = menupermissiongroupDescRemark.Default.(string)
-	// menupermissiongroup.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
-	menupermissiongroup.RemarkValidator = menupermissiongroupDescRemark.Validators[0].(func(string) error)
-	// menupermissiongroupDescID is the schema descriptor for id field.
-	menupermissiongroupDescID := menupermissiongroupMixinFields0[0].Descriptor()
-	// menupermissiongroup.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	menupermissiongroup.IDValidator = menupermissiongroupDescID.Validators[0].(func(uint32) error)
-	menupermissiongroupversionMixin := schema.MenuPermissionGroupVersion{}.Mixin()
-	menupermissiongroupversionMixinFields0 := menupermissiongroupversionMixin[0].Fields()
-	_ = menupermissiongroupversionMixinFields0
-	menupermissiongroupversionMixinFields1 := menupermissiongroupversionMixin[1].Fields()
-	_ = menupermissiongroupversionMixinFields1
-	menupermissiongroupversionFields := schema.MenuPermissionGroupVersion{}.Fields()
-	_ = menupermissiongroupversionFields
-	// menupermissiongroupversionDescCreatedAt is the schema descriptor for created_at field.
-	menupermissiongroupversionDescCreatedAt := menupermissiongroupversionMixinFields1[0].Descriptor()
-	// menupermissiongroupversion.DefaultCreatedAt holds the default value on creation for the created_at field.
-	menupermissiongroupversion.DefaultCreatedAt = menupermissiongroupversionDescCreatedAt.Default.(func() time.Time)
-	// menupermissiongroupversionDescGroupID is the schema descriptor for group_id field.
-	menupermissiongroupversionDescGroupID := menupermissiongroupversionFields[0].Descriptor()
-	// menupermissiongroupversion.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	menupermissiongroupversion.GroupIDValidator = menupermissiongroupversionDescGroupID.Validators[0].(func(uint32) error)
-	// menupermissiongroupversionDescVersion is the schema descriptor for version field.
-	menupermissiongroupversionDescVersion := menupermissiongroupversionFields[1].Descriptor()
-	// menupermissiongroupversion.VersionValidator is a validator for the "version" field. It is called by the builders before save.
-	menupermissiongroupversion.VersionValidator = menupermissiongroupversionDescVersion.Validators[0].(func(int32) error)
-	// menupermissiongroupversionDescState is the schema descriptor for state field.
-	menupermissiongroupversionDescState := menupermissiongroupversionFields[2].Descriptor()
-	// menupermissiongroupversion.DefaultState holds the default value on creation for the state field.
-	menupermissiongroupversion.DefaultState = menupermissiongroupversionDescState.Default.(int32)
-	// menupermissiongroupversionDescChangeSummary is the schema descriptor for change_summary field.
-	menupermissiongroupversionDescChangeSummary := menupermissiongroupversionFields[3].Descriptor()
-	// menupermissiongroupversion.DefaultChangeSummary holds the default value on creation for the change_summary field.
-	menupermissiongroupversion.DefaultChangeSummary = menupermissiongroupversionDescChangeSummary.Default.(string)
-	// menupermissiongroupversion.ChangeSummaryValidator is a validator for the "change_summary" field. It is called by the builders before save.
-	menupermissiongroupversion.ChangeSummaryValidator = menupermissiongroupversionDescChangeSummary.Validators[0].(func(string) error)
-	// menupermissiongroupversionDescID is the schema descriptor for id field.
-	menupermissiongroupversionDescID := menupermissiongroupversionMixinFields0[0].Descriptor()
-	// menupermissiongroupversion.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	menupermissiongroupversion.IDValidator = menupermissiongroupversionDescID.Validators[0].(func(uint32) error)
 	notificationmessageMixin := schema.NotificationMessage{}.Mixin()
 	notificationmessage.Policy = privacy.NewPolicies(notificationmessageMixin[0], schema.NotificationMessage{})
 	notificationmessage.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -1893,6 +1752,229 @@ func init() {
 	storageproviderDescID := storageproviderMixinFields0[0].Descriptor()
 	// storageprovider.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	storageprovider.IDValidator = storageproviderDescID.Validators[0].(func(uint32) error)
+	tenantMixin := schema.Tenant{}.Mixin()
+	tenantMixinHooks3 := tenantMixin[3].Hooks()
+	tenant.Hooks[0] = tenantMixinHooks3[0]
+	tenantMixinInters3 := tenantMixin[3].Interceptors()
+	tenant.Interceptors[0] = tenantMixinInters3[0]
+	tenantMixinFields0 := tenantMixin[0].Fields()
+	_ = tenantMixinFields0
+	tenantMixinFields1 := tenantMixin[1].Fields()
+	_ = tenantMixinFields1
+	tenantMixinFields2 := tenantMixin[2].Fields()
+	_ = tenantMixinFields2
+	tenantFields := schema.Tenant{}.Fields()
+	_ = tenantFields
+	// tenantDescCreatedAt is the schema descriptor for created_at field.
+	tenantDescCreatedAt := tenantMixinFields1[0].Descriptor()
+	// tenant.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tenant.DefaultCreatedAt = tenantDescCreatedAt.Default.(func() time.Time)
+	// tenantDescUpdatedAt is the schema descriptor for updated_at field.
+	tenantDescUpdatedAt := tenantMixinFields2[0].Descriptor()
+	// tenant.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	tenant.DefaultUpdatedAt = tenantDescUpdatedAt.Default.(func() time.Time)
+	// tenant.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	tenant.UpdateDefaultUpdatedAt = tenantDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tenantDescName is the schema descriptor for name field.
+	tenantDescName := tenantFields[0].Descriptor()
+	// tenant.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	tenant.NameValidator = func() func(string) error {
+		validators := tenantDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tenantDescCode is the schema descriptor for code field.
+	tenantDescCode := tenantFields[1].Descriptor()
+	// tenant.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	tenant.CodeValidator = func() func(string) error {
+		validators := tenantDescCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(code string) error {
+			for _, fn := range fns {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tenantDescSort is the schema descriptor for sort field.
+	tenantDescSort := tenantFields[2].Descriptor()
+	// tenant.DefaultSort holds the default value on creation for the sort field.
+	tenant.DefaultSort = tenantDescSort.Default.(int32)
+	// tenantDescRemark is the schema descriptor for remark field.
+	tenantDescRemark := tenantFields[3].Descriptor()
+	// tenant.DefaultRemark holds the default value on creation for the remark field.
+	tenant.DefaultRemark = tenantDescRemark.Default.(string)
+	// tenant.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	tenant.RemarkValidator = tenantDescRemark.Validators[0].(func(string) error)
+	// tenantDescIsPlatform is the schema descriptor for is_platform field.
+	tenantDescIsPlatform := tenantFields[4].Descriptor()
+	// tenant.DefaultIsPlatform holds the default value on creation for the is_platform field.
+	tenant.DefaultIsPlatform = tenantDescIsPlatform.Default.(bool)
+	// tenantDescLifecycleStatus is the schema descriptor for lifecycle_status field.
+	tenantDescLifecycleStatus := tenantFields[5].Descriptor()
+	// tenant.DefaultLifecycleStatus holds the default value on creation for the lifecycle_status field.
+	tenant.DefaultLifecycleStatus = tenantDescLifecycleStatus.Default.(int32)
+	// tenantDescID is the schema descriptor for id field.
+	tenantDescID := tenantMixinFields0[0].Descriptor()
+	// tenant.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	tenant.IDValidator = tenantDescID.Validators[0].(func(uint32) error)
+	tenantmenupermissiongroupMixin := schema.TenantMenuPermissionGroup{}.Mixin()
+	tenantmenupermissiongroupMixinHooks4 := tenantmenupermissiongroupMixin[4].Hooks()
+	tenantmenupermissiongroup.Hooks[0] = tenantmenupermissiongroupMixinHooks4[0]
+	tenantmenupermissiongroupMixinInters4 := tenantmenupermissiongroupMixin[4].Interceptors()
+	tenantmenupermissiongroup.Interceptors[0] = tenantmenupermissiongroupMixinInters4[0]
+	tenantmenupermissiongroupMixinFields0 := tenantmenupermissiongroupMixin[0].Fields()
+	_ = tenantmenupermissiongroupMixinFields0
+	tenantmenupermissiongroupMixinFields1 := tenantmenupermissiongroupMixin[1].Fields()
+	_ = tenantmenupermissiongroupMixinFields1
+	tenantmenupermissiongroupMixinFields2 := tenantmenupermissiongroupMixin[2].Fields()
+	_ = tenantmenupermissiongroupMixinFields2
+	tenantmenupermissiongroupMixinFields3 := tenantmenupermissiongroupMixin[3].Fields()
+	_ = tenantmenupermissiongroupMixinFields3
+	tenantmenupermissiongroupFields := schema.TenantMenuPermissionGroup{}.Fields()
+	_ = tenantmenupermissiongroupFields
+	// tenantmenupermissiongroupDescStatus is the schema descriptor for status field.
+	tenantmenupermissiongroupDescStatus := tenantmenupermissiongroupMixinFields1[0].Descriptor()
+	// tenantmenupermissiongroup.DefaultStatus holds the default value on creation for the status field.
+	tenantmenupermissiongroup.DefaultStatus = tenantmenupermissiongroupDescStatus.Default.(int32)
+	// tenantmenupermissiongroup.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	tenantmenupermissiongroup.StatusValidator = func() func(int32) error {
+		validators := tenantmenupermissiongroupDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tenantmenupermissiongroupDescCreatedAt is the schema descriptor for created_at field.
+	tenantmenupermissiongroupDescCreatedAt := tenantmenupermissiongroupMixinFields2[0].Descriptor()
+	// tenantmenupermissiongroup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tenantmenupermissiongroup.DefaultCreatedAt = tenantmenupermissiongroupDescCreatedAt.Default.(func() time.Time)
+	// tenantmenupermissiongroupDescUpdatedAt is the schema descriptor for updated_at field.
+	tenantmenupermissiongroupDescUpdatedAt := tenantmenupermissiongroupMixinFields3[0].Descriptor()
+	// tenantmenupermissiongroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	tenantmenupermissiongroup.DefaultUpdatedAt = tenantmenupermissiongroupDescUpdatedAt.Default.(func() time.Time)
+	// tenantmenupermissiongroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	tenantmenupermissiongroup.UpdateDefaultUpdatedAt = tenantmenupermissiongroupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tenantmenupermissiongroupDescName is the schema descriptor for name field.
+	tenantmenupermissiongroupDescName := tenantmenupermissiongroupFields[0].Descriptor()
+	// tenantmenupermissiongroup.DefaultName holds the default value on creation for the name field.
+	tenantmenupermissiongroup.DefaultName = tenantmenupermissiongroupDescName.Default.(string)
+	// tenantmenupermissiongroup.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	tenantmenupermissiongroup.NameValidator = func() func(string) error {
+		validators := tenantmenupermissiongroupDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tenantmenupermissiongroupDescCode is the schema descriptor for code field.
+	tenantmenupermissiongroupDescCode := tenantmenupermissiongroupFields[1].Descriptor()
+	// tenantmenupermissiongroup.DefaultCode holds the default value on creation for the code field.
+	tenantmenupermissiongroup.DefaultCode = tenantmenupermissiongroupDescCode.Default.(string)
+	// tenantmenupermissiongroup.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	tenantmenupermissiongroup.CodeValidator = func() func(string) error {
+		validators := tenantmenupermissiongroupDescCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(code string) error {
+			for _, fn := range fns {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tenantmenupermissiongroupDescIsSystem is the schema descriptor for is_system field.
+	tenantmenupermissiongroupDescIsSystem := tenantmenupermissiongroupFields[2].Descriptor()
+	// tenantmenupermissiongroup.DefaultIsSystem holds the default value on creation for the is_system field.
+	tenantmenupermissiongroup.DefaultIsSystem = tenantmenupermissiongroupDescIsSystem.Default.(bool)
+	// tenantmenupermissiongroupDescSort is the schema descriptor for sort field.
+	tenantmenupermissiongroupDescSort := tenantmenupermissiongroupFields[3].Descriptor()
+	// tenantmenupermissiongroup.DefaultSort holds the default value on creation for the sort field.
+	tenantmenupermissiongroup.DefaultSort = tenantmenupermissiongroupDescSort.Default.(int32)
+	// tenantmenupermissiongroupDescDescription is the schema descriptor for description field.
+	tenantmenupermissiongroupDescDescription := tenantmenupermissiongroupFields[4].Descriptor()
+	// tenantmenupermissiongroup.DefaultDescription holds the default value on creation for the description field.
+	tenantmenupermissiongroup.DefaultDescription = tenantmenupermissiongroupDescDescription.Default.(string)
+	// tenantmenupermissiongroup.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	tenantmenupermissiongroup.DescriptionValidator = tenantmenupermissiongroupDescDescription.Validators[0].(func(string) error)
+	// tenantmenupermissiongroupDescRemark is the schema descriptor for remark field.
+	tenantmenupermissiongroupDescRemark := tenantmenupermissiongroupFields[5].Descriptor()
+	// tenantmenupermissiongroup.DefaultRemark holds the default value on creation for the remark field.
+	tenantmenupermissiongroup.DefaultRemark = tenantmenupermissiongroupDescRemark.Default.(string)
+	// tenantmenupermissiongroup.RemarkValidator is a validator for the "remark" field. It is called by the builders before save.
+	tenantmenupermissiongroup.RemarkValidator = tenantmenupermissiongroupDescRemark.Validators[0].(func(string) error)
+	// tenantmenupermissiongroupDescID is the schema descriptor for id field.
+	tenantmenupermissiongroupDescID := tenantmenupermissiongroupMixinFields0[0].Descriptor()
+	// tenantmenupermissiongroup.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	tenantmenupermissiongroup.IDValidator = tenantmenupermissiongroupDescID.Validators[0].(func(uint32) error)
+	tenantmenupermissiongroupversionMixin := schema.TenantMenuPermissionGroupVersion{}.Mixin()
+	tenantmenupermissiongroupversionMixinFields0 := tenantmenupermissiongroupversionMixin[0].Fields()
+	_ = tenantmenupermissiongroupversionMixinFields0
+	tenantmenupermissiongroupversionMixinFields1 := tenantmenupermissiongroupversionMixin[1].Fields()
+	_ = tenantmenupermissiongroupversionMixinFields1
+	tenantmenupermissiongroupversionFields := schema.TenantMenuPermissionGroupVersion{}.Fields()
+	_ = tenantmenupermissiongroupversionFields
+	// tenantmenupermissiongroupversionDescCreatedAt is the schema descriptor for created_at field.
+	tenantmenupermissiongroupversionDescCreatedAt := tenantmenupermissiongroupversionMixinFields1[0].Descriptor()
+	// tenantmenupermissiongroupversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tenantmenupermissiongroupversion.DefaultCreatedAt = tenantmenupermissiongroupversionDescCreatedAt.Default.(func() time.Time)
+	// tenantmenupermissiongroupversionDescGroupID is the schema descriptor for group_id field.
+	tenantmenupermissiongroupversionDescGroupID := tenantmenupermissiongroupversionFields[0].Descriptor()
+	// tenantmenupermissiongroupversion.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	tenantmenupermissiongroupversion.GroupIDValidator = tenantmenupermissiongroupversionDescGroupID.Validators[0].(func(uint32) error)
+	// tenantmenupermissiongroupversionDescVersion is the schema descriptor for version field.
+	tenantmenupermissiongroupversionDescVersion := tenantmenupermissiongroupversionFields[1].Descriptor()
+	// tenantmenupermissiongroupversion.VersionValidator is a validator for the "version" field. It is called by the builders before save.
+	tenantmenupermissiongroupversion.VersionValidator = tenantmenupermissiongroupversionDescVersion.Validators[0].(func(int32) error)
+	// tenantmenupermissiongroupversionDescState is the schema descriptor for state field.
+	tenantmenupermissiongroupversionDescState := tenantmenupermissiongroupversionFields[2].Descriptor()
+	// tenantmenupermissiongroupversion.DefaultState holds the default value on creation for the state field.
+	tenantmenupermissiongroupversion.DefaultState = tenantmenupermissiongroupversionDescState.Default.(int32)
+	// tenantmenupermissiongroupversionDescChangeSummary is the schema descriptor for change_summary field.
+	tenantmenupermissiongroupversionDescChangeSummary := tenantmenupermissiongroupversionFields[3].Descriptor()
+	// tenantmenupermissiongroupversion.DefaultChangeSummary holds the default value on creation for the change_summary field.
+	tenantmenupermissiongroupversion.DefaultChangeSummary = tenantmenupermissiongroupversionDescChangeSummary.Default.(string)
+	// tenantmenupermissiongroupversion.ChangeSummaryValidator is a validator for the "change_summary" field. It is called by the builders before save.
+	tenantmenupermissiongroupversion.ChangeSummaryValidator = tenantmenupermissiongroupversionDescChangeSummary.Validators[0].(func(string) error)
+	// tenantmenupermissiongroupversionDescID is the schema descriptor for id field.
+	tenantmenupermissiongroupversionDescID := tenantmenupermissiongroupversionMixinFields0[0].Descriptor()
+	// tenantmenupermissiongroupversion.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	tenantmenupermissiongroupversion.IDValidator = tenantmenupermissiongroupversionDescID.Validators[0].(func(uint32) error)
 	tenantparameteroverrideMixin := schema.TenantParameterOverride{}.Mixin()
 	tenantparameteroverride.Policy = privacy.NewPolicies(tenantparameteroverrideMixin[3], schema.TenantParameterOverride{})
 	tenantparameteroverride.Hooks[0] = func(next ent.Mutator) ent.Mutator {

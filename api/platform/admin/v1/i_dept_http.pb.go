@@ -23,8 +23,10 @@ const _ = http.SupportPackageIsVersion1
 const OperationDeptServiceCreateDept = "/platform.admin.v1.DeptService/CreateDept"
 const OperationDeptServiceDeleteDept = "/platform.admin.v1.DeptService/DeleteDept"
 const OperationDeptServiceGetDept = "/platform.admin.v1.DeptService/GetDept"
+const OperationDeptServiceGetDeptDeleteImpact = "/platform.admin.v1.DeptService/GetDeptDeleteImpact"
 const OperationDeptServiceListDepts = "/platform.admin.v1.DeptService/ListDepts"
 const OperationDeptServiceListDeptsTree = "/platform.admin.v1.DeptService/ListDeptsTree"
+const OperationDeptServiceTransferAndDeleteDept = "/platform.admin.v1.DeptService/TransferAndDeleteDept"
 const OperationDeptServiceUpdateDept = "/platform.admin.v1.DeptService/UpdateDept"
 const OperationDeptServiceUpdateDeptByStatus = "/platform.admin.v1.DeptService/UpdateDeptByStatus"
 
@@ -35,10 +37,14 @@ type DeptServiceHTTPServer interface {
 	DeleteDept(context.Context, *v1.DeleteDeptRequest) (*v1.DeleteDeptResponse, error)
 	// GetDept 获取部门数据
 	GetDept(context.Context, *v1.GetDeptRequest) (*v1.Dept, error)
+	// GetDeptDeleteImpact 获取删除部门前的影响范围
+	GetDeptDeleteImpact(context.Context, *v1.GetDeptDeleteImpactRequest) (*v1.GetDeptDeleteImpactResponse, error)
 	// ListDepts 获取部门列表
 	ListDepts(context.Context, *v1.ListDeptsRequest) (*v1.ListDeptsResponse, error)
 	// ListDeptsTree 获取部门树
 	ListDeptsTree(context.Context, *v1.ListDeptsTreeRequest) (*v1.ListDeptsTreeResponse, error)
+	// TransferAndDeleteDept 转移部门人员并删除部门
+	TransferAndDeleteDept(context.Context, *v1.TransferAndDeleteDeptRequest) (*v1.TransferAndDeleteDeptResponse, error)
 	// UpdateDept 更新部门
 	UpdateDept(context.Context, *v1.UpdateDeptRequest) (*v1.UpdateDeptResponse, error)
 	// UpdateDeptByStatus 更新部门状态
@@ -54,6 +60,8 @@ func RegisterDeptServiceHTTPServer(s *http.Server, srv DeptServiceHTTPServer) {
 	r.POST("/admin/v1/depts", _DeptService_CreateDept0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/depts/{id}", _DeptService_UpdateDept0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/depts/{id}", _DeptService_DeleteDept0_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts/{id}/delete-impact", _DeptService_GetDeptDeleteImpact0_HTTP_Handler(srv))
+	r.POST("/admin/v1/depts/{id}:transfer-and-delete", _DeptService_TransferAndDeleteDept0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/depts/status-update/{id}", _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv))
 }
 
@@ -208,6 +216,53 @@ func _DeptService_DeleteDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx h
 	}
 }
 
+func _DeptService_GetDeptDeleteImpact0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.GetDeptDeleteImpactRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDeptServiceGetDeptDeleteImpact)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetDeptDeleteImpact(ctx, req.(*v1.GetDeptDeleteImpactRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.GetDeptDeleteImpactResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DeptService_TransferAndDeleteDept0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.TransferAndDeleteDeptRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDeptServiceTransferAndDeleteDept)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.TransferAndDeleteDept(ctx, req.(*v1.TransferAndDeleteDeptRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.TransferAndDeleteDeptResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.UpdateDeptByStatusRequest
@@ -240,10 +295,14 @@ type DeptServiceHTTPClient interface {
 	DeleteDept(ctx context.Context, req *v1.DeleteDeptRequest, opts ...http.CallOption) (rsp *v1.DeleteDeptResponse, err error)
 	// GetDept 获取部门数据
 	GetDept(ctx context.Context, req *v1.GetDeptRequest, opts ...http.CallOption) (rsp *v1.Dept, err error)
+	// GetDeptDeleteImpact 获取删除部门前的影响范围
+	GetDeptDeleteImpact(ctx context.Context, req *v1.GetDeptDeleteImpactRequest, opts ...http.CallOption) (rsp *v1.GetDeptDeleteImpactResponse, err error)
 	// ListDepts 获取部门列表
 	ListDepts(ctx context.Context, req *v1.ListDeptsRequest, opts ...http.CallOption) (rsp *v1.ListDeptsResponse, err error)
 	// ListDeptsTree 获取部门树
 	ListDeptsTree(ctx context.Context, req *v1.ListDeptsTreeRequest, opts ...http.CallOption) (rsp *v1.ListDeptsTreeResponse, err error)
+	// TransferAndDeleteDept 转移部门人员并删除部门
+	TransferAndDeleteDept(ctx context.Context, req *v1.TransferAndDeleteDeptRequest, opts ...http.CallOption) (rsp *v1.TransferAndDeleteDeptResponse, err error)
 	// UpdateDept 更新部门
 	UpdateDept(ctx context.Context, req *v1.UpdateDeptRequest, opts ...http.CallOption) (rsp *v1.UpdateDeptResponse, err error)
 	// UpdateDeptByStatus 更新部门状态
@@ -300,6 +359,20 @@ func (c *DeptServiceHTTPClientImpl) GetDept(ctx context.Context, in *v1.GetDeptR
 	return &out, nil
 }
 
+// GetDeptDeleteImpact 获取删除部门前的影响范围
+func (c *DeptServiceHTTPClientImpl) GetDeptDeleteImpact(ctx context.Context, in *v1.GetDeptDeleteImpactRequest, opts ...http.CallOption) (*v1.GetDeptDeleteImpactResponse, error) {
+	var out v1.GetDeptDeleteImpactResponse
+	pattern := "/admin/v1/depts/{id}/delete-impact"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDeptServiceGetDeptDeleteImpact))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ListDepts 获取部门列表
 func (c *DeptServiceHTTPClientImpl) ListDepts(ctx context.Context, in *v1.ListDeptsRequest, opts ...http.CallOption) (*v1.ListDeptsResponse, error) {
 	var out v1.ListDeptsResponse
@@ -322,6 +395,20 @@ func (c *DeptServiceHTTPClientImpl) ListDeptsTree(ctx context.Context, in *v1.Li
 	opts = append(opts, http.Operation(OperationDeptServiceListDeptsTree))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// TransferAndDeleteDept 转移部门人员并删除部门
+func (c *DeptServiceHTTPClientImpl) TransferAndDeleteDept(ctx context.Context, in *v1.TransferAndDeleteDeptRequest, opts ...http.CallOption) (*v1.TransferAndDeleteDeptResponse, error) {
+	var out v1.TransferAndDeleteDeptResponse
+	pattern := "/admin/v1/depts/{id}:transfer-and-delete"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDeptServiceTransferAndDeleteDept))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

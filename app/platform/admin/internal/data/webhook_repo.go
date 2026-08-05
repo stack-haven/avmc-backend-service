@@ -2,8 +2,8 @@ package data
 
 import (
 	"context"
-	"strconv"
 	"strings"
+	"time"
 
 	"backend-service/api/common/enum"
 	pb "backend-service/api/core/service/v1"
@@ -11,6 +11,8 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhooksubscription"
+	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -49,8 +51,8 @@ func webhookSubscriptionProto(row *gen.WebhookSubscription) *pb.WebhookSubscript
 		Secret:     row.Secret,
 		EventTypes: eventTypes,
 		Status:     &status,
-		CreatedAt:  strTime(row.CreatedAt),
-		UpdatedAt:  strTime(row.UpdatedAt),
+		CreatedAt:  convert.TimeValueToString(&row.CreatedAt, time.DateTime),
+		UpdatedAt:  convert.TimeValueToString(&row.UpdatedAt, time.DateTime),
 	}
 }
 
@@ -67,19 +69,19 @@ func webhookDeliveryLogProto(row *gen.WebhookDeliveryLog) *pb.WebhookDeliveryLog
 		rspBody = row.ResponseBody
 	}
 	return &pb.WebhookDeliveryLog{
-		Id:              row.ID,
-		TenantId:        row.TenantID,
-		SubscriptionId:  row.SubscriptionID,
-		EventId:         row.EventID,
-		EventType:       pb.WebhookEventType(row.EventType),
-		TargetUrl:       row.TargetURL,
-		RequestBody:     row.RequestBody,
-		ResponseCode:    i32Ptr(row.ResponseCode),
-		ResponseBody:    strPtr(rspBody),
-		DeliveryStatus:  pb.WebhookDeliveryStatus(row.DeliveryStatus),
-		AttemptNumber:   row.AttemptNumber,
-		ErrorMessage:    strPtr(errMsg),
-		CreatedAt:       strTime(row.CreatedAt),
+		Id:             row.ID,
+		TenantId:       row.TenantID,
+		SubscriptionId: row.SubscriptionID,
+		EventId:        row.EventID,
+		EventType:      pb.WebhookEventType(row.EventType),
+		TargetUrl:      row.TargetURL,
+		RequestBody:    row.RequestBody,
+		ResponseCode:   convert.ToPointer(row.ResponseCode),
+		ResponseBody:   convert.EmptyToNil(rspBody),
+		DeliveryStatus: pb.WebhookDeliveryStatus(row.DeliveryStatus),
+		AttemptNumber:  row.AttemptNumber,
+		ErrorMessage:   convert.EmptyToNil(errMsg),
+		CreatedAt:      convert.TimeValueToString(&row.CreatedAt, time.DateTime),
 	}
 }
 
@@ -88,7 +90,7 @@ func webhookDeliveryLogProto(row *gen.WebhookDeliveryLog) *pb.WebhookDeliveryLog
 // ---------------------------------------------------------------------------
 
 func (r *webhookRepo) ListSubscriptions(ctx context.Context, req *pb.ListWebhookSubscriptionsRequest) ([]*pb.WebhookSubscription, int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, 0, err
 	}
 	if req == nil {
@@ -101,7 +103,7 @@ func (r *webhookRepo) ListSubscriptions(ctx context.Context, req *pb.ListWebhook
 			webhooksubscription.URLContains(keyword),
 		))
 	}
-		// EventType filtering is applied at the application layer (JSON array contains)
+	// EventType filtering is applied at the application layer (JSON array contains)
 	if req.Status != nil && req.GetStatus() != enum.Status_STATUS_UNSPECIFIED {
 		query.Where(webhooksubscription.StatusEQ(int32(req.GetStatus())))
 	}
@@ -109,23 +111,17 @@ func (r *webhookRepo) ListSubscriptions(ctx context.Context, req *pb.ListWebhook
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, err := strconv.Atoi(req.GetPageToken())
-	if err != nil || offset < 0 {
-		offset = 0
-	}
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(webhooksubscription.FieldCreatedAt)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
-	return ConvertSlice(rows, webhookSubscriptionProto), int32(total), nil
+	return convert.SliceToAny(rows, webhookSubscriptionProto), int32(total), nil
 }
 
 func (r *webhookRepo) GetSubscription(ctx context.Context, id uint32) (*pb.WebhookSubscription, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).WebhookSubscription.Get(ctx, id)
@@ -139,7 +135,7 @@ func (r *webhookRepo) GetSubscription(ctx context.Context, id uint32) (*pb.Webho
 }
 
 func (r *webhookRepo) CreateSubscription(ctx context.Context, value *pb.WebhookSubscription) (*pb.WebhookSubscription, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).WebhookSubscription.Create().
@@ -159,7 +155,7 @@ func (r *webhookRepo) CreateSubscription(ctx context.Context, value *pb.WebhookS
 }
 
 func (r *webhookRepo) UpdateSubscription(ctx context.Context, value *pb.WebhookSubscription) (*pb.WebhookSubscription, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	upd := r.Data.DB(ctx).WebhookSubscription.UpdateOneID(value.GetId())
@@ -190,7 +186,7 @@ func (r *webhookRepo) UpdateSubscription(ctx context.Context, value *pb.WebhookS
 }
 
 func (r *webhookRepo) DeleteSubscription(ctx context.Context, id uint32) error {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return err
 	}
 	err := r.Data.DB(ctx).WebhookSubscription.DeleteOneID(id).Exec(ctx)
@@ -230,7 +226,7 @@ func (r *webhookRepo) FindSubscriptionsByEvent(ctx context.Context, tenantID uin
 // ---------------------------------------------------------------------------
 
 func (r *webhookRepo) ListDeliveryLogs(ctx context.Context, req *pb.ListWebhookDeliveryLogsRequest) ([]*pb.WebhookDeliveryLog, int32, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, 0, err
 	}
 	if req == nil {
@@ -250,23 +246,17 @@ func (r *webhookRepo) ListDeliveryLogs(ctx context.Context, req *pb.ListWebhookD
 	if err != nil {
 		return nil, 0, err
 	}
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, err := strconv.Atoi(req.GetPageToken())
-	if err != nil || offset < 0 {
-		offset = 0
-	}
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	rows, err := query.Order(gen.Desc(webhookdeliverylog.FieldCreatedAt)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
-	return ConvertSlice(rows, webhookDeliveryLogProto), int32(total), nil
+	return convert.SliceToAny(rows, webhookDeliveryLogProto), int32(total), nil
 }
 
 func (r *webhookRepo) GetDeliveryLog(ctx context.Context, id uint32) (*pb.WebhookDeliveryLog, error) {
-	if _, err := requireTenantID(ctx); err != nil {
+	if _, err := r.RequireTenantID(ctx); err != nil {
 		return nil, err
 	}
 	row, err := r.Data.DB(ctx).WebhookDeliveryLog.Get(ctx, id)
@@ -318,41 +308,6 @@ func eventTypeInt32s(types []pb.WebhookEventType) []int32 {
 	result := make([]int32, len(types))
 	for i, v := range types {
 		result[i] = int32(v)
-	}
-	return result
-}
-
-func i32Ptr(n int32) *int32 { return &n }
-
-func strPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
-}
-
-func trimStr(s string) string {
-	trimmed := ""
-	for _, c := range s {
-		if c != ' ' {
-			trimmed += string(c)
-		}
-	}
-	if trimmed == "" {
-		return ""
-	}
-	// simple trim
-	result := ""
-	i := 0
-	for i < len(s) && s[i] == ' ' {
-		i++
-	}
-	j := len(s) - 1
-	for j >= 0 && s[j] == ' ' {
-		j--
-	}
-	if i <= j {
-		result = s[i : j+1]
 	}
 	return result
 }

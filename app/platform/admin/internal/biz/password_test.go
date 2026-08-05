@@ -11,7 +11,7 @@ func TestValidatePassword(t *testing.T) {
 		wantErr  bool
 	}{
 		{name: "strong", password: "Str0ng!Admin#2026"},
-		{name: "too short", password: "Aa1!short", wantErr: true},
+		{name: "too short", password: "Aa1!s", wantErr: true},
 		{name: "missing uppercase", password: "lowercase1!password", wantErr: true},
 		{name: "missing lowercase", password: "UPPERCASE1!PASSWORD", wantErr: true},
 		{name: "missing digit", password: "NoDigits!Password", wantErr: true},

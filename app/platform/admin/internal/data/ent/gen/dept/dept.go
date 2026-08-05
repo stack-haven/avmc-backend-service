@@ -46,27 +46,27 @@ const (
 	// EdgeDataScopeRoles holds the string denoting the data_scope_roles edge name in mutations.
 	EdgeDataScopeRoles = "data_scope_roles"
 	// Table holds the table name of the dept in the database.
-	Table = "depts"
+	Table = "system_depts"
 	// ParentTable is the table that holds the parent relation/edge.
-	ParentTable = "depts"
+	ParentTable = "system_depts"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "parent_id"
 	// ChildrenTable is the table that holds the children relation/edge.
-	ChildrenTable = "depts"
+	ChildrenTable = "system_depts"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "parent_id"
 	// UsersTable is the table that holds the users relation/edge.
-	UsersTable = "users"
+	UsersTable = "system_users"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UsersInverseTable = "users"
+	UsersInverseTable = "system_users"
 	// UsersColumn is the table column denoting the users relation/edge.
 	UsersColumn = "dept_id"
 	// DataScopeRolesTable is the table that holds the data_scope_roles relation/edge. The primary key declared below.
-	DataScopeRolesTable = "role_data_scope_depts"
+	DataScopeRolesTable = "system_role_data_scope_depts"
 	// DataScopeRolesInverseTable is the table name for the Role entity.
 	// It exists in this package in order to avoid circular dependency with the "role" package.
-	DataScopeRolesInverseTable = "roles"
+	DataScopeRolesInverseTable = "system_roles"
 )
 
 // Columns holds all SQL columns for dept fields.

@@ -15,7 +15,7 @@ import (
 type DictionaryItem struct{ ent.Schema }
 
 func (DictionaryItem) Annotations() []schema.Annotation {
-	return []schema.Annotation{entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"}, entsql.WithComments(true), schema.Comment("租户数据字典项表")}
+	return []schema.Annotation{entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_dictionary_items"}, entsql.WithComments(true), schema.Comment("租户数据字典项表")}
 }
 func (DictionaryItem) Fields() []ent.Field {
 	return []ent.Field{

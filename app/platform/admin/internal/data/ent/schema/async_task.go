@@ -15,7 +15,7 @@ type AsyncTask struct{ ent.Schema }
 
 func (AsyncTask) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_async_tasks"},
 		entsql.WithComments(true),
 		schema.Comment("统一异步任务表"),
 	}

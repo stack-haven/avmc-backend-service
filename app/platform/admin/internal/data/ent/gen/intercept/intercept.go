@@ -15,8 +15,6 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroup"
-	"backend-service/app/platform/admin/internal/data/ent/gen/menupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
@@ -26,6 +24,9 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroupversion"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	"backend-service/app/platform/admin/internal/data/ent/gen/webhookdeliverylog"
@@ -306,60 +307,6 @@ func (f TraverseMenu) Traverse(ctx context.Context, q gen.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *gen.MenuQuery", q)
 }
 
-// The MenuPermissionGroupFunc type is an adapter to allow the use of ordinary function as a Querier.
-type MenuPermissionGroupFunc func(context.Context, *gen.MenuPermissionGroupQuery) (gen.Value, error)
-
-// Query calls f(ctx, q).
-func (f MenuPermissionGroupFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.MenuPermissionGroupQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupQuery", q)
-}
-
-// The TraverseMenuPermissionGroup type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseMenuPermissionGroup func(context.Context, *gen.MenuPermissionGroupQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseMenuPermissionGroup) Intercept(next gen.Querier) gen.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseMenuPermissionGroup) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.MenuPermissionGroupQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupQuery", q)
-}
-
-// The MenuPermissionGroupVersionFunc type is an adapter to allow the use of ordinary function as a Querier.
-type MenuPermissionGroupVersionFunc func(context.Context, *gen.MenuPermissionGroupVersionQuery) (gen.Value, error)
-
-// Query calls f(ctx, q).
-func (f MenuPermissionGroupVersionFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.MenuPermissionGroupVersionQuery); ok {
-		return f(ctx, q)
-	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupVersionQuery", q)
-}
-
-// The TraverseMenuPermissionGroupVersion type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseMenuPermissionGroupVersion func(context.Context, *gen.MenuPermissionGroupVersionQuery) error
-
-// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseMenuPermissionGroupVersion) Intercept(next gen.Querier) gen.Querier {
-	return next
-}
-
-// Traverse calls f(ctx, q).
-func (f TraverseMenuPermissionGroupVersion) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.MenuPermissionGroupVersionQuery); ok {
-		return f(ctx, q)
-	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.MenuPermissionGroupVersionQuery", q)
-}
-
 // The NotificationMessageFunc type is an adapter to allow the use of ordinary function as a Querier.
 type NotificationMessageFunc func(context.Context, *gen.NotificationMessageQuery) (gen.Value, error)
 
@@ -576,6 +523,87 @@ func (f TraverseStorageProvider) Traverse(ctx context.Context, q gen.Query) erro
 	return fmt.Errorf("unexpected query type %T. expect *gen.StorageProviderQuery", q)
 }
 
+// The TenantFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TenantFunc func(context.Context, *gen.TenantQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f TenantFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.TenantQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantQuery", q)
+}
+
+// The TraverseTenant type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTenant func(context.Context, *gen.TenantQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTenant) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTenant) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.TenantQuery", q)
+}
+
+// The TenantMenuPermissionGroupFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TenantMenuPermissionGroupFunc func(context.Context, *gen.TenantMenuPermissionGroupQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f TenantMenuPermissionGroupFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.TenantMenuPermissionGroupQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantMenuPermissionGroupQuery", q)
+}
+
+// The TraverseTenantMenuPermissionGroup type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTenantMenuPermissionGroup func(context.Context, *gen.TenantMenuPermissionGroupQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTenantMenuPermissionGroup) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTenantMenuPermissionGroup) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantMenuPermissionGroupQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.TenantMenuPermissionGroupQuery", q)
+}
+
+// The TenantMenuPermissionGroupVersionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type TenantMenuPermissionGroupVersionFunc func(context.Context, *gen.TenantMenuPermissionGroupVersionQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f TenantMenuPermissionGroupVersionFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.TenantMenuPermissionGroupVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.TenantMenuPermissionGroupVersionQuery", q)
+}
+
+// The TraverseTenantMenuPermissionGroupVersion type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseTenantMenuPermissionGroupVersion func(context.Context, *gen.TenantMenuPermissionGroupVersionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseTenantMenuPermissionGroupVersion) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseTenantMenuPermissionGroupVersion) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.TenantMenuPermissionGroupVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.TenantMenuPermissionGroupVersionQuery", q)
+}
+
 // The TenantParameterOverrideFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TenantParameterOverrideFunc func(context.Context, *gen.TenantParameterOverrideQuery) (gen.Value, error)
 
@@ -703,10 +731,6 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.LoginLogQuery, predicate.LoginLog, loginlog.OrderOption]{typ: gen.TypeLoginLog, tq: q}, nil
 	case *gen.MenuQuery:
 		return &query[*gen.MenuQuery, predicate.Menu, menu.OrderOption]{typ: gen.TypeMenu, tq: q}, nil
-	case *gen.MenuPermissionGroupQuery:
-		return &query[*gen.MenuPermissionGroupQuery, predicate.MenuPermissionGroup, menupermissiongroup.OrderOption]{typ: gen.TypeMenuPermissionGroup, tq: q}, nil
-	case *gen.MenuPermissionGroupVersionQuery:
-		return &query[*gen.MenuPermissionGroupVersionQuery, predicate.MenuPermissionGroupVersion, menupermissiongroupversion.OrderOption]{typ: gen.TypeMenuPermissionGroupVersion, tq: q}, nil
 	case *gen.NotificationMessageQuery:
 		return &query[*gen.NotificationMessageQuery, predicate.NotificationMessage, notificationmessage.OrderOption]{typ: gen.TypeNotificationMessage, tq: q}, nil
 	case *gen.NotificationTemplateQuery:
@@ -723,6 +747,12 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.RoleQuery, predicate.Role, role.OrderOption]{typ: gen.TypeRole, tq: q}, nil
 	case *gen.StorageProviderQuery:
 		return &query[*gen.StorageProviderQuery, predicate.StorageProvider, storageprovider.OrderOption]{typ: gen.TypeStorageProvider, tq: q}, nil
+	case *gen.TenantQuery:
+		return &query[*gen.TenantQuery, predicate.Tenant, tenant.OrderOption]{typ: gen.TypeTenant, tq: q}, nil
+	case *gen.TenantMenuPermissionGroupQuery:
+		return &query[*gen.TenantMenuPermissionGroupQuery, predicate.TenantMenuPermissionGroup, tenantmenupermissiongroup.OrderOption]{typ: gen.TypeTenantMenuPermissionGroup, tq: q}, nil
+	case *gen.TenantMenuPermissionGroupVersionQuery:
+		return &query[*gen.TenantMenuPermissionGroupVersionQuery, predicate.TenantMenuPermissionGroupVersion, tenantmenupermissiongroupversion.OrderOption]{typ: gen.TypeTenantMenuPermissionGroupVersion, tq: q}, nil
 	case *gen.TenantParameterOverrideQuery:
 		return &query[*gen.TenantParameterOverrideQuery, predicate.TenantParameterOverride, tenantparameteroverride.OrderOption]{typ: gen.TypeTenantParameterOverride, tq: q}, nil
 	case *gen.UserQuery:

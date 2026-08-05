@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-kratos/kratos/v2/log"
+
 	"backend-service/api/common/enum"
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/auth/authn"
-
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 type notificationRepoStub struct {
@@ -50,7 +50,7 @@ func (r *notificationRepoStub) CreateMessages(_ context.Context, values []*pb.No
 }
 
 func (r *notificationRepoStub) ListMessages(_ context.Context, req *pb.ListNotificationMessagesRequest) ([]*pb.NotificationMessage, int32, error) {
-	var items []*pb.NotificationMessage
+	items := make([]*pb.NotificationMessage, 0, len(r.messages))
 	for _, item := range r.messages {
 		if req.RecipientUserId != nil && item.GetRecipientUserId() != req.GetRecipientUserId() {
 			continue

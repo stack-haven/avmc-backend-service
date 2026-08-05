@@ -4,11 +4,11 @@ import (
 	"context"
 	stderrors "errors"
 	"sort"
-	"strconv"
 	"strings"
 
 	pb "backend-service/api/core/service/v1"
 	"backend-service/app/platform/admin/internal/biz"
+	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/auth"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -70,11 +70,8 @@ func (r *sessionRepo) List(ctx context.Context, req *pb.ListSessionsRequest, cur
 		return filtered[i].LastActiveAt.After(filtered[j].LastActiveAt)
 	})
 	total := len(filtered)
-	size := int(req.GetPageSize())
-	if size <= 0 || size > 100 {
-		size = 20
-	}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
 	if offset > total {
 		offset = total
 	}
@@ -128,4 +125,8 @@ func (r *sessionRepo) RevokeUser(ctx context.Context, userID uint32) error {
 		return err
 	}
 	return r.token.RevokeUserSessions(ctx, tenantID, userID)
+}
+
+func (r *sessionRepo) RevokeTenant(ctx context.Context, tenantID uint32) error {
+	return r.token.RevokeTenantSessions(ctx, tenantID)
 }

@@ -41,7 +41,7 @@ const (
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
 	// Table holds the table name of the notificationtemplate in the database.
-	Table = "notification_templates"
+	Table = "system_notification_templates"
 )
 
 // Columns holds all SQL columns for notificationtemplate fields.

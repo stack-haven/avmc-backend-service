@@ -7,13 +7,14 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
+
 	pbEnum "backend-service/api/common/enum"
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 type roleRepoServiceStub struct {
@@ -66,10 +67,7 @@ func (r *roleRepoServiceStub) ExistByName(_ context.Context, name string, exclud
 }
 
 func protoCloneRole(role *pbCore.Role) *pbCore.Role {
-	clone := *role
-	clone.MenuIds = append([]uint32(nil), role.MenuIds...)
-	clone.DeptIds = append([]uint32(nil), role.DeptIds...)
-	return &clone
+	return proto.Clone(role).(*pbCore.Role) //nolint:errcheck // proto.Clone does not return error
 }
 
 func newRoleServiceForTest(repo *roleRepoServiceStub) *RoleServiceService {

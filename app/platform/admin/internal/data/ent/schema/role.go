@@ -22,6 +22,7 @@ func (Role) Annotations() []schema.Annotation {
 		entsql.Annotation{
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
+			Table:     "system_roles",
 		},
 		entsql.WithComments(true),
 		schema.Comment("角色表"),
@@ -43,8 +44,8 @@ func (Role) Fields() []ent.Field {
 // Edges of the Role.
 func (Role) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("menus", Menu.Type),
-		edge.To("data_scope_depts", Dept.Type),
+		edge.To("menus", Menu.Type).StorageKey(edge.Table("system_role_menus")).Comment("角色菜单关联表"),
+		edge.To("data_scope_depts", Dept.Type).StorageKey(edge.Table("system_role_data_scope_depts")).Comment("角色数据权限部门关联表"),
 		edge.From("users", User.Type).
 			Ref("roles"),
 	}

@@ -24,7 +24,10 @@ func (s *LoginLogServiceService) ListLoginLogs(ctx context.Context, req *pbCore.
 		return nil, err
 	}
 	resp := &pbCore.ListLoginLogsResponse{Items: items, Total: total}
-	offset, _ := strconv.Atoi(req.GetPageToken())
+	offset, err := strconv.Atoi(req.GetPageToken())
+	if err != nil {
+		offset = 0
+	}
 	if offset+len(items) < int(total) {
 		resp.NextPageToken = strconv.Itoa(offset + len(items))
 	}

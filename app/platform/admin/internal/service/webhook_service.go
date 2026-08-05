@@ -3,20 +3,22 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/types/known/emptypb"
+
 	pb "backend-service/api/core/service/v1"
 	v1 "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
-
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type WebhookServiceService struct {
 	v1.UnimplementedWebhookServiceServer
-	uc *biz.WebhookUsecase
+	uc  *biz.WebhookUsecase
+	log *log.Helper
 }
 
-func NewWebhookService(uc *biz.WebhookUsecase) *WebhookServiceService {
-	return &WebhookServiceService{uc: uc}
+func NewWebhookService(uc *biz.WebhookUsecase, logger log.Logger) *WebhookServiceService {
+	return &WebhookServiceService{uc: uc, log: log.NewHelper(logger)}
 }
 
 // ---------------------------------------------------------------------------

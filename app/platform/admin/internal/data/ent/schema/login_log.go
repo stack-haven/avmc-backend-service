@@ -15,9 +15,9 @@ type LoginLog struct{ ent.Schema }
 
 func (LoginLog) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin"},
+		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_login_logs"},
 		entsql.WithComments(true),
-		schema.Comment("不可变登录安全日志表"),
+		schema.Comment("登录日志表"),
 	}
 }
 

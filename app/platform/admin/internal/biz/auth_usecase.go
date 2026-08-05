@@ -1,13 +1,13 @@
 package biz
 
 import (
-	v1 "backend-service/api/platform/admin/v1"
-	"backend-service/pkg/auth/authn"
 	"context"
 
-	pbCore "backend-service/api/core/service/v1"
-
 	"github.com/go-kratos/kratos/v2/log"
+
+	pbCore "backend-service/api/core/service/v1"
+	v1 "backend-service/api/platform/admin/v1"
+	"backend-service/pkg/auth/authn"
 )
 
 // UserRepo is a Greater repo.
@@ -47,19 +47,34 @@ func NewAuthUsecase(logger log.Logger, repo AuthRepo) *AuthUsecase {
 	}
 }
 
-// LoginByUsername 处理后台用户名登录业务逻辑
-// 参数：ctx 上下文，name 用户名，password 密码
-// 返回值：登录响应结构体，错误信息
+// LoginByUsername 处理后台用户名登录业务逻辑。
+//
+// 注意：username/tenant_id 的格式校验（min_len、max_len、gt）由 proto 层
+// buf.validate 完成，biz 层不应重复。本方法仅执行 proto 无法表达的**业务策略**
+// 校验——密码字符类组合（大写+小写+数字+特殊字符）。
+//
+// 后续可扩展的 biz 层校验示例：
+//  - 租户生命周期状态检查（是否 ACTIVE）
+//  - 用户账号状态检查（是否被锁定/冻结）
+//  - 登录地理位置异常检测
 func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (*v1.LoginResponse, error) {
 	uc.log.Infof("尝试用户名登录，tenant_id=%d", tenantID)
+	// 业务策略：密码复杂度。proto 只校验长度，不校验字符类组合。
+	if err := ValidatePassword(password); err != nil {
+		return nil, err
+	}
 	return uc.repo.LoginByUsername(ctx, name, password, tenantID)
 }
 
-// LoginByEmail 处理后台邮箱登录业务逻辑
-// 参数：ctx 上下文，email 邮箱，password 密码
-// 返回值：登录响应结构体，错误信息
+// LoginByEmail 处理后台邮箱登录业务逻辑。
+//
+// email/tenant_id 的格式校验由 proto 层 buf.validate 完成（email: true、
+// uint32.gt: 0），biz 层不重复。这里只做密码复杂度业务策略校验。
 func (uc *AuthUsecase) LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*v1.LoginResponse, error) {
 	uc.log.Infof("尝试邮箱登录，tenant_id=%d", tenantID)
+	if err := ValidatePassword(password); err != nil {
+		return nil, err
+	}
 	return uc.repo.LoginByEmail(ctx, email, password, tenantID)
 }
 
@@ -97,8 +112,8 @@ func (uc *AuthUsecase) Register(ctx context.Context, name, password string) erro
 func (uc *AuthUsecase) Profile(ctx context.Context) (*v1.ProfileResponse, error) {
 	// 这里实现具体的登录用户简介信息业务逻辑
 	uc.log.Infof("尝试获取登录用户简介信息")
-	userId := authn.GetAuthUserID(ctx)
-	return uc.repo.Profile(ctx, userId)
+	userID := authn.GetAuthUserID(ctx)
+	return uc.repo.Profile(ctx, userID)
 }
 
 // VbenProfile 处理登录用户简介信息业务逻辑
@@ -107,8 +122,8 @@ func (uc *AuthUsecase) Profile(ctx context.Context) (*v1.ProfileResponse, error)
 func (uc *AuthUsecase) VbenProfile(ctx context.Context) (*v1.VbenProfileResponse, error) {
 	// 这里实现具体的登录用户简介信息业务逻辑
 	uc.log.Infof("尝试获取登录用户简介信息")
-	userId := authn.GetAuthUserID(ctx)
-	profile, err := uc.repo.Profile(ctx, userId)
+	userID := authn.GetAuthUserID(ctx)
+	profile, err := uc.repo.Profile(ctx, userID)
 	if err != nil {
 		uc.log.Errorf("获取登录用户简介信息失败: %v", err)
 		return nil, err
@@ -130,8 +145,8 @@ func (uc *AuthUsecase) VbenProfile(ctx context.Context) (*v1.VbenProfileResponse
 func (uc *AuthUsecase) Codes(ctx context.Context) ([]string, error) {
 	// 这里实现具体的登录用户权限码业务逻辑
 	uc.log.Infof("尝试获取登录用户权限码")
-	userId := authn.GetAuthUserID(ctx)
-	return uc.repo.Codes(ctx, userId)
+	userID := authn.GetAuthUserID(ctx)
+	return uc.repo.Codes(ctx, userID)
 }
 
 // Menus 处理登录用户菜单业务逻辑
@@ -140,8 +155,8 @@ func (uc *AuthUsecase) Codes(ctx context.Context) ([]string, error) {
 func (uc *AuthUsecase) Menus(ctx context.Context) ([]*pbCore.Menu, error) {
 	// 这里实现具体的登录用户菜单业务逻辑
 	uc.log.Infof("尝试获取登录用户菜单")
-	userId := authn.GetAuthUserID(ctx)
-	menus, err := uc.repo.Menus(ctx, userId)
+	userID := authn.GetAuthUserID(ctx)
+	menus, err := uc.repo.Menus(ctx, userID)
 	if err != nil {
 		uc.log.Errorf("获取登录用户菜单失败: %v", err)
 		return nil, err

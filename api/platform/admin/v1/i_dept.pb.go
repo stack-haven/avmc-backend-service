@@ -29,7 +29,7 @@ var File_platform_admin_v1_i_dept_proto protoreflect.FileDescriptor
 
 const file_platform_admin_v1_i_dept_proto_rawDesc = "" +
 	"\n" +
-	"\x1eplatform/admin/v1/i_dept.proto\x12\x11platform.admin.v1\x1a\"common/pagination/pagination.proto\x1a\x1acore/service/v1/dept.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto2\x9c\v\n" +
+	"\x1eplatform/admin/v1/i_dept.proto\x12\x11platform.admin.v1\x1a\"common/pagination/pagination.proto\x1a\x1acore/service/v1/dept.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto2\xe9\r\n" +
 	"\vDeptService\x12\xbc\x01\n" +
 	"\tListDepts\x12!.core.service.v1.ListDeptsRequest\x1a\".core.service.v1.ListDeptsResponse\"h\xbaGN\n" +
 	"\x12部门管理服务\x12\x12获取部门列表\x1a\x12获取部门列表Z\x10\n" +
@@ -63,7 +63,9 @@ const file_platform_admin_v1_i_dept_proto_rawDesc = "" +
 	"\x12部门管理服务\x12\f删除部门\x1a\f删除部门Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x16*\x14/admin/v1/depts/{id}\x12\xf3\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x16*\x14/admin/v1/depts/{id}\x12\x9c\x01\n" +
+	"\x13GetDeptDeleteImpact\x12+.core.service.v1.GetDeptDeleteImpactRequest\x1a,.core.service.v1.GetDeptDeleteImpactResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/admin/v1/depts/{id}/delete-impact\x12\xab\x01\n" +
+	"\x15TransferAndDeleteDept\x12-.core.service.v1.TransferAndDeleteDeptRequest\x1a..core.service.v1.TransferAndDeleteDeptResponse\"3\x82\xd3\xe4\x93\x02-:\x01*\"(/admin/v1/depts/{id}:transfer-and-delete\x12\xf3\x01\n" +
 	"\x12UpdateDeptByStatus\x12*.core.service.v1.UpdateDeptByStatusRequest\x1a+.core.service.v1.UpdateDeptByStatusResponse\"\x83\x01\xbaGN\n" +
 	"\x12部门管理服务\x12\x12更新部门状态\x1a\x12更新部门状态Z\x10\n" +
 	"\x0e\n" +
@@ -73,20 +75,24 @@ const file_platform_admin_v1_i_dept_proto_rawDesc = "" +
 	"IDeptProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 
 var file_platform_admin_v1_i_dept_proto_goTypes = []any{
-	(*v1.ListDeptsRequest)(nil),           // 0: core.service.v1.ListDeptsRequest
-	(*v1.ListDeptsTreeRequest)(nil),       // 1: core.service.v1.ListDeptsTreeRequest
-	(*v1.GetDeptRequest)(nil),             // 2: core.service.v1.GetDeptRequest
-	(*v1.CreateDeptRequest)(nil),          // 3: core.service.v1.CreateDeptRequest
-	(*v1.UpdateDeptRequest)(nil),          // 4: core.service.v1.UpdateDeptRequest
-	(*v1.DeleteDeptRequest)(nil),          // 5: core.service.v1.DeleteDeptRequest
-	(*v1.UpdateDeptByStatusRequest)(nil),  // 6: core.service.v1.UpdateDeptByStatusRequest
-	(*v1.ListDeptsResponse)(nil),          // 7: core.service.v1.ListDeptsResponse
-	(*v1.ListDeptsTreeResponse)(nil),      // 8: core.service.v1.ListDeptsTreeResponse
-	(*v1.Dept)(nil),                       // 9: core.service.v1.Dept
-	(*v1.CreateDeptResponse)(nil),         // 10: core.service.v1.CreateDeptResponse
-	(*v1.UpdateDeptResponse)(nil),         // 11: core.service.v1.UpdateDeptResponse
-	(*v1.DeleteDeptResponse)(nil),         // 12: core.service.v1.DeleteDeptResponse
-	(*v1.UpdateDeptByStatusResponse)(nil), // 13: core.service.v1.UpdateDeptByStatusResponse
+	(*v1.ListDeptsRequest)(nil),              // 0: core.service.v1.ListDeptsRequest
+	(*v1.ListDeptsTreeRequest)(nil),          // 1: core.service.v1.ListDeptsTreeRequest
+	(*v1.GetDeptRequest)(nil),                // 2: core.service.v1.GetDeptRequest
+	(*v1.CreateDeptRequest)(nil),             // 3: core.service.v1.CreateDeptRequest
+	(*v1.UpdateDeptRequest)(nil),             // 4: core.service.v1.UpdateDeptRequest
+	(*v1.DeleteDeptRequest)(nil),             // 5: core.service.v1.DeleteDeptRequest
+	(*v1.GetDeptDeleteImpactRequest)(nil),    // 6: core.service.v1.GetDeptDeleteImpactRequest
+	(*v1.TransferAndDeleteDeptRequest)(nil),  // 7: core.service.v1.TransferAndDeleteDeptRequest
+	(*v1.UpdateDeptByStatusRequest)(nil),     // 8: core.service.v1.UpdateDeptByStatusRequest
+	(*v1.ListDeptsResponse)(nil),             // 9: core.service.v1.ListDeptsResponse
+	(*v1.ListDeptsTreeResponse)(nil),         // 10: core.service.v1.ListDeptsTreeResponse
+	(*v1.Dept)(nil),                          // 11: core.service.v1.Dept
+	(*v1.CreateDeptResponse)(nil),            // 12: core.service.v1.CreateDeptResponse
+	(*v1.UpdateDeptResponse)(nil),            // 13: core.service.v1.UpdateDeptResponse
+	(*v1.DeleteDeptResponse)(nil),            // 14: core.service.v1.DeleteDeptResponse
+	(*v1.GetDeptDeleteImpactResponse)(nil),   // 15: core.service.v1.GetDeptDeleteImpactResponse
+	(*v1.TransferAndDeleteDeptResponse)(nil), // 16: core.service.v1.TransferAndDeleteDeptResponse
+	(*v1.UpdateDeptByStatusResponse)(nil),    // 17: core.service.v1.UpdateDeptByStatusResponse
 }
 var file_platform_admin_v1_i_dept_proto_depIdxs = []int32{
 	0,  // 0: platform.admin.v1.DeptService.ListDepts:input_type -> core.service.v1.ListDeptsRequest
@@ -95,16 +101,20 @@ var file_platform_admin_v1_i_dept_proto_depIdxs = []int32{
 	3,  // 3: platform.admin.v1.DeptService.CreateDept:input_type -> core.service.v1.CreateDeptRequest
 	4,  // 4: platform.admin.v1.DeptService.UpdateDept:input_type -> core.service.v1.UpdateDeptRequest
 	5,  // 5: platform.admin.v1.DeptService.DeleteDept:input_type -> core.service.v1.DeleteDeptRequest
-	6,  // 6: platform.admin.v1.DeptService.UpdateDeptByStatus:input_type -> core.service.v1.UpdateDeptByStatusRequest
-	7,  // 7: platform.admin.v1.DeptService.ListDepts:output_type -> core.service.v1.ListDeptsResponse
-	8,  // 8: platform.admin.v1.DeptService.ListDeptsTree:output_type -> core.service.v1.ListDeptsTreeResponse
-	9,  // 9: platform.admin.v1.DeptService.GetDept:output_type -> core.service.v1.Dept
-	10, // 10: platform.admin.v1.DeptService.CreateDept:output_type -> core.service.v1.CreateDeptResponse
-	11, // 11: platform.admin.v1.DeptService.UpdateDept:output_type -> core.service.v1.UpdateDeptResponse
-	12, // 12: platform.admin.v1.DeptService.DeleteDept:output_type -> core.service.v1.DeleteDeptResponse
-	13, // 13: platform.admin.v1.DeptService.UpdateDeptByStatus:output_type -> core.service.v1.UpdateDeptByStatusResponse
-	7,  // [7:14] is the sub-list for method output_type
-	0,  // [0:7] is the sub-list for method input_type
+	6,  // 6: platform.admin.v1.DeptService.GetDeptDeleteImpact:input_type -> core.service.v1.GetDeptDeleteImpactRequest
+	7,  // 7: platform.admin.v1.DeptService.TransferAndDeleteDept:input_type -> core.service.v1.TransferAndDeleteDeptRequest
+	8,  // 8: platform.admin.v1.DeptService.UpdateDeptByStatus:input_type -> core.service.v1.UpdateDeptByStatusRequest
+	9,  // 9: platform.admin.v1.DeptService.ListDepts:output_type -> core.service.v1.ListDeptsResponse
+	10, // 10: platform.admin.v1.DeptService.ListDeptsTree:output_type -> core.service.v1.ListDeptsTreeResponse
+	11, // 11: platform.admin.v1.DeptService.GetDept:output_type -> core.service.v1.Dept
+	12, // 12: platform.admin.v1.DeptService.CreateDept:output_type -> core.service.v1.CreateDeptResponse
+	13, // 13: platform.admin.v1.DeptService.UpdateDept:output_type -> core.service.v1.UpdateDeptResponse
+	14, // 14: platform.admin.v1.DeptService.DeleteDept:output_type -> core.service.v1.DeleteDeptResponse
+	15, // 15: platform.admin.v1.DeptService.GetDeptDeleteImpact:output_type -> core.service.v1.GetDeptDeleteImpactResponse
+	16, // 16: platform.admin.v1.DeptService.TransferAndDeleteDept:output_type -> core.service.v1.TransferAndDeleteDeptResponse
+	17, // 17: platform.admin.v1.DeptService.UpdateDeptByStatus:output_type -> core.service.v1.UpdateDeptByStatusResponse
+	9,  // [9:18] is the sub-list for method output_type
+	0,  // [0:9] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
