@@ -1,0 +1,52 @@
+server:
+  http:
+    addr: 0.0.0.0:8100
+    timeout: 1s
+    enable_swagger: true
+    enable_pprof: false
+    cors:
+      headers:
+        - "X-Requested-With"
+        - "Content-Type"
+        - "Authorization"
+      methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "DELETE"
+        - "HEAD"
+        - "OPTIONS"
+      origins:
+        - "*"
+    middleware:
+      limiter:
+        name: "bbr"
+      enable_logging: true
+      enable_recovery: true
+      enable_validate: true
+      auth:
+        method: "HS256"
+        key: "dev-only-change-before-production-32-bytes"
+        expires_time: 604800s
+  grpc:
+    addr: 0.0.0.0:9100
+    timeout: 1s
+    middleware:
+      limiter:
+        name: "bbr"
+      enable_logging: true
+      enable_recovery: true
+      enable_validate: true
+data:
+  database:
+    driver: mysql
+    source: root:123456@tcp(127.0.0.1:3306)/platform_evie?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+    migrate: false
+    debug: false
+  redis:
+    addr: 127.0.0.1:6379
+    password: "123456"
+    db: 0
+    dial_timeout: 1s
+    read_timeout: 0.2s
+    write_timeout: 0.2s

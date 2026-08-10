@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"fmt"
+	"sync"
 	"time"
 )
 
@@ -87,6 +89,40 @@ type Config struct {
 	// 写入超时时间
 	WriteTimeout time.Duration
 }
+
+// ───────────────────────────── 供应商工厂 ─────────────────────────────
+
+// Factory 存储后端构造函数
+type Factory func(config Config) (Storage, error)
+
+var (
+	factories   = make(map[string]Factory)
+	factoriesMu sync.RWMutex
+)
+
+// Register 注册存储后端工厂。子包应在 init() 中调用。
+func Register(typ string, factory Factory) {
+	factoriesMu.Lock()
+	defer factoriesMu.Unlock()
+	factories[typ] = factory
+}
+
+// NewClient 根据 Config.Type 创建对应的存储客户端。
+// 使用方需在 main 或 bootstrap 中空白导入子包以触发注册：
+//
+//	import _ "backend-service/pkg/storage/redis"
+//	import _ "backend-service/pkg/storage/memcached"
+func NewClient(config Config) (Storage, error) {
+	factoriesMu.RLock()
+	factory, ok := factories[config.Type]
+	factoriesMu.RUnlock()
+	if !ok {
+		return nil, fmt.Errorf("unsupported storage type: %s", config.Type)
+	}
+	return factory(config)
+}
+
+// ───────────────────────────── 配置选项 ─────────────────────────────
 
 // StorageOption 是存储选项的函数类型
 type StorageOption func(*Config)

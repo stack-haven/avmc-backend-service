@@ -1,4 +1,4 @@
-package objectstorage
+package local
 
 import (
 	"context"
@@ -7,14 +7,16 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"backend-service/pkg/objectstorage"
 )
 
 func TestLocalClientPutDeleteObject(t *testing.T) {
-	client, err := NewLocalClient(Config{Provider: ProviderLocal, LocalBasePath: t.TempDir()})
+	client, err := New(Config{BasePath: t.TempDir()})
 	if err != nil {
-		t.Fatalf("NewLocalClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
-	info, err := client.PutObject(context.Background(), "tenant-files", "tenants/1/readme.txt", strings.NewReader("hello"), PutOptions{ContentType: "text/plain"})
+	info, err := client.PutObject(context.Background(), "tenant-files", "tenants/1/readme.txt", strings.NewReader("hello"), objectstorage.PutOptions{ContentType: "text/plain"})
 	if err != nil {
 		t.Fatalf("PutObject() error = %v", err)
 	}
@@ -41,28 +43,27 @@ func TestLocalClientPutDeleteObject(t *testing.T) {
 }
 
 func TestLocalClientRejectsPathTraversal(t *testing.T) {
-	client, err := NewLocalClient(Config{Provider: ProviderLocal, LocalBasePath: t.TempDir()})
+	client, err := New(Config{BasePath: t.TempDir()})
 	if err != nil {
-		t.Fatalf("NewLocalClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
-	_, err = client.PutObject(context.Background(), "tenant-files", "../escape.txt", strings.NewReader("bad"), PutOptions{})
-	if !errors.Is(err, ErrInvalidObject) {
+	_, err = client.PutObject(context.Background(), "tenant-files", "../escape.txt", strings.NewReader("bad"), objectstorage.PutOptions{})
+	if !errors.Is(err, objectstorage.ErrInvalidObject) {
 		t.Fatalf("PutObject() error = %v, want ErrInvalidObject", err)
 	}
 	_, err = client.objectPath("tenant-files", filepath.Join("..", "escape.txt"))
-	if !errors.Is(err, ErrInvalidObject) {
+	if !errors.Is(err, objectstorage.ErrInvalidObject) {
 		t.Fatalf("objectPath() error = %v, want ErrInvalidObject", err)
 	}
 }
 
 func TestLocalClientPublicURL(t *testing.T) {
-	client, err := NewLocalClient(Config{
-		Provider:      ProviderLocal,
-		LocalBasePath: t.TempDir(),
+	client, err := New(Config{
+		BasePath:      t.TempDir(),
 		PublicBaseURL: "https://files.example.test/base",
 	})
 	if err != nil {
-		t.Fatalf("NewLocalClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 	got, err := client.PublicURL("tenant-files", "tenants/1/report 1.pdf")
 	if err != nil {
@@ -75,11 +76,11 @@ func TestLocalClientPublicURL(t *testing.T) {
 }
 
 func TestLocalClientPresignPutUnsupported(t *testing.T) {
-	client, err := NewLocalClient(Config{Provider: ProviderLocal, LocalBasePath: t.TempDir()})
+	client, err := New(Config{BasePath: t.TempDir()})
 	if err != nil {
-		t.Fatalf("NewLocalClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
-	if _, err = client.PresignPutObject(context.Background(), "tenant-files", "a.txt", PresignOptions{}); !errors.Is(err, ErrUnsupportedProvider) {
+	if _, err = client.PresignPutObject(context.Background(), "tenant-files", "a.txt", objectstorage.PresignOptions{}); !errors.Is(err, objectstorage.ErrUnsupportedProvider) {
 		t.Fatalf("PresignPutObject() error = %v, want ErrUnsupportedProvider", err)
 	}
 }

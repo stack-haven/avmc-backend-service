@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"path/filepath"
 	"strings"
 	"time"
@@ -16,6 +17,11 @@ import (
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/objectstorage"
+
+	// 触发供应商注册
+	_ "backend-service/pkg/objectstorage/local"
+	_ "backend-service/pkg/objectstorage/s3"
+
 	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -306,7 +312,11 @@ func (r *storageProviderRepo) ResolveSnapshot(ctx context.Context, id uint32, co
 }
 
 func (r *storageProviderRepo) BuildClient(_ context.Context, item *pbCore.StorageProvider) (objectstorage.Client, error) {
-	return objectstorage.NewClient(storageProviderObjectConfig(item))
+	configJSON, err := storageProviderObjectConfig(item)
+	if err != nil {
+		return nil, err
+	}
+	return objectstorage.NewClient(item.GetType(), configJSON)
 }
 
 func (r *storageProviderRepo) getRow(ctx context.Context, id uint32) (*gen.StorageProvider, error) {
@@ -336,45 +346,47 @@ func (r *storageProviderRepo) resolveRow(ctx context.Context, row *gen.StoragePr
 
 func (r *storageProviderRepo) resolveLegacyMinIO(_ context.Context) (*biz.ResolvedStorageProvider, error) {
 	minio := r.oss.Minio
-	item := &pbCore.StorageProvider{
-		Code:           "legacy-minio",
-		Name:           "Legacy MinIO",
-		Type:           biz.StorageProviderTypeS3Compatible,
-		Endpoint:       &minio.Endpoint,
-		AccessKey:      &minio.AccessKey,
-		SecretKey:      &minio.SecretKey,
-		SessionToken:   &minio.Token,
-		UseSsl:         &minio.UseSsl,
-		ForcePathStyle: boolPtr(true),
-		PublicBaseUrl:  &minio.DownloadHost,
-		DefaultBucket:  storageStringPtr(defaultStorageProviderBucket),
+	configJSON, err := json.Marshal(map[string]interface{}{
+		"endpoint":         minio.Endpoint,
+		"access_key":       minio.AccessKey,
+		"secret_key":       minio.SecretKey,
+		"session_token":    minio.Token,
+		"use_ssl":          minio.UseSsl,
+		"force_path_style": true,
+		"public_base_url":  minio.DownloadHost,
+	})
+	if err != nil {
+		return nil, err
 	}
-	client, err := objectstorage.NewClient(storageProviderObjectConfig(item))
+	client, err := objectstorage.NewClient(biz.StorageProviderTypeS3Compatible, configJSON)
 	if err != nil {
 		return nil, err
 	}
 	return &biz.ResolvedStorageProvider{
-		Code:          item.GetCode(),
-		Type:          item.GetType(),
-		DefaultBucket: item.GetDefaultBucket(),
+		Code:          "legacy-minio",
+		Type:          biz.StorageProviderTypeS3Compatible,
+		DefaultBucket: "tenant-files",
 		Client:        client,
 	}, nil
 }
 
-func storageProviderObjectConfig(item *pbCore.StorageProvider) objectstorage.Config {
-	return objectstorage.Config{
-		Provider:       objectstorage.Provider(item.GetType()),
-		Endpoint:       item.GetEndpoint(),
-		Region:         item.GetRegion(),
-		AccessKey:      item.GetAccessKey(),
-		SecretKey:      item.GetSecretKey(),
-		SessionToken:   item.GetSessionToken(),
-		UseSSL:         item.GetUseSsl(),
-		ForcePathStyle: item.GetForcePathStyle(),
-		PublicBaseURL:  item.GetPublicBaseUrl(),
-		DefaultBucket:  item.GetDefaultBucket(),
-		LocalBasePath:  item.GetLocalBasePath(),
+func storageProviderObjectConfig(item *pbCore.StorageProvider) (json.RawMessage, error) {
+	cfg := map[string]interface{}{
+		"region":          item.GetRegion(),
+		"use_ssl":         item.GetUseSsl(),
+		"force_path_style": item.GetForcePathStyle(),
+		"public_base_url":  item.GetPublicBaseUrl(),
 	}
+	switch item.GetType() {
+	case biz.StorageProviderTypeS3Compatible:
+		cfg["endpoint"] = item.GetEndpoint()
+		cfg["access_key"] = item.GetAccessKey()
+		cfg["secret_key"] = item.GetSecretKey()
+		cfg["session_token"] = item.GetSessionToken()
+	case biz.StorageProviderTypeLocal:
+		cfg["base_path"] = item.GetLocalBasePath()
+	}
+	return json.Marshal(cfg)
 }
 
 func cleanLocalBasePath(value string) string {

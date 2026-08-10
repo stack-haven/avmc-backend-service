@@ -8,6 +8,7 @@ package v1
 
 import (
 	v1 "backend-service/api/core/service/v1"
+	_ "github.com/google/gnostic/openapiv3"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -26,25 +27,42 @@ var File_platform_admin_v1_i_operation_log_proto protoreflect.FileDescriptor
 
 const file_platform_admin_v1_i_operation_log_proto_rawDesc = "" +
 	"\n" +
-	"'platform/admin/v1/i_operation_log.proto\x12\x11platform.admin.v1\x1a#core/service/v1/operation_log.proto\x1a\x1cgoogle/api/annotations.proto2\xa7\x02\n" +
-	"\x13OperationLogService\x12\x8c\x01\n" +
-	"\x11ListOperationLogs\x12).core.service.v1.ListOperationLogsRequest\x1a*.core.service.v1.ListOperationLogsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/admin/v1/operation-logs\x12\x80\x01\n" +
-	"\x0fGetOperationLog\x12'.core.service.v1.GetOperationLogRequest\x1a\x1d.core.service.v1.OperationLog\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/admin/v1/operation-logs/{id}B\xbb\x01\n" +
+	"'platform/admin/v1/i_operation_log.proto\x12\x11platform.admin.v1\x1a#core/service/v1/operation_log.proto\x1a\x1cgoogle/api/annotations.proto\x1a$gnostic/openapi/v3/annotations.proto2\x84\x06\n" +
+	"\x13OperationLogService\x12\x89\x02\n" +
+	"\x12CreateOperationLog\x12*.core.service.v1.CreateOperationLogRequest\x1a+.core.service.v1.CreateOperationLogResponse\"\x99\x01\xbaGo\n" +
+	"\x12操作日志服务\x12\x12创建操作日志\x1a3记录一条操作日志（供内部服务调用）Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02!:\x05entry\"\x18/admin/v1/operation-logs\x12\xf0\x01\n" +
+	"\x11ListOperationLogs\x12).core.service.v1.ListOperationLogsRequest\x1a*.core.service.v1.ListOperationLogsResponse\"\x83\x01\xbaG`\n" +
+	"\x12操作日志服务\x12\x18分页查询操作日志\x1a\x1e分页查询操作日志列表Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1a\x12\x18/admin/v1/operation-logs\x12\xed\x01\n" +
+	"\x0fGetOperationLog\x12'.core.service.v1.GetOperationLogRequest\x1a\x1d.core.service.v1.OperationLog\"\x91\x01\xbaGi\n" +
+	"\x12操作日志服务\x12\x18获取操作日志详情\x1a'获取指定操作日志的详细信息Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f\x12\x1d/admin/v1/operation-logs/{id}B\xbb\x01\n" +
 	"\x15com.platform.admin.v1B\x12IOperationLogProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 
 var file_platform_admin_v1_i_operation_log_proto_goTypes = []any{
-	(*v1.ListOperationLogsRequest)(nil),  // 0: core.service.v1.ListOperationLogsRequest
-	(*v1.GetOperationLogRequest)(nil),    // 1: core.service.v1.GetOperationLogRequest
-	(*v1.ListOperationLogsResponse)(nil), // 2: core.service.v1.ListOperationLogsResponse
-	(*v1.OperationLog)(nil),              // 3: core.service.v1.OperationLog
+	(*v1.CreateOperationLogRequest)(nil),  // 0: core.service.v1.CreateOperationLogRequest
+	(*v1.ListOperationLogsRequest)(nil),   // 1: core.service.v1.ListOperationLogsRequest
+	(*v1.GetOperationLogRequest)(nil),     // 2: core.service.v1.GetOperationLogRequest
+	(*v1.CreateOperationLogResponse)(nil), // 3: core.service.v1.CreateOperationLogResponse
+	(*v1.ListOperationLogsResponse)(nil),  // 4: core.service.v1.ListOperationLogsResponse
+	(*v1.OperationLog)(nil),               // 5: core.service.v1.OperationLog
 }
 var file_platform_admin_v1_i_operation_log_proto_depIdxs = []int32{
-	0, // 0: platform.admin.v1.OperationLogService.ListOperationLogs:input_type -> core.service.v1.ListOperationLogsRequest
-	1, // 1: platform.admin.v1.OperationLogService.GetOperationLog:input_type -> core.service.v1.GetOperationLogRequest
-	2, // 2: platform.admin.v1.OperationLogService.ListOperationLogs:output_type -> core.service.v1.ListOperationLogsResponse
-	3, // 3: platform.admin.v1.OperationLogService.GetOperationLog:output_type -> core.service.v1.OperationLog
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	0, // 0: platform.admin.v1.OperationLogService.CreateOperationLog:input_type -> core.service.v1.CreateOperationLogRequest
+	1, // 1: platform.admin.v1.OperationLogService.ListOperationLogs:input_type -> core.service.v1.ListOperationLogsRequest
+	2, // 2: platform.admin.v1.OperationLogService.GetOperationLog:input_type -> core.service.v1.GetOperationLogRequest
+	3, // 3: platform.admin.v1.OperationLogService.CreateOperationLog:output_type -> core.service.v1.CreateOperationLogResponse
+	4, // 4: platform.admin.v1.OperationLogService.ListOperationLogs:output_type -> core.service.v1.ListOperationLogsResponse
+	5, // 5: platform.admin.v1.OperationLogService.GetOperationLog:output_type -> core.service.v1.OperationLog
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

@@ -1,4 +1,4 @@
-package objectstorage
+package s3
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"backend-service/pkg/objectstorage"
 )
 
 const (
@@ -23,7 +26,58 @@ const (
 	maxPresignTTL = 7 * 24 * time.Hour
 )
 
-type S3CompatibleClient struct {
+func init() {
+	objectstorage.Register("s3-compatible", func(raw json.RawMessage) (objectstorage.Client, error) {
+		var jc jsonConfig
+		if err := json.Unmarshal(raw, &jc); err != nil {
+			return nil, err
+		}
+		return New(jc.toConfig())
+	})
+}
+
+// ───────────────────────────── Config ─────────────────────────────
+
+// Config S3 兼容存储配置
+type Config struct {
+	Endpoint       string
+	Region         string
+	AccessKey      string
+	SecretKey      string
+	SessionToken   string
+	UseSSL         bool
+	ForcePathStyle bool
+	PublicBaseURL  string
+	HTTPClient     *http.Client
+}
+
+type jsonConfig struct {
+	Endpoint       string `json:"endpoint"`
+	Region         string `json:"region"`
+	AccessKey      string `json:"access_key"`
+	SecretKey      string `json:"secret_key"`
+	SessionToken   string `json:"session_token"`
+	UseSSL         bool   `json:"use_ssl"`
+	ForcePathStyle bool   `json:"force_path_style"`
+	PublicBaseURL  string `json:"public_base_url"`
+}
+
+func (j jsonConfig) toConfig() Config {
+	return Config{
+		Endpoint:       j.Endpoint,
+		Region:         j.Region,
+		AccessKey:      j.AccessKey,
+		SecretKey:      j.SecretKey,
+		SessionToken:   j.SessionToken,
+		UseSSL:         j.UseSSL,
+		ForcePathStyle: j.ForcePathStyle,
+		PublicBaseURL:  j.PublicBaseURL,
+	}
+}
+
+// ───────────────────────────── Client ─────────────────────────────
+
+type client struct {
 	endpoint       *url.URL
 	publicBaseURL  *url.URL
 	region         string
@@ -35,13 +89,14 @@ type S3CompatibleClient struct {
 	now            func() time.Time
 }
 
-func NewS3CompatibleClient(config Config) (*S3CompatibleClient, error) {
+// New 创建 S3 兼容存储客户端
+func New(config Config) (*client, error) {
 	endpoint, err := normalizeEndpoint(config.Endpoint, config.UseSSL)
 	if err != nil {
 		return nil, err
 	}
 	if strings.TrimSpace(config.AccessKey) == "" || strings.TrimSpace(config.SecretKey) == "" {
-		return nil, ErrInvalidConfig
+		return nil, objectstorage.ErrInvalidConfig
 	}
 	region := strings.TrimSpace(config.Region)
 	if region == "" {
@@ -55,10 +110,10 @@ func NewS3CompatibleClient(config Config) (*S3CompatibleClient, error) {
 	if strings.TrimSpace(config.PublicBaseURL) != "" {
 		publicBase, err = url.Parse(strings.TrimRight(config.PublicBaseURL, "/"))
 		if err != nil || publicBase.Scheme == "" || publicBase.Host == "" {
-			return nil, ErrInvalidConfig
+			return nil, objectstorage.ErrInvalidConfig
 		}
 	}
-	return &S3CompatibleClient{
+	return &client{
 		endpoint:       endpoint,
 		publicBaseURL:  publicBase,
 		region:         region,
@@ -71,7 +126,7 @@ func NewS3CompatibleClient(config Config) (*S3CompatibleClient, error) {
 	}, nil
 }
 
-func (c *S3CompatibleClient) PutObject(ctx context.Context, bucket string, key string, body io.Reader, opts PutOptions) (*ObjectInfo, error) {
+func (c *client) PutObject(ctx context.Context, bucket string, key string, body io.Reader, opts objectstorage.PutOptions) (*objectstorage.ObjectInfo, error) {
 	if err := validateObject(bucket, key); err != nil {
 		return nil, err
 	}
@@ -102,7 +157,7 @@ func (c *S3CompatibleClient) PutObject(ctx context.Context, bucket string, key s
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("objectstorage: put object failed: %s", resp.Status)
 	}
-	return &ObjectInfo{
+	return &objectstorage.ObjectInfo{
 		Bucket: bucket,
 		Key:    key,
 		ETag:   strings.Trim(resp.Header.Get("ETag"), `"`),
@@ -110,7 +165,7 @@ func (c *S3CompatibleClient) PutObject(ctx context.Context, bucket string, key s
 	}, nil
 }
 
-func (c *S3CompatibleClient) DeleteObject(ctx context.Context, bucket string, key string) error {
+func (c *client) DeleteObject(ctx context.Context, bucket string, key string) error {
 	if err := validateObject(bucket, key); err != nil {
 		return err
 	}
@@ -132,22 +187,22 @@ func (c *S3CompatibleClient) DeleteObject(ctx context.Context, bucket string, ke
 	return nil
 }
 
-func (c *S3CompatibleClient) PresignGetObject(_ context.Context, bucket string, key string, opts PresignOptions) (string, error) {
+func (c *client) PresignGetObject(_ context.Context, bucket string, key string, opts objectstorage.PresignOptions) (string, error) {
 	return c.presign(http.MethodGet, bucket, key, opts)
 }
 
-func (c *S3CompatibleClient) PresignPutObject(_ context.Context, bucket string, key string, opts PresignOptions) (string, error) {
+func (c *client) PresignPutObject(_ context.Context, bucket string, key string, opts objectstorage.PresignOptions) (string, error) {
 	return c.presign(http.MethodPut, bucket, key, opts)
 }
 
-func (c *S3CompatibleClient) PublicURL(bucket string, key string) (string, error) {
+func (c *client) PublicURL(bucket string, key string) (string, error) {
 	if err := validateObject(bucket, key); err != nil {
 		return "", err
 	}
 	return c.objectURLWithBase(bucket, key, c.publicBaseURL, true).String(), nil
 }
 
-func (c *S3CompatibleClient) presign(method string, bucket string, key string, opts PresignOptions) (string, error) {
+func (c *client) presign(method string, bucket string, key string, opts objectstorage.PresignOptions) (string, error) {
 	if err := validateObject(bucket, key); err != nil {
 		return "", err
 	}
@@ -185,7 +240,7 @@ func (c *S3CompatibleClient) presign(method string, bucket string, key string, o
 	return objectURL.String(), nil
 }
 
-func (c *S3CompatibleClient) signHeader(req *http.Request, payload []byte) {
+func (c *client) signHeader(req *http.Request, payload []byte) {
 	t := c.now().UTC()
 	req.Header.Set("Host", req.URL.Host)
 	req.Header.Set("X-Amz-Date", amzDate(t))
@@ -217,7 +272,7 @@ func (c *S3CompatibleClient) signHeader(req *http.Request, payload []byte) {
 	req.Header.Set("Authorization", auth)
 }
 
-func (c *S3CompatibleClient) signature(t time.Time, canonicalRequest string) string {
+func (c *client) signature(t time.Time, canonicalRequest string) string {
 	stringToSign := strings.Join([]string{
 		awsAlgorithm,
 		amzDate(t),
@@ -231,11 +286,11 @@ func (c *S3CompatibleClient) signature(t time.Time, canonicalRequest string) str
 	return hex.EncodeToString(hmacSHA256(signingKey, stringToSign))
 }
 
-func (c *S3CompatibleClient) credentialScope(t time.Time) string {
+func (c *client) credentialScope(t time.Time) string {
 	return shortDate(t) + "/" + c.region + "/s3/aws4_request"
 }
 
-func (c *S3CompatibleClient) objectURL(bucket string, key string, usePublicBase bool) *url.URL {
+func (c *client) objectURL(bucket string, key string, usePublicBase bool) *url.URL {
 	var base *url.URL
 	if usePublicBase && c.publicBaseURL != nil {
 		base = c.publicBaseURL
@@ -245,7 +300,7 @@ func (c *S3CompatibleClient) objectURL(bucket string, key string, usePublicBase 
 	return c.objectURLWithBase(bucket, key, base, usePublicBase)
 }
 
-func (c *S3CompatibleClient) objectURLWithBase(bucket string, key string, base *url.URL, public bool) *url.URL {
+func (c *client) objectURLWithBase(bucket string, key string, base *url.URL, public bool) *url.URL {
 	u := *base
 	if !c.forcePathStyle && !public {
 		u.Host = bucket + "." + u.Host
@@ -262,10 +317,12 @@ func (c *S3CompatibleClient) objectURLWithBase(bucket string, key string, base *
 	return &u
 }
 
+// ───────────────────────────── helpers ─────────────────────────────
+
 func normalizeEndpoint(endpoint string, useSSL bool) (*url.URL, error) {
 	endpoint = strings.TrimSpace(endpoint)
 	if endpoint == "" {
-		return nil, ErrInvalidConfig
+		return nil, objectstorage.ErrInvalidConfig
 	}
 	if !strings.Contains(endpoint, "://") {
 		scheme := "http"
@@ -276,14 +333,14 @@ func normalizeEndpoint(endpoint string, useSSL bool) (*url.URL, error) {
 	}
 	u, err := url.Parse(strings.TrimRight(endpoint, "/"))
 	if err != nil || u.Scheme == "" || u.Host == "" {
-		return nil, ErrInvalidConfig
+		return nil, objectstorage.ErrInvalidConfig
 	}
 	return u, nil
 }
 
 func validateObject(bucket string, key string) error {
 	if strings.TrimSpace(bucket) == "" || strings.TrimSpace(key) == "" || strings.HasPrefix(key, "/") {
-		return ErrInvalidObject
+		return objectstorage.ErrInvalidObject
 	}
 	return nil
 }

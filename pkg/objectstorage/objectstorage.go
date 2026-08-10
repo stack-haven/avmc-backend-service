@@ -2,44 +2,38 @@ package objectstorage
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
-	"net/http"
+	"sync"
 	"time"
 )
 
-type Provider string
+// ───────────────────────────── Shared Errors ─────────────────────────────
 
-const (
-	ProviderS3Compatible Provider = "s3-compatible"
-	ProviderLocal        Provider = "local"
+var (
+	ErrInvalidConfig       = errors.New("objectstorage: invalid config")
+	ErrInvalidObject       = errors.New("objectstorage: invalid bucket or key")
+	ErrUnsupportedProvider = errors.New("objectstorage: unsupported provider")
 )
 
-type Config struct {
-	Provider       Provider
-	Endpoint       string
-	Region         string
-	AccessKey      string
-	SecretKey      string
-	SessionToken   string
-	UseSSL         bool
-	ForcePathStyle bool
-	PublicBaseURL  string
-	DefaultBucket  string
-	LocalBasePath  string
-	HTTPClient     *http.Client
-}
+// ───────────────────────────── Shared Types ─────────────────────────────
 
+// PutOptions 上传选项
 type PutOptions struct {
 	ContentType string
 	Metadata    map[string]string
 }
 
+// PresignOptions 预签名选项
 type PresignOptions struct {
 	ContentType string
 	Expires     time.Duration
 	Metadata    map[string]string
 }
 
+// ObjectInfo 对象信息
 type ObjectInfo struct {
 	Bucket string
 	Key    string
@@ -47,6 +41,9 @@ type ObjectInfo struct {
 	Size   int64
 }
 
+// ───────────────────────────── Client Interface ─────────────────────────────
+
+// Client 对象存储客户端接口
 type Client interface {
 	PutObject(context.Context, string, string, io.Reader, PutOptions) (*ObjectInfo, error)
 	DeleteObject(context.Context, string, string) error
@@ -55,12 +52,34 @@ type Client interface {
 	PublicURL(string, string) (string, error)
 }
 
-func NewClient(config Config) (Client, error) {
-	if config.Provider == "" || config.Provider == ProviderS3Compatible {
-		return NewS3CompatibleClient(config)
+// ───────────────────────────── 供应商工厂 ─────────────────────────────
+
+// Factory 存储后端构造函数。raw 为 provider 专属配置的 JSON。
+type Factory func(raw json.RawMessage) (Client, error)
+
+var (
+	factories   = make(map[string]Factory)
+	factoriesMu sync.RWMutex
+)
+
+// Register 注册存储后端工厂。子包应在 init() 中调用。
+func Register(typ string, factory Factory) {
+	factoriesMu.Lock()
+	defer factoriesMu.Unlock()
+	factories[typ] = factory
+}
+
+// NewClient 根据 type 创建对象存储客户端。configJSON 为 provider 专属配置。
+// 使用方需在 main 或 bootstrap 中空白导入子包以触发注册：
+//
+//	import _ "backend-service/pkg/objectstorage/s3"
+//	import _ "backend-service/pkg/objectstorage/local"
+func NewClient(typ string, configJSON json.RawMessage) (Client, error) {
+	factoriesMu.RLock()
+	factory, ok := factories[typ]
+	factoriesMu.RUnlock()
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrUnsupportedProvider, typ)
 	}
-	if config.Provider == ProviderLocal {
-		return NewLocalClient(config)
-	}
-	return nil, ErrUnsupportedProvider
+	return factory(configJSON)
 }

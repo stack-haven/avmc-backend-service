@@ -9,6 +9,12 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+func init() {
+	storage.Register("redis", func(config storage.Config) (storage.Storage, error) {
+		return NewRedisStorage(config)
+	})
+}
+
 // RedisStorage 是Redis存储的实现
 type RedisStorage struct {
 	client *redis.Client
@@ -184,8 +190,4 @@ func (s *RedisStorage) BatchDelete(ctx context.Context, keys []string) error {
 func (s *RedisStorage) Close() error {
 	return s.client.Close()
 }
-
-// 注册Redis存储到NewStorage函数
-func init() {
-	// 后续可以通过修改NewStorage函数来支持Redis存储
-}
+// ───────────────────────────── 以下为 Redis 操作实现 ─────────────────────────────

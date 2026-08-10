@@ -1,21 +1,26 @@
 module backend-service
 
-go 1.24.6
+go 1.25.0
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250307204501-0409229c3780.1
 	entgo.io/ent v0.14.5
 	github.com/BurntSushi/toml v1.6.0
+	github.com/aliyun/aliyun-oss-go-sdk v2.2.10+incompatible
 	github.com/casbin/casbin/v2 v2.135.0
 	github.com/envoyproxy/protoc-gen-validate v1.2.1
 	github.com/glebarez/go-sqlite v1.20.3
+	github.com/glebarez/sqlite v1.7.0
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/gnostic v0.7.1
 	github.com/google/wire v0.7.0
 	github.com/iancoleman/strcase v0.3.0
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
+	github.com/qiniu/go-sdk/v7 v7.21.1
 	github.com/stretchr/testify v1.11.0
+	github.com/tencentyun/cos-go-sdk-v5 v0.7.47
 	go.einride.tech/aip v0.80.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/crypto v0.47.0
@@ -27,21 +32,24 @@ require (
 
 require (
 	cel.dev/expr v0.24.0 // indirect
+	github.com/alex-ant/gomath v0.0.0-20160516115720-89013a210a82 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
 	github.com/bufbuild/protovalidate-go v0.9.2 // indirect
 	github.com/casbin/govaluate v1.4.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/glebarez/sqlite v1.7.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
+	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/cel-go v0.24.1 // indirect
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.2 // indirect
@@ -50,8 +58,11 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect
+	github.com/matishsiao/goInfo v0.0.0-20210923090445-da2e3fa8d45f // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/microsoft/go-mssqldb v1.6.0 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/mozillazg/go-httpheader v0.2.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.8.0 // indirect
@@ -64,6 +75,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
 	gorm.io/driver/postgres v1.5.9 // indirect

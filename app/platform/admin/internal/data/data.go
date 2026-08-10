@@ -66,6 +66,8 @@ var ProviderSet = wire.NewSet(
 	NewWebhookRepo,
 	NewResourceQuotaRepo,
 	NewPermissionCacheInvalidator,
+	NewStorageConfigRepo,
+	NewStorageCrypto,
 )
 
 // Data .

@@ -1,4 +1,4 @@
-package objectstorage
+package s3
 
 import (
 	"context"
@@ -9,10 +9,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"backend-service/pkg/objectstorage"
 )
 
 func TestS3CompatiblePresignPutUsesSigV4Query(t *testing.T) {
-	client, err := NewS3CompatibleClient(Config{
+	client, err := New(Config{
 		Endpoint:       "storage.example.com",
 		Region:         "auto",
 		AccessKey:      "ak",
@@ -21,13 +23,13 @@ func TestS3CompatiblePresignPutUsesSigV4Query(t *testing.T) {
 		ForcePathStyle: true,
 	})
 	if err != nil {
-		t.Fatalf("NewS3CompatibleClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 	client.now = func() time.Time {
 		return time.Date(2026, 7, 17, 8, 9, 10, 0, time.UTC)
 	}
 
-	rawURL, err := client.PresignPutObject(context.Background(), "tenant-files", "avatars/user 1.png", PresignOptions{Expires: time.Hour})
+	rawURL, err := client.PresignPutObject(context.Background(), "tenant-files", "avatars/user 1.png", objectstorage.PresignOptions{Expires: time.Hour})
 	if err != nil {
 		t.Fatalf("PresignPutObject() error = %v", err)
 	}
@@ -75,7 +77,7 @@ func TestS3CompatiblePutObjectSignsAndSendsPayload(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := NewS3CompatibleClient(Config{
+	client, err := New(Config{
 		Endpoint:       server.URL,
 		Region:         "us-east-1",
 		AccessKey:      "ak",
@@ -83,13 +85,13 @@ func TestS3CompatiblePutObjectSignsAndSendsPayload(t *testing.T) {
 		ForcePathStyle: true,
 	})
 	if err != nil {
-		t.Fatalf("NewS3CompatibleClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 	client.now = func() time.Time {
 		return time.Date(2026, 7, 17, 8, 9, 10, 0, time.UTC)
 	}
 
-	info, err := client.PutObject(context.Background(), "bucket", "docs/readme.txt", strings.NewReader("hello"), PutOptions{ContentType: "text/plain"})
+	info, err := client.PutObject(context.Background(), "bucket", "docs/readme.txt", strings.NewReader("hello"), objectstorage.PutOptions{ContentType: "text/plain"})
 	if err != nil {
 		t.Fatalf("PutObject() error = %v", err)
 	}
@@ -111,7 +113,7 @@ func TestS3CompatiblePutObjectSignsAndSendsPayload(t *testing.T) {
 }
 
 func TestObjectStoragePublicURLUsesPublicBase(t *testing.T) {
-	client, err := NewS3CompatibleClient(Config{
+	client, err := New(Config{
 		Endpoint:       "minio:9000",
 		PublicBaseURL:  "https://cdn.example.com/assets",
 		AccessKey:      "ak",
@@ -119,7 +121,7 @@ func TestObjectStoragePublicURLUsesPublicBase(t *testing.T) {
 		ForcePathStyle: true,
 	})
 	if err != nil {
-		t.Fatalf("NewS3CompatibleClient() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 	rawURL, err := client.PublicURL("bucket", "a/b.txt")
 	if err != nil {

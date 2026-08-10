@@ -26,6 +26,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageconfig"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
@@ -78,6 +79,8 @@ type Client struct {
 	Project *ProjectClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
+	// StorageConfig is the client for interacting with the StorageConfig builders.
+	StorageConfig *StorageConfigClient
 	// StorageProvider is the client for interacting with the StorageProvider builders.
 	StorageProvider *StorageProviderClient
 	// Tenant is the client for interacting with the Tenant builders.
@@ -120,6 +123,7 @@ func (c *Client) init() {
 	c.Post = NewPostClient(c.config)
 	c.Project = NewProjectClient(c.config)
 	c.Role = NewRoleClient(c.config)
+	c.StorageConfig = NewStorageConfigClient(c.config)
 	c.StorageProvider = NewStorageProviderClient(c.config)
 	c.Tenant = NewTenantClient(c.config)
 	c.TenantMenuPermissionGroup = NewTenantMenuPermissionGroupClient(c.config)
@@ -235,6 +239,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Post:                             NewPostClient(cfg),
 		Project:                          NewProjectClient(cfg),
 		Role:                             NewRoleClient(cfg),
+		StorageConfig:                    NewStorageConfigClient(cfg),
 		StorageProvider:                  NewStorageProviderClient(cfg),
 		Tenant:                           NewTenantClient(cfg),
 		TenantMenuPermissionGroup:        NewTenantMenuPermissionGroupClient(cfg),
@@ -277,6 +282,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Post:                             NewPostClient(cfg),
 		Project:                          NewProjectClient(cfg),
 		Role:                             NewRoleClient(cfg),
+		StorageConfig:                    NewStorageConfigClient(cfg),
 		StorageProvider:                  NewStorageProviderClient(cfg),
 		Tenant:                           NewTenantClient(cfg),
 		TenantMenuPermissionGroup:        NewTenantMenuPermissionGroupClient(cfg),
@@ -317,9 +323,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
 		c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
 		c.NotificationTemplate, c.OperationLog, c.ParameterDefinition, c.Post,
-		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantMenuPermissionGroup,
-		c.TenantMenuPermissionGroupVersion, c.TenantParameterOverride, c.User,
-		c.WebhookDeliveryLog, c.WebhookSubscription,
+		c.Project, c.Role, c.StorageConfig, c.StorageProvider, c.Tenant,
+		c.TenantMenuPermissionGroup, c.TenantMenuPermissionGroupVersion,
+		c.TenantParameterOverride, c.User, c.WebhookDeliveryLog, c.WebhookSubscription,
 	} {
 		n.Use(hooks...)
 	}
@@ -332,9 +338,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
 		c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
 		c.NotificationTemplate, c.OperationLog, c.ParameterDefinition, c.Post,
-		c.Project, c.Role, c.StorageProvider, c.Tenant, c.TenantMenuPermissionGroup,
-		c.TenantMenuPermissionGroupVersion, c.TenantParameterOverride, c.User,
-		c.WebhookDeliveryLog, c.WebhookSubscription,
+		c.Project, c.Role, c.StorageConfig, c.StorageProvider, c.Tenant,
+		c.TenantMenuPermissionGroup, c.TenantMenuPermissionGroupVersion,
+		c.TenantParameterOverride, c.User, c.WebhookDeliveryLog, c.WebhookSubscription,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -373,6 +379,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Project.mutate(ctx, m)
 	case *RoleMutation:
 		return c.Role.mutate(ctx, m)
+	case *StorageConfigMutation:
+		return c.StorageConfig.mutate(ctx, m)
 	case *StorageProviderMutation:
 		return c.StorageProvider.mutate(ctx, m)
 	case *TenantMutation:
@@ -2670,6 +2678,141 @@ func (c *RoleClient) mutate(ctx context.Context, m *RoleMutation) (Value, error)
 	}
 }
 
+// StorageConfigClient is a client for the StorageConfig schema.
+type StorageConfigClient struct {
+	config
+}
+
+// NewStorageConfigClient returns a client for the StorageConfig from the given config.
+func NewStorageConfigClient(c config) *StorageConfigClient {
+	return &StorageConfigClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storageconfig.Hooks(f(g(h())))`.
+func (c *StorageConfigClient) Use(hooks ...Hook) {
+	c.hooks.StorageConfig = append(c.hooks.StorageConfig, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storageconfig.Intercept(f(g(h())))`.
+func (c *StorageConfigClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StorageConfig = append(c.inters.StorageConfig, interceptors...)
+}
+
+// Create returns a builder for creating a StorageConfig entity.
+func (c *StorageConfigClient) Create() *StorageConfigCreate {
+	mutation := newStorageConfigMutation(c.config, OpCreate)
+	return &StorageConfigCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StorageConfig entities.
+func (c *StorageConfigClient) CreateBulk(builders ...*StorageConfigCreate) *StorageConfigCreateBulk {
+	return &StorageConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StorageConfigClient) MapCreateBulk(slice any, setFunc func(*StorageConfigCreate, int)) *StorageConfigCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StorageConfigCreateBulk{err: fmt.Errorf("calling to StorageConfigClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StorageConfigCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StorageConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StorageConfig.
+func (c *StorageConfigClient) Update() *StorageConfigUpdate {
+	mutation := newStorageConfigMutation(c.config, OpUpdate)
+	return &StorageConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StorageConfigClient) UpdateOne(_m *StorageConfig) *StorageConfigUpdateOne {
+	mutation := newStorageConfigMutation(c.config, OpUpdateOne, withStorageConfig(_m))
+	return &StorageConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StorageConfigClient) UpdateOneID(id uint32) *StorageConfigUpdateOne {
+	mutation := newStorageConfigMutation(c.config, OpUpdateOne, withStorageConfigID(id))
+	return &StorageConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StorageConfig.
+func (c *StorageConfigClient) Delete() *StorageConfigDelete {
+	mutation := newStorageConfigMutation(c.config, OpDelete)
+	return &StorageConfigDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StorageConfigClient) DeleteOne(_m *StorageConfig) *StorageConfigDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StorageConfigClient) DeleteOneID(id uint32) *StorageConfigDeleteOne {
+	builder := c.Delete().Where(storageconfig.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StorageConfigDeleteOne{builder}
+}
+
+// Query returns a query builder for StorageConfig.
+func (c *StorageConfigClient) Query() *StorageConfigQuery {
+	return &StorageConfigQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStorageConfig},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StorageConfig entity by its id.
+func (c *StorageConfigClient) Get(ctx context.Context, id uint32) (*StorageConfig, error) {
+	return c.Query().Where(storageconfig.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StorageConfigClient) GetX(ctx context.Context, id uint32) *StorageConfig {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StorageConfigClient) Hooks() []Hook {
+	hooks := c.hooks.StorageConfig
+	return append(hooks[:len(hooks):len(hooks)], storageconfig.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *StorageConfigClient) Interceptors() []Interceptor {
+	inters := c.inters.StorageConfig
+	return append(inters[:len(inters):len(inters)], storageconfig.Interceptors[:]...)
+}
+
+func (c *StorageConfigClient) mutate(ctx context.Context, m *StorageConfigMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StorageConfigCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StorageConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StorageConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StorageConfigDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown StorageConfig mutation op: %q", m.Op())
+	}
+}
+
 // StorageProviderClient is a client for the StorageProvider schema.
 type StorageProviderClient struct {
 	config
@@ -3943,16 +4086,16 @@ type (
 	hooks struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
 		LoginLog, Menu, NotificationMessage, NotificationTemplate, OperationLog,
-		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
-		TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
+		ParameterDefinition, Post, Project, Role, StorageConfig, StorageProvider,
+		Tenant, TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
 		TenantParameterOverride, User, WebhookDeliveryLog,
 		WebhookSubscription []ent.Hook
 	}
 	inters struct {
 		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
 		LoginLog, Menu, NotificationMessage, NotificationTemplate, OperationLog,
-		ParameterDefinition, Post, Project, Role, StorageProvider, Tenant,
-		TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
+		ParameterDefinition, Post, Project, Role, StorageConfig, StorageProvider,
+		Tenant, TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
 		TenantParameterOverride, User, WebhookDeliveryLog,
 		WebhookSubscription []ent.Interceptor
 	}

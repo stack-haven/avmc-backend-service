@@ -18,6 +18,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/post"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageconfig"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
@@ -1577,6 +1578,121 @@ func init() {
 	roleDescID := roleMixinFields0[0].Descriptor()
 	// role.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	role.IDValidator = roleDescID.Validators[0].(func(uint32) error)
+	storageconfigMixin := schema.StorageConfig{}.Mixin()
+	storageconfig.Policy = privacy.NewPolicies(storageconfigMixin[0], schema.StorageConfig{})
+	storageconfig.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := storageconfig.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	storageconfigMixinHooks1 := storageconfigMixin[1].Hooks()
+
+	storageconfig.Hooks[1] = storageconfigMixinHooks1[0]
+	storageconfigMixinInters1 := storageconfigMixin[1].Interceptors()
+	storageconfig.Interceptors[0] = storageconfigMixinInters1[0]
+	storageconfigMixinFields0 := storageconfigMixin[0].Fields()
+	_ = storageconfigMixinFields0
+	storageconfigFields := schema.StorageConfig{}.Fields()
+	_ = storageconfigFields
+	// storageconfigDescCreatedAt is the schema descriptor for created_at field.
+	storageconfigDescCreatedAt := storageconfigMixinFields0[1].Descriptor()
+	// storageconfig.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storageconfig.DefaultCreatedAt = storageconfigDescCreatedAt.Default.(func() time.Time)
+	// storageconfigDescUpdatedAt is the schema descriptor for updated_at field.
+	storageconfigDescUpdatedAt := storageconfigMixinFields0[2].Descriptor()
+	// storageconfig.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	storageconfig.DefaultUpdatedAt = storageconfigDescUpdatedAt.Default.(func() time.Time)
+	// storageconfig.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	storageconfig.UpdateDefaultUpdatedAt = storageconfigDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// storageconfigDescStatus is the schema descriptor for status field.
+	storageconfigDescStatus := storageconfigMixinFields0[3].Descriptor()
+	// storageconfig.DefaultStatus holds the default value on creation for the status field.
+	storageconfig.DefaultStatus = storageconfigDescStatus.Default.(int32)
+	// storageconfig.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	storageconfig.StatusValidator = func() func(int32) error {
+		validators := storageconfigDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageconfigDescTenantID is the schema descriptor for tenant_id field.
+	storageconfigDescTenantID := storageconfigMixinFields0[4].Descriptor()
+	// storageconfig.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	storageconfig.TenantIDValidator = storageconfigDescTenantID.Validators[0].(func(uint32) error)
+	// storageconfigDescName is the schema descriptor for name field.
+	storageconfigDescName := storageconfigFields[0].Descriptor()
+	// storageconfig.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	storageconfig.NameValidator = func() func(string) error {
+		validators := storageconfigDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageconfigDescProvider is the schema descriptor for provider field.
+	storageconfigDescProvider := storageconfigFields[1].Descriptor()
+	// storageconfig.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	storageconfig.ProviderValidator = func() func(string) error {
+		validators := storageconfigDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// storageconfigDescPurpose is the schema descriptor for purpose field.
+	storageconfigDescPurpose := storageconfigFields[2].Descriptor()
+	// storageconfig.DefaultPurpose holds the default value on creation for the purpose field.
+	storageconfig.DefaultPurpose = storageconfigDescPurpose.Default.(string)
+	// storageconfig.PurposeValidator is a validator for the "purpose" field. It is called by the builders before save.
+	storageconfig.PurposeValidator = storageconfigDescPurpose.Validators[0].(func(string) error)
+	// storageconfigDescBucket is the schema descriptor for bucket field.
+	storageconfigDescBucket := storageconfigFields[3].Descriptor()
+	// storageconfig.DefaultBucket holds the default value on creation for the bucket field.
+	storageconfig.DefaultBucket = storageconfigDescBucket.Default.(string)
+	// storageconfig.BucketValidator is a validator for the "bucket" field. It is called by the builders before save.
+	storageconfig.BucketValidator = storageconfigDescBucket.Validators[0].(func(string) error)
+	// storageconfigDescIsDefault is the schema descriptor for is_default field.
+	storageconfigDescIsDefault := storageconfigFields[4].Descriptor()
+	// storageconfig.DefaultIsDefault holds the default value on creation for the is_default field.
+	storageconfig.DefaultIsDefault = storageconfigDescIsDefault.Default.(bool)
+	// storageconfigDescHealthStatus is the schema descriptor for health_status field.
+	storageconfigDescHealthStatus := storageconfigFields[6].Descriptor()
+	// storageconfig.DefaultHealthStatus holds the default value on creation for the health_status field.
+	storageconfig.DefaultHealthStatus = storageconfigDescHealthStatus.Default.(string)
+	// storageconfig.HealthStatusValidator is a validator for the "health_status" field. It is called by the builders before save.
+	storageconfig.HealthStatusValidator = storageconfigDescHealthStatus.Validators[0].(func(string) error)
+	// storageconfigDescID is the schema descriptor for id field.
+	storageconfigDescID := storageconfigMixinFields0[0].Descriptor()
+	// storageconfig.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	storageconfig.IDValidator = storageconfigDescID.Validators[0].(func(uint32) error)
 	storageproviderMixin := schema.StorageProvider{}.Mixin()
 	storageproviderMixinHooks4 := storageproviderMixin[4].Hooks()
 	storageprovider.Hooks[0] = storageproviderMixinHooks4[0]

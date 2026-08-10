@@ -58,6 +58,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	session *service.SessionServiceService,
 	parameter *service.ParameterServiceService,
 	storageProvider *service.StorageProviderServiceService,
+	storageConfig *service.StorageConfigService,
 	fileCenter *service.FileCenterServiceService,
 	notification *service.NotificationServiceService,
 	asyncTask *service.AsyncTaskServiceService,
@@ -107,6 +108,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterSessionServiceHTTPServer(srv, session)
 	v1.RegisterParameterServiceHTTPServer(srv, parameter)
 	v1.RegisterStorageProviderServiceHTTPServer(srv, storageProvider)
+	v1.RegisterStorageConfigServiceHTTPServer(srv, storageConfig)
 	v1.RegisterFileCenterServiceHTTPServer(srv, fileCenter)
 	v1.RegisterNotificationServiceHTTPServer(srv, notification)
 	v1.RegisterAsyncTaskServiceHTTPServer(srv, asyncTask)

@@ -1,4 +1,4 @@
-# 中间件目录 (internal/middleware)
+# 中间件目录 (pkg/middleware)
 
 ## 目录说明
 该目录用于存放项目内部使用的中间件组件。遵循 Go-Kratos 微服务项目规范，按功能模块划分子目录：

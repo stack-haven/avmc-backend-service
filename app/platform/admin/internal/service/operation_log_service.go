@@ -20,6 +20,14 @@ type OperationLogServiceService struct {
 func NewOperationLogServiceService(uc *biz.OperationLogUsecase, logger log.Logger) *OperationLogServiceService {
 	return &OperationLogServiceService{uc: uc, log: log.NewHelper(logger)}
 }
+
+func (s *OperationLogServiceService) CreateOperationLog(ctx context.Context, req *pbCore.CreateOperationLogRequest) (*pbCore.CreateOperationLogResponse, error) {
+	if err := s.uc.Record(ctx, req.GetEntry()); err != nil {
+		return nil, err
+	}
+	return &pbCore.CreateOperationLogResponse{}, nil
+}
+
 func (s *OperationLogServiceService) ListOperationLogs(ctx context.Context, req *pbCore.ListOperationLogsRequest) (*pbCore.ListOperationLogsResponse, error) {
 	items, total, err := s.uc.List(ctx, req)
 	if err != nil {

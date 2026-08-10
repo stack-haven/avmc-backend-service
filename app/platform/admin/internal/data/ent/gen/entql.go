@@ -19,6 +19,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageconfig"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
@@ -36,7 +37,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 23)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 24)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   asynctask.Table,
@@ -453,6 +454,32 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[15] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   storageconfig.Table,
+			Columns: storageconfig.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: storageconfig.FieldID,
+			},
+		},
+		Type: "StorageConfig",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			storageconfig.FieldCreatedAt:     {Type: field.TypeTime, Column: storageconfig.FieldCreatedAt},
+			storageconfig.FieldUpdatedAt:     {Type: field.TypeTime, Column: storageconfig.FieldUpdatedAt},
+			storageconfig.FieldStatus:        {Type: field.TypeInt32, Column: storageconfig.FieldStatus},
+			storageconfig.FieldTenantID:      {Type: field.TypeUint32, Column: storageconfig.FieldTenantID},
+			storageconfig.FieldDeletedAt:     {Type: field.TypeTime, Column: storageconfig.FieldDeletedAt},
+			storageconfig.FieldName:          {Type: field.TypeString, Column: storageconfig.FieldName},
+			storageconfig.FieldProvider:      {Type: field.TypeString, Column: storageconfig.FieldProvider},
+			storageconfig.FieldPurpose:       {Type: field.TypeString, Column: storageconfig.FieldPurpose},
+			storageconfig.FieldBucket:        {Type: field.TypeString, Column: storageconfig.FieldBucket},
+			storageconfig.FieldIsDefault:     {Type: field.TypeBool, Column: storageconfig.FieldIsDefault},
+			storageconfig.FieldConfigJSON:    {Type: field.TypeString, Column: storageconfig.FieldConfigJSON},
+			storageconfig.FieldHealthStatus:  {Type: field.TypeString, Column: storageconfig.FieldHealthStatus},
+			storageconfig.FieldLastCheckedAt: {Type: field.TypeTime, Column: storageconfig.FieldLastCheckedAt},
+		},
+	}
+	graph.Nodes[16] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   storageprovider.Table,
 			Columns: storageprovider.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -485,7 +512,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			storageprovider.FieldRemark:         {Type: field.TypeString, Column: storageprovider.FieldRemark},
 		},
 	}
-	graph.Nodes[16] = &sqlgraph.Node{
+	graph.Nodes[17] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
@@ -511,7 +538,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldCancelledAt:     {Type: field.TypeTime, Column: tenant.FieldCancelledAt},
 		},
 	}
-	graph.Nodes[17] = &sqlgraph.Node{
+	graph.Nodes[18] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantmenupermissiongroup.Table,
 			Columns: tenantmenupermissiongroup.Columns,
@@ -538,7 +565,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantmenupermissiongroup.FieldResourceQuotas:   {Type: field.TypeJSON, Column: tenantmenupermissiongroup.FieldResourceQuotas},
 		},
 	}
-	graph.Nodes[18] = &sqlgraph.Node{
+	graph.Nodes[19] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantmenupermissiongroupversion.Table,
 			Columns: tenantmenupermissiongroupversion.Columns,
@@ -563,7 +590,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantmenupermissiongroupversion.FieldResourceQuotas: {Type: field.TypeJSON, Column: tenantmenupermissiongroupversion.FieldResourceQuotas},
 		},
 	}
-	graph.Nodes[19] = &sqlgraph.Node{
+	graph.Nodes[20] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenantparameteroverride.Table,
 			Columns: tenantparameteroverride.Columns,
@@ -582,7 +609,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenantparameteroverride.FieldUpdatedBy:    {Type: field.TypeUint32, Column: tenantparameteroverride.FieldUpdatedBy},
 		},
 	}
-	graph.Nodes[20] = &sqlgraph.Node{
+	graph.Nodes[21] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -617,7 +644,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldDeptID:      {Type: field.TypeUint32, Column: user.FieldDeptID},
 		},
 	}
-	graph.Nodes[21] = &sqlgraph.Node{
+	graph.Nodes[22] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   webhookdeliverylog.Table,
 			Columns: webhookdeliverylog.Columns,
@@ -644,7 +671,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			webhookdeliverylog.FieldErrorMessage:   {Type: field.TypeString, Column: webhookdeliverylog.FieldErrorMessage},
 		},
 	}
-	graph.Nodes[22] = &sqlgraph.Node{
+	graph.Nodes[23] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   webhooksubscription.Table,
 			Columns: webhooksubscription.Columns,
@@ -2931,6 +2958,111 @@ func (f *RoleFilter) WhereHasUsersWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *StorageConfigQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the StorageConfigQuery builder.
+func (_q *StorageConfigQuery) Filter() *StorageConfigFilter {
+	return &StorageConfigFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *StorageConfigMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the StorageConfigMutation builder.
+func (m *StorageConfigMutation) Filter() *StorageConfigFilter {
+	return &StorageConfigFilter{config: m.config, predicateAdder: m}
+}
+
+// StorageConfigFilter provides a generic filtering capability at runtime for StorageConfigQuery.
+type StorageConfigFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *StorageConfigFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *StorageConfigFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(storageconfig.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *StorageConfigFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(storageconfig.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *StorageConfigFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(storageconfig.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *StorageConfigFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(storageconfig.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *StorageConfigFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(storageconfig.FieldTenantID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *StorageConfigFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(storageconfig.FieldDeletedAt))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *StorageConfigFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(storageconfig.FieldName))
+}
+
+// WhereProvider applies the entql string predicate on the provider field.
+func (f *StorageConfigFilter) WhereProvider(p entql.StringP) {
+	f.Where(p.Field(storageconfig.FieldProvider))
+}
+
+// WherePurpose applies the entql string predicate on the purpose field.
+func (f *StorageConfigFilter) WherePurpose(p entql.StringP) {
+	f.Where(p.Field(storageconfig.FieldPurpose))
+}
+
+// WhereBucket applies the entql string predicate on the bucket field.
+func (f *StorageConfigFilter) WhereBucket(p entql.StringP) {
+	f.Where(p.Field(storageconfig.FieldBucket))
+}
+
+// WhereIsDefault applies the entql bool predicate on the is_default field.
+func (f *StorageConfigFilter) WhereIsDefault(p entql.BoolP) {
+	f.Where(p.Field(storageconfig.FieldIsDefault))
+}
+
+// WhereConfigJSON applies the entql string predicate on the config_json field.
+func (f *StorageConfigFilter) WhereConfigJSON(p entql.StringP) {
+	f.Where(p.Field(storageconfig.FieldConfigJSON))
+}
+
+// WhereHealthStatus applies the entql string predicate on the health_status field.
+func (f *StorageConfigFilter) WhereHealthStatus(p entql.StringP) {
+	f.Where(p.Field(storageconfig.FieldHealthStatus))
+}
+
+// WhereLastCheckedAt applies the entql time.Time predicate on the last_checked_at field.
+func (f *StorageConfigFilter) WhereLastCheckedAt(p entql.TimeP) {
+	f.Where(p.Field(storageconfig.FieldLastCheckedAt))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *StorageProviderQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -2959,7 +3091,7 @@ type StorageProviderFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *StorageProviderFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3104,7 +3236,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3223,7 +3355,7 @@ type TenantMenuPermissionGroupFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantMenuPermissionGroupFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3389,7 +3521,7 @@ type TenantMenuPermissionGroupVersionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantMenuPermissionGroupVersionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3517,7 +3649,7 @@ type TenantParameterOverrideFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantParameterOverrideFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3601,7 +3733,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3807,7 +3939,7 @@ type WebhookDeliveryLogFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *WebhookDeliveryLogFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[22].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3917,7 +4049,7 @@ type WebhookSubscriptionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *WebhookSubscriptionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[22].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[23].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

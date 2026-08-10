@@ -96,6 +96,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	storageProviderRepo := data.NewStorageProviderRepo(dataData, oss, logger)
 	storageProviderUsecase := biz.NewStorageProviderUsecase(storageProviderRepo, logger)
 	storageProviderServiceService := service.NewStorageProviderServiceService(storageProviderUsecase)
+	storageCrypto := data.NewStorageCrypto()
+	storageConfigRepo := data.NewStorageConfigRepo(dataData, storageCrypto, logger)
+	storageConfigUsecase := biz.NewStorageConfigUsecase(storageConfigRepo, logger)
+	storageConfigService := service.NewStorageConfigService(storageConfigUsecase)
 	fileRepo := data.NewFileRepo(dataData, logger)
 	fileAccessLogRepo := data.NewFileAccessLogRepo(dataData, logger)
 	storageProviderResolver := biz.NewStorageProviderResolver(storageProviderRepo)
@@ -116,13 +120,13 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 		cleanup()
 		return nil, nil, err
 	}
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService)
+	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

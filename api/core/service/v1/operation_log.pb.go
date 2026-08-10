@@ -22,6 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 操作日志
 type OperationLog struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -226,6 +227,86 @@ func (x *OperationLog) GetCreatedAt() string {
 	return ""
 }
 
+type CreateOperationLogRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Entry         *OperationLog          `protobuf:"bytes,1,opt,name=entry,proto3" json:"entry,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateOperationLogRequest) Reset() {
+	*x = CreateOperationLogRequest{}
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateOperationLogRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateOperationLogRequest) ProtoMessage() {}
+
+func (x *CreateOperationLogRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateOperationLogRequest.ProtoReflect.Descriptor instead.
+func (*CreateOperationLogRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateOperationLogRequest) GetEntry() *OperationLog {
+	if x != nil {
+		return x.Entry
+	}
+	return nil
+}
+
+type CreateOperationLogResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateOperationLogResponse) Reset() {
+	*x = CreateOperationLogResponse{}
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateOperationLogResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateOperationLogResponse) ProtoMessage() {}
+
+func (x *CreateOperationLogResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateOperationLogResponse.ProtoReflect.Descriptor instead.
+func (*CreateOperationLogResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{2}
+}
+
 type ListOperationLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PageToken     string                 `protobuf:"bytes,1,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
@@ -243,7 +324,7 @@ type ListOperationLogsRequest struct {
 
 func (x *ListOperationLogsRequest) Reset() {
 	*x = ListOperationLogsRequest{}
-	mi := &file_core_service_v1_operation_log_proto_msgTypes[1]
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -255,7 +336,7 @@ func (x *ListOperationLogsRequest) String() string {
 func (*ListOperationLogsRequest) ProtoMessage() {}
 
 func (x *ListOperationLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_operation_log_proto_msgTypes[1]
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -268,7 +349,7 @@ func (x *ListOperationLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOperationLogsRequest.ProtoReflect.Descriptor instead.
 func (*ListOperationLogsRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{1}
+	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListOperationLogsRequest) GetPageToken() string {
@@ -345,7 +426,7 @@ type ListOperationLogsResponse struct {
 
 func (x *ListOperationLogsResponse) Reset() {
 	*x = ListOperationLogsResponse{}
-	mi := &file_core_service_v1_operation_log_proto_msgTypes[2]
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -357,7 +438,7 @@ func (x *ListOperationLogsResponse) String() string {
 func (*ListOperationLogsResponse) ProtoMessage() {}
 
 func (x *ListOperationLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_operation_log_proto_msgTypes[2]
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -370,7 +451,7 @@ func (x *ListOperationLogsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOperationLogsResponse.ProtoReflect.Descriptor instead.
 func (*ListOperationLogsResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{2}
+	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListOperationLogsResponse) GetItems() []*OperationLog {
@@ -403,7 +484,7 @@ type GetOperationLogRequest struct {
 
 func (x *GetOperationLogRequest) Reset() {
 	*x = GetOperationLogRequest{}
-	mi := &file_core_service_v1_operation_log_proto_msgTypes[3]
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +496,7 @@ func (x *GetOperationLogRequest) String() string {
 func (*GetOperationLogRequest) ProtoMessage() {}
 
 func (x *GetOperationLogRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_operation_log_proto_msgTypes[3]
+	mi := &file_core_service_v1_operation_log_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -428,7 +509,7 @@ func (x *GetOperationLogRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOperationLogRequest.ProtoReflect.Descriptor instead.
 func (*GetOperationLogRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{3}
+	return file_core_service_v1_operation_log_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetOperationLogRequest) GetId() uint64 {
@@ -490,7 +571,10 @@ const file_core_service_v1_operation_log_proto_rawDesc = "" +
 	"\t_trace_idB\x0e\n" +
 	"\f_duration_msB\x10\n" +
 	"\x0e_error_messageB\r\n" +
-	"\v_created_at\"\xa6\x03\n" +
+	"\v_created_at\"X\n" +
+	"\x19CreateOperationLogRequest\x12;\n" +
+	"\x05entry\x18\x01 \x01(\v2\x1d.core.service.v1.OperationLogB\x06\xbaH\x03\xc8\x01\x01R\x05entry\"\x1c\n" +
+	"\x1aCreateOperationLogResponse\"\xa6\x03\n" +
 	"\x18ListOperationLogsRequest\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x01 \x01(\tR\tpageToken\x12\x1b\n" +
@@ -517,7 +601,11 @@ const file_core_service_v1_operation_log_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
 	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"1\n" +
 	"\x16GetOperationLogRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x04B\a\xbaH\x042\x02 \x00R\x02idB\xae\x01\n" +
+	"\x02id\x18\x01 \x01(\x04B\a\xbaH\x042\x02 \x00R\x02id2\xcb\x02\n" +
+	"\x13OperationLogService\x12m\n" +
+	"\x12CreateOperationLog\x12*.core.service.v1.CreateOperationLogRequest\x1a+.core.service.v1.CreateOperationLogResponse\x12j\n" +
+	"\x11ListOperationLogs\x12).core.service.v1.ListOperationLogsRequest\x1a*.core.service.v1.ListOperationLogsResponse\x12Y\n" +
+	"\x0fGetOperationLog\x12'.core.service.v1.GetOperationLogRequest\x1a\x1d.core.service.v1.OperationLogB\xae\x01\n" +
 	"\x13com.core.service.v1B\x11OperationLogProtoP\x01Z&backend-service/api/core/service/v1;v1\xa2\x02\x03CSX\xaa\x02\x0fCore.Service.V1\xca\x02\x0fCore\\Service\\V1\xe2\x02\x1bCore\\Service\\V1\\GPBMetadata\xea\x02\x11Core::Service::V1b\x06proto3"
 
 var (
@@ -532,20 +620,29 @@ func file_core_service_v1_operation_log_proto_rawDescGZIP() []byte {
 	return file_core_service_v1_operation_log_proto_rawDescData
 }
 
-var file_core_service_v1_operation_log_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_core_service_v1_operation_log_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_core_service_v1_operation_log_proto_goTypes = []any{
-	(*OperationLog)(nil),              // 0: core.service.v1.OperationLog
-	(*ListOperationLogsRequest)(nil),  // 1: core.service.v1.ListOperationLogsRequest
-	(*ListOperationLogsResponse)(nil), // 2: core.service.v1.ListOperationLogsResponse
-	(*GetOperationLogRequest)(nil),    // 3: core.service.v1.GetOperationLogRequest
+	(*OperationLog)(nil),               // 0: core.service.v1.OperationLog
+	(*CreateOperationLogRequest)(nil),  // 1: core.service.v1.CreateOperationLogRequest
+	(*CreateOperationLogResponse)(nil), // 2: core.service.v1.CreateOperationLogResponse
+	(*ListOperationLogsRequest)(nil),   // 3: core.service.v1.ListOperationLogsRequest
+	(*ListOperationLogsResponse)(nil),  // 4: core.service.v1.ListOperationLogsResponse
+	(*GetOperationLogRequest)(nil),     // 5: core.service.v1.GetOperationLogRequest
 }
 var file_core_service_v1_operation_log_proto_depIdxs = []int32{
-	0, // 0: core.service.v1.ListOperationLogsResponse.items:type_name -> core.service.v1.OperationLog
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: core.service.v1.CreateOperationLogRequest.entry:type_name -> core.service.v1.OperationLog
+	0, // 1: core.service.v1.ListOperationLogsResponse.items:type_name -> core.service.v1.OperationLog
+	1, // 2: core.service.v1.OperationLogService.CreateOperationLog:input_type -> core.service.v1.CreateOperationLogRequest
+	3, // 3: core.service.v1.OperationLogService.ListOperationLogs:input_type -> core.service.v1.ListOperationLogsRequest
+	5, // 4: core.service.v1.OperationLogService.GetOperationLog:input_type -> core.service.v1.GetOperationLogRequest
+	2, // 5: core.service.v1.OperationLogService.CreateOperationLog:output_type -> core.service.v1.CreateOperationLogResponse
+	4, // 6: core.service.v1.OperationLogService.ListOperationLogs:output_type -> core.service.v1.ListOperationLogsResponse
+	0, // 7: core.service.v1.OperationLogService.GetOperationLog:output_type -> core.service.v1.OperationLog
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_operation_log_proto_init() }
@@ -554,16 +651,16 @@ func file_core_service_v1_operation_log_proto_init() {
 		return
 	}
 	file_core_service_v1_operation_log_proto_msgTypes[0].OneofWrappers = []any{}
-	file_core_service_v1_operation_log_proto_msgTypes[1].OneofWrappers = []any{}
+	file_core_service_v1_operation_log_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_operation_log_proto_rawDesc), len(file_core_service_v1_operation_log_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_core_service_v1_operation_log_proto_goTypes,
 		DependencyIndexes: file_core_service_v1_operation_log_proto_depIdxs,

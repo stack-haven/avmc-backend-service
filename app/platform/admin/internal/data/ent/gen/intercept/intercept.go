@@ -23,6 +23,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/predicate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/project"
 	"backend-service/app/platform/admin/internal/data/ent/gen/role"
+	"backend-service/app/platform/admin/internal/data/ent/gen/storageconfig"
 	"backend-service/app/platform/admin/internal/data/ent/gen/storageprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/tenantmenupermissiongroup"
@@ -496,6 +497,33 @@ func (f TraverseRole) Traverse(ctx context.Context, q gen.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *gen.RoleQuery", q)
 }
 
+// The StorageConfigFunc type is an adapter to allow the use of ordinary function as a Querier.
+type StorageConfigFunc func(context.Context, *gen.StorageConfigQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f StorageConfigFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.StorageConfigQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.StorageConfigQuery", q)
+}
+
+// The TraverseStorageConfig type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseStorageConfig func(context.Context, *gen.StorageConfigQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseStorageConfig) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseStorageConfig) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.StorageConfigQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.StorageConfigQuery", q)
+}
+
 // The StorageProviderFunc type is an adapter to allow the use of ordinary function as a Querier.
 type StorageProviderFunc func(context.Context, *gen.StorageProviderQuery) (gen.Value, error)
 
@@ -745,6 +773,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.ProjectQuery, predicate.Project, project.OrderOption]{typ: gen.TypeProject, tq: q}, nil
 	case *gen.RoleQuery:
 		return &query[*gen.RoleQuery, predicate.Role, role.OrderOption]{typ: gen.TypeRole, tq: q}, nil
+	case *gen.StorageConfigQuery:
+		return &query[*gen.StorageConfigQuery, predicate.StorageConfig, storageconfig.OrderOption]{typ: gen.TypeStorageConfig, tq: q}, nil
 	case *gen.StorageProviderQuery:
 		return &query[*gen.StorageProviderQuery, predicate.StorageProvider, storageprovider.OrderOption]{typ: gen.TypeStorageProvider, tq: q}, nil
 	case *gen.TenantQuery:

@@ -20,18 +20,43 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationOperationLogServiceCreateOperationLog = "/platform.admin.v1.OperationLogService/CreateOperationLog"
 const OperationOperationLogServiceGetOperationLog = "/platform.admin.v1.OperationLogService/GetOperationLog"
 const OperationOperationLogServiceListOperationLogs = "/platform.admin.v1.OperationLogService/ListOperationLogs"
 
 type OperationLogServiceHTTPServer interface {
+	CreateOperationLog(context.Context, *v1.CreateOperationLogRequest) (*v1.CreateOperationLogResponse, error)
 	GetOperationLog(context.Context, *v1.GetOperationLogRequest) (*v1.OperationLog, error)
 	ListOperationLogs(context.Context, *v1.ListOperationLogsRequest) (*v1.ListOperationLogsResponse, error)
 }
 
 func RegisterOperationLogServiceHTTPServer(s *http.Server, srv OperationLogServiceHTTPServer) {
 	r := s.Route("/")
+	r.POST("/admin/v1/operation-logs", _OperationLogService_CreateOperationLog0_HTTP_Handler(srv))
 	r.GET("/admin/v1/operation-logs", _OperationLogService_ListOperationLogs0_HTTP_Handler(srv))
 	r.GET("/admin/v1/operation-logs/{id}", _OperationLogService_GetOperationLog0_HTTP_Handler(srv))
+}
+
+func _OperationLogService_CreateOperationLog0_HTTP_Handler(srv OperationLogServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.CreateOperationLogRequest
+		if err := ctx.Bind(&in.Entry); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOperationLogServiceCreateOperationLog)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateOperationLog(ctx, req.(*v1.CreateOperationLogRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.CreateOperationLogResponse)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _OperationLogService_ListOperationLogs0_HTTP_Handler(srv OperationLogServiceHTTPServer) func(ctx http.Context) error {
@@ -76,6 +101,7 @@ func _OperationLogService_GetOperationLog0_HTTP_Handler(srv OperationLogServiceH
 }
 
 type OperationLogServiceHTTPClient interface {
+	CreateOperationLog(ctx context.Context, req *v1.CreateOperationLogRequest, opts ...http.CallOption) (rsp *v1.CreateOperationLogResponse, err error)
 	GetOperationLog(ctx context.Context, req *v1.GetOperationLogRequest, opts ...http.CallOption) (rsp *v1.OperationLog, err error)
 	ListOperationLogs(ctx context.Context, req *v1.ListOperationLogsRequest, opts ...http.CallOption) (rsp *v1.ListOperationLogsResponse, err error)
 }
@@ -86,6 +112,19 @@ type OperationLogServiceHTTPClientImpl struct {
 
 func NewOperationLogServiceHTTPClient(client *http.Client) OperationLogServiceHTTPClient {
 	return &OperationLogServiceHTTPClientImpl{client}
+}
+
+func (c *OperationLogServiceHTTPClientImpl) CreateOperationLog(ctx context.Context, in *v1.CreateOperationLogRequest, opts ...http.CallOption) (*v1.CreateOperationLogResponse, error) {
+	var out v1.CreateOperationLogResponse
+	pattern := "/admin/v1/operation-logs"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationOperationLogServiceCreateOperationLog))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.Entry, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *OperationLogServiceHTTPClientImpl) GetOperationLog(ctx context.Context, in *v1.GetOperationLogRequest, opts ...http.CallOption) (*v1.OperationLog, error) {

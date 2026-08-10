@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/storage_config.proto";
+import "google/api/annotations.proto";
+import "gnostic/openapi/v3/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+option java_multiple_files = true;
+option java_package = "platform.admin.v1";
+
+service StorageConfigService {
+  rpc CreateStorageConfig(core.service.v1.CreateStorageConfigRequest) returns (core.service.v1.CreateStorageConfigResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/storage-configs"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建存储配置"
+      description: "为当前租户创建一条对象存储配置"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc UpdateStorageConfig(core.service.v1.UpdateStorageConfigRequest) returns (core.service.v1.UpdateStorageConfigResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/storage-configs/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新存储配置"
+      description: "更新当前租户的一条存储配置"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc DeleteStorageConfig(core.service.v1.DeleteStorageConfigRequest) returns (core.service.v1.DeleteStorageConfigResponse) {
+    option (google.api.http) = {delete: "/admin/v1/storage-configs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除存储配置"
+      description: "删除当前租户的一条存储配置"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc GetStorageConfig(core.service.v1.GetStorageConfigRequest) returns (core.service.v1.GetStorageConfigResponse) {
+    option (google.api.http) = {get: "/admin/v1/storage-configs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取存储配置详情"
+      description: "获取当前租户的一条存储配置详情"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc ListStorageConfigs(core.service.v1.ListStorageConfigsRequest) returns (core.service.v1.ListStorageConfigsResponse) {
+    option (google.api.http) = {get: "/admin/v1/storage-configs"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询存储配置"
+      description: "分页查询当前租户的存储配置列表"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc SetDefaultStorageConfig(core.service.v1.SetDefaultStorageConfigRequest) returns (core.service.v1.SetDefaultStorageConfigResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/storage-configs/{id}:set-default"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "设为默认存储配置"
+      description: "将指定存储配置设为当前租户的默认存储"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc TestStorageConfig(core.service.v1.TestStorageConfigRequest) returns (core.service.v1.TestStorageConfigResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/storage-configs:test"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "测试存储配置连接"
+      description: "测试存储配置是否可用"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+}

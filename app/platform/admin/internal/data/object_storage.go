@@ -1,10 +1,14 @@
 package data
 
 import (
+	"encoding/json"
 	"strings"
 
 	"backend-service/app/platform/admin/internal/conf"
 	"backend-service/pkg/objectstorage"
+
+	// 触发 S3 供应商注册
+	_ "backend-service/pkg/objectstorage/s3"
 )
 
 func NewObjectStorageClient(cfg *conf.OSS) objectstorage.Client {
@@ -17,17 +21,19 @@ func NewObjectStorageClient(cfg *conf.OSS) objectstorage.Client {
 		strings.TrimSpace(minio.SecretKey) == "" {
 		return nil
 	}
-	client, err := objectstorage.NewClient(objectstorage.Config{
-		Provider:       objectstorage.ProviderS3Compatible,
-		Endpoint:       minio.Endpoint,
-		AccessKey:      minio.AccessKey,
-		SecretKey:      minio.SecretKey,
-		SessionToken:   minio.Token,
-		UseSSL:         minio.UseSsl,
-		ForcePathStyle: true,
-		PublicBaseURL:  minio.DownloadHost,
-		DefaultBucket:  "tenant-files",
+	configJSON, err := json.Marshal(map[string]interface{}{
+		"endpoint":         minio.Endpoint,
+		"access_key":       minio.AccessKey,
+		"secret_key":       minio.SecretKey,
+		"session_token":    minio.Token,
+		"use_ssl":          minio.UseSsl,
+		"force_path_style": true,
+		"public_base_url":  minio.DownloadHost,
 	})
+	if err != nil {
+		return nil
+	}
+	client, err := objectstorage.NewClient("s3-compatible", configJSON)
 	if err != nil {
 		return nil
 	}

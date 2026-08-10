@@ -9,6 +9,12 @@ import (
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
+func init() {
+	storage.Register("memcached", func(config storage.Config) (storage.Storage, error) {
+		return NewMemcachedStorage(config)
+	})
+}
+
 // MemcachedStorage 是Memcached存储的实现
 type MemcachedStorage struct {
 	client *memcache.Client

@@ -471,6 +471,30 @@ func (f RoleMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) 
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.RoleMutation", m)
 }
 
+// The StorageConfigQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type StorageConfigQueryRuleFunc func(context.Context, *gen.StorageConfigQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f StorageConfigQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.StorageConfigQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.StorageConfigQuery", q)
+}
+
+// The StorageConfigMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type StorageConfigMutationRuleFunc func(context.Context, *gen.StorageConfigMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f StorageConfigMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.StorageConfigMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.StorageConfigMutation", m)
+}
+
 // The StorageProviderQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type StorageProviderQueryRuleFunc func(context.Context, *gen.StorageProviderQuery) error
@@ -728,6 +752,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.RoleQuery:
 		return q.Filter(), nil
+	case *gen.StorageConfigQuery:
+		return q.Filter(), nil
 	case *gen.StorageProviderQuery:
 		return q.Filter(), nil
 	case *gen.TenantQuery:
@@ -780,6 +806,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.ProjectMutation:
 		return m.Filter(), nil
 	case *gen.RoleMutation:
+		return m.Filter(), nil
+	case *gen.StorageConfigMutation:
 		return m.Filter(), nil
 	case *gen.StorageProviderMutation:
 		return m.Filter(), nil

@@ -3,14 +3,39 @@ package platform.admin.v1;
 
 import "core/service/v1/operation_log.proto";
 import "google/api/annotations.proto";
+import "gnostic/openapi/v3/annotations.proto";
 
 option go_package = "backend-service/api/platform/admin/v1;v1";
 
 service OperationLogService {
+  rpc CreateOperationLog(core.service.v1.CreateOperationLogRequest) returns (core.service.v1.CreateOperationLogResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/operation-logs"
+      body: "entry"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建操作日志"
+      description: "记录一条操作日志（供内部服务调用）"
+      tags: ["操作日志服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
   rpc ListOperationLogs(core.service.v1.ListOperationLogsRequest) returns (core.service.v1.ListOperationLogsResponse) {
     option (google.api.http) = {get: "/admin/v1/operation-logs"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询操作日志"
+      description: "分页查询操作日志列表"
+      tags: ["操作日志服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
   }
   rpc GetOperationLog(core.service.v1.GetOperationLogRequest) returns (core.service.v1.OperationLog) {
     option (google.api.http) = {get: "/admin/v1/operation-logs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取操作日志详情"
+      description: "获取指定操作日志的详细信息"
+      tags: ["操作日志服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
   }
 }

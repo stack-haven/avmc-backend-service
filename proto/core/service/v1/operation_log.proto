@@ -6,6 +6,7 @@ import "buf/validate/validate.proto";
 
 option go_package = "backend-service/api/core/service/v1;v1";
 
+// 操作日志
 message OperationLog {
   uint64 id = 1;
   uint32 tenant_id = 2;
@@ -30,6 +31,22 @@ message OperationLog {
   optional string created_at = 21;
 }
 
+// 操作日志服务
+service OperationLogService {
+  // 创建操作日志（供产品服务 gRPC 调用）
+  rpc CreateOperationLog(CreateOperationLogRequest) returns (CreateOperationLogResponse);
+  // 分页查询
+  rpc ListOperationLogs(ListOperationLogsRequest) returns (ListOperationLogsResponse);
+  // 获取详情
+  rpc GetOperationLog(GetOperationLogRequest) returns (OperationLog);
+}
+
+message CreateOperationLogRequest {
+  OperationLog entry = 1 [(buf.validate.field).required = true];
+}
+
+message CreateOperationLogResponse {}
+
 message ListOperationLogsRequest {
   string page_token = 1;
   int32 page_size = 2;
@@ -41,10 +58,11 @@ message ListOperationLogsRequest {
   optional string resource_id = 8;
   optional string trace_id = 9;
 }
+
 message ListOperationLogsResponse {
   repeated OperationLog items = 1;
   int32 total = 2;
   string next_page_token = 3;
 }
-message GetOperationLogRequest { uint64 id = 1 [(buf.validate.field).uint64.gt = 0]; }
 
+message GetOperationLogRequest { uint64 id = 1 [(buf.validate.field).uint64.gt = 0]; }

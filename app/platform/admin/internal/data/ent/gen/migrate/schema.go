@@ -736,6 +736,52 @@ var (
 			},
 		},
 	}
+	// StorageConfigsColumns holds the columns for the "storage_configs" table.
+	StorageConfigsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Size: 120, Comment: "配置名称"},
+		{Name: "provider", Type: field.TypeString, Size: 40, Comment: "s3-compatible / aliyun-oss / tencent-cos / qiniu-kodo / local"},
+		{Name: "purpose", Type: field.TypeString, Size: 40, Comment: "用途：default / audio / backup", Default: ""},
+		{Name: "bucket", Type: field.TypeString, Size: 120, Comment: "默认桶名", Default: ""},
+		{Name: "is_default", Type: field.TypeBool, Comment: "是否默认存储", Default: false},
+		{Name: "config_json", Type: field.TypeString, Size: 2147483647, Comment: "供应商专属配置 JSON（加密存储）"},
+		{Name: "health_status", Type: field.TypeString, Size: 20, Comment: "unknown / healthy / unhealthy", Default: "unknown"},
+		{Name: "last_checked_at", Type: field.TypeTime, Nullable: true, Comment: "最后健康检查时间"},
+	}
+	// StorageConfigsTable holds the schema information for the "storage_configs" table.
+	StorageConfigsTable = &schema.Table{
+		Name:       "storage_configs",
+		Comment:    "租户存储配置表",
+		Columns:    StorageConfigsColumns,
+		PrimaryKey: []*schema.Column{StorageConfigsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storageconfig_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{StorageConfigsColumns[4]},
+			},
+			{
+				Name:    "storageconfig_tenant_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{StorageConfigsColumns[4], StorageConfigsColumns[6]},
+			},
+			{
+				Name:    "storageconfig_tenant_id_provider",
+				Unique:  false,
+				Columns: []*schema.Column{StorageConfigsColumns[4], StorageConfigsColumns[7]},
+			},
+			{
+				Name:    "storageconfig_tenant_id_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{StorageConfigsColumns[4], StorageConfigsColumns[10]},
+			},
+		},
+	}
 	// SystemStorageProvidersColumns holds the columns for the "system_storage_providers" table.
 	SystemStorageProvidersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -1345,6 +1391,7 @@ var (
 		SystemPostsTable,
 		SystemProjectsTable,
 		SystemRolesTable,
+		StorageConfigsTable,
 		SystemStorageProvidersTable,
 		SystemTenantsTable,
 		SystemTenantMenuPermissionGroupsTable,
@@ -1440,6 +1487,11 @@ func init() {
 	}
 	SystemRolesTable.Annotation = &entsql.Annotation{
 		Table:     "system_roles",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	StorageConfigsTable.Annotation = &entsql.Annotation{
+		Table:     "storage_configs",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
