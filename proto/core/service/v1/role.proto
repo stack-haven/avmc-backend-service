@@ -240,6 +240,15 @@ message ListRolesResponse {
   string next_page_token = 3;
 }
 
+// 查询角色简单列表请求
+message ListRoleSimpleRequest {}
+
+// 查询角色简单列表响应
+message ListRoleSimpleResponse {
+  repeated Role items = 1;
+  int32 total = 2;
+}
+
 // 判断角色名是否存在请求
 message ExistRoleByNameRequest {
   optional uint32 id = 1 [

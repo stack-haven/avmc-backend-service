@@ -24,6 +24,7 @@ const OperationRoleServiceCreateRole = "/platform.admin.v1.RoleService/CreateRol
 const OperationRoleServiceDeleteRole = "/platform.admin.v1.RoleService/DeleteRole"
 const OperationRoleServiceExistRoleByName = "/platform.admin.v1.RoleService/ExistRoleByName"
 const OperationRoleServiceGetRole = "/platform.admin.v1.RoleService/GetRole"
+const OperationRoleServiceListRoleSimple = "/platform.admin.v1.RoleService/ListRoleSimple"
 const OperationRoleServiceListRoles = "/platform.admin.v1.RoleService/ListRoles"
 const OperationRoleServiceUpdateRole = "/platform.admin.v1.RoleService/UpdateRole"
 const OperationRoleServiceUpdateRoleByStatus = "/platform.admin.v1.RoleService/UpdateRoleByStatus"
@@ -37,6 +38,8 @@ type RoleServiceHTTPServer interface {
 	ExistRoleByName(context.Context, *v1.ExistRoleByNameRequest) (*v1.ExistRoleByNameResponse, error)
 	// GetRole 获取角色数据
 	GetRole(context.Context, *v1.GetRoleRequest) (*v1.Role, error)
+	// ListRoleSimple 获取角色简单列表
+	ListRoleSimple(context.Context, *v1.ListRoleSimpleRequest) (*v1.ListRoleSimpleResponse, error)
 	// ListRoles 获取角色列表
 	ListRoles(context.Context, *v1.ListRolesRequest) (*v1.ListRolesResponse, error)
 	// UpdateRole 更新角色
@@ -47,6 +50,7 @@ type RoleServiceHTTPServer interface {
 
 func RegisterRoleServiceHTTPServer(s *http.Server, srv RoleServiceHTTPServer) {
 	r := s.Route("/")
+	r.GET("/admin/v1/roles/simple", _RoleService_ListRoleSimple0_HTTP_Handler(srv))
 	r.GET("/admin/v1/roles", _RoleService_ListRoles0_HTTP_Handler(srv))
 	r.GET("/admin/v1/roles/{id}", _RoleService_GetRole0_HTTP_Handler(srv))
 	r.POST("/admin/v1/roles", _RoleService_CreateRole0_HTTP_Handler(srv))
@@ -55,6 +59,25 @@ func RegisterRoleServiceHTTPServer(s *http.Server, srv RoleServiceHTTPServer) {
 	r.POST("/admin/v1/roles/name-exists", _RoleService_ExistRoleByName0_HTTP_Handler(srv))
 	r.GET("/admin/v1/roles/name-exists/{id}", _RoleService_ExistRoleByName1_HTTP_Handler(srv))
 	r.PUT("/admin/v1/roles/status-update/{id}", _RoleService_UpdateRoleByStatus0_HTTP_Handler(srv))
+}
+
+func _RoleService_ListRoleSimple0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListRoleSimpleRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoleServiceListRoleSimple)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListRoleSimple(ctx, req.(*v1.ListRoleSimpleRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListRoleSimpleResponse)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _RoleService_ListRoles0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
@@ -245,6 +268,8 @@ type RoleServiceHTTPClient interface {
 	ExistRoleByName(ctx context.Context, req *v1.ExistRoleByNameRequest, opts ...http.CallOption) (rsp *v1.ExistRoleByNameResponse, err error)
 	// GetRole 获取角色数据
 	GetRole(ctx context.Context, req *v1.GetRoleRequest, opts ...http.CallOption) (rsp *v1.Role, err error)
+	// ListRoleSimple 获取角色简单列表
+	ListRoleSimple(ctx context.Context, req *v1.ListRoleSimpleRequest, opts ...http.CallOption) (rsp *v1.ListRoleSimpleResponse, err error)
 	// ListRoles 获取角色列表
 	ListRoles(ctx context.Context, req *v1.ListRolesRequest, opts ...http.CallOption) (rsp *v1.ListRolesResponse, err error)
 	// UpdateRole 更新角色
@@ -309,6 +334,20 @@ func (c *RoleServiceHTTPClientImpl) GetRole(ctx context.Context, in *v1.GetRoleR
 	pattern := "/admin/v1/roles/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationRoleServiceGetRole))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListRoleSimple 获取角色简单列表
+func (c *RoleServiceHTTPClientImpl) ListRoleSimple(ctx context.Context, in *v1.ListRoleSimpleRequest, opts ...http.CallOption) (*v1.ListRoleSimpleResponse, error) {
+	var out v1.ListRoleSimpleResponse
+	pattern := "/admin/v1/roles/simple"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationRoleServiceListRoleSimple))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

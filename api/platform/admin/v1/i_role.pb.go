@@ -29,8 +29,13 @@ var File_platform_admin_v1_i_role_proto protoreflect.FileDescriptor
 
 const file_platform_admin_v1_i_role_proto_rawDesc = "" +
 	"\n" +
-	"\x1eplatform/admin/v1/i_role.proto\x12\x11platform.admin.v1\x1a\"common/pagination/pagination.proto\x1a\x1acore/service/v1/role.proto\x1a\x1acore/service/v1/user.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto2\xbb\v\n" +
-	"\vRoleService\x12\xbc\x01\n" +
+	"\x1eplatform/admin/v1/i_role.proto\x12\x11platform.admin.v1\x1a\"common/pagination/pagination.proto\x1a\x1acore/service/v1/role.proto\x1a\x1acore/service/v1/user.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto2\xe3\r\n" +
+	"\vRoleService\x12\xa5\x02\n" +
+	"\x0eListRoleSimple\x12&.core.service.v1.ListRoleSimpleRequest\x1a'.core.service.v1.ListRoleSimpleResponse\"\xc1\x01\xbaG\x9f\x01\n" +
+	"\x12角色管理服务\x12\x18获取角色简单列表\x1a]获取角色简单列表，用于用户角色配置、筛选项和绑定选择等轻量场景Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x18\x12\x16/admin/v1/roles/simple\x12\xbc\x01\n" +
 	"\tListRoles\x12!.core.service.v1.ListRolesRequest\x1a\".core.service.v1.ListRolesResponse\"h\xbaGN\n" +
 	"\x12角色管理服务\x12\x12获取角色列表\x1a\x12获取角色列表Z\x10\n" +
 	"\x0e\n" +
@@ -73,38 +78,42 @@ const file_platform_admin_v1_i_role_proto_rawDesc = "" +
 	"IRoleProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 
 var file_platform_admin_v1_i_role_proto_goTypes = []any{
-	(*v1.ListRolesRequest)(nil),           // 0: core.service.v1.ListRolesRequest
-	(*v1.GetRoleRequest)(nil),             // 1: core.service.v1.GetRoleRequest
-	(*v1.CreateRoleRequest)(nil),          // 2: core.service.v1.CreateRoleRequest
-	(*v1.UpdateRoleRequest)(nil),          // 3: core.service.v1.UpdateRoleRequest
-	(*v1.DeleteRoleRequest)(nil),          // 4: core.service.v1.DeleteRoleRequest
-	(*v1.ExistRoleByNameRequest)(nil),     // 5: core.service.v1.ExistRoleByNameRequest
-	(*v1.UpdateRoleByStatusRequest)(nil),  // 6: core.service.v1.UpdateRoleByStatusRequest
-	(*v1.ListRolesResponse)(nil),          // 7: core.service.v1.ListRolesResponse
-	(*v1.Role)(nil),                       // 8: core.service.v1.Role
-	(*v1.CreateRoleResponse)(nil),         // 9: core.service.v1.CreateRoleResponse
-	(*v1.UpdateRoleResponse)(nil),         // 10: core.service.v1.UpdateRoleResponse
-	(*v1.DeleteRoleResponse)(nil),         // 11: core.service.v1.DeleteRoleResponse
-	(*v1.ExistRoleByNameResponse)(nil),    // 12: core.service.v1.ExistRoleByNameResponse
-	(*v1.UpdateRoleByStatusResponse)(nil), // 13: core.service.v1.UpdateRoleByStatusResponse
+	(*v1.ListRoleSimpleRequest)(nil),      // 0: core.service.v1.ListRoleSimpleRequest
+	(*v1.ListRolesRequest)(nil),           // 1: core.service.v1.ListRolesRequest
+	(*v1.GetRoleRequest)(nil),             // 2: core.service.v1.GetRoleRequest
+	(*v1.CreateRoleRequest)(nil),          // 3: core.service.v1.CreateRoleRequest
+	(*v1.UpdateRoleRequest)(nil),          // 4: core.service.v1.UpdateRoleRequest
+	(*v1.DeleteRoleRequest)(nil),          // 5: core.service.v1.DeleteRoleRequest
+	(*v1.ExistRoleByNameRequest)(nil),     // 6: core.service.v1.ExistRoleByNameRequest
+	(*v1.UpdateRoleByStatusRequest)(nil),  // 7: core.service.v1.UpdateRoleByStatusRequest
+	(*v1.ListRoleSimpleResponse)(nil),     // 8: core.service.v1.ListRoleSimpleResponse
+	(*v1.ListRolesResponse)(nil),          // 9: core.service.v1.ListRolesResponse
+	(*v1.Role)(nil),                       // 10: core.service.v1.Role
+	(*v1.CreateRoleResponse)(nil),         // 11: core.service.v1.CreateRoleResponse
+	(*v1.UpdateRoleResponse)(nil),         // 12: core.service.v1.UpdateRoleResponse
+	(*v1.DeleteRoleResponse)(nil),         // 13: core.service.v1.DeleteRoleResponse
+	(*v1.ExistRoleByNameResponse)(nil),    // 14: core.service.v1.ExistRoleByNameResponse
+	(*v1.UpdateRoleByStatusResponse)(nil), // 15: core.service.v1.UpdateRoleByStatusResponse
 }
 var file_platform_admin_v1_i_role_proto_depIdxs = []int32{
-	0,  // 0: platform.admin.v1.RoleService.ListRoles:input_type -> core.service.v1.ListRolesRequest
-	1,  // 1: platform.admin.v1.RoleService.GetRole:input_type -> core.service.v1.GetRoleRequest
-	2,  // 2: platform.admin.v1.RoleService.CreateRole:input_type -> core.service.v1.CreateRoleRequest
-	3,  // 3: platform.admin.v1.RoleService.UpdateRole:input_type -> core.service.v1.UpdateRoleRequest
-	4,  // 4: platform.admin.v1.RoleService.DeleteRole:input_type -> core.service.v1.DeleteRoleRequest
-	5,  // 5: platform.admin.v1.RoleService.ExistRoleByName:input_type -> core.service.v1.ExistRoleByNameRequest
-	6,  // 6: platform.admin.v1.RoleService.UpdateRoleByStatus:input_type -> core.service.v1.UpdateRoleByStatusRequest
-	7,  // 7: platform.admin.v1.RoleService.ListRoles:output_type -> core.service.v1.ListRolesResponse
-	8,  // 8: platform.admin.v1.RoleService.GetRole:output_type -> core.service.v1.Role
-	9,  // 9: platform.admin.v1.RoleService.CreateRole:output_type -> core.service.v1.CreateRoleResponse
-	10, // 10: platform.admin.v1.RoleService.UpdateRole:output_type -> core.service.v1.UpdateRoleResponse
-	11, // 11: platform.admin.v1.RoleService.DeleteRole:output_type -> core.service.v1.DeleteRoleResponse
-	12, // 12: platform.admin.v1.RoleService.ExistRoleByName:output_type -> core.service.v1.ExistRoleByNameResponse
-	13, // 13: platform.admin.v1.RoleService.UpdateRoleByStatus:output_type -> core.service.v1.UpdateRoleByStatusResponse
-	7,  // [7:14] is the sub-list for method output_type
-	0,  // [0:7] is the sub-list for method input_type
+	0,  // 0: platform.admin.v1.RoleService.ListRoleSimple:input_type -> core.service.v1.ListRoleSimpleRequest
+	1,  // 1: platform.admin.v1.RoleService.ListRoles:input_type -> core.service.v1.ListRolesRequest
+	2,  // 2: platform.admin.v1.RoleService.GetRole:input_type -> core.service.v1.GetRoleRequest
+	3,  // 3: platform.admin.v1.RoleService.CreateRole:input_type -> core.service.v1.CreateRoleRequest
+	4,  // 4: platform.admin.v1.RoleService.UpdateRole:input_type -> core.service.v1.UpdateRoleRequest
+	5,  // 5: platform.admin.v1.RoleService.DeleteRole:input_type -> core.service.v1.DeleteRoleRequest
+	6,  // 6: platform.admin.v1.RoleService.ExistRoleByName:input_type -> core.service.v1.ExistRoleByNameRequest
+	7,  // 7: platform.admin.v1.RoleService.UpdateRoleByStatus:input_type -> core.service.v1.UpdateRoleByStatusRequest
+	8,  // 8: platform.admin.v1.RoleService.ListRoleSimple:output_type -> core.service.v1.ListRoleSimpleResponse
+	9,  // 9: platform.admin.v1.RoleService.ListRoles:output_type -> core.service.v1.ListRolesResponse
+	10, // 10: platform.admin.v1.RoleService.GetRole:output_type -> core.service.v1.Role
+	11, // 11: platform.admin.v1.RoleService.CreateRole:output_type -> core.service.v1.CreateRoleResponse
+	12, // 12: platform.admin.v1.RoleService.UpdateRole:output_type -> core.service.v1.UpdateRoleResponse
+	13, // 13: platform.admin.v1.RoleService.DeleteRole:output_type -> core.service.v1.DeleteRoleResponse
+	14, // 14: platform.admin.v1.RoleService.ExistRoleByName:output_type -> core.service.v1.ExistRoleByNameResponse
+	15, // 15: platform.admin.v1.RoleService.UpdateRoleByStatus:output_type -> core.service.v1.UpdateRoleByStatusResponse
+	8,  // [8:16] is the sub-list for method output_type
+	0,  // [0:8] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

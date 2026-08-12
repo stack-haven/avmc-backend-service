@@ -781,6 +781,96 @@ func (x *ListRolesResponse) GetNextPageToken() string {
 	return ""
 }
 
+// 查询角色简单列表请求
+type ListRoleSimpleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRoleSimpleRequest) Reset() {
+	*x = ListRoleSimpleRequest{}
+	mi := &file_core_service_v1_role_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRoleSimpleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRoleSimpleRequest) ProtoMessage() {}
+
+func (x *ListRoleSimpleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_role_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRoleSimpleRequest.ProtoReflect.Descriptor instead.
+func (*ListRoleSimpleRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_role_proto_rawDescGZIP(), []int{11}
+}
+
+// 查询角色简单列表响应
+type ListRoleSimpleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*Role                `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRoleSimpleResponse) Reset() {
+	*x = ListRoleSimpleResponse{}
+	mi := &file_core_service_v1_role_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRoleSimpleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRoleSimpleResponse) ProtoMessage() {}
+
+func (x *ListRoleSimpleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_role_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRoleSimpleResponse.ProtoReflect.Descriptor instead.
+func (*ListRoleSimpleResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_role_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListRoleSimpleResponse) GetItems() []*Role {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListRoleSimpleResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 // 判断角色名是否存在请求
 type ExistRoleByNameRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -792,7 +882,7 @@ type ExistRoleByNameRequest struct {
 
 func (x *ExistRoleByNameRequest) Reset() {
 	*x = ExistRoleByNameRequest{}
-	mi := &file_core_service_v1_role_proto_msgTypes[11]
+	mi := &file_core_service_v1_role_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -804,7 +894,7 @@ func (x *ExistRoleByNameRequest) String() string {
 func (*ExistRoleByNameRequest) ProtoMessage() {}
 
 func (x *ExistRoleByNameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_role_proto_msgTypes[11]
+	mi := &file_core_service_v1_role_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -817,7 +907,7 @@ func (x *ExistRoleByNameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExistRoleByNameRequest.ProtoReflect.Descriptor instead.
 func (*ExistRoleByNameRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_role_proto_rawDescGZIP(), []int{11}
+	return file_core_service_v1_role_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ExistRoleByNameRequest) GetId() uint32 {
@@ -844,7 +934,7 @@ type ExistRoleByNameResponse struct {
 
 func (x *ExistRoleByNameResponse) Reset() {
 	*x = ExistRoleByNameResponse{}
-	mi := &file_core_service_v1_role_proto_msgTypes[12]
+	mi := &file_core_service_v1_role_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -856,7 +946,7 @@ func (x *ExistRoleByNameResponse) String() string {
 func (*ExistRoleByNameResponse) ProtoMessage() {}
 
 func (x *ExistRoleByNameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_role_proto_msgTypes[12]
+	mi := &file_core_service_v1_role_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -869,7 +959,7 @@ func (x *ExistRoleByNameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExistRoleByNameResponse.ProtoReflect.Descriptor instead.
 func (*ExistRoleByNameResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_role_proto_rawDescGZIP(), []int{12}
+	return file_core_service_v1_role_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ExistRoleByNameResponse) GetExist() bool {
@@ -891,7 +981,7 @@ type UpdateRoleByStatusRequest struct {
 
 func (x *UpdateRoleByStatusRequest) Reset() {
 	*x = UpdateRoleByStatusRequest{}
-	mi := &file_core_service_v1_role_proto_msgTypes[13]
+	mi := &file_core_service_v1_role_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -903,7 +993,7 @@ func (x *UpdateRoleByStatusRequest) String() string {
 func (*UpdateRoleByStatusRequest) ProtoMessage() {}
 
 func (x *UpdateRoleByStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_role_proto_msgTypes[13]
+	mi := &file_core_service_v1_role_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -916,7 +1006,7 @@ func (x *UpdateRoleByStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleByStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRoleByStatusRequest) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_role_proto_rawDescGZIP(), []int{13}
+	return file_core_service_v1_role_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateRoleByStatusRequest) GetId() uint32 {
@@ -949,7 +1039,7 @@ type UpdateRoleByStatusResponse struct {
 
 func (x *UpdateRoleByStatusResponse) Reset() {
 	*x = UpdateRoleByStatusResponse{}
-	mi := &file_core_service_v1_role_proto_msgTypes[14]
+	mi := &file_core_service_v1_role_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -961,7 +1051,7 @@ func (x *UpdateRoleByStatusResponse) String() string {
 func (*UpdateRoleByStatusResponse) ProtoMessage() {}
 
 func (x *UpdateRoleByStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_core_service_v1_role_proto_msgTypes[14]
+	mi := &file_core_service_v1_role_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -974,7 +1064,7 @@ func (x *UpdateRoleByStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleByStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRoleByStatusResponse) Descriptor() ([]byte, []int) {
-	return file_core_service_v1_role_proto_rawDescGZIP(), []int{14}
+	return file_core_service_v1_role_proto_rawDescGZIP(), []int{16}
 }
 
 var File_core_service_v1_role_proto protoreflect.FileDescriptor
@@ -1063,7 +1153,11 @@ const file_core_service_v1_role_proto_rawDesc = "" +
 	"\x11ListRolesResponse\x12+\n" +
 	"\x05items\x18\x01 \x03(\v2\x15.core.service.v1.RoleR\x05items\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
-	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"w\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"\x17\n" +
+	"\x15ListRoleSimpleRequest\"[\n" +
+	"\x16ListRoleSimpleResponse\x12+\n" +
+	"\x05items\x18\x01 \x03(\v2\x15.core.service.v1.RoleR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"w\n" +
 	"\x16ExistRoleByNameRequest\x12*\n" +
 	"\x02id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b角色ID\xbaH\x04*\x02 \x00H\x00R\x02id\x88\x01\x01\x12*\n" +
 	"\x04name\x18\x02 \x01(\tB\x16\xbaG\f\x92\x02\t角色名\xbaH\x04r\x02\x18\x14R\x04nameB\x05\n" +
@@ -1103,7 +1197,7 @@ func file_core_service_v1_role_proto_rawDescGZIP() []byte {
 	return file_core_service_v1_role_proto_rawDescData
 }
 
-var file_core_service_v1_role_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_core_service_v1_role_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_core_service_v1_role_proto_goTypes = []any{
 	(*Role)(nil),                       // 0: core.service.v1.Role
 	(*CreateRoleRequest)(nil),          // 1: core.service.v1.CreateRoleRequest
@@ -1116,41 +1210,44 @@ var file_core_service_v1_role_proto_goTypes = []any{
 	(*GetRoleResponse)(nil),            // 8: core.service.v1.GetRoleResponse
 	(*ListRolesRequest)(nil),           // 9: core.service.v1.ListRolesRequest
 	(*ListRolesResponse)(nil),          // 10: core.service.v1.ListRolesResponse
-	(*ExistRoleByNameRequest)(nil),     // 11: core.service.v1.ExistRoleByNameRequest
-	(*ExistRoleByNameResponse)(nil),    // 12: core.service.v1.ExistRoleByNameResponse
-	(*UpdateRoleByStatusRequest)(nil),  // 13: core.service.v1.UpdateRoleByStatusRequest
-	(*UpdateRoleByStatusResponse)(nil), // 14: core.service.v1.UpdateRoleByStatusResponse
-	(enum.Status)(0),                   // 15: enum.Status
-	(*fieldmaskpb.FieldMask)(nil),      // 16: google.protobuf.FieldMask
+	(*ListRoleSimpleRequest)(nil),      // 11: core.service.v1.ListRoleSimpleRequest
+	(*ListRoleSimpleResponse)(nil),     // 12: core.service.v1.ListRoleSimpleResponse
+	(*ExistRoleByNameRequest)(nil),     // 13: core.service.v1.ExistRoleByNameRequest
+	(*ExistRoleByNameResponse)(nil),    // 14: core.service.v1.ExistRoleByNameResponse
+	(*UpdateRoleByStatusRequest)(nil),  // 15: core.service.v1.UpdateRoleByStatusRequest
+	(*UpdateRoleByStatusResponse)(nil), // 16: core.service.v1.UpdateRoleByStatusResponse
+	(enum.Status)(0),                   // 17: enum.Status
+	(*fieldmaskpb.FieldMask)(nil),      // 18: google.protobuf.FieldMask
 }
 var file_core_service_v1_role_proto_depIdxs = []int32{
-	15, // 0: core.service.v1.Role.status:type_name -> enum.Status
+	17, // 0: core.service.v1.Role.status:type_name -> enum.Status
 	0,  // 1: core.service.v1.CreateRoleRequest.role:type_name -> core.service.v1.Role
 	0,  // 2: core.service.v1.UpdateRoleRequest.role:type_name -> core.service.v1.Role
-	16, // 3: core.service.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	18, // 3: core.service.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
 	0,  // 4: core.service.v1.GetRoleResponse.role:type_name -> core.service.v1.Role
-	15, // 5: core.service.v1.ListRolesRequest.status:type_name -> enum.Status
+	17, // 5: core.service.v1.ListRolesRequest.status:type_name -> enum.Status
 	0,  // 6: core.service.v1.ListRolesResponse.items:type_name -> core.service.v1.Role
-	15, // 7: core.service.v1.UpdateRoleByStatusRequest.status:type_name -> enum.Status
-	1,  // 8: core.service.v1.RoleService.CreateRole:input_type -> core.service.v1.CreateRoleRequest
-	3,  // 9: core.service.v1.RoleService.UpdateRole:input_type -> core.service.v1.UpdateRoleRequest
-	5,  // 10: core.service.v1.RoleService.DeleteRole:input_type -> core.service.v1.DeleteRoleRequest
-	7,  // 11: core.service.v1.RoleService.GetRole:input_type -> core.service.v1.GetRoleRequest
-	9,  // 12: core.service.v1.RoleService.ListRoles:input_type -> core.service.v1.ListRolesRequest
-	11, // 13: core.service.v1.RoleService.ExistRoleByName:input_type -> core.service.v1.ExistRoleByNameRequest
-	13, // 14: core.service.v1.RoleService.UpdateRoleByStatus:input_type -> core.service.v1.UpdateRoleByStatusRequest
-	2,  // 15: core.service.v1.RoleService.CreateRole:output_type -> core.service.v1.CreateRoleResponse
-	4,  // 16: core.service.v1.RoleService.UpdateRole:output_type -> core.service.v1.UpdateRoleResponse
-	6,  // 17: core.service.v1.RoleService.DeleteRole:output_type -> core.service.v1.DeleteRoleResponse
-	8,  // 18: core.service.v1.RoleService.GetRole:output_type -> core.service.v1.GetRoleResponse
-	10, // 19: core.service.v1.RoleService.ListRoles:output_type -> core.service.v1.ListRolesResponse
-	12, // 20: core.service.v1.RoleService.ExistRoleByName:output_type -> core.service.v1.ExistRoleByNameResponse
-	14, // 21: core.service.v1.RoleService.UpdateRoleByStatus:output_type -> core.service.v1.UpdateRoleByStatusResponse
-	15, // [15:22] is the sub-list for method output_type
-	8,  // [8:15] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	0,  // 7: core.service.v1.ListRoleSimpleResponse.items:type_name -> core.service.v1.Role
+	17, // 8: core.service.v1.UpdateRoleByStatusRequest.status:type_name -> enum.Status
+	1,  // 9: core.service.v1.RoleService.CreateRole:input_type -> core.service.v1.CreateRoleRequest
+	3,  // 10: core.service.v1.RoleService.UpdateRole:input_type -> core.service.v1.UpdateRoleRequest
+	5,  // 11: core.service.v1.RoleService.DeleteRole:input_type -> core.service.v1.DeleteRoleRequest
+	7,  // 12: core.service.v1.RoleService.GetRole:input_type -> core.service.v1.GetRoleRequest
+	9,  // 13: core.service.v1.RoleService.ListRoles:input_type -> core.service.v1.ListRolesRequest
+	13, // 14: core.service.v1.RoleService.ExistRoleByName:input_type -> core.service.v1.ExistRoleByNameRequest
+	15, // 15: core.service.v1.RoleService.UpdateRoleByStatus:input_type -> core.service.v1.UpdateRoleByStatusRequest
+	2,  // 16: core.service.v1.RoleService.CreateRole:output_type -> core.service.v1.CreateRoleResponse
+	4,  // 17: core.service.v1.RoleService.UpdateRole:output_type -> core.service.v1.UpdateRoleResponse
+	6,  // 18: core.service.v1.RoleService.DeleteRole:output_type -> core.service.v1.DeleteRoleResponse
+	8,  // 19: core.service.v1.RoleService.GetRole:output_type -> core.service.v1.GetRoleResponse
+	10, // 20: core.service.v1.RoleService.ListRoles:output_type -> core.service.v1.ListRolesResponse
+	14, // 21: core.service.v1.RoleService.ExistRoleByName:output_type -> core.service.v1.ExistRoleByNameResponse
+	16, // 22: core.service.v1.RoleService.UpdateRoleByStatus:output_type -> core.service.v1.UpdateRoleByStatusResponse
+	16, // [16:23] is the sub-list for method output_type
+	9,  // [9:16] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_role_proto_init() }
@@ -1163,15 +1260,15 @@ func file_core_service_v1_role_proto_init() {
 	file_core_service_v1_role_proto_msgTypes[3].OneofWrappers = []any{}
 	file_core_service_v1_role_proto_msgTypes[5].OneofWrappers = []any{}
 	file_core_service_v1_role_proto_msgTypes[9].OneofWrappers = []any{}
-	file_core_service_v1_role_proto_msgTypes[11].OneofWrappers = []any{}
 	file_core_service_v1_role_proto_msgTypes[13].OneofWrappers = []any{}
+	file_core_service_v1_role_proto_msgTypes[15].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_role_proto_rawDesc), len(file_core_service_v1_role_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

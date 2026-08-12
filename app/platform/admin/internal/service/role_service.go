@@ -28,6 +28,16 @@ func NewRoleServiceService(ruc *biz.RoleUsecase, logger log.Logger) *RoleService
 	}
 }
 
+// ListRoleSimple 角色简单列表
+func (s *RoleServiceService) ListRoleSimple(ctx context.Context, _ *pbCore.ListRoleSimpleRequest) (*pbCore.ListRoleSimpleResponse, error) {
+	s.log.Infof("查询角色简单列表")
+	items, err := s.ruc.ListSimple(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &pbCore.ListRoleSimpleResponse{Items: items, Total: int32(len(items))}, nil
+}
+
 // ListRoles 角色列表
 func (s *RoleServiceService) ListRoles(ctx context.Context, req *pbCore.ListRolesRequest) (*pbCore.ListRolesResponse, error) {
 	s.log.Infof("查询角色列表，page_size=%d page_token=%s", req.GetPageSize(), req.GetPageToken())

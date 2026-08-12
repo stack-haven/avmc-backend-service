@@ -20,6 +20,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	RoleService_ListRoleSimple_FullMethodName     = "/platform.admin.v1.RoleService/ListRoleSimple"
 	RoleService_ListRoles_FullMethodName          = "/platform.admin.v1.RoleService/ListRoles"
 	RoleService_GetRole_FullMethodName            = "/platform.admin.v1.RoleService/GetRole"
 	RoleService_CreateRole_FullMethodName         = "/platform.admin.v1.RoleService/CreateRole"
@@ -35,6 +36,8 @@ const (
 //
 // 角色管理服务
 type RoleServiceClient interface {
+	// 获取角色简单列表
+	ListRoleSimple(ctx context.Context, in *v1.ListRoleSimpleRequest, opts ...grpc.CallOption) (*v1.ListRoleSimpleResponse, error)
 	// 获取角色列表
 	ListRoles(ctx context.Context, in *v1.ListRolesRequest, opts ...grpc.CallOption) (*v1.ListRolesResponse, error)
 	// 获取角色数据
@@ -57,6 +60,16 @@ type roleServiceClient struct {
 
 func NewRoleServiceClient(cc grpc.ClientConnInterface) RoleServiceClient {
 	return &roleServiceClient{cc}
+}
+
+func (c *roleServiceClient) ListRoleSimple(ctx context.Context, in *v1.ListRoleSimpleRequest, opts ...grpc.CallOption) (*v1.ListRoleSimpleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListRoleSimpleResponse)
+	err := c.cc.Invoke(ctx, RoleService_ListRoleSimple_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *roleServiceClient) ListRoles(ctx context.Context, in *v1.ListRolesRequest, opts ...grpc.CallOption) (*v1.ListRolesResponse, error) {
@@ -135,6 +148,8 @@ func (c *roleServiceClient) UpdateRoleByStatus(ctx context.Context, in *v1.Updat
 //
 // 角色管理服务
 type RoleServiceServer interface {
+	// 获取角色简单列表
+	ListRoleSimple(context.Context, *v1.ListRoleSimpleRequest) (*v1.ListRoleSimpleResponse, error)
 	// 获取角色列表
 	ListRoles(context.Context, *v1.ListRolesRequest) (*v1.ListRolesResponse, error)
 	// 获取角色数据
@@ -159,6 +174,9 @@ type RoleServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRoleServiceServer struct{}
 
+func (UnimplementedRoleServiceServer) ListRoleSimple(context.Context, *v1.ListRoleSimpleRequest) (*v1.ListRoleSimpleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListRoleSimple not implemented")
+}
 func (UnimplementedRoleServiceServer) ListRoles(context.Context, *v1.ListRolesRequest) (*v1.ListRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListRoles not implemented")
 }
@@ -199,6 +217,24 @@ func RegisterRoleServiceServer(s grpc.ServiceRegistrar, srv RoleServiceServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&RoleService_ServiceDesc, srv)
+}
+
+func _RoleService_ListRoleSimple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListRoleSimpleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServiceServer).ListRoleSimple(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoleService_ListRoleSimple_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServiceServer).ListRoleSimple(ctx, req.(*v1.ListRoleSimpleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _RoleService_ListRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -334,6 +370,10 @@ var RoleService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "platform.admin.v1.RoleService",
 	HandlerType: (*RoleServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ListRoleSimple",
+			Handler:    _RoleService_ListRoleSimple_Handler,
+		},
 		{
 			MethodName: "ListRoles",
 			Handler:    _RoleService_ListRoles_Handler,

@@ -21,6 +21,7 @@ type roleRepoServiceStub struct {
 	current *pbCore.Role
 	updated *pbCore.Role
 	saved   *pbCore.Role
+	roles   []*pbCore.Role
 
 	deletedID uint32
 	existName string
@@ -52,7 +53,7 @@ func (r *roleRepoServiceStub) FindByID(context.Context, uint32) (*pbCore.Role, e
 func (*roleRepoServiceStub) CountRoles(context.Context, ...listing.Option) (int32, error) {
 	return 0, nil
 }
-func (*roleRepoServiceStub) ListAll(context.Context) ([]*pbCore.Role, error) { return nil, nil }
+func (r *roleRepoServiceStub) ListAll(context.Context) ([]*pbCore.Role, error) { return r.roles, nil }
 func (*roleRepoServiceStub) ListRoles(context.Context, ...listing.Option) ([]*pbCore.Role, error) {
 	return nil, nil
 }
@@ -94,6 +95,27 @@ func TestRoleServiceUpdateRolePreservesMenuIDsWhenMaskExcludesAuthorization(t *t
 	}
 	if !reflect.DeepEqual(repo.updated.GetMenuIds(), []uint32{1, 2, 3}) {
 		t.Fatalf("menu ids = %v, want preserved [1 2 3]", repo.updated.GetMenuIds())
+	}
+}
+
+func TestRoleServiceListRoleSimpleUsesLightweightRoleList(t *testing.T) {
+	repo := &roleRepoServiceStub{
+		roles: []*pbCore.Role{
+			{Id: 1, Name: ptrString("管理员"), IsTenantAdmin: true},
+			{Id: 2, Name: ptrString("普通用户")},
+		},
+	}
+	service := newRoleServiceForTest(repo)
+
+	resp, err := service.ListRoleSimple(context.Background(), &pbCore.ListRoleSimpleRequest{})
+	if err != nil {
+		t.Fatalf("ListRoleSimple() error = %v", err)
+	}
+	if got, want := resp.GetTotal(), int32(2); got != want {
+		t.Fatalf("ListRoleSimple() total = %d, want %d", got, want)
+	}
+	if got := len(resp.GetItems()); got != 2 {
+		t.Fatalf("ListRoleSimple() items len = %d, want 2", got)
 	}
 }
 

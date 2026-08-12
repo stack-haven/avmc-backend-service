@@ -13,6 +13,26 @@ option go_package = "backend-service/api/platform/admin/v1;v1";
 
 // 角色管理服务
 service RoleService {
+  // 获取角色简单列表
+  rpc ListRoleSimple(core.service.v1.ListRoleSimpleRequest) returns (core.service.v1.ListRoleSimpleResponse) {
+    option (google.api.http) = {get: "/admin/v1/roles/simple"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取角色简单列表"
+      description: "获取角色简单列表，用于用户角色配置、筛选项和绑定选择等轻量场景"
+      tags: ["角色管理服务"]
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {}
+            }
+          ]
+        }
+      ]
+    };
+  }
+
   // 获取角色列表
   rpc ListRoles(core.service.v1.ListRolesRequest) returns (core.service.v1.ListRolesResponse) {
     option (google.api.http) = {get: "/admin/v1/roles"};

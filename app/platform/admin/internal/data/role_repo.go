@@ -363,12 +363,7 @@ func (r *roleRepo) ListAll(ctx context.Context) ([]*pbCore.Role, error) {
 	}
 	res, err := r.Data.DB(ctx).Role.Query().
 		Select(role.FieldID, role.FieldName, role.FieldStatus, role.FieldIsTenantAdmin).
-		WithMenus(func(q *gen.MenuQuery) {
-			q.Select(menu.FieldID)
-		}).
-		WithDataScopeDepts(func(q *gen.DeptQuery) {
-			q.Select(dept.FieldID)
-		}).
+		Order(role.ByIsTenantAdmin(), role.ByID()).
 		All(ctx)
 	if err != nil {
 		return nil, err
