@@ -4,6 +4,7 @@ import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
+	"backend-service/app/platform/admin/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/admin/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/auth"
@@ -193,7 +194,20 @@ func (r *authRepo) findActiveTenant(ctx context.Context, tenantID uint32) (*tena
 	if tenantID == 0 {
 		return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
 	}
-	return &tenantInfo{IsPlatform: false, ExpiresAt: nil}, nil
+	t, err := r.data.DB(ctx).Tenant.Query().
+		Select(tenant.FieldIsPlatform, tenant.FieldLifecycleStatus, tenant.FieldExpiresAt).
+		Where(tenant.IDEQ(tenantID)).
+		Only(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
+		}
+		return nil, err
+	}
+	if t.LifecycleStatus != int32(pbCore.TenantLifecycleStatus_TENANT_LIFECYCLE_STATUS_ACTIVE) {
+		return nil, pb.ErrorUserIncorrectPassword("用户名或密码错误")
+	}
+	return &tenantInfo{IsPlatform: t.IsPlatform, ExpiresAt: t.ExpiresAt}, nil
 }
 
 func (r *authRepo) recordLogin(ctx context.Context, loginType, identity string, tenantID uint32, resp *pb.LoginResponse, loginErr error) {
