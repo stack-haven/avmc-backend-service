@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# backend-service pre-commit 钩子（随子仓库版本管理，位于 .githooks/pre-commit）
+# 通过 core.hooksPath=.githooks 生效，见 Makefile 的 setup-hooks 目标。
+#
+# 作用：提交后端代码前，若 deploy/sql 超过 24 小时没有新备份，提醒一句（非阻塞）。
+# 真正的「是否备份」交互由 avmc-db-backup skill 完成，这里只做时间兜底提醒。
+
+# 定位仓库根目录（git 运行 hook 时 cwd 已是仓库根，但显式定位更稳）
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+last=$(find "$REPO_ROOT/deploy/sql" -name '*.sql' -mtime -1 2>/dev/null | head -1)
+if [[ -z "$last" ]]; then
+  echo "" >&2
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+  echo "  [数据库备份提醒] 24 小时内没有新的数据库备份" >&2
+  echo "  建议先执行: bash scripts/db-backup.sh" >&2
+  echo "  或跳过本次提醒（不阻塞提交）" >&2
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+  echo "" >&2
+fi
+
+exit 0

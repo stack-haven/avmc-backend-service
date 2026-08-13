@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# backend-service commit-msg 钩子（随子仓库版本管理，位于 .githooks/commit-msg）
+# 通过 core.hooksPath=.githooks 生效，见 Makefile 的 setup-hooks 目标。
+#
+# 作用：校验提交信息符合后端 Conventional Commits 规范。
+# 格式：<type>(<scope>): <subject>
+#   type   — 必填，见下方 TYPE_ENUM
+#   scope  — 可选，若填写必须命中后端结构枚举（见 SCOPE_ENUM）
+#   subject— 必填，简短描述
+# 参考：frontend-service 的 commitlint 配置（@vben/commitlint-config）。
+
+set -u
+
+COMMIT_MSG_FILE="$1"
+
+# 跳过空文件（异常情况）
+[[ -f "$COMMIT_MSG_FILE" ]] || exit 0
+
+# 读取提交信息首行（header）
+header="$(sed -n '1p' "$COMMIT_MSG_FILE")"
+
+# 跳过 git 自动生成的 merge / revert / squash 提交
+if [[ "$header" =~ ^(Merge|Revert|Squash)\  ]]; then
+  exit 0
+fi
+
+# ── 类型枚举（与前端 commitlint 对齐 + 后端 Go 项目习惯）──
+TYPE_ENUM="feat fix perf refactor style docs test build ci chore revert"
+
+# ── scope 枚举（严格按 backend-service 结构映射）──
+#   platform  app/platform/admin（平台基础服务：认证/用户/角色/菜单/权限/租户等）
+#   evie      app/evie/service
+#   version   app/version/service（冻结中）
+#   ai        app/ai/service
+#   proto     proto/、api/（API 契约与生成代码）
+#   pkg       pkg/（共享包）
+#   make      Makefile、app.mk、scripts/、.golangci.yml（构建与工具链）
+#   deps      go.mod、go.sum（依赖）
+#   ci        .github/（CI/CD）
+SCOPE_ENUM="platform evie version ai proto pkg make deps ci"
+
+# ── 解析 header ──
+# 形如：feat(platform): 描述  或  chore: 描述
+if [[ "$header" =~ ^([a-z]+)(\(([a-zA-Z0-9/_-]+)\))?:[[:space:]]*(.+)$ ]]; then
+  type="${BASH_REMATCH[1]}"
+  scope="${BASH_REMATCH[3]:-}"   # 可能为空
+  subject="${BASH_REMATCH[4]}"
+else
+  echo "" >&2
+  echo "✗ 提交信息格式不正确" >&2
+  echo "" >&2
+  echo "  正确格式: <type>(<scope>): <subject>" >&2
+  echo "  示例:     feat(platform): 新增用户管理 CRUD 接口" >&2
+  echo "           fix(auth): 修复 JWT token 过期未刷新问题" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# ── 校验 type ──
+if ! grep -qw "$type" <<< "$TYPE_ENUM"; then
+  echo "" >&2
+  echo "✗ 无效的 type: \"$type\"" >&2
+  echo "" >&2
+  echo "  允许的 type:" >&2
+  echo "    feat     新增功能" >&2
+  echo "    fix      修复缺陷" >&2
+  echo "    perf     性能优化" >&2
+  echo "    refactor 代码重构（不改行为）" >&2
+  echo "    style    代码格式（不影响逻辑）" >&2
+  echo "    docs     文档变更" >&2
+  echo "    test     测试相关" >&2
+  echo "    build    构建系统/外部依赖变更" >&2
+  echo "    ci       CI 配置变更" >&2
+  echo "    chore    杂项（不影响 src/test）" >&2
+  echo "    revert   回滚提交" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# ── 校验 scope（可选，但填写必须合法）──
+if [[ -n "$scope" ]] && ! grep -qw "$scope" <<< "$SCOPE_ENUM"; then
+  echo "" >&2
+  echo "✗ 无效的 scope: \"$scope\"" >&2
+  echo "" >&2
+  echo "  允许的 scope（严格按 backend-service 结构）:" >&2
+  echo "    platform  app/platform/admin（平台基础服务）" >&2
+  echo "    evie      app/evie/service" >&2
+  echo "    version   app/version/service" >&2
+  echo "    ai        app/ai/service" >&2
+  echo "    proto     proto/、api/（契约与生成代码）" >&2
+  echo "    pkg       pkg/（共享包）" >&2
+  echo "    make      Makefile、app.mk、scripts/、构建工具链" >&2
+  echo "    deps      go.mod、go.sum（依赖）" >&2
+  echo "    ci        .github/（CI/CD）" >&2
+  echo "" >&2
+  echo "  也可以省略 scope（例如: feat: 描述）" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# ── 校验 subject 非空 ──
+if [[ -z "$subject" ]]; then
+  echo "" >&2
+  echo "✗ subject 不能为空" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# ── 校验 header 长度（与前端一致 ≤108）──
+if [[ ${#header} -gt 108 ]]; then
+  echo "" >&2
+  echo "✗ header 超过 108 字符（当前 ${#header}）" >&2
+  echo "  请精简提交描述" >&2
+  echo "" >&2
+  exit 1
+fi
+
+exit 0

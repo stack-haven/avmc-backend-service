@@ -10,6 +10,13 @@ init:
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 	go install github.com/google/wire/cmd/wire@latest
 
+.PHONY: setup-hooks
+# point git at the versioned .githooks directory (run once after clone)
+setup-hooks:
+	@git config core.hooksPath .githooks
+	@chmod +x .githooks/pre-commit .githooks/commit-msg 2>/dev/null || true
+	@echo "core.hooksPath = $$(git config --get core.hooksPath)"
+
 # generate protobuf api go code using buf
 .PHONY: proto
 proto:
