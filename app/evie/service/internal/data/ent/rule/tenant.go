@@ -70,9 +70,20 @@ func (tenantRule) EvalMutation(ctx context.Context, m ent.Mutation) error {
 
 func filterTenantQuery(q ent.Query, tenantID uint32) error {
 	switch q.(type) {
-	case *gen.UserQuery:
-		q.(*gen.UserQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
-	// TODO: 添加新 schema 后在此补充 case
+	case *gen.DictionaryWordQuery:
+		q.(*gen.DictionaryWordQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.DictionaryAliasQuery:
+		q.(*gen.DictionaryAliasQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.AsrRecordQuery:
+		q.(*gen.AsrRecordQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.HotwordQuery:
+		q.(*gen.HotwordQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.AsrProviderConfigQuery:
+		q.(*gen.AsrProviderConfigQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.CorrectionRuleQuery:
+		q.(*gen.CorrectionRuleQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.CorrectionLogQuery:
+		q.(*gen.CorrectionLogQuery).Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	default:
 		return privacy.Denyf("unexpected tenant query type %T", q)
 	}
@@ -81,9 +92,20 @@ func filterTenantQuery(q ent.Query, tenantID uint32) error {
 
 func filterTenantMutation(m ent.Mutation, tenantID uint32) error {
 	switch m.(type) {
-	case *gen.UserMutation:
-		m.(*gen.UserMutation).WhereP(tenantFieldEQ(tenantID))
-	// TODO: 添加新 schema 后在此补充 case
+	case *gen.DictionaryWordMutation:
+		m.(*gen.DictionaryWordMutation).WhereP(tenantFieldEQ(tenantID))
+	case *gen.DictionaryAliasMutation:
+		m.(*gen.DictionaryAliasMutation).WhereP(tenantFieldEQ(tenantID))
+	case *gen.AsrRecordMutation:
+		m.(*gen.AsrRecordMutation).WhereP(tenantFieldEQ(tenantID))
+	case *gen.HotwordMutation:
+		m.(*gen.HotwordMutation).WhereP(tenantFieldEQ(tenantID))
+	case *gen.AsrProviderConfigMutation:
+		m.(*gen.AsrProviderConfigMutation).WhereP(tenantFieldEQ(tenantID))
+	case *gen.CorrectionRuleMutation:
+		m.(*gen.CorrectionRuleMutation).WhereP(tenantFieldEQ(tenantID))
+	case *gen.CorrectionLogMutation:
+		m.(*gen.CorrectionLogMutation).WhereP(tenantFieldEQ(tenantID))
 	default:
 		return privacy.Denyf("unexpected tenant mutation type %T", m)
 	}

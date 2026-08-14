@@ -27,4 +27,5 @@ var ProviderSet = wire.NewSet(
 	NewWebhookService,
 	NewStorageConfigService,
 	NewAuthzService,
+	NewCoreOperationLogService,
 )

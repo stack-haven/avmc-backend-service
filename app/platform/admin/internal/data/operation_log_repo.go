@@ -11,6 +11,7 @@ import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
+	entviewer "backend-service/app/platform/admin/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 )
 
@@ -24,6 +25,10 @@ func operationLogProto(row *gen.OperationLog) *pb.OperationLog {
 	return &pb.OperationLog{Id: uint64(row.ID), TenantId: row.TenantID, OperatorId: row.OperatorID, OperatorName: &row.OperatorName, Module: row.Module, Action: row.Action, ResourceType: &row.ResourceType, ResourceId: &row.ResourceID, Operation: &row.Operation, Method: &row.Method, Path: &row.Path, RequestSummary: &row.RequestSummary, BeforeData: &row.BeforeData, AfterData: &row.AfterData, Ip: &row.IP, UserAgent: &row.UserAgent, TraceId: &row.TraceID, Success: row.Success, DurationMs: &row.DurationMs, ErrorMessage: &row.ErrorMessage, CreatedAt: &created}
 }
 func (r *operationLogRepo) Append(ctx context.Context, value *pb.OperationLog) error {
+	// 跨服务审计委托（evie 等）不携带 JWT 上下文，租户从 entry 提取并注入 Ent viewer。
+	if value.GetTenantId() > 0 {
+		ctx = entviewer.NewTenantContext(ctx, value.GetTenantId())
+	}
 	_, err := r.Data.DB(ctx).OperationLog.Create().SetNillableOperatorID(value.OperatorId).SetOperatorName(value.GetOperatorName()).SetModule(value.GetModule()).SetAction(value.GetAction()).SetResourceType(value.GetResourceType()).SetResourceID(value.GetResourceId()).SetOperation(value.GetOperation()).SetMethod(value.GetMethod()).SetPath(value.GetPath()).SetRequestSummary(value.GetRequestSummary()).SetBeforeData(value.GetBeforeData()).SetAfterData(value.GetAfterData()).SetIP(value.GetIp()).SetUserAgent(value.GetUserAgent()).SetTraceID(value.GetTraceId()).SetSuccess(value.GetSuccess()).SetDurationMs(value.GetDurationMs()).SetErrorMessage(value.GetErrorMessage()).Save(ctx)
 	return err
 }

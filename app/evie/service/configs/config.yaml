@@ -1,7 +1,7 @@
 server:
   http:
     addr: 0.0.0.0:8100
-    timeout: 1s
+    timeout: 120s
     enable_swagger: true
     enable_pprof: false
     cors:

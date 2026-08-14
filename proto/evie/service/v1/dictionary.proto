@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package evie.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/evie/service/v1;v1";
+
+// 企业知识字典中心：标准词与别名的管理服务。
+service DictionaryService {
+  // 分页查询标准词列表
+  rpc ListWords(ListWordsRequest) returns (ListWordsResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionary/words"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询标准词列表"
+      tags: ["字典中心"]
+    };
+  }
+
+  // 查询标准词详情（含别名）
+  rpc GetWord(GetWordRequest) returns (GetWordResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionary/words/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询标准词详情"
+      tags: ["字典中心"]
+    };
+  }
+
+  // 创建标准词（可同时指定别名）
+  rpc CreateWord(CreateWordRequest) returns (CreateWordResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/dictionary/words"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建标准词"
+      tags: ["字典中心"]
+    };
+  }
+
+  // 更新标准词
+  rpc UpdateWord(UpdateWordRequest) returns (UpdateWordResponse) {
+    option (google.api.http) = {
+      put: "/evie/v1/dictionary/words/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新标准词"
+      tags: ["字典中心"]
+    };
+  }
+
+  // 删除标准词（级联软删除别名）
+  rpc DeleteWord(DeleteWordRequest) returns (DeleteWordResponse) {
+    option (google.api.http) = {delete: "/evie/v1/dictionary/words/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除标准词"
+      tags: ["字典中心"]
+    };
+  }
+}
+
+// DictionaryWord 标准词。
+message DictionaryWord {
+  uint32 id = 1;
+  string word = 2;      // 标准词
+  string level = 3;     // 字典层级: platform/system/tenant/user
+  string category = 4;  // 实体分类: person/org/product/term
+  string source = 5;    // 来源: manual/sync_org/sync_biz/feedback
+  int32 priority = 6;   // 匹配优先级，越大越优先
+  int32 status = 7;     // 1=启用 2=禁用
+  repeated DictionaryAlias aliases = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+// DictionaryAlias 标准词别名。
+message DictionaryAlias {
+  uint32 id = 1;
+  uint32 word_id = 2;  // 关联标准词ID
+  string alias = 3;    // 别名
+  string pinyin = 4;   // 拼音
+  float weight = 5;    // 匹配权重
+  string source = 6;   // manual/auto/feedback
+}
+
+message ListWordsRequest {
+  int32 page_size = 1;   // 每页行数
+  string page_token = 2; // 页码 token（偏移量）
+  string category = 3;   // 按实体分类筛选
+  string keyword = 4;    // 按标准词模糊搜索
+  int32 status = 5;      // 按状态筛选
+}
+
+message ListWordsResponse {
+  repeated DictionaryWord words = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetWordRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message GetWordResponse {
+  DictionaryWord word = 1;
+}
+
+message CreateWordRequest {
+  string word = 1 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
+  string category = 2 [(buf.validate.field).string = {max_len: 32}];
+  string level = 3 [(buf.validate.field).string = {max_len: 32}];
+  int32 priority = 4;
+  repeated DictionaryAlias aliases = 5;  // 创建时一并指定的别名
+}
+
+message CreateWordResponse {
+  DictionaryWord word = 1;
+}
+
+message UpdateWordRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string word = 2 [(buf.validate.field).string = {max_len: 128}];
+  string category = 3 [(buf.validate.field).string = {max_len: 32}];
+  int32 priority = 4;
+  int32 status = 5;
+}
+
+message UpdateWordResponse {
+  DictionaryWord word = 1;
+}
+
+message DeleteWordRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message DeleteWordResponse {}

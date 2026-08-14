@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package evie.service.v1;
+
+import "buf/validate/validate.proto";
+import "evie/service/v1/correction.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/evie/service/v1;v1";
+
+// ASR 语音识别服务。
+// 将音频转为文本；Provider（FunASR/Whisper/讯飞/阿里云）可替换、租户可自选。
+service ASRService {
+  // 同步识别（短音频 ≤60s）
+  rpc Recognize(RecognizeRequest) returns (RecognizeResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/asr:recognize"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "同步语音识别"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // 流式识别（长音频 / 实时），双向流
+  rpc StreamRecognize(stream AudioChunk) returns (stream StreamResult) {
+    option (gnostic.openapi.v3.operation) = {
+      summary: "流式语音识别"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // 查询识别记录列表
+  rpc ListAsrRecords(ListAsrRecordsRequest) returns (ListAsrRecordsResponse) {
+    option (google.api.http) = {get: "/evie/v1/asr/records"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询识别记录列表"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // 查询识别记录详情
+  rpc GetAsrRecord(GetAsrRecordRequest) returns (AsrRecord) {
+    option (google.api.http) = {get: "/evie/v1/asr/records/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询识别记录详情"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
+  rpc RecognizeAndCorrect(RecognizeRequest) returns (RecognizeAndCorrectResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/asr:recognize-and-correct"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "语音识别并纠错"
+      tags: ["ASR识别"]
+    };
+  }
+}
+
+// AudioEncoding 音频编码。
+enum AudioEncoding {
+  AUDIO_ENCODING_UNSPECIFIED = 0;
+  AUDIO_ENCODING_PCM = 1;
+  AUDIO_ENCODING_WAV = 2;
+  AUDIO_ENCODING_MP3 = 3;
+  AUDIO_ENCODING_OPUS = 4;
+}
+
+// AudioFormat 音频格式。
+message AudioFormat {
+  AudioEncoding encoding = 1;
+  int32 sample_rate = 2;
+  int32 bit_depth = 3;
+  int32 channels = 4;
+}
+
+message RecognizeRequest {
+  string session_id = 1;
+  AudioFormat format = 2;
+  bytes audio_data = 3 [(buf.validate.field).bytes = {max_len: 10485760}]; // max 10MB
+}
+
+message RecognizeResponse {
+  string request_id = 1;
+  string text = 2;
+  repeated Segment segments = 3;
+  float confidence = 4;
+  int64 duration_ms = 5;
+  bool is_final = 6;
+  string provider_name = 7;  // 使用的 ASR 引擎
+}
+
+message Segment {
+  int64 start_ms = 1;
+  int64 end_ms = 2;
+  string text = 3;
+  float confidence = 4;
+}
+
+message AudioChunk {
+  string session_id = 1;
+  bytes data = 2;
+  int64 timestamp_ms = 3;
+}
+
+message StreamResult {
+  string request_id = 1;
+  string text = 2;      // 增量文本
+  float confidence = 3;
+  bool is_final = 4;
+  int64 timestamp_ms = 5;
+}
+
+// AsrRecord 识别记录。
+message AsrRecord {
+  uint32 id = 1;
+  uint32 user_id = 2;
+  string session_id = 3;
+  string raw_text = 4;
+  float confidence = 5;
+  int64 duration_ms = 6;
+  int32 audio_duration_ms = 7;
+  string audio_url = 8;
+  string audio_format = 9;
+  string engine = 10;
+  string created_at = 11;
+}
+
+message ListAsrRecordsRequest {
+  int32 page_size = 1;   // 每页行数
+  string page_token = 2; // 页码 token（偏移量）
+  string session_id = 3; // 按会话ID筛选
+}
+
+message ListAsrRecordsResponse {
+  repeated AsrRecord records = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetAsrRecordRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+// RecognizeAndCorrectResponse 语音识别 + 纠错的组合结果。
+message RecognizeAndCorrectResponse {
+  string original_text = 1;   // ASR 原始文本
+  string corrected_text = 2;  // 纠错后标准企业语言
+  repeated CorrectionChange changes = 3;
+  float confidence = 4;
+  string provider_name = 5;   // 使用的 ASR 引擎
+}

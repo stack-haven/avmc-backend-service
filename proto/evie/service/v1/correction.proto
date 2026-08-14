@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package evie.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/evie/service/v1;v1";
+
+// 智能纠错引擎：将 ASR 原始文本转为企业标准语言。
+service CorrectionService {
+  // 文本纠错
+  rpc Correct(CorrectRequest) returns (CorrectResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/correction:correct"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "文本纠错"
+      tags: ["纠错引擎"]
+    };
+  }
+}
+
+message CorrectRequest {
+  string text = 1 [(buf.validate.field).string = {min_len: 1}];
+  string session_id = 2;
+  string context = 3;  // 上下文（前几轮对话），可选
+}
+
+message CorrectResponse {
+  string original_text = 1;
+  string corrected_text = 2;
+  repeated CorrectionChange changes = 3;
+  float confidence = 4;
+  bool need_confirm = 5;  // 是否需要用户二次确认
+}
+
+message CorrectionChange {
+  string from = 1;
+  string to = 2;
+  string type = 3;        // person/org/product/dictionary/rule
+  float confidence = 4;
+}

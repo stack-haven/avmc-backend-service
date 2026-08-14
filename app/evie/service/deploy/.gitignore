@@ -1,0 +1,6 @@
+# 模型权重不入库（体积大，部署时按 deploy/README.md 单独下载）
+models/*.pt
+models/*.onnx
+models/*.pth
+models/*.bin
+models/*.safetensors

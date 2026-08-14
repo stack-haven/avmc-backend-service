@@ -4,7 +4,85 @@ package gen
 
 import "context"
 
-func (_m *UserQuery) Page(ctx context.Context, page, size int) ([]*User, int, error) {
+func (_m *AsrProviderConfigQuery) Page(ctx context.Context, page, size int) ([]*AsrProviderConfig, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *AsrRecordQuery) Page(ctx context.Context, page, size int) ([]*AsrRecord, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *CorrectionLogQuery) Page(ctx context.Context, page, size int) ([]*CorrectionLog, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *CorrectionRuleQuery) Page(ctx context.Context, page, size int) ([]*CorrectionRule, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *DictionaryAliasQuery) Page(ctx context.Context, page, size int) ([]*DictionaryAlias, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *DictionaryWordQuery) Page(ctx context.Context, page, size int) ([]*DictionaryWord, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *HotwordQuery) Page(ctx context.Context, page, size int) ([]*Hotword, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err

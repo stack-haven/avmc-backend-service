@@ -11,11 +11,18 @@ import (
 
 	"backend-service/app/evie/service/internal/data/ent/gen/migrate"
 
-	"backend-service/app/evie/service/internal/data/ent/gen/user"
+	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
+	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
+	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
+	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 
 	stdsql "database/sql"
 )
@@ -25,8 +32,20 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// AsrProviderConfig is the client for interacting with the AsrProviderConfig builders.
+	AsrProviderConfig *AsrProviderConfigClient
+	// AsrRecord is the client for interacting with the AsrRecord builders.
+	AsrRecord *AsrRecordClient
+	// CorrectionLog is the client for interacting with the CorrectionLog builders.
+	CorrectionLog *CorrectionLogClient
+	// CorrectionRule is the client for interacting with the CorrectionRule builders.
+	CorrectionRule *CorrectionRuleClient
+	// DictionaryAlias is the client for interacting with the DictionaryAlias builders.
+	DictionaryAlias *DictionaryAliasClient
+	// DictionaryWord is the client for interacting with the DictionaryWord builders.
+	DictionaryWord *DictionaryWordClient
+	// Hotword is the client for interacting with the Hotword builders.
+	Hotword *HotwordClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -38,7 +57,13 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.User = NewUserClient(c.config)
+	c.AsrProviderConfig = NewAsrProviderConfigClient(c.config)
+	c.AsrRecord = NewAsrRecordClient(c.config)
+	c.CorrectionLog = NewCorrectionLogClient(c.config)
+	c.CorrectionRule = NewCorrectionRuleClient(c.config)
+	c.DictionaryAlias = NewDictionaryAliasClient(c.config)
+	c.DictionaryWord = NewDictionaryWordClient(c.config)
+	c.Hotword = NewHotwordClient(c.config)
 }
 
 type (
@@ -129,9 +154,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		AsrProviderConfig: NewAsrProviderConfigClient(cfg),
+		AsrRecord:         NewAsrRecordClient(cfg),
+		CorrectionLog:     NewCorrectionLogClient(cfg),
+		CorrectionRule:    NewCorrectionRuleClient(cfg),
+		DictionaryAlias:   NewDictionaryAliasClient(cfg),
+		DictionaryWord:    NewDictionaryWordClient(cfg),
+		Hotword:           NewHotwordClient(cfg),
 	}, nil
 }
 
@@ -149,16 +180,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		AsrProviderConfig: NewAsrProviderConfigClient(cfg),
+		AsrRecord:         NewAsrRecordClient(cfg),
+		CorrectionLog:     NewCorrectionLogClient(cfg),
+		CorrectionRule:    NewCorrectionRuleClient(cfg),
+		DictionaryAlias:   NewDictionaryAliasClient(cfg),
+		DictionaryWord:    NewDictionaryWordClient(cfg),
+		Hotword:           NewHotwordClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		AsrProviderConfig.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -180,126 +217,148 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.AsrProviderConfig, c.AsrRecord, c.CorrectionLog, c.CorrectionRule,
+		c.DictionaryAlias, c.DictionaryWord, c.Hotword,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.AsrProviderConfig, c.AsrRecord, c.CorrectionLog, c.CorrectionRule,
+		c.DictionaryAlias, c.DictionaryWord, c.Hotword,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *UserMutation:
-		return c.User.mutate(ctx, m)
+	case *AsrProviderConfigMutation:
+		return c.AsrProviderConfig.mutate(ctx, m)
+	case *AsrRecordMutation:
+		return c.AsrRecord.mutate(ctx, m)
+	case *CorrectionLogMutation:
+		return c.CorrectionLog.mutate(ctx, m)
+	case *CorrectionRuleMutation:
+		return c.CorrectionRule.mutate(ctx, m)
+	case *DictionaryAliasMutation:
+		return c.DictionaryAlias.mutate(ctx, m)
+	case *DictionaryWordMutation:
+		return c.DictionaryWord.mutate(ctx, m)
+	case *HotwordMutation:
+		return c.Hotword.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("gen: unknown mutation type %T", m)
 	}
 }
 
-// UserClient is a client for the User schema.
-type UserClient struct {
+// AsrProviderConfigClient is a client for the AsrProviderConfig schema.
+type AsrProviderConfigClient struct {
 	config
 }
 
-// NewUserClient returns a client for the User from the given config.
-func NewUserClient(c config) *UserClient {
-	return &UserClient{config: c}
+// NewAsrProviderConfigClient returns a client for the AsrProviderConfig from the given config.
+func NewAsrProviderConfigClient(c config) *AsrProviderConfigClient {
+	return &AsrProviderConfigClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
-func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks.User = append(c.hooks.User, hooks...)
+// A call to `Use(f, g, h)` equals to `asrproviderconfig.Hooks(f(g(h())))`.
+func (c *AsrProviderConfigClient) Use(hooks ...Hook) {
+	c.hooks.AsrProviderConfig = append(c.hooks.AsrProviderConfig, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
-func (c *UserClient) Intercept(interceptors ...Interceptor) {
-	c.inters.User = append(c.inters.User, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `asrproviderconfig.Intercept(f(g(h())))`.
+func (c *AsrProviderConfigClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AsrProviderConfig = append(c.inters.AsrProviderConfig, interceptors...)
 }
 
-// Create returns a builder for creating a User entity.
-func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a AsrProviderConfig entity.
+func (c *AsrProviderConfigClient) Create() *AsrProviderConfigCreate {
+	mutation := newAsrProviderConfigMutation(c.config, OpCreate)
+	return &AsrProviderConfigCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of User entities.
-func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of AsrProviderConfig entities.
+func (c *AsrProviderConfigClient) CreateBulk(builders ...*AsrProviderConfigCreate) *AsrProviderConfigCreateBulk {
+	return &AsrProviderConfigCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *UserClient) MapCreateBulk(slice any, setFunc func(*UserCreate, int)) *UserCreateBulk {
+func (c *AsrProviderConfigClient) MapCreateBulk(slice any, setFunc func(*AsrProviderConfigCreate, int)) *AsrProviderConfigCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &UserCreateBulk{err: fmt.Errorf("calling to UserClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &AsrProviderConfigCreateBulk{err: fmt.Errorf("calling to AsrProviderConfigClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*UserCreate, rv.Len())
+	builders := make([]*AsrProviderConfigCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &UserCreateBulk{config: c.config, builders: builders}
+	return &AsrProviderConfigCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for User.
-func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for AsrProviderConfig.
+func (c *AsrProviderConfigClient) Update() *AsrProviderConfigUpdate {
+	mutation := newAsrProviderConfigMutation(c.config, OpUpdate)
+	return &AsrProviderConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(_m *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(_m))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AsrProviderConfigClient) UpdateOne(_m *AsrProviderConfig) *AsrProviderConfigUpdateOne {
+	mutation := newAsrProviderConfigMutation(c.config, OpUpdateOne, withAsrProviderConfig(_m))
+	return &AsrProviderConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id uint32) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AsrProviderConfigClient) UpdateOneID(id uint32) *AsrProviderConfigUpdateOne {
+	mutation := newAsrProviderConfigMutation(c.config, OpUpdateOne, withAsrProviderConfigID(id))
+	return &AsrProviderConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for User.
-func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for AsrProviderConfig.
+func (c *AsrProviderConfigClient) Delete() *AsrProviderConfigDelete {
+	mutation := newAsrProviderConfigMutation(c.config, OpDelete)
+	return &AsrProviderConfigDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
+func (c *AsrProviderConfigClient) DeleteOne(_m *AsrProviderConfig) *AsrProviderConfigDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id uint32) *UserDeleteOne {
-	builder := c.Delete().Where(user.ID(id))
+func (c *AsrProviderConfigClient) DeleteOneID(id uint32) *AsrProviderConfigDeleteOne {
+	builder := c.Delete().Where(asrproviderconfig.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &UserDeleteOne{builder}
+	return &AsrProviderConfigDeleteOne{builder}
 }
 
-// Query returns a query builder for User.
-func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{
+// Query returns a query builder for AsrProviderConfig.
+func (c *AsrProviderConfigClient) Query() *AsrProviderConfigQuery {
+	return &AsrProviderConfigQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeUser},
+		ctx:    &QueryContext{Type: TypeAsrProviderConfig},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id uint32) (*User, error) {
-	return c.Query().Where(user.ID(id)).Only(ctx)
+// Get returns a AsrProviderConfig entity by its id.
+func (c *AsrProviderConfigClient) Get(ctx context.Context, id uint32) (*AsrProviderConfig, error) {
+	return c.Query().Where(asrproviderconfig.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id uint32) *User {
+func (c *AsrProviderConfigClient) GetX(ctx context.Context, id uint32) *AsrProviderConfig {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -308,39 +367,879 @@ func (c *UserClient) GetX(ctx context.Context, id uint32) *User {
 }
 
 // Hooks returns the client hooks.
-func (c *UserClient) Hooks() []Hook {
-	hooks := c.hooks.User
-	return append(hooks[:len(hooks):len(hooks)], user.Hooks[:]...)
+func (c *AsrProviderConfigClient) Hooks() []Hook {
+	hooks := c.hooks.AsrProviderConfig
+	return append(hooks[:len(hooks):len(hooks)], asrproviderconfig.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
-func (c *UserClient) Interceptors() []Interceptor {
-	inters := c.inters.User
-	return append(inters[:len(inters):len(inters)], user.Interceptors[:]...)
+func (c *AsrProviderConfigClient) Interceptors() []Interceptor {
+	return c.inters.AsrProviderConfig
 }
 
-func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+func (c *AsrProviderConfigClient) mutate(ctx context.Context, m *AsrProviderConfigMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AsrProviderConfigCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AsrProviderConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AsrProviderConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&AsrProviderConfigDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("gen: unknown User mutation op: %q", m.Op())
+		return nil, fmt.Errorf("gen: unknown AsrProviderConfig mutation op: %q", m.Op())
+	}
+}
+
+// AsrRecordClient is a client for the AsrRecord schema.
+type AsrRecordClient struct {
+	config
+}
+
+// NewAsrRecordClient returns a client for the AsrRecord from the given config.
+func NewAsrRecordClient(c config) *AsrRecordClient {
+	return &AsrRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `asrrecord.Hooks(f(g(h())))`.
+func (c *AsrRecordClient) Use(hooks ...Hook) {
+	c.hooks.AsrRecord = append(c.hooks.AsrRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `asrrecord.Intercept(f(g(h())))`.
+func (c *AsrRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AsrRecord = append(c.inters.AsrRecord, interceptors...)
+}
+
+// Create returns a builder for creating a AsrRecord entity.
+func (c *AsrRecordClient) Create() *AsrRecordCreate {
+	mutation := newAsrRecordMutation(c.config, OpCreate)
+	return &AsrRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AsrRecord entities.
+func (c *AsrRecordClient) CreateBulk(builders ...*AsrRecordCreate) *AsrRecordCreateBulk {
+	return &AsrRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AsrRecordClient) MapCreateBulk(slice any, setFunc func(*AsrRecordCreate, int)) *AsrRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AsrRecordCreateBulk{err: fmt.Errorf("calling to AsrRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AsrRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AsrRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AsrRecord.
+func (c *AsrRecordClient) Update() *AsrRecordUpdate {
+	mutation := newAsrRecordMutation(c.config, OpUpdate)
+	return &AsrRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AsrRecordClient) UpdateOne(_m *AsrRecord) *AsrRecordUpdateOne {
+	mutation := newAsrRecordMutation(c.config, OpUpdateOne, withAsrRecord(_m))
+	return &AsrRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AsrRecordClient) UpdateOneID(id uint32) *AsrRecordUpdateOne {
+	mutation := newAsrRecordMutation(c.config, OpUpdateOne, withAsrRecordID(id))
+	return &AsrRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AsrRecord.
+func (c *AsrRecordClient) Delete() *AsrRecordDelete {
+	mutation := newAsrRecordMutation(c.config, OpDelete)
+	return &AsrRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AsrRecordClient) DeleteOne(_m *AsrRecord) *AsrRecordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AsrRecordClient) DeleteOneID(id uint32) *AsrRecordDeleteOne {
+	builder := c.Delete().Where(asrrecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AsrRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for AsrRecord.
+func (c *AsrRecordClient) Query() *AsrRecordQuery {
+	return &AsrRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAsrRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AsrRecord entity by its id.
+func (c *AsrRecordClient) Get(ctx context.Context, id uint32) (*AsrRecord, error) {
+	return c.Query().Where(asrrecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AsrRecordClient) GetX(ctx context.Context, id uint32) *AsrRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AsrRecordClient) Hooks() []Hook {
+	hooks := c.hooks.AsrRecord
+	return append(hooks[:len(hooks):len(hooks)], asrrecord.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *AsrRecordClient) Interceptors() []Interceptor {
+	return c.inters.AsrRecord
+}
+
+func (c *AsrRecordClient) mutate(ctx context.Context, m *AsrRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AsrRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AsrRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AsrRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AsrRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown AsrRecord mutation op: %q", m.Op())
+	}
+}
+
+// CorrectionLogClient is a client for the CorrectionLog schema.
+type CorrectionLogClient struct {
+	config
+}
+
+// NewCorrectionLogClient returns a client for the CorrectionLog from the given config.
+func NewCorrectionLogClient(c config) *CorrectionLogClient {
+	return &CorrectionLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `correctionlog.Hooks(f(g(h())))`.
+func (c *CorrectionLogClient) Use(hooks ...Hook) {
+	c.hooks.CorrectionLog = append(c.hooks.CorrectionLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `correctionlog.Intercept(f(g(h())))`.
+func (c *CorrectionLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CorrectionLog = append(c.inters.CorrectionLog, interceptors...)
+}
+
+// Create returns a builder for creating a CorrectionLog entity.
+func (c *CorrectionLogClient) Create() *CorrectionLogCreate {
+	mutation := newCorrectionLogMutation(c.config, OpCreate)
+	return &CorrectionLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CorrectionLog entities.
+func (c *CorrectionLogClient) CreateBulk(builders ...*CorrectionLogCreate) *CorrectionLogCreateBulk {
+	return &CorrectionLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CorrectionLogClient) MapCreateBulk(slice any, setFunc func(*CorrectionLogCreate, int)) *CorrectionLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CorrectionLogCreateBulk{err: fmt.Errorf("calling to CorrectionLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CorrectionLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CorrectionLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CorrectionLog.
+func (c *CorrectionLogClient) Update() *CorrectionLogUpdate {
+	mutation := newCorrectionLogMutation(c.config, OpUpdate)
+	return &CorrectionLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CorrectionLogClient) UpdateOne(_m *CorrectionLog) *CorrectionLogUpdateOne {
+	mutation := newCorrectionLogMutation(c.config, OpUpdateOne, withCorrectionLog(_m))
+	return &CorrectionLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CorrectionLogClient) UpdateOneID(id uint32) *CorrectionLogUpdateOne {
+	mutation := newCorrectionLogMutation(c.config, OpUpdateOne, withCorrectionLogID(id))
+	return &CorrectionLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CorrectionLog.
+func (c *CorrectionLogClient) Delete() *CorrectionLogDelete {
+	mutation := newCorrectionLogMutation(c.config, OpDelete)
+	return &CorrectionLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CorrectionLogClient) DeleteOne(_m *CorrectionLog) *CorrectionLogDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CorrectionLogClient) DeleteOneID(id uint32) *CorrectionLogDeleteOne {
+	builder := c.Delete().Where(correctionlog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CorrectionLogDeleteOne{builder}
+}
+
+// Query returns a query builder for CorrectionLog.
+func (c *CorrectionLogClient) Query() *CorrectionLogQuery {
+	return &CorrectionLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCorrectionLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CorrectionLog entity by its id.
+func (c *CorrectionLogClient) Get(ctx context.Context, id uint32) (*CorrectionLog, error) {
+	return c.Query().Where(correctionlog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CorrectionLogClient) GetX(ctx context.Context, id uint32) *CorrectionLog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CorrectionLogClient) Hooks() []Hook {
+	hooks := c.hooks.CorrectionLog
+	return append(hooks[:len(hooks):len(hooks)], correctionlog.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CorrectionLogClient) Interceptors() []Interceptor {
+	return c.inters.CorrectionLog
+}
+
+func (c *CorrectionLogClient) mutate(ctx context.Context, m *CorrectionLogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CorrectionLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CorrectionLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CorrectionLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CorrectionLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown CorrectionLog mutation op: %q", m.Op())
+	}
+}
+
+// CorrectionRuleClient is a client for the CorrectionRule schema.
+type CorrectionRuleClient struct {
+	config
+}
+
+// NewCorrectionRuleClient returns a client for the CorrectionRule from the given config.
+func NewCorrectionRuleClient(c config) *CorrectionRuleClient {
+	return &CorrectionRuleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `correctionrule.Hooks(f(g(h())))`.
+func (c *CorrectionRuleClient) Use(hooks ...Hook) {
+	c.hooks.CorrectionRule = append(c.hooks.CorrectionRule, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `correctionrule.Intercept(f(g(h())))`.
+func (c *CorrectionRuleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CorrectionRule = append(c.inters.CorrectionRule, interceptors...)
+}
+
+// Create returns a builder for creating a CorrectionRule entity.
+func (c *CorrectionRuleClient) Create() *CorrectionRuleCreate {
+	mutation := newCorrectionRuleMutation(c.config, OpCreate)
+	return &CorrectionRuleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CorrectionRule entities.
+func (c *CorrectionRuleClient) CreateBulk(builders ...*CorrectionRuleCreate) *CorrectionRuleCreateBulk {
+	return &CorrectionRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CorrectionRuleClient) MapCreateBulk(slice any, setFunc func(*CorrectionRuleCreate, int)) *CorrectionRuleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CorrectionRuleCreateBulk{err: fmt.Errorf("calling to CorrectionRuleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CorrectionRuleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CorrectionRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CorrectionRule.
+func (c *CorrectionRuleClient) Update() *CorrectionRuleUpdate {
+	mutation := newCorrectionRuleMutation(c.config, OpUpdate)
+	return &CorrectionRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CorrectionRuleClient) UpdateOne(_m *CorrectionRule) *CorrectionRuleUpdateOne {
+	mutation := newCorrectionRuleMutation(c.config, OpUpdateOne, withCorrectionRule(_m))
+	return &CorrectionRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CorrectionRuleClient) UpdateOneID(id uint32) *CorrectionRuleUpdateOne {
+	mutation := newCorrectionRuleMutation(c.config, OpUpdateOne, withCorrectionRuleID(id))
+	return &CorrectionRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CorrectionRule.
+func (c *CorrectionRuleClient) Delete() *CorrectionRuleDelete {
+	mutation := newCorrectionRuleMutation(c.config, OpDelete)
+	return &CorrectionRuleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CorrectionRuleClient) DeleteOne(_m *CorrectionRule) *CorrectionRuleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CorrectionRuleClient) DeleteOneID(id uint32) *CorrectionRuleDeleteOne {
+	builder := c.Delete().Where(correctionrule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CorrectionRuleDeleteOne{builder}
+}
+
+// Query returns a query builder for CorrectionRule.
+func (c *CorrectionRuleClient) Query() *CorrectionRuleQuery {
+	return &CorrectionRuleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCorrectionRule},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CorrectionRule entity by its id.
+func (c *CorrectionRuleClient) Get(ctx context.Context, id uint32) (*CorrectionRule, error) {
+	return c.Query().Where(correctionrule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CorrectionRuleClient) GetX(ctx context.Context, id uint32) *CorrectionRule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CorrectionRuleClient) Hooks() []Hook {
+	hooks := c.hooks.CorrectionRule
+	return append(hooks[:len(hooks):len(hooks)], correctionrule.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CorrectionRuleClient) Interceptors() []Interceptor {
+	inters := c.inters.CorrectionRule
+	return append(inters[:len(inters):len(inters)], correctionrule.Interceptors[:]...)
+}
+
+func (c *CorrectionRuleClient) mutate(ctx context.Context, m *CorrectionRuleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CorrectionRuleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CorrectionRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CorrectionRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CorrectionRuleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown CorrectionRule mutation op: %q", m.Op())
+	}
+}
+
+// DictionaryAliasClient is a client for the DictionaryAlias schema.
+type DictionaryAliasClient struct {
+	config
+}
+
+// NewDictionaryAliasClient returns a client for the DictionaryAlias from the given config.
+func NewDictionaryAliasClient(c config) *DictionaryAliasClient {
+	return &DictionaryAliasClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dictionaryalias.Hooks(f(g(h())))`.
+func (c *DictionaryAliasClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryAlias = append(c.hooks.DictionaryAlias, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dictionaryalias.Intercept(f(g(h())))`.
+func (c *DictionaryAliasClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryAlias = append(c.inters.DictionaryAlias, interceptors...)
+}
+
+// Create returns a builder for creating a DictionaryAlias entity.
+func (c *DictionaryAliasClient) Create() *DictionaryAliasCreate {
+	mutation := newDictionaryAliasMutation(c.config, OpCreate)
+	return &DictionaryAliasCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DictionaryAlias entities.
+func (c *DictionaryAliasClient) CreateBulk(builders ...*DictionaryAliasCreate) *DictionaryAliasCreateBulk {
+	return &DictionaryAliasCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DictionaryAliasClient) MapCreateBulk(slice any, setFunc func(*DictionaryAliasCreate, int)) *DictionaryAliasCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DictionaryAliasCreateBulk{err: fmt.Errorf("calling to DictionaryAliasClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DictionaryAliasCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DictionaryAliasCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DictionaryAlias.
+func (c *DictionaryAliasClient) Update() *DictionaryAliasUpdate {
+	mutation := newDictionaryAliasMutation(c.config, OpUpdate)
+	return &DictionaryAliasUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DictionaryAliasClient) UpdateOne(_m *DictionaryAlias) *DictionaryAliasUpdateOne {
+	mutation := newDictionaryAliasMutation(c.config, OpUpdateOne, withDictionaryAlias(_m))
+	return &DictionaryAliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DictionaryAliasClient) UpdateOneID(id uint32) *DictionaryAliasUpdateOne {
+	mutation := newDictionaryAliasMutation(c.config, OpUpdateOne, withDictionaryAliasID(id))
+	return &DictionaryAliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DictionaryAlias.
+func (c *DictionaryAliasClient) Delete() *DictionaryAliasDelete {
+	mutation := newDictionaryAliasMutation(c.config, OpDelete)
+	return &DictionaryAliasDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DictionaryAliasClient) DeleteOne(_m *DictionaryAlias) *DictionaryAliasDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DictionaryAliasClient) DeleteOneID(id uint32) *DictionaryAliasDeleteOne {
+	builder := c.Delete().Where(dictionaryalias.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DictionaryAliasDeleteOne{builder}
+}
+
+// Query returns a query builder for DictionaryAlias.
+func (c *DictionaryAliasClient) Query() *DictionaryAliasQuery {
+	return &DictionaryAliasQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDictionaryAlias},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DictionaryAlias entity by its id.
+func (c *DictionaryAliasClient) Get(ctx context.Context, id uint32) (*DictionaryAlias, error) {
+	return c.Query().Where(dictionaryalias.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DictionaryAliasClient) GetX(ctx context.Context, id uint32) *DictionaryAlias {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWord queries the word edge of a DictionaryAlias.
+func (c *DictionaryAliasClient) QueryWord(_m *DictionaryAlias) *DictionaryWordQuery {
+	query := (&DictionaryWordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dictionaryalias.Table, dictionaryalias.FieldID, id),
+			sqlgraph.To(dictionaryword.Table, dictionaryword.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dictionaryalias.WordTable, dictionaryalias.WordColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DictionaryAliasClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryAlias
+	return append(hooks[:len(hooks):len(hooks)], dictionaryalias.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryAliasClient) Interceptors() []Interceptor {
+	inters := c.inters.DictionaryAlias
+	return append(inters[:len(inters):len(inters)], dictionaryalias.Interceptors[:]...)
+}
+
+func (c *DictionaryAliasClient) mutate(ctx context.Context, m *DictionaryAliasMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryAliasCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryAliasUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryAliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryAliasDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryAlias mutation op: %q", m.Op())
+	}
+}
+
+// DictionaryWordClient is a client for the DictionaryWord schema.
+type DictionaryWordClient struct {
+	config
+}
+
+// NewDictionaryWordClient returns a client for the DictionaryWord from the given config.
+func NewDictionaryWordClient(c config) *DictionaryWordClient {
+	return &DictionaryWordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dictionaryword.Hooks(f(g(h())))`.
+func (c *DictionaryWordClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryWord = append(c.hooks.DictionaryWord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dictionaryword.Intercept(f(g(h())))`.
+func (c *DictionaryWordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryWord = append(c.inters.DictionaryWord, interceptors...)
+}
+
+// Create returns a builder for creating a DictionaryWord entity.
+func (c *DictionaryWordClient) Create() *DictionaryWordCreate {
+	mutation := newDictionaryWordMutation(c.config, OpCreate)
+	return &DictionaryWordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DictionaryWord entities.
+func (c *DictionaryWordClient) CreateBulk(builders ...*DictionaryWordCreate) *DictionaryWordCreateBulk {
+	return &DictionaryWordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DictionaryWordClient) MapCreateBulk(slice any, setFunc func(*DictionaryWordCreate, int)) *DictionaryWordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DictionaryWordCreateBulk{err: fmt.Errorf("calling to DictionaryWordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DictionaryWordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DictionaryWordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DictionaryWord.
+func (c *DictionaryWordClient) Update() *DictionaryWordUpdate {
+	mutation := newDictionaryWordMutation(c.config, OpUpdate)
+	return &DictionaryWordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DictionaryWordClient) UpdateOne(_m *DictionaryWord) *DictionaryWordUpdateOne {
+	mutation := newDictionaryWordMutation(c.config, OpUpdateOne, withDictionaryWord(_m))
+	return &DictionaryWordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DictionaryWordClient) UpdateOneID(id uint32) *DictionaryWordUpdateOne {
+	mutation := newDictionaryWordMutation(c.config, OpUpdateOne, withDictionaryWordID(id))
+	return &DictionaryWordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DictionaryWord.
+func (c *DictionaryWordClient) Delete() *DictionaryWordDelete {
+	mutation := newDictionaryWordMutation(c.config, OpDelete)
+	return &DictionaryWordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DictionaryWordClient) DeleteOne(_m *DictionaryWord) *DictionaryWordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DictionaryWordClient) DeleteOneID(id uint32) *DictionaryWordDeleteOne {
+	builder := c.Delete().Where(dictionaryword.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DictionaryWordDeleteOne{builder}
+}
+
+// Query returns a query builder for DictionaryWord.
+func (c *DictionaryWordClient) Query() *DictionaryWordQuery {
+	return &DictionaryWordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDictionaryWord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DictionaryWord entity by its id.
+func (c *DictionaryWordClient) Get(ctx context.Context, id uint32) (*DictionaryWord, error) {
+	return c.Query().Where(dictionaryword.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DictionaryWordClient) GetX(ctx context.Context, id uint32) *DictionaryWord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAliases queries the aliases edge of a DictionaryWord.
+func (c *DictionaryWordClient) QueryAliases(_m *DictionaryWord) *DictionaryAliasQuery {
+	query := (&DictionaryAliasClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dictionaryword.Table, dictionaryword.FieldID, id),
+			sqlgraph.To(dictionaryalias.Table, dictionaryalias.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dictionaryword.AliasesTable, dictionaryword.AliasesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DictionaryWordClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryWord
+	return append(hooks[:len(hooks):len(hooks)], dictionaryword.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryWordClient) Interceptors() []Interceptor {
+	inters := c.inters.DictionaryWord
+	return append(inters[:len(inters):len(inters)], dictionaryword.Interceptors[:]...)
+}
+
+func (c *DictionaryWordClient) mutate(ctx context.Context, m *DictionaryWordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryWordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryWordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryWordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryWordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryWord mutation op: %q", m.Op())
+	}
+}
+
+// HotwordClient is a client for the Hotword schema.
+type HotwordClient struct {
+	config
+}
+
+// NewHotwordClient returns a client for the Hotword from the given config.
+func NewHotwordClient(c config) *HotwordClient {
+	return &HotwordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `hotword.Hooks(f(g(h())))`.
+func (c *HotwordClient) Use(hooks ...Hook) {
+	c.hooks.Hotword = append(c.hooks.Hotword, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `hotword.Intercept(f(g(h())))`.
+func (c *HotwordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Hotword = append(c.inters.Hotword, interceptors...)
+}
+
+// Create returns a builder for creating a Hotword entity.
+func (c *HotwordClient) Create() *HotwordCreate {
+	mutation := newHotwordMutation(c.config, OpCreate)
+	return &HotwordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Hotword entities.
+func (c *HotwordClient) CreateBulk(builders ...*HotwordCreate) *HotwordCreateBulk {
+	return &HotwordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *HotwordClient) MapCreateBulk(slice any, setFunc func(*HotwordCreate, int)) *HotwordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &HotwordCreateBulk{err: fmt.Errorf("calling to HotwordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*HotwordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &HotwordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Hotword.
+func (c *HotwordClient) Update() *HotwordUpdate {
+	mutation := newHotwordMutation(c.config, OpUpdate)
+	return &HotwordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *HotwordClient) UpdateOne(_m *Hotword) *HotwordUpdateOne {
+	mutation := newHotwordMutation(c.config, OpUpdateOne, withHotword(_m))
+	return &HotwordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *HotwordClient) UpdateOneID(id uint32) *HotwordUpdateOne {
+	mutation := newHotwordMutation(c.config, OpUpdateOne, withHotwordID(id))
+	return &HotwordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Hotword.
+func (c *HotwordClient) Delete() *HotwordDelete {
+	mutation := newHotwordMutation(c.config, OpDelete)
+	return &HotwordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *HotwordClient) DeleteOne(_m *Hotword) *HotwordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *HotwordClient) DeleteOneID(id uint32) *HotwordDeleteOne {
+	builder := c.Delete().Where(hotword.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &HotwordDeleteOne{builder}
+}
+
+// Query returns a query builder for Hotword.
+func (c *HotwordClient) Query() *HotwordQuery {
+	return &HotwordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeHotword},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Hotword entity by its id.
+func (c *HotwordClient) Get(ctx context.Context, id uint32) (*Hotword, error) {
+	return c.Query().Where(hotword.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *HotwordClient) GetX(ctx context.Context, id uint32) *Hotword {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *HotwordClient) Hooks() []Hook {
+	hooks := c.hooks.Hotword
+	return append(hooks[:len(hooks):len(hooks)], hotword.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *HotwordClient) Interceptors() []Interceptor {
+	return c.inters.Hotword
+}
+
+func (c *HotwordClient) mutate(ctx context.Context, m *HotwordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&HotwordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&HotwordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&HotwordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&HotwordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown Hotword mutation op: %q", m.Op())
 	}
 }
 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		User []ent.Hook
+		AsrProviderConfig, AsrRecord, CorrectionLog, CorrectionRule, DictionaryAlias,
+		DictionaryWord, Hotword []ent.Hook
 	}
 	inters struct {
-		User []ent.Interceptor
+		AsrProviderConfig, AsrRecord, CorrectionLog, CorrectionRule, DictionaryAlias,
+		DictionaryWord, Hotword []ent.Interceptor
 	}
 )
 

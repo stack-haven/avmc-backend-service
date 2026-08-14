@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package evie.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/evie/service/v1;v1";
+
+// ASR 供应商配置管理服务。
+service ProviderService {
+  // 查询可用供应商列表（平台级能力声明）
+  rpc ListAvailableProviders(ListAvailableProvidersRequest) returns (ListAvailableProvidersResponse) {
+    option (google.api.http) = {get: "/evie/v1/providers/available"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询可用供应商列表"
+      tags: ["供应商管理"]
+    };
+  }
+
+  // 查询租户已配置的供应商
+  rpc GetTenantConfig(GetTenantConfigRequest) returns (GetTenantConfigResponse) {
+    option (google.api.http) = {get: "/evie/v1/providers/config"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询租户供应商配置"
+      tags: ["供应商管理"]
+    };
+  }
+
+  // 更新租户供应商配置
+  rpc UpdateTenantConfig(UpdateTenantConfigRequest) returns (UpdateTenantConfigResponse) {
+    option (google.api.http) = {
+      put: "/evie/v1/providers/config"
+      body: "config"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新租户供应商配置"
+      tags: ["供应商管理"]
+    };
+  }
+}
+
+// ProviderInfo 供应商能力声明。
+message ProviderInfo {
+  string name = 1;                    // funasr/whisper/xunfei/aliyun
+  string deployment_mode = 2;         // self_hosted/cloud_api
+  bool streaming = 3;
+  repeated string supported_formats = 4;
+  repeated int32 sample_rates = 5;
+  bool hotword_support = 6;
+}
+
+message ListAvailableProvidersRequest {}
+
+message ListAvailableProvidersResponse {
+  repeated ProviderInfo providers = 1;
+}
+
+// TenantProviderConfig 租户供应商配置。
+message TenantProviderConfig {
+  string provider_name = 1;  // funasr/whisper/xunfei/aliyun
+  bool is_active = 2;
+  string config_json = 3;    // Provider 连接配置 JSON
+  int32 sample_rate = 4;
+  string language = 5;
+}
+
+message GetTenantConfigRequest {}
+
+message GetTenantConfigResponse {
+  repeated TenantProviderConfig configs = 1;
+}
+
+message UpdateTenantConfigRequest {
+  TenantProviderConfig config = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateTenantConfigResponse {
+  TenantProviderConfig config = 1;
+}

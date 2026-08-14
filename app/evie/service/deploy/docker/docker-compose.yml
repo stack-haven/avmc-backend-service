@@ -1,0 +1,45 @@
+# Evie ASR 依赖部署：FunASR Runtime Server
+#
+# 启动方式：
+#   GPU（推荐，需 NVIDIA Container Toolkit）：
+#     docker compose --profile gpu up -d
+#   CPU（无 GPU，Paraformer onnx 导出，速度较慢）：
+#     docker compose --profile cpu up -d
+#
+# 端口约定（与 evie 后端 config 一致）：
+#   10095  gRPC（pkg/asr/funasr 客户端对接）
+#   10096  HTTP / WebSocket（调试用）
+
+services:
+  funasr-gpu:
+    profiles: ['gpu']
+    image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.2.0
+    container_name: evie-funasr
+    restart: unless-stopped
+    ports:
+      - '10095:10095' # gRPC
+      - '10096:10096' # HTTP/WebSocket
+    volumes:
+      - ../models:/workspace/models # 模型缓存，首次启动会从 ModelScope 下载
+    environment:
+      - TZ=Asia/Shanghai
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  funasr-cpu:
+    profiles: ['cpu']
+    image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
+    container_name: evie-funasr
+    restart: unless-stopped
+    ports:
+      - '10095:10095' # gRPC
+      - '10096:10096' # HTTP/WebSocket
+    volumes:
+      - ../models:/workspace/models # 模型缓存
+    environment:
+      - TZ=Asia/Shanghai

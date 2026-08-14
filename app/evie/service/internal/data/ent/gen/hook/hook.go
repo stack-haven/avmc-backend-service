@@ -8,16 +8,88 @@ import (
 	"fmt"
 )
 
-// The UserFunc type is an adapter to allow the use of ordinary
-// function as User mutator.
-type UserFunc func(context.Context, *gen.UserMutation) (gen.Value, error)
+// The AsrProviderConfigFunc type is an adapter to allow the use of ordinary
+// function as AsrProviderConfig mutator.
+type AsrProviderConfigFunc func(context.Context, *gen.AsrProviderConfigMutation) (gen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f UserFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.UserMutation); ok {
+func (f AsrProviderConfigFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.AsrProviderConfigMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.UserMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.AsrProviderConfigMutation", m)
+}
+
+// The AsrRecordFunc type is an adapter to allow the use of ordinary
+// function as AsrRecord mutator.
+type AsrRecordFunc func(context.Context, *gen.AsrRecordMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AsrRecordFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.AsrRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.AsrRecordMutation", m)
+}
+
+// The CorrectionLogFunc type is an adapter to allow the use of ordinary
+// function as CorrectionLog mutator.
+type CorrectionLogFunc func(context.Context, *gen.CorrectionLogMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CorrectionLogFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.CorrectionLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.CorrectionLogMutation", m)
+}
+
+// The CorrectionRuleFunc type is an adapter to allow the use of ordinary
+// function as CorrectionRule mutator.
+type CorrectionRuleFunc func(context.Context, *gen.CorrectionRuleMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CorrectionRuleFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.CorrectionRuleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.CorrectionRuleMutation", m)
+}
+
+// The DictionaryAliasFunc type is an adapter to allow the use of ordinary
+// function as DictionaryAlias mutator.
+type DictionaryAliasFunc func(context.Context, *gen.DictionaryAliasMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DictionaryAliasFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryAliasMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryAliasMutation", m)
+}
+
+// The DictionaryWordFunc type is an adapter to allow the use of ordinary
+// function as DictionaryWord mutator.
+type DictionaryWordFunc func(context.Context, *gen.DictionaryWordMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DictionaryWordFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryWordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryWordMutation", m)
+}
+
+// The HotwordFunc type is an adapter to allow the use of ordinary
+// function as Hotword mutator.
+type HotwordFunc func(context.Context, *gen.HotwordMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HotwordFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.HotwordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.HotwordMutation", m)
 }
 
 // Condition is a hook condition function.

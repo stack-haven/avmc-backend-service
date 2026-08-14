@@ -1,0 +1,6 @@
+# 音频测试数据不入库
+*.wav
+*.pcm
+*.mp3
+*.opus
+!README.md

@@ -27,6 +27,8 @@ func newGRPCWhiteListMatcher() selector.MatchFunc {
 		// 跨服务鉴权委托：产品服务（evie 等）调用平台 IsAuthorized，
 		// 该内部 RPC 不携带原始 JWT，需跳过本服务的认证/鉴权中间件。
 		coreV1.AuthService_IsAuthorized_FullMethodName: true,
+		// 跨服务审计委托：产品服务写入操作审计，同样不携带原始 JWT。
+		coreV1.OperationLogService_CreateOperationLog_FullMethodName: true,
 	}
 	return func(_ context.Context, operation string) bool {
 		return !whiteList[operation]
@@ -57,6 +59,7 @@ func NewGRPCServer(c *conf.Server,
 	device *service.DeviceServiceService,
 	asyncTask *service.AsyncTaskServiceService,
 	authz *service.AuthzService,
+	coreOperationLog *service.CoreOperationLogService,
 	authenticator *auth.AuthToken,
 	authorizer authzEngine.Authorizer,
 	operationAudit *biz.OperationLogUsecase,
@@ -81,6 +84,7 @@ func NewGRPCServer(c *conf.Server,
 	}
 	srv := grpc.NewServer(opts...)
 	coreV1.RegisterAuthServiceServer(srv, authz)
+	coreV1.RegisterOperationLogServiceServer(srv, coreOperationLog)
 	v1.RegisterAuthServiceServer(srv, auth)
 	v1.RegisterTenantServiceServer(srv, tenant)
 	v1.RegisterUserServiceServer(srv, user)

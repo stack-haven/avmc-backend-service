@@ -111,28 +111,172 @@ func DenyMutationOperationRule(op gen.Op) MutationRule {
 	return OnMutationOperation(rule, op)
 }
 
-// The UserQueryRuleFunc type is an adapter to allow the use of ordinary
+// The AsrProviderConfigQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
-type UserQueryRuleFunc func(context.Context, *gen.UserQuery) error
+type AsrProviderConfigQueryRuleFunc func(context.Context, *gen.AsrProviderConfigQuery) error
 
 // EvalQuery return f(ctx, q).
-func (f UserQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.UserQuery); ok {
+func (f AsrProviderConfigQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.AsrProviderConfigQuery); ok {
 		return f(ctx, q)
 	}
-	return Denyf("gen/privacy: unexpected query type %T, expect *gen.UserQuery", q)
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.AsrProviderConfigQuery", q)
 }
 
-// The UserMutationRuleFunc type is an adapter to allow the use of ordinary
+// The AsrProviderConfigMutationRuleFunc type is an adapter to allow the use of ordinary
 // functions as a mutation rule.
-type UserMutationRuleFunc func(context.Context, *gen.UserMutation) error
+type AsrProviderConfigMutationRuleFunc func(context.Context, *gen.AsrProviderConfigMutation) error
 
 // EvalMutation calls f(ctx, m).
-func (f UserMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
-	if m, ok := m.(*gen.UserMutation); ok {
+func (f AsrProviderConfigMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.AsrProviderConfigMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.UserMutation", m)
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.AsrProviderConfigMutation", m)
+}
+
+// The AsrRecordQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type AsrRecordQueryRuleFunc func(context.Context, *gen.AsrRecordQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f AsrRecordQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.AsrRecordQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.AsrRecordQuery", q)
+}
+
+// The AsrRecordMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type AsrRecordMutationRuleFunc func(context.Context, *gen.AsrRecordMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f AsrRecordMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.AsrRecordMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.AsrRecordMutation", m)
+}
+
+// The CorrectionLogQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type CorrectionLogQueryRuleFunc func(context.Context, *gen.CorrectionLogQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f CorrectionLogQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.CorrectionLogQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.CorrectionLogQuery", q)
+}
+
+// The CorrectionLogMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type CorrectionLogMutationRuleFunc func(context.Context, *gen.CorrectionLogMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f CorrectionLogMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.CorrectionLogMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.CorrectionLogMutation", m)
+}
+
+// The CorrectionRuleQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type CorrectionRuleQueryRuleFunc func(context.Context, *gen.CorrectionRuleQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f CorrectionRuleQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.CorrectionRuleQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.CorrectionRuleQuery", q)
+}
+
+// The CorrectionRuleMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type CorrectionRuleMutationRuleFunc func(context.Context, *gen.CorrectionRuleMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f CorrectionRuleMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.CorrectionRuleMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.CorrectionRuleMutation", m)
+}
+
+// The DictionaryAliasQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type DictionaryAliasQueryRuleFunc func(context.Context, *gen.DictionaryAliasQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f DictionaryAliasQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryAliasQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.DictionaryAliasQuery", q)
+}
+
+// The DictionaryAliasMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type DictionaryAliasMutationRuleFunc func(context.Context, *gen.DictionaryAliasMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f DictionaryAliasMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.DictionaryAliasMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.DictionaryAliasMutation", m)
+}
+
+// The DictionaryWordQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type DictionaryWordQueryRuleFunc func(context.Context, *gen.DictionaryWordQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f DictionaryWordQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryWordQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.DictionaryWordQuery", q)
+}
+
+// The DictionaryWordMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type DictionaryWordMutationRuleFunc func(context.Context, *gen.DictionaryWordMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f DictionaryWordMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.DictionaryWordMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.DictionaryWordMutation", m)
+}
+
+// The HotwordQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type HotwordQueryRuleFunc func(context.Context, *gen.HotwordQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f HotwordQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.HotwordQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.HotwordQuery", q)
+}
+
+// The HotwordMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type HotwordMutationRuleFunc func(context.Context, *gen.HotwordMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f HotwordMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.HotwordMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.HotwordMutation", m)
 }
 
 type (
@@ -170,7 +314,19 @@ var _ QueryMutationRule = FilterFunc(nil)
 
 func queryFilter(q gen.Query) (Filter, error) {
 	switch q := q.(type) {
-	case *gen.UserQuery:
+	case *gen.AsrProviderConfigQuery:
+		return q.Filter(), nil
+	case *gen.AsrRecordQuery:
+		return q.Filter(), nil
+	case *gen.CorrectionLogQuery:
+		return q.Filter(), nil
+	case *gen.CorrectionRuleQuery:
+		return q.Filter(), nil
+	case *gen.DictionaryAliasQuery:
+		return q.Filter(), nil
+	case *gen.DictionaryWordQuery:
+		return q.Filter(), nil
+	case *gen.HotwordQuery:
 		return q.Filter(), nil
 	default:
 		return nil, Denyf("gen/privacy: unexpected query type %T for query filter", q)
@@ -179,7 +335,19 @@ func queryFilter(q gen.Query) (Filter, error) {
 
 func mutationFilter(m gen.Mutation) (Filter, error) {
 	switch m := m.(type) {
-	case *gen.UserMutation:
+	case *gen.AsrProviderConfigMutation:
+		return m.Filter(), nil
+	case *gen.AsrRecordMutation:
+		return m.Filter(), nil
+	case *gen.CorrectionLogMutation:
+		return m.Filter(), nil
+	case *gen.CorrectionRuleMutation:
+		return m.Filter(), nil
+	case *gen.DictionaryAliasMutation:
+		return m.Filter(), nil
+	case *gen.DictionaryWordMutation:
+		return m.Filter(), nil
+	case *gen.HotwordMutation:
 		return m.Filter(), nil
 	default:
 		return nil, Denyf("gen/privacy: unexpected mutation type %T for mutation filter", m)

@@ -6,5 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// User is the predicate function for user builders.
-type User func(*sql.Selector)
+// AsrProviderConfig is the predicate function for asrproviderconfig builders.
+type AsrProviderConfig func(*sql.Selector)
+
+// AsrRecord is the predicate function for asrrecord builders.
+type AsrRecord func(*sql.Selector)
+
+// CorrectionLog is the predicate function for correctionlog builders.
+type CorrectionLog func(*sql.Selector)
+
+// CorrectionRule is the predicate function for correctionrule builders.
+type CorrectionRule func(*sql.Selector)
+
+// DictionaryAlias is the predicate function for dictionaryalias builders.
+type DictionaryAlias func(*sql.Selector)
+
+// DictionaryWord is the predicate function for dictionaryword builders.
+type DictionaryWord func(*sql.Selector)
+
+// Hotword is the predicate function for hotword builders.
+type Hotword func(*sql.Selector)

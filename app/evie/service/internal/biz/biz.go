@@ -8,13 +8,12 @@ import (
 
 // ProviderSet is biz providers.
 var ProviderSet = wire.NewSet(
-	NewUserUsecase,
+	NewDictionaryUsecase,
+	NewHotwordUsecase,
+	NewASRUsecase,
+	NewProviderUsecase,
+	NewCorrectionEngine,
 )
-
-// SessionRepo TODO: move to session_usecase.go when session business logic created
-type SessionRepo interface {
-	RevokeUser(context.Context, uint32) error
-}
 
 type Transaction interface {
 	InTx(context.Context, func(ctx context.Context) error) error

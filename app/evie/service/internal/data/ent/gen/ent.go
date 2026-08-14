@@ -3,7 +3,13 @@
 package gen
 
 import (
-	"backend-service/app/evie/service/internal/data/ent/gen/user"
+	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
+	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
+	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
+	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
 	"context"
 	"errors"
 	"fmt"
@@ -73,7 +79,13 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			user.Table: user.ValidColumn,
+			asrproviderconfig.Table: asrproviderconfig.ValidColumn,
+			asrrecord.Table:         asrrecord.ValidColumn,
+			correctionlog.Table:     correctionlog.ValidColumn,
+			correctionrule.Table:    correctionrule.ValidColumn,
+			dictionaryalias.Table:   dictionaryalias.ValidColumn,
+			dictionaryword.Table:    dictionaryword.ValidColumn,
+			hotword.Table:           hotword.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

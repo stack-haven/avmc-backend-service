@@ -14,8 +14,20 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// AsrProviderConfig is the client for interacting with the AsrProviderConfig builders.
+	AsrProviderConfig *AsrProviderConfigClient
+	// AsrRecord is the client for interacting with the AsrRecord builders.
+	AsrRecord *AsrRecordClient
+	// CorrectionLog is the client for interacting with the CorrectionLog builders.
+	CorrectionLog *CorrectionLogClient
+	// CorrectionRule is the client for interacting with the CorrectionRule builders.
+	CorrectionRule *CorrectionRuleClient
+	// DictionaryAlias is the client for interacting with the DictionaryAlias builders.
+	DictionaryAlias *DictionaryAliasClient
+	// DictionaryWord is the client for interacting with the DictionaryWord builders.
+	DictionaryWord *DictionaryWordClient
+	// Hotword is the client for interacting with the Hotword builders.
+	Hotword *HotwordClient
 
 	// lazily loaded.
 	client     *Client
@@ -147,7 +159,13 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.User = NewUserClient(tx.config)
+	tx.AsrProviderConfig = NewAsrProviderConfigClient(tx.config)
+	tx.AsrRecord = NewAsrRecordClient(tx.config)
+	tx.CorrectionLog = NewCorrectionLogClient(tx.config)
+	tx.CorrectionRule = NewCorrectionRuleClient(tx.config)
+	tx.DictionaryAlias = NewDictionaryAliasClient(tx.config)
+	tx.DictionaryWord = NewDictionaryWordClient(tx.config)
+	tx.Hotword = NewHotwordClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -157,7 +175,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: User.QueryXXX(), the query will be executed
+// applies a query, for example: AsrProviderConfig.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

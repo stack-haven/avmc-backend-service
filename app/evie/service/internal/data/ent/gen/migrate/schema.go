@@ -9,75 +9,336 @@ import (
 )
 
 var (
-	// SystemUsersColumns holds the columns for the "system_users" table.
-	SystemUsersColumns = []*schema.Column{
+	// EvieAsrProviderConfigsColumns holds the columns for the "evie_asr_provider_configs" table.
+	EvieAsrProviderConfigsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "provider_name", Type: field.TypeString, Size: 32, Comment: "funasr/whisper/xunfei/aliyun"},
+		{Name: "is_active", Type: field.TypeBool, Comment: "是否启用", Default: false},
+		{Name: "config_json", Type: field.TypeString, Size: 2147483647, Comment: "Provider 连接配置 JSON"},
+		{Name: "sample_rate", Type: field.TypeInt, Comment: "采样率", Default: 16000},
+		{Name: "language", Type: field.TypeString, Size: 8, Comment: "语言代码", Default: "zh"},
+	}
+	// EvieAsrProviderConfigsTable holds the schema information for the "evie_asr_provider_configs" table.
+	EvieAsrProviderConfigsTable = &schema.Table{
+		Name:       "evie_asr_provider_configs",
+		Comment:    "ASR 供应商租户配置表",
+		Columns:    EvieAsrProviderConfigsColumns,
+		PrimaryKey: []*schema.Column{EvieAsrProviderConfigsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "asrproviderconfig_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieAsrProviderConfigsColumns[4]},
+			},
+			{
+				Name:    "asrproviderconfig_tenant_id_provider_name",
+				Unique:  true,
+				Columns: []*schema.Column{EvieAsrProviderConfigsColumns[4], EvieAsrProviderConfigsColumns[5]},
+			},
+		},
+	}
+	// EvieAsrRecordsColumns holds the columns for the "evie_asr_records" table.
+	EvieAsrRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "user_id", Type: field.TypeUint32, Nullable: true, Comment: "用户ID"},
+		{Name: "session_id", Type: field.TypeString, Size: 64, Comment: "会话ID"},
+		{Name: "raw_text", Type: field.TypeString, Size: 2147483647, Comment: "ASR 原始文本"},
+		{Name: "confidence", Type: field.TypeFloat64, Comment: "识别置信度"},
+		{Name: "duration_ms", Type: field.TypeInt64, Comment: "处理耗时(ms)"},
+		{Name: "audio_duration_ms", Type: field.TypeInt, Comment: "音频时长(ms)"},
+		{Name: "audio_url", Type: field.TypeString, Nullable: true, Size: 512, Comment: "音频文件URL"},
+		{Name: "audio_format", Type: field.TypeString, Size: 16, Comment: "pcm/wav/mp3/opus", Default: "pcm"},
+		{Name: "engine", Type: field.TypeString, Size: 32, Comment: "funasr/whisper/sensevoice", Default: "funasr"},
+	}
+	// EvieAsrRecordsTable holds the schema information for the "evie_asr_records" table.
+	EvieAsrRecordsTable = &schema.Table{
+		Name:       "evie_asr_records",
+		Comment:    "ASR 识别记录表（只追加不删除）",
+		Columns:    EvieAsrRecordsColumns,
+		PrimaryKey: []*schema.Column{EvieAsrRecordsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "asrrecord_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieAsrRecordsColumns[4]},
+			},
+			{
+				Name:    "asrrecord_tenant_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{EvieAsrRecordsColumns[4], EvieAsrRecordsColumns[1]},
+			},
+			{
+				Name:    "asrrecord_session_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieAsrRecordsColumns[6]},
+			},
+		},
+	}
+	// EvieCorrectionLogsColumns holds the columns for the "evie_correction_logs" table.
+	EvieCorrectionLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "user_id", Type: field.TypeUint32, Nullable: true, Comment: "用户ID"},
+		{Name: "session_id", Type: field.TypeString, Size: 64, Comment: "会话ID"},
+		{Name: "original_text", Type: field.TypeString, Size: 2147483647, Comment: "原始文本"},
+		{Name: "corrected_text", Type: field.TypeString, Size: 2147483647, Comment: "纠正后文本"},
+		{Name: "changes_json", Type: field.TypeString, Size: 2147483647, Comment: "修正明细 JSON"},
+		{Name: "confidence", Type: field.TypeFloat64, Comment: "整体置信度"},
+		{Name: "need_confirm", Type: field.TypeBool, Comment: "是否需要用户确认", Default: false},
+		{Name: "duration_ms", Type: field.TypeInt64, Comment: "纠错耗时(ms)"},
+		{Name: "rule_hits", Type: field.TypeInt, Comment: "规则命中次数", Default: 0},
+		{Name: "pinyin_hits", Type: field.TypeInt, Comment: "拼音命中次数", Default: 0},
+		{Name: "entity_hits", Type: field.TypeInt, Comment: "实体命中次数", Default: 0},
+		{Name: "llm_hits", Type: field.TypeInt, Comment: "LLM命中次数", Default: 0},
+	}
+	// EvieCorrectionLogsTable holds the schema information for the "evie_correction_logs" table.
+	EvieCorrectionLogsTable = &schema.Table{
+		Name:       "evie_correction_logs",
+		Comment:    "纠错记录表（只追加不删除）",
+		Columns:    EvieCorrectionLogsColumns,
+		PrimaryKey: []*schema.Column{EvieCorrectionLogsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "correctionlog_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieCorrectionLogsColumns[4]},
+			},
+			{
+				Name:    "correctionlog_tenant_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{EvieCorrectionLogsColumns[4], EvieCorrectionLogsColumns[1]},
+			},
+			{
+				Name:    "correctionlog_session_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieCorrectionLogsColumns[6]},
+			},
+		},
+	}
+	// EvieCorrectionRulesColumns holds the columns for the "evie_correction_rules" table.
+	EvieCorrectionRulesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
-		{Name: "name", Type: field.TypeString, Size: 32, Comment: "用户名，域内唯一"},
-		{Name: "password", Type: field.TypeString, Size: 100, Comment: "密码哈希"},
-		{Name: "realname", Type: field.TypeString, Nullable: true, Size: 50, Comment: "用户真实姓名"},
-		{Name: "nickname", Type: field.TypeString, Nullable: true, Size: 50, Comment: "用户昵称"},
-		{Name: "email", Type: field.TypeString, Nullable: true, Size: 100, Comment: "电子邮箱，域内唯一"},
-		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 20, Comment: "手机号码，域内唯一"},
-		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 255, Comment: "头像URL"},
-		{Name: "birthday", Type: field.TypeTime, Nullable: true, Comment: "生日", SchemaType: map[string]string{"mysql": "date"}},
-		{Name: "gender", Type: field.TypeInt32, Comment: "性别：0=未知 1=男 2=女", Default: 0, SchemaType: map[string]string{"mysql": "tinyint", "postgres": "tinyint(2)"}},
-		{Name: "age", Type: field.TypeInt, Nullable: true, Comment: "年龄"},
-		{Name: "last_login_at", Type: field.TypeTime, Nullable: true, Comment: "最后登录时间"},
-		{Name: "last_login_ip", Type: field.TypeString, Nullable: true, Size: 50, Comment: "最后登录IP"},
-		{Name: "login_count", Type: field.TypeInt, Comment: "登录次数", Default: 0},
-		{Name: "settings", Type: field.TypeJSON, Nullable: true, Comment: "用户设置，JSON格式"},
-		{Name: "metadata", Type: field.TypeJSON, Nullable: true, Comment: "元数据，JSON格式"},
-		{Name: "description", Type: field.TypeString, Nullable: true, Size: 255, Comment: "个人说明"},
-		{Name: "dept_id", Type: field.TypeUint32, Nullable: true, Comment: "所属主部门ID"},
+		{Name: "source", Type: field.TypeString, Size: 128, Comment: "源词（替换前）"},
+		{Name: "target", Type: field.TypeString, Size: 128, Comment: "目标词（替换后）"},
+		{Name: "type", Type: field.TypeString, Size: 32, Comment: "dictionary/business/system", Default: "dictionary"},
+		{Name: "priority", Type: field.TypeInt32, Comment: "优先级，数字越大越先执行", Default: 100},
 	}
-	// SystemUsersTable holds the schema information for the "system_users" table.
-	SystemUsersTable = &schema.Table{
-		Name:       "system_users",
-		Comment:    "用户表",
-		Columns:    SystemUsersColumns,
-		PrimaryKey: []*schema.Column{SystemUsersColumns[0]},
+	// EvieCorrectionRulesTable holds the schema information for the "evie_correction_rules" table.
+	EvieCorrectionRulesTable = &schema.Table{
+		Name:       "evie_correction_rules",
+		Comment:    "纠错规则表",
+		Columns:    EvieCorrectionRulesColumns,
+		PrimaryKey: []*schema.Column{EvieCorrectionRulesColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "user_tenant_id",
+				Name:    "correctionrule_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{SystemUsersColumns[4]},
+				Columns: []*schema.Column{EvieCorrectionRulesColumns[4]},
 			},
 			{
-				Name:    "user_tenant_id_name",
+				Name:    "correctionrule_tenant_id_source",
 				Unique:  true,
-				Columns: []*schema.Column{SystemUsersColumns[4], SystemUsersColumns[6]},
+				Columns: []*schema.Column{EvieCorrectionRulesColumns[4], EvieCorrectionRulesColumns[6]},
 			},
 			{
-				Name:    "user_tenant_id_phone",
-				Unique:  true,
-				Columns: []*schema.Column{SystemUsersColumns[4], SystemUsersColumns[11]},
-			},
-			{
-				Name:    "user_status",
+				Name:    "correctionrule_tenant_id_type",
 				Unique:  false,
-				Columns: []*schema.Column{SystemUsersColumns[3]},
+				Columns: []*schema.Column{EvieCorrectionRulesColumns[4], EvieCorrectionRulesColumns[8]},
+			},
+		},
+	}
+	// EvieDictionaryAliasesColumns holds the columns for the "evie_dictionary_aliases" table.
+	EvieDictionaryAliasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "alias", Type: field.TypeString, Size: 128, Comment: "别名"},
+		{Name: "pinyin", Type: field.TypeString, Nullable: true, Size: 256, Comment: "拼音"},
+		{Name: "weight", Type: field.TypeFloat64, Comment: "匹配权重", Default: 1},
+		{Name: "source", Type: field.TypeString, Size: 32, Comment: "manual/auto/feedback", Default: "manual"},
+		{Name: "word_id", Type: field.TypeUint32, Comment: "关联标准词ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+	}
+	// EvieDictionaryAliasesTable holds the schema information for the "evie_dictionary_aliases" table.
+	EvieDictionaryAliasesTable = &schema.Table{
+		Name:       "evie_dictionary_aliases",
+		Comment:    "语音字典别名表",
+		Columns:    EvieDictionaryAliasesColumns,
+		PrimaryKey: []*schema.Column{EvieDictionaryAliasesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "evie_dictionary_aliases_evie_dictionary_words_aliases",
+				Columns:    []*schema.Column{EvieDictionaryAliasesColumns[10]},
+				RefColumns: []*schema.Column{EvieDictionaryWordsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "dictionaryalias_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieDictionaryAliasesColumns[4]},
 			},
 			{
-				Name:    "user_tenant_id_email",
+				Name:    "dictionaryalias_alias",
+				Unique:  false,
+				Columns: []*schema.Column{EvieDictionaryAliasesColumns[6]},
+			},
+			{
+				Name:    "dictionaryalias_pinyin",
+				Unique:  false,
+				Columns: []*schema.Column{EvieDictionaryAliasesColumns[7]},
+			},
+			{
+				Name:    "dictionaryalias_word_id_alias",
 				Unique:  true,
-				Columns: []*schema.Column{SystemUsersColumns[4], SystemUsersColumns[10]},
+				Columns: []*schema.Column{EvieDictionaryAliasesColumns[10], EvieDictionaryAliasesColumns[6]},
+			},
+		},
+	}
+	// EvieDictionaryWordsColumns holds the columns for the "evie_dictionary_words" table.
+	EvieDictionaryWordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "word", Type: field.TypeString, Size: 128, Comment: "标准词"},
+		{Name: "level", Type: field.TypeString, Size: 32, Comment: "字典层级: platform/system/tenant/user", Default: "tenant"},
+		{Name: "category", Type: field.TypeString, Size: 32, Comment: "实体分类: person/org/product/term", Default: "term"},
+		{Name: "source", Type: field.TypeString, Size: 32, Comment: "来源: manual/sync_org/sync_biz/feedback", Default: "manual"},
+		{Name: "priority", Type: field.TypeInt32, Comment: "匹配优先级，越大越优先", Default: 0},
+	}
+	// EvieDictionaryWordsTable holds the schema information for the "evie_dictionary_words" table.
+	EvieDictionaryWordsTable = &schema.Table{
+		Name:       "evie_dictionary_words",
+		Comment:    "语音字典标准词表",
+		Columns:    EvieDictionaryWordsColumns,
+		PrimaryKey: []*schema.Column{EvieDictionaryWordsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "dictionaryword_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieDictionaryWordsColumns[4]},
+			},
+			{
+				Name:    "dictionaryword_tenant_id_word",
+				Unique:  true,
+				Columns: []*schema.Column{EvieDictionaryWordsColumns[4], EvieDictionaryWordsColumns[6]},
+			},
+			{
+				Name:    "dictionaryword_tenant_id_level_category",
+				Unique:  false,
+				Columns: []*schema.Column{EvieDictionaryWordsColumns[4], EvieDictionaryWordsColumns[7], EvieDictionaryWordsColumns[8]},
+			},
+			{
+				Name:    "dictionaryword_word",
+				Unique:  false,
+				Columns: []*schema.Column{EvieDictionaryWordsColumns[6]},
+			},
+		},
+	}
+	// EvieHotwordsColumns holds the columns for the "evie_hotwords" table.
+	EvieHotwordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "word", Type: field.TypeString, Size: 64, Comment: "热词原文"},
+		{Name: "target", Type: field.TypeString, Nullable: true, Size: 64, Comment: "期望识别结果，空=用 word"},
+		{Name: "weight", Type: field.TypeFloat64, Comment: "权重 0-10", Default: 5},
+		{Name: "category", Type: field.TypeString, Size: 32, Comment: "person/org/product/term", Default: "term"},
+	}
+	// EvieHotwordsTable holds the schema information for the "evie_hotwords" table.
+	EvieHotwordsTable = &schema.Table{
+		Name:       "evie_hotwords",
+		Comment:    "ASR 热词表",
+		Columns:    EvieHotwordsColumns,
+		PrimaryKey: []*schema.Column{EvieHotwordsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "hotword_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{EvieHotwordsColumns[4]},
+			},
+			{
+				Name:    "hotword_tenant_id_word",
+				Unique:  true,
+				Columns: []*schema.Column{EvieHotwordsColumns[4], EvieHotwordsColumns[5]},
+			},
+			{
+				Name:    "hotword_tenant_id_category",
+				Unique:  false,
+				Columns: []*schema.Column{EvieHotwordsColumns[4], EvieHotwordsColumns[8]},
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		SystemUsersTable,
+		EvieAsrProviderConfigsTable,
+		EvieAsrRecordsTable,
+		EvieCorrectionLogsTable,
+		EvieCorrectionRulesTable,
+		EvieDictionaryAliasesTable,
+		EvieDictionaryWordsTable,
+		EvieHotwordsTable,
 	}
 )
 
 func init() {
-	SystemUsersTable.Annotation = &entsql.Annotation{
-		Table:     "system_users",
+	EvieAsrProviderConfigsTable.Annotation = &entsql.Annotation{
+		Table:     "evie_asr_provider_configs",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	EvieAsrRecordsTable.Annotation = &entsql.Annotation{
+		Table:     "evie_asr_records",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	EvieCorrectionLogsTable.Annotation = &entsql.Annotation{
+		Table:     "evie_correction_logs",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	EvieCorrectionRulesTable.Annotation = &entsql.Annotation{
+		Table:     "evie_correction_rules",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	EvieDictionaryAliasesTable.ForeignKeys[0].RefTable = EvieDictionaryWordsTable
+	EvieDictionaryAliasesTable.Annotation = &entsql.Annotation{
+		Table:     "evie_dictionary_aliases",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	EvieDictionaryWordsTable.Annotation = &entsql.Annotation{
+		Table:     "evie_dictionary_words",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	EvieHotwordsTable.Annotation = &entsql.Annotation{
+		Table:     "evie_hotwords",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
