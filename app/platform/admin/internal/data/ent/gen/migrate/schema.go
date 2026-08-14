@@ -109,6 +109,50 @@ var (
 			},
 		},
 	}
+	// SystemDevicesColumns holds the columns for the "system_devices" table.
+	SystemDevicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "user_id", Type: field.TypeUint32, Comment: "用户ID"},
+		{Name: "device_token", Type: field.TypeString, Size: 200, Comment: "设备令牌（极光 registration id / 个推 cid）"},
+		{Name: "platform", Type: field.TypeString, Size: 20, Comment: "平台 android/ios"},
+		{Name: "app_key", Type: field.TypeString, Size: 80, Comment: "应用标识（支持多 APP）", Default: ""},
+		{Name: "device_name", Type: field.TypeString, Size: 120, Comment: "设备名称", Default: ""},
+		{Name: "app_version", Type: field.TypeString, Size: 40, Comment: "APP 版本", Default: ""},
+		{Name: "last_active_at", Type: field.TypeTime, Comment: "最后活跃时间"},
+	}
+	// SystemDevicesTable holds the schema information for the "system_devices" table.
+	SystemDevicesTable = &schema.Table{
+		Name:       "system_devices",
+		Comment:    "用户设备注册表",
+		Columns:    SystemDevicesColumns,
+		PrimaryKey: []*schema.Column{SystemDevicesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "device_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{SystemDevicesColumns[4]},
+			},
+			{
+				Name:    "device_tenant_id_device_token",
+				Unique:  true,
+				Columns: []*schema.Column{SystemDevicesColumns[4], SystemDevicesColumns[6]},
+			},
+			{
+				Name:    "device_tenant_id_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{SystemDevicesColumns[4], SystemDevicesColumns[5]},
+			},
+			{
+				Name:    "device_tenant_id_platform",
+				Unique:  false,
+				Columns: []*schema.Column{SystemDevicesColumns[4], SystemDevicesColumns[7]},
+			},
+		},
+	}
 	// SystemDictionaryItemsColumns holds the columns for the "system_dictionary_items" table.
 	SystemDictionaryItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -246,6 +290,9 @@ var (
 		{Name: "business_id", Type: field.TypeString, Size: 120, Comment: "业务ID", Default: ""},
 		{Name: "visibility", Type: field.TypeString, Size: 20, Comment: "可见性 private/public", Default: "private"},
 		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 120, Comment: "创建幂等键"},
+		{Name: "upload_id", Type: field.TypeString, Size: 255, Comment: "分片上传会话ID（本地=临时目录路径，对象存储预留为 multipart upload id）", Default: ""},
+		{Name: "part_size", Type: field.TypeInt64, Comment: "分片大小（字节），0 表示非分片上传", Default: 0},
+		{Name: "total_parts", Type: field.TypeInt32, Comment: "总分片数，0 表示非分片上传", Default: 0},
 		{Name: "upload_expires_at", Type: field.TypeTime, Comment: "上传凭证过期时间"},
 		{Name: "confirmed_at", Type: field.TypeTime, Nullable: true, Comment: "上传确认时间"},
 		{Name: "created_by", Type: field.TypeUint32, Nullable: true, Comment: "创建人ID"},
@@ -469,6 +516,54 @@ var (
 				Name:    "notificationmessage_tenant_id_template_code_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{SystemNotificationMessagesColumns[4], SystemNotificationMessagesColumns[8], SystemNotificationMessagesColumns[1]},
+			},
+		},
+	}
+	// SystemNotificationProvidersColumns holds the columns for the "system_notification_providers" table.
+	SystemNotificationProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
+		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "code", Type: field.TypeString, Size: 80, Comment: "渠道配置编码"},
+		{Name: "name", Type: field.TypeString, Size: 120, Comment: "渠道配置名称"},
+		{Name: "channel", Type: field.TypeString, Size: 40, Comment: "渠道类型 in-app/sms/email/webhook/push"},
+		{Name: "provider_type", Type: field.TypeString, Size: 80, Comment: "提供商类型 aliyun-sms/yunpian/jpush/getui", Default: ""},
+		{Name: "endpoint", Type: field.TypeString, Size: 255, Comment: "服务商 endpoint", Default: ""},
+		{Name: "access_key_id", Type: field.TypeString, Size: 120, Comment: "访问密钥ID", Default: ""},
+		{Name: "access_key_secret", Type: field.TypeString, Size: 200, Comment: "访问密钥（加密存储）", Default: ""},
+		{Name: "sign_name", Type: field.TypeString, Size: 80, Comment: "短信签名", Default: ""},
+		{Name: "template_code", Type: field.TypeString, Size: 80, Comment: "短信模板代码", Default: ""},
+		{Name: "is_default", Type: field.TypeBool, Comment: "是否默认渠道配置", Default: false},
+		{Name: "remark", Type: field.TypeString, Size: 500, Comment: "备注", Default: ""},
+	}
+	// SystemNotificationProvidersTable holds the schema information for the "system_notification_providers" table.
+	SystemNotificationProvidersTable = &schema.Table{
+		Name:       "system_notification_providers",
+		Comment:    "通知渠道配置表",
+		Columns:    SystemNotificationProvidersColumns,
+		PrimaryKey: []*schema.Column{SystemNotificationProvidersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "notificationprovider_id",
+				Unique:  false,
+				Columns: []*schema.Column{SystemNotificationProvidersColumns[0]},
+			},
+			{
+				Name:    "notificationprovider_code",
+				Unique:  true,
+				Columns: []*schema.Column{SystemNotificationProvidersColumns[5]},
+			},
+			{
+				Name:    "notificationprovider_channel_status",
+				Unique:  false,
+				Columns: []*schema.Column{SystemNotificationProvidersColumns[7], SystemNotificationProvidersColumns[1]},
+			},
+			{
+				Name:    "notificationprovider_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{SystemNotificationProvidersColumns[14]},
 			},
 		},
 	}
@@ -1378,6 +1473,7 @@ var (
 	Tables = []*schema.Table{
 		SystemAsyncTasksTable,
 		SystemDeptsTable,
+		SystemDevicesTable,
 		SystemDictionaryItemsTable,
 		SystemDictionaryTypesTable,
 		SystemFileAccessLogsTable,
@@ -1385,6 +1481,7 @@ var (
 		SystemLoginLogsTable,
 		SystemMenusTable,
 		SystemNotificationMessagesTable,
+		SystemNotificationProvidersTable,
 		SystemNotificationTemplatesTable,
 		SystemOperationLogsTable,
 		SystemParameterDefinitionsTable,
@@ -1422,6 +1519,11 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
+	SystemDevicesTable.Annotation = &entsql.Annotation{
+		Table:     "system_devices",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
 	SystemDictionaryItemsTable.ForeignKeys[0].RefTable = SystemDictionaryTypesTable
 	SystemDictionaryItemsTable.Annotation = &entsql.Annotation{
 		Table:     "system_dictionary_items",
@@ -1456,6 +1558,11 @@ func init() {
 	}
 	SystemNotificationMessagesTable.Annotation = &entsql.Annotation{
 		Table:     "system_notification_messages",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	SystemNotificationProvidersTable.Annotation = &entsql.Annotation{
+		Table:     "system_notification_providers",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

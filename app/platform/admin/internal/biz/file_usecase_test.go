@@ -95,6 +95,28 @@ func (r *fileRepoStub) Delete(_ context.Context, id uint32) error {
 	return nil
 }
 
+func (r *fileRepoStub) UpdateFileName(_ context.Context, id uint32, fileName string) (*pbCore.FileObject, error) {
+	file := r.byID[id]
+	if file == nil {
+		return nil, errors.NotFound("FILE_NOT_FOUND", "file not found")
+	}
+	file.FileName = stringPtr(fileName)
+	return file, nil
+}
+
+func (r *fileRepoStub) UpdateAfterReplace(_ context.Context, id uint32, objectKey string, size int64, sha256, _ string, contentType string, fileName string) (*pbCore.FileObject, error) {
+	file := r.byID[id]
+	if file == nil {
+		return nil, errors.NotFound("FILE_NOT_FOUND", "file not found")
+	}
+	file.ObjectKey = stringPtr(objectKey)
+	file.Size = fileInt64Ptr(size)
+	file.Sha256 = stringPtr(sha256)
+	file.ContentType = stringPtr(contentType)
+	file.FileName = stringPtr(fileName)
+	return file, nil
+}
+
 type fileStorageStub struct {
 	presignPutCalls int
 	presignGetCalls int
@@ -121,8 +143,8 @@ func (r *fileAccessLogRepoStub) Count(context.Context, ...listing.Option) (int32
 	return int32(len(r.items)), nil
 }
 
-func (*fileStorageStub) PutObject(context.Context, string, string, io.Reader, objectstorage.PutOptions) (*objectstorage.ObjectInfo, error) {
-	return nil, nil
+func (*fileStorageStub) PutObject(_ context.Context, bucket string, key string, _ io.Reader, _ objectstorage.PutOptions) (*objectstorage.ObjectInfo, error) {
+	return &objectstorage.ObjectInfo{Bucket: bucket, Key: key, ETag: "etag-1", Size: 5}, nil
 }
 
 func (s *fileStorageStub) DeleteObject(context.Context, string, string) error {
@@ -142,6 +164,30 @@ func (s *fileStorageStub) PresignPutObject(context.Context, string, string, obje
 
 func (*fileStorageStub) PublicURL(string, string) (string, error) {
 	return "", nil
+}
+
+func (*fileStorageStub) GetObject(context.Context, string, string) ([]byte, error) {
+	return []byte("file-content"), nil
+}
+
+func (*fileStorageStub) CreateMultipartUpload(context.Context, string, string) (string, error) {
+	return "multipart-upload-1", nil
+}
+
+func (*fileStorageStub) UploadPart(context.Context, string, string, string, int32, io.Reader, objectstorage.PutOptions) (string, error) {
+	return "part-etag", nil
+}
+
+func (*fileStorageStub) ListMultipartParts(context.Context, string, string, string) ([]objectstorage.MultipartPart, error) {
+	return []objectstorage.MultipartPart{}, nil
+}
+
+func (*fileStorageStub) CompleteMultipartUpload(context.Context, string, string, string, []objectstorage.MultipartPart) (string, error) {
+	return "complete-etag", nil
+}
+
+func (*fileStorageStub) AbortMultipartUpload(context.Context, string, string, string) error {
+	return nil
 }
 
 func (s *fileStorageStub) ResolveDefault(context.Context) (*ResolvedStorageProvider, error) {
@@ -310,5 +356,138 @@ func TestFileUsecasePresignDownloadAppendsAccessLog(t *testing.T) {
 	}
 	if accessLog.items[0].GetAction() != "download" || accessLog.items[0].GetResult() != "success" {
 		t.Fatalf("access log = %v", accessLog.items[0])
+	}
+}
+
+func TestFileUsecaseUpdateFileName(t *testing.T) {
+	t.Parallel()
+
+	repo := newFileRepoStub()
+	repo.byID[1] = &pbCore.FileObject{
+		Id:        1,
+		FileName:  stringPtr("old.txt"),
+		Bucket:    stringPtr("tenant-files"),
+		ObjectKey: stringPtr("old.txt"),
+		Status:    fileInt32Ptr(FileStatusConfirmed),
+	}
+	uc := NewFileUsecase(repo, nil, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
+
+	updated, err := uc.UpdateFileName(projectQuotaContext(), 1, "new.txt")
+	if err != nil {
+		t.Fatalf("UpdateFileName() error = %v", err)
+	}
+	if updated.GetFileName() != "new.txt" {
+		t.Fatalf("file name = %q, want new.txt", updated.GetFileName())
+	}
+	if repo.byID[1].GetObjectKey() != "old.txt" {
+		t.Fatalf("object key changed to %q, want unchanged", repo.byID[1].GetObjectKey())
+	}
+}
+
+func TestFileUsecaseUpdateFileNameRejectsEmptyName(t *testing.T) {
+	t.Parallel()
+
+	uc := NewFileUsecase(newFileRepoStub(), nil, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
+	if _, err := uc.UpdateFileName(projectQuotaContext(), 1, "  "); err == nil {
+		t.Fatal("UpdateFileName() error = nil, want empty name rejection")
+	}
+}
+
+func TestFileUsecaseReplaceContentRejectsNonLocalProvider(t *testing.T) {
+	t.Parallel()
+
+	repo := newFileRepoStub()
+	repo.byID[1] = &pbCore.FileObject{
+		Id:        1,
+		FileName:  stringPtr("confirmed.txt"),
+		Bucket:    stringPtr("tenant-files"),
+		ObjectKey: stringPtr("confirmed.txt"),
+		Provider:  stringPtr(StorageProviderTypeS3Compatible),
+		Status:    fileInt32Ptr(FileStatusConfirmed),
+	}
+	uc := NewFileUsecase(repo, nil, &fileStorageStub{providerType: StorageProviderTypeS3Compatible}, nil, log.NewStdLogger(io.Discard))
+	if _, err := uc.ReplaceContent(projectQuotaContext(), &pbCore.ReplaceFileContentRequest{Id: 1, Content: []byte("new")}); err == nil {
+		t.Fatal("ReplaceContent() error = nil, want non-local rejection")
+	}
+}
+
+func TestFileUsecaseDownloadContentLocalProvider(t *testing.T) {
+	t.Parallel()
+
+	repo := newFileRepoStub()
+	repo.byID[1] = &pbCore.FileObject{
+		Id:        1,
+		FileName:  stringPtr("image.png"),
+		Bucket:    stringPtr("tenant-files"),
+		ObjectKey: stringPtr("image.png"),
+		Provider:  stringPtr(StorageProviderTypeLocal),
+		Status:    fileInt32Ptr(FileStatusConfirmed),
+	}
+	uc := NewFileUsecase(repo, nil, &fileStorageStub{providerType: StorageProviderTypeLocal}, nil, log.NewStdLogger(io.Discard))
+
+	resp, err := uc.DownloadContent(projectQuotaContext(), 1)
+	if err != nil {
+		t.Fatalf("DownloadContent() error = %v", err)
+	}
+	if string(resp.GetContent()) != "file-content" {
+		t.Fatalf("content = %q, want file-content", string(resp.GetContent()))
+	}
+}
+
+func TestFileUsecaseDownloadContentRejectsNonLocal(t *testing.T) {
+	t.Parallel()
+
+	repo := newFileRepoStub()
+	repo.byID[1] = &pbCore.FileObject{
+		Id:        1,
+		FileName:  stringPtr("image.png"),
+		Bucket:    stringPtr("tenant-files"),
+		ObjectKey: stringPtr("image.png"),
+		Provider:  stringPtr(StorageProviderTypeS3Compatible),
+		Status:    fileInt32Ptr(FileStatusConfirmed),
+	}
+	uc := NewFileUsecase(repo, nil, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
+
+	if _, err := uc.DownloadContent(projectQuotaContext(), 1); err == nil {
+		t.Fatal("DownloadContent() error = nil, want non-local rejection")
+	}
+}
+
+func TestFileUsecaseReplaceContentUpdatesMetadataAndObject(t *testing.T) {
+	t.Parallel()
+
+	repo := newFileRepoStub()
+	repo.byID[1] = &pbCore.FileObject{
+		Id:        1,
+		FileName:  stringPtr("confirmed.txt"),
+		Bucket:    stringPtr("tenant-files"),
+		ObjectKey: stringPtr("old-key.txt"),
+		Provider:  stringPtr(StorageProviderTypeLocal),
+		Status:    fileInt32Ptr(FileStatusConfirmed),
+		Size:      fileInt64Ptr(3),
+	}
+	storage := &fileStorageStub{providerType: StorageProviderTypeLocal}
+	uc := NewFileUsecase(repo, nil, storage, nil, log.NewStdLogger(io.Discard))
+
+	updated, err := uc.ReplaceContent(projectQuotaContext(), &pbCore.ReplaceFileContentRequest{
+		Id:          1,
+		Content:     []byte("new-content"),
+		FileName:    stringPtr("renamed.txt"),
+		ContentType: stringPtr("text/plain"),
+	})
+	if err != nil {
+		t.Fatalf("ReplaceContent() error = %v", err)
+	}
+	if storage.deleteCalls != 1 {
+		t.Fatalf("deleteCalls = %d, want 1", storage.deleteCalls)
+	}
+	if updated.GetFileName() != "renamed.txt" {
+		t.Fatalf("file name = %q, want renamed.txt", updated.GetFileName())
+	}
+	if updated.GetObjectKey() == "old-key.txt" {
+		t.Fatalf("object key unchanged = %q, want new key", updated.GetObjectKey())
+	}
+	if updated.GetContentType() != "text/plain" {
+		t.Fatalf("content type = %q, want text/plain", updated.GetContentType())
 	}
 }

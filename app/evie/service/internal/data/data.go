@@ -28,9 +28,10 @@ import (
 	authnJwt "backend-service/pkg/auth/authn/jwt"
 	"backend-service/pkg/auth/loginattempt"
 	"backend-service/pkg/audit"
+	auditgrpc "backend-service/pkg/audit/grpc"
 
 	authzEngine "backend-service/pkg/auth/authz"
-	authzCasbin "backend-service/pkg/auth/authz/casbin"
+	authzgrpc "backend-service/pkg/auth/authz/grpc"
 	pkgHealth "backend-service/pkg/health"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -53,7 +54,6 @@ var ProviderSet = wire.NewSet(
 type Data struct {
 	db                    *gen.Client
 	rdb                   *redis.Client
-	authorizer            authzEngine.Authorizer
 	permissionCacheBypass sync.Map
 	authorizationCache    sync.Map
 	authorizationStats    tenantAuthorizationCacheStats
@@ -328,39 +328,34 @@ func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duratio
 	return v
 }
 
-// NewAuthorizer 创建权鉴器
-func NewAuthorizer(cfg *conf.Data, db *gen.Client, data *Data, logger log.Logger) (authzEngine.Authorizer, error) {
-	// adapter, err := entrapper.NewAdapter(cfg.Database.Driver, cfg.Database.Source)
-	// if err != nil {
-	// 	l.Fatalf("failed creating adapter: %s", err.Error())
-	// 	panic(err)
-	// }
-	// model, err := casbinmodel.NewModelFromString(authzCasbin.DefaultAbacModel)
-	// if err != nil {
-	// 	log.Fatalf("failed casbin model connection %v", err)
-	// }
-
-	if cfg == nil || cfg.Database == nil {
-		return nil, fmt.Errorf("database config is required")
+// NewAuthorizer 创建权鉴器。
+// evie 作为产品服务不维护本地 Casbin 策略，鉴权通过 gRPC 委托给技术中台（platform/admin）的
+// core.service.v1.AuthService.IsAuthorized，复用中台的租户用户权限体系。
+func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Authorizer, error) {
+	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
+		return nil, fmt.Errorf("client.grpc.addr is required for gRPC authorization delegation")
 	}
-	provider := authzCasbin.NewProvider()
-	authorizer, err := provider.NewAuthorizer(
-		context.Background(),
-		authzEngine.WithAdapterType(authzEngine.AdapterMySQL),
-		authzEngine.WithAdapterDSN(cfg.Database.Source),
-	)
-
+	authorizer, err := authzgrpc.New(context.Background(), cfg.Grpc.GetAddr())
 	if err != nil {
-		return nil, fmt.Errorf("creating authorizer: %w", err)
+		return nil, fmt.Errorf("creating gRPC authorizer: %w", err)
 	}
-	data.authorizer = authorizer
+	log.NewHelper(log.With(logger, "module", "authz/grpc")).
+		Infof("initialized gRPC authorizer: endpoint=%s", cfg.Grpc.GetAddr())
 	return authorizer, nil
 }
 
-// NewAuditClient creates a noop audit client.
-// TODO: when platform gRPC endpoint is configured, switch to:
-//   auditGrpc "backend-service/pkg/audit/grpc"
-//   auditClient, _ := auditGrpc.New(ctx, cfg.Client.Grpc.Addr)
-func NewAuditClient() audit.Client {
-	return audit.NoopClient{}
+// NewAuditClient 创建审计客户端。
+// evie 的操作审计通过 gRPC 委托给技术中台（platform/admin）的 OperationLogService，
+// 复用中台的 append-only 审计与脱敏能力。
+func NewAuditClient(cfg *conf.Client, logger log.Logger) (audit.Client, error) {
+	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
+		return nil, fmt.Errorf("client.grpc.addr is required for gRPC audit delegation")
+	}
+	client, err := auditgrpc.New(context.Background(), cfg.Grpc.GetAddr())
+	if err != nil {
+		return nil, fmt.Errorf("creating gRPC audit client: %w", err)
+	}
+	log.NewHelper(log.With(logger, "module", "audit/grpc")).
+		Infof("initialized gRPC audit client: endpoint=%s", cfg.Grpc.GetAddr())
+	return client, nil
 }

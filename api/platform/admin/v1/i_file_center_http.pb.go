@@ -20,36 +20,57 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationFileCenterServiceAbortFileUpload = "/platform.admin.v1.FileCenterService/AbortFileUpload"
+const OperationFileCenterServiceCompleteFileUpload = "/platform.admin.v1.FileCenterService/CompleteFileUpload"
 const OperationFileCenterServiceConfirmFileUpload = "/platform.admin.v1.FileCenterService/ConfirmFileUpload"
 const OperationFileCenterServiceCreateFileUploadSession = "/platform.admin.v1.FileCenterService/CreateFileUploadSession"
 const OperationFileCenterServiceDeleteFileObject = "/platform.admin.v1.FileCenterService/DeleteFileObject"
+const OperationFileCenterServiceDownloadFileContent = "/platform.admin.v1.FileCenterService/DownloadFileContent"
 const OperationFileCenterServiceGetFileObject = "/platform.admin.v1.FileCenterService/GetFileObject"
 const OperationFileCenterServiceListFileAccessLogs = "/platform.admin.v1.FileCenterService/ListFileAccessLogs"
 const OperationFileCenterServiceListFileObjects = "/platform.admin.v1.FileCenterService/ListFileObjects"
+const OperationFileCenterServiceListFileParts = "/platform.admin.v1.FileCenterService/ListFileParts"
 const OperationFileCenterServicePresignFileDownload = "/platform.admin.v1.FileCenterService/PresignFileDownload"
+const OperationFileCenterServiceReplaceFileContent = "/platform.admin.v1.FileCenterService/ReplaceFileContent"
+const OperationFileCenterServiceUpdateFileObject = "/platform.admin.v1.FileCenterService/UpdateFileObject"
 const OperationFileCenterServiceUploadFileContent = "/platform.admin.v1.FileCenterService/UploadFileContent"
+const OperationFileCenterServiceUploadFilePart = "/platform.admin.v1.FileCenterService/UploadFilePart"
 
 type FileCenterServiceHTTPServer interface {
+	AbortFileUpload(context.Context, *v1.AbortFileUploadRequest) (*v1.AbortFileUploadResponse, error)
+	CompleteFileUpload(context.Context, *v1.CompleteFileUploadRequest) (*v1.CompleteFileUploadResponse, error)
 	ConfirmFileUpload(context.Context, *v1.ConfirmFileUploadRequest) (*v1.ConfirmFileUploadResponse, error)
 	CreateFileUploadSession(context.Context, *v1.CreateFileUploadSessionRequest) (*v1.CreateFileUploadSessionResponse, error)
 	DeleteFileObject(context.Context, *v1.DeleteFileObjectRequest) (*v1.DeleteFileObjectResponse, error)
+	DownloadFileContent(context.Context, *v1.DownloadFileContentRequest) (*v1.DownloadFileContentResponse, error)
 	GetFileObject(context.Context, *v1.GetFileObjectRequest) (*v1.FileObject, error)
 	ListFileAccessLogs(context.Context, *v1.ListFileAccessLogsRequest) (*v1.ListFileAccessLogsResponse, error)
 	ListFileObjects(context.Context, *v1.ListFileObjectsRequest) (*v1.ListFileObjectsResponse, error)
+	ListFileParts(context.Context, *v1.ListFilePartsRequest) (*v1.ListFilePartsResponse, error)
 	PresignFileDownload(context.Context, *v1.PresignFileDownloadRequest) (*v1.PresignFileDownloadResponse, error)
+	ReplaceFileContent(context.Context, *v1.ReplaceFileContentRequest) (*v1.ReplaceFileContentResponse, error)
+	UpdateFileObject(context.Context, *v1.UpdateFileObjectRequest) (*v1.UpdateFileObjectResponse, error)
 	UploadFileContent(context.Context, *v1.UploadFileContentRequest) (*v1.UploadFileContentResponse, error)
+	UploadFilePart(context.Context, *v1.UploadFilePartRequest) (*v1.UploadFilePartResponse, error)
 }
 
 func RegisterFileCenterServiceHTTPServer(s *http.Server, srv FileCenterServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/admin/v1/files/upload-sessions", _FileCenterService_CreateFileUploadSession0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}:content", _FileCenterService_UploadFileContent0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}:confirm", _FileCenterService_ConfirmFileUpload0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}/content", _FileCenterService_UploadFileContent0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}/confirm", _FileCenterService_ConfirmFileUpload0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files/{id}", _FileCenterService_GetFileObject0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files", _FileCenterService_ListFileObjects0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files/{file_id}/access-logs", _FileCenterService_ListFileAccessLogs0_HTTP_Handler(srv))
-	r.GET("/admin/v1/files/{id}:download-url", _FileCenterService_PresignFileDownload0_HTTP_Handler(srv))
+	r.GET("/admin/v1/files/{id}/download-url", _FileCenterService_PresignFileDownload0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/files/{id}", _FileCenterService_DeleteFileObject0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/files/{id}", _FileCenterService_UpdateFileObject0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}/replace", _FileCenterService_ReplaceFileContent0_HTTP_Handler(srv))
+	r.GET("/admin/v1/files/{id}/download", _FileCenterService_DownloadFileContent0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/files/{id}/parts", _FileCenterService_UploadFilePart0_HTTP_Handler(srv))
+	r.GET("/admin/v1/files/{id}/parts", _FileCenterService_ListFileParts0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}/complete", _FileCenterService_CompleteFileUpload0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}/abort", _FileCenterService_AbortFileUpload0_HTTP_Handler(srv))
 }
 
 func _FileCenterService_CreateFileUploadSession0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
@@ -231,15 +252,191 @@ func _FileCenterService_DeleteFileObject0_HTTP_Handler(srv FileCenterServiceHTTP
 	}
 }
 
+func _FileCenterService_UpdateFileObject0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UpdateFileObjectRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceUpdateFileObject)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateFileObject(ctx, req.(*v1.UpdateFileObjectRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UpdateFileObjectResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_ReplaceFileContent0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ReplaceFileContentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceReplaceFileContent)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ReplaceFileContent(ctx, req.(*v1.ReplaceFileContentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ReplaceFileContentResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_DownloadFileContent0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.DownloadFileContentRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceDownloadFileContent)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DownloadFileContent(ctx, req.(*v1.DownloadFileContentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.DownloadFileContentResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_UploadFilePart0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.UploadFilePartRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceUploadFilePart)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UploadFilePart(ctx, req.(*v1.UploadFilePartRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.UploadFilePartResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_ListFileParts0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListFilePartsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceListFileParts)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListFileParts(ctx, req.(*v1.ListFilePartsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListFilePartsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_CompleteFileUpload0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.CompleteFileUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceCompleteFileUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CompleteFileUpload(ctx, req.(*v1.CompleteFileUploadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.CompleteFileUploadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FileCenterService_AbortFileUpload0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.AbortFileUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFileCenterServiceAbortFileUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AbortFileUpload(ctx, req.(*v1.AbortFileUploadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.AbortFileUploadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type FileCenterServiceHTTPClient interface {
+	AbortFileUpload(ctx context.Context, req *v1.AbortFileUploadRequest, opts ...http.CallOption) (rsp *v1.AbortFileUploadResponse, err error)
+	CompleteFileUpload(ctx context.Context, req *v1.CompleteFileUploadRequest, opts ...http.CallOption) (rsp *v1.CompleteFileUploadResponse, err error)
 	ConfirmFileUpload(ctx context.Context, req *v1.ConfirmFileUploadRequest, opts ...http.CallOption) (rsp *v1.ConfirmFileUploadResponse, err error)
 	CreateFileUploadSession(ctx context.Context, req *v1.CreateFileUploadSessionRequest, opts ...http.CallOption) (rsp *v1.CreateFileUploadSessionResponse, err error)
 	DeleteFileObject(ctx context.Context, req *v1.DeleteFileObjectRequest, opts ...http.CallOption) (rsp *v1.DeleteFileObjectResponse, err error)
+	DownloadFileContent(ctx context.Context, req *v1.DownloadFileContentRequest, opts ...http.CallOption) (rsp *v1.DownloadFileContentResponse, err error)
 	GetFileObject(ctx context.Context, req *v1.GetFileObjectRequest, opts ...http.CallOption) (rsp *v1.FileObject, err error)
 	ListFileAccessLogs(ctx context.Context, req *v1.ListFileAccessLogsRequest, opts ...http.CallOption) (rsp *v1.ListFileAccessLogsResponse, err error)
 	ListFileObjects(ctx context.Context, req *v1.ListFileObjectsRequest, opts ...http.CallOption) (rsp *v1.ListFileObjectsResponse, err error)
+	ListFileParts(ctx context.Context, req *v1.ListFilePartsRequest, opts ...http.CallOption) (rsp *v1.ListFilePartsResponse, err error)
 	PresignFileDownload(ctx context.Context, req *v1.PresignFileDownloadRequest, opts ...http.CallOption) (rsp *v1.PresignFileDownloadResponse, err error)
+	ReplaceFileContent(ctx context.Context, req *v1.ReplaceFileContentRequest, opts ...http.CallOption) (rsp *v1.ReplaceFileContentResponse, err error)
+	UpdateFileObject(ctx context.Context, req *v1.UpdateFileObjectRequest, opts ...http.CallOption) (rsp *v1.UpdateFileObjectResponse, err error)
 	UploadFileContent(ctx context.Context, req *v1.UploadFileContentRequest, opts ...http.CallOption) (rsp *v1.UploadFileContentResponse, err error)
+	UploadFilePart(ctx context.Context, req *v1.UploadFilePartRequest, opts ...http.CallOption) (rsp *v1.UploadFilePartResponse, err error)
 }
 
 type FileCenterServiceHTTPClientImpl struct {
@@ -250,9 +447,35 @@ func NewFileCenterServiceHTTPClient(client *http.Client) FileCenterServiceHTTPCl
 	return &FileCenterServiceHTTPClientImpl{client}
 }
 
+func (c *FileCenterServiceHTTPClientImpl) AbortFileUpload(ctx context.Context, in *v1.AbortFileUploadRequest, opts ...http.CallOption) (*v1.AbortFileUploadResponse, error) {
+	var out v1.AbortFileUploadResponse
+	pattern := "/admin/v1/files/{id}/abort"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFileCenterServiceAbortFileUpload))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *FileCenterServiceHTTPClientImpl) CompleteFileUpload(ctx context.Context, in *v1.CompleteFileUploadRequest, opts ...http.CallOption) (*v1.CompleteFileUploadResponse, error) {
+	var out v1.CompleteFileUploadResponse
+	pattern := "/admin/v1/files/{id}/complete"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFileCenterServiceCompleteFileUpload))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *FileCenterServiceHTTPClientImpl) ConfirmFileUpload(ctx context.Context, in *v1.ConfirmFileUploadRequest, opts ...http.CallOption) (*v1.ConfirmFileUploadResponse, error) {
 	var out v1.ConfirmFileUploadResponse
-	pattern := "/admin/v1/files/{id}:confirm"
+	pattern := "/admin/v1/files/{id}/confirm"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceConfirmFileUpload))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -283,6 +506,19 @@ func (c *FileCenterServiceHTTPClientImpl) DeleteFileObject(ctx context.Context, 
 	opts = append(opts, http.Operation(OperationFileCenterServiceDeleteFileObject))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *FileCenterServiceHTTPClientImpl) DownloadFileContent(ctx context.Context, in *v1.DownloadFileContentRequest, opts ...http.CallOption) (*v1.DownloadFileContentResponse, error) {
+	var out v1.DownloadFileContentResponse
+	pattern := "/admin/v1/files/{id}/download"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationFileCenterServiceDownloadFileContent))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -328,9 +564,22 @@ func (c *FileCenterServiceHTTPClientImpl) ListFileObjects(ctx context.Context, i
 	return &out, nil
 }
 
+func (c *FileCenterServiceHTTPClientImpl) ListFileParts(ctx context.Context, in *v1.ListFilePartsRequest, opts ...http.CallOption) (*v1.ListFilePartsResponse, error) {
+	var out v1.ListFilePartsResponse
+	pattern := "/admin/v1/files/{id}/parts"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationFileCenterServiceListFileParts))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *FileCenterServiceHTTPClientImpl) PresignFileDownload(ctx context.Context, in *v1.PresignFileDownloadRequest, opts ...http.CallOption) (*v1.PresignFileDownloadResponse, error) {
 	var out v1.PresignFileDownloadResponse
-	pattern := "/admin/v1/files/{id}:download-url"
+	pattern := "/admin/v1/files/{id}/download-url"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationFileCenterServicePresignFileDownload))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -341,13 +590,52 @@ func (c *FileCenterServiceHTTPClientImpl) PresignFileDownload(ctx context.Contex
 	return &out, nil
 }
 
+func (c *FileCenterServiceHTTPClientImpl) ReplaceFileContent(ctx context.Context, in *v1.ReplaceFileContentRequest, opts ...http.CallOption) (*v1.ReplaceFileContentResponse, error) {
+	var out v1.ReplaceFileContentResponse
+	pattern := "/admin/v1/files/{id}/replace"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFileCenterServiceReplaceFileContent))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *FileCenterServiceHTTPClientImpl) UpdateFileObject(ctx context.Context, in *v1.UpdateFileObjectRequest, opts ...http.CallOption) (*v1.UpdateFileObjectResponse, error) {
+	var out v1.UpdateFileObjectResponse
+	pattern := "/admin/v1/files/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFileCenterServiceUpdateFileObject))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *FileCenterServiceHTTPClientImpl) UploadFileContent(ctx context.Context, in *v1.UploadFileContentRequest, opts ...http.CallOption) (*v1.UploadFileContentResponse, error) {
 	var out v1.UploadFileContentResponse
-	pattern := "/admin/v1/files/{id}:content"
+	pattern := "/admin/v1/files/{id}/content"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceUploadFileContent))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *FileCenterServiceHTTPClientImpl) UploadFilePart(ctx context.Context, in *v1.UploadFilePartRequest, opts ...http.CallOption) (*v1.UploadFilePartResponse, error) {
+	var out v1.UploadFilePartResponse
+	pattern := "/admin/v1/files/{id}/parts"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFileCenterServiceUploadFilePart))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

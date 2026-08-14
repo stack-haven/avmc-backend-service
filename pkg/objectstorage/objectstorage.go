@@ -41,6 +41,12 @@ type ObjectInfo struct {
 	Size   int64
 }
 
+// MultipartPart 分片上传的分片信息
+type MultipartPart struct {
+	PartNumber int32
+	ETag       string
+}
+
 // ───────────────────────────── Client Interface ─────────────────────────────
 
 // Client 对象存储客户端接口
@@ -50,6 +56,26 @@ type Client interface {
 	PresignGetObject(context.Context, string, string, PresignOptions) (string, error)
 	PresignPutObject(context.Context, string, string, PresignOptions) (string, error)
 	PublicURL(string, string) (string, error)
+	// GetObject 读取对象完整内容（后端代理下载用）。
+	// 对象存储渠道若未实现，返回 ErrUnsupportedProvider。
+	GetObject(context.Context, string, string) ([]byte, error)
+
+	// CreateMultipartUpload 初始化分片上传会话，返回 uploadID。
+	// 本地渠道用临时目录承载分片；对象存储渠道预留为原生 Multipart Upload。
+	CreateMultipartUpload(context.Context, string, string) (string, error)
+
+	// UploadPart 上传单个分片，返回分片 ETag。
+	UploadPart(context.Context, string, string, string, int32, io.Reader, PutOptions) (string, error)
+
+	// ListMultipartParts 查询已上传分片（断点续传用）。
+	// 本地渠道扫描临时目录；对象存储预留为原生 ListParts。
+	ListMultipartParts(context.Context, string, string, string) ([]MultipartPart, error)
+
+	// CompleteMultipartUpload 合并所有分片，返回最终对象 ETag。
+	CompleteMultipartUpload(context.Context, string, string, string, []MultipartPart) (string, error)
+
+	// AbortMultipartUpload 取消分片上传并清理已上传分片。
+	AbortMultipartUpload(context.Context, string, string, string) error
 }
 
 // ───────────────────────────── 供应商工厂 ─────────────────────────────

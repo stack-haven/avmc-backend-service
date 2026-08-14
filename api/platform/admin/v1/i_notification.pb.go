@@ -27,14 +27,15 @@ var File_platform_admin_v1_i_notification_proto protoreflect.FileDescriptor
 
 const file_platform_admin_v1_i_notification_proto_rawDesc = "" +
 	"\n" +
-	"&platform/admin/v1/i_notification.proto\x12\x11platform.admin.v1\x1a\"core/service/v1/notification.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto2\xcc\x0f\n" +
+	"&platform/admin/v1/i_notification.proto\x12\x11platform.admin.v1\x1a\"core/service/v1/notification.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto2\xdf\x10\n" +
 	"\x13NotificationService\x12\xac\x01\n" +
 	"\x19ListNotificationTemplates\x121.core.service.v1.ListNotificationTemplatesRequest\x1a2.core.service.v1.ListNotificationTemplatesResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /admin/v1/notification-templates\x12\xa0\x01\n" +
 	"\x17GetNotificationTemplate\x12/.core.service.v1.GetNotificationTemplateRequest\x1a%.core.service.v1.NotificationTemplate\"-\x82\xd3\xe4\x93\x02'\x12%/admin/v1/notification-templates/{id}\x12\xab\x01\n" +
 	"\x1aCreateNotificationTemplate\x122.core.service.v1.CreateNotificationTemplateRequest\x1a%.core.service.v1.NotificationTemplate\"2\x82\xd3\xe4\x93\x02,:\btemplate\" /admin/v1/notification-templates\x12\xb0\x01\n" +
 	"\x1aUpdateNotificationTemplate\x122.core.service.v1.UpdateNotificationTemplateRequest\x1a%.core.service.v1.NotificationTemplate\"7\x82\xd3\xe4\x93\x021:\btemplate\x1a%/admin/v1/notification-templates/{id}\x12\x97\x01\n" +
 	"\x1aDeleteNotificationTemplate\x122.core.service.v1.DeleteNotificationTemplateRequest\x1a\x16.google.protobuf.Empty\"-\x82\xd3\xe4\x93\x02'*%/admin/v1/notification-templates/{id}\x12\xa6\x01\n" +
-	"\x15SendInAppNotification\x12-.core.service.v1.SendInAppNotificationRequest\x1a..core.service.v1.SendInAppNotificationResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/admin/v1/notifications:send-in-app\x12\xa8\x01\n" +
+	"\x15SendInAppNotification\x12-.core.service.v1.SendInAppNotificationRequest\x1a..core.service.v1.SendInAppNotificationResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/admin/v1/notifications:send-in-app\x12\x90\x01\n" +
+	"\x10SendNotification\x12(.core.service.v1.SendNotificationRequest\x1a).core.service.v1.SendNotificationResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/notifications:send\x12\xa8\x01\n" +
 	"\x18ListNotificationMessages\x120.core.service.v1.ListNotificationMessagesRequest\x1a1.core.service.v1.ListNotificationMessagesResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/admin/v1/notification-messages\x12\x9c\x01\n" +
 	"\x16GetNotificationMessage\x12..core.service.v1.GetNotificationMessageRequest\x1a$.core.service.v1.NotificationMessage\",\x82\xd3\xe4\x93\x02&\x12$/admin/v1/notification-messages/{id}\x12\x9e\x01\n" +
 	"\x13ListMyNotifications\x120.core.service.v1.ListNotificationMessagesRequest\x1a1.core.service.v1.ListNotificationMessagesResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/admin/v1/my/notifications\x12\xb6\x01\n" +
@@ -50,18 +51,20 @@ var file_platform_admin_v1_i_notification_proto_goTypes = []any{
 	(*v1.UpdateNotificationTemplateRequest)(nil),  // 3: core.service.v1.UpdateNotificationTemplateRequest
 	(*v1.DeleteNotificationTemplateRequest)(nil),  // 4: core.service.v1.DeleteNotificationTemplateRequest
 	(*v1.SendInAppNotificationRequest)(nil),       // 5: core.service.v1.SendInAppNotificationRequest
-	(*v1.ListNotificationMessagesRequest)(nil),    // 6: core.service.v1.ListNotificationMessagesRequest
-	(*v1.GetNotificationMessageRequest)(nil),      // 7: core.service.v1.GetNotificationMessageRequest
-	(*v1.CountMyUnreadNotificationsRequest)(nil),  // 8: core.service.v1.CountMyUnreadNotificationsRequest
-	(*v1.MarkNotificationReadRequest)(nil),        // 9: core.service.v1.MarkNotificationReadRequest
-	(*v1.MarkNotificationsReadRequest)(nil),       // 10: core.service.v1.MarkNotificationsReadRequest
-	(*v1.ListNotificationTemplatesResponse)(nil),  // 11: core.service.v1.ListNotificationTemplatesResponse
-	(*v1.NotificationTemplate)(nil),               // 12: core.service.v1.NotificationTemplate
-	(*emptypb.Empty)(nil),                         // 13: google.protobuf.Empty
-	(*v1.SendInAppNotificationResponse)(nil),      // 14: core.service.v1.SendInAppNotificationResponse
-	(*v1.ListNotificationMessagesResponse)(nil),   // 15: core.service.v1.ListNotificationMessagesResponse
-	(*v1.NotificationMessage)(nil),                // 16: core.service.v1.NotificationMessage
-	(*v1.CountMyUnreadNotificationsResponse)(nil), // 17: core.service.v1.CountMyUnreadNotificationsResponse
+	(*v1.SendNotificationRequest)(nil),            // 6: core.service.v1.SendNotificationRequest
+	(*v1.ListNotificationMessagesRequest)(nil),    // 7: core.service.v1.ListNotificationMessagesRequest
+	(*v1.GetNotificationMessageRequest)(nil),      // 8: core.service.v1.GetNotificationMessageRequest
+	(*v1.CountMyUnreadNotificationsRequest)(nil),  // 9: core.service.v1.CountMyUnreadNotificationsRequest
+	(*v1.MarkNotificationReadRequest)(nil),        // 10: core.service.v1.MarkNotificationReadRequest
+	(*v1.MarkNotificationsReadRequest)(nil),       // 11: core.service.v1.MarkNotificationsReadRequest
+	(*v1.ListNotificationTemplatesResponse)(nil),  // 12: core.service.v1.ListNotificationTemplatesResponse
+	(*v1.NotificationTemplate)(nil),               // 13: core.service.v1.NotificationTemplate
+	(*emptypb.Empty)(nil),                         // 14: google.protobuf.Empty
+	(*v1.SendInAppNotificationResponse)(nil),      // 15: core.service.v1.SendInAppNotificationResponse
+	(*v1.SendNotificationResponse)(nil),           // 16: core.service.v1.SendNotificationResponse
+	(*v1.ListNotificationMessagesResponse)(nil),   // 17: core.service.v1.ListNotificationMessagesResponse
+	(*v1.NotificationMessage)(nil),                // 18: core.service.v1.NotificationMessage
+	(*v1.CountMyUnreadNotificationsResponse)(nil), // 19: core.service.v1.CountMyUnreadNotificationsResponse
 }
 var file_platform_admin_v1_i_notification_proto_depIdxs = []int32{
 	0,  // 0: platform.admin.v1.NotificationService.ListNotificationTemplates:input_type -> core.service.v1.ListNotificationTemplatesRequest
@@ -70,26 +73,28 @@ var file_platform_admin_v1_i_notification_proto_depIdxs = []int32{
 	3,  // 3: platform.admin.v1.NotificationService.UpdateNotificationTemplate:input_type -> core.service.v1.UpdateNotificationTemplateRequest
 	4,  // 4: platform.admin.v1.NotificationService.DeleteNotificationTemplate:input_type -> core.service.v1.DeleteNotificationTemplateRequest
 	5,  // 5: platform.admin.v1.NotificationService.SendInAppNotification:input_type -> core.service.v1.SendInAppNotificationRequest
-	6,  // 6: platform.admin.v1.NotificationService.ListNotificationMessages:input_type -> core.service.v1.ListNotificationMessagesRequest
-	7,  // 7: platform.admin.v1.NotificationService.GetNotificationMessage:input_type -> core.service.v1.GetNotificationMessageRequest
-	6,  // 8: platform.admin.v1.NotificationService.ListMyNotifications:input_type -> core.service.v1.ListNotificationMessagesRequest
-	8,  // 9: platform.admin.v1.NotificationService.CountMyUnreadNotifications:input_type -> core.service.v1.CountMyUnreadNotificationsRequest
-	9,  // 10: platform.admin.v1.NotificationService.MarkNotificationRead:input_type -> core.service.v1.MarkNotificationReadRequest
-	10, // 11: platform.admin.v1.NotificationService.MarkNotificationsRead:input_type -> core.service.v1.MarkNotificationsReadRequest
-	11, // 12: platform.admin.v1.NotificationService.ListNotificationTemplates:output_type -> core.service.v1.ListNotificationTemplatesResponse
-	12, // 13: platform.admin.v1.NotificationService.GetNotificationTemplate:output_type -> core.service.v1.NotificationTemplate
-	12, // 14: platform.admin.v1.NotificationService.CreateNotificationTemplate:output_type -> core.service.v1.NotificationTemplate
-	12, // 15: platform.admin.v1.NotificationService.UpdateNotificationTemplate:output_type -> core.service.v1.NotificationTemplate
-	13, // 16: platform.admin.v1.NotificationService.DeleteNotificationTemplate:output_type -> google.protobuf.Empty
-	14, // 17: platform.admin.v1.NotificationService.SendInAppNotification:output_type -> core.service.v1.SendInAppNotificationResponse
-	15, // 18: platform.admin.v1.NotificationService.ListNotificationMessages:output_type -> core.service.v1.ListNotificationMessagesResponse
-	16, // 19: platform.admin.v1.NotificationService.GetNotificationMessage:output_type -> core.service.v1.NotificationMessage
-	15, // 20: platform.admin.v1.NotificationService.ListMyNotifications:output_type -> core.service.v1.ListNotificationMessagesResponse
-	17, // 21: platform.admin.v1.NotificationService.CountMyUnreadNotifications:output_type -> core.service.v1.CountMyUnreadNotificationsResponse
-	13, // 22: platform.admin.v1.NotificationService.MarkNotificationRead:output_type -> google.protobuf.Empty
-	13, // 23: platform.admin.v1.NotificationService.MarkNotificationsRead:output_type -> google.protobuf.Empty
-	12, // [12:24] is the sub-list for method output_type
-	0,  // [0:12] is the sub-list for method input_type
+	6,  // 6: platform.admin.v1.NotificationService.SendNotification:input_type -> core.service.v1.SendNotificationRequest
+	7,  // 7: platform.admin.v1.NotificationService.ListNotificationMessages:input_type -> core.service.v1.ListNotificationMessagesRequest
+	8,  // 8: platform.admin.v1.NotificationService.GetNotificationMessage:input_type -> core.service.v1.GetNotificationMessageRequest
+	7,  // 9: platform.admin.v1.NotificationService.ListMyNotifications:input_type -> core.service.v1.ListNotificationMessagesRequest
+	9,  // 10: platform.admin.v1.NotificationService.CountMyUnreadNotifications:input_type -> core.service.v1.CountMyUnreadNotificationsRequest
+	10, // 11: platform.admin.v1.NotificationService.MarkNotificationRead:input_type -> core.service.v1.MarkNotificationReadRequest
+	11, // 12: platform.admin.v1.NotificationService.MarkNotificationsRead:input_type -> core.service.v1.MarkNotificationsReadRequest
+	12, // 13: platform.admin.v1.NotificationService.ListNotificationTemplates:output_type -> core.service.v1.ListNotificationTemplatesResponse
+	13, // 14: platform.admin.v1.NotificationService.GetNotificationTemplate:output_type -> core.service.v1.NotificationTemplate
+	13, // 15: platform.admin.v1.NotificationService.CreateNotificationTemplate:output_type -> core.service.v1.NotificationTemplate
+	13, // 16: platform.admin.v1.NotificationService.UpdateNotificationTemplate:output_type -> core.service.v1.NotificationTemplate
+	14, // 17: platform.admin.v1.NotificationService.DeleteNotificationTemplate:output_type -> google.protobuf.Empty
+	15, // 18: platform.admin.v1.NotificationService.SendInAppNotification:output_type -> core.service.v1.SendInAppNotificationResponse
+	16, // 19: platform.admin.v1.NotificationService.SendNotification:output_type -> core.service.v1.SendNotificationResponse
+	17, // 20: platform.admin.v1.NotificationService.ListNotificationMessages:output_type -> core.service.v1.ListNotificationMessagesResponse
+	18, // 21: platform.admin.v1.NotificationService.GetNotificationMessage:output_type -> core.service.v1.NotificationMessage
+	17, // 22: platform.admin.v1.NotificationService.ListMyNotifications:output_type -> core.service.v1.ListNotificationMessagesResponse
+	19, // 23: platform.admin.v1.NotificationService.CountMyUnreadNotifications:output_type -> core.service.v1.CountMyUnreadNotificationsResponse
+	14, // 24: platform.admin.v1.NotificationService.MarkNotificationRead:output_type -> google.protobuf.Empty
+	14, // 25: platform.admin.v1.NotificationService.MarkNotificationsRead:output_type -> google.protobuf.Empty
+	13, // [13:26] is the sub-list for method output_type
+	0,  // [0:13] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

@@ -32,6 +32,18 @@ func (f DeptFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DeptMutation", m)
 }
 
+// The DeviceFunc type is an adapter to allow the use of ordinary
+// function as Device mutator.
+type DeviceFunc func(context.Context, *gen.DeviceMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeviceFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DeviceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DeviceMutation", m)
+}
+
 // The DictionaryItemFunc type is an adapter to allow the use of ordinary
 // function as DictionaryItem mutator.
 type DictionaryItemFunc func(context.Context, *gen.DictionaryItemMutation) (gen.Value, error)
@@ -114,6 +126,18 @@ func (f NotificationMessageFunc) Mutate(ctx context.Context, m gen.Mutation) (ge
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.NotificationMessageMutation", m)
+}
+
+// The NotificationProviderFunc type is an adapter to allow the use of ordinary
+// function as NotificationProvider mutator.
+type NotificationProviderFunc func(context.Context, *gen.NotificationProviderMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NotificationProviderFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.NotificationProviderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.NotificationProviderMutation", m)
 }
 
 // The NotificationTemplateFunc type is an adapter to allow the use of ordinary

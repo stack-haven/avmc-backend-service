@@ -61,6 +61,8 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	storageConfig *service.StorageConfigService,
 	fileCenter *service.FileCenterServiceService,
 	notification *service.NotificationServiceService,
+	notificationProvider *service.NotificationProviderServiceService,
+	device *service.DeviceServiceService,
 	asyncTask *service.AsyncTaskServiceService,
 ) (*http.Server, error) {
 	if c == nil || c.Http == nil {
@@ -111,6 +113,8 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterStorageConfigServiceHTTPServer(srv, storageConfig)
 	v1.RegisterFileCenterServiceHTTPServer(srv, fileCenter)
 	v1.RegisterNotificationServiceHTTPServer(srv, notification)
+	v1.RegisterNotificationProviderServiceHTTPServer(srv, notificationProvider)
+	v1.RegisterDeviceServiceHTTPServer(srv, device)
 	v1.RegisterAsyncTaskServiceHTTPServer(srv, asyncTask)
 	if c.GetHttp().GetEnableSwagger() {
 		allFS := nethttp.FS(assets.OpenAPIData)

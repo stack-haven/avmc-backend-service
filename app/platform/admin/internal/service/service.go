@@ -21,7 +21,10 @@ var ProviderSet = wire.NewSet(
 	NewStorageProviderServiceService,
 	NewFileCenterServiceService,
 	NewNotificationServiceService,
+	NewNotificationProviderServiceService,
+	NewDeviceServiceService,
 	NewAsyncTaskServiceService,
 	NewWebhookService,
 	NewStorageConfigService,
+	NewAuthzService,
 )

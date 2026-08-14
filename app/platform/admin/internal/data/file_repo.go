@@ -51,6 +51,9 @@ func fileObjectToProto(row *gen.FileObject) *pbCore.FileObject {
 		UpdatedAt:       convert.TimeValueToString(&row.UpdatedAt, time.DateTime),
 		DeletedAt:       convert.TimeValueToString(row.DeletedAt, time.DateTime),
 		UploadExpiresAt: convert.TimeValueToString(&row.UploadExpiresAt, time.DateTime),
+		UploadId:        &row.UploadID,
+		PartSize:        &row.PartSize,
+		TotalParts:      &row.TotalParts,
 	}
 }
 
@@ -75,6 +78,9 @@ func (r *fileRepo) CreateUploadSession(ctx context.Context, file *pbCore.FileObj
 		SetBusinessID(file.GetBusinessId()).
 		SetVisibility(file.GetVisibility()).
 		SetStatus(biz.FileStatusPending).
+		SetUploadID(file.GetUploadId()).
+		SetPartSize(file.GetPartSize()).
+		SetTotalParts(file.GetTotalParts()).
 		SetUploadExpiresAt(expiresAt)
 	if idempotencyKey != "" {
 		builder.SetIdempotencyKey(idempotencyKey)
@@ -203,4 +209,41 @@ func (r *fileRepo) Delete(ctx context.Context, id uint32) error {
 		return pb.ErrorFileNotFound("文件不存在")
 	}
 	return err
+}
+
+func (r *fileRepo) UpdateFileName(ctx context.Context, id uint32, fileName string) (*pbCore.FileObject, error) {
+	if _, err := r.RequireTenantID(ctx); err != nil {
+		return nil, err
+	}
+	row, err := r.Data.DB(ctx).FileObject.UpdateOneID(id).
+		SetFileName(fileName).
+		Save(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorFileNotFound("文件不存在")
+		}
+		return nil, err
+	}
+	return fileObjectToProto(row), nil
+}
+
+func (r *fileRepo) UpdateAfterReplace(ctx context.Context, id uint32, objectKey string, size int64, sha256 string, etag string, contentType string, fileName string) (*pbCore.FileObject, error) {
+	if _, err := r.RequireTenantID(ctx); err != nil {
+		return nil, err
+	}
+	row, err := r.Data.DB(ctx).FileObject.UpdateOneID(id).
+		SetObjectKey(objectKey).
+		SetSize(size).
+		SetSha256(sha256).
+		SetEtag(etag).
+		SetContentType(contentType).
+		SetFileName(fileName).
+		Save(ctx)
+	if err != nil {
+		if gen.IsNotFound(err) {
+			return nil, pb.ErrorFileNotFound("文件不存在")
+		}
+		return nil, err
+	}
+	return fileObjectToProto(row), nil
 }

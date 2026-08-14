@@ -1,12 +1,229 @@
 package authzpolicy
 
 import (
+	"context"
+	"strings"
+
 	v1 "backend-service/api/platform/admin/v1"
+	"backend-service/pkg/auth/authz"
 )
 
+type Operation struct {
+	Object     authz.Object
+	HTTPAction authz.Action
+	GRPCAction authz.Action
+}
+
+func ProtectedOperations() []Operation {
+	return []Operation{
+		op(v1.OperationAuthServiceCodes, "GET"),
+		op(v1.OperationAuthServiceLogout, "POST"),
+		op(v1.OperationAuthServiceMenus, "GET"),
+		op(v1.OperationAuthServiceProfile, "GET"),
+		op(v1.OperationAuthServiceVbenProfile, "GET"),
+		op(v1.OperationAuthServiceLoginByEmail, "POST"),
+		op(v1.OperationAuthServiceLoginByPhoneCode, "POST"),
+		op(v1.OperationAuthServiceLoginByUsername, "POST"),
+		op(v1.OperationAuthServiceLoginPassword, "POST"),
+		op(v1.OperationAuthServiceRefreshToken, "POST"),
+		op(v1.OperationTenantServiceCreateTenant, "POST"),
+		op(v1.OperationTenantServiceDeleteTenant, "DELETE"),
+		op(v1.OperationTenantServiceGetTenant, "GET"),
+		op(v1.OperationTenantServiceListTenants, "GET"),
+		op(v1.OperationTenantServiceListTenantAdmins, "GET"),
+		op(v1.OperationTenantServiceListTenantSimples, "GET"),
+		op(v1.OperationTenantServiceResetTenantAdminPassword, "POST"),
+		op(v1.OperationTenantServiceUpdateTenant, "PUT"),
+		op(v1.OperationTenantServiceUpdateTenantAdmin, "PUT"),
+		op(v1.OperationTenantServiceUpdateTenantLifecycle, "PUT"),
+		op(v1.OperationUserServiceCreateUser, "POST"),
+		op(v1.OperationUserServiceDeleteUser, "DELETE"),
+		op(v1.OperationUserServiceGetUser, "GET"),
+		op(v1.OperationUserServiceListUsers, "GET"),
+		op(v1.OperationUserServiceListUsersSimple, "GET"),
+		op(v1.OperationUserServiceUpdateUser, "PUT"),
+		op(v1.OperationUserServiceUpdateUserByStatus, "PUT"),
+		op(v1.OperationDeptServiceCreateDept, "POST"),
+		op(v1.OperationDeptServiceDeleteDept, "DELETE"),
+		op(v1.OperationDeptServiceGetDept, "GET"),
+		op(v1.OperationDeptServiceListDepts, "GET"),
+		op(v1.OperationDeptServiceListDeptsTree, "GET"),
+		op(v1.OperationDeptServiceUpdateDept, "PUT"),
+		op(v1.OperationDeptServiceUpdateDeptByStatus, "PUT"),
+		op(v1.OperationDeptServiceGetDeptDeleteImpact, "GET"),
+		op(v1.OperationDeptServiceTransferAndDeleteDept, "POST"),
+		op(v1.OperationMenuServiceCreateMenu, "POST"),
+		op(v1.OperationMenuServiceDeleteMenu, "DELETE"),
+		op(v1.OperationMenuServiceExistMenuByName, "POST"),
+		op(v1.OperationMenuServiceExistMenuByPath, "POST"),
+		op(v1.OperationMenuServiceGetMenu, "GET"),
+		op(v1.OperationMenuServiceListMenus, "GET"),
+		op(v1.OperationMenuServiceListMenusAll, "GET"),
+		op(v1.OperationMenuServiceListMenusTree, "GET"),
+		op(v1.OperationMenuServiceUpdateMenu, "PUT"),
+		op(v1.OperationMenuServiceUpdateMenuByStatus, "PUT"),
+		op(v1.OperationTenantMenuPermissionGroupServiceCreateTenantMenuPermissionGroup, "POST"),
+		op(v1.OperationTenantMenuPermissionGroupServiceDeleteTenantMenuPermissionGroup, "DELETE"),
+		op(v1.OperationTenantMenuPermissionGroupServiceGetTenantMenuPermissionGroup, "GET"),
+		op(v1.OperationTenantMenuPermissionGroupServiceListTenantMenuPermissionGroups, "GET"),
+		op(v1.OperationTenantMenuPermissionGroupServiceUpdateTenantMenuPermissionGroup, "PUT"),
+		op(v1.OperationTenantMenuPermissionGroupServiceUpdateTenantMenuPermissionGroupStatus, "PUT"),
+		op(v1.OperationTenantMenuPermissionGroupServiceListTenantMenuPermissionGroupVersions, "GET"),
+		op(v1.OperationTenantMenuPermissionGroupServicePublishTenantMenuPermissionGroupVersion, "POST"),
+		op(v1.OperationTenantMenuPermissionGroupServiceRollbackTenantMenuPermissionGroupVersion, "POST"),
+		op(v1.OperationRoleServiceCreateRole, "POST"),
+		op(v1.OperationRoleServiceDeleteRole, "DELETE"),
+		op(v1.OperationRoleServiceExistRoleByName, "POST"),
+		op(v1.OperationRoleServiceGetRole, "GET"),
+		op(v1.OperationRoleServiceListRoles, "GET"),
+		op(v1.OperationRoleServiceUpdateRole, "PUT"),
+		op(v1.OperationRoleServiceUpdateRoleByStatus, "PUT"),
+		op(v1.OperationRoleServiceListRoleSimple, "GET"),
+		op(v1.OperationPostServiceCreatePost, "POST"),
+		op(v1.OperationPostServiceDeletePost, "DELETE"),
+		op(v1.OperationPostServiceGetPost, "GET"),
+		op(v1.OperationPostServiceListPosts, "GET"),
+		op(v1.OperationPostServiceUpdatePost, "PUT"),
+		op(v1.OperationPostServiceUpdatePostByStatus, "PUT"),
+		op(v1.OperationProjectServiceCreateProject, "POST"),
+		op(v1.OperationProjectServiceDeleteProject, "DELETE"),
+		op(v1.OperationProjectServiceGetProject, "GET"),
+		op(v1.OperationProjectServiceListProjects, "GET"),
+		op(v1.OperationProjectServiceUpdateProject, "PUT"),
+		op(v1.OperationProjectServiceUpdateProjectByStatus, "PUT"),
+		op(v1.OperationDictionaryServiceListDictionaryTypes, "GET"),
+		op(v1.OperationDictionaryServiceGetDictionaryType, "GET"),
+		op(v1.OperationDictionaryServiceCreateDictionaryType, "POST"),
+		op(v1.OperationDictionaryServiceUpdateDictionaryType, "PUT"),
+		op(v1.OperationDictionaryServiceDeleteDictionaryType, "DELETE"),
+		op(v1.OperationDictionaryServiceListDictionaryItems, "GET"),
+		op(v1.OperationDictionaryServiceCreateDictionaryItem, "POST"),
+		op(v1.OperationDictionaryServiceUpdateDictionaryItem, "PUT"),
+		op(v1.OperationDictionaryServiceDeleteDictionaryItem, "DELETE"),
+		op(v1.OperationOperationLogServiceListOperationLogs, "GET"),
+		op(v1.OperationOperationLogServiceGetOperationLog, "GET"),
+		op(v1.OperationOperationLogServiceCreateOperationLog, "POST"),
+		op(v1.OperationLoginLogServiceListLoginLogs, "GET"),
+		op(v1.OperationLoginLogServiceGetLoginLog, "GET"),
+		op(v1.OperationSessionServiceListSessions, "GET"),
+		op(v1.OperationSessionServiceListMySessions, "GET"),
+		op(v1.OperationSessionServiceRevokeSession, "DELETE"),
+		op(v1.OperationParameterServiceListParameterDefinitions, "GET"),
+		op(v1.OperationParameterServiceGetParameterDefinition, "GET"),
+		op(v1.OperationParameterServiceCreateParameterDefinition, "POST"),
+		op(v1.OperationParameterServiceUpdateParameterDefinition, "PUT"),
+		op(v1.OperationParameterServiceDeleteParameterDefinition, "DELETE"),
+		op(v1.OperationParameterServiceListCurrentTenantParameters, "GET"),
+		op(v1.OperationParameterServiceSetCurrentTenantParameter, "PUT"),
+		op(v1.OperationParameterServiceResetCurrentTenantParameter, "DELETE"),
+		op(v1.OperationParameterServiceListTenantParameters, "GET"),
+		op(v1.OperationParameterServiceSetTenantParameter, "PUT"),
+		op(v1.OperationParameterServiceResetTenantParameter, "DELETE"),
+		op(v1.OperationFileCenterServiceCreateFileUploadSession, "POST"),
+		op(v1.OperationFileCenterServiceUploadFileContent, "POST"),
+		op(v1.OperationFileCenterServiceConfirmFileUpload, "POST"),
+		op(v1.OperationFileCenterServiceGetFileObject, "GET"),
+		op(v1.OperationFileCenterServiceListFileObjects, "GET"),
+		op(v1.OperationFileCenterServiceListFileAccessLogs, "GET"),
+		op(v1.OperationFileCenterServicePresignFileDownload, "GET"),
+		op(v1.OperationFileCenterServiceDeleteFileObject, "DELETE"),
+		op(v1.OperationFileCenterServiceUpdateFileObject, "PUT"),
+		op(v1.OperationFileCenterServiceReplaceFileContent, "POST"),
+		op(v1.OperationFileCenterServiceDownloadFileContent, "GET"),
+		op(v1.OperationFileCenterServiceUploadFilePart, "PUT"),
+		op(v1.OperationFileCenterServiceListFileParts, "GET"),
+		op(v1.OperationFileCenterServiceCompleteFileUpload, "POST"),
+		op(v1.OperationFileCenterServiceAbortFileUpload, "POST"),
+		op(v1.OperationNotificationServiceListNotificationTemplates, "GET"),
+		op(v1.OperationNotificationServiceGetNotificationTemplate, "GET"),
+		op(v1.OperationNotificationServiceCreateNotificationTemplate, "POST"),
+		op(v1.OperationNotificationServiceUpdateNotificationTemplate, "PUT"),
+		op(v1.OperationNotificationServiceDeleteNotificationTemplate, "DELETE"),
+		op(v1.OperationNotificationServiceSendInAppNotification, "POST"),
+		op(v1.OperationNotificationServiceSendNotification, "POST"),
+		op(v1.OperationNotificationServiceListNotificationMessages, "GET"),
+		op(v1.OperationNotificationServiceGetNotificationMessage, "GET"),
+		op(v1.OperationNotificationServiceListMyNotifications, "GET"),
+		op(v1.OperationNotificationServiceCountMyUnreadNotifications, "GET"),
+		op(v1.OperationNotificationServiceMarkNotificationRead, "POST"),
+		op(v1.OperationNotificationServiceMarkNotificationsRead, "POST"),
+		op(v1.OperationNotificationProviderServiceCreateNotificationProvider, "POST"),
+		op(v1.OperationNotificationProviderServiceUpdateNotificationProvider, "PUT"),
+		op(v1.OperationNotificationProviderServiceDeleteNotificationProvider, "DELETE"),
+		op(v1.OperationNotificationProviderServiceGetNotificationProvider, "GET"),
+		op(v1.OperationNotificationProviderServiceListNotificationProviders, "GET"),
+		op(v1.OperationNotificationProviderServiceSetDefaultNotificationProvider, "POST"),
+		op(v1.OperationNotificationProviderServiceTestNotificationProvider, "POST"),
+		op(v1.OperationDeviceServiceRegisterDevice, "POST"),
+		op(v1.OperationDeviceServiceUnregisterDevice, "DELETE"),
+		op(v1.OperationDeviceServiceListMyDevices, "GET"),
+		op(v1.OperationDeviceServiceListUserDevices, "GET"),
+		op(v1.OperationStorageProviderServiceCreateStorageProvider, "POST"),
+		op(v1.OperationStorageProviderServiceUpdateStorageProvider, "PUT"),
+		op(v1.OperationStorageProviderServiceDeleteStorageProvider, "DELETE"),
+		op(v1.OperationStorageProviderServiceGetStorageProvider, "GET"),
+		op(v1.OperationStorageProviderServiceListStorageProviders, "GET"),
+		op(v1.OperationStorageProviderServiceSetDefaultStorageProvider, "POST"),
+		op(v1.OperationStorageProviderServiceTestStorageProvider, "POST"),
+		op(v1.OperationStorageConfigServiceCreateStorageConfig, "POST"),
+		op(v1.OperationStorageConfigServiceUpdateStorageConfig, "PUT"),
+		op(v1.OperationStorageConfigServiceDeleteStorageConfig, "DELETE"),
+		op(v1.OperationStorageConfigServiceGetStorageConfig, "GET"),
+		op(v1.OperationStorageConfigServiceListStorageConfigs, "GET"),
+		op(v1.OperationStorageConfigServiceSetDefaultStorageConfig, "POST"),
+		op(v1.OperationStorageConfigServiceTestStorageConfig, "POST"),
+		op(v1.OperationAsyncTaskServiceListAsyncTasks, "GET"),
+		op(v1.OperationAsyncTaskServiceGetAsyncTaskStats, "GET"),
+		op(v1.OperationAsyncTaskServiceGetAsyncTask, "GET"),
+		op(v1.OperationAsyncTaskServiceCancelAsyncTask, "POST"),
+		op(v1.OperationAsyncTaskServiceRetryAsyncTask, "POST"),
+		op(v1.OperationWebhookServiceListWebhookSubscriptions, "GET"),
+		op(v1.OperationWebhookServiceGetWebhookSubscription, "GET"),
+		op(v1.OperationWebhookServiceCreateWebhookSubscription, "POST"),
+		op(v1.OperationWebhookServiceUpdateWebhookSubscription, "PUT"),
+		op(v1.OperationWebhookServiceDeleteWebhookSubscription, "DELETE"),
+		op(v1.OperationWebhookServiceListWebhookDeliveryLogs, "GET"),
+		op(v1.OperationWebhookServiceGetWebhookDeliveryLog, "GET"),
+		op(v1.OperationWebhookServiceRetryWebhookDelivery, "POST"),
+	}
+}
+
+func MatchProtectedOperation(object authz.Object, action authz.Action) bool {
+	for _, operation := range ProtectedOperations() {
+		if operation.Object == object &&
+			(operation.HTTPAction == action || operation.GRPCAction == action) {
+			return true
+		}
+	}
+	return false
+}
+
+func IsAuthenticatedSelfServiceOperation(object authz.Object, action authz.Action) bool {
+	switch object {
+	case authz.Object(v1.OperationAuthServiceCodes),
+		authz.Object(v1.OperationAuthServiceMenus),
+		authz.Object(v1.OperationAuthServiceProfile),
+		authz.Object(v1.OperationAuthServiceVbenProfile):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationAuthServiceLogout):
+		return action == "POST" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationSessionServiceListMySessions):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+		return action == "POST" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationNotificationServiceListMyNotifications),
+		authz.Object(v1.OperationNotificationServiceCountMyUnreadNotifications):
+		return action == "GET" || action == authz.Action(lastSegment(string(object)))
+	case authz.Object(v1.OperationNotificationServiceMarkNotificationRead),
+		authz.Object(v1.OperationNotificationServiceMarkNotificationsRead):
+		return action == "POST" || action == authz.Action(lastSegment(string(object)))
+	}
+	return false
+}
+
 // IsPlatformControlOperation identifies operations that manage global platform
-// resources or explicitly target another tenant. This is used by the middleware
-// to distinguish platform control-plane operations from tenant data-plane ones.
+// resources or explicitly target another tenant.
 func IsPlatformControlOperation(operation string) bool {
 	switch operation {
 	case v1.OperationMenuServiceCreateMenu,
@@ -52,6 +269,13 @@ func IsPlatformControlOperation(operation string) bool {
 		v1.OperationStorageProviderServiceListStorageProviders,
 		v1.OperationStorageProviderServiceSetDefaultStorageProvider,
 		v1.OperationStorageProviderServiceTestStorageProvider,
+		v1.OperationNotificationProviderServiceCreateNotificationProvider,
+		v1.OperationNotificationProviderServiceUpdateNotificationProvider,
+		v1.OperationNotificationProviderServiceDeleteNotificationProvider,
+		v1.OperationNotificationProviderServiceGetNotificationProvider,
+		v1.OperationNotificationProviderServiceListNotificationProviders,
+		v1.OperationNotificationProviderServiceSetDefaultNotificationProvider,
+		v1.OperationNotificationProviderServiceTestNotificationProvider,
 		v1.OperationAsyncTaskServiceListAsyncTasks,
 		v1.OperationAsyncTaskServiceGetAsyncTaskStats,
 		v1.OperationAsyncTaskServiceGetAsyncTask,
@@ -61,4 +285,133 @@ func IsPlatformControlOperation(operation string) bool {
 	default:
 		return false
 	}
+}
+
+func TenantOperations() []Operation {
+	operations := ProtectedOperations()
+	result := make([]Operation, 0, len(operations))
+	for _, operation := range operations {
+		if !IsPlatformControlOperation(string(operation.Object)) {
+			result = append(result, operation)
+		}
+	}
+	return result
+}
+
+func PoliciesForRole(role authz.Subject, tenant authz.Tenant) []authz.Policy {
+	return policiesForOperations(role, tenant, TenantOperations())
+}
+
+func PoliciesForPlatformRole(role authz.Subject, tenant authz.Tenant) []authz.Policy {
+	return policiesForOperations(role, tenant, ProtectedOperations())
+}
+
+func policiesForOperations(role authz.Subject, tenant authz.Tenant, ops []Operation) []authz.Policy {
+	policies := make([]authz.Policy, 0, len(ops)*2)
+	for _, op := range ops {
+		policies = append(policies,
+			authz.Policy{Subject: role, Object: op.Object, Action: op.HTTPAction, Tenant: tenant, Effect: authz.EffectAllow},
+			authz.Policy{Subject: role, Object: op.Object, Action: op.GRPCAction, Tenant: tenant, Effect: authz.EffectAllow},
+		)
+	}
+	return policies
+}
+
+func SyncSuperAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject) error {
+	return syncAdmin(ctx, authorizer, role, tenant, users, PoliciesForRole(role, tenant))
+}
+
+func SyncPlatformAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject) error {
+	return syncAdmin(ctx, authorizer, role, tenant, users, PoliciesForPlatformRole(role, tenant))
+}
+
+func SetAdminMembership(
+	ctx context.Context,
+	authorizer authz.Authorizer,
+	tenant authz.Tenant,
+	user authz.Subject,
+	platform bool,
+	enabled bool,
+) error {
+	role := authz.Subject("super_admin")
+	desired := PoliciesForRole(role, tenant)
+	if platform {
+		desired = PoliciesForPlatformRole(role, tenant)
+	}
+	for _, policy := range PoliciesForPlatformRole(role, tenant) {
+		if _, err := authorizer.RemovePolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	for _, policy := range desired {
+		if _, err := authorizer.AddPolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	if enabled {
+		_, err := authorizer.AddRoleForUser(ctx, user, role, tenant)
+		return err
+	}
+	_, err := authorizer.DeleteRoleForUser(ctx, user, role, tenant)
+	return err
+}
+
+func syncAdmin(ctx context.Context, authorizer authz.Authorizer, role authz.Subject, tenant authz.Tenant, users []authz.Subject, desired []authz.Policy) error {
+	// Remove the previous complete policy set first so changing a tenant from
+	// platform to business scope cannot leave stale control-plane grants.
+	for _, policy := range PoliciesForPlatformRole(role, tenant) {
+		if _, err := authorizer.RemovePolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	for _, policy := range desired {
+		if _, err := authorizer.AddPolicy(ctx, policy); err != nil {
+			return err
+		}
+	}
+	desiredUsers := make(map[authz.Subject]struct{}, len(users))
+	for _, user := range users {
+		if user != "" {
+			desiredUsers[user] = struct{}{}
+		}
+	}
+	existingUsers, err := authorizer.GetUsersForRole(ctx, role, tenant)
+	if err != nil {
+		return err
+	}
+	for _, user := range existingUsers {
+		if _, ok := desiredUsers[user]; ok {
+			continue
+		}
+		if _, err := authorizer.DeleteRoleForUser(ctx, user, role, tenant); err != nil {
+			return err
+		}
+	}
+	for _, user := range users {
+		if user == "" {
+			continue
+		}
+		if _, err := authorizer.AddRoleForUser(ctx, user, role, tenant); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func op(operation string, httpAction authz.Action) Operation {
+	return Operation{
+		Object:     authz.Object(operation),
+		HTTPAction: httpAction,
+		GRPCAction: authz.Action(lastSegment(operation)),
+	}
+}
+
+func lastSegment(operation string) string {
+	parts := strings.Split(operation, "/")
+	for i := len(parts) - 1; i >= 0; i-- {
+		if parts[i] != "" {
+			return parts[i]
+		}
+	}
+	return operation
 }

@@ -256,6 +256,48 @@ func (_c *FileObjectCreate) SetNillableIdempotencyKey(v *string) *FileObjectCrea
 	return _c
 }
 
+// SetUploadID sets the "upload_id" field.
+func (_c *FileObjectCreate) SetUploadID(v string) *FileObjectCreate {
+	_c.mutation.SetUploadID(v)
+	return _c
+}
+
+// SetNillableUploadID sets the "upload_id" field if the given value is not nil.
+func (_c *FileObjectCreate) SetNillableUploadID(v *string) *FileObjectCreate {
+	if v != nil {
+		_c.SetUploadID(*v)
+	}
+	return _c
+}
+
+// SetPartSize sets the "part_size" field.
+func (_c *FileObjectCreate) SetPartSize(v int64) *FileObjectCreate {
+	_c.mutation.SetPartSize(v)
+	return _c
+}
+
+// SetNillablePartSize sets the "part_size" field if the given value is not nil.
+func (_c *FileObjectCreate) SetNillablePartSize(v *int64) *FileObjectCreate {
+	if v != nil {
+		_c.SetPartSize(*v)
+	}
+	return _c
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (_c *FileObjectCreate) SetTotalParts(v int32) *FileObjectCreate {
+	_c.mutation.SetTotalParts(v)
+	return _c
+}
+
+// SetNillableTotalParts sets the "total_parts" field if the given value is not nil.
+func (_c *FileObjectCreate) SetNillableTotalParts(v *int32) *FileObjectCreate {
+	if v != nil {
+		_c.SetTotalParts(*v)
+	}
+	return _c
+}
+
 // SetUploadExpiresAt sets the "upload_expires_at" field.
 func (_c *FileObjectCreate) SetUploadExpiresAt(v time.Time) *FileObjectCreate {
 	_c.mutation.SetUploadExpiresAt(v)
@@ -387,6 +429,18 @@ func (_c *FileObjectCreate) defaults() error {
 		v := fileobject.DefaultVisibility
 		_c.mutation.SetVisibility(v)
 	}
+	if _, ok := _c.mutation.UploadID(); !ok {
+		v := fileobject.DefaultUploadID
+		_c.mutation.SetUploadID(v)
+	}
+	if _, ok := _c.mutation.PartSize(); !ok {
+		v := fileobject.DefaultPartSize
+		_c.mutation.SetPartSize(v)
+	}
+	if _, ok := _c.mutation.TotalParts(); !ok {
+		v := fileobject.DefaultTotalParts
+		_c.mutation.SetTotalParts(v)
+	}
 	return nil
 }
 
@@ -515,6 +569,25 @@ func (_c *FileObjectCreate) check() error {
 			return &ValidationError{Name: "idempotency_key", err: fmt.Errorf(`gen: validator failed for field "FileObject.idempotency_key": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.UploadID(); !ok {
+		return &ValidationError{Name: "upload_id", err: errors.New(`gen: missing required field "FileObject.upload_id"`)}
+	}
+	if v, ok := _c.mutation.UploadID(); ok {
+		if err := fileobject.UploadIDValidator(v); err != nil {
+			return &ValidationError{Name: "upload_id", err: fmt.Errorf(`gen: validator failed for field "FileObject.upload_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PartSize(); !ok {
+		return &ValidationError{Name: "part_size", err: errors.New(`gen: missing required field "FileObject.part_size"`)}
+	}
+	if v, ok := _c.mutation.PartSize(); ok {
+		if err := fileobject.PartSizeValidator(v); err != nil {
+			return &ValidationError{Name: "part_size", err: fmt.Errorf(`gen: validator failed for field "FileObject.part_size": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TotalParts(); !ok {
+		return &ValidationError{Name: "total_parts", err: errors.New(`gen: missing required field "FileObject.total_parts"`)}
+	}
 	if _, ok := _c.mutation.UploadExpiresAt(); !ok {
 		return &ValidationError{Name: "upload_expires_at", err: errors.New(`gen: missing required field "FileObject.upload_expires_at"`)}
 	}
@@ -631,6 +704,18 @@ func (_c *FileObjectCreate) createSpec() (*FileObject, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.IdempotencyKey(); ok {
 		_spec.SetField(fileobject.FieldIdempotencyKey, field.TypeString, value)
 		_node.IdempotencyKey = &value
+	}
+	if value, ok := _c.mutation.UploadID(); ok {
+		_spec.SetField(fileobject.FieldUploadID, field.TypeString, value)
+		_node.UploadID = value
+	}
+	if value, ok := _c.mutation.PartSize(); ok {
+		_spec.SetField(fileobject.FieldPartSize, field.TypeInt64, value)
+		_node.PartSize = value
+	}
+	if value, ok := _c.mutation.TotalParts(); ok {
+		_spec.SetField(fileobject.FieldTotalParts, field.TypeInt32, value)
+		_node.TotalParts = value
 	}
 	if value, ok := _c.mutation.UploadExpiresAt(); ok {
 		_spec.SetField(fileobject.FieldUploadExpiresAt, field.TypeTime, value)
@@ -951,6 +1036,54 @@ func (u *FileObjectUpsert) UpdateIdempotencyKey() *FileObjectUpsert {
 // ClearIdempotencyKey clears the value of the "idempotency_key" field.
 func (u *FileObjectUpsert) ClearIdempotencyKey() *FileObjectUpsert {
 	u.SetNull(fileobject.FieldIdempotencyKey)
+	return u
+}
+
+// SetUploadID sets the "upload_id" field.
+func (u *FileObjectUpsert) SetUploadID(v string) *FileObjectUpsert {
+	u.Set(fileobject.FieldUploadID, v)
+	return u
+}
+
+// UpdateUploadID sets the "upload_id" field to the value that was provided on create.
+func (u *FileObjectUpsert) UpdateUploadID() *FileObjectUpsert {
+	u.SetExcluded(fileobject.FieldUploadID)
+	return u
+}
+
+// SetPartSize sets the "part_size" field.
+func (u *FileObjectUpsert) SetPartSize(v int64) *FileObjectUpsert {
+	u.Set(fileobject.FieldPartSize, v)
+	return u
+}
+
+// UpdatePartSize sets the "part_size" field to the value that was provided on create.
+func (u *FileObjectUpsert) UpdatePartSize() *FileObjectUpsert {
+	u.SetExcluded(fileobject.FieldPartSize)
+	return u
+}
+
+// AddPartSize adds v to the "part_size" field.
+func (u *FileObjectUpsert) AddPartSize(v int64) *FileObjectUpsert {
+	u.Add(fileobject.FieldPartSize, v)
+	return u
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (u *FileObjectUpsert) SetTotalParts(v int32) *FileObjectUpsert {
+	u.Set(fileobject.FieldTotalParts, v)
+	return u
+}
+
+// UpdateTotalParts sets the "total_parts" field to the value that was provided on create.
+func (u *FileObjectUpsert) UpdateTotalParts() *FileObjectUpsert {
+	u.SetExcluded(fileobject.FieldTotalParts)
+	return u
+}
+
+// AddTotalParts adds v to the "total_parts" field.
+func (u *FileObjectUpsert) AddTotalParts(v int32) *FileObjectUpsert {
+	u.Add(fileobject.FieldTotalParts, v)
 	return u
 }
 
@@ -1357,6 +1490,62 @@ func (u *FileObjectUpsertOne) UpdateIdempotencyKey() *FileObjectUpsertOne {
 func (u *FileObjectUpsertOne) ClearIdempotencyKey() *FileObjectUpsertOne {
 	return u.Update(func(s *FileObjectUpsert) {
 		s.ClearIdempotencyKey()
+	})
+}
+
+// SetUploadID sets the "upload_id" field.
+func (u *FileObjectUpsertOne) SetUploadID(v string) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetUploadID(v)
+	})
+}
+
+// UpdateUploadID sets the "upload_id" field to the value that was provided on create.
+func (u *FileObjectUpsertOne) UpdateUploadID() *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateUploadID()
+	})
+}
+
+// SetPartSize sets the "part_size" field.
+func (u *FileObjectUpsertOne) SetPartSize(v int64) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetPartSize(v)
+	})
+}
+
+// AddPartSize adds v to the "part_size" field.
+func (u *FileObjectUpsertOne) AddPartSize(v int64) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.AddPartSize(v)
+	})
+}
+
+// UpdatePartSize sets the "part_size" field to the value that was provided on create.
+func (u *FileObjectUpsertOne) UpdatePartSize() *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdatePartSize()
+	})
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (u *FileObjectUpsertOne) SetTotalParts(v int32) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetTotalParts(v)
+	})
+}
+
+// AddTotalParts adds v to the "total_parts" field.
+func (u *FileObjectUpsertOne) AddTotalParts(v int32) *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.AddTotalParts(v)
+	})
+}
+
+// UpdateTotalParts sets the "total_parts" field to the value that was provided on create.
+func (u *FileObjectUpsertOne) UpdateTotalParts() *FileObjectUpsertOne {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateTotalParts()
 	})
 }
 
@@ -1938,6 +2127,62 @@ func (u *FileObjectUpsertBulk) UpdateIdempotencyKey() *FileObjectUpsertBulk {
 func (u *FileObjectUpsertBulk) ClearIdempotencyKey() *FileObjectUpsertBulk {
 	return u.Update(func(s *FileObjectUpsert) {
 		s.ClearIdempotencyKey()
+	})
+}
+
+// SetUploadID sets the "upload_id" field.
+func (u *FileObjectUpsertBulk) SetUploadID(v string) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetUploadID(v)
+	})
+}
+
+// UpdateUploadID sets the "upload_id" field to the value that was provided on create.
+func (u *FileObjectUpsertBulk) UpdateUploadID() *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateUploadID()
+	})
+}
+
+// SetPartSize sets the "part_size" field.
+func (u *FileObjectUpsertBulk) SetPartSize(v int64) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetPartSize(v)
+	})
+}
+
+// AddPartSize adds v to the "part_size" field.
+func (u *FileObjectUpsertBulk) AddPartSize(v int64) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.AddPartSize(v)
+	})
+}
+
+// UpdatePartSize sets the "part_size" field to the value that was provided on create.
+func (u *FileObjectUpsertBulk) UpdatePartSize() *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdatePartSize()
+	})
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (u *FileObjectUpsertBulk) SetTotalParts(v int32) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.SetTotalParts(v)
+	})
+}
+
+// AddTotalParts adds v to the "total_parts" field.
+func (u *FileObjectUpsertBulk) AddTotalParts(v int32) *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.AddTotalParts(v)
+	})
+}
+
+// UpdateTotalParts sets the "total_parts" field to the value that was provided on create.
+func (u *FileObjectUpsertBulk) UpdateTotalParts() *FileObjectUpsertBulk {
+	return u.Update(func(s *FileObjectUpsert) {
+		s.UpdateTotalParts()
 	})
 }
 

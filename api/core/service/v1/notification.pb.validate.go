@@ -1323,6 +1323,246 @@ var _ interface {
 	ErrorName() string
 } = SendInAppNotificationResponseValidationError{}
 
+// Validate checks the field values on SendNotificationRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SendNotificationRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SendNotificationRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SendNotificationRequestMultiError, or nil if none found.
+func (m *SendNotificationRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SendNotificationRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Channel
+
+	if m.TemplateCode != nil {
+		// no validation rules for TemplateCode
+	}
+
+	if m.Title != nil {
+		// no validation rules for Title
+	}
+
+	if m.Content != nil {
+		// no validation rules for Content
+	}
+
+	if m.Variables != nil {
+		// no validation rules for Variables
+	}
+
+	if m.Priority != nil {
+		// no validation rules for Priority
+	}
+
+	if m.BusinessType != nil {
+		// no validation rules for BusinessType
+	}
+
+	if m.BusinessId != nil {
+		// no validation rules for BusinessId
+	}
+
+	if m.IdempotencyKey != nil {
+		// no validation rules for IdempotencyKey
+	}
+
+	if len(errors) > 0 {
+		return SendNotificationRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// SendNotificationRequestMultiError is an error wrapping multiple validation
+// errors returned by SendNotificationRequest.ValidateAll() if the designated
+// constraints aren't met.
+type SendNotificationRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SendNotificationRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SendNotificationRequestMultiError) AllErrors() []error { return m }
+
+// SendNotificationRequestValidationError is the validation error returned by
+// SendNotificationRequest.Validate if the designated constraints aren't met.
+type SendNotificationRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SendNotificationRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SendNotificationRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SendNotificationRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SendNotificationRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SendNotificationRequestValidationError) ErrorName() string {
+	return "SendNotificationRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SendNotificationRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSendNotificationRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SendNotificationRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SendNotificationRequestValidationError{}
+
+// Validate checks the field values on SendNotificationResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SendNotificationResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SendNotificationResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SendNotificationResponseMultiError, or nil if none found.
+func (m *SendNotificationResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SendNotificationResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TaskId
+
+	if len(errors) > 0 {
+		return SendNotificationResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// SendNotificationResponseMultiError is an error wrapping multiple validation
+// errors returned by SendNotificationResponse.ValidateAll() if the designated
+// constraints aren't met.
+type SendNotificationResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SendNotificationResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SendNotificationResponseMultiError) AllErrors() []error { return m }
+
+// SendNotificationResponseValidationError is the validation error returned by
+// SendNotificationResponse.Validate if the designated constraints aren't met.
+type SendNotificationResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SendNotificationResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SendNotificationResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SendNotificationResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SendNotificationResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SendNotificationResponseValidationError) ErrorName() string {
+	return "SendNotificationResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SendNotificationResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSendNotificationResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SendNotificationResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SendNotificationResponseValidationError{}
+
 // Validate checks the field values on ListNotificationMessagesRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

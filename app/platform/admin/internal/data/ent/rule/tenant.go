@@ -92,6 +92,22 @@ func filterTenantQuery(q ent.Query, tenantID uint32) error {
 		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	case *gen.UserQuery:
 		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.FileObjectQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.FileAccessLogQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.StorageConfigQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.NotificationMessageQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.NotificationTemplateQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.WebhookDeliveryLogQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.WebhookSubscriptionQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
+	case *gen.DeviceQuery:
+		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	default:
 		return privacy.Denyf("unexpected tenant query type %T", q)
 	}
@@ -119,6 +135,22 @@ func filterTenantMutation(m ent.Mutation, tenantID uint32) error {
 	case *gen.TenantParameterOverrideMutation:
 		m.WhereP(tenantFieldEQ(tenantID))
 	case *gen.UserMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.FileObjectMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.FileAccessLogMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.StorageConfigMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.NotificationMessageMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.NotificationTemplateMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.WebhookDeliveryLogMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.WebhookSubscriptionMutation:
+		m.WhereP(tenantFieldEQ(tenantID))
+	case *gen.DeviceMutation:
 		m.WhereP(tenantFieldEQ(tenantID))
 	default:
 		return privacy.Denyf("unexpected tenant mutation type %T", m)

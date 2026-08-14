@@ -33,6 +33,10 @@ service NotificationService {
     option (google.api.http) = {post: "/admin/v1/notifications:send-in-app" body: "*"};
   }
 
+  rpc SendNotification(core.service.v1.SendNotificationRequest) returns (core.service.v1.SendNotificationResponse) {
+    option (google.api.http) = {post: "/admin/v1/notifications:send" body: "*"};
+  }
+
   rpc ListNotificationMessages(core.service.v1.ListNotificationMessagesRequest) returns (core.service.v1.ListNotificationMessagesResponse) {
     option (google.api.http) = {get: "/admin/v1/notification-messages"};
   }

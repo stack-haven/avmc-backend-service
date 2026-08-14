@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/device"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
@@ -12,6 +13,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
@@ -49,6 +51,7 @@ const (
 	// Node types.
 	TypeAsyncTask                        = "AsyncTask"
 	TypeDept                             = "Dept"
+	TypeDevice                           = "Device"
 	TypeDictionaryItem                   = "DictionaryItem"
 	TypeDictionaryType                   = "DictionaryType"
 	TypeFileAccessLog                    = "FileAccessLog"
@@ -56,6 +59,7 @@ const (
 	TypeLoginLog                         = "LoginLog"
 	TypeMenu                             = "Menu"
 	TypeNotificationMessage              = "NotificationMessage"
+	TypeNotificationProvider             = "NotificationProvider"
 	TypeNotificationTemplate             = "NotificationTemplate"
 	TypeOperationLog                     = "OperationLog"
 	TypeParameterDefinition              = "ParameterDefinition"
@@ -3177,6 +3181,980 @@ func (m *DeptMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Dept edge %s", name)
+}
+
+// DeviceMutation represents an operation that mutates the Device nodes in the graph.
+type DeviceMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uint32
+	created_at     *time.Time
+	updated_at     *time.Time
+	status         *int32
+	addstatus      *int32
+	tenant_id      *uint32
+	addtenant_id   *int32
+	user_id        *uint32
+	adduser_id     *int32
+	device_token   *string
+	platform       *string
+	app_key        *string
+	device_name    *string
+	app_version    *string
+	last_active_at *time.Time
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*Device, error)
+	predicates     []predicate.Device
+}
+
+var _ ent.Mutation = (*DeviceMutation)(nil)
+
+// deviceOption allows management of the mutation configuration using functional options.
+type deviceOption func(*DeviceMutation)
+
+// newDeviceMutation creates new mutation for the Device entity.
+func newDeviceMutation(c config, op Op, opts ...deviceOption) *DeviceMutation {
+	m := &DeviceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDevice,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDeviceID sets the ID field of the mutation.
+func withDeviceID(id uint32) deviceOption {
+	return func(m *DeviceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Device
+		)
+		m.oldValue = func(ctx context.Context) (*Device, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Device.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDevice sets the old Device of the mutation.
+func withDevice(node *Device) deviceOption {
+	return func(m *DeviceMutation) {
+		m.oldValue = func(context.Context) (*Device, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DeviceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DeviceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("gen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Device entities.
+func (m *DeviceMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DeviceMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DeviceMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Device.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DeviceMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DeviceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DeviceMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DeviceMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DeviceMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DeviceMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *DeviceMutation) SetStatus(i int32) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *DeviceMutation) Status() (r int32, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldStatus(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *DeviceMutation) AddStatus(i int32) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *DeviceMutation) AddedStatus() (r int32, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *DeviceMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (m *DeviceMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *DeviceMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// AddTenantID adds u to the "tenant_id" field.
+func (m *DeviceMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
+	} else {
+		m.addtenant_id = &u
+	}
+}
+
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *DeviceMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *DeviceMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DeviceMutation) SetUserID(u uint32) {
+	m.user_id = &u
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DeviceMutation) UserID() (r uint32, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldUserID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds u to the "user_id" field.
+func (m *DeviceMutation) AddUserID(u int32) {
+	if m.adduser_id != nil {
+		*m.adduser_id += u
+	} else {
+		m.adduser_id = &u
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *DeviceMutation) AddedUserID() (r int32, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DeviceMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+}
+
+// SetDeviceToken sets the "device_token" field.
+func (m *DeviceMutation) SetDeviceToken(s string) {
+	m.device_token = &s
+}
+
+// DeviceToken returns the value of the "device_token" field in the mutation.
+func (m *DeviceMutation) DeviceToken() (r string, exists bool) {
+	v := m.device_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceToken returns the old "device_token" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldDeviceToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceToken: %w", err)
+	}
+	return oldValue.DeviceToken, nil
+}
+
+// ResetDeviceToken resets all changes to the "device_token" field.
+func (m *DeviceMutation) ResetDeviceToken() {
+	m.device_token = nil
+}
+
+// SetPlatform sets the "platform" field.
+func (m *DeviceMutation) SetPlatform(s string) {
+	m.platform = &s
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *DeviceMutation) Platform() (r string, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldPlatform(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *DeviceMutation) ResetPlatform() {
+	m.platform = nil
+}
+
+// SetAppKey sets the "app_key" field.
+func (m *DeviceMutation) SetAppKey(s string) {
+	m.app_key = &s
+}
+
+// AppKey returns the value of the "app_key" field in the mutation.
+func (m *DeviceMutation) AppKey() (r string, exists bool) {
+	v := m.app_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppKey returns the old "app_key" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldAppKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppKey: %w", err)
+	}
+	return oldValue.AppKey, nil
+}
+
+// ResetAppKey resets all changes to the "app_key" field.
+func (m *DeviceMutation) ResetAppKey() {
+	m.app_key = nil
+}
+
+// SetDeviceName sets the "device_name" field.
+func (m *DeviceMutation) SetDeviceName(s string) {
+	m.device_name = &s
+}
+
+// DeviceName returns the value of the "device_name" field in the mutation.
+func (m *DeviceMutation) DeviceName() (r string, exists bool) {
+	v := m.device_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceName returns the old "device_name" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldDeviceName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceName: %w", err)
+	}
+	return oldValue.DeviceName, nil
+}
+
+// ResetDeviceName resets all changes to the "device_name" field.
+func (m *DeviceMutation) ResetDeviceName() {
+	m.device_name = nil
+}
+
+// SetAppVersion sets the "app_version" field.
+func (m *DeviceMutation) SetAppVersion(s string) {
+	m.app_version = &s
+}
+
+// AppVersion returns the value of the "app_version" field in the mutation.
+func (m *DeviceMutation) AppVersion() (r string, exists bool) {
+	v := m.app_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppVersion returns the old "app_version" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldAppVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppVersion: %w", err)
+	}
+	return oldValue.AppVersion, nil
+}
+
+// ResetAppVersion resets all changes to the "app_version" field.
+func (m *DeviceMutation) ResetAppVersion() {
+	m.app_version = nil
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (m *DeviceMutation) SetLastActiveAt(t time.Time) {
+	m.last_active_at = &t
+}
+
+// LastActiveAt returns the value of the "last_active_at" field in the mutation.
+func (m *DeviceMutation) LastActiveAt() (r time.Time, exists bool) {
+	v := m.last_active_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastActiveAt returns the old "last_active_at" field's value of the Device entity.
+// If the Device object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceMutation) OldLastActiveAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastActiveAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastActiveAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastActiveAt: %w", err)
+	}
+	return oldValue.LastActiveAt, nil
+}
+
+// ResetLastActiveAt resets all changes to the "last_active_at" field.
+func (m *DeviceMutation) ResetLastActiveAt() {
+	m.last_active_at = nil
+}
+
+// Where appends a list predicates to the DeviceMutation builder.
+func (m *DeviceMutation) Where(ps ...predicate.Device) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DeviceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DeviceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Device, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DeviceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DeviceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Device).
+func (m *DeviceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DeviceMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.created_at != nil {
+		fields = append(fields, device.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, device.FieldUpdatedAt)
+	}
+	if m.status != nil {
+		fields = append(fields, device.FieldStatus)
+	}
+	if m.tenant_id != nil {
+		fields = append(fields, device.FieldTenantID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, device.FieldUserID)
+	}
+	if m.device_token != nil {
+		fields = append(fields, device.FieldDeviceToken)
+	}
+	if m.platform != nil {
+		fields = append(fields, device.FieldPlatform)
+	}
+	if m.app_key != nil {
+		fields = append(fields, device.FieldAppKey)
+	}
+	if m.device_name != nil {
+		fields = append(fields, device.FieldDeviceName)
+	}
+	if m.app_version != nil {
+		fields = append(fields, device.FieldAppVersion)
+	}
+	if m.last_active_at != nil {
+		fields = append(fields, device.FieldLastActiveAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DeviceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case device.FieldCreatedAt:
+		return m.CreatedAt()
+	case device.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case device.FieldStatus:
+		return m.Status()
+	case device.FieldTenantID:
+		return m.TenantID()
+	case device.FieldUserID:
+		return m.UserID()
+	case device.FieldDeviceToken:
+		return m.DeviceToken()
+	case device.FieldPlatform:
+		return m.Platform()
+	case device.FieldAppKey:
+		return m.AppKey()
+	case device.FieldDeviceName:
+		return m.DeviceName()
+	case device.FieldAppVersion:
+		return m.AppVersion()
+	case device.FieldLastActiveAt:
+		return m.LastActiveAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DeviceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case device.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case device.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case device.FieldStatus:
+		return m.OldStatus(ctx)
+	case device.FieldTenantID:
+		return m.OldTenantID(ctx)
+	case device.FieldUserID:
+		return m.OldUserID(ctx)
+	case device.FieldDeviceToken:
+		return m.OldDeviceToken(ctx)
+	case device.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case device.FieldAppKey:
+		return m.OldAppKey(ctx)
+	case device.FieldDeviceName:
+		return m.OldDeviceName(ctx)
+	case device.FieldAppVersion:
+		return m.OldAppVersion(ctx)
+	case device.FieldLastActiveAt:
+		return m.OldLastActiveAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Device field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case device.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case device.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case device.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case device.FieldTenantID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
+	case device.FieldUserID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case device.FieldDeviceToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceToken(v)
+		return nil
+	case device.FieldPlatform:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case device.FieldAppKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppKey(v)
+		return nil
+	case device.FieldDeviceName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceName(v)
+		return nil
+	case device.FieldAppVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppVersion(v)
+		return nil
+	case device.FieldLastActiveAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastActiveAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Device field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DeviceMutation) AddedFields() []string {
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, device.FieldStatus)
+	}
+	if m.addtenant_id != nil {
+		fields = append(fields, device.FieldTenantID)
+	}
+	if m.adduser_id != nil {
+		fields = append(fields, device.FieldUserID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DeviceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case device.FieldStatus:
+		return m.AddedStatus()
+	case device.FieldTenantID:
+		return m.AddedTenantID()
+	case device.FieldUserID:
+		return m.AddedUserID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case device.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	case device.FieldTenantID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTenantID(v)
+		return nil
+	case device.FieldUserID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Device numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DeviceMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DeviceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DeviceMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Device nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DeviceMutation) ResetField(name string) error {
+	switch name {
+	case device.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case device.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case device.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case device.FieldTenantID:
+		m.ResetTenantID()
+		return nil
+	case device.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case device.FieldDeviceToken:
+		m.ResetDeviceToken()
+		return nil
+	case device.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case device.FieldAppKey:
+		m.ResetAppKey()
+		return nil
+	case device.FieldDeviceName:
+		m.ResetDeviceName()
+		return nil
+	case device.FieldAppVersion:
+		m.ResetAppVersion()
+		return nil
+	case device.FieldLastActiveAt:
+		m.ResetLastActiveAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Device field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DeviceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DeviceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DeviceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DeviceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DeviceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DeviceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DeviceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Device unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DeviceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Device edge %s", name)
 }
 
 // DictionaryItemMutation represents an operation that mutates the DictionaryItem nodes in the graph.
@@ -6377,6 +7355,11 @@ type FileObjectMutation struct {
 	business_id       *string
 	visibility        *string
 	idempotency_key   *string
+	upload_id         *string
+	part_size         *int64
+	addpart_size      *int64
+	total_parts       *int32
+	addtotal_parts    *int32
 	upload_expires_at *time.Time
 	confirmed_at      *time.Time
 	created_by        *uint32
@@ -7295,6 +8278,154 @@ func (m *FileObjectMutation) ResetIdempotencyKey() {
 	delete(m.clearedFields, fileobject.FieldIdempotencyKey)
 }
 
+// SetUploadID sets the "upload_id" field.
+func (m *FileObjectMutation) SetUploadID(s string) {
+	m.upload_id = &s
+}
+
+// UploadID returns the value of the "upload_id" field in the mutation.
+func (m *FileObjectMutation) UploadID() (r string, exists bool) {
+	v := m.upload_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUploadID returns the old "upload_id" field's value of the FileObject entity.
+// If the FileObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileObjectMutation) OldUploadID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUploadID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUploadID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUploadID: %w", err)
+	}
+	return oldValue.UploadID, nil
+}
+
+// ResetUploadID resets all changes to the "upload_id" field.
+func (m *FileObjectMutation) ResetUploadID() {
+	m.upload_id = nil
+}
+
+// SetPartSize sets the "part_size" field.
+func (m *FileObjectMutation) SetPartSize(i int64) {
+	m.part_size = &i
+	m.addpart_size = nil
+}
+
+// PartSize returns the value of the "part_size" field in the mutation.
+func (m *FileObjectMutation) PartSize() (r int64, exists bool) {
+	v := m.part_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPartSize returns the old "part_size" field's value of the FileObject entity.
+// If the FileObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileObjectMutation) OldPartSize(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPartSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPartSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPartSize: %w", err)
+	}
+	return oldValue.PartSize, nil
+}
+
+// AddPartSize adds i to the "part_size" field.
+func (m *FileObjectMutation) AddPartSize(i int64) {
+	if m.addpart_size != nil {
+		*m.addpart_size += i
+	} else {
+		m.addpart_size = &i
+	}
+}
+
+// AddedPartSize returns the value that was added to the "part_size" field in this mutation.
+func (m *FileObjectMutation) AddedPartSize() (r int64, exists bool) {
+	v := m.addpart_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPartSize resets all changes to the "part_size" field.
+func (m *FileObjectMutation) ResetPartSize() {
+	m.part_size = nil
+	m.addpart_size = nil
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (m *FileObjectMutation) SetTotalParts(i int32) {
+	m.total_parts = &i
+	m.addtotal_parts = nil
+}
+
+// TotalParts returns the value of the "total_parts" field in the mutation.
+func (m *FileObjectMutation) TotalParts() (r int32, exists bool) {
+	v := m.total_parts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotalParts returns the old "total_parts" field's value of the FileObject entity.
+// If the FileObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileObjectMutation) OldTotalParts(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotalParts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotalParts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotalParts: %w", err)
+	}
+	return oldValue.TotalParts, nil
+}
+
+// AddTotalParts adds i to the "total_parts" field.
+func (m *FileObjectMutation) AddTotalParts(i int32) {
+	if m.addtotal_parts != nil {
+		*m.addtotal_parts += i
+	} else {
+		m.addtotal_parts = &i
+	}
+}
+
+// AddedTotalParts returns the value that was added to the "total_parts" field in this mutation.
+func (m *FileObjectMutation) AddedTotalParts() (r int32, exists bool) {
+	v := m.addtotal_parts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTotalParts resets all changes to the "total_parts" field.
+func (m *FileObjectMutation) ResetTotalParts() {
+	m.total_parts = nil
+	m.addtotal_parts = nil
+}
+
 // SetUploadExpiresAt sets the "upload_expires_at" field.
 func (m *FileObjectMutation) SetUploadExpiresAt(t time.Time) {
 	m.upload_expires_at = &t
@@ -7484,7 +8615,7 @@ func (m *FileObjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FileObjectMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 25)
 	if m.created_at != nil {
 		fields = append(fields, fileobject.FieldCreatedAt)
 	}
@@ -7542,6 +8673,15 @@ func (m *FileObjectMutation) Fields() []string {
 	if m.idempotency_key != nil {
 		fields = append(fields, fileobject.FieldIdempotencyKey)
 	}
+	if m.upload_id != nil {
+		fields = append(fields, fileobject.FieldUploadID)
+	}
+	if m.part_size != nil {
+		fields = append(fields, fileobject.FieldPartSize)
+	}
+	if m.total_parts != nil {
+		fields = append(fields, fileobject.FieldTotalParts)
+	}
 	if m.upload_expires_at != nil {
 		fields = append(fields, fileobject.FieldUploadExpiresAt)
 	}
@@ -7597,6 +8737,12 @@ func (m *FileObjectMutation) Field(name string) (ent.Value, bool) {
 		return m.Visibility()
 	case fileobject.FieldIdempotencyKey:
 		return m.IdempotencyKey()
+	case fileobject.FieldUploadID:
+		return m.UploadID()
+	case fileobject.FieldPartSize:
+		return m.PartSize()
+	case fileobject.FieldTotalParts:
+		return m.TotalParts()
 	case fileobject.FieldUploadExpiresAt:
 		return m.UploadExpiresAt()
 	case fileobject.FieldConfirmedAt:
@@ -7650,6 +8796,12 @@ func (m *FileObjectMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldVisibility(ctx)
 	case fileobject.FieldIdempotencyKey:
 		return m.OldIdempotencyKey(ctx)
+	case fileobject.FieldUploadID:
+		return m.OldUploadID(ctx)
+	case fileobject.FieldPartSize:
+		return m.OldPartSize(ctx)
+	case fileobject.FieldTotalParts:
+		return m.OldTotalParts(ctx)
 	case fileobject.FieldUploadExpiresAt:
 		return m.OldUploadExpiresAt(ctx)
 	case fileobject.FieldConfirmedAt:
@@ -7798,6 +8950,27 @@ func (m *FileObjectMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetIdempotencyKey(v)
 		return nil
+	case fileobject.FieldUploadID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUploadID(v)
+		return nil
+	case fileobject.FieldPartSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPartSize(v)
+		return nil
+	case fileobject.FieldTotalParts:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotalParts(v)
+		return nil
 	case fileobject.FieldUploadExpiresAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -7839,6 +9012,12 @@ func (m *FileObjectMutation) AddedFields() []string {
 	if m.addprovider_id != nil {
 		fields = append(fields, fileobject.FieldProviderID)
 	}
+	if m.addpart_size != nil {
+		fields = append(fields, fileobject.FieldPartSize)
+	}
+	if m.addtotal_parts != nil {
+		fields = append(fields, fileobject.FieldTotalParts)
+	}
 	if m.addcreated_by != nil {
 		fields = append(fields, fileobject.FieldCreatedBy)
 	}
@@ -7858,6 +9037,10 @@ func (m *FileObjectMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSize()
 	case fileobject.FieldProviderID:
 		return m.AddedProviderID()
+	case fileobject.FieldPartSize:
+		return m.AddedPartSize()
+	case fileobject.FieldTotalParts:
+		return m.AddedTotalParts()
 	case fileobject.FieldCreatedBy:
 		return m.AddedCreatedBy()
 	}
@@ -7896,6 +9079,20 @@ func (m *FileObjectMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddProviderID(v)
+		return nil
+	case fileobject.FieldPartSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPartSize(v)
+		return nil
+	case fileobject.FieldTotalParts:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotalParts(v)
 		return nil
 	case fileobject.FieldCreatedBy:
 		v, ok := value.(int32)
@@ -8020,6 +9217,15 @@ func (m *FileObjectMutation) ResetField(name string) error {
 		return nil
 	case fileobject.FieldIdempotencyKey:
 		m.ResetIdempotencyKey()
+		return nil
+	case fileobject.FieldUploadID:
+		m.ResetUploadID()
+		return nil
+	case fileobject.FieldPartSize:
+		m.ResetPartSize()
+		return nil
+	case fileobject.FieldTotalParts:
+		m.ResetTotalParts()
 		return nil
 	case fileobject.FieldUploadExpiresAt:
 		m.ResetUploadExpiresAt()
@@ -13407,6 +14613,1152 @@ func (m *NotificationMessageMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *NotificationMessageMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown NotificationMessage edge %s", name)
+}
+
+// NotificationProviderMutation represents an operation that mutates the NotificationProvider nodes in the graph.
+type NotificationProviderMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uint32
+	status            *int32
+	addstatus         *int32
+	created_at        *time.Time
+	updated_at        *time.Time
+	deleted_at        *time.Time
+	code              *string
+	name              *string
+	channel           *string
+	provider_type     *string
+	endpoint          *string
+	access_key_id     *string
+	access_key_secret *string
+	sign_name         *string
+	template_code     *string
+	is_default        *bool
+	remark            *string
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*NotificationProvider, error)
+	predicates        []predicate.NotificationProvider
+}
+
+var _ ent.Mutation = (*NotificationProviderMutation)(nil)
+
+// notificationproviderOption allows management of the mutation configuration using functional options.
+type notificationproviderOption func(*NotificationProviderMutation)
+
+// newNotificationProviderMutation creates new mutation for the NotificationProvider entity.
+func newNotificationProviderMutation(c config, op Op, opts ...notificationproviderOption) *NotificationProviderMutation {
+	m := &NotificationProviderMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeNotificationProvider,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withNotificationProviderID sets the ID field of the mutation.
+func withNotificationProviderID(id uint32) notificationproviderOption {
+	return func(m *NotificationProviderMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *NotificationProvider
+		)
+		m.oldValue = func(ctx context.Context) (*NotificationProvider, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().NotificationProvider.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withNotificationProvider sets the old NotificationProvider of the mutation.
+func withNotificationProvider(node *NotificationProvider) notificationproviderOption {
+	return func(m *NotificationProviderMutation) {
+		m.oldValue = func(context.Context) (*NotificationProvider, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m NotificationProviderMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m NotificationProviderMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("gen: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of NotificationProvider entities.
+func (m *NotificationProviderMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *NotificationProviderMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *NotificationProviderMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().NotificationProvider.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStatus sets the "status" field.
+func (m *NotificationProviderMutation) SetStatus(i int32) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *NotificationProviderMutation) Status() (r int32, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldStatus(ctx context.Context) (v *int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *NotificationProviderMutation) AddStatus(i int32) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *NotificationProviderMutation) AddedStatus() (r int32, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *NotificationProviderMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *NotificationProviderMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *NotificationProviderMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *NotificationProviderMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *NotificationProviderMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *NotificationProviderMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *NotificationProviderMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *NotificationProviderMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *NotificationProviderMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *NotificationProviderMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[notificationprovider.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *NotificationProviderMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[notificationprovider.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *NotificationProviderMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, notificationprovider.FieldDeletedAt)
+}
+
+// SetCode sets the "code" field.
+func (m *NotificationProviderMutation) SetCode(s string) {
+	m.code = &s
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *NotificationProviderMutation) Code() (r string, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *NotificationProviderMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetName sets the "name" field.
+func (m *NotificationProviderMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *NotificationProviderMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *NotificationProviderMutation) ResetName() {
+	m.name = nil
+}
+
+// SetChannel sets the "channel" field.
+func (m *NotificationProviderMutation) SetChannel(s string) {
+	m.channel = &s
+}
+
+// Channel returns the value of the "channel" field in the mutation.
+func (m *NotificationProviderMutation) Channel() (r string, exists bool) {
+	v := m.channel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannel returns the old "channel" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldChannel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannel: %w", err)
+	}
+	return oldValue.Channel, nil
+}
+
+// ResetChannel resets all changes to the "channel" field.
+func (m *NotificationProviderMutation) ResetChannel() {
+	m.channel = nil
+}
+
+// SetProviderType sets the "provider_type" field.
+func (m *NotificationProviderMutation) SetProviderType(s string) {
+	m.provider_type = &s
+}
+
+// ProviderType returns the value of the "provider_type" field in the mutation.
+func (m *NotificationProviderMutation) ProviderType() (r string, exists bool) {
+	v := m.provider_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderType returns the old "provider_type" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldProviderType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderType: %w", err)
+	}
+	return oldValue.ProviderType, nil
+}
+
+// ResetProviderType resets all changes to the "provider_type" field.
+func (m *NotificationProviderMutation) ResetProviderType() {
+	m.provider_type = nil
+}
+
+// SetEndpoint sets the "endpoint" field.
+func (m *NotificationProviderMutation) SetEndpoint(s string) {
+	m.endpoint = &s
+}
+
+// Endpoint returns the value of the "endpoint" field in the mutation.
+func (m *NotificationProviderMutation) Endpoint() (r string, exists bool) {
+	v := m.endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndpoint returns the old "endpoint" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndpoint: %w", err)
+	}
+	return oldValue.Endpoint, nil
+}
+
+// ResetEndpoint resets all changes to the "endpoint" field.
+func (m *NotificationProviderMutation) ResetEndpoint() {
+	m.endpoint = nil
+}
+
+// SetAccessKeyID sets the "access_key_id" field.
+func (m *NotificationProviderMutation) SetAccessKeyID(s string) {
+	m.access_key_id = &s
+}
+
+// AccessKeyID returns the value of the "access_key_id" field in the mutation.
+func (m *NotificationProviderMutation) AccessKeyID() (r string, exists bool) {
+	v := m.access_key_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccessKeyID returns the old "access_key_id" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldAccessKeyID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccessKeyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccessKeyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccessKeyID: %w", err)
+	}
+	return oldValue.AccessKeyID, nil
+}
+
+// ResetAccessKeyID resets all changes to the "access_key_id" field.
+func (m *NotificationProviderMutation) ResetAccessKeyID() {
+	m.access_key_id = nil
+}
+
+// SetAccessKeySecret sets the "access_key_secret" field.
+func (m *NotificationProviderMutation) SetAccessKeySecret(s string) {
+	m.access_key_secret = &s
+}
+
+// AccessKeySecret returns the value of the "access_key_secret" field in the mutation.
+func (m *NotificationProviderMutation) AccessKeySecret() (r string, exists bool) {
+	v := m.access_key_secret
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccessKeySecret returns the old "access_key_secret" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldAccessKeySecret(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccessKeySecret is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccessKeySecret requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccessKeySecret: %w", err)
+	}
+	return oldValue.AccessKeySecret, nil
+}
+
+// ResetAccessKeySecret resets all changes to the "access_key_secret" field.
+func (m *NotificationProviderMutation) ResetAccessKeySecret() {
+	m.access_key_secret = nil
+}
+
+// SetSignName sets the "sign_name" field.
+func (m *NotificationProviderMutation) SetSignName(s string) {
+	m.sign_name = &s
+}
+
+// SignName returns the value of the "sign_name" field in the mutation.
+func (m *NotificationProviderMutation) SignName() (r string, exists bool) {
+	v := m.sign_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSignName returns the old "sign_name" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldSignName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSignName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSignName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSignName: %w", err)
+	}
+	return oldValue.SignName, nil
+}
+
+// ResetSignName resets all changes to the "sign_name" field.
+func (m *NotificationProviderMutation) ResetSignName() {
+	m.sign_name = nil
+}
+
+// SetTemplateCode sets the "template_code" field.
+func (m *NotificationProviderMutation) SetTemplateCode(s string) {
+	m.template_code = &s
+}
+
+// TemplateCode returns the value of the "template_code" field in the mutation.
+func (m *NotificationProviderMutation) TemplateCode() (r string, exists bool) {
+	v := m.template_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTemplateCode returns the old "template_code" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldTemplateCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTemplateCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTemplateCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTemplateCode: %w", err)
+	}
+	return oldValue.TemplateCode, nil
+}
+
+// ResetTemplateCode resets all changes to the "template_code" field.
+func (m *NotificationProviderMutation) ResetTemplateCode() {
+	m.template_code = nil
+}
+
+// SetIsDefault sets the "is_default" field.
+func (m *NotificationProviderMutation) SetIsDefault(b bool) {
+	m.is_default = &b
+}
+
+// IsDefault returns the value of the "is_default" field in the mutation.
+func (m *NotificationProviderMutation) IsDefault() (r bool, exists bool) {
+	v := m.is_default
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsDefault returns the old "is_default" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldIsDefault(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsDefault is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsDefault requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsDefault: %w", err)
+	}
+	return oldValue.IsDefault, nil
+}
+
+// ResetIsDefault resets all changes to the "is_default" field.
+func (m *NotificationProviderMutation) ResetIsDefault() {
+	m.is_default = nil
+}
+
+// SetRemark sets the "remark" field.
+func (m *NotificationProviderMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *NotificationProviderMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the NotificationProvider entity.
+// If the NotificationProvider object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationProviderMutation) OldRemark(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *NotificationProviderMutation) ResetRemark() {
+	m.remark = nil
+}
+
+// Where appends a list predicates to the NotificationProviderMutation builder.
+func (m *NotificationProviderMutation) Where(ps ...predicate.NotificationProvider) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the NotificationProviderMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *NotificationProviderMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.NotificationProvider, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *NotificationProviderMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *NotificationProviderMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (NotificationProvider).
+func (m *NotificationProviderMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *NotificationProviderMutation) Fields() []string {
+	fields := make([]string, 0, 15)
+	if m.status != nil {
+		fields = append(fields, notificationprovider.FieldStatus)
+	}
+	if m.created_at != nil {
+		fields = append(fields, notificationprovider.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, notificationprovider.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, notificationprovider.FieldDeletedAt)
+	}
+	if m.code != nil {
+		fields = append(fields, notificationprovider.FieldCode)
+	}
+	if m.name != nil {
+		fields = append(fields, notificationprovider.FieldName)
+	}
+	if m.channel != nil {
+		fields = append(fields, notificationprovider.FieldChannel)
+	}
+	if m.provider_type != nil {
+		fields = append(fields, notificationprovider.FieldProviderType)
+	}
+	if m.endpoint != nil {
+		fields = append(fields, notificationprovider.FieldEndpoint)
+	}
+	if m.access_key_id != nil {
+		fields = append(fields, notificationprovider.FieldAccessKeyID)
+	}
+	if m.access_key_secret != nil {
+		fields = append(fields, notificationprovider.FieldAccessKeySecret)
+	}
+	if m.sign_name != nil {
+		fields = append(fields, notificationprovider.FieldSignName)
+	}
+	if m.template_code != nil {
+		fields = append(fields, notificationprovider.FieldTemplateCode)
+	}
+	if m.is_default != nil {
+		fields = append(fields, notificationprovider.FieldIsDefault)
+	}
+	if m.remark != nil {
+		fields = append(fields, notificationprovider.FieldRemark)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *NotificationProviderMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case notificationprovider.FieldStatus:
+		return m.Status()
+	case notificationprovider.FieldCreatedAt:
+		return m.CreatedAt()
+	case notificationprovider.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case notificationprovider.FieldDeletedAt:
+		return m.DeletedAt()
+	case notificationprovider.FieldCode:
+		return m.Code()
+	case notificationprovider.FieldName:
+		return m.Name()
+	case notificationprovider.FieldChannel:
+		return m.Channel()
+	case notificationprovider.FieldProviderType:
+		return m.ProviderType()
+	case notificationprovider.FieldEndpoint:
+		return m.Endpoint()
+	case notificationprovider.FieldAccessKeyID:
+		return m.AccessKeyID()
+	case notificationprovider.FieldAccessKeySecret:
+		return m.AccessKeySecret()
+	case notificationprovider.FieldSignName:
+		return m.SignName()
+	case notificationprovider.FieldTemplateCode:
+		return m.TemplateCode()
+	case notificationprovider.FieldIsDefault:
+		return m.IsDefault()
+	case notificationprovider.FieldRemark:
+		return m.Remark()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *NotificationProviderMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case notificationprovider.FieldStatus:
+		return m.OldStatus(ctx)
+	case notificationprovider.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case notificationprovider.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case notificationprovider.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case notificationprovider.FieldCode:
+		return m.OldCode(ctx)
+	case notificationprovider.FieldName:
+		return m.OldName(ctx)
+	case notificationprovider.FieldChannel:
+		return m.OldChannel(ctx)
+	case notificationprovider.FieldProviderType:
+		return m.OldProviderType(ctx)
+	case notificationprovider.FieldEndpoint:
+		return m.OldEndpoint(ctx)
+	case notificationprovider.FieldAccessKeyID:
+		return m.OldAccessKeyID(ctx)
+	case notificationprovider.FieldAccessKeySecret:
+		return m.OldAccessKeySecret(ctx)
+	case notificationprovider.FieldSignName:
+		return m.OldSignName(ctx)
+	case notificationprovider.FieldTemplateCode:
+		return m.OldTemplateCode(ctx)
+	case notificationprovider.FieldIsDefault:
+		return m.OldIsDefault(ctx)
+	case notificationprovider.FieldRemark:
+		return m.OldRemark(ctx)
+	}
+	return nil, fmt.Errorf("unknown NotificationProvider field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *NotificationProviderMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case notificationprovider.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case notificationprovider.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case notificationprovider.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case notificationprovider.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case notificationprovider.FieldCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case notificationprovider.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case notificationprovider.FieldChannel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannel(v)
+		return nil
+	case notificationprovider.FieldProviderType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderType(v)
+		return nil
+	case notificationprovider.FieldEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndpoint(v)
+		return nil
+	case notificationprovider.FieldAccessKeyID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccessKeyID(v)
+		return nil
+	case notificationprovider.FieldAccessKeySecret:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccessKeySecret(v)
+		return nil
+	case notificationprovider.FieldSignName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSignName(v)
+		return nil
+	case notificationprovider.FieldTemplateCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTemplateCode(v)
+		return nil
+	case notificationprovider.FieldIsDefault:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsDefault(v)
+		return nil
+	case notificationprovider.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
+	}
+	return fmt.Errorf("unknown NotificationProvider field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *NotificationProviderMutation) AddedFields() []string {
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, notificationprovider.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *NotificationProviderMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case notificationprovider.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *NotificationProviderMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case notificationprovider.FieldStatus:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown NotificationProvider numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *NotificationProviderMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(notificationprovider.FieldDeletedAt) {
+		fields = append(fields, notificationprovider.FieldDeletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *NotificationProviderMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *NotificationProviderMutation) ClearField(name string) error {
+	switch name {
+	case notificationprovider.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown NotificationProvider nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *NotificationProviderMutation) ResetField(name string) error {
+	switch name {
+	case notificationprovider.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case notificationprovider.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case notificationprovider.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case notificationprovider.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case notificationprovider.FieldCode:
+		m.ResetCode()
+		return nil
+	case notificationprovider.FieldName:
+		m.ResetName()
+		return nil
+	case notificationprovider.FieldChannel:
+		m.ResetChannel()
+		return nil
+	case notificationprovider.FieldProviderType:
+		m.ResetProviderType()
+		return nil
+	case notificationprovider.FieldEndpoint:
+		m.ResetEndpoint()
+		return nil
+	case notificationprovider.FieldAccessKeyID:
+		m.ResetAccessKeyID()
+		return nil
+	case notificationprovider.FieldAccessKeySecret:
+		m.ResetAccessKeySecret()
+		return nil
+	case notificationprovider.FieldSignName:
+		m.ResetSignName()
+		return nil
+	case notificationprovider.FieldTemplateCode:
+		m.ResetTemplateCode()
+		return nil
+	case notificationprovider.FieldIsDefault:
+		m.ResetIsDefault()
+		return nil
+	case notificationprovider.FieldRemark:
+		m.ResetRemark()
+		return nil
+	}
+	return fmt.Errorf("unknown NotificationProvider field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *NotificationProviderMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *NotificationProviderMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *NotificationProviderMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *NotificationProviderMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *NotificationProviderMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *NotificationProviderMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *NotificationProviderMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown NotificationProvider unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *NotificationProviderMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown NotificationProvider edge %s", name)
 }
 
 // NotificationTemplateMutation represents an operation that mutates the NotificationTemplate nodes in the graph.

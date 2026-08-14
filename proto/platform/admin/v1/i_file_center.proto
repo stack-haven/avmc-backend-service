@@ -18,13 +18,13 @@ service FileCenterService {
   }
   rpc UploadFileContent(core.service.v1.UploadFileContentRequest) returns (core.service.v1.UploadFileContentResponse) {
     option (google.api.http) = {
-      post: "/admin/v1/files/{id}:content"
+      post: "/admin/v1/files/{id}/content"
       body: "*"
     };
   }
   rpc ConfirmFileUpload(core.service.v1.ConfirmFileUploadRequest) returns (core.service.v1.ConfirmFileUploadResponse) {
     option (google.api.http) = {
-      post: "/admin/v1/files/{id}:confirm"
+      post: "/admin/v1/files/{id}/confirm"
       body: "*"
     };
   }
@@ -38,9 +38,45 @@ service FileCenterService {
     option (google.api.http) = {get: "/admin/v1/files/{file_id}/access-logs"};
   }
   rpc PresignFileDownload(core.service.v1.PresignFileDownloadRequest) returns (core.service.v1.PresignFileDownloadResponse) {
-    option (google.api.http) = {get: "/admin/v1/files/{id}:download-url"};
+    option (google.api.http) = {get: "/admin/v1/files/{id}/download-url"};
   }
   rpc DeleteFileObject(core.service.v1.DeleteFileObjectRequest) returns (core.service.v1.DeleteFileObjectResponse) {
     option (google.api.http) = {delete: "/admin/v1/files/{id}"};
+  }
+  rpc UpdateFileObject(core.service.v1.UpdateFileObjectRequest) returns (core.service.v1.UpdateFileObjectResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/files/{id}"
+      body: "*"
+    };
+  }
+  rpc ReplaceFileContent(core.service.v1.ReplaceFileContentRequest) returns (core.service.v1.ReplaceFileContentResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/files/{id}/replace"
+      body: "*"
+    };
+  }
+  rpc DownloadFileContent(core.service.v1.DownloadFileContentRequest) returns (core.service.v1.DownloadFileContentResponse) {
+    option (google.api.http) = {get: "/admin/v1/files/{id}/download"};
+  }
+  rpc UploadFilePart(core.service.v1.UploadFilePartRequest) returns (core.service.v1.UploadFilePartResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/files/{id}/parts"
+      body: "*"
+    };
+  }
+  rpc ListFileParts(core.service.v1.ListFilePartsRequest) returns (core.service.v1.ListFilePartsResponse) {
+    option (google.api.http) = {get: "/admin/v1/files/{id}/parts"};
+  }
+  rpc CompleteFileUpload(core.service.v1.CompleteFileUploadRequest) returns (core.service.v1.CompleteFileUploadResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/files/{id}/complete"
+      body: "*"
+    };
+  }
+  rpc AbortFileUpload(core.service.v1.AbortFileUploadRequest) returns (core.service.v1.AbortFileUploadResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/files/{id}/abort"
+      body: "*"
+    };
   }
 }

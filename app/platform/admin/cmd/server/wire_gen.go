@@ -109,8 +109,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	asyncTaskRepo := data.NewAsyncTaskRepo(dataData, logger)
 	notificationUsecase := biz.NewNotificationUsecase(notificationRepo, asyncTaskRepo, logger)
 	notificationServiceService := service.NewNotificationServiceService(notificationUsecase, logger)
+	notificationProviderRepo := data.NewNotificationProviderRepo(dataData, logger)
+	notificationProviderUsecase := biz.NewNotificationProviderUsecase(notificationProviderRepo, logger)
+	notificationProviderServiceService := service.NewNotificationProviderServiceService(notificationProviderUsecase, logger)
+	deviceRepo := data.NewDeviceRepo(dataData, logger)
+	deviceUsecase := biz.NewDeviceUsecase(deviceRepo, logger)
+	deviceServiceService := service.NewDeviceServiceService(deviceUsecase, logger)
 	permissionCacheInvalidator := data.NewPermissionCacheInvalidator(logger)
-	asyncTaskHandler := biz.NewNotificationAsyncTaskHandler(notificationRepo)
+	notificationSenderResolver := biz.NewNotificationSenderResolver(notificationProviderRepo, notificationRepo)
+	asyncTaskHandler := biz.NewNotificationAsyncTaskHandler(notificationRepo, notificationSenderResolver)
 	webhookRepo := data.NewWebhookRepo(dataData, logger)
 	v := biz.NewAsyncTaskHandlers(asyncTaskRepo, permissionCacheInvalidator, asyncTaskHandler, webhookRepo, logger)
 	asyncTaskUsecase := biz.NewAsyncTaskUsecase(asyncTaskRepo, v, logger)
@@ -120,13 +127,14 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 		cleanup()
 		return nil, nil, err
 	}
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
+	authzService := service.NewAuthzService(authorizer, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, authzService, authToken, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, asyncTaskServiceService)
+	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

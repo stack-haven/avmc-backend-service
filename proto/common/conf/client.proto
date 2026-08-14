@@ -11,14 +11,16 @@ import "common/conf/middleware.proto";
 message Client {
   // HTTP
   message HTTP {
-    google.protobuf.Duration timeout = 1; // 超时时间
-    Middleware middleware = 2;
+    string addr = 1; // 服务地址
+    google.protobuf.Duration timeout = 2; // 超时时间
+    Middleware middleware = 3;
   }
 
   // gPRC
   message GRPC {
-    google.protobuf.Duration timeout = 1; // 超时时间
-    Middleware middleware = 2;
+    string addr = 1; // 服务地址
+    google.protobuf.Duration timeout = 2; // 超时时间
+    Middleware middleware = 3;
   }
 
   HTTP http = 1;  // HTTP服务

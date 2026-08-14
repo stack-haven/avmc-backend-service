@@ -159,6 +159,30 @@ func (f DeptMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) 
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.DeptMutation", m)
 }
 
+// The DeviceQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type DeviceQueryRuleFunc func(context.Context, *gen.DeviceQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f DeviceQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DeviceQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.DeviceQuery", q)
+}
+
+// The DeviceMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type DeviceMutationRuleFunc func(context.Context, *gen.DeviceMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f DeviceMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.DeviceMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.DeviceMutation", m)
+}
+
 // The DictionaryItemQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type DictionaryItemQueryRuleFunc func(context.Context, *gen.DictionaryItemQuery) error
@@ -325,6 +349,30 @@ func (f NotificationMessageMutationRuleFunc) EvalMutation(ctx context.Context, m
 		return f(ctx, m)
 	}
 	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.NotificationMessageMutation", m)
+}
+
+// The NotificationProviderQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type NotificationProviderQueryRuleFunc func(context.Context, *gen.NotificationProviderQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f NotificationProviderQueryRuleFunc) EvalQuery(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.NotificationProviderQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("gen/privacy: unexpected query type %T, expect *gen.NotificationProviderQuery", q)
+}
+
+// The NotificationProviderMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type NotificationProviderMutationRuleFunc func(context.Context, *gen.NotificationProviderMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f NotificationProviderMutationRuleFunc) EvalMutation(ctx context.Context, m gen.Mutation) error {
+	if m, ok := m.(*gen.NotificationProviderMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("gen/privacy: unexpected mutation type %T, expect *gen.NotificationProviderMutation", m)
 }
 
 // The NotificationTemplateQueryRuleFunc type is an adapter to allow the use of ordinary
@@ -726,6 +774,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *gen.DeptQuery:
 		return q.Filter(), nil
+	case *gen.DeviceQuery:
+		return q.Filter(), nil
 	case *gen.DictionaryItemQuery:
 		return q.Filter(), nil
 	case *gen.DictionaryTypeQuery:
@@ -739,6 +789,8 @@ func queryFilter(q gen.Query) (Filter, error) {
 	case *gen.MenuQuery:
 		return q.Filter(), nil
 	case *gen.NotificationMessageQuery:
+		return q.Filter(), nil
+	case *gen.NotificationProviderQuery:
 		return q.Filter(), nil
 	case *gen.NotificationTemplateQuery:
 		return q.Filter(), nil
@@ -781,6 +833,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 		return m.Filter(), nil
 	case *gen.DeptMutation:
 		return m.Filter(), nil
+	case *gen.DeviceMutation:
+		return m.Filter(), nil
 	case *gen.DictionaryItemMutation:
 		return m.Filter(), nil
 	case *gen.DictionaryTypeMutation:
@@ -794,6 +848,8 @@ func mutationFilter(m gen.Mutation) (Filter, error) {
 	case *gen.MenuMutation:
 		return m.Filter(), nil
 	case *gen.NotificationMessageMutation:
+		return m.Filter(), nil
+	case *gen.NotificationProviderMutation:
 		return m.Filter(), nil
 	case *gen.NotificationTemplateMutation:
 		return m.Filter(), nil

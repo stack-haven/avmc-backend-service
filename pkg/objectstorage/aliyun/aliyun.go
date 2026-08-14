@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 	"time"
 
@@ -77,7 +76,7 @@ func (c *client) PutObject(ctx context.Context, bucket string, key string, body 
 	var size int64
 	if err == nil {
 		etag = strings.Trim(header.Get("ETag"), `"`)
-		if cl, e := header.Get("Content-Length"); e == nil {
+		if cl := header.Get("Content-Length"); cl != "" {
 			fmt.Sscanf(cl, "%d", &size)
 		}
 	}
@@ -137,6 +136,11 @@ func (c *client) PresignPutObject(_ context.Context, bucket string, key string, 
 	return url, nil
 }
 
+// GetObject 对象存储渠道不支持后端代理读取，下载走预签名 URL。
+func (*client) GetObject(context.Context, string, string) ([]byte, error) {
+	return nil, objectstorage.ErrUnsupportedProvider
+}
+
 func (c *client) PublicURL(bucket string, key string) (string, error) {
 	if c.cfg.PublicBaseURL == "" {
 		return "", fmt.Errorf("oss: public_base_url not configured")
@@ -146,4 +150,26 @@ func (c *client) PublicURL(bucket string, key string) (string, error) {
 
 // Ensure client implements the interface.
 var _ objectstorage.Client = (*client)(nil)
-var _ http.Handler = nil // unused, just to keep http import
+
+// ── Multipart 预留：对象存储渠道未来实现原生分片上传 ──
+func (*client) CreateMultipartUpload(context.Context, string, string) (string, error) {
+	return "", objectstorage.ErrUnsupportedProvider
+}
+
+func (*client) UploadPart(context.Context, string, string, string, int32, io.Reader, objectstorage.PutOptions) (string, error) {
+	return "", objectstorage.ErrUnsupportedProvider
+}
+
+
+func (*client) ListMultipartParts(context.Context, string, string, string) ([]objectstorage.MultipartPart, error) {
+	return nil, objectstorage.ErrUnsupportedProvider
+}
+
+func (*client) CompleteMultipartUpload(context.Context, string, string, string, []objectstorage.MultipartPart) (string, error) {
+	return "", objectstorage.ErrUnsupportedProvider
+}
+
+func (*client) AbortMultipartUpload(context.Context, string, string, string) error {
+	return objectstorage.ErrUnsupportedProvider
+}
+

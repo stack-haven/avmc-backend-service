@@ -5,6 +5,7 @@ package gen
 import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/device"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
@@ -12,6 +13,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
@@ -98,6 +100,7 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			asynctask.Table:                        asynctask.ValidColumn,
 			dept.Table:                             dept.ValidColumn,
+			device.Table:                           device.ValidColumn,
 			dictionaryitem.Table:                   dictionaryitem.ValidColumn,
 			dictionarytype.Table:                   dictionarytype.ValidColumn,
 			fileaccesslog.Table:                    fileaccesslog.ValidColumn,
@@ -105,6 +108,7 @@ func checkColumn(t, c string) error {
 			loginlog.Table:                         loginlog.ValidColumn,
 			menu.Table:                             menu.ValidColumn,
 			notificationmessage.Table:              notificationmessage.ValidColumn,
+			notificationprovider.Table:             notificationprovider.ValidColumn,
 			notificationtemplate.Table:             notificationtemplate.ValidColumn,
 			operationlog.Table:                     operationlog.ValidColumn,
 			parameterdefinition.Table:              parameterdefinition.ValidColumn,

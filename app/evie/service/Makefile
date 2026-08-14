@@ -1,7 +1,7 @@
 include ../../../app.mk
 
 .PHONY: generate-check
-# regenerate platform admin generated code and verify generated outputs are committed
+# regenerate evie service generated code and verify generated outputs are committed
 generate-check:
 	$(MAKE) api
 	$(MAKE) ent
@@ -12,7 +12,7 @@ generate-check:
 	$(MAKE) diff-check
 
 .PHONY: diff-check
-# verify platform admin generated outputs are committed
+# verify evie service generated outputs are committed
 diff-check:
 	@cd ../../.. && git diff --check
 	@cd ../../.. && git diff --exit-code -- \
@@ -43,7 +43,7 @@ diff-check:
 		 exit 1)
 
 .PHONY: race
-# run race detection for platform admin packages
+# run race detection for evie service packages
 race:
 	go test -race -timeout 240s \
 		./internal/authzpolicy \
@@ -82,10 +82,10 @@ policy:
 	@go run ./cmd/policy -conf ./configs
 
 .PHONY: kill
-# kill running platform admin server and release ports 8000/9000
+# kill running evie service server and release ports 8000/9000
 kill:
 	@pkill -f "cmd/server/main.go" || true
-	@for port in 8000 9000; do \
+	@for port in 8100 9100; do \
 		lsof -ti :$$port 2>/dev/null | xargs -r kill -9 2>/dev/null || true; \
 	done
 

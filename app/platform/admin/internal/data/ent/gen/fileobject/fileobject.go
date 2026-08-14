@@ -52,6 +52,12 @@ const (
 	FieldVisibility = "visibility"
 	// FieldIdempotencyKey holds the string denoting the idempotency_key field in the database.
 	FieldIdempotencyKey = "idempotency_key"
+	// FieldUploadID holds the string denoting the upload_id field in the database.
+	FieldUploadID = "upload_id"
+	// FieldPartSize holds the string denoting the part_size field in the database.
+	FieldPartSize = "part_size"
+	// FieldTotalParts holds the string denoting the total_parts field in the database.
+	FieldTotalParts = "total_parts"
 	// FieldUploadExpiresAt holds the string denoting the upload_expires_at field in the database.
 	FieldUploadExpiresAt = "upload_expires_at"
 	// FieldConfirmedAt holds the string denoting the confirmed_at field in the database.
@@ -84,6 +90,9 @@ var Columns = []string{
 	FieldBusinessID,
 	FieldVisibility,
 	FieldIdempotencyKey,
+	FieldUploadID,
+	FieldPartSize,
+	FieldTotalParts,
 	FieldUploadExpiresAt,
 	FieldConfirmedAt,
 	FieldCreatedBy,
@@ -164,6 +173,16 @@ var (
 	VisibilityValidator func(string) error
 	// IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	IdempotencyKeyValidator func(string) error
+	// DefaultUploadID holds the default value on creation for the "upload_id" field.
+	DefaultUploadID string
+	// UploadIDValidator is a validator for the "upload_id" field. It is called by the builders before save.
+	UploadIDValidator func(string) error
+	// DefaultPartSize holds the default value on creation for the "part_size" field.
+	DefaultPartSize int64
+	// PartSizeValidator is a validator for the "part_size" field. It is called by the builders before save.
+	PartSizeValidator func(int64) error
+	// DefaultTotalParts holds the default value on creation for the "total_parts" field.
+	DefaultTotalParts int32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -269,6 +288,21 @@ func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
 // ByIdempotencyKey orders the results by the idempotency_key field.
 func ByIdempotencyKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIdempotencyKey, opts...).ToFunc()
+}
+
+// ByUploadID orders the results by the upload_id field.
+func ByUploadID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUploadID, opts...).ToFunc()
+}
+
+// ByPartSize orders the results by the part_size field.
+func ByPartSize(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPartSize, opts...).ToFunc()
+}
+
+// ByTotalParts orders the results by the total_parts field.
+func ByTotalParts(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalParts, opts...).ToFunc()
 }
 
 // ByUploadExpiresAt orders the results by the upload_expires_at field.

@@ -319,6 +319,62 @@ func (_u *FileObjectUpdate) ClearIdempotencyKey() *FileObjectUpdate {
 	return _u
 }
 
+// SetUploadID sets the "upload_id" field.
+func (_u *FileObjectUpdate) SetUploadID(v string) *FileObjectUpdate {
+	_u.mutation.SetUploadID(v)
+	return _u
+}
+
+// SetNillableUploadID sets the "upload_id" field if the given value is not nil.
+func (_u *FileObjectUpdate) SetNillableUploadID(v *string) *FileObjectUpdate {
+	if v != nil {
+		_u.SetUploadID(*v)
+	}
+	return _u
+}
+
+// SetPartSize sets the "part_size" field.
+func (_u *FileObjectUpdate) SetPartSize(v int64) *FileObjectUpdate {
+	_u.mutation.ResetPartSize()
+	_u.mutation.SetPartSize(v)
+	return _u
+}
+
+// SetNillablePartSize sets the "part_size" field if the given value is not nil.
+func (_u *FileObjectUpdate) SetNillablePartSize(v *int64) *FileObjectUpdate {
+	if v != nil {
+		_u.SetPartSize(*v)
+	}
+	return _u
+}
+
+// AddPartSize adds value to the "part_size" field.
+func (_u *FileObjectUpdate) AddPartSize(v int64) *FileObjectUpdate {
+	_u.mutation.AddPartSize(v)
+	return _u
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (_u *FileObjectUpdate) SetTotalParts(v int32) *FileObjectUpdate {
+	_u.mutation.ResetTotalParts()
+	_u.mutation.SetTotalParts(v)
+	return _u
+}
+
+// SetNillableTotalParts sets the "total_parts" field if the given value is not nil.
+func (_u *FileObjectUpdate) SetNillableTotalParts(v *int32) *FileObjectUpdate {
+	if v != nil {
+		_u.SetTotalParts(*v)
+	}
+	return _u
+}
+
+// AddTotalParts adds value to the "total_parts" field.
+func (_u *FileObjectUpdate) AddTotalParts(v int32) *FileObjectUpdate {
+	_u.mutation.AddTotalParts(v)
+	return _u
+}
+
 // SetUploadExpiresAt sets the "upload_expires_at" field.
 func (_u *FileObjectUpdate) SetUploadExpiresAt(v time.Time) *FileObjectUpdate {
 	_u.mutation.SetUploadExpiresAt(v)
@@ -504,6 +560,16 @@ func (_u *FileObjectUpdate) check() error {
 			return &ValidationError{Name: "idempotency_key", err: fmt.Errorf(`gen: validator failed for field "FileObject.idempotency_key": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.UploadID(); ok {
+		if err := fileobject.UploadIDValidator(v); err != nil {
+			return &ValidationError{Name: "upload_id", err: fmt.Errorf(`gen: validator failed for field "FileObject.upload_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PartSize(); ok {
+		if err := fileobject.PartSizeValidator(v); err != nil {
+			return &ValidationError{Name: "part_size", err: fmt.Errorf(`gen: validator failed for field "FileObject.part_size": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -599,6 +665,21 @@ func (_u *FileObjectUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.IdempotencyKeyCleared() {
 		_spec.ClearField(fileobject.FieldIdempotencyKey, field.TypeString)
+	}
+	if value, ok := _u.mutation.UploadID(); ok {
+		_spec.SetField(fileobject.FieldUploadID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PartSize(); ok {
+		_spec.SetField(fileobject.FieldPartSize, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPartSize(); ok {
+		_spec.AddField(fileobject.FieldPartSize, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.TotalParts(); ok {
+		_spec.SetField(fileobject.FieldTotalParts, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedTotalParts(); ok {
+		_spec.AddField(fileobject.FieldTotalParts, field.TypeInt32, value)
 	}
 	if value, ok := _u.mutation.UploadExpiresAt(); ok {
 		_spec.SetField(fileobject.FieldUploadExpiresAt, field.TypeTime, value)
@@ -930,6 +1011,62 @@ func (_u *FileObjectUpdateOne) ClearIdempotencyKey() *FileObjectUpdateOne {
 	return _u
 }
 
+// SetUploadID sets the "upload_id" field.
+func (_u *FileObjectUpdateOne) SetUploadID(v string) *FileObjectUpdateOne {
+	_u.mutation.SetUploadID(v)
+	return _u
+}
+
+// SetNillableUploadID sets the "upload_id" field if the given value is not nil.
+func (_u *FileObjectUpdateOne) SetNillableUploadID(v *string) *FileObjectUpdateOne {
+	if v != nil {
+		_u.SetUploadID(*v)
+	}
+	return _u
+}
+
+// SetPartSize sets the "part_size" field.
+func (_u *FileObjectUpdateOne) SetPartSize(v int64) *FileObjectUpdateOne {
+	_u.mutation.ResetPartSize()
+	_u.mutation.SetPartSize(v)
+	return _u
+}
+
+// SetNillablePartSize sets the "part_size" field if the given value is not nil.
+func (_u *FileObjectUpdateOne) SetNillablePartSize(v *int64) *FileObjectUpdateOne {
+	if v != nil {
+		_u.SetPartSize(*v)
+	}
+	return _u
+}
+
+// AddPartSize adds value to the "part_size" field.
+func (_u *FileObjectUpdateOne) AddPartSize(v int64) *FileObjectUpdateOne {
+	_u.mutation.AddPartSize(v)
+	return _u
+}
+
+// SetTotalParts sets the "total_parts" field.
+func (_u *FileObjectUpdateOne) SetTotalParts(v int32) *FileObjectUpdateOne {
+	_u.mutation.ResetTotalParts()
+	_u.mutation.SetTotalParts(v)
+	return _u
+}
+
+// SetNillableTotalParts sets the "total_parts" field if the given value is not nil.
+func (_u *FileObjectUpdateOne) SetNillableTotalParts(v *int32) *FileObjectUpdateOne {
+	if v != nil {
+		_u.SetTotalParts(*v)
+	}
+	return _u
+}
+
+// AddTotalParts adds value to the "total_parts" field.
+func (_u *FileObjectUpdateOne) AddTotalParts(v int32) *FileObjectUpdateOne {
+	_u.mutation.AddTotalParts(v)
+	return _u
+}
+
 // SetUploadExpiresAt sets the "upload_expires_at" field.
 func (_u *FileObjectUpdateOne) SetUploadExpiresAt(v time.Time) *FileObjectUpdateOne {
 	_u.mutation.SetUploadExpiresAt(v)
@@ -1128,6 +1265,16 @@ func (_u *FileObjectUpdateOne) check() error {
 			return &ValidationError{Name: "idempotency_key", err: fmt.Errorf(`gen: validator failed for field "FileObject.idempotency_key": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.UploadID(); ok {
+		if err := fileobject.UploadIDValidator(v); err != nil {
+			return &ValidationError{Name: "upload_id", err: fmt.Errorf(`gen: validator failed for field "FileObject.upload_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PartSize(); ok {
+		if err := fileobject.PartSizeValidator(v); err != nil {
+			return &ValidationError{Name: "part_size", err: fmt.Errorf(`gen: validator failed for field "FileObject.part_size": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1240,6 +1387,21 @@ func (_u *FileObjectUpdateOne) sqlSave(ctx context.Context) (_node *FileObject, 
 	}
 	if _u.mutation.IdempotencyKeyCleared() {
 		_spec.ClearField(fileobject.FieldIdempotencyKey, field.TypeString)
+	}
+	if value, ok := _u.mutation.UploadID(); ok {
+		_spec.SetField(fileobject.FieldUploadID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PartSize(); ok {
+		_spec.SetField(fileobject.FieldPartSize, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPartSize(); ok {
+		_spec.AddField(fileobject.FieldPartSize, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.TotalParts(); ok {
+		_spec.SetField(fileobject.FieldTotalParts, field.TypeInt32, value)
+	}
+	if value, ok := _u.mutation.AddedTotalParts(); ok {
+		_spec.AddField(fileobject.FieldTotalParts, field.TypeInt32, value)
 	}
 	if value, ok := _u.mutation.UploadExpiresAt(); ok {
 		_spec.SetField(fileobject.FieldUploadExpiresAt, field.TypeTime, value)

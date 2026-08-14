@@ -12,6 +12,9 @@ type AsyncTask func(*sql.Selector)
 // Dept is the predicate function for dept builders.
 type Dept func(*sql.Selector)
 
+// Device is the predicate function for device builders.
+type Device func(*sql.Selector)
+
 // DictionaryItem is the predicate function for dictionaryitem builders.
 type DictionaryItem func(*sql.Selector)
 
@@ -32,6 +35,9 @@ type Menu func(*sql.Selector)
 
 // NotificationMessage is the predicate function for notificationmessage builders.
 type NotificationMessage func(*sql.Selector)
+
+// NotificationProvider is the predicate function for notificationprovider builders.
+type NotificationProvider func(*sql.Selector)
 
 // NotificationTemplate is the predicate function for notificationtemplate builders.
 type NotificationTemplate func(*sql.Selector)

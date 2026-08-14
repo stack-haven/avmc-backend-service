@@ -45,6 +45,9 @@ type FileObject struct {
 	UploadExpiresAt *string                `protobuf:"bytes,18,opt,name=upload_expires_at,json=uploadExpiresAt,proto3,oneof" json:"upload_expires_at,omitempty"`
 	ProviderId      *uint32                `protobuf:"varint,19,opt,name=provider_id,json=providerId,proto3,oneof" json:"provider_id,omitempty"`
 	ProviderCode    *string                `protobuf:"bytes,20,opt,name=provider_code,json=providerCode,proto3,oneof" json:"provider_code,omitempty"`
+	UploadId        *string                `protobuf:"bytes,21,opt,name=upload_id,json=uploadId,proto3,oneof" json:"upload_id,omitempty"`
+	PartSize        *int64                 `protobuf:"varint,22,opt,name=part_size,json=partSize,proto3,oneof" json:"part_size,omitempty"`
+	TotalParts      *int32                 `protobuf:"varint,23,opt,name=total_parts,json=totalParts,proto3,oneof" json:"total_parts,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -219,6 +222,27 @@ func (x *FileObject) GetProviderCode() string {
 	return ""
 }
 
+func (x *FileObject) GetUploadId() string {
+	if x != nil && x.UploadId != nil {
+		return *x.UploadId
+	}
+	return ""
+}
+
+func (x *FileObject) GetPartSize() int64 {
+	if x != nil && x.PartSize != nil {
+		return *x.PartSize
+	}
+	return 0
+}
+
+func (x *FileObject) GetTotalParts() int32 {
+	if x != nil && x.TotalParts != nil {
+		return *x.TotalParts
+	}
+	return 0
+}
+
 type FileAccessLog struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -361,6 +385,8 @@ type CreateFileUploadSessionRequest struct {
 	BusinessId     *string                `protobuf:"bytes,6,opt,name=business_id,json=businessId,proto3,oneof" json:"business_id,omitempty"`
 	Visibility     *string                `protobuf:"bytes,7,opt,name=visibility,proto3,oneof" json:"visibility,omitempty"`
 	IdempotencyKey *string                `protobuf:"bytes,8,opt,name=idempotency_key,json=idempotencyKey,proto3,oneof" json:"idempotency_key,omitempty"`
+	PartSize       *int64                 `protobuf:"varint,9,opt,name=part_size,json=partSize,proto3,oneof" json:"part_size,omitempty"`
+	TotalParts     *int32                 `protobuf:"varint,10,opt,name=total_parts,json=totalParts,proto3,oneof" json:"total_parts,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -449,6 +475,20 @@ func (x *CreateFileUploadSessionRequest) GetIdempotencyKey() string {
 		return *x.IdempotencyKey
 	}
 	return ""
+}
+
+func (x *CreateFileUploadSessionRequest) GetPartSize() int64 {
+	if x != nil && x.PartSize != nil {
+		return *x.PartSize
+	}
+	return 0
+}
+
+func (x *CreateFileUploadSessionRequest) GetTotalParts() int32 {
+	if x != nil && x.TotalParts != nil {
+		return *x.TotalParts
+	}
+	return 0
 }
 
 type CreateFileUploadSessionResponse struct {
@@ -1323,11 +1363,784 @@ func (*DeleteFileObjectResponse) Descriptor() ([]byte, []int) {
 	return file_core_service_v1_file_proto_rawDescGZIP(), []int{16}
 }
 
+// 更新文件元数据（目前仅支持修改显示文件名）
+type UpdateFileObjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	FileName      string                 `protobuf:"bytes,2,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateFileObjectRequest) Reset() {
+	*x = UpdateFileObjectRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateFileObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateFileObjectRequest) ProtoMessage() {}
+
+func (x *UpdateFileObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateFileObjectRequest.ProtoReflect.Descriptor instead.
+func (*UpdateFileObjectRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpdateFileObjectRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateFileObjectRequest) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
+type UpdateFileObjectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          *FileObject            `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateFileObjectResponse) Reset() {
+	*x = UpdateFileObjectResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateFileObjectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateFileObjectResponse) ProtoMessage() {}
+
+func (x *UpdateFileObjectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateFileObjectResponse.ProtoReflect.Descriptor instead.
+func (*UpdateFileObjectResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *UpdateFileObjectResponse) GetFile() *FileObject {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
+// 原地替换文件内容（保留文件 ID，替换二进制对象和元数据）
+type ReplaceFileContentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Content       []byte                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	FileName      *string                `protobuf:"bytes,3,opt,name=file_name,json=fileName,proto3,oneof" json:"file_name,omitempty"`
+	ContentType   *string                `protobuf:"bytes,4,opt,name=content_type,json=contentType,proto3,oneof" json:"content_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplaceFileContentRequest) Reset() {
+	*x = ReplaceFileContentRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplaceFileContentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplaceFileContentRequest) ProtoMessage() {}
+
+func (x *ReplaceFileContentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplaceFileContentRequest.ProtoReflect.Descriptor instead.
+func (*ReplaceFileContentRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ReplaceFileContentRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ReplaceFileContentRequest) GetContent() []byte {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+func (x *ReplaceFileContentRequest) GetFileName() string {
+	if x != nil && x.FileName != nil {
+		return *x.FileName
+	}
+	return ""
+}
+
+func (x *ReplaceFileContentRequest) GetContentType() string {
+	if x != nil && x.ContentType != nil {
+		return *x.ContentType
+	}
+	return ""
+}
+
+type ReplaceFileContentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          *FileObject            `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplaceFileContentResponse) Reset() {
+	*x = ReplaceFileContentResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplaceFileContentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplaceFileContentResponse) ProtoMessage() {}
+
+func (x *ReplaceFileContentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplaceFileContentResponse.ProtoReflect.Descriptor instead.
+func (*ReplaceFileContentResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ReplaceFileContentResponse) GetFile() *FileObject {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
+// 下载文件内容（后端代理读取，仅本地存储渠道支持）
+type DownloadFileContentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DownloadFileContentRequest) Reset() {
+	*x = DownloadFileContentRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DownloadFileContentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DownloadFileContentRequest) ProtoMessage() {}
+
+func (x *DownloadFileContentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DownloadFileContentRequest.ProtoReflect.Descriptor instead.
+func (*DownloadFileContentRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *DownloadFileContentRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DownloadFileContentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Content       []byte                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	FileName      string                 `protobuf:"bytes,3,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DownloadFileContentResponse) Reset() {
+	*x = DownloadFileContentResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DownloadFileContentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DownloadFileContentResponse) ProtoMessage() {}
+
+func (x *DownloadFileContentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DownloadFileContentResponse.ProtoReflect.Descriptor instead.
+func (*DownloadFileContentResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DownloadFileContentResponse) GetContent() []byte {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+func (x *DownloadFileContentResponse) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *DownloadFileContentResponse) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
+// 上传单个分片（分片上传模式）。
+// 本地渠道后端代理接收分片；对象存储渠道预留为预签名分片直传。
+type UploadFilePartRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	PartNumber    int32                  `protobuf:"varint,2,opt,name=part_number,json=partNumber,proto3" json:"part_number,omitempty"`
+	Content       []byte                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	ContentSha256 *string                `protobuf:"bytes,4,opt,name=content_sha256,json=contentSha256,proto3,oneof" json:"content_sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFilePartRequest) Reset() {
+	*x = UploadFilePartRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFilePartRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFilePartRequest) ProtoMessage() {}
+
+func (x *UploadFilePartRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFilePartRequest.ProtoReflect.Descriptor instead.
+func (*UploadFilePartRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *UploadFilePartRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UploadFilePartRequest) GetPartNumber() int32 {
+	if x != nil {
+		return x.PartNumber
+	}
+	return 0
+}
+
+func (x *UploadFilePartRequest) GetContent() []byte {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+func (x *UploadFilePartRequest) GetContentSha256() string {
+	if x != nil && x.ContentSha256 != nil {
+		return *x.ContentSha256
+	}
+	return ""
+}
+
+type UploadFilePartResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Etag          string                 `protobuf:"bytes,1,opt,name=etag,proto3" json:"etag,omitempty"`
+	PartNumber    int32                  `protobuf:"varint,2,opt,name=part_number,json=partNumber,proto3" json:"part_number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFilePartResponse) Reset() {
+	*x = UploadFilePartResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFilePartResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFilePartResponse) ProtoMessage() {}
+
+func (x *UploadFilePartResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFilePartResponse.ProtoReflect.Descriptor instead.
+func (*UploadFilePartResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *UploadFilePartResponse) GetEtag() string {
+	if x != nil {
+		return x.Etag
+	}
+	return ""
+}
+
+func (x *UploadFilePartResponse) GetPartNumber() int32 {
+	if x != nil {
+		return x.PartNumber
+	}
+	return 0
+}
+
+// 完成分片上传：本地渠道合并分片，对象存储渠道预留为 CompleteMultipartUpload。
+type FilePart struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PartNumber    int32                  `protobuf:"varint,1,opt,name=part_number,json=partNumber,proto3" json:"part_number,omitempty"`
+	Etag          string                 `protobuf:"bytes,2,opt,name=etag,proto3" json:"etag,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FilePart) Reset() {
+	*x = FilePart{}
+	mi := &file_core_service_v1_file_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FilePart) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FilePart) ProtoMessage() {}
+
+func (x *FilePart) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FilePart.ProtoReflect.Descriptor instead.
+func (*FilePart) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *FilePart) GetPartNumber() int32 {
+	if x != nil {
+		return x.PartNumber
+	}
+	return 0
+}
+
+func (x *FilePart) GetEtag() string {
+	if x != nil {
+		return x.Etag
+	}
+	return ""
+}
+
+// 查询已上传分片（断点续传）。
+// 本地渠道扫描临时目录；对象存储预留为原生 ListParts。
+type ListFilePartsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListFilePartsRequest) Reset() {
+	*x = ListFilePartsRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListFilePartsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListFilePartsRequest) ProtoMessage() {}
+
+func (x *ListFilePartsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListFilePartsRequest.ProtoReflect.Descriptor instead.
+func (*ListFilePartsRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ListFilePartsRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ListFilePartsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Parts         []*FilePart            `protobuf:"bytes,1,rep,name=parts,proto3" json:"parts,omitempty"`
+	TotalParts    int32                  `protobuf:"varint,2,opt,name=total_parts,json=totalParts,proto3" json:"total_parts,omitempty"`
+	PartSize      int64                  `protobuf:"varint,3,opt,name=part_size,json=partSize,proto3" json:"part_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListFilePartsResponse) Reset() {
+	*x = ListFilePartsResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListFilePartsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListFilePartsResponse) ProtoMessage() {}
+
+func (x *ListFilePartsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListFilePartsResponse.ProtoReflect.Descriptor instead.
+func (*ListFilePartsResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListFilePartsResponse) GetParts() []*FilePart {
+	if x != nil {
+		return x.Parts
+	}
+	return nil
+}
+
+func (x *ListFilePartsResponse) GetTotalParts() int32 {
+	if x != nil {
+		return x.TotalParts
+	}
+	return 0
+}
+
+func (x *ListFilePartsResponse) GetPartSize() int64 {
+	if x != nil {
+		return x.PartSize
+	}
+	return 0
+}
+
+type CompleteFileUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Parts         []*FilePart            `protobuf:"bytes,2,rep,name=parts,proto3" json:"parts,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteFileUploadRequest) Reset() {
+	*x = CompleteFileUploadRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteFileUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteFileUploadRequest) ProtoMessage() {}
+
+func (x *CompleteFileUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteFileUploadRequest.ProtoReflect.Descriptor instead.
+func (*CompleteFileUploadRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *CompleteFileUploadRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *CompleteFileUploadRequest) GetParts() []*FilePart {
+	if x != nil {
+		return x.Parts
+	}
+	return nil
+}
+
+type CompleteFileUploadResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	File          *FileObject            `protobuf:"bytes,1,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteFileUploadResponse) Reset() {
+	*x = CompleteFileUploadResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteFileUploadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteFileUploadResponse) ProtoMessage() {}
+
+func (x *CompleteFileUploadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteFileUploadResponse.ProtoReflect.Descriptor instead.
+func (*CompleteFileUploadResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *CompleteFileUploadResponse) GetFile() *FileObject {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
+// 取消分片上传，清理已上传的分片。
+type AbortFileUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AbortFileUploadRequest) Reset() {
+	*x = AbortFileUploadRequest{}
+	mi := &file_core_service_v1_file_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbortFileUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbortFileUploadRequest) ProtoMessage() {}
+
+func (x *AbortFileUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AbortFileUploadRequest.ProtoReflect.Descriptor instead.
+func (*AbortFileUploadRequest) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *AbortFileUploadRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type AbortFileUploadResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AbortFileUploadResponse) Reset() {
+	*x = AbortFileUploadResponse{}
+	mi := &file_core_service_v1_file_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AbortFileUploadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AbortFileUploadResponse) ProtoMessage() {}
+
+func (x *AbortFileUploadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_core_service_v1_file_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AbortFileUploadResponse.ProtoReflect.Descriptor instead.
+func (*AbortFileUploadResponse) Descriptor() ([]byte, []int) {
+	return file_core_service_v1_file_proto_rawDescGZIP(), []int{31}
+}
+
 var File_core_service_v1_file_proto protoreflect.FileDescriptor
 
 const file_core_service_v1_file_proto_rawDesc = "" +
 	"\n" +
-	"\x1acore/service/v1/file.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\"\xbf\v\n" +
+	"\x1acore/service/v1/file.proto\x12\x0fcore.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\"\xb9\r\n" +
 	"\n" +
 	"FileObject\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x120\n" +
@@ -1361,7 +2174,11 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\x11upload_expires_at\x18\x12 \x01(\tB\x1e\xbaG\x1b\x92\x02\x18上传凭证过期时间H\x10R\x0fuploadExpiresAt\x88\x01\x01\x12:\n" +
 	"\vprovider_id\x18\x13 \x01(\rB\x14\xbaG\x11\x92\x02\x0e存储渠道IDH\x11R\n" +
 	"providerId\x88\x01\x01\x12B\n" +
-	"\rprovider_code\x18\x14 \x01(\tB\x18\xbaG\x15\x92\x02\x12存储渠道编码H\x12R\fproviderCode\x88\x01\x01B\f\n" +
+	"\rprovider_code\x18\x14 \x01(\tB\x18\xbaG\x15\x92\x02\x12存储渠道编码H\x12R\fproviderCode\x88\x01\x01\x12<\n" +
+	"\tupload_id\x18\x15 \x01(\tB\x1a\xbaG\x17\x92\x02\x14分片上传会话IDH\x13R\buploadId\x88\x01\x01\x12T\n" +
+	"\tpart_size\x18\x16 \x01(\x03B2\xbaG/\x92\x02,分片大小（字节），0 表示非分片H\x14R\bpartSize\x88\x01\x01\x128\n" +
+	"\vtotal_parts\x18\x17 \x01(\x05B\x12\xbaG\x0f\x92\x02\f总分片数H\x15R\n" +
+	"totalParts\x88\x01\x01B\f\n" +
 	"\n" +
 	"_tenant_idB\f\n" +
 	"\n" +
@@ -1382,7 +2199,12 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\v_deleted_atB\x14\n" +
 	"\x12_upload_expires_atB\x0e\n" +
 	"\f_provider_idB\x10\n" +
-	"\x0e_provider_code\"\x97\x06\n" +
+	"\x0e_provider_codeB\f\n" +
+	"\n" +
+	"_upload_idB\f\n" +
+	"\n" +
+	"_part_sizeB\x0e\n" +
+	"\f_total_parts\"\x97\x06\n" +
 	"\rFileAccessLog\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x120\n" +
 	"\ttenant_id\x18\x02 \x01(\rB\x0e\xbaG\v\x92\x02\b租户IDH\x00R\btenantId\x88\x01\x01\x12'\n" +
@@ -1414,7 +2236,7 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\a_resultB\n" +
 	"\n" +
 	"\b_messageB\r\n" +
-	"\v_created_at\"\x9b\x04\n" +
+	"\v_created_at\"\xf9\x05\n" +
 	"\x1eCreateFileUploadSessionRequest\x12A\n" +
 	"\tfile_name\x18\x01 \x01(\tB\x1f\xbaG\x12\x92\x02\x0f原始文件名\xbaH\ar\x05\x10\x01\x18\xff\x01H\x00R\bfileName\x88\x01\x01\x12/\n" +
 	"\fcontent_type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18xH\x01R\vcontentType\x88\x01\x01\x12 \n" +
@@ -1426,7 +2248,11 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\n" +
 	"visibility\x18\a \x01(\tB\a\xbaH\x04r\x02\x18\x14H\x06R\n" +
 	"visibility\x88\x01\x01\x125\n" +
-	"\x0fidempotency_key\x18\b \x01(\tB\a\xbaH\x04r\x02\x18xH\aR\x0eidempotencyKey\x88\x01\x01B\f\n" +
+	"\x0fidempotency_key\x18\b \x01(\tB\a\xbaH\x04r\x02\x18xH\aR\x0eidempotencyKey\x88\x01\x01\x12e\n" +
+	"\tpart_size\x18\t \x01(\x03BC\xbaG9\x92\x026分片大小（字节），>0 表示分片上传模式\xbaH\x04\"\x02(\x00H\bR\bpartSize\x88\x01\x01\x12W\n" +
+	"\vtotal_parts\x18\n" +
+	" \x01(\x05B1\xbaG'\x92\x02$总分片数（分片模式必填）\xbaH\x04\x1a\x02(\x00H\tR\n" +
+	"totalParts\x88\x01\x01B\f\n" +
 	"\n" +
 	"_file_nameB\x0f\n" +
 	"\r_content_typeB\a\n" +
@@ -1435,7 +2261,10 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\x0e_business_typeB\x0e\n" +
 	"\f_business_idB\r\n" +
 	"\v_visibilityB\x12\n" +
-	"\x10_idempotency_key\"\xb5\x01\n" +
+	"\x10_idempotency_keyB\f\n" +
+	"\n" +
+	"_part_sizeB\x0e\n" +
+	"\f_total_parts\"\xb5\x01\n" +
 	"\x1fCreateFileUploadSessionResponse\x12/\n" +
 	"\x04file\x18\x01 \x01(\v2\x1b.core.service.v1.FileObjectR\x04file\x12\x1d\n" +
 	"\n" +
@@ -1525,7 +2354,58 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x125\n" +
 	"\x0fidempotency_key\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18xH\x00R\x0eidempotencyKey\x88\x01\x01B\x12\n" +
 	"\x10_idempotency_key\"\x1a\n" +
-	"\x18DeleteFileObjectResponse2\xee\x06\n" +
+	"\x18DeleteFileObjectResponse\"v\n" +
+	"\x17UpdateFileObjectRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12B\n" +
+	"\tfile_name\x18\x02 \x01(\tB%\xbaG\x18\x92\x02\x15新的显示文件名\xbaH\ar\x05\x10\x01\x18\xff\x01R\bfileName\"K\n" +
+	"\x18UpdateFileObjectResponse\x12/\n" +
+	"\x04file\x18\x01 \x01(\v2\x1b.core.service.v1.FileObjectR\x04file\"\x8d\x02\n" +
+	"\x19ReplaceFileContentRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12/\n" +
+	"\acontent\x18\x02 \x01(\fB\x15\xbaG\x12\x92\x02\x0f新文件内容R\acontent\x12V\n" +
+	"\tfile_name\x18\x03 \x01(\tB4\xbaG'\x92\x02$可选：同时更新显示文件名\xbaH\ar\x05\x10\x01\x18\xff\x01H\x00R\bfileName\x88\x01\x01\x12/\n" +
+	"\fcontent_type\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18xH\x01R\vcontentType\x88\x01\x01B\f\n" +
+	"\n" +
+	"_file_nameB\x0f\n" +
+	"\r_content_type\"M\n" +
+	"\x1aReplaceFileContentResponse\x12/\n" +
+	"\x04file\x18\x01 \x01(\v2\x1b.core.service.v1.FileObjectR\x04file\"5\n" +
+	"\x1aDownloadFileContentRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"w\n" +
+	"\x1bDownloadFileContentResponse\x12\x18\n" +
+	"\acontent\x18\x01 \x01(\fR\acontent\x12!\n" +
+	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x1b\n" +
+	"\tfile_name\x18\x03 \x01(\tR\bfileName\"\x96\x02\n" +
+	"\x15UploadFilePartRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12I\n" +
+	"\vpart_number\x18\x02 \x01(\x05B(\xbaG\x1e\x92\x02\x1b分片序号，从 1 开始\xbaH\x04\x1a\x02(\x01R\n" +
+	"partNumber\x12,\n" +
+	"\acontent\x18\x03 \x01(\fB\x12\xbaG\x0f\x92\x02\f分片内容R\acontent\x12X\n" +
+	"\x0econtent_sha256\x18\x04 \x01(\tB,\xbaG\"\x92\x02\x1f分片 SHA256（可选校验）\xbaH\x04r\x02\x18@H\x00R\rcontentSha256\x88\x01\x01B\x11\n" +
+	"\x0f_content_sha256\"a\n" +
+	"\x16UploadFilePartResponse\x12&\n" +
+	"\x04etag\x18\x01 \x01(\tB\x12\xbaG\x0f\x92\x02\f分片标识R\x04etag\x12\x1f\n" +
+	"\vpart_number\x18\x02 \x01(\x05R\n" +
+	"partNumber\"R\n" +
+	"\bFilePart\x12(\n" +
+	"\vpart_number\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x01R\n" +
+	"partNumber\x12\x1c\n" +
+	"\x04etag\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04etag\"/\n" +
+	"\x14ListFilePartsRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x86\x01\n" +
+	"\x15ListFilePartsResponse\x12/\n" +
+	"\x05parts\x18\x01 \x03(\v2\x19.core.service.v1.FilePartR\x05parts\x12\x1f\n" +
+	"\vtotal_parts\x18\x02 \x01(\x05R\n" +
+	"totalParts\x12\x1b\n" +
+	"\tpart_size\x18\x03 \x01(\x03R\bpartSize\"\x9f\x01\n" +
+	"\x19CompleteFileUploadRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12i\n" +
+	"\x05parts\x18\x02 \x03(\v2\x19.core.service.v1.FilePartB8\xbaG-\x92\x02*已上传分片列表（校验完整性）\xbaH\x05\x92\x01\x02\b\x01R\x05parts\"M\n" +
+	"\x1aCompleteFileUploadResponse\x12/\n" +
+	"\x04file\x18\x01 \x01(\v2\x1b.core.service.v1.FileObjectR\x04file\"1\n" +
+	"\x16AbortFileUploadRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x19\n" +
+	"\x17AbortFileUploadResponse2\xd0\f\n" +
 	"\x11FileCenterService\x12|\n" +
 	"\x17CreateFileUploadSession\x12/.core.service.v1.CreateFileUploadSessionRequest\x1a0.core.service.v1.CreateFileUploadSessionResponse\x12j\n" +
 	"\x11UploadFileContent\x12).core.service.v1.UploadFileContentRequest\x1a*.core.service.v1.UploadFileContentResponse\x12j\n" +
@@ -1534,7 +2414,14 @@ const file_core_service_v1_file_proto_rawDesc = "" +
 	"\x0fListFileObjects\x12'.core.service.v1.ListFileObjectsRequest\x1a(.core.service.v1.ListFileObjectsResponse\x12m\n" +
 	"\x12ListFileAccessLogs\x12*.core.service.v1.ListFileAccessLogsRequest\x1a+.core.service.v1.ListFileAccessLogsResponse\x12p\n" +
 	"\x13PresignFileDownload\x12+.core.service.v1.PresignFileDownloadRequest\x1a,.core.service.v1.PresignFileDownloadResponse\x12g\n" +
-	"\x10DeleteFileObject\x12(.core.service.v1.DeleteFileObjectRequest\x1a).core.service.v1.DeleteFileObjectResponseB\xa6\x01\n" +
+	"\x10DeleteFileObject\x12(.core.service.v1.DeleteFileObjectRequest\x1a).core.service.v1.DeleteFileObjectResponse\x12g\n" +
+	"\x10UpdateFileObject\x12(.core.service.v1.UpdateFileObjectRequest\x1a).core.service.v1.UpdateFileObjectResponse\x12m\n" +
+	"\x12ReplaceFileContent\x12*.core.service.v1.ReplaceFileContentRequest\x1a+.core.service.v1.ReplaceFileContentResponse\x12p\n" +
+	"\x13DownloadFileContent\x12+.core.service.v1.DownloadFileContentRequest\x1a,.core.service.v1.DownloadFileContentResponse\x12a\n" +
+	"\x0eUploadFilePart\x12&.core.service.v1.UploadFilePartRequest\x1a'.core.service.v1.UploadFilePartResponse\x12^\n" +
+	"\rListFileParts\x12%.core.service.v1.ListFilePartsRequest\x1a&.core.service.v1.ListFilePartsResponse\x12m\n" +
+	"\x12CompleteFileUpload\x12*.core.service.v1.CompleteFileUploadRequest\x1a+.core.service.v1.CompleteFileUploadResponse\x12d\n" +
+	"\x0fAbortFileUpload\x12'.core.service.v1.AbortFileUploadRequest\x1a(.core.service.v1.AbortFileUploadResponseB\xa6\x01\n" +
 	"\x13com.core.service.v1B\tFileProtoP\x01Z&backend-service/api/core/service/v1;v1\xa2\x02\x03CSX\xaa\x02\x0fCore.Service.V1\xca\x02\x0fCore\\Service\\V1\xe2\x02\x1bCore\\Service\\V1\\GPBMetadata\xea\x02\x11Core::Service::V1b\x06proto3"
 
 var (
@@ -1549,7 +2436,7 @@ func file_core_service_v1_file_proto_rawDescGZIP() []byte {
 	return file_core_service_v1_file_proto_rawDescData
 }
 
-var file_core_service_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_core_service_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_core_service_v1_file_proto_goTypes = []any{
 	(*FileObject)(nil),                      // 0: core.service.v1.FileObject
 	(*FileAccessLog)(nil),                   // 1: core.service.v1.FileAccessLog
@@ -1568,6 +2455,21 @@ var file_core_service_v1_file_proto_goTypes = []any{
 	(*PresignFileDownloadResponse)(nil),     // 14: core.service.v1.PresignFileDownloadResponse
 	(*DeleteFileObjectRequest)(nil),         // 15: core.service.v1.DeleteFileObjectRequest
 	(*DeleteFileObjectResponse)(nil),        // 16: core.service.v1.DeleteFileObjectResponse
+	(*UpdateFileObjectRequest)(nil),         // 17: core.service.v1.UpdateFileObjectRequest
+	(*UpdateFileObjectResponse)(nil),        // 18: core.service.v1.UpdateFileObjectResponse
+	(*ReplaceFileContentRequest)(nil),       // 19: core.service.v1.ReplaceFileContentRequest
+	(*ReplaceFileContentResponse)(nil),      // 20: core.service.v1.ReplaceFileContentResponse
+	(*DownloadFileContentRequest)(nil),      // 21: core.service.v1.DownloadFileContentRequest
+	(*DownloadFileContentResponse)(nil),     // 22: core.service.v1.DownloadFileContentResponse
+	(*UploadFilePartRequest)(nil),           // 23: core.service.v1.UploadFilePartRequest
+	(*UploadFilePartResponse)(nil),          // 24: core.service.v1.UploadFilePartResponse
+	(*FilePart)(nil),                        // 25: core.service.v1.FilePart
+	(*ListFilePartsRequest)(nil),            // 26: core.service.v1.ListFilePartsRequest
+	(*ListFilePartsResponse)(nil),           // 27: core.service.v1.ListFilePartsResponse
+	(*CompleteFileUploadRequest)(nil),       // 28: core.service.v1.CompleteFileUploadRequest
+	(*CompleteFileUploadResponse)(nil),      // 29: core.service.v1.CompleteFileUploadResponse
+	(*AbortFileUploadRequest)(nil),          // 30: core.service.v1.AbortFileUploadRequest
+	(*AbortFileUploadResponse)(nil),         // 31: core.service.v1.AbortFileUploadResponse
 }
 var file_core_service_v1_file_proto_depIdxs = []int32{
 	0,  // 0: core.service.v1.CreateFileUploadSessionResponse.file:type_name -> core.service.v1.FileObject
@@ -1575,27 +2477,46 @@ var file_core_service_v1_file_proto_depIdxs = []int32{
 	0,  // 2: core.service.v1.ConfirmFileUploadResponse.file:type_name -> core.service.v1.FileObject
 	0,  // 3: core.service.v1.ListFileObjectsResponse.items:type_name -> core.service.v1.FileObject
 	1,  // 4: core.service.v1.ListFileAccessLogsResponse.items:type_name -> core.service.v1.FileAccessLog
-	2,  // 5: core.service.v1.FileCenterService.CreateFileUploadSession:input_type -> core.service.v1.CreateFileUploadSessionRequest
-	4,  // 6: core.service.v1.FileCenterService.UploadFileContent:input_type -> core.service.v1.UploadFileContentRequest
-	6,  // 7: core.service.v1.FileCenterService.ConfirmFileUpload:input_type -> core.service.v1.ConfirmFileUploadRequest
-	8,  // 8: core.service.v1.FileCenterService.GetFileObject:input_type -> core.service.v1.GetFileObjectRequest
-	9,  // 9: core.service.v1.FileCenterService.ListFileObjects:input_type -> core.service.v1.ListFileObjectsRequest
-	11, // 10: core.service.v1.FileCenterService.ListFileAccessLogs:input_type -> core.service.v1.ListFileAccessLogsRequest
-	13, // 11: core.service.v1.FileCenterService.PresignFileDownload:input_type -> core.service.v1.PresignFileDownloadRequest
-	15, // 12: core.service.v1.FileCenterService.DeleteFileObject:input_type -> core.service.v1.DeleteFileObjectRequest
-	3,  // 13: core.service.v1.FileCenterService.CreateFileUploadSession:output_type -> core.service.v1.CreateFileUploadSessionResponse
-	5,  // 14: core.service.v1.FileCenterService.UploadFileContent:output_type -> core.service.v1.UploadFileContentResponse
-	7,  // 15: core.service.v1.FileCenterService.ConfirmFileUpload:output_type -> core.service.v1.ConfirmFileUploadResponse
-	0,  // 16: core.service.v1.FileCenterService.GetFileObject:output_type -> core.service.v1.FileObject
-	10, // 17: core.service.v1.FileCenterService.ListFileObjects:output_type -> core.service.v1.ListFileObjectsResponse
-	12, // 18: core.service.v1.FileCenterService.ListFileAccessLogs:output_type -> core.service.v1.ListFileAccessLogsResponse
-	14, // 19: core.service.v1.FileCenterService.PresignFileDownload:output_type -> core.service.v1.PresignFileDownloadResponse
-	16, // 20: core.service.v1.FileCenterService.DeleteFileObject:output_type -> core.service.v1.DeleteFileObjectResponse
-	13, // [13:21] is the sub-list for method output_type
-	5,  // [5:13] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0,  // 5: core.service.v1.UpdateFileObjectResponse.file:type_name -> core.service.v1.FileObject
+	0,  // 6: core.service.v1.ReplaceFileContentResponse.file:type_name -> core.service.v1.FileObject
+	25, // 7: core.service.v1.ListFilePartsResponse.parts:type_name -> core.service.v1.FilePart
+	25, // 8: core.service.v1.CompleteFileUploadRequest.parts:type_name -> core.service.v1.FilePart
+	0,  // 9: core.service.v1.CompleteFileUploadResponse.file:type_name -> core.service.v1.FileObject
+	2,  // 10: core.service.v1.FileCenterService.CreateFileUploadSession:input_type -> core.service.v1.CreateFileUploadSessionRequest
+	4,  // 11: core.service.v1.FileCenterService.UploadFileContent:input_type -> core.service.v1.UploadFileContentRequest
+	6,  // 12: core.service.v1.FileCenterService.ConfirmFileUpload:input_type -> core.service.v1.ConfirmFileUploadRequest
+	8,  // 13: core.service.v1.FileCenterService.GetFileObject:input_type -> core.service.v1.GetFileObjectRequest
+	9,  // 14: core.service.v1.FileCenterService.ListFileObjects:input_type -> core.service.v1.ListFileObjectsRequest
+	11, // 15: core.service.v1.FileCenterService.ListFileAccessLogs:input_type -> core.service.v1.ListFileAccessLogsRequest
+	13, // 16: core.service.v1.FileCenterService.PresignFileDownload:input_type -> core.service.v1.PresignFileDownloadRequest
+	15, // 17: core.service.v1.FileCenterService.DeleteFileObject:input_type -> core.service.v1.DeleteFileObjectRequest
+	17, // 18: core.service.v1.FileCenterService.UpdateFileObject:input_type -> core.service.v1.UpdateFileObjectRequest
+	19, // 19: core.service.v1.FileCenterService.ReplaceFileContent:input_type -> core.service.v1.ReplaceFileContentRequest
+	21, // 20: core.service.v1.FileCenterService.DownloadFileContent:input_type -> core.service.v1.DownloadFileContentRequest
+	23, // 21: core.service.v1.FileCenterService.UploadFilePart:input_type -> core.service.v1.UploadFilePartRequest
+	26, // 22: core.service.v1.FileCenterService.ListFileParts:input_type -> core.service.v1.ListFilePartsRequest
+	28, // 23: core.service.v1.FileCenterService.CompleteFileUpload:input_type -> core.service.v1.CompleteFileUploadRequest
+	30, // 24: core.service.v1.FileCenterService.AbortFileUpload:input_type -> core.service.v1.AbortFileUploadRequest
+	3,  // 25: core.service.v1.FileCenterService.CreateFileUploadSession:output_type -> core.service.v1.CreateFileUploadSessionResponse
+	5,  // 26: core.service.v1.FileCenterService.UploadFileContent:output_type -> core.service.v1.UploadFileContentResponse
+	7,  // 27: core.service.v1.FileCenterService.ConfirmFileUpload:output_type -> core.service.v1.ConfirmFileUploadResponse
+	0,  // 28: core.service.v1.FileCenterService.GetFileObject:output_type -> core.service.v1.FileObject
+	10, // 29: core.service.v1.FileCenterService.ListFileObjects:output_type -> core.service.v1.ListFileObjectsResponse
+	12, // 30: core.service.v1.FileCenterService.ListFileAccessLogs:output_type -> core.service.v1.ListFileAccessLogsResponse
+	14, // 31: core.service.v1.FileCenterService.PresignFileDownload:output_type -> core.service.v1.PresignFileDownloadResponse
+	16, // 32: core.service.v1.FileCenterService.DeleteFileObject:output_type -> core.service.v1.DeleteFileObjectResponse
+	18, // 33: core.service.v1.FileCenterService.UpdateFileObject:output_type -> core.service.v1.UpdateFileObjectResponse
+	20, // 34: core.service.v1.FileCenterService.ReplaceFileContent:output_type -> core.service.v1.ReplaceFileContentResponse
+	22, // 35: core.service.v1.FileCenterService.DownloadFileContent:output_type -> core.service.v1.DownloadFileContentResponse
+	24, // 36: core.service.v1.FileCenterService.UploadFilePart:output_type -> core.service.v1.UploadFilePartResponse
+	27, // 37: core.service.v1.FileCenterService.ListFileParts:output_type -> core.service.v1.ListFilePartsResponse
+	29, // 38: core.service.v1.FileCenterService.CompleteFileUpload:output_type -> core.service.v1.CompleteFileUploadResponse
+	31, // 39: core.service.v1.FileCenterService.AbortFileUpload:output_type -> core.service.v1.AbortFileUploadResponse
+	25, // [25:40] is the sub-list for method output_type
+	10, // [10:25] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_core_service_v1_file_proto_init() }
@@ -1612,13 +2533,15 @@ func file_core_service_v1_file_proto_init() {
 	file_core_service_v1_file_proto_msgTypes[11].OneofWrappers = []any{}
 	file_core_service_v1_file_proto_msgTypes[13].OneofWrappers = []any{}
 	file_core_service_v1_file_proto_msgTypes[15].OneofWrappers = []any{}
+	file_core_service_v1_file_proto_msgTypes[19].OneofWrappers = []any{}
+	file_core_service_v1_file_proto_msgTypes[23].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_service_v1_file_proto_rawDesc), len(file_core_service_v1_file_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

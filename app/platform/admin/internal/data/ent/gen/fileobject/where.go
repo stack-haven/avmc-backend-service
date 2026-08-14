@@ -149,6 +149,21 @@ func IdempotencyKey(v string) predicate.FileObject {
 	return predicate.FileObject(sql.FieldEQ(FieldIdempotencyKey, v))
 }
 
+// UploadID applies equality check predicate on the "upload_id" field. It's identical to UploadIDEQ.
+func UploadID(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldUploadID, v))
+}
+
+// PartSize applies equality check predicate on the "part_size" field. It's identical to PartSizeEQ.
+func PartSize(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldPartSize, v))
+}
+
+// TotalParts applies equality check predicate on the "total_parts" field. It's identical to TotalPartsEQ.
+func TotalParts(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldTotalParts, v))
+}
+
 // UploadExpiresAt applies equality check predicate on the "upload_expires_at" field. It's identical to UploadExpiresAtEQ.
 func UploadExpiresAt(v time.Time) predicate.FileObject {
 	return predicate.FileObject(sql.FieldEQ(FieldUploadExpiresAt, v))
@@ -1252,6 +1267,151 @@ func IdempotencyKeyEqualFold(v string) predicate.FileObject {
 // IdempotencyKeyContainsFold applies the ContainsFold predicate on the "idempotency_key" field.
 func IdempotencyKeyContainsFold(v string) predicate.FileObject {
 	return predicate.FileObject(sql.FieldContainsFold(FieldIdempotencyKey, v))
+}
+
+// UploadIDEQ applies the EQ predicate on the "upload_id" field.
+func UploadIDEQ(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldUploadID, v))
+}
+
+// UploadIDNEQ applies the NEQ predicate on the "upload_id" field.
+func UploadIDNEQ(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNEQ(FieldUploadID, v))
+}
+
+// UploadIDIn applies the In predicate on the "upload_id" field.
+func UploadIDIn(vs ...string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldIn(FieldUploadID, vs...))
+}
+
+// UploadIDNotIn applies the NotIn predicate on the "upload_id" field.
+func UploadIDNotIn(vs ...string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNotIn(FieldUploadID, vs...))
+}
+
+// UploadIDGT applies the GT predicate on the "upload_id" field.
+func UploadIDGT(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGT(FieldUploadID, v))
+}
+
+// UploadIDGTE applies the GTE predicate on the "upload_id" field.
+func UploadIDGTE(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGTE(FieldUploadID, v))
+}
+
+// UploadIDLT applies the LT predicate on the "upload_id" field.
+func UploadIDLT(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLT(FieldUploadID, v))
+}
+
+// UploadIDLTE applies the LTE predicate on the "upload_id" field.
+func UploadIDLTE(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLTE(FieldUploadID, v))
+}
+
+// UploadIDContains applies the Contains predicate on the "upload_id" field.
+func UploadIDContains(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldContains(FieldUploadID, v))
+}
+
+// UploadIDHasPrefix applies the HasPrefix predicate on the "upload_id" field.
+func UploadIDHasPrefix(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldHasPrefix(FieldUploadID, v))
+}
+
+// UploadIDHasSuffix applies the HasSuffix predicate on the "upload_id" field.
+func UploadIDHasSuffix(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldHasSuffix(FieldUploadID, v))
+}
+
+// UploadIDEqualFold applies the EqualFold predicate on the "upload_id" field.
+func UploadIDEqualFold(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEqualFold(FieldUploadID, v))
+}
+
+// UploadIDContainsFold applies the ContainsFold predicate on the "upload_id" field.
+func UploadIDContainsFold(v string) predicate.FileObject {
+	return predicate.FileObject(sql.FieldContainsFold(FieldUploadID, v))
+}
+
+// PartSizeEQ applies the EQ predicate on the "part_size" field.
+func PartSizeEQ(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldPartSize, v))
+}
+
+// PartSizeNEQ applies the NEQ predicate on the "part_size" field.
+func PartSizeNEQ(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNEQ(FieldPartSize, v))
+}
+
+// PartSizeIn applies the In predicate on the "part_size" field.
+func PartSizeIn(vs ...int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldIn(FieldPartSize, vs...))
+}
+
+// PartSizeNotIn applies the NotIn predicate on the "part_size" field.
+func PartSizeNotIn(vs ...int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNotIn(FieldPartSize, vs...))
+}
+
+// PartSizeGT applies the GT predicate on the "part_size" field.
+func PartSizeGT(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGT(FieldPartSize, v))
+}
+
+// PartSizeGTE applies the GTE predicate on the "part_size" field.
+func PartSizeGTE(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGTE(FieldPartSize, v))
+}
+
+// PartSizeLT applies the LT predicate on the "part_size" field.
+func PartSizeLT(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLT(FieldPartSize, v))
+}
+
+// PartSizeLTE applies the LTE predicate on the "part_size" field.
+func PartSizeLTE(v int64) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLTE(FieldPartSize, v))
+}
+
+// TotalPartsEQ applies the EQ predicate on the "total_parts" field.
+func TotalPartsEQ(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldEQ(FieldTotalParts, v))
+}
+
+// TotalPartsNEQ applies the NEQ predicate on the "total_parts" field.
+func TotalPartsNEQ(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNEQ(FieldTotalParts, v))
+}
+
+// TotalPartsIn applies the In predicate on the "total_parts" field.
+func TotalPartsIn(vs ...int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldIn(FieldTotalParts, vs...))
+}
+
+// TotalPartsNotIn applies the NotIn predicate on the "total_parts" field.
+func TotalPartsNotIn(vs ...int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldNotIn(FieldTotalParts, vs...))
+}
+
+// TotalPartsGT applies the GT predicate on the "total_parts" field.
+func TotalPartsGT(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGT(FieldTotalParts, v))
+}
+
+// TotalPartsGTE applies the GTE predicate on the "total_parts" field.
+func TotalPartsGTE(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldGTE(FieldTotalParts, v))
+}
+
+// TotalPartsLT applies the LT predicate on the "total_parts" field.
+func TotalPartsLT(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLT(FieldTotalParts, v))
+}
+
+// TotalPartsLTE applies the LTE predicate on the "total_parts" field.
+func TotalPartsLTE(v int32) predicate.FileObject {
+	return predicate.FileObject(sql.FieldLTE(FieldTotalParts, v))
 }
 
 // UploadExpiresAtEQ applies the EQ predicate on the "upload_expires_at" field.

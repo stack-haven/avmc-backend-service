@@ -13,6 +13,7 @@ import (
 
 	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/device"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
@@ -20,6 +21,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
@@ -53,6 +55,8 @@ type Client struct {
 	AsyncTask *AsyncTaskClient
 	// Dept is the client for interacting with the Dept builders.
 	Dept *DeptClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
 	// DictionaryItem is the client for interacting with the DictionaryItem builders.
 	DictionaryItem *DictionaryItemClient
 	// DictionaryType is the client for interacting with the DictionaryType builders.
@@ -67,6 +71,8 @@ type Client struct {
 	Menu *MenuClient
 	// NotificationMessage is the client for interacting with the NotificationMessage builders.
 	NotificationMessage *NotificationMessageClient
+	// NotificationProvider is the client for interacting with the NotificationProvider builders.
+	NotificationProvider *NotificationProviderClient
 	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
 	NotificationTemplate *NotificationTemplateClient
 	// OperationLog is the client for interacting with the OperationLog builders.
@@ -110,6 +116,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AsyncTask = NewAsyncTaskClient(c.config)
 	c.Dept = NewDeptClient(c.config)
+	c.Device = NewDeviceClient(c.config)
 	c.DictionaryItem = NewDictionaryItemClient(c.config)
 	c.DictionaryType = NewDictionaryTypeClient(c.config)
 	c.FileAccessLog = NewFileAccessLogClient(c.config)
@@ -117,6 +124,7 @@ func (c *Client) init() {
 	c.LoginLog = NewLoginLogClient(c.config)
 	c.Menu = NewMenuClient(c.config)
 	c.NotificationMessage = NewNotificationMessageClient(c.config)
+	c.NotificationProvider = NewNotificationProviderClient(c.config)
 	c.NotificationTemplate = NewNotificationTemplateClient(c.config)
 	c.OperationLog = NewOperationLogClient(c.config)
 	c.ParameterDefinition = NewParameterDefinitionClient(c.config)
@@ -226,6 +234,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:                           cfg,
 		AsyncTask:                        NewAsyncTaskClient(cfg),
 		Dept:                             NewDeptClient(cfg),
+		Device:                           NewDeviceClient(cfg),
 		DictionaryItem:                   NewDictionaryItemClient(cfg),
 		DictionaryType:                   NewDictionaryTypeClient(cfg),
 		FileAccessLog:                    NewFileAccessLogClient(cfg),
@@ -233,6 +242,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LoginLog:                         NewLoginLogClient(cfg),
 		Menu:                             NewMenuClient(cfg),
 		NotificationMessage:              NewNotificationMessageClient(cfg),
+		NotificationProvider:             NewNotificationProviderClient(cfg),
 		NotificationTemplate:             NewNotificationTemplateClient(cfg),
 		OperationLog:                     NewOperationLogClient(cfg),
 		ParameterDefinition:              NewParameterDefinitionClient(cfg),
@@ -269,6 +279,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:                           cfg,
 		AsyncTask:                        NewAsyncTaskClient(cfg),
 		Dept:                             NewDeptClient(cfg),
+		Device:                           NewDeviceClient(cfg),
 		DictionaryItem:                   NewDictionaryItemClient(cfg),
 		DictionaryType:                   NewDictionaryTypeClient(cfg),
 		FileAccessLog:                    NewFileAccessLogClient(cfg),
@@ -276,6 +287,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LoginLog:                         NewLoginLogClient(cfg),
 		Menu:                             NewMenuClient(cfg),
 		NotificationMessage:              NewNotificationMessageClient(cfg),
+		NotificationProvider:             NewNotificationProviderClient(cfg),
 		NotificationTemplate:             NewNotificationTemplateClient(cfg),
 		OperationLog:                     NewOperationLogClient(cfg),
 		ParameterDefinition:              NewParameterDefinitionClient(cfg),
@@ -320,12 +332,13 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
-		c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
-		c.NotificationTemplate, c.OperationLog, c.ParameterDefinition, c.Post,
-		c.Project, c.Role, c.StorageConfig, c.StorageProvider, c.Tenant,
-		c.TenantMenuPermissionGroup, c.TenantMenuPermissionGroupVersion,
-		c.TenantParameterOverride, c.User, c.WebhookDeliveryLog, c.WebhookSubscription,
+		c.AsyncTask, c.Dept, c.Device, c.DictionaryItem, c.DictionaryType,
+		c.FileAccessLog, c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
+		c.NotificationProvider, c.NotificationTemplate, c.OperationLog,
+		c.ParameterDefinition, c.Post, c.Project, c.Role, c.StorageConfig,
+		c.StorageProvider, c.Tenant, c.TenantMenuPermissionGroup,
+		c.TenantMenuPermissionGroupVersion, c.TenantParameterOverride, c.User,
+		c.WebhookDeliveryLog, c.WebhookSubscription,
 	} {
 		n.Use(hooks...)
 	}
@@ -335,12 +348,13 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AsyncTask, c.Dept, c.DictionaryItem, c.DictionaryType, c.FileAccessLog,
-		c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
-		c.NotificationTemplate, c.OperationLog, c.ParameterDefinition, c.Post,
-		c.Project, c.Role, c.StorageConfig, c.StorageProvider, c.Tenant,
-		c.TenantMenuPermissionGroup, c.TenantMenuPermissionGroupVersion,
-		c.TenantParameterOverride, c.User, c.WebhookDeliveryLog, c.WebhookSubscription,
+		c.AsyncTask, c.Dept, c.Device, c.DictionaryItem, c.DictionaryType,
+		c.FileAccessLog, c.FileObject, c.LoginLog, c.Menu, c.NotificationMessage,
+		c.NotificationProvider, c.NotificationTemplate, c.OperationLog,
+		c.ParameterDefinition, c.Post, c.Project, c.Role, c.StorageConfig,
+		c.StorageProvider, c.Tenant, c.TenantMenuPermissionGroup,
+		c.TenantMenuPermissionGroupVersion, c.TenantParameterOverride, c.User,
+		c.WebhookDeliveryLog, c.WebhookSubscription,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -353,6 +367,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AsyncTask.mutate(ctx, m)
 	case *DeptMutation:
 		return c.Dept.mutate(ctx, m)
+	case *DeviceMutation:
+		return c.Device.mutate(ctx, m)
 	case *DictionaryItemMutation:
 		return c.DictionaryItem.mutate(ctx, m)
 	case *DictionaryTypeMutation:
@@ -367,6 +383,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Menu.mutate(ctx, m)
 	case *NotificationMessageMutation:
 		return c.NotificationMessage.mutate(ctx, m)
+	case *NotificationProviderMutation:
+		return c.NotificationProvider.mutate(ctx, m)
 	case *NotificationTemplateMutation:
 		return c.NotificationTemplate.mutate(ctx, m)
 	case *OperationLogMutation:
@@ -731,6 +749,140 @@ func (c *DeptClient) mutate(ctx context.Context, m *DeptMutation) (Value, error)
 		return (&DeptDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("gen: unknown Dept mutation op: %q", m.Op())
+	}
+}
+
+// DeviceClient is a client for the Device schema.
+type DeviceClient struct {
+	config
+}
+
+// NewDeviceClient returns a client for the Device from the given config.
+func NewDeviceClient(c config) *DeviceClient {
+	return &DeviceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `device.Hooks(f(g(h())))`.
+func (c *DeviceClient) Use(hooks ...Hook) {
+	c.hooks.Device = append(c.hooks.Device, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `device.Intercept(f(g(h())))`.
+func (c *DeviceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Device = append(c.inters.Device, interceptors...)
+}
+
+// Create returns a builder for creating a Device entity.
+func (c *DeviceClient) Create() *DeviceCreate {
+	mutation := newDeviceMutation(c.config, OpCreate)
+	return &DeviceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Device entities.
+func (c *DeviceClient) CreateBulk(builders ...*DeviceCreate) *DeviceCreateBulk {
+	return &DeviceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DeviceClient) MapCreateBulk(slice any, setFunc func(*DeviceCreate, int)) *DeviceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DeviceCreateBulk{err: fmt.Errorf("calling to DeviceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DeviceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DeviceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Device.
+func (c *DeviceClient) Update() *DeviceUpdate {
+	mutation := newDeviceMutation(c.config, OpUpdate)
+	return &DeviceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DeviceClient) UpdateOne(_m *Device) *DeviceUpdateOne {
+	mutation := newDeviceMutation(c.config, OpUpdateOne, withDevice(_m))
+	return &DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DeviceClient) UpdateOneID(id uint32) *DeviceUpdateOne {
+	mutation := newDeviceMutation(c.config, OpUpdateOne, withDeviceID(id))
+	return &DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Device.
+func (c *DeviceClient) Delete() *DeviceDelete {
+	mutation := newDeviceMutation(c.config, OpDelete)
+	return &DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DeviceClient) DeleteOne(_m *Device) *DeviceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DeviceClient) DeleteOneID(id uint32) *DeviceDeleteOne {
+	builder := c.Delete().Where(device.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DeviceDeleteOne{builder}
+}
+
+// Query returns a query builder for Device.
+func (c *DeviceClient) Query() *DeviceQuery {
+	return &DeviceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDevice},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Device entity by its id.
+func (c *DeviceClient) Get(ctx context.Context, id uint32) (*Device, error) {
+	return c.Query().Where(device.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DeviceClient) GetX(ctx context.Context, id uint32) *Device {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DeviceClient) Hooks() []Hook {
+	hooks := c.hooks.Device
+	return append(hooks[:len(hooks):len(hooks)], device.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DeviceClient) Interceptors() []Interceptor {
+	return c.inters.Device
+}
+
+func (c *DeviceClient) mutate(ctx context.Context, m *DeviceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DeviceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DeviceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown Device mutation op: %q", m.Op())
 	}
 }
 
@@ -1786,6 +1938,141 @@ func (c *NotificationMessageClient) mutate(ctx context.Context, m *NotificationM
 		return (&NotificationMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("gen: unknown NotificationMessage mutation op: %q", m.Op())
+	}
+}
+
+// NotificationProviderClient is a client for the NotificationProvider schema.
+type NotificationProviderClient struct {
+	config
+}
+
+// NewNotificationProviderClient returns a client for the NotificationProvider from the given config.
+func NewNotificationProviderClient(c config) *NotificationProviderClient {
+	return &NotificationProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `notificationprovider.Hooks(f(g(h())))`.
+func (c *NotificationProviderClient) Use(hooks ...Hook) {
+	c.hooks.NotificationProvider = append(c.hooks.NotificationProvider, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `notificationprovider.Intercept(f(g(h())))`.
+func (c *NotificationProviderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NotificationProvider = append(c.inters.NotificationProvider, interceptors...)
+}
+
+// Create returns a builder for creating a NotificationProvider entity.
+func (c *NotificationProviderClient) Create() *NotificationProviderCreate {
+	mutation := newNotificationProviderMutation(c.config, OpCreate)
+	return &NotificationProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NotificationProvider entities.
+func (c *NotificationProviderClient) CreateBulk(builders ...*NotificationProviderCreate) *NotificationProviderCreateBulk {
+	return &NotificationProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NotificationProviderClient) MapCreateBulk(slice any, setFunc func(*NotificationProviderCreate, int)) *NotificationProviderCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NotificationProviderCreateBulk{err: fmt.Errorf("calling to NotificationProviderClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NotificationProviderCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NotificationProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NotificationProvider.
+func (c *NotificationProviderClient) Update() *NotificationProviderUpdate {
+	mutation := newNotificationProviderMutation(c.config, OpUpdate)
+	return &NotificationProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NotificationProviderClient) UpdateOne(_m *NotificationProvider) *NotificationProviderUpdateOne {
+	mutation := newNotificationProviderMutation(c.config, OpUpdateOne, withNotificationProvider(_m))
+	return &NotificationProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NotificationProviderClient) UpdateOneID(id uint32) *NotificationProviderUpdateOne {
+	mutation := newNotificationProviderMutation(c.config, OpUpdateOne, withNotificationProviderID(id))
+	return &NotificationProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NotificationProvider.
+func (c *NotificationProviderClient) Delete() *NotificationProviderDelete {
+	mutation := newNotificationProviderMutation(c.config, OpDelete)
+	return &NotificationProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NotificationProviderClient) DeleteOne(_m *NotificationProvider) *NotificationProviderDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NotificationProviderClient) DeleteOneID(id uint32) *NotificationProviderDeleteOne {
+	builder := c.Delete().Where(notificationprovider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NotificationProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for NotificationProvider.
+func (c *NotificationProviderClient) Query() *NotificationProviderQuery {
+	return &NotificationProviderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNotificationProvider},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NotificationProvider entity by its id.
+func (c *NotificationProviderClient) Get(ctx context.Context, id uint32) (*NotificationProvider, error) {
+	return c.Query().Where(notificationprovider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NotificationProviderClient) GetX(ctx context.Context, id uint32) *NotificationProvider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *NotificationProviderClient) Hooks() []Hook {
+	hooks := c.hooks.NotificationProvider
+	return append(hooks[:len(hooks):len(hooks)], notificationprovider.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *NotificationProviderClient) Interceptors() []Interceptor {
+	inters := c.inters.NotificationProvider
+	return append(inters[:len(inters):len(inters)], notificationprovider.Interceptors[:]...)
+}
+
+func (c *NotificationProviderClient) mutate(ctx context.Context, m *NotificationProviderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NotificationProviderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NotificationProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NotificationProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NotificationProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown NotificationProvider mutation op: %q", m.Op())
 	}
 }
 
@@ -4084,20 +4371,20 @@ func (c *WebhookSubscriptionClient) mutate(ctx context.Context, m *WebhookSubscr
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
-		LoginLog, Menu, NotificationMessage, NotificationTemplate, OperationLog,
-		ParameterDefinition, Post, Project, Role, StorageConfig, StorageProvider,
-		Tenant, TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
-		TenantParameterOverride, User, WebhookDeliveryLog,
-		WebhookSubscription []ent.Hook
+		AsyncTask, Dept, Device, DictionaryItem, DictionaryType, FileAccessLog,
+		FileObject, LoginLog, Menu, NotificationMessage, NotificationProvider,
+		NotificationTemplate, OperationLog, ParameterDefinition, Post, Project, Role,
+		StorageConfig, StorageProvider, Tenant, TenantMenuPermissionGroup,
+		TenantMenuPermissionGroupVersion, TenantParameterOverride, User,
+		WebhookDeliveryLog, WebhookSubscription []ent.Hook
 	}
 	inters struct {
-		AsyncTask, Dept, DictionaryItem, DictionaryType, FileAccessLog, FileObject,
-		LoginLog, Menu, NotificationMessage, NotificationTemplate, OperationLog,
-		ParameterDefinition, Post, Project, Role, StorageConfig, StorageProvider,
-		Tenant, TenantMenuPermissionGroup, TenantMenuPermissionGroupVersion,
-		TenantParameterOverride, User, WebhookDeliveryLog,
-		WebhookSubscription []ent.Interceptor
+		AsyncTask, Dept, Device, DictionaryItem, DictionaryType, FileAccessLog,
+		FileObject, LoginLog, Menu, NotificationMessage, NotificationProvider,
+		NotificationTemplate, OperationLog, ParameterDefinition, Post, Project, Role,
+		StorageConfig, StorageProvider, Tenant, TenantMenuPermissionGroup,
+		TenantMenuPermissionGroupVersion, TenantParameterOverride, User,
+		WebhookDeliveryLog, WebhookSubscription []ent.Interceptor
 	}
 )
 

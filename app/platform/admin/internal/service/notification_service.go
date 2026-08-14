@@ -62,6 +62,10 @@ func (s *NotificationServiceService) SendInAppNotification(ctx context.Context, 
 	return s.uc.SendInApp(ctx, req)
 }
 
+func (s *NotificationServiceService) SendNotification(ctx context.Context, req *pbCore.SendNotificationRequest) (*pbCore.SendNotificationResponse, error) {
+	return s.uc.SendNotification(ctx, req)
+}
+
 func (s *NotificationServiceService) ListNotificationMessages(ctx context.Context, req *pbCore.ListNotificationMessagesRequest) (*pbCore.ListNotificationMessagesResponse, error) {
 	items, total, err := s.uc.ListMessages(ctx, req)
 	if err != nil {

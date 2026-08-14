@@ -30,6 +30,19 @@ func (_m *DeptQuery) Page(ctx context.Context, page, size int) ([]*Dept, int, er
 	return rs, cnt, nil
 }
 
+func (_m *DeviceQuery) Page(ctx context.Context, page, size int) ([]*Device, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
 func (_m *DictionaryItemQuery) Page(ctx context.Context, page, size int) ([]*DictionaryItem, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
@@ -109,6 +122,19 @@ func (_m *MenuQuery) Page(ctx context.Context, page, size int) ([]*Menu, int, er
 }
 
 func (_m *NotificationMessageQuery) Page(ctx context.Context, page, size int) ([]*NotificationMessage, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *NotificationProviderQuery) Page(ctx context.Context, page, size int) ([]*NotificationProvider, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err

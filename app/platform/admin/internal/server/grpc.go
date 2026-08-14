@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 
+	coreV1 "backend-service/api/core/service/v1"
 	v1 "backend-service/api/platform/admin/v1"
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/app/platform/admin/internal/conf"
@@ -23,6 +24,9 @@ func newGRPCWhiteListMatcher() selector.MatchFunc {
 		v1.OperationAuthServiceLoginByEmail:     true,
 		v1.OperationAuthServiceLoginByUsername:  true,
 		v1.OperationAuthServiceRefreshToken:     true,
+		// 跨服务鉴权委托：产品服务（evie 等）调用平台 IsAuthorized，
+		// 该内部 RPC 不携带原始 JWT，需跳过本服务的认证/鉴权中间件。
+		coreV1.AuthService_IsAuthorized_FullMethodName: true,
 	}
 	return func(_ context.Context, operation string) bool {
 		return !whiteList[operation]
@@ -49,7 +53,10 @@ func NewGRPCServer(c *conf.Server,
 	storageConfig *service.StorageConfigService,
 	fileCenter *service.FileCenterServiceService,
 	notification *service.NotificationServiceService,
+	notificationProvider *service.NotificationProviderServiceService,
+	device *service.DeviceServiceService,
 	asyncTask *service.AsyncTaskServiceService,
+	authz *service.AuthzService,
 	authenticator *auth.AuthToken,
 	authorizer authzEngine.Authorizer,
 	operationAudit *biz.OperationLogUsecase,
@@ -73,6 +80,7 @@ func NewGRPCServer(c *conf.Server,
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
+	coreV1.RegisterAuthServiceServer(srv, authz)
 	v1.RegisterAuthServiceServer(srv, auth)
 	v1.RegisterTenantServiceServer(srv, tenant)
 	v1.RegisterUserServiceServer(srv, user)
@@ -91,6 +99,8 @@ func NewGRPCServer(c *conf.Server,
 	v1.RegisterStorageConfigServiceServer(srv, storageConfig)
 	v1.RegisterFileCenterServiceServer(srv, fileCenter)
 	v1.RegisterNotificationServiceServer(srv, notification)
+	v1.RegisterNotificationProviderServiceServer(srv, notificationProvider)
+	v1.RegisterDeviceServiceServer(srv, device)
 	v1.RegisterAsyncTaskServiceServer(srv, asyncTask)
 	return srv, nil
 }

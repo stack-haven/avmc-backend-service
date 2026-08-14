@@ -13,9 +13,11 @@ import (
 	"backend-service/api/common/enum"
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/notifier"
 )
 
-const AsyncTaskTypeNotificationInApp = "notification.in_app.send"
+// AsyncTaskTypeNotificationSend 通用通知发送任务（站内信/短信/邮件/Webhook）。
+const AsyncTaskTypeNotificationSend = "notification.send"
 
 type NotificationRepo interface {
 	ListTemplates(context.Context, *pb.ListNotificationTemplatesRequest) ([]*pb.NotificationTemplate, int32, error)
@@ -90,6 +92,7 @@ func (uc *NotificationUsecase) SendInApp(ctx context.Context, req *pb.SendInAppN
 		return nil, err
 	}
 	payload, err := json.Marshal(inAppNotificationPayload{
+		Channel:          NotificationChannelInApp,
 		TenantID:         tenantID,
 		RecipientUserIDs: req.GetRecipientUserIds(),
 		TemplateCode:     strings.TrimSpace(req.GetTemplateCode()),
@@ -109,22 +112,77 @@ func (uc *NotificationUsecase) SendInApp(ctx context.Context, req *pb.SendInAppN
 	if idempotencyKey == "" {
 		idempotencyKey = fmt.Sprintf("notification:in-app:%d:%s:%s:%d", tenantID, req.GetBusinessType(), req.GetBusinessId(), time.Now().UnixNano())
 	}
-	task, err := uc.tasks.Enqueue(ctx, &AsyncTaskSpec{
+	task, err := uc.enqueueNotification(ctx, tenantID, NotificationChannelInApp, len(req.GetRecipientUserIds()), 0, req.GetPriority(), payload, idempotencyKey)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SendInAppNotificationResponse{TaskId: task.GetId()}, nil
+}
+
+// SendNotification 通用通知发送（站内信/短信/邮件/Webhook）。
+func (uc *NotificationUsecase) SendNotification(ctx context.Context, req *pb.SendNotificationRequest) (*pb.SendNotificationResponse, error) {
+	if req == nil {
+		return nil, errors.BadRequest("NOTIFICATION_REQUEST_REQUIRED", "通知请求不能为空")
+	}
+	channel := channelString(req.GetChannel())
+	if channel == "" {
+		return nil, errors.BadRequest("NOTIFICATION_CHANNEL_REQUIRED", "通知渠道不能为空")
+	}
+	if len(req.GetRecipientUserIds()) == 0 && len(req.GetPhones()) == 0 {
+		return nil, errors.BadRequest("NOTIFICATION_RECIPIENT_REQUIRED", "通知接收人不能为空")
+	}
+	hasTemplate := strings.TrimSpace(req.GetTemplateCode()) != ""
+	if !hasTemplate && (strings.TrimSpace(req.GetTitle()) == "" || strings.TrimSpace(req.GetContent()) == "") {
+		return nil, errors.BadRequest("NOTIFICATION_CONTENT_REQUIRED", "未使用模板时通知标题和内容不能为空")
+	}
+	tenantID, err := currentTenantID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	payload, err := json.Marshal(inAppNotificationPayload{
+		Channel:          channel,
+		TenantID:         tenantID,
+		RecipientUserIDs: req.GetRecipientUserIds(),
+		Phones:           req.GetPhones(),
+		TemplateCode:     strings.TrimSpace(req.GetTemplateCode()),
+		Title:            strings.TrimSpace(req.GetTitle()),
+		Content:          strings.TrimSpace(req.GetContent()),
+		Variables:        strings.TrimSpace(req.GetVariables()),
+		Priority:         req.GetPriority(),
+		BusinessType:     strings.TrimSpace(req.GetBusinessType()),
+		BusinessID:       strings.TrimSpace(req.GetBusinessId()),
+		SenderUserID:     authn.GetAuthUserID(ctx),
+		SenderName:       currentUserName(ctx),
+	})
+	if err != nil {
+		return nil, err
+	}
+	idempotencyKey := strings.TrimSpace(req.GetIdempotencyKey())
+	if idempotencyKey == "" {
+		idempotencyKey = fmt.Sprintf("notification:%s:%d:%s:%s:%d", channel, tenantID, req.GetBusinessType(), req.GetBusinessId(), time.Now().UnixNano())
+	}
+	task, err := uc.enqueueNotification(ctx, tenantID, channel, len(req.GetRecipientUserIds()), len(req.GetPhones()), req.GetPriority(), payload, idempotencyKey)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SendNotificationResponse{TaskId: task.GetId()}, nil
+}
+
+// enqueueNotification 创建通用通知发送任务。
+func (uc *NotificationUsecase) enqueueNotification(ctx context.Context, tenantID uint32, channel string, userCount, phoneCount int, priority int32, payload []byte, idempotencyKey string) (*pb.AsyncTask, error) {
+	summary := fmt.Sprintf("通知发送：渠道 %s，用户 %d 个，手机号 %d 个", channel, userCount, phoneCount)
+	return uc.tasks.Enqueue(ctx, &AsyncTaskSpec{
 		TenantID:       &tenantID,
-		TaskType:       AsyncTaskTypeNotificationInApp,
+		TaskType:       AsyncTaskTypeNotificationSend,
 		Queue:          "notification",
-		Priority:       req.GetPriority(),
+		Priority:       priority,
 		Payload:        payload,
-		PayloadSummary: fmt.Sprintf("站内信接收人 %d 个", len(req.GetRecipientUserIds())),
+		PayloadSummary: summary,
 		IdempotencyKey: idempotencyKey,
 		MaxAttempts:    3,
 		ScheduledAt:    time.Now(),
 		CreatedBy:      notificationUint32Ptr(authn.GetAuthUserID(ctx)),
 	})
-	if err != nil {
-		return nil, err
-	}
-	return &pb.SendInAppNotificationResponse{TaskId: task.GetId()}, nil
 }
 
 func (uc *NotificationUsecase) ListMessages(ctx context.Context, req *pb.ListNotificationMessagesRequest) ([]*pb.NotificationMessage, int32, error) {
@@ -164,8 +222,10 @@ func (uc *NotificationUsecase) MarkMyRead(ctx context.Context, ids []uint32) err
 }
 
 type inAppNotificationPayload struct {
+	Channel          string   `json:"channel,omitempty"`
 	TenantID         uint32   `json:"tenantId"`
 	RecipientUserIDs []uint32 `json:"recipientUserIds"`
+	Phones           []string `json:"phones,omitempty"`
 	TemplateCode     string   `json:"templateCode,omitempty"`
 	Title            string   `json:"title,omitempty"`
 	Content          string   `json:"content,omitempty"`
@@ -178,53 +238,76 @@ type inAppNotificationPayload struct {
 }
 
 type notificationInAppHandler struct {
-	repo NotificationRepo
+	repo     NotificationRepo
+	resolver *notificationSenderResolver
 }
 
-func NewNotificationAsyncTaskHandler(repo NotificationRepo) AsyncTaskHandler {
-	return &notificationInAppHandler{repo: repo}
+func NewNotificationAsyncTaskHandler(repo NotificationRepo, resolver *notificationSenderResolver) AsyncTaskHandler {
+	return &notificationInAppHandler{repo: repo, resolver: resolver}
 }
 
-func (h *notificationInAppHandler) Type() string { return AsyncTaskTypeNotificationInApp }
+func (h *notificationInAppHandler) Type() string { return AsyncTaskTypeNotificationSend }
 
 func (h *notificationInAppHandler) Handle(ctx context.Context, raw json.RawMessage) (string, error) {
 	var payload inAppNotificationPayload
 	if err := json.Unmarshal(raw, &payload); err != nil {
 		return "", fmt.Errorf("decode notification payload: %w", err)
 	}
-	if payload.TenantID == 0 || len(payload.RecipientUserIDs) == 0 {
-		return "", fmt.Errorf("tenant id and recipients are required")
+	if payload.TenantID == 0 {
+		return "", fmt.Errorf("tenant id is required")
+	}
+	channel := payload.Channel
+	if channel == "" {
+		channel = NotificationChannelInApp
+	}
+	if len(payload.RecipientUserIDs) == 0 && len(payload.Phones) == 0 {
+		return "", fmt.Errorf("recipients or phones are required")
 	}
 	title, content, templateID, templateCode, err := h.resolveContent(ctx, &payload)
 	if err != nil {
 		return "", err
 	}
-	messages := make([]*pb.NotificationMessage, 0, len(payload.RecipientUserIDs))
+
+	// 通过供应商抽象发送：resolver 解析 sender，站内信直写 DB，短信调用服务商。
+	sender, err := h.resolver.ResolveByChannel(ctx, channel)
+	if err != nil {
+		return "", err
+	}
+	recipients := make([]notifier.Recipient, 0, len(payload.RecipientUserIDs)+len(payload.Phones))
 	for _, recipientID := range payload.RecipientUserIDs {
 		if recipientID == 0 {
 			continue
 		}
-		messages = append(messages, &pb.NotificationMessage{
-			TenantId:        payload.TenantID,
-			RecipientUserId: recipientID,
-			TemplateId:      templateID,
-			TemplateCode:    notificationStringPtr(templateCode),
-			Channel:         pb.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP,
-			Title:           title,
-			Content:         content,
-			Status:          pb.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD,
-			Priority:        &payload.Priority,
-			BusinessType:    notificationStringPtr(payload.BusinessType),
-			BusinessId:      notificationStringPtr(payload.BusinessID),
-			SenderUserId:    notificationUint32Ptr(payload.SenderUserID),
-			SenderName:      notificationStringPtr(payload.SenderName),
-		})
+		recipients = append(recipients, notifier.Recipient{UserID: recipientID})
 	}
-	count, err := h.repo.CreateMessages(ctx, messages)
+	for _, phone := range payload.Phones {
+		if strings.TrimSpace(phone) == "" {
+			continue
+		}
+		recipients = append(recipients, notifier.Recipient{Phone: strings.TrimSpace(phone)})
+	}
+	var templateIDVal uint32
+	if templateID != nil {
+		templateIDVal = *templateID
+	}
+	result, err := sender.Send(ctx, notifier.Message{
+		Channel:      channel,
+		TenantID:     payload.TenantID,
+		Title:        title,
+		Content:      content,
+		Recipients:   recipients,
+		TemplateID:   templateIDVal,
+		TemplateCode: templateCode,
+		Priority:     payload.Priority,
+		BusinessType: payload.BusinessType,
+		BusinessID:   payload.BusinessID,
+		SenderUserID: payload.SenderUserID,
+		SenderName:   payload.SenderName,
+	})
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("已生成 %d 条站内信", count), nil
+	return fmt.Sprintf("已发送 %d 条通知，失败 %d 条", result.SuccessCount, result.FailCount), nil
 }
 
 func (h *notificationInAppHandler) resolveContent(ctx context.Context, payload *inAppNotificationPayload) (string, string, *uint32, string, error) { //nolint:gocritic // return types clear from callers
@@ -249,6 +332,20 @@ func (h *notificationInAppHandler) resolveContent(ctx context.Context, payload *
 		}
 	}
 	return renderNotificationText(title, variables), renderNotificationText(content, variables), templateID, templateCode, nil
+}
+
+// channelString 把通知渠道枚举转为 notifier 渠道标识。
+func channelString(channel pb.NotificationChannel) string {
+	switch channel {
+	case pb.NotificationChannel_NOTIFICATION_CHANNEL_SMS:
+		return NotificationChannelSMS
+	case pb.NotificationChannel_NOTIFICATION_CHANNEL_EMAIL:
+		return NotificationChannelEmail
+	case pb.NotificationChannel_NOTIFICATION_CHANNEL_WEBHOOK:
+		return NotificationChannelWebhook
+	default:
+		return NotificationChannelInApp
+	}
 }
 
 func renderNotificationText(input string, variables map[string]string) string {

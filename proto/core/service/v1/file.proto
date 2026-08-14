@@ -18,6 +18,13 @@ service FileCenterService {
   rpc ListFileAccessLogs(ListFileAccessLogsRequest) returns (ListFileAccessLogsResponse);
   rpc PresignFileDownload(PresignFileDownloadRequest) returns (PresignFileDownloadResponse);
   rpc DeleteFileObject(DeleteFileObjectRequest) returns (DeleteFileObjectResponse);
+  rpc UpdateFileObject(UpdateFileObjectRequest) returns (UpdateFileObjectResponse);
+  rpc ReplaceFileContent(ReplaceFileContentRequest) returns (ReplaceFileContentResponse);
+  rpc DownloadFileContent(DownloadFileContentRequest) returns (DownloadFileContentResponse);
+  rpc UploadFilePart(UploadFilePartRequest) returns (UploadFilePartResponse);
+  rpc ListFileParts(ListFilePartsRequest) returns (ListFilePartsResponse);
+  rpc CompleteFileUpload(CompleteFileUploadRequest) returns (CompleteFileUploadResponse);
+  rpc AbortFileUpload(AbortFileUploadRequest) returns (AbortFileUploadResponse);
 }
 
 message FileObject {
@@ -56,6 +63,9 @@ message FileObject {
   optional string upload_expires_at = 18 [(gnostic.openapi.v3.property) = {description: "上传凭证过期时间"}];
   optional uint32 provider_id = 19 [(gnostic.openapi.v3.property) = {description: "存储渠道ID"}];
   optional string provider_code = 20 [(gnostic.openapi.v3.property) = {description: "存储渠道编码"}];
+  optional string upload_id = 21 [(gnostic.openapi.v3.property) = {description: "分片上传会话ID"}];
+  optional int64 part_size = 22 [(gnostic.openapi.v3.property) = {description: "分片大小（字节），0 表示非分片"}];
+  optional int32 total_parts = 23 [(gnostic.openapi.v3.property) = {description: "总分片数"}];
 }
 
 message FileAccessLog {
@@ -88,6 +98,14 @@ message CreateFileUploadSessionRequest {
   optional string business_id = 6 [(buf.validate.field).string.max_len = 120];
   optional string visibility = 7 [(buf.validate.field).string.max_len = 20];
   optional string idempotency_key = 8 [(buf.validate.field).string.max_len = 120];
+  optional int64 part_size = 9 [
+    (buf.validate.field).int64.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "分片大小（字节），>0 表示分片上传模式"}
+  ];
+  optional int32 total_parts = 10 [
+    (buf.validate.field).int32.gte = 0,
+    (gnostic.openapi.v3.property) = {description: "总分片数（分片模式必填）"}
+  ];
 }
 
 message CreateFileUploadSessionResponse {
@@ -206,3 +224,105 @@ message DeleteFileObjectRequest {
 }
 
 message DeleteFileObjectResponse {}
+
+// 更新文件元数据（目前仅支持修改显示文件名）
+message UpdateFileObjectRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  string file_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 255
+    },
+    (gnostic.openapi.v3.property) = {description: "新的显示文件名"}
+  ];
+}
+
+message UpdateFileObjectResponse {
+  FileObject file = 1;
+}
+
+// 原地替换文件内容（保留文件 ID，替换二进制对象和元数据）
+message ReplaceFileContentRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  bytes content = 2 [(gnostic.openapi.v3.property) = {description: "新文件内容"}];
+  optional string file_name = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 255
+    },
+    (gnostic.openapi.v3.property) = {description: "可选：同时更新显示文件名"}
+  ];
+  optional string content_type = 4 [(buf.validate.field).string.max_len = 120];
+}
+
+message ReplaceFileContentResponse {
+  FileObject file = 1;
+}
+
+// 下载文件内容（后端代理读取，仅本地存储渠道支持）
+message DownloadFileContentRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message DownloadFileContentResponse {
+  bytes content = 1;
+  string content_type = 2;
+  string file_name = 3;
+}
+
+// 上传单个分片（分片上传模式）。
+// 本地渠道后端代理接收分片；对象存储渠道预留为预签名分片直传。
+message UploadFilePartRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  int32 part_number = 2 [
+    (buf.validate.field).int32.gte = 1,
+    (gnostic.openapi.v3.property) = {description: "分片序号，从 1 开始"}
+  ];
+  bytes content = 3 [(gnostic.openapi.v3.property) = {description: "分片内容"}];
+  optional string content_sha256 = 4 [
+    (buf.validate.field).string.max_len = 64,
+    (gnostic.openapi.v3.property) = {description: "分片 SHA256（可选校验）"}
+  ];
+}
+
+message UploadFilePartResponse {
+  string etag = 1 [(gnostic.openapi.v3.property) = {description: "分片标识"}];
+  int32 part_number = 2;
+}
+
+// 完成分片上传：本地渠道合并分片，对象存储渠道预留为 CompleteMultipartUpload。
+message FilePart {
+  int32 part_number = 1 [(buf.validate.field).int32.gte = 1];
+  string etag = 2 [(buf.validate.field).string.max_len = 128];
+}
+
+// 查询已上传分片（断点续传）。
+// 本地渠道扫描临时目录；对象存储预留为原生 ListParts。
+message ListFilePartsRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message ListFilePartsResponse {
+  repeated FilePart parts = 1;
+  int32 total_parts = 2;
+  int64 part_size = 3;
+}
+
+message CompleteFileUploadRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  repeated FilePart parts = 2 [
+    (buf.validate.field).repeated.min_items = 1,
+    (gnostic.openapi.v3.property) = {description: "已上传分片列表（校验完整性）"}
+  ];
+}
+
+message CompleteFileUploadResponse {
+  FileObject file = 1;
+}
+
+// 取消分片上传，清理已上传的分片。
+message AbortFileUploadRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message AbortFileUploadResponse {}

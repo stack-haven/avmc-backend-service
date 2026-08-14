@@ -126,6 +126,7 @@ func seed(ctx context.Context, client *gen.Client, authorizer authzEngine.Author
 	notif := md(mockMenuSpec{"NotificationCenter", "通知中心", "/notif", "BasicLayout", "ion:notifications-outline", 1, 60, ""}, 0)
 	mi(mockMenuSpec{"NotifTemplate", "通知模板", "/notif/template", "/system/notification/template", "mdi:email-outline", 2, 10, ""}, notif.ID)
 	mi(mockMenuSpec{"NotifRecord", "通知记录", "/notif/record", "/system/notification/record", "mdi:bell-outline", 2, 20, ""}, notif.ID)
+	mi(mockMenuSpec{"NotifProvider", "通知渠道配置", "/notif/provider", "/system/notification-provider/list", "mdi:message-cog-outline", 2, 30, ""}, notif.ID)
 
 	sys := md(mockMenuSpec{"SystemManagement", "系统管理", "/system", "BasicLayout", "ion:settings-outline", 1, 999, ""}, 0)
 	mi(mockMenuSpec{"Dictionary", "字典管理", "/system/dictionary", "/system/dictionary/list", "mdi:book-cog-outline", 2, 10, ""}, sys.ID)
@@ -215,6 +216,12 @@ func seed(ctx context.Context, client *gen.Client, authorizer authzEngine.Author
 	bt("NotifTemplate", "NTDelete", "删除", "OperationNotificationServiceDeleteNotificationTemplate", 40)
 	bt("NotifRecord", "NMsgQuery", "查询", "OperationNotificationServiceListNotificationMessages", 10)
 	bt("NotifRecord", "NMsgSend", "发送", "OperationNotificationServiceSendInAppNotification", 20)
+	bt("NotifProvider", "NPQuery", "查询", "OperationNotificationProviderServiceListNotificationProviders", 10)
+	bt("NotifProvider", "NPCreate", "新增", "OperationNotificationProviderServiceCreateNotificationProvider", 20)
+	bt("NotifProvider", "NPEdit", "编辑", "OperationNotificationProviderServiceUpdateNotificationProvider", 30)
+	bt("NotifProvider", "NPDelete", "删除", "OperationNotificationProviderServiceDeleteNotificationProvider", 40)
+	bt("NotifProvider", "NPDefault", "设默认", "OperationNotificationProviderServiceSetDefaultNotificationProvider", 50)
+	bt("NotifProvider", "NPTest", "测试", "OperationNotificationProviderServiceTestNotificationProvider", 60)
 	// 系统管理
 	bt("Dictionary", "DictQuery", "查询", "OperationDictionaryServiceListDictionaryTypes", 10)
 	bt("Dictionary", "DictCreate", "新增", "OperationDictionaryServiceCreateDictionaryType", 20)

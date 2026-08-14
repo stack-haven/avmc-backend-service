@@ -41,6 +41,8 @@ type FileRepo interface {
 	Count(context.Context, ...listing.Option) (int32, error)
 	Confirm(context.Context, uint32, int64, string, string) (*pbCore.FileObject, error)
 	Delete(context.Context, uint32) error
+	UpdateFileName(context.Context, uint32, string) (*pbCore.FileObject, error)
+	UpdateAfterReplace(context.Context, uint32, string, int64, string, string, string, string) (*pbCore.FileObject, error)
 }
 
 type FileAccessLogRepo interface {
@@ -101,6 +103,21 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 		bucket = defaultFileBucket
 	}
 	objectKey := buildObjectKey(tenantID, fileName)
+	partSize := req.GetPartSize()
+	totalParts := req.GetTotalParts()
+
+	// 分片上传模式：初始化分片会话（本地=临时目录，对象存储预留为 Multipart Upload）。
+	var uploadID string
+	if partSize > 0 {
+		if totalParts <= 0 {
+			return nil, errors.BadRequest("FILE_MULTIPART_PARTS_REQUIRED", "分片上传必须指定总分片数")
+		}
+		uploadID, err = provider.Client.CreateMultipartUpload(ctx, bucket, objectKey)
+		if err != nil {
+			return nil, errors.InternalServer("FILE_MULTIPART_INIT_FAILED", fmt.Sprintf("初始化分片上传失败: %v", err))
+		}
+	}
+
 	file := &pbCore.FileObject{
 		TenantId:     &tenantID,
 		FileName:     &fileName,
@@ -117,6 +134,9 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 		Visibility:   &visibility,
 		Status:       fileInt32Ptr(FileStatusPending),
 		CreatedBy:    fileUint32Ptr(authn.GetAuthUserID(ctx)),
+		UploadId:     &uploadID,
+		PartSize:     &partSize,
+		TotalParts:   &totalParts,
 	}
 	created, err := uc.repo.CreateUploadSession(ctx, file, idempotencyKey, expiresAt)
 	if err != nil {
@@ -228,6 +248,15 @@ func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignF
 	if err != nil {
 		return nil, err
 	}
+
+	// 访问控制：public 文件优先返回公开 URL（长期有效），未配置公开域名时回退预签名。
+	if file.GetVisibility() == "public" {
+		if publicURL, publicErr := provider.Client.PublicURL(file.GetBucket(), file.GetObjectKey()); publicErr == nil && publicURL != "" {
+			uc.appendAccessLog(ctx, file, "download", "success", "")
+			return &pbCore.PresignFileDownloadResponse{DownloadUrl: publicURL}, nil
+		}
+	}
+
 	ttl := defaultDownloadTTL
 	if req.GetExpiresSeconds() > 0 {
 		ttl = time.Duration(req.GetExpiresSeconds()) * time.Second
@@ -242,6 +271,270 @@ func (uc *FileUsecase) PresignDownload(ctx context.Context, req *pbCore.PresignF
 		DownloadUrl: url,
 		ExpiresAt:   time.Now().UTC().Add(ttl).Format(time.DateTime),
 	}, nil
+}
+
+// DownloadContent 后端代理读取文件内容（仅本地存储渠道）。
+func (uc *FileUsecase) DownloadContent(ctx context.Context, id uint32) (*pbCore.DownloadFileContentResponse, error) {
+	if id == 0 {
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	file, err := uc.repo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if file.GetStatus() != FileStatusConfirmed {
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件未确认或已删除")
+	}
+	if file.GetProvider() != StorageProviderTypeLocal {
+		return nil, errors.BadRequest("FILE_UPLOAD_METHOD_UNSUPPORTED", "当前存储渠道不支持后端代理下载")
+	}
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
+	}
+	content, err := provider.Client.GetObject(ctx, file.GetBucket(), file.GetObjectKey())
+	if err != nil {
+		uc.appendAccessLog(ctx, file, "download", "failure", err.Error())
+		return nil, errors.InternalServer("FILE_READ_ERROR", fmt.Sprintf("读取文件内容失败: %v", err))
+	}
+	uc.appendAccessLog(ctx, file, "download", "success", "")
+	return &pbCore.DownloadFileContentResponse{
+		Content:     content,
+		ContentType: file.GetContentType(),
+		FileName:    file.GetFileName(),
+	}, nil
+}
+
+// UpdateFileName 更新文件显示名（不影响对象存储 key）。
+func (uc *FileUsecase) UpdateFileName(ctx context.Context, id uint32, fileName string) (*pbCore.FileObject, error) {
+	if id == 0 {
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	fileName = strings.TrimSpace(fileName)
+	if fileName == "" {
+		return nil, errors.BadRequest("FILE_NAME_REQUIRED", "文件名不能为空")
+	}
+	file, err := uc.repo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if file.GetStatus() == FileStatusDeleted {
+		return nil, errors.NotFound("FILE_NOT_FOUND", "文件不存在")
+	}
+	return uc.repo.UpdateFileName(ctx, id, fileName)
+}
+
+// ReplaceContent 原地替换文件内容（保留文件 ID，替换二进制对象和元数据）。
+func (uc *FileUsecase) ReplaceContent(ctx context.Context, req *pbCore.ReplaceFileContentRequest) (*pbCore.FileObject, error) {
+	if req == nil || req.GetId() == 0 {
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	if len(req.GetContent()) == 0 {
+		return nil, errors.BadRequest("FILE_CONTENT_REQUIRED", "文件内容不能为空")
+	}
+	file, err := uc.repo.Get(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if file.GetStatus() != FileStatusConfirmed {
+		return nil, errors.BadRequest("FILE_NOT_CONFIRMED", "仅已确认的文件可替换内容")
+	}
+	if file.GetProvider() != StorageProviderTypeLocal {
+		return nil, errors.BadRequest("FILE_UPLOAD_METHOD_UNSUPPORTED", "当前存储渠道不支持平台代理上传")
+	}
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
+	}
+
+	newSize := int64(len(req.GetContent()))
+	contentType := defaultContentType(req.GetContentType())
+	fileName := file.GetFileName()
+	if strings.TrimSpace(req.GetFileName()) != "" {
+		fileName = strings.TrimSpace(req.GetFileName())
+	}
+
+	// 配额：文件数量不变，仅存储字节从旧 size 变为新 size。
+	if uc.quota != nil && newSize > file.GetSize() {
+		storage, checkErr := uc.quota.CheckCurrent(ctx, storageBytesQuotaKey, newSize-file.GetSize())
+		if checkErr != nil {
+			return nil, checkErr
+		}
+		if !storage.GetAllowed() {
+			return nil, errors.Forbidden("RESOURCE_QUOTA_EXCEEDED", "文件存储容量额度不足")
+		}
+	}
+
+	// 删除旧对象，写入新对象（新 object_key，保持对象不可变语义）。
+	if err = provider.Client.DeleteObject(ctx, file.GetBucket(), file.GetObjectKey()); err != nil {
+		uc.appendAccessLog(ctx, file, "replace", "failure", err.Error())
+		return nil, errors.InternalServer("FILE_DELETE_ERROR", fmt.Sprintf("删除旧文件对象失败: %v", err))
+	}
+	tenantID, tenantErr := currentTenantID(ctx)
+	if tenantErr != nil {
+		return nil, tenantErr
+	}
+	newObjectKey := buildObjectKey(tenantID, fileName)
+	info, putErr := provider.Client.PutObject(ctx, file.GetBucket(), newObjectKey, bytes.NewReader(req.GetContent()), objectstorage.PutOptions{ContentType: contentType})
+	if putErr != nil {
+		uc.appendAccessLog(ctx, file, "replace", "failure", putErr.Error())
+		return nil, errors.InternalServer("FILE_WRITE_ERROR", fmt.Sprintf("写入文件对象失败: %v", putErr))
+	}
+
+	updated, err := uc.repo.UpdateAfterReplace(ctx, req.GetId(), newObjectKey, info.Size, info.ETag, info.ETag, contentType, fileName)
+	if err != nil {
+		uc.appendAccessLog(ctx, file, "replace", "failure", err.Error())
+		return nil, err
+	}
+
+	// 写入成功后调整配额占用：释放旧 size，占用新 size。
+	if uc.quota != nil {
+		if file.GetSize() > 0 {
+			if _, releaseErr := uc.quota.ReleaseCurrent(ctx, storageBytesQuotaKey, file.GetSize(), fmt.Sprintf("file:replace:%d:old", file.GetId())); releaseErr != nil {
+				uc.log.Warnf("release old file storage quota failed: %v", releaseErr)
+			}
+		}
+		if newSize > 0 {
+			if _, _, reserveErr := uc.quota.ReserveCurrent(ctx, storageBytesQuotaKey, newSize, fmt.Sprintf("file:replace:%d:new", file.GetId())); reserveErr != nil {
+				uc.log.Warnf("reserve new file storage quota failed: %v", reserveErr)
+			}
+		}
+	}
+
+	uc.appendAccessLog(ctx, file, "replace", "success", "")
+	return updated, nil
+}
+
+// UploadFilePart 上传单个分片（本地渠道代理接收；对象存储预留为预签名直传）。
+func (uc *FileUsecase) UploadFilePart(ctx context.Context, req *pbCore.UploadFilePartRequest) (*pbCore.UploadFilePartResponse, error) {
+	if req == nil || req.GetId() == 0 {
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	if req.GetPartNumber() <= 0 {
+		return nil, errors.BadRequest("FILE_PART_NUMBER_INVALID", "分片序号必须大于 0")
+	}
+	if len(req.GetContent()) == 0 {
+		return nil, errors.BadRequest("FILE_CONTENT_REQUIRED", "分片内容不能为空")
+	}
+	file, err := uc.repo.Get(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if file.GetStatus() != FileStatusPending {
+		return nil, errors.BadRequest("FILE_NOT_PENDING", "仅待上传状态可接收分片")
+	}
+	if file.GetPartSize() <= 0 || file.GetUploadId() == "" {
+		return nil, errors.BadRequest("FILE_NOT_MULTIPART", "当前文件不是分片上传会话")
+	}
+	if req.GetPartNumber() > file.GetTotalParts() {
+		return nil, errors.BadRequest("FILE_PART_NUMBER_INVALID", "分片序号超出总分片数")
+	}
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
+	}
+	etag, err := provider.Client.UploadPart(ctx, file.GetBucket(), file.GetObjectKey(), file.GetUploadId(), req.GetPartNumber(), bytes.NewReader(req.GetContent()), objectstorage.PutOptions{ContentType: file.GetContentType()})
+	if err != nil {
+		return nil, errors.InternalServer("FILE_PART_WRITE_ERROR", fmt.Sprintf("写入分片失败: %v", err))
+	}
+	return &pbCore.UploadFilePartResponse{Etag: etag, PartNumber: req.GetPartNumber()}, nil
+}
+
+// ListFileParts 查询已上传分片（断点续传）。本地扫描临时目录；对象存储预留为 ListParts。
+func (uc *FileUsecase) ListFileParts(ctx context.Context, id uint32) (*pbCore.ListFilePartsResponse, error) {
+	if id == 0 {
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	file, err := uc.repo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if file.GetPartSize() <= 0 || file.GetUploadId() == "" {
+		return nil, errors.BadRequest("FILE_NOT_MULTIPART", "当前文件不是分片上传会话")
+	}
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
+	}
+	parts, err := provider.Client.ListMultipartParts(ctx, file.GetBucket(), file.GetObjectKey(), file.GetUploadId())
+	if err != nil {
+		return nil, errors.InternalServer("FILE_PARTS_LIST_ERROR", fmt.Sprintf("查询已上传分片失败: %v", err))
+	}
+	pbParts := make([]*pbCore.FilePart, len(parts))
+	for i, p := range parts {
+		pbParts[i] = &pbCore.FilePart{PartNumber: p.PartNumber, Etag: p.ETag}
+	}
+	return &pbCore.ListFilePartsResponse{
+		Parts:      pbParts,
+		TotalParts: file.GetTotalParts(),
+		PartSize:   file.GetPartSize(),
+	}, nil
+}
+
+// CompleteFileUpload 完成分片上传：本地合并分片，对象存储预留为 CompleteMultipartUpload。
+func (uc *FileUsecase) CompleteFileUpload(ctx context.Context, req *pbCore.CompleteFileUploadRequest) (*pbCore.FileObject, error) {
+	if req == nil || req.GetId() == 0 {
+		return nil, errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	if len(req.GetParts()) == 0 {
+		return nil, errors.BadRequest("FILE_PARTS_REQUIRED", "分片列表不能为空")
+	}
+	file, err := uc.repo.Get(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if file.GetStatus() != FileStatusPending {
+		return nil, errors.BadRequest("FILE_NOT_PENDING", "仅待上传状态可完成上传")
+	}
+	if file.GetPartSize() <= 0 || file.GetUploadId() == "" {
+		return nil, errors.BadRequest("FILE_NOT_MULTIPART", "当前文件不是分片上传会话")
+	}
+	if int32(len(req.GetParts())) != file.GetTotalParts() {
+		return nil, errors.BadRequest("FILE_PARTS_COUNT_MISMATCH", fmt.Sprintf("分片数量不匹配：期望 %d，实际 %d", file.GetTotalParts(), len(req.GetParts())))
+	}
+	provider, err := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+	if err != nil {
+		return nil, err
+	}
+	parts := make([]objectstorage.MultipartPart, len(req.GetParts()))
+	for i, p := range req.GetParts() {
+		parts[i] = objectstorage.MultipartPart{PartNumber: p.GetPartNumber(), ETag: p.GetEtag()}
+	}
+	etag, err := provider.Client.CompleteMultipartUpload(ctx, file.GetBucket(), file.GetObjectKey(), file.GetUploadId(), parts)
+	if err != nil {
+		uc.appendAccessLog(ctx, file, "upload", "failure", err.Error())
+		return nil, errors.InternalServer("FILE_MULTIPART_COMPLETE_FAILED", fmt.Sprintf("合并分片失败: %v", err))
+	}
+	// 本地渠道 etag 即整文件 sha256。
+	sha256 := etag
+	if strings.TrimSpace(file.GetSha256()) != "" {
+		sha256 = file.GetSha256()
+	}
+	uc.appendAccessLog(ctx, file, "upload", "success", "")
+	return uc.confirmWithQuota(ctx, file, file.GetSize(), sha256, etag)
+}
+
+// AbortFileUpload 取消分片上传，清理已上传分片并删除文件记录。
+func (uc *FileUsecase) AbortFileUpload(ctx context.Context, id uint32) error {
+	if id == 0 {
+		return errors.BadRequest("FILE_ID_REQUIRED", "文件ID不能为空")
+	}
+	file, err := uc.repo.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	if file.GetStatus() != FileStatusPending {
+		return nil
+	}
+	if file.GetUploadId() != "" {
+		provider, resolveErr := uc.resolver.ResolveSnapshot(ctx, file.GetProviderId(), file.GetProviderCode(), file.GetProvider())
+		if resolveErr == nil {
+			if abortErr := provider.Client.AbortMultipartUpload(ctx, file.GetBucket(), file.GetObjectKey(), file.GetUploadId()); abortErr != nil {
+				uc.log.Warnf("abort multipart upload failed: %v", abortErr)
+			}
+		}
+	}
+	return uc.repo.Delete(ctx, id)
 }
 
 func (uc *FileUsecase) Delete(ctx context.Context, id uint32, idempotencyKey string) error {
@@ -421,7 +714,7 @@ func (uc *FileUsecase) uploadSessionResponse(ctx context.Context, provider *Reso
 	if provider.Type == StorageProviderTypeLocal {
 		return &pbCore.CreateFileUploadSessionResponse{
 			File:         file,
-			UploadUrl:    fmt.Sprintf("/admin/v1/files/%d:content", file.GetId()),
+			UploadUrl:    fmt.Sprintf("/admin/v1/files/%d/content", file.GetId()),
 			UploadMethod: "POST",
 			ExpiresAt:    time.Now().UTC().Add(ttl).Format(time.DateTime),
 		}, nil

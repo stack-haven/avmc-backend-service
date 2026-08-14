@@ -18,6 +18,8 @@ type Tx struct {
 	AsyncTask *AsyncTaskClient
 	// Dept is the client for interacting with the Dept builders.
 	Dept *DeptClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
 	// DictionaryItem is the client for interacting with the DictionaryItem builders.
 	DictionaryItem *DictionaryItemClient
 	// DictionaryType is the client for interacting with the DictionaryType builders.
@@ -32,6 +34,8 @@ type Tx struct {
 	Menu *MenuClient
 	// NotificationMessage is the client for interacting with the NotificationMessage builders.
 	NotificationMessage *NotificationMessageClient
+	// NotificationProvider is the client for interacting with the NotificationProvider builders.
+	NotificationProvider *NotificationProviderClient
 	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
 	NotificationTemplate *NotificationTemplateClient
 	// OperationLog is the client for interacting with the OperationLog builders.
@@ -195,6 +199,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.AsyncTask = NewAsyncTaskClient(tx.config)
 	tx.Dept = NewDeptClient(tx.config)
+	tx.Device = NewDeviceClient(tx.config)
 	tx.DictionaryItem = NewDictionaryItemClient(tx.config)
 	tx.DictionaryType = NewDictionaryTypeClient(tx.config)
 	tx.FileAccessLog = NewFileAccessLogClient(tx.config)
@@ -202,6 +207,7 @@ func (tx *Tx) init() {
 	tx.LoginLog = NewLoginLogClient(tx.config)
 	tx.Menu = NewMenuClient(tx.config)
 	tx.NotificationMessage = NewNotificationMessageClient(tx.config)
+	tx.NotificationProvider = NewNotificationProviderClient(tx.config)
 	tx.NotificationTemplate = NewNotificationTemplateClient(tx.config)
 	tx.OperationLog = NewOperationLogClient(tx.config)
 	tx.ParameterDefinition = NewParameterDefinitionClient(tx.config)

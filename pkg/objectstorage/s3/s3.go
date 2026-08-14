@@ -195,6 +195,11 @@ func (c *client) PresignPutObject(_ context.Context, bucket string, key string, 
 	return c.presign(http.MethodPut, bucket, key, opts)
 }
 
+// GetObject 对象存储渠道不支持后端代理读取，下载走预签名 URL。
+func (*client) GetObject(context.Context, string, string) ([]byte, error) {
+	return nil, objectstorage.ErrUnsupportedProvider
+}
+
 func (c *client) PublicURL(bucket string, key string) (string, error) {
 	if err := validateObject(bucket, key); err != nil {
 		return "", err
@@ -420,3 +425,26 @@ func amzDate(t time.Time) string {
 func shortDate(t time.Time) string {
 	return t.UTC().Format("20060102")
 }
+
+// ── Multipart 预留：对象存储渠道未来实现原生分片上传 ──
+func (*client) CreateMultipartUpload(context.Context, string, string) (string, error) {
+	return "", objectstorage.ErrUnsupportedProvider
+}
+
+func (*client) UploadPart(context.Context, string, string, string, int32, io.Reader, objectstorage.PutOptions) (string, error) {
+	return "", objectstorage.ErrUnsupportedProvider
+}
+
+
+func (*client) ListMultipartParts(context.Context, string, string, string) ([]objectstorage.MultipartPart, error) {
+	return nil, objectstorage.ErrUnsupportedProvider
+}
+
+func (*client) CompleteMultipartUpload(context.Context, string, string, string, []objectstorage.MultipartPart) (string, error) {
+	return "", objectstorage.ErrUnsupportedProvider
+}
+
+func (*client) AbortMultipartUpload(context.Context, string, string, string) error {
+	return objectstorage.ErrUnsupportedProvider
+}
+

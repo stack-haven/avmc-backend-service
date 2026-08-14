@@ -16,12 +16,26 @@ import (
 const (
 	StorageProviderTypeS3Compatible = "s3-compatible"
 	StorageProviderTypeLocal        = "local"
+	StorageProviderTypeAliyunOSS    = "aliyun-oss"
+	StorageProviderTypeQiniuKodo    = "qiniu-kodo"
+	StorageProviderTypeTencentCOS   = "tencent-cos"
 
 	StorageProviderStatusEnabled  int32 = 1
 	StorageProviderStatusDisabled int32 = 2
 
 	defaultStorageProviderBucket = "tenant-files"
 )
+
+// SupportedStorageProviderTypes 返回全部受支持的存储渠道类型。
+func SupportedStorageProviderTypes() []string {
+	return []string{
+		StorageProviderTypeS3Compatible,
+		StorageProviderTypeLocal,
+		StorageProviderTypeAliyunOSS,
+		StorageProviderTypeQiniuKodo,
+		StorageProviderTypeTencentCOS,
+	}
+}
 
 type ResolvedStorageProvider struct {
 	ID            uint32
@@ -154,6 +168,24 @@ func validateStorageProvider(item *pbCore.StorageProvider, create bool) error {
 		if strings.TrimSpace(item.GetLocalBasePath()) == "" {
 			return errors.BadRequest("STORAGE_PROVIDER_LOCAL_PATH_REQUIRED", "本地存储根目录不能为空")
 		}
+	case StorageProviderTypeAliyunOSS:
+		if strings.TrimSpace(item.GetEndpoint()) == "" {
+			return errors.BadRequest("STORAGE_PROVIDER_ENDPOINT_REQUIRED", "阿里云 OSS endpoint 不能为空")
+		}
+		if create && (strings.TrimSpace(item.GetAccessKey()) == "" || strings.TrimSpace(item.GetSecretKey()) == "") {
+			return errors.BadRequest("STORAGE_PROVIDER_SECRET_KEY_REQUIRED", "阿里云 OSS access key 和 secret key 不能为空")
+		}
+	case StorageProviderTypeQiniuKodo:
+		if create && (strings.TrimSpace(item.GetAccessKey()) == "" || strings.TrimSpace(item.GetSecretKey()) == "") {
+			return errors.BadRequest("STORAGE_PROVIDER_SECRET_KEY_REQUIRED", "七牛 Kodo access key 和 secret key 不能为空")
+		}
+	case StorageProviderTypeTencentCOS:
+		if strings.TrimSpace(item.GetRegion()) == "" {
+			return errors.BadRequest("STORAGE_PROVIDER_REGION_REQUIRED", "腾讯云 COS region 不能为空")
+		}
+		if create && (strings.TrimSpace(item.GetAccessKey()) == "" || strings.TrimSpace(item.GetSecretKey()) == "") {
+			return errors.BadRequest("STORAGE_PROVIDER_SECRET_KEY_REQUIRED", "腾讯云 COS secret id 和 secret key 不能为空")
+		}
 	default:
 		return errors.BadRequest("STORAGE_PROVIDER_TYPE_UNSUPPORTED", fmt.Sprintf("不支持的存储类型: %s", item.GetType()))
 	}
@@ -182,10 +214,18 @@ func normalizeStorageProvider(item *pbCore.StorageProvider, create bool) *pbCore
 
 func normalizeStorageProviderType(value string) string {
 	value = strings.TrimSpace(strings.ToLower(value))
-	if value == "s3" || value == "minio" {
+	switch value {
+	case "s3", "minio":
 		return StorageProviderTypeS3Compatible
+	case "oss", "aliyun":
+		return StorageProviderTypeAliyunOSS
+	case "kodo", "qiniu":
+		return StorageProviderTypeQiniuKodo
+	case "cos", "tencent":
+		return StorageProviderTypeTencentCOS
+	default:
+		return value
 	}
-	return value
 }
 
 func storageProviderStringPtr(value string) *string { return &value }

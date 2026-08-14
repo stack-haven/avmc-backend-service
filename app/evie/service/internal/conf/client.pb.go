@@ -78,8 +78,9 @@ func (x *Client) GetGrpc() *Client_GRPC {
 // HTTP
 type Client_HTTP struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Timeout       *durationpb.Duration   `protobuf:"bytes,1,opt,name=timeout,proto3" json:"timeout,omitempty"` // 超时时间
-	Middleware    *Middleware            `protobuf:"bytes,2,opt,name=middleware,proto3" json:"middleware,omitempty"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`       // 服务地址
+	Timeout       *durationpb.Duration   `protobuf:"bytes,2,opt,name=timeout,proto3" json:"timeout,omitempty"` // 超时时间
+	Middleware    *Middleware            `protobuf:"bytes,3,opt,name=middleware,proto3" json:"middleware,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -114,6 +115,13 @@ func (*Client_HTTP) Descriptor() ([]byte, []int) {
 	return file_common_conf_client_proto_rawDescGZIP(), []int{0, 0}
 }
 
+func (x *Client_HTTP) GetAddr() string {
+	if x != nil {
+		return x.Addr
+	}
+	return ""
+}
+
 func (x *Client_HTTP) GetTimeout() *durationpb.Duration {
 	if x != nil {
 		return x.Timeout
@@ -131,8 +139,9 @@ func (x *Client_HTTP) GetMiddleware() *Middleware {
 // gPRC
 type Client_GRPC struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Timeout       *durationpb.Duration   `protobuf:"bytes,1,opt,name=timeout,proto3" json:"timeout,omitempty"` // 超时时间
-	Middleware    *Middleware            `protobuf:"bytes,2,opt,name=middleware,proto3" json:"middleware,omitempty"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`       // 服务地址
+	Timeout       *durationpb.Duration   `protobuf:"bytes,2,opt,name=timeout,proto3" json:"timeout,omitempty"` // 超时时间
+	Middleware    *Middleware            `protobuf:"bytes,3,opt,name=middleware,proto3" json:"middleware,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -167,6 +176,13 @@ func (*Client_GRPC) Descriptor() ([]byte, []int) {
 	return file_common_conf_client_proto_rawDescGZIP(), []int{0, 1}
 }
 
+func (x *Client_GRPC) GetAddr() string {
+	if x != nil {
+		return x.Addr
+	}
+	return ""
+}
+
 func (x *Client_GRPC) GetTimeout() *durationpb.Duration {
 	if x != nil {
 		return x.Timeout
@@ -185,19 +201,21 @@ var File_common_conf_client_proto protoreflect.FileDescriptor
 
 const file_common_conf_client_proto_rawDesc = "" +
 	"\n" +
-	"\x18common/conf/client.proto\x12\x04conf\x1a\x1egoogle/protobuf/duration.proto\x1a\x1ccommon/conf/middleware.proto\"\xb4\x02\n" +
+	"\x18common/conf/client.proto\x12\x04conf\x1a\x1egoogle/protobuf/duration.proto\x1a\x1ccommon/conf/middleware.proto\"\xde\x02\n" +
 	"\x06Client\x12%\n" +
 	"\x04http\x18\x01 \x01(\v2\x11.conf.Client.HTTPR\x04http\x12%\n" +
-	"\x04grpc\x18\x02 \x01(\v2\x11.conf.Client.GRPCR\x04grpc\x1am\n" +
-	"\x04HTTP\x123\n" +
-	"\atimeout\x18\x01 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x120\n" +
+	"\x04grpc\x18\x02 \x01(\v2\x11.conf.Client.GRPCR\x04grpc\x1a\x81\x01\n" +
+	"\x04HTTP\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\x123\n" +
+	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x120\n" +
 	"\n" +
-	"middleware\x18\x02 \x01(\v2\x10.conf.MiddlewareR\n" +
-	"middleware\x1am\n" +
-	"\x04GRPC\x123\n" +
-	"\atimeout\x18\x01 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x120\n" +
+	"middleware\x18\x03 \x01(\v2\x10.conf.MiddlewareR\n" +
+	"middleware\x1a\x81\x01\n" +
+	"\x04GRPC\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\x123\n" +
+	"\atimeout\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x120\n" +
 	"\n" +
-	"middleware\x18\x02 \x01(\v2\x10.conf.MiddlewareR\n" +
+	"middleware\x18\x03 \x01(\v2\x10.conf.MiddlewareR\n" +
 	"middlewareBm\n" +
 	"\bcom.confB\vClientProtoP\x01Z$backend-service/api/common/conf;conf\xa2\x02\x03CXX\xaa\x02\x04Conf\xca\x02\x04Conf\xe2\x02\x10Conf\\GPBMetadata\xea\x02\x04Confb\x06proto3"
 

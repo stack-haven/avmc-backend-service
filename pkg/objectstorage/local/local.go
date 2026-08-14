@@ -11,7 +11,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"backend-service/pkg/objectstorage"
 )
@@ -62,6 +66,10 @@ func New(config Config) (*client, error) {
 	if err != nil {
 		return nil, err
 	}
+	// 提前验证目录可写，避免上传时才报 read-only file system。
+	if err := ensureWritable(abs); err != nil {
+		return nil, err
+	}
 	var publicBase *url.URL
 	if strings.TrimSpace(config.PublicBaseURL) != "" {
 		publicBase, err = url.Parse(strings.TrimRight(config.PublicBaseURL, "/"))
@@ -70,6 +78,19 @@ func New(config Config) (*client, error) {
 		}
 	}
 	return &client{basePath: abs, publicBaseURL: publicBase}, nil
+}
+
+// ensureWritable 创建目录并写入探针文件，验证路径可写。
+func ensureWritable(basePath string) error {
+	if err := os.MkdirAll(basePath, 0o750); err != nil {
+		return fmt.Errorf("local storage: create base path: %w", err)
+	}
+	probe := filepath.Join(basePath, ".write-probe")
+	if err := os.WriteFile(probe, []byte("ok"), 0o640); err != nil {
+		return fmt.Errorf("local storage: base path not writable (%s): %w", basePath, err)
+	}
+	_ = os.Remove(probe)
+	return nil
 }
 
 func (c *client) PutObject(_ context.Context, bucket string, key string, body io.Reader, opts objectstorage.PutOptions) (*objectstorage.ObjectInfo, error) {
@@ -130,8 +151,171 @@ func (c *client) PresignGetObject(_ context.Context, bucket string, key string, 
 	return c.PublicURL(bucket, key)
 }
 
+// GetObject 从本地磁盘读取对象完整内容。
+func (c *client) GetObject(_ context.Context, bucket string, key string) ([]byte, error) {
+	if err := validateObject(bucket, key); err != nil {
+		return nil, err
+	}
+	target, err := c.objectPath(bucket, key)
+	if err != nil {
+		return nil, err
+	}
+	content, err := os.ReadFile(target)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
+}
+
 func (c *client) PresignPutObject(context.Context, string, string, objectstorage.PresignOptions) (string, error) {
 	return "", objectstorage.ErrUnsupportedProvider
+}
+
+// ───────────────────────────── Multipart 分片上传 ─────────────────────────────
+//
+// 本地渠道用临时目录承载分片，uploadID 即临时目录绝对路径；合并时按分片序
+// 号顺序写入最终文件。对象存储渠道未来实现原生 Multipart Upload 时，方法签名
+// 保持一致，仅 uploadID 语义变为供应商的 multipart upload id。
+
+func (c *client) CreateMultipartUpload(_ context.Context, bucket string, key string) (string, error) {
+	if err := validateObject(bucket, key); err != nil {
+		return "", err
+	}
+	uploadID := filepath.Join(c.basePath, ".multipart", uuid.NewString())
+	if err := os.MkdirAll(uploadID, 0o750); err != nil {
+		return "", fmt.Errorf("local storage: create multipart dir: %w", err)
+	}
+	return uploadID, nil
+}
+
+func (c *client) UploadPart(_ context.Context, _ string, _ string, uploadID string, partNumber int32, body io.Reader, _ objectstorage.PutOptions) (string, error) {
+	if err := validateUploadID(c.basePath, uploadID); err != nil {
+		return "", err
+	}
+	partPath := filepath.Join(uploadID, fmt.Sprintf("part-%d", partNumber))
+	file, err := os.OpenFile(partPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o640)
+	if err != nil {
+		return "", fmt.Errorf("local storage: create part file: %w", err)
+	}
+	hasher := sha256.New()
+	if _, err := io.Copy(file, io.TeeReader(body, hasher)); err != nil {
+		_ = file.Close()
+		_ = os.Remove(partPath)
+		return "", err
+	}
+	if err := file.Close(); err != nil {
+		_ = os.Remove(partPath)
+		return "", err
+	}
+	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
+func (c *client) ListMultipartParts(_ context.Context, _ string, _ string, uploadID string) ([]objectstorage.MultipartPart, error) {
+	if err := validateUploadID(c.basePath, uploadID); err != nil {
+		return nil, err
+	}
+	entries, err := os.ReadDir(uploadID)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []objectstorage.MultipartPart{}, nil
+		}
+		return nil, err
+	}
+	parts := make([]objectstorage.MultipartPart, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasPrefix(entry.Name(), "part-") {
+			continue
+		}
+		partNumber, err := strconv.ParseInt(strings.TrimPrefix(entry.Name(), "part-"), 10, 32)
+		if err != nil {
+			continue
+		}
+		content, readErr := os.ReadFile(filepath.Join(uploadID, entry.Name()))
+		if readErr != nil {
+			continue
+		}
+		hasher := sha256.New()
+		_, _ = hasher.Write(content)
+		parts = append(parts, objectstorage.MultipartPart{
+			PartNumber: int32(partNumber),
+			ETag:       hex.EncodeToString(hasher.Sum(nil)),
+		})
+	}
+	sort.Slice(parts, func(i, j int) bool { return parts[i].PartNumber < parts[j].PartNumber })
+	return parts, nil
+}
+
+func (c *client) CompleteMultipartUpload(_ context.Context, bucket string, key string, uploadID string, parts []objectstorage.MultipartPart) (string, error) {
+	if err := validateObject(bucket, key); err != nil {
+		return "", err
+	}
+	if err := validateUploadID(c.basePath, uploadID); err != nil {
+		return "", err
+	}
+	if len(parts) == 0 {
+		return "", fmt.Errorf("local storage: no parts to complete")
+	}
+	target, err := c.objectPath(bucket, key)
+	if err != nil {
+		return "", err
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0o750); err != nil {
+		return "", err
+	}
+	tmp := target + ".tmp"
+	out, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o640)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = out.Close() }()
+
+	// 按分片序号排序后顺序合并，避免乱序写入。
+	sortedParts := make([]objectstorage.MultipartPart, len(parts))
+	copy(sortedParts, parts)
+	sort.Slice(sortedParts, func(i, j int) bool { return sortedParts[i].PartNumber < sortedParts[j].PartNumber })
+
+	hasher := sha256.New()
+	for _, part := range sortedParts {
+		partPath := filepath.Join(uploadID, fmt.Sprintf("part-%d", part.PartNumber))
+		f, openErr := os.Open(partPath)
+		if openErr != nil {
+			_ = os.Remove(tmp)
+			return "", fmt.Errorf("local storage: open part %d: %w", part.PartNumber, openErr)
+		}
+		if _, copyErr := io.Copy(out, io.TeeReader(f, hasher)); copyErr != nil {
+			_ = f.Close()
+			_ = os.Remove(tmp)
+			return "", copyErr
+		}
+		_ = f.Close()
+	}
+	if err := out.Close(); err != nil {
+		_ = os.Remove(tmp)
+		return "", err
+	}
+	if err := os.Rename(tmp, target); err != nil {
+		_ = os.Remove(tmp)
+		return "", err
+	}
+	_ = os.RemoveAll(uploadID)
+	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
+func (c *client) AbortMultipartUpload(_ context.Context, _ string, _ string, uploadID string) error {
+	if err := validateUploadID(c.basePath, uploadID); err != nil {
+		return err
+	}
+	return os.RemoveAll(uploadID)
+}
+
+// validateUploadID 校验 uploadID 是否位于 basePath 的分片临时目录内，防路径穿越。
+func validateUploadID(basePath, uploadID string) error {
+	clean := filepath.Clean(uploadID)
+	multipartRoot := filepath.Join(basePath, ".multipart")
+	if clean == multipartRoot || !strings.HasPrefix(clean, multipartRoot+string(filepath.Separator)) {
+		return fmt.Errorf("%w: invalid multipart upload id", objectstorage.ErrInvalidObject)
+	}
+	return nil
 }
 
 func (c *client) PublicURL(bucket string, key string) (string, error) {

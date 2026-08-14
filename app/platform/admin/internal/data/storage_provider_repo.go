@@ -19,8 +19,11 @@ import (
 	"backend-service/pkg/objectstorage"
 
 	// 触发供应商注册
+	_ "backend-service/pkg/objectstorage/aliyun"
 	_ "backend-service/pkg/objectstorage/local"
+	_ "backend-service/pkg/objectstorage/qiniu"
 	_ "backend-service/pkg/objectstorage/s3"
+	_ "backend-service/pkg/objectstorage/tencent"
 
 	"backend-service/pkg/utils/convert"
 
@@ -385,6 +388,21 @@ func storageProviderObjectConfig(item *pbCore.StorageProvider) (json.RawMessage,
 		cfg["session_token"] = item.GetSessionToken()
 	case biz.StorageProviderTypeLocal:
 		cfg["base_path"] = item.GetLocalBasePath()
+	case biz.StorageProviderTypeAliyunOSS:
+		cfg["endpoint"] = item.GetEndpoint()
+		cfg["access_key_id"] = item.GetAccessKey()
+		cfg["access_key_secret"] = item.GetSecretKey()
+	case biz.StorageProviderTypeQiniuKodo:
+		cfg["access_key"] = item.GetAccessKey()
+		cfg["secret_key"] = item.GetSecretKey()
+		cfg["zone"] = item.GetRegion() // 复用 region 承载 zone（z0/z1/z2/na0，留空自动）
+		cfg["use_https"] = item.GetUseSsl()
+	case biz.StorageProviderTypeTencentCOS:
+		// 腾讯云 COS 的 app_id 复用 session_token 字段承载（该渠道不使用 session_token）
+		cfg["app_id"] = item.GetSessionToken()
+		cfg["region"] = item.GetRegion()
+		cfg["secret_id"] = item.GetAccessKey()
+		cfg["secret_key"] = item.GetSecretKey()
 	}
 	return json.Marshal(cfg)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"strings"
 	"testing"
 	"time"
 
@@ -18,6 +19,28 @@ type notificationRepoStub struct {
 	template *pb.NotificationTemplate
 	messages []*pb.NotificationMessage
 	marked   []uint32
+}
+
+type notificationProviderRepoStub struct{}
+
+func (*notificationProviderRepoStub) Create(context.Context, *pb.NotificationProvider) (*pb.NotificationProvider, error) {
+	return nil, nil
+}
+func (*notificationProviderRepoStub) Update(context.Context, *pb.NotificationProvider) (*pb.NotificationProvider, error) {
+	return nil, nil
+}
+func (*notificationProviderRepoStub) Delete(context.Context, uint32) error { return nil }
+func (*notificationProviderRepoStub) Get(context.Context, uint32) (*pb.NotificationProvider, error) {
+	return nil, nil
+}
+func (*notificationProviderRepoStub) List(context.Context, *pb.ListNotificationProvidersRequest) ([]*pb.NotificationProvider, int32, error) {
+	return nil, 0, nil
+}
+func (*notificationProviderRepoStub) SetDefault(context.Context, uint32) (*pb.NotificationProvider, error) {
+	return nil, nil
+}
+func (*notificationProviderRepoStub) ResolveChannel(_ context.Context, channel string) (*pb.NotificationProvider, json.RawMessage, error) {
+	return &pb.NotificationProvider{Channel: channel, Status: int32Ptr(StorageProviderStatusEnabled)}, json.RawMessage("{}"), nil
 }
 
 func (r *notificationRepoStub) ListTemplates(context.Context, *pb.ListNotificationTemplatesRequest) ([]*pb.NotificationTemplate, int32, error) {
@@ -140,7 +163,7 @@ func TestNotificationUsecaseSendInAppEnqueuesAsyncTask(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SendInApp() error = %v", err)
 	}
-	if resp.GetTaskId() != 9 || tasks.spec == nil || tasks.spec.TaskType != AsyncTaskTypeNotificationInApp || tasks.spec.Queue != "notification" {
+	if resp.GetTaskId() != 9 || tasks.spec == nil || tasks.spec.TaskType != AsyncTaskTypeNotificationSend || tasks.spec.Queue != "notification" {
 		t.Fatalf("queued task = %#v resp=%#v", tasks.spec, resp)
 	}
 	if tasks.spec.TenantID == nil || *tasks.spec.TenantID != 10 || tasks.spec.CreatedBy == nil || *tasks.spec.CreatedBy != 7 {
@@ -166,14 +189,16 @@ func TestNotificationInAppHandlerCreatesRenderedMessages(t *testing.T) {
 		Content: "租户 {{tenantName}} 已开通",
 		Status:  enum.Status_STATUS_ENABLED.Enum(),
 	}}
-	handler := NewNotificationAsyncTaskHandler(repo)
+	providerRepo := &notificationProviderRepoStub{}
+	resolver := NewNotificationSenderResolver(providerRepo, repo)
+	handler := NewNotificationAsyncTaskHandler(repo, resolver)
 	payload := []byte(`{"tenantId":10,"recipientUserIds":[7,8],"templateCode":"system.welcome","variables":"{\"userName\":\"admin\",\"tenantName\":\"演示租户\"}"}`)
 
 	result, err := handler.Handle(context.Background(), payload)
 	if err != nil {
 		t.Fatalf("Handle() error = %v", err)
 	}
-	if result != "已生成 2 条站内信" || len(repo.messages) != 2 {
+	if !strings.Contains(result, "已发送 2 条通知") || len(repo.messages) != 2 {
 		t.Fatalf("result=%q messages=%d", result, len(repo.messages))
 	}
 	if got := repo.messages[0]; got.GetTenantId() != 10 || got.GetTitle() != "欢迎 admin" || got.GetContent() != "租户 演示租户 已开通" || got.GetStatus() != pb.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD {

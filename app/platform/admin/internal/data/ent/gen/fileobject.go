@@ -56,6 +56,12 @@ type FileObject struct {
 	Visibility string `json:"visibility,omitempty"`
 	// 创建幂等键
 	IdempotencyKey *string `json:"idempotency_key,omitempty"`
+	// 分片上传会话ID（本地=临时目录路径，对象存储预留为 multipart upload id）
+	UploadID string `json:"upload_id,omitempty"`
+	// 分片大小（字节），0 表示非分片上传
+	PartSize int64 `json:"part_size,omitempty"`
+	// 总分片数，0 表示非分片上传
+	TotalParts int32 `json:"total_parts,omitempty"`
 	// 上传凭证过期时间
 	UploadExpiresAt time.Time `json:"upload_expires_at,omitempty"`
 	// 上传确认时间
@@ -70,9 +76,9 @@ func (*FileObject) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fileobject.FieldID, fileobject.FieldStatus, fileobject.FieldTenantID, fileobject.FieldSize, fileobject.FieldProviderID, fileobject.FieldCreatedBy:
+		case fileobject.FieldID, fileobject.FieldStatus, fileobject.FieldTenantID, fileobject.FieldSize, fileobject.FieldProviderID, fileobject.FieldPartSize, fileobject.FieldTotalParts, fileobject.FieldCreatedBy:
 			values[i] = new(sql.NullInt64)
-		case fileobject.FieldFileName, fileobject.FieldContentType, fileobject.FieldSha256, fileobject.FieldEtag, fileobject.FieldProvider, fileobject.FieldProviderCode, fileobject.FieldBucket, fileobject.FieldObjectKey, fileobject.FieldBusinessType, fileobject.FieldBusinessID, fileobject.FieldVisibility, fileobject.FieldIdempotencyKey:
+		case fileobject.FieldFileName, fileobject.FieldContentType, fileobject.FieldSha256, fileobject.FieldEtag, fileobject.FieldProvider, fileobject.FieldProviderCode, fileobject.FieldBucket, fileobject.FieldObjectKey, fileobject.FieldBusinessType, fileobject.FieldBusinessID, fileobject.FieldVisibility, fileobject.FieldIdempotencyKey, fileobject.FieldUploadID:
 			values[i] = new(sql.NullString)
 		case fileobject.FieldCreatedAt, fileobject.FieldUpdatedAt, fileobject.FieldDeletedAt, fileobject.FieldUploadExpiresAt, fileobject.FieldConfirmedAt:
 			values[i] = new(sql.NullTime)
@@ -215,6 +221,24 @@ func (_m *FileObject) assignValues(columns []string, values []any) error {
 				_m.IdempotencyKey = new(string)
 				*_m.IdempotencyKey = value.String
 			}
+		case fileobject.FieldUploadID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field upload_id", values[i])
+			} else if value.Valid {
+				_m.UploadID = value.String
+			}
+		case fileobject.FieldPartSize:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field part_size", values[i])
+			} else if value.Valid {
+				_m.PartSize = value.Int64
+			}
+		case fileobject.FieldTotalParts:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field total_parts", values[i])
+			} else if value.Valid {
+				_m.TotalParts = int32(value.Int64)
+			}
 		case fileobject.FieldUploadExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field upload_expires_at", values[i])
@@ -335,6 +359,15 @@ func (_m *FileObject) String() string {
 		builder.WriteString("idempotency_key=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("upload_id=")
+	builder.WriteString(_m.UploadID)
+	builder.WriteString(", ")
+	builder.WriteString("part_size=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PartSize))
+	builder.WriteString(", ")
+	builder.WriteString("total_parts=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TotalParts))
 	builder.WriteString(", ")
 	builder.WriteString("upload_expires_at=")
 	builder.WriteString(_m.UploadExpiresAt.Format(time.ANSIC))

@@ -27,6 +27,13 @@ const (
 	FileCenterService_ListFileAccessLogs_FullMethodName      = "/core.service.v1.FileCenterService/ListFileAccessLogs"
 	FileCenterService_PresignFileDownload_FullMethodName     = "/core.service.v1.FileCenterService/PresignFileDownload"
 	FileCenterService_DeleteFileObject_FullMethodName        = "/core.service.v1.FileCenterService/DeleteFileObject"
+	FileCenterService_UpdateFileObject_FullMethodName        = "/core.service.v1.FileCenterService/UpdateFileObject"
+	FileCenterService_ReplaceFileContent_FullMethodName      = "/core.service.v1.FileCenterService/ReplaceFileContent"
+	FileCenterService_DownloadFileContent_FullMethodName     = "/core.service.v1.FileCenterService/DownloadFileContent"
+	FileCenterService_UploadFilePart_FullMethodName          = "/core.service.v1.FileCenterService/UploadFilePart"
+	FileCenterService_ListFileParts_FullMethodName           = "/core.service.v1.FileCenterService/ListFileParts"
+	FileCenterService_CompleteFileUpload_FullMethodName      = "/core.service.v1.FileCenterService/CompleteFileUpload"
+	FileCenterService_AbortFileUpload_FullMethodName         = "/core.service.v1.FileCenterService/AbortFileUpload"
 )
 
 // FileCenterServiceClient is the client API for FileCenterService service.
@@ -41,6 +48,13 @@ type FileCenterServiceClient interface {
 	ListFileAccessLogs(ctx context.Context, in *ListFileAccessLogsRequest, opts ...grpc.CallOption) (*ListFileAccessLogsResponse, error)
 	PresignFileDownload(ctx context.Context, in *PresignFileDownloadRequest, opts ...grpc.CallOption) (*PresignFileDownloadResponse, error)
 	DeleteFileObject(ctx context.Context, in *DeleteFileObjectRequest, opts ...grpc.CallOption) (*DeleteFileObjectResponse, error)
+	UpdateFileObject(ctx context.Context, in *UpdateFileObjectRequest, opts ...grpc.CallOption) (*UpdateFileObjectResponse, error)
+	ReplaceFileContent(ctx context.Context, in *ReplaceFileContentRequest, opts ...grpc.CallOption) (*ReplaceFileContentResponse, error)
+	DownloadFileContent(ctx context.Context, in *DownloadFileContentRequest, opts ...grpc.CallOption) (*DownloadFileContentResponse, error)
+	UploadFilePart(ctx context.Context, in *UploadFilePartRequest, opts ...grpc.CallOption) (*UploadFilePartResponse, error)
+	ListFileParts(ctx context.Context, in *ListFilePartsRequest, opts ...grpc.CallOption) (*ListFilePartsResponse, error)
+	CompleteFileUpload(ctx context.Context, in *CompleteFileUploadRequest, opts ...grpc.CallOption) (*CompleteFileUploadResponse, error)
+	AbortFileUpload(ctx context.Context, in *AbortFileUploadRequest, opts ...grpc.CallOption) (*AbortFileUploadResponse, error)
 }
 
 type fileCenterServiceClient struct {
@@ -131,6 +145,76 @@ func (c *fileCenterServiceClient) DeleteFileObject(ctx context.Context, in *Dele
 	return out, nil
 }
 
+func (c *fileCenterServiceClient) UpdateFileObject(ctx context.Context, in *UpdateFileObjectRequest, opts ...grpc.CallOption) (*UpdateFileObjectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateFileObjectResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_UpdateFileObject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) ReplaceFileContent(ctx context.Context, in *ReplaceFileContentRequest, opts ...grpc.CallOption) (*ReplaceFileContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReplaceFileContentResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_ReplaceFileContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) DownloadFileContent(ctx context.Context, in *DownloadFileContentRequest, opts ...grpc.CallOption) (*DownloadFileContentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DownloadFileContentResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_DownloadFileContent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) UploadFilePart(ctx context.Context, in *UploadFilePartRequest, opts ...grpc.CallOption) (*UploadFilePartResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadFilePartResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_UploadFilePart_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) ListFileParts(ctx context.Context, in *ListFilePartsRequest, opts ...grpc.CallOption) (*ListFilePartsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListFilePartsResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_ListFileParts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) CompleteFileUpload(ctx context.Context, in *CompleteFileUploadRequest, opts ...grpc.CallOption) (*CompleteFileUploadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CompleteFileUploadResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_CompleteFileUpload_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileCenterServiceClient) AbortFileUpload(ctx context.Context, in *AbortFileUploadRequest, opts ...grpc.CallOption) (*AbortFileUploadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AbortFileUploadResponse)
+	err := c.cc.Invoke(ctx, FileCenterService_AbortFileUpload_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileCenterServiceServer is the server API for FileCenterService service.
 // All implementations must embed UnimplementedFileCenterServiceServer
 // for forward compatibility.
@@ -143,6 +227,13 @@ type FileCenterServiceServer interface {
 	ListFileAccessLogs(context.Context, *ListFileAccessLogsRequest) (*ListFileAccessLogsResponse, error)
 	PresignFileDownload(context.Context, *PresignFileDownloadRequest) (*PresignFileDownloadResponse, error)
 	DeleteFileObject(context.Context, *DeleteFileObjectRequest) (*DeleteFileObjectResponse, error)
+	UpdateFileObject(context.Context, *UpdateFileObjectRequest) (*UpdateFileObjectResponse, error)
+	ReplaceFileContent(context.Context, *ReplaceFileContentRequest) (*ReplaceFileContentResponse, error)
+	DownloadFileContent(context.Context, *DownloadFileContentRequest) (*DownloadFileContentResponse, error)
+	UploadFilePart(context.Context, *UploadFilePartRequest) (*UploadFilePartResponse, error)
+	ListFileParts(context.Context, *ListFilePartsRequest) (*ListFilePartsResponse, error)
+	CompleteFileUpload(context.Context, *CompleteFileUploadRequest) (*CompleteFileUploadResponse, error)
+	AbortFileUpload(context.Context, *AbortFileUploadRequest) (*AbortFileUploadResponse, error)
 	mustEmbedUnimplementedFileCenterServiceServer()
 }
 
@@ -176,6 +267,27 @@ func (UnimplementedFileCenterServiceServer) PresignFileDownload(context.Context,
 }
 func (UnimplementedFileCenterServiceServer) DeleteFileObject(context.Context, *DeleteFileObjectRequest) (*DeleteFileObjectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteFileObject not implemented")
+}
+func (UnimplementedFileCenterServiceServer) UpdateFileObject(context.Context, *UpdateFileObjectRequest) (*UpdateFileObjectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateFileObject not implemented")
+}
+func (UnimplementedFileCenterServiceServer) ReplaceFileContent(context.Context, *ReplaceFileContentRequest) (*ReplaceFileContentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplaceFileContent not implemented")
+}
+func (UnimplementedFileCenterServiceServer) DownloadFileContent(context.Context, *DownloadFileContentRequest) (*DownloadFileContentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DownloadFileContent not implemented")
+}
+func (UnimplementedFileCenterServiceServer) UploadFilePart(context.Context, *UploadFilePartRequest) (*UploadFilePartResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UploadFilePart not implemented")
+}
+func (UnimplementedFileCenterServiceServer) ListFileParts(context.Context, *ListFilePartsRequest) (*ListFilePartsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListFileParts not implemented")
+}
+func (UnimplementedFileCenterServiceServer) CompleteFileUpload(context.Context, *CompleteFileUploadRequest) (*CompleteFileUploadResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CompleteFileUpload not implemented")
+}
+func (UnimplementedFileCenterServiceServer) AbortFileUpload(context.Context, *AbortFileUploadRequest) (*AbortFileUploadResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AbortFileUpload not implemented")
 }
 func (UnimplementedFileCenterServiceServer) mustEmbedUnimplementedFileCenterServiceServer() {}
 func (UnimplementedFileCenterServiceServer) testEmbeddedByValue()                           {}
@@ -342,6 +454,132 @@ func _FileCenterService_DeleteFileObject_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileCenterService_UpdateFileObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFileObjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).UpdateFileObject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_UpdateFileObject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).UpdateFileObject(ctx, req.(*UpdateFileObjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_ReplaceFileContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplaceFileContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).ReplaceFileContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_ReplaceFileContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).ReplaceFileContent(ctx, req.(*ReplaceFileContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_DownloadFileContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadFileContentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).DownloadFileContent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_DownloadFileContent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).DownloadFileContent(ctx, req.(*DownloadFileContentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_UploadFilePart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadFilePartRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).UploadFilePart(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_UploadFilePart_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).UploadFilePart(ctx, req.(*UploadFilePartRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_ListFileParts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFilePartsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).ListFileParts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_ListFileParts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).ListFileParts(ctx, req.(*ListFilePartsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_CompleteFileUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteFileUploadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).CompleteFileUpload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_CompleteFileUpload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).CompleteFileUpload(ctx, req.(*CompleteFileUploadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileCenterService_AbortFileUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AbortFileUploadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileCenterServiceServer).AbortFileUpload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileCenterService_AbortFileUpload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileCenterServiceServer).AbortFileUpload(ctx, req.(*AbortFileUploadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileCenterService_ServiceDesc is the grpc.ServiceDesc for FileCenterService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +618,34 @@ var FileCenterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteFileObject",
 			Handler:    _FileCenterService_DeleteFileObject_Handler,
+		},
+		{
+			MethodName: "UpdateFileObject",
+			Handler:    _FileCenterService_UpdateFileObject_Handler,
+		},
+		{
+			MethodName: "ReplaceFileContent",
+			Handler:    _FileCenterService_ReplaceFileContent_Handler,
+		},
+		{
+			MethodName: "DownloadFileContent",
+			Handler:    _FileCenterService_DownloadFileContent_Handler,
+		},
+		{
+			MethodName: "UploadFilePart",
+			Handler:    _FileCenterService_UploadFilePart_Handler,
+		},
+		{
+			MethodName: "ListFileParts",
+			Handler:    _FileCenterService_ListFileParts_Handler,
+		},
+		{
+			MethodName: "CompleteFileUpload",
+			Handler:    _FileCenterService_CompleteFileUpload_Handler,
+		},
+		{
+			MethodName: "AbortFileUpload",
+			Handler:    _FileCenterService_AbortFileUpload_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

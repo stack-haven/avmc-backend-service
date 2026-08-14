@@ -59,10 +59,7 @@ func NewAuthUsecase(logger log.Logger, repo AuthRepo) *AuthUsecase {
 //  - 登录地理位置异常检测
 func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password string, tenantID uint32) (*v1.LoginResponse, error) {
 	uc.log.Infof("尝试用户名登录，tenant_id=%d", tenantID)
-	// 业务策略：密码复杂度。proto 只校验长度，不校验字符类组合。
-	if err := ValidatePassword(password); err != nil {
-		return nil, err
-	}
+	// 登录只校验密码正确性，不做密码强度校验（强度校验仅在设置/修改密码时执行）。
 	return uc.repo.LoginByUsername(ctx, name, password, tenantID)
 }
 
@@ -72,9 +69,7 @@ func (uc *AuthUsecase) LoginByUsername(ctx context.Context, name, password strin
 // uint32.gt: 0），biz 层不重复。这里只做密码复杂度业务策略校验。
 func (uc *AuthUsecase) LoginByEmail(ctx context.Context, email, password string, tenantID uint32) (*v1.LoginResponse, error) {
 	uc.log.Infof("尝试邮箱登录，tenant_id=%d", tenantID)
-	if err := ValidatePassword(password); err != nil {
-		return nil, err
-	}
+	// 登录只校验密码正确性，不做密码强度校验。
 	return uc.repo.LoginByEmail(ctx, email, password, tenantID)
 }
 

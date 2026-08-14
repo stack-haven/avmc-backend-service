@@ -27,6 +27,7 @@ const (
 	NotificationService_UpdateNotificationTemplate_FullMethodName = "/platform.admin.v1.NotificationService/UpdateNotificationTemplate"
 	NotificationService_DeleteNotificationTemplate_FullMethodName = "/platform.admin.v1.NotificationService/DeleteNotificationTemplate"
 	NotificationService_SendInAppNotification_FullMethodName      = "/platform.admin.v1.NotificationService/SendInAppNotification"
+	NotificationService_SendNotification_FullMethodName           = "/platform.admin.v1.NotificationService/SendNotification"
 	NotificationService_ListNotificationMessages_FullMethodName   = "/platform.admin.v1.NotificationService/ListNotificationMessages"
 	NotificationService_GetNotificationMessage_FullMethodName     = "/platform.admin.v1.NotificationService/GetNotificationMessage"
 	NotificationService_ListMyNotifications_FullMethodName        = "/platform.admin.v1.NotificationService/ListMyNotifications"
@@ -45,6 +46,7 @@ type NotificationServiceClient interface {
 	UpdateNotificationTemplate(ctx context.Context, in *v1.UpdateNotificationTemplateRequest, opts ...grpc.CallOption) (*v1.NotificationTemplate, error)
 	DeleteNotificationTemplate(ctx context.Context, in *v1.DeleteNotificationTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SendInAppNotification(ctx context.Context, in *v1.SendInAppNotificationRequest, opts ...grpc.CallOption) (*v1.SendInAppNotificationResponse, error)
+	SendNotification(ctx context.Context, in *v1.SendNotificationRequest, opts ...grpc.CallOption) (*v1.SendNotificationResponse, error)
 	ListNotificationMessages(ctx context.Context, in *v1.ListNotificationMessagesRequest, opts ...grpc.CallOption) (*v1.ListNotificationMessagesResponse, error)
 	GetNotificationMessage(ctx context.Context, in *v1.GetNotificationMessageRequest, opts ...grpc.CallOption) (*v1.NotificationMessage, error)
 	ListMyNotifications(ctx context.Context, in *v1.ListNotificationMessagesRequest, opts ...grpc.CallOption) (*v1.ListNotificationMessagesResponse, error)
@@ -121,6 +123,16 @@ func (c *notificationServiceClient) SendInAppNotification(ctx context.Context, i
 	return out, nil
 }
 
+func (c *notificationServiceClient) SendNotification(ctx context.Context, in *v1.SendNotificationRequest, opts ...grpc.CallOption) (*v1.SendNotificationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SendNotificationResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendNotification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *notificationServiceClient) ListNotificationMessages(ctx context.Context, in *v1.ListNotificationMessagesRequest, opts ...grpc.CallOption) (*v1.ListNotificationMessagesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListNotificationMessagesResponse)
@@ -191,6 +203,7 @@ type NotificationServiceServer interface {
 	UpdateNotificationTemplate(context.Context, *v1.UpdateNotificationTemplateRequest) (*v1.NotificationTemplate, error)
 	DeleteNotificationTemplate(context.Context, *v1.DeleteNotificationTemplateRequest) (*emptypb.Empty, error)
 	SendInAppNotification(context.Context, *v1.SendInAppNotificationRequest) (*v1.SendInAppNotificationResponse, error)
+	SendNotification(context.Context, *v1.SendNotificationRequest) (*v1.SendNotificationResponse, error)
 	ListNotificationMessages(context.Context, *v1.ListNotificationMessagesRequest) (*v1.ListNotificationMessagesResponse, error)
 	GetNotificationMessage(context.Context, *v1.GetNotificationMessageRequest) (*v1.NotificationMessage, error)
 	ListMyNotifications(context.Context, *v1.ListNotificationMessagesRequest) (*v1.ListNotificationMessagesResponse, error)
@@ -224,6 +237,9 @@ func (UnimplementedNotificationServiceServer) DeleteNotificationTemplate(context
 }
 func (UnimplementedNotificationServiceServer) SendInAppNotification(context.Context, *v1.SendInAppNotificationRequest) (*v1.SendInAppNotificationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendInAppNotification not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendNotification(context.Context, *v1.SendNotificationRequest) (*v1.SendNotificationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SendNotification not implemented")
 }
 func (UnimplementedNotificationServiceServer) ListNotificationMessages(context.Context, *v1.ListNotificationMessagesRequest) (*v1.ListNotificationMessagesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListNotificationMessages not implemented")
@@ -372,6 +388,24 @@ func _NotificationService_SendInAppNotification_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_SendNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.SendNotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendNotification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendNotification(ctx, req.(*v1.SendNotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _NotificationService_ListNotificationMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.ListNotificationMessagesRequest)
 	if err := dec(in); err != nil {
@@ -510,6 +544,10 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendInAppNotification",
 			Handler:    _NotificationService_SendInAppNotification_Handler,
+		},
+		{
+			MethodName: "SendNotification",
+			Handler:    _NotificationService_SendNotification_Handler,
 		},
 		{
 			MethodName: "ListNotificationMessages",

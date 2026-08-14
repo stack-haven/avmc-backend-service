@@ -9,6 +9,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen"
 	"backend-service/app/platform/admin/internal/data/ent/gen/asynctask"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dept"
+	"backend-service/app/platform/admin/internal/data/ent/gen/device"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionaryitem"
 	"backend-service/app/platform/admin/internal/data/ent/gen/dictionarytype"
 	"backend-service/app/platform/admin/internal/data/ent/gen/fileaccesslog"
@@ -16,6 +17,7 @@ import (
 	"backend-service/app/platform/admin/internal/data/ent/gen/loginlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/menu"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationmessage"
+	"backend-service/app/platform/admin/internal/data/ent/gen/notificationprovider"
 	"backend-service/app/platform/admin/internal/data/ent/gen/notificationtemplate"
 	"backend-service/app/platform/admin/internal/data/ent/gen/operationlog"
 	"backend-service/app/platform/admin/internal/data/ent/gen/parameterdefinition"
@@ -144,6 +146,33 @@ func (f TraverseDept) Traverse(ctx context.Context, q gen.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *gen.DeptQuery", q)
+}
+
+// The DeviceFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DeviceFunc func(context.Context, *gen.DeviceQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f DeviceFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DeviceQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DeviceQuery", q)
+}
+
+// The TraverseDevice type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDevice func(context.Context, *gen.DeviceQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDevice) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDevice) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DeviceQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.DeviceQuery", q)
 }
 
 // The DictionaryItemFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -333,6 +362,33 @@ func (f TraverseNotificationMessage) Traverse(ctx context.Context, q gen.Query) 
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *gen.NotificationMessageQuery", q)
+}
+
+// The NotificationProviderFunc type is an adapter to allow the use of ordinary function as a Querier.
+type NotificationProviderFunc func(context.Context, *gen.NotificationProviderQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f NotificationProviderFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.NotificationProviderQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.NotificationProviderQuery", q)
+}
+
+// The TraverseNotificationProvider type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseNotificationProvider func(context.Context, *gen.NotificationProviderQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseNotificationProvider) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseNotificationProvider) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.NotificationProviderQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.NotificationProviderQuery", q)
 }
 
 // The NotificationTemplateFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -747,6 +803,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.AsyncTaskQuery, predicate.AsyncTask, asynctask.OrderOption]{typ: gen.TypeAsyncTask, tq: q}, nil
 	case *gen.DeptQuery:
 		return &query[*gen.DeptQuery, predicate.Dept, dept.OrderOption]{typ: gen.TypeDept, tq: q}, nil
+	case *gen.DeviceQuery:
+		return &query[*gen.DeviceQuery, predicate.Device, device.OrderOption]{typ: gen.TypeDevice, tq: q}, nil
 	case *gen.DictionaryItemQuery:
 		return &query[*gen.DictionaryItemQuery, predicate.DictionaryItem, dictionaryitem.OrderOption]{typ: gen.TypeDictionaryItem, tq: q}, nil
 	case *gen.DictionaryTypeQuery:
@@ -761,6 +819,8 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.MenuQuery, predicate.Menu, menu.OrderOption]{typ: gen.TypeMenu, tq: q}, nil
 	case *gen.NotificationMessageQuery:
 		return &query[*gen.NotificationMessageQuery, predicate.NotificationMessage, notificationmessage.OrderOption]{typ: gen.TypeNotificationMessage, tq: q}, nil
+	case *gen.NotificationProviderQuery:
+		return &query[*gen.NotificationProviderQuery, predicate.NotificationProvider, notificationprovider.OrderOption]{typ: gen.TypeNotificationProvider, tq: q}, nil
 	case *gen.NotificationTemplateQuery:
 		return &query[*gen.NotificationTemplateQuery, predicate.NotificationTemplate, notificationtemplate.OrderOption]{typ: gen.TypeNotificationTemplate, tq: q}, nil
 	case *gen.OperationLogQuery:

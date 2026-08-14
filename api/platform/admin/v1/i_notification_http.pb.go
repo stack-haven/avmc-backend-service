@@ -32,6 +32,7 @@ const OperationNotificationServiceListNotificationTemplates = "/platform.admin.v
 const OperationNotificationServiceMarkNotificationRead = "/platform.admin.v1.NotificationService/MarkNotificationRead"
 const OperationNotificationServiceMarkNotificationsRead = "/platform.admin.v1.NotificationService/MarkNotificationsRead"
 const OperationNotificationServiceSendInAppNotification = "/platform.admin.v1.NotificationService/SendInAppNotification"
+const OperationNotificationServiceSendNotification = "/platform.admin.v1.NotificationService/SendNotification"
 const OperationNotificationServiceUpdateNotificationTemplate = "/platform.admin.v1.NotificationService/UpdateNotificationTemplate"
 
 type NotificationServiceHTTPServer interface {
@@ -46,6 +47,7 @@ type NotificationServiceHTTPServer interface {
 	MarkNotificationRead(context.Context, *v1.MarkNotificationReadRequest) (*emptypb.Empty, error)
 	MarkNotificationsRead(context.Context, *v1.MarkNotificationsReadRequest) (*emptypb.Empty, error)
 	SendInAppNotification(context.Context, *v1.SendInAppNotificationRequest) (*v1.SendInAppNotificationResponse, error)
+	SendNotification(context.Context, *v1.SendNotificationRequest) (*v1.SendNotificationResponse, error)
 	UpdateNotificationTemplate(context.Context, *v1.UpdateNotificationTemplateRequest) (*v1.NotificationTemplate, error)
 }
 
@@ -57,6 +59,7 @@ func RegisterNotificationServiceHTTPServer(s *http.Server, srv NotificationServi
 	r.PUT("/admin/v1/notification-templates/{id}", _NotificationService_UpdateNotificationTemplate0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/notification-templates/{id}", _NotificationService_DeleteNotificationTemplate0_HTTP_Handler(srv))
 	r.POST("/admin/v1/notifications:send-in-app", _NotificationService_SendInAppNotification0_HTTP_Handler(srv))
+	r.POST("/admin/v1/notifications:send", _NotificationService_SendNotification0_HTTP_Handler(srv))
 	r.GET("/admin/v1/notification-messages", _NotificationService_ListNotificationMessages0_HTTP_Handler(srv))
 	r.GET("/admin/v1/notification-messages/{id}", _NotificationService_GetNotificationMessage0_HTTP_Handler(srv))
 	r.GET("/admin/v1/my/notifications", _NotificationService_ListMyNotifications0_HTTP_Handler(srv))
@@ -193,6 +196,28 @@ func _NotificationService_SendInAppNotification0_HTTP_Handler(srv NotificationSe
 			return err
 		}
 		reply := out.(*v1.SendInAppNotificationResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _NotificationService_SendNotification0_HTTP_Handler(srv NotificationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.SendNotificationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationNotificationServiceSendNotification)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SendNotification(ctx, req.(*v1.SendNotificationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.SendNotificationResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -335,6 +360,7 @@ type NotificationServiceHTTPClient interface {
 	MarkNotificationRead(ctx context.Context, req *v1.MarkNotificationReadRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	MarkNotificationsRead(ctx context.Context, req *v1.MarkNotificationsReadRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	SendInAppNotification(ctx context.Context, req *v1.SendInAppNotificationRequest, opts ...http.CallOption) (rsp *v1.SendInAppNotificationResponse, err error)
+	SendNotification(ctx context.Context, req *v1.SendNotificationRequest, opts ...http.CallOption) (rsp *v1.SendNotificationResponse, err error)
 	UpdateNotificationTemplate(ctx context.Context, req *v1.UpdateNotificationTemplateRequest, opts ...http.CallOption) (rsp *v1.NotificationTemplate, err error)
 }
 
@@ -481,6 +507,19 @@ func (c *NotificationServiceHTTPClientImpl) SendInAppNotification(ctx context.Co
 	pattern := "/admin/v1/notifications:send-in-app"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationNotificationServiceSendInAppNotification))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *NotificationServiceHTTPClientImpl) SendNotification(ctx context.Context, in *v1.SendNotificationRequest, opts ...http.CallOption) (*v1.SendNotificationResponse, error) {
+	var out v1.SendNotificationResponse
+	pattern := "/admin/v1/notifications:send"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationNotificationServiceSendNotification))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

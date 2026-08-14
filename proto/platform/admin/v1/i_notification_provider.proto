@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package platform.admin.v1;
+
+import "core/service/v1/notification_provider.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/admin/v1;v1";
+
+service NotificationProviderService {
+  rpc CreateNotificationProvider(core.service.v1.CreateNotificationProviderRequest) returns (core.service.v1.CreateNotificationProviderResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/notification-providers"
+      body: "*"
+    };
+  }
+  rpc UpdateNotificationProvider(core.service.v1.UpdateNotificationProviderRequest) returns (core.service.v1.UpdateNotificationProviderResponse) {
+    option (google.api.http) = {
+      put: "/admin/v1/notification-providers/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteNotificationProvider(core.service.v1.DeleteNotificationProviderRequest) returns (core.service.v1.DeleteNotificationProviderResponse) {
+    option (google.api.http) = {delete: "/admin/v1/notification-providers/{id}"};
+  }
+  rpc GetNotificationProvider(core.service.v1.GetNotificationProviderRequest) returns (core.service.v1.NotificationProvider) {
+    option (google.api.http) = {get: "/admin/v1/notification-providers/{id}"};
+  }
+  rpc ListNotificationProviders(core.service.v1.ListNotificationProvidersRequest) returns (core.service.v1.ListNotificationProvidersResponse) {
+    option (google.api.http) = {get: "/admin/v1/notification-providers"};
+  }
+  rpc SetDefaultNotificationProvider(core.service.v1.SetDefaultNotificationProviderRequest) returns (core.service.v1.SetDefaultNotificationProviderResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/notification-providers/{id}:set-default"
+      body: "*"
+    };
+  }
+  rpc TestNotificationProvider(core.service.v1.TestNotificationProviderRequest) returns (core.service.v1.TestNotificationProviderResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/notification-providers/{id}:test"
+      body: "*"
+    };
+  }
+}
