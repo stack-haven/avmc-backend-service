@@ -29,20 +29,20 @@ const file_platform_admin_v1_i_file_center_proto_rawDesc = "" +
 	"%platform/admin/v1/i_file_center.proto\x12\x11platform.admin.v1\x1a\x1acore/service/v1/file.proto\x1a\x1cgoogle/api/annotations.proto2\x97\x11\n" +
 	"\x11FileCenterService\x12\xa8\x01\n" +
 	"\x17CreateFileUploadSession\x12/.core.service.v1.CreateFileUploadSessionRequest\x1a0.core.service.v1.CreateFileUploadSessionResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/admin/v1/files/upload-sessions\x12\x93\x01\n" +
-	"\x11UploadFileContent\x12).core.service.v1.UploadFileContentRequest\x1a*.core.service.v1.UploadFileContentResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}/content\x12\x93\x01\n" +
-	"\x11ConfirmFileUpload\x12).core.service.v1.ConfirmFileUploadRequest\x1a*.core.service.v1.ConfirmFileUploadResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}/confirm\x12q\n" +
+	"\x11UploadFileContent\x12).core.service.v1.UploadFileContentRequest\x1a*.core.service.v1.UploadFileContentResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}:content\x12\x93\x01\n" +
+	"\x11ConfirmFileUpload\x12).core.service.v1.ConfirmFileUploadRequest\x1a*.core.service.v1.ConfirmFileUploadResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}:confirm\x12q\n" +
 	"\rGetFileObject\x12%.core.service.v1.GetFileObjectRequest\x1a\x1b.core.service.v1.FileObject\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/admin/v1/files/{id}\x12}\n" +
 	"\x0fListFileObjects\x12'.core.service.v1.ListFileObjectsRequest\x1a(.core.service.v1.ListFileObjectsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/admin/v1/files\x12\x9c\x01\n" +
 	"\x12ListFileAccessLogs\x12*.core.service.v1.ListFileAccessLogsRequest\x1a+.core.service.v1.ListFileAccessLogsResponse\"-\x82\xd3\xe4\x93\x02'\x12%/admin/v1/files/{file_id}/access-logs\x12\x9b\x01\n" +
-	"\x13PresignFileDownload\x12+.core.service.v1.PresignFileDownloadRequest\x1a,.core.service.v1.PresignFileDownloadResponse\")\x82\xd3\xe4\x93\x02#\x12!/admin/v1/files/{id}/download-url\x12\x85\x01\n" +
+	"\x13PresignFileDownload\x12+.core.service.v1.PresignFileDownloadRequest\x1a,.core.service.v1.PresignFileDownloadResponse\")\x82\xd3\xe4\x93\x02#\x12!/admin/v1/files/{id}:download-url\x12\x85\x01\n" +
 	"\x10DeleteFileObject\x12(.core.service.v1.DeleteFileObjectRequest\x1a).core.service.v1.DeleteFileObjectResponse\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/admin/v1/files/{id}\x12\x88\x01\n" +
 	"\x10UpdateFileObject\x12(.core.service.v1.UpdateFileObjectRequest\x1a).core.service.v1.UpdateFileObjectResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/admin/v1/files/{id}\x12\x96\x01\n" +
-	"\x12ReplaceFileContent\x12*.core.service.v1.ReplaceFileContentRequest\x1a+.core.service.v1.ReplaceFileContentResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}/replace\x12\x97\x01\n" +
-	"\x13DownloadFileContent\x12+.core.service.v1.DownloadFileContentRequest\x1a,.core.service.v1.DownloadFileContentResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/admin/v1/files/{id}/download\x12\x88\x01\n" +
+	"\x12ReplaceFileContent\x12*.core.service.v1.ReplaceFileContentRequest\x1a+.core.service.v1.ReplaceFileContentResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/admin/v1/files/{id}:replace\x12\x97\x01\n" +
+	"\x13DownloadFileContent\x12+.core.service.v1.DownloadFileContentRequest\x1a,.core.service.v1.DownloadFileContentResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/admin/v1/files/{id}:download\x12\x88\x01\n" +
 	"\x0eUploadFilePart\x12&.core.service.v1.UploadFilePartRequest\x1a'.core.service.v1.UploadFilePartResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\x1a\x1a/admin/v1/files/{id}/parts\x12\x82\x01\n" +
 	"\rListFileParts\x12%.core.service.v1.ListFilePartsRequest\x1a&.core.service.v1.ListFilePartsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/admin/v1/files/{id}/parts\x12\x97\x01\n" +
-	"\x12CompleteFileUpload\x12*.core.service.v1.CompleteFileUploadRequest\x1a+.core.service.v1.CompleteFileUploadResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/admin/v1/files/{id}/complete\x12\x8b\x01\n" +
-	"\x0fAbortFileUpload\x12'.core.service.v1.AbortFileUploadRequest\x1a(.core.service.v1.AbortFileUploadResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/admin/v1/files/{id}/abortB\xb9\x01\n" +
+	"\x12CompleteFileUpload\x12*.core.service.v1.CompleteFileUploadRequest\x1a+.core.service.v1.CompleteFileUploadResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/admin/v1/files/{id}:complete\x12\x8b\x01\n" +
+	"\x0fAbortFileUpload\x12'.core.service.v1.AbortFileUploadRequest\x1a(.core.service.v1.AbortFileUploadResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/admin/v1/files/{id}:abortB\xb9\x01\n" +
 	"\x15com.platform.admin.v1B\x10IFileCenterProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 
 var file_platform_admin_v1_i_file_center_proto_goTypes = []any{

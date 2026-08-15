@@ -25,10 +25,14 @@ const (
 var (
 	// ErrMissingToken 缺少令牌错误
 	ErrMissingToken = errors.New(ErrUnauthorized, "UNAUTHORIZED", "missing token")
-	// ErrInvalidToken 无效令牌错误
+	// ErrInvalidToken 无效令牌错误（格式错误）
 	ErrInvalidToken = errors.New(ErrUnauthorized, "UNAUTHORIZED", "invalid token")
 	// ErrExpiredToken 令牌过期错误
 	ErrExpiredToken = errors.New(ErrUnauthorized, "UNAUTHORIZED", "token has expired")
+	// ErrInvalidSignature 令牌签名错误
+	ErrInvalidSignature = errors.New(ErrUnauthorized, "UNAUTHORIZED", "invalid token signature")
+	// ErrInvalidClaims 令牌声明错误
+	ErrInvalidClaims = errors.New(ErrUnauthorized, "UNAUTHORIZED", "invalid token claims")
 	// ErrPermissionDenied 权限被拒绝错误
 	ErrPermissionDenied = errors.New(ErrForbidden, "FORBIDDEN", "permission denied")
 )
@@ -48,8 +52,12 @@ func AuthnMiddleware(authenticator authn.Authenticator) middleware.Middleware {
 						return nil, ErrMissingToken
 					case authn.ErrCodeExpiredToken:
 						return nil, ErrExpiredToken
-					case authn.ErrCodeInvalidToken, authn.ErrCodeInvalidSignature, authn.ErrCodeInvalidClaims:
+					case authn.ErrCodeInvalidToken:
 						return nil, ErrInvalidToken
+					case authn.ErrCodeInvalidSignature:
+						return nil, ErrInvalidSignature
+					case authn.ErrCodeInvalidClaims:
+						return nil, ErrInvalidClaims
 					default:
 						return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", authErr.Error())
 					}
@@ -169,8 +177,12 @@ func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.
 						return nil, ErrMissingToken
 					case authn.ErrCodeExpiredToken:
 						return nil, ErrExpiredToken
-					case authn.ErrCodeInvalidToken, authn.ErrCodeInvalidSignature, authn.ErrCodeInvalidClaims:
+					case authn.ErrCodeInvalidToken:
 						return nil, ErrInvalidToken
+					case authn.ErrCodeInvalidSignature:
+						return nil, ErrInvalidSignature
+					case authn.ErrCodeInvalidClaims:
+						return nil, ErrInvalidClaims
 					default:
 						return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", authErr.Error())
 					}
@@ -283,8 +295,12 @@ func SkipAuthPathMiddleware(authenticator authn.Authenticator, skipPaths []strin
 						return nil, ErrMissingToken
 					case authn.ErrCodeExpiredToken:
 						return nil, ErrExpiredToken
-					case authn.ErrCodeInvalidToken, authn.ErrCodeInvalidSignature, authn.ErrCodeInvalidClaims:
+					case authn.ErrCodeInvalidToken:
 						return nil, ErrInvalidToken
+					case authn.ErrCodeInvalidSignature:
+						return nil, ErrInvalidSignature
+					case authn.ErrCodeInvalidClaims:
+						return nil, ErrInvalidClaims
 					default:
 						return nil, errors.New(ErrUnauthorized, "UNAUTHORIZED", authErr.Error())
 					}

@@ -15,7 +15,7 @@ option go_package = "backend-service/api/ai/service/v1;v1";
 service ChatService {
   // 获取对话简单列表
   rpc ListChatsSimple(ListChatsRequest) returns (ListChatsResponse) {
-    option (google.api.http) = {get: "/ai/v1/ai/chats/simple"};
+    option (google.api.http) = {get: "/ai/v1/chats/simple"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取对话简单列表"
       description: "获取对话简单列表"
@@ -34,7 +34,7 @@ service ChatService {
   }
   // 获取对话列表分页
   rpc ListChats(ListChatsRequest) returns (ListChatsResponse) {
-    option (google.api.http) = {get: "/ai/v1/ai/chats"};
+    option (google.api.http) = {get: "/ai/v1/chats"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取对话列表分页"
       description: "获取对话列表分页"
@@ -54,7 +54,7 @@ service ChatService {
 
   // 获取对话数据
   rpc GetChat(GetChatRequest) returns (Chat) {
-    option (google.api.http) = {get: "/ai/v1/ai/chats/{id}"};
+    option (google.api.http) = {get: "/ai/v1/chats/{id}"};
     option (gnostic.openapi.v3.operation) = {
       summary: "获取对话数据"
       description: "获取对话数据"
@@ -75,7 +75,7 @@ service ChatService {
   // 创建对话
   rpc CreateChat(CreateChatRequest) returns (CreateChatResponse) {
     option (google.api.http) = {
-      post: "/ai/v1/ai/chats"
+      post: "/ai/v1/chats"
       body: "chat"
     };
     option (gnostic.openapi.v3.operation) = {
@@ -98,7 +98,7 @@ service ChatService {
   // 更新对话
   rpc UpdateChat(UpdateChatRequest) returns (UpdateChatResponse) {
     option (google.api.http) = {
-      put: "/ai/v1/ai/chats/{id}"
+      put: "/ai/v1/chats/{id}"
       body: "chat"
     };
     option (gnostic.openapi.v3.operation) = {
@@ -120,7 +120,7 @@ service ChatService {
 
   // 删除对话
   rpc DeleteChat(DeleteChatRequest) returns (DeleteChatResponse) {
-    option (google.api.http) = {delete: "/ai/v1/ai/chats/{id}"};
+    option (google.api.http) = {delete: "/ai/v1/chats/{id}"};
     option (gnostic.openapi.v3.operation) = {
       summary: "删除对话"
       description: "删除对话"
@@ -141,7 +141,7 @@ service ChatService {
   // 更新对话状态
   rpc UpdateChatByStatus(UpdateChatByStatusRequest) returns (UpdateChatByStatusResponse) {
     option (google.api.http) = {
-      put: "/ai/v1/ai/chats/status-update/{id}"
+      post: "/ai/v1/chats/{id}:status-update"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
@@ -164,7 +164,7 @@ service ChatService {
   // 流式对话
   rpc StreamChat(StreamChatRequest) returns (StreamChatResponse) {
     option (google.api.http) = {
-      post: "/ai/v1/ai/chats/stream"
+      post: "/ai/v1/chats:stream"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"backend-service/api/common/pagination"
+	"backend-service/pkg/utils/convert"
 )
 
 // TestConvertPagingRequest 测试分页请求转换功能
@@ -19,8 +20,8 @@ func TestConvertPagingRequest(t *testing.T) {
 	}{{
 		name: "基本分页请求",
 		request: &pagination.PagingRequest{
-			Page:     int32Ptr(1),
-			PageSize: int32Ptr(10),
+			Page:     convert.ToPointer(int32(1)),
+			PageSize: convert.ToPointer(int32(10)),
 		},
 		expected: &PagingOption{
 			Limit:  10,
@@ -29,8 +30,8 @@ func TestConvertPagingRequest(t *testing.T) {
 	}, {
 		name: "非第一页请求",
 		request: &pagination.PagingRequest{
-			Page:     int32Ptr(3),
-			PageSize: int32Ptr(20),
+			Page:     convert.ToPointer(int32(3)),
+			PageSize: convert.ToPointer(int32(20)),
 		},
 		expected: &PagingOption{
 			Limit:  20,
@@ -39,7 +40,7 @@ func TestConvertPagingRequest(t *testing.T) {
 	}, {
 		name: "禁用分页请求",
 		request: &pagination.PagingRequest{
-			NoPaging: boolPtr(true),
+			NoPaging: convert.ToPointer(true),
 		},
 		expected: &PagingOption{
 			NoPaging: true,
@@ -49,8 +50,8 @@ func TestConvertPagingRequest(t *testing.T) {
 	}, {
 		name: "带排序请求",
 		request: &pagination.PagingRequest{
-			Page:     int32Ptr(1),
-			PageSize: int32Ptr(10),
+			Page:     convert.ToPointer(int32(1)),
+			PageSize: convert.ToPointer(int32(10)),
 			OrderBy:  []string{"created_at desc"},
 		},
 		expected: &PagingOption{

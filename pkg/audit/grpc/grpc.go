@@ -8,6 +8,7 @@ import (
 
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/audit"
+	"backend-service/pkg/utils/convert"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -40,21 +41,21 @@ func New(ctx context.Context, endpoint string) (*Client, error) {
 func (c *Client) Append(ctx context.Context, record *audit.Record) error {
 	entry := &pb.OperationLog{
 		TenantId:       record.TenantID,
-		OperatorId:     uint32Ptr(record.OperatorID),
-		OperatorName:   strPtr(record.OperatorName),
+		OperatorId:     convert.EmptyToNil(record.OperatorID),
+		OperatorName:   convert.EmptyToNil(record.OperatorName),
 		Module:         record.Module,
 		Action:         record.Action,
-		ResourceType:   strPtr(record.ResourceType),
-		ResourceId:     strPtr(record.ResourceID),
-		Method:         strPtr(record.Method),
-		Path:           strPtr(record.Path),
-		RequestSummary: strPtr(record.RequestSummary),
-		Ip:             strPtr(record.IP),
-		UserAgent:      strPtr(record.UserAgent),
-		TraceId:        strPtr(record.TraceID),
+		ResourceType:   convert.EmptyToNil(record.ResourceType),
+		ResourceId:     convert.EmptyToNil(record.ResourceID),
+		Method:         convert.EmptyToNil(record.Method),
+		Path:           convert.EmptyToNil(record.Path),
+		RequestSummary: convert.EmptyToNil(record.RequestSummary),
+		Ip:             convert.EmptyToNil(record.IP),
+		UserAgent:      convert.EmptyToNil(record.UserAgent),
+		TraceId:        convert.EmptyToNil(record.TraceID),
 		Success:        record.Success,
-		DurationMs:     int64Ptr(record.DurationMs),
-		ErrorMessage:   strPtr(record.ErrorMessage),
+		DurationMs:     convert.ToPointer(record.DurationMs),
+		ErrorMessage:   convert.EmptyToNil(record.ErrorMessage),
 	}
 	_, err := c.client.CreateOperationLog(ctx, &pb.CreateOperationLogRequest{Entry: entry})
 	return err
@@ -62,19 +63,3 @@ func (c *Client) Append(ctx context.Context, record *audit.Record) error {
 
 // Close closes the gRPC connection.
 func (c *Client) Close() error { return c.conn.Close() }
-
-func strPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
-}
-
-func uint32Ptr(v uint32) *uint32 {
-	if v == 0 {
-		return nil
-	}
-	return &v
-}
-
-func int64Ptr(v int64) *int64 { return &v }

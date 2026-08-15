@@ -64,13 +64,13 @@ const file_platform_admin_v1_i_dept_proto_rawDesc = "" +
 	"\x0e\n" +
 	"\n" +
 	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x16*\x14/admin/v1/depts/{id}\x12\x9c\x01\n" +
-	"\x13GetDeptDeleteImpact\x12+.core.service.v1.GetDeptDeleteImpactRequest\x1a,.core.service.v1.GetDeptDeleteImpactResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/admin/v1/depts/{id}/delete-impact\x12\xab\x01\n" +
+	"\x13GetDeptDeleteImpact\x12+.core.service.v1.GetDeptDeleteImpactRequest\x1a,.core.service.v1.GetDeptDeleteImpactResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/admin/v1/depts/{id}:delete-impact\x12\xab\x01\n" +
 	"\x15TransferAndDeleteDept\x12-.core.service.v1.TransferAndDeleteDeptRequest\x1a..core.service.v1.TransferAndDeleteDeptResponse\"3\x82\xd3\xe4\x93\x02-:\x01*\"(/admin/v1/depts/{id}:transfer-and-delete\x12\xf3\x01\n" +
 	"\x12UpdateDeptByStatus\x12*.core.service.v1.UpdateDeptByStatusRequest\x1a+.core.service.v1.UpdateDeptByStatusResponse\"\x83\x01\xbaGN\n" +
 	"\x12部门管理服务\x12\x12更新部门状态\x1a\x12更新部门状态Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02,:\x06status\x1a\"/admin/v1/depts/status-update/{id}B\xb3\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02,:\x06status\"\"/admin/v1/depts/{id}:status-updateB\xb3\x01\n" +
 	"\x15com.platform.admin.v1B\n" +
 	"IDeptProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 

@@ -13,6 +13,7 @@ import (
 	"backend-service/api/common/enum"
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/utils/convert"
 )
 
 type notificationRepoStub struct {
@@ -40,7 +41,7 @@ func (*notificationProviderRepoStub) SetDefault(context.Context, uint32) (*pb.No
 	return nil, nil
 }
 func (*notificationProviderRepoStub) ResolveChannel(_ context.Context, channel string) (*pb.NotificationProvider, json.RawMessage, error) {
-	return &pb.NotificationProvider{Channel: channel, Status: int32Ptr(StorageProviderStatusEnabled)}, json.RawMessage("{}"), nil
+	return &pb.NotificationProvider{Channel: channel, Status: convert.ToPointer(StorageProviderStatusEnabled)}, json.RawMessage("{}"), nil
 }
 
 func (r *notificationRepoStub) ListTemplates(context.Context, *pb.ListNotificationTemplatesRequest) ([]*pb.NotificationTemplate, int32, error) {
@@ -156,9 +157,9 @@ func TestNotificationUsecaseSendInAppEnqueuesAsyncTask(t *testing.T) {
 
 	resp, err := uc.SendInApp(ctx, &pb.SendInAppNotificationRequest{
 		RecipientUserIds: []uint32{7, 8},
-		TemplateCode:     strPtr("system.welcome"),
-		Variables:        strPtr(`{"userName":"admin"}`),
-		IdempotencyKey:   strPtr("welcome:7"),
+		TemplateCode:     convert.ToPointer("system.welcome"),
+		Variables:        convert.ToPointer(`{"userName":"admin"}`),
+		IdempotencyKey:   convert.ToPointer("welcome:7"),
 	})
 	if err != nil {
 		t.Fatalf("SendInApp() error = %v", err)
@@ -235,5 +236,3 @@ func TestNotificationUsecaseMyNotifications(t *testing.T) {
 		t.Fatalf("unread after mark = %d, want 0", unread)
 	}
 }
-
-func strPtr(value string) *string { return &value }

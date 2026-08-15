@@ -1216,6 +1216,216 @@ var _ interface {
 	ErrorName() string
 } = GetAsrRecordRequestValidationError{}
 
+// Validate checks the field values on GetAsrRecordAudioRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetAsrRecordAudioRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetAsrRecordAudioRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetAsrRecordAudioRequestMultiError, or nil if none found.
+func (m *GetAsrRecordAudioRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetAsrRecordAudioRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return GetAsrRecordAudioRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetAsrRecordAudioRequestMultiError is an error wrapping multiple validation
+// errors returned by GetAsrRecordAudioRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetAsrRecordAudioRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetAsrRecordAudioRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetAsrRecordAudioRequestMultiError) AllErrors() []error { return m }
+
+// GetAsrRecordAudioRequestValidationError is the validation error returned by
+// GetAsrRecordAudioRequest.Validate if the designated constraints aren't met.
+type GetAsrRecordAudioRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetAsrRecordAudioRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetAsrRecordAudioRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetAsrRecordAudioRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetAsrRecordAudioRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetAsrRecordAudioRequestValidationError) ErrorName() string {
+	return "GetAsrRecordAudioRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetAsrRecordAudioRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetAsrRecordAudioRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetAsrRecordAudioRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetAsrRecordAudioRequestValidationError{}
+
+// Validate checks the field values on GetAsrRecordAudioResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetAsrRecordAudioResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetAsrRecordAudioResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetAsrRecordAudioResponseMultiError, or nil if none found.
+func (m *GetAsrRecordAudioResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetAsrRecordAudioResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AudioData
+
+	// no validation rules for ContentType
+
+	if len(errors) > 0 {
+		return GetAsrRecordAudioResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetAsrRecordAudioResponseMultiError is an error wrapping multiple validation
+// errors returned by GetAsrRecordAudioResponse.ValidateAll() if the
+// designated constraints aren't met.
+type GetAsrRecordAudioResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetAsrRecordAudioResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetAsrRecordAudioResponseMultiError) AllErrors() []error { return m }
+
+// GetAsrRecordAudioResponseValidationError is the validation error returned by
+// GetAsrRecordAudioResponse.Validate if the designated constraints aren't met.
+type GetAsrRecordAudioResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetAsrRecordAudioResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetAsrRecordAudioResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetAsrRecordAudioResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetAsrRecordAudioResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetAsrRecordAudioResponseValidationError) ErrorName() string {
+	return "GetAsrRecordAudioResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetAsrRecordAudioResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetAsrRecordAudioResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetAsrRecordAudioResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetAsrRecordAudioResponseValidationError{}
+
 // Validate checks the field values on RecognizeAndCorrectResponse with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1360,3 +1570,107 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RecognizeAndCorrectResponseValidationError{}
+
+// Validate checks the field values on ReRecognizeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ReRecognizeRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ReRecognizeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ReRecognizeRequestMultiError, or nil if none found.
+func (m *ReRecognizeRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ReRecognizeRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ReRecognizeRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ReRecognizeRequestMultiError is an error wrapping multiple validation errors
+// returned by ReRecognizeRequest.ValidateAll() if the designated constraints
+// aren't met.
+type ReRecognizeRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ReRecognizeRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ReRecognizeRequestMultiError) AllErrors() []error { return m }
+
+// ReRecognizeRequestValidationError is the validation error returned by
+// ReRecognizeRequest.Validate if the designated constraints aren't met.
+type ReRecognizeRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ReRecognizeRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ReRecognizeRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ReRecognizeRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ReRecognizeRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ReRecognizeRequestValidationError) ErrorName() string {
+	return "ReRecognizeRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ReRecognizeRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sReRecognizeRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ReRecognizeRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ReRecognizeRequestValidationError{}

@@ -14,6 +14,7 @@ import (
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/objectstorage"
+	"backend-service/pkg/utils/convert"
 )
 
 type fileRepoStub struct {
@@ -39,7 +40,7 @@ func (r *fileRepoStub) CreateUploadSession(_ context.Context, file *pbCore.FileO
 	r.createCalls++
 	created := proto.Clone(file).(*pbCore.FileObject) //nolint:errcheck // proto.Clone does not return error
 	created.Id = r.nextID
-	created.UploadExpiresAt = stringPtr(expiresAt.UTC().Format(time.DateTime))
+	created.UploadExpiresAt = convert.ToPointer(expiresAt.UTC().Format(time.DateTime))
 	r.nextID++
 	r.byID[created.Id] = created
 	if idempotencyKey != "" {
@@ -80,9 +81,9 @@ func (r *fileRepoStub) Confirm(_ context.Context, id uint32, size int64, sha256,
 	if file == nil {
 		return nil, errors.NotFound("FILE_NOT_FOUND", "file not found")
 	}
-	file.Status = fileInt32Ptr(FileStatusConfirmed)
-	file.Size = fileInt64Ptr(size)
-	file.Sha256 = stringPtr(sha256)
+	file.Status = convert.ToPointer(FileStatusConfirmed)
+	file.Size = convert.ToPointer(size)
+	file.Sha256 = convert.ToPointer(sha256)
 	return file, nil
 }
 
@@ -90,7 +91,7 @@ func (r *fileRepoStub) Delete(_ context.Context, id uint32) error {
 	r.deleteCalls++
 	file := r.byID[id]
 	if file != nil {
-		file.Status = fileInt32Ptr(FileStatusDeleted)
+		file.Status = convert.ToPointer(FileStatusDeleted)
 	}
 	return nil
 }
@@ -100,7 +101,7 @@ func (r *fileRepoStub) UpdateFileName(_ context.Context, id uint32, fileName str
 	if file == nil {
 		return nil, errors.NotFound("FILE_NOT_FOUND", "file not found")
 	}
-	file.FileName = stringPtr(fileName)
+	file.FileName = convert.ToPointer(fileName)
 	return file, nil
 }
 
@@ -109,11 +110,11 @@ func (r *fileRepoStub) UpdateAfterReplace(_ context.Context, id uint32, objectKe
 	if file == nil {
 		return nil, errors.NotFound("FILE_NOT_FOUND", "file not found")
 	}
-	file.ObjectKey = stringPtr(objectKey)
-	file.Size = fileInt64Ptr(size)
-	file.Sha256 = stringPtr(sha256)
-	file.ContentType = stringPtr(contentType)
-	file.FileName = stringPtr(fileName)
+	file.ObjectKey = convert.ToPointer(objectKey)
+	file.Size = convert.ToPointer(size)
+	file.Sha256 = convert.ToPointer(sha256)
+	file.ContentType = convert.ToPointer(contentType)
+	file.FileName = convert.ToPointer(fileName)
 	return file, nil
 }
 
@@ -222,9 +223,9 @@ func TestFileUsecaseCreateUploadSessionUsesIdempotencyReplay(t *testing.T) {
 	uc := NewFileUsecase(repo, nil, storage, nil, log.NewStdLogger(io.Discard))
 	ctx := projectQuotaContext()
 	req := &pbCore.CreateFileUploadSessionRequest{
-		FileName:       stringPtr("report.pdf"),
-		ContentType:    stringPtr("application/pdf"),
-		IdempotencyKey: stringPtr("file-upload-1"),
+		FileName:       convert.ToPointer("report.pdf"),
+		ContentType:    convert.ToPointer("application/pdf"),
+		IdempotencyKey: convert.ToPointer("file-upload-1"),
 	}
 
 	first, err := uc.CreateUploadSession(ctx, req)
@@ -253,7 +254,7 @@ func TestFileUsecaseCreateUploadSessionRejectsMissingStorageProvider(t *testing.
 	t.Parallel()
 
 	uc := NewFileUsecase(newFileRepoStub(), nil, nil, nil, log.NewStdLogger(io.Discard))
-	if _, err := uc.CreateUploadSession(projectQuotaContext(), &pbCore.CreateFileUploadSessionRequest{FileName: stringPtr("avatar.png")}); err == nil {
+	if _, err := uc.CreateUploadSession(projectQuotaContext(), &pbCore.CreateFileUploadSessionRequest{FileName: convert.ToPointer("avatar.png")}); err == nil {
 		t.Fatal("CreateUploadSession() error = nil, want missing storage provider rejection")
 	}
 }
@@ -264,10 +265,10 @@ func TestFileUsecasePresignDownloadRequiresConfirmedFile(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("pending.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("pending.txt"),
-		Status:    fileInt32Ptr(FileStatusPending),
+		FileName:  convert.ToPointer("pending.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("pending.txt"),
+		Status:    convert.ToPointer(FileStatusPending),
 	}
 	uc := NewFileUsecase(repo, nil, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
 	if _, err := uc.PresignDownload(projectQuotaContext(), &pbCore.PresignFileDownloadRequest{Id: 1}); err == nil {
@@ -281,10 +282,10 @@ func TestFileUsecaseDeleteRemovesObjectAndSoftDeletesMetadata(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("confirmed.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("confirmed.txt"),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
+		FileName:  convert.ToPointer("confirmed.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("confirmed.txt"),
+		Status:    convert.ToPointer(FileStatusConfirmed),
 	}
 	storage := &fileStorageStub{}
 	uc := NewFileUsecase(repo, nil, storage, nil, log.NewStdLogger(io.Discard))
@@ -302,11 +303,11 @@ func TestFileUsecaseConfirmConsumesFileQuotas(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("confirmed.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("confirmed.txt"),
-		Size:      fileInt64Ptr(12),
-		Status:    fileInt32Ptr(FileStatusPending),
+		FileName:  convert.ToPointer("confirmed.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("confirmed.txt"),
+		Size:      convert.ToPointer(int64(12)),
+		Status:    convert.ToPointer(FileStatusPending),
 	}
 	quotaRepo := &resourceQuotaRepoStub{}
 	quota := NewResourceQuotaUsecase(
@@ -319,7 +320,7 @@ func TestFileUsecaseConfirmConsumesFileQuotas(t *testing.T) {
 	)
 	uc := NewFileUsecase(repo, nil, &fileStorageStub{}, quota, log.NewStdLogger(io.Discard))
 
-	file, err := uc.ConfirmUpload(projectQuotaContext(), &pbCore.ConfirmFileUploadRequest{Id: 1, Size: fileInt64Ptr(12)})
+	file, err := uc.ConfirmUpload(projectQuotaContext(), &pbCore.ConfirmFileUploadRequest{Id: 1, Size: convert.ToPointer(int64(12))})
 	if err != nil {
 		t.Fatalf("ConfirmUpload() error = %v", err)
 	}
@@ -340,10 +341,10 @@ func TestFileUsecasePresignDownloadAppendsAccessLog(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("confirmed.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("confirmed.txt"),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
+		FileName:  convert.ToPointer("confirmed.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("confirmed.txt"),
+		Status:    convert.ToPointer(FileStatusConfirmed),
 	}
 	accessLog := &fileAccessLogRepoStub{}
 	uc := NewFileUsecase(repo, accessLog, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
@@ -365,10 +366,10 @@ func TestFileUsecaseUpdateFileName(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("old.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("old.txt"),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
+		FileName:  convert.ToPointer("old.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("old.txt"),
+		Status:    convert.ToPointer(FileStatusConfirmed),
 	}
 	uc := NewFileUsecase(repo, nil, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
 
@@ -399,11 +400,11 @@ func TestFileUsecaseReplaceContentRejectsNonLocalProvider(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("confirmed.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("confirmed.txt"),
-		Provider:  stringPtr(StorageProviderTypeS3Compatible),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
+		FileName:  convert.ToPointer("confirmed.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("confirmed.txt"),
+		Provider:  convert.ToPointer(StorageProviderTypeS3Compatible),
+		Status:    convert.ToPointer(FileStatusConfirmed),
 	}
 	uc := NewFileUsecase(repo, nil, &fileStorageStub{providerType: StorageProviderTypeS3Compatible}, nil, log.NewStdLogger(io.Discard))
 	if _, err := uc.ReplaceContent(projectQuotaContext(), &pbCore.ReplaceFileContentRequest{Id: 1, Content: []byte("new")}); err == nil {
@@ -417,11 +418,11 @@ func TestFileUsecaseDownloadContentLocalProvider(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("image.png"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("image.png"),
-		Provider:  stringPtr(StorageProviderTypeLocal),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
+		FileName:  convert.ToPointer("image.png"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("image.png"),
+		Provider:  convert.ToPointer(StorageProviderTypeLocal),
+		Status:    convert.ToPointer(FileStatusConfirmed),
 	}
 	uc := NewFileUsecase(repo, nil, &fileStorageStub{providerType: StorageProviderTypeLocal}, nil, log.NewStdLogger(io.Discard))
 
@@ -440,11 +441,11 @@ func TestFileUsecaseDownloadContentRejectsNonLocal(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("image.png"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("image.png"),
-		Provider:  stringPtr(StorageProviderTypeS3Compatible),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
+		FileName:  convert.ToPointer("image.png"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("image.png"),
+		Provider:  convert.ToPointer(StorageProviderTypeS3Compatible),
+		Status:    convert.ToPointer(FileStatusConfirmed),
 	}
 	uc := NewFileUsecase(repo, nil, &fileStorageStub{}, nil, log.NewStdLogger(io.Discard))
 
@@ -459,12 +460,12 @@ func TestFileUsecaseReplaceContentUpdatesMetadataAndObject(t *testing.T) {
 	repo := newFileRepoStub()
 	repo.byID[1] = &pbCore.FileObject{
 		Id:        1,
-		FileName:  stringPtr("confirmed.txt"),
-		Bucket:    stringPtr("tenant-files"),
-		ObjectKey: stringPtr("old-key.txt"),
-		Provider:  stringPtr(StorageProviderTypeLocal),
-		Status:    fileInt32Ptr(FileStatusConfirmed),
-		Size:      fileInt64Ptr(3),
+		FileName:  convert.ToPointer("confirmed.txt"),
+		Bucket:    convert.ToPointer("tenant-files"),
+		ObjectKey: convert.ToPointer("old-key.txt"),
+		Provider:  convert.ToPointer(StorageProviderTypeLocal),
+		Status:    convert.ToPointer(FileStatusConfirmed),
+		Size:      convert.ToPointer(int64(3)),
 	}
 	storage := &fileStorageStub{providerType: StorageProviderTypeLocal}
 	uc := NewFileUsecase(repo, nil, storage, nil, log.NewStdLogger(io.Discard))
@@ -472,8 +473,8 @@ func TestFileUsecaseReplaceContentUpdatesMetadataAndObject(t *testing.T) {
 	updated, err := uc.ReplaceContent(projectQuotaContext(), &pbCore.ReplaceFileContentRequest{
 		Id:          1,
 		Content:     []byte("new-content"),
-		FileName:    stringPtr("renamed.txt"),
-		ContentType: stringPtr("text/plain"),
+		FileName:    convert.ToPointer("renamed.txt"),
+		ContentType: convert.ToPointer("text/plain"),
 	})
 	if err != nil {
 		t.Fatalf("ReplaceContent() error = %v", err)

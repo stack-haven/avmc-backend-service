@@ -83,7 +83,7 @@ const file_platform_admin_v1_i_menu_proto_rawDesc = "" +
 	"\x12菜单管理服务\x12\x12更新菜单状态\x1a\x12更新菜单状态Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02,:\x06status\x1a\"/admin/v1/menus/status-update/{id}B\xb3\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02,:\x06status\"\"/admin/v1/menus/{id}:status-updateB\xb3\x01\n" +
 	"\x15com.platform.admin.v1B\n" +
 	"IMenuProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 

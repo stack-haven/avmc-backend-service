@@ -29,6 +29,7 @@ import (
 	"backend-service/pkg/auth/loginattempt"
 	"backend-service/pkg/audit"
 	auditgrpc "backend-service/pkg/audit/grpc"
+	filecentergrpc "backend-service/pkg/filecenter/grpc"
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authzgrpc "backend-service/pkg/auth/authz/grpc"
@@ -51,6 +52,7 @@ var ProviderSet = wire.NewSet(
 	NewProviderConfigRepo,
 	NewCorrectionRuleRepo,
 	NewCorrectionLogRepo,
+	NewFileCenterClient,
 	NewAuditClient,
 )
 
@@ -346,6 +348,20 @@ func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Authorizer,
 	log.NewHelper(log.With(logger, "module", "authz/grpc")).
 		Infof("initialized gRPC authorizer: endpoint=%s", cfg.Grpc.GetAddr())
 	return authorizer, nil
+}
+
+// NewFileCenterClient 创建文件中心客户端（用于音频上传/预览）。
+func NewFileCenterClient(cfg *conf.Client, logger log.Logger) (*filecentergrpc.Client, error) {
+	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
+		return nil, fmt.Errorf("client.grpc.addr is required for file center")
+	}
+	client, err := filecentergrpc.New(context.Background(), cfg.Grpc.GetAddr())
+	if err != nil {
+		return nil, fmt.Errorf("creating file center client: %w", err)
+	}
+	log.NewHelper(log.With(logger, "module", "filecenter/grpc")).
+		Infof("initialized file center client: endpoint=%s", cfg.Grpc.GetAddr())
+	return client, nil
 }
 
 // NewAuditClient 创建审计客户端。

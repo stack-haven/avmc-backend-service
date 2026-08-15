@@ -148,6 +148,11 @@ func actionsForAuthCode(code string) []authz.Action {
 	case strings.HasPrefix(lower, "create"), strings.HasPrefix(lower, "add"), strings.HasPrefix(lower, "send"):
 		return []authz.Action{"POST"}
 	case strings.HasPrefix(lower, "update"), strings.HasPrefix(lower, "set"), strings.HasPrefix(lower, "mark"):
+		// UpdateXxxByStatus / UpdateXxxStatus 是状态切换自定义动作（AIP-136 用 POST），
+		// 普通 UpdateXxx 是标准更新（PUT）。
+		if strings.HasSuffix(lower, "status") {
+			return []authz.Action{"POST"}
+		}
 		return []authz.Action{"PUT"}
 	case strings.HasPrefix(lower, "delete"), strings.HasPrefix(lower, "remove"):
 		return []authz.Action{"DELETE"}

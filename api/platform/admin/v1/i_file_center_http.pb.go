@@ -57,20 +57,20 @@ type FileCenterServiceHTTPServer interface {
 func RegisterFileCenterServiceHTTPServer(s *http.Server, srv FileCenterServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/admin/v1/files/upload-sessions", _FileCenterService_CreateFileUploadSession0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}/content", _FileCenterService_UploadFileContent0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}/confirm", _FileCenterService_ConfirmFileUpload0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}:content", _FileCenterService_UploadFileContent0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}:confirm", _FileCenterService_ConfirmFileUpload0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files/{id}", _FileCenterService_GetFileObject0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files", _FileCenterService_ListFileObjects0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files/{file_id}/access-logs", _FileCenterService_ListFileAccessLogs0_HTTP_Handler(srv))
-	r.GET("/admin/v1/files/{id}/download-url", _FileCenterService_PresignFileDownload0_HTTP_Handler(srv))
+	r.GET("/admin/v1/files/{id}:download-url", _FileCenterService_PresignFileDownload0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/files/{id}", _FileCenterService_DeleteFileObject0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/files/{id}", _FileCenterService_UpdateFileObject0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}/replace", _FileCenterService_ReplaceFileContent0_HTTP_Handler(srv))
-	r.GET("/admin/v1/files/{id}/download", _FileCenterService_DownloadFileContent0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}:replace", _FileCenterService_ReplaceFileContent0_HTTP_Handler(srv))
+	r.GET("/admin/v1/files/{id}:download", _FileCenterService_DownloadFileContent0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/files/{id}/parts", _FileCenterService_UploadFilePart0_HTTP_Handler(srv))
 	r.GET("/admin/v1/files/{id}/parts", _FileCenterService_ListFileParts0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}/complete", _FileCenterService_CompleteFileUpload0_HTTP_Handler(srv))
-	r.POST("/admin/v1/files/{id}/abort", _FileCenterService_AbortFileUpload0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}:complete", _FileCenterService_CompleteFileUpload0_HTTP_Handler(srv))
+	r.POST("/admin/v1/files/{id}:abort", _FileCenterService_AbortFileUpload0_HTTP_Handler(srv))
 }
 
 func _FileCenterService_CreateFileUploadSession0_HTTP_Handler(srv FileCenterServiceHTTPServer) func(ctx http.Context) error {
@@ -449,7 +449,7 @@ func NewFileCenterServiceHTTPClient(client *http.Client) FileCenterServiceHTTPCl
 
 func (c *FileCenterServiceHTTPClientImpl) AbortFileUpload(ctx context.Context, in *v1.AbortFileUploadRequest, opts ...http.CallOption) (*v1.AbortFileUploadResponse, error) {
 	var out v1.AbortFileUploadResponse
-	pattern := "/admin/v1/files/{id}/abort"
+	pattern := "/admin/v1/files/{id}:abort"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceAbortFileUpload))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -462,7 +462,7 @@ func (c *FileCenterServiceHTTPClientImpl) AbortFileUpload(ctx context.Context, i
 
 func (c *FileCenterServiceHTTPClientImpl) CompleteFileUpload(ctx context.Context, in *v1.CompleteFileUploadRequest, opts ...http.CallOption) (*v1.CompleteFileUploadResponse, error) {
 	var out v1.CompleteFileUploadResponse
-	pattern := "/admin/v1/files/{id}/complete"
+	pattern := "/admin/v1/files/{id}:complete"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceCompleteFileUpload))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -475,7 +475,7 @@ func (c *FileCenterServiceHTTPClientImpl) CompleteFileUpload(ctx context.Context
 
 func (c *FileCenterServiceHTTPClientImpl) ConfirmFileUpload(ctx context.Context, in *v1.ConfirmFileUploadRequest, opts ...http.CallOption) (*v1.ConfirmFileUploadResponse, error) {
 	var out v1.ConfirmFileUploadResponse
-	pattern := "/admin/v1/files/{id}/confirm"
+	pattern := "/admin/v1/files/{id}:confirm"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceConfirmFileUpload))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -514,7 +514,7 @@ func (c *FileCenterServiceHTTPClientImpl) DeleteFileObject(ctx context.Context, 
 
 func (c *FileCenterServiceHTTPClientImpl) DownloadFileContent(ctx context.Context, in *v1.DownloadFileContentRequest, opts ...http.CallOption) (*v1.DownloadFileContentResponse, error) {
 	var out v1.DownloadFileContentResponse
-	pattern := "/admin/v1/files/{id}/download"
+	pattern := "/admin/v1/files/{id}:download"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationFileCenterServiceDownloadFileContent))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -579,7 +579,7 @@ func (c *FileCenterServiceHTTPClientImpl) ListFileParts(ctx context.Context, in 
 
 func (c *FileCenterServiceHTTPClientImpl) PresignFileDownload(ctx context.Context, in *v1.PresignFileDownloadRequest, opts ...http.CallOption) (*v1.PresignFileDownloadResponse, error) {
 	var out v1.PresignFileDownloadResponse
-	pattern := "/admin/v1/files/{id}/download-url"
+	pattern := "/admin/v1/files/{id}:download-url"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationFileCenterServicePresignFileDownload))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -592,7 +592,7 @@ func (c *FileCenterServiceHTTPClientImpl) PresignFileDownload(ctx context.Contex
 
 func (c *FileCenterServiceHTTPClientImpl) ReplaceFileContent(ctx context.Context, in *v1.ReplaceFileContentRequest, opts ...http.CallOption) (*v1.ReplaceFileContentResponse, error) {
 	var out v1.ReplaceFileContentResponse
-	pattern := "/admin/v1/files/{id}/replace"
+	pattern := "/admin/v1/files/{id}:replace"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceReplaceFileContent))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -618,7 +618,7 @@ func (c *FileCenterServiceHTTPClientImpl) UpdateFileObject(ctx context.Context, 
 
 func (c *FileCenterServiceHTTPClientImpl) UploadFileContent(ctx context.Context, in *v1.UploadFileContentRequest, opts ...http.CallOption) (*v1.UploadFileContentResponse, error) {
 	var out v1.UploadFileContentResponse
-	pattern := "/admin/v1/files/{id}/content"
+	pattern := "/admin/v1/files/{id}:content"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationFileCenterServiceUploadFileContent))
 	opts = append(opts, http.PathTemplate(pattern))

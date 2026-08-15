@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	pb "backend-service/api/core/service/v1"
+	"backend-service/pkg/utils/convert"
 )
 
 type OperationLogRepo interface {
@@ -20,9 +21,9 @@ func NewOperationLogUsecase(repo OperationLogRepo) *OperationLogUsecase {
 	return &OperationLogUsecase{repo: repo}
 }
 func (uc *OperationLogUsecase) Record(ctx context.Context, event *pb.OperationLog) error {
-	event.RequestSummary = auditStringPtr(redactJSON(event.GetRequestSummary()))
-	event.BeforeData = auditStringPtr(redactJSON(event.GetBeforeData()))
-	event.AfterData = auditStringPtr(redactJSON(event.GetAfterData()))
+	event.RequestSummary = convert.ToPointer(redactJSON(event.GetRequestSummary()))
+	event.BeforeData = convert.ToPointer(redactJSON(event.GetBeforeData()))
+	event.AfterData = convert.ToPointer(redactJSON(event.GetAfterData()))
 	return uc.repo.Append(ctx, event)
 }
 func (uc *OperationLogUsecase) List(ctx context.Context, req *pb.ListOperationLogsRequest) ([]*pb.OperationLog, int32, error) {
@@ -69,4 +70,3 @@ func redactValue(value any) {
 		}
 	}
 }
-func auditStringPtr(value string) *string { return &value }

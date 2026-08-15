@@ -63,7 +63,7 @@ const file_platform_admin_v1_i_post_proto_rawDesc = "" +
 	"\x12岗位管理服务\x12\x12更新岗位状态\x1a\x12更新岗位状态Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02,:\x06status\x1a\"/admin/v1/posts/status-update/{id}B\xb3\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02,:\x06status\"\"/admin/v1/posts/{id}:status-updateB\xb3\x01\n" +
 	"\x15com.platform.admin.v1B\n" +
 	"IPostProtoP\x01Z(backend-service/api/platform/admin/v1;v1\xa2\x02\x03PAX\xaa\x02\x11Platform.Admin.V1\xca\x02\x11Platform\\Admin\\V1\xe2\x02\x1dPlatform\\Admin\\V1\\GPBMetadata\xea\x02\x13Platform::Admin::V1b\x06proto3"
 

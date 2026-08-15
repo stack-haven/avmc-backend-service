@@ -55,7 +55,7 @@ func RegisterTenantMenuPermissionGroupServiceHTTPServer(s *http.Server, srv Tena
 	r.POST("/admin/v1/tenant-menu-permission-groups", _TenantMenuPermissionGroupService_CreateTenantMenuPermissionGroup0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/tenant-menu-permission-groups/{id}", _TenantMenuPermissionGroupService_UpdateTenantMenuPermissionGroup0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/tenant-menu-permission-groups/{id}", _TenantMenuPermissionGroupService_DeleteTenantMenuPermissionGroup0_HTTP_Handler(srv))
-	r.PUT("/admin/v1/tenant-menu-permission-groups/status-update/{id}", _TenantMenuPermissionGroupService_UpdateTenantMenuPermissionGroupStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/tenant-menu-permission-groups/{id}:status-update", _TenantMenuPermissionGroupService_UpdateTenantMenuPermissionGroupStatus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/tenant-menu-permission-groups/{group_id}/versions", _TenantMenuPermissionGroupService_ListTenantMenuPermissionGroupVersions0_HTTP_Handler(srv))
 	r.POST("/admin/v1/tenant-menu-permission-groups/{group_id}/versions:publish", _TenantMenuPermissionGroupService_PublishTenantMenuPermissionGroupVersion0_HTTP_Handler(srv))
 	r.POST("/admin/v1/tenant-menu-permission-groups/{group_id}/versions:rollback", _TenantMenuPermissionGroupService_RollbackTenantMenuPermissionGroupVersion0_HTTP_Handler(srv))
@@ -406,11 +406,11 @@ func (c *TenantMenuPermissionGroupServiceHTTPClientImpl) UpdateTenantMenuPermiss
 // UpdateTenantMenuPermissionGroupStatus 更新菜单权限组状态
 func (c *TenantMenuPermissionGroupServiceHTTPClientImpl) UpdateTenantMenuPermissionGroupStatus(ctx context.Context, in *v1.UpdateTenantMenuPermissionGroupStatusRequest, opts ...http.CallOption) (*v1.UpdateTenantMenuPermissionGroupStatusResponse, error) {
 	var out v1.UpdateTenantMenuPermissionGroupStatusResponse
-	pattern := "/admin/v1/tenant-menu-permission-groups/status-update/{id}"
+	pattern := "/admin/v1/tenant-menu-permission-groups/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationTenantMenuPermissionGroupServiceUpdateTenantMenuPermissionGroupStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

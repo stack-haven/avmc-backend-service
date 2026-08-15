@@ -14,6 +14,7 @@ import (
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/notifier"
+	"backend-service/pkg/utils/convert"
 )
 
 // AsyncTaskTypeNotificationSend 通用通知发送任务（站内信/短信/邮件/Webhook）。
@@ -181,7 +182,7 @@ func (uc *NotificationUsecase) enqueueNotification(ctx context.Context, tenantID
 		IdempotencyKey: idempotencyKey,
 		MaxAttempts:    3,
 		ScheduledAt:    time.Now(),
-		CreatedBy:      notificationUint32Ptr(authn.GetAuthUserID(ctx)),
+		CreatedBy:      convert.EmptyToNil(authn.GetAuthUserID(ctx)),
 	})
 }
 
@@ -360,18 +361,4 @@ func currentUserName(ctx context.Context) string {
 		return user.Name()
 	}
 	return ""
-}
-
-func notificationStringPtr(value string) *string {
-	if value == "" {
-		return nil
-	}
-	return &value
-}
-
-func notificationUint32Ptr(value uint32) *uint32 {
-	if value == 0 {
-		return nil
-	}
-	return &value
 }

@@ -10,21 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 辅助函数 - 目前未使用，但保留以便将来扩展
-func int32Ptr(i int32) *int32 {
-	return &i
-}
-
-// 辅助函数 - 目前未使用，但保留以便将来扩展
-func strPtr(s string) *string {
-	return &s
-}
-
-// 辅助函数 - 目前未使用，但保留以便将来扩展
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 // PagingOption 封装分页、排序和筛选参数
 // 这个结构体包含了处理分页查询所需的所有选项
 // 字段说明：

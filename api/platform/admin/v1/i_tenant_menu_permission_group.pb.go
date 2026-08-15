@@ -58,7 +58,7 @@ const file_platform_admin_v1_i_tenant_menu_permission_group_proto_rawDesc = "" +
 	"\x15菜单权限组服务\x12\x1b更新菜单权限组状态\x1a\x1b更新菜单权限组状态Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02?:\x01*\x1a:/admin/v1/tenant-menu-permission-groups/status-update/{id}\x12\xeb\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02?:\x01*\":/admin/v1/tenant-menu-permission-groups/{id}:status-update\x12\xeb\x01\n" +
 	"%ListTenantMenuPermissionGroupVersions\x12=.core.service.v1.ListTenantMenuPermissionGroupVersionsRequest\x1a>.core.service.v1.ListTenantMenuPermissionGroupVersionsResponse\"C\x82\xd3\xe4\x93\x02=\x12;/admin/v1/tenant-menu-permission-groups/{group_id}/versions\x12\xfc\x01\n" +
 	"'PublishTenantMenuPermissionGroupVersion\x12?.core.service.v1.PublishTenantMenuPermissionGroupVersionRequest\x1a@.core.service.v1.PublishTenantMenuPermissionGroupVersionResponse\"N\x82\xd3\xe4\x93\x02H:\x01*\"C/admin/v1/tenant-menu-permission-groups/{group_id}/versions:publish\x12\x80\x02\n" +
 	"(RollbackTenantMenuPermissionGroupVersion\x12@.core.service.v1.RollbackTenantMenuPermissionGroupVersionRequest\x1aA.core.service.v1.RollbackTenantMenuPermissionGroupVersionResponse\"O\x82\xd3\xe4\x93\x02I:\x01*\"D/admin/v1/tenant-menu-permission-groups/{group_id}/versions:rollbackB\xc8\x01\n" +

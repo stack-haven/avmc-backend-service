@@ -119,7 +119,7 @@ service ProjectService {
   // 更新项目状态
   rpc UpdateProjectByStatus(core.service.v1.UpdateProjectByStatusRequest) returns (core.service.v1.UpdateProjectByStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/projects/status-update/{id}"
+      post: "/admin/v1/projects/{id}:status-update"
       body: "status"
     };
     option (gnostic.openapi.v3.operation) = {

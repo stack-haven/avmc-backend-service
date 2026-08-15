@@ -50,6 +50,15 @@ service ASRService {
     };
   }
 
+  // 查询识别记录原始音频（用于预览播放）
+  rpc GetAsrRecordAudio(GetAsrRecordAudioRequest) returns (GetAsrRecordAudioResponse) {
+    option (google.api.http) = {get: "/evie/v1/asr/records/{id}/audio"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询识别记录原始音频"
+      tags: ["ASR识别"]
+    };
+  }
+
   // 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
   rpc RecognizeAndCorrect(RecognizeRequest) returns (RecognizeAndCorrectResponse) {
     option (google.api.http) = {
@@ -58,6 +67,18 @@ service ASRService {
     };
     option (gnostic.openapi.v3.operation) = {
       summary: "语音识别并纠错"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // 对已有记录重新识别（复用文件中心音频，不重复上传）
+  rpc ReRecognize(ReRecognizeRequest) returns (RecognizeAndCorrectResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/asr/records/{id}:re-recognize"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "重新识别"
       tags: ["ASR识别"]
     };
   }
@@ -148,6 +169,15 @@ message GetAsrRecordRequest {
   uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
 }
 
+message GetAsrRecordAudioRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message GetAsrRecordAudioResponse {
+  bytes audio_data = 1;   // 音频内容（base64，文件中心代理下载）
+  string content_type = 2; // 如 audio/webm
+}
+
 // RecognizeAndCorrectResponse 语音识别 + 纠错的组合结果。
 message RecognizeAndCorrectResponse {
   string original_text = 1;   // ASR 原始文本
@@ -155,4 +185,8 @@ message RecognizeAndCorrectResponse {
   repeated CorrectionChange changes = 3;
   float confidence = 4;
   string provider_name = 5;   // 使用的 ASR 引擎
+}
+
+message ReRecognizeRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
 }

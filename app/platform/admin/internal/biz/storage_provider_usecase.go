@@ -11,6 +11,7 @@ import (
 
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/objectstorage"
+	"backend-service/pkg/utils/convert"
 )
 
 const (
@@ -198,10 +199,10 @@ func normalizeStorageProvider(item *pbCore.StorageProvider, create bool) *pbCore
 	clone.Name = strings.TrimSpace(clone.Name)
 	clone.Type = normalizeStorageProviderType(clone.Type)
 	if clone.Status == nil || clone.GetStatus() == 0 {
-		clone.Status = int32Ptr(StorageProviderStatusEnabled)
+		clone.Status = convert.ToPointer(StorageProviderStatusEnabled)
 	}
 	if strings.TrimSpace(clone.GetDefaultBucket()) == "" {
-		clone.DefaultBucket = storageProviderStringPtr(defaultStorageProviderBucket)
+		clone.DefaultBucket = convert.ToPointer(defaultStorageProviderBucket)
 	}
 	if !create && strings.TrimSpace(clone.GetSecretKey()) == "" {
 		clone.SecretKey = nil
@@ -227,7 +228,3 @@ func normalizeStorageProviderType(value string) string {
 		return value
 	}
 }
-
-func storageProviderStringPtr(value string) *string { return &value }
-
-func int32Ptr(value int32) *int32 { return &value }

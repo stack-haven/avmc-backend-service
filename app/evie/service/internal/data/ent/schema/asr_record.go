@@ -36,7 +36,7 @@ func (AsrRecord) Fields() []ent.Field {
 		field.Float("confidence").Comment("识别置信度"),
 		field.Int64("duration_ms").Comment("处理耗时(ms)"),
 		field.Int("audio_duration_ms").Comment("音频时长(ms)"),
-		field.String("audio_url").MaxLen(512).Optional().Comment("音频文件URL"),
+		field.String("audio_url").MaxLen(512).Optional().Comment("文件中心文件ID（供预览重识别）"),
 		field.String("audio_format").Default("pcm").MaxLen(16).Comment("pcm/wav/mp3/opus"),
 		field.String("engine").Default("funasr").MaxLen(32).Comment("funasr/whisper/sensevoice"),
 	}

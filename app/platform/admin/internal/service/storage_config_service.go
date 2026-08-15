@@ -8,10 +8,11 @@ import (
 	"backend-service/app/platform/admin/internal/biz"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/utils/convert"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"go.einride.tech/aip/filtering"
 	"google.golang.org/protobuf/proto"
-	"github.com/go-kratos/kratos/v2/errors"
 )
 
 type StorageConfigService struct {
@@ -99,7 +100,7 @@ func (s *StorageConfigService) ListStorageConfigs(ctx context.Context, req *pbCo
 		return nil, err
 	}
 	if len(resp.Items) >= params.PageSize {
-		resp.NextPageToken = stringPtr(params.PageToken.Next(req).String())
+		resp.NextPageToken = convert.ToPointer(params.PageToken.Next(req).String())
 	}
 	return resp, nil
 }
@@ -121,6 +122,3 @@ func (s *StorageConfigService) TestStorageConfig(ctx context.Context, req *pbCor
 	}
 	return nil, errors.BadRequest("TEST_STORAGE_CONFIG_INVALID", "请提供存储配置 ID")
 }
-
-func int32Ptr(v int32) *int32 { return &v }
-func stringPtr(v string) *string { return &v }

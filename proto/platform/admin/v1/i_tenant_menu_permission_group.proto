@@ -119,7 +119,7 @@ service TenantMenuPermissionGroupService {
   // 更新菜单权限组状态
   rpc UpdateTenantMenuPermissionGroupStatus(core.service.v1.UpdateTenantMenuPermissionGroupStatusRequest) returns (core.service.v1.UpdateTenantMenuPermissionGroupStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/tenant-menu-permission-groups/status-update/{id}"
+      post: "/admin/v1/tenant-menu-permission-groups/{id}:status-update"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {

@@ -3,13 +3,17 @@ package biz
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/go-kratos/kratos/v2/log"
 
+	corepb "backend-service/api/core/service/v1"
 	pb "backend-service/api/evie/service/v1"
 	"backend-service/pkg/asr"
 	"backend-service/pkg/asr/funasr"
 	"backend-service/pkg/auth/authn"
+	filecentergrpc "backend-service/pkg/filecenter/grpc"
+	"backend-service/pkg/utils/convert"
 )
 
 // ASRRecordRepo ASR 识别记录仓库接口。
@@ -27,7 +31,7 @@ type ASRRecord struct {
 	Confidence      float64
 	DurationMs      int64
 	AudioDurationMs int
-	AudioURL        string
+	AudioURL        string // 文件中心文件ID（字符串）
 	AudioFormat     string
 	Engine          string
 }
@@ -37,12 +41,13 @@ type ASRUsecase struct {
 	providerRepo ProviderRepo
 	hotwordRepo  HotwordRepo
 	recordRepo   ASRRecordRepo
+	fileCenter   *filecentergrpc.Client
 	log          *log.Helper
 }
 
 // NewASRUsecase 创建 ASR usecase。
-func NewASRUsecase(providerRepo ProviderRepo, hotwordRepo HotwordRepo, recordRepo ASRRecordRepo, logger log.Logger) *ASRUsecase {
-	return &ASRUsecase{providerRepo: providerRepo, hotwordRepo: hotwordRepo, recordRepo: recordRepo, log: log.NewHelper(logger)}
+func NewASRUsecase(providerRepo ProviderRepo, hotwordRepo HotwordRepo, recordRepo ASRRecordRepo, fileCenter *filecentergrpc.Client, logger log.Logger) *ASRUsecase {
+	return &ASRUsecase{providerRepo: providerRepo, hotwordRepo: hotwordRepo, recordRepo: recordRepo, fileCenter: fileCenter, log: log.NewHelper(logger)}
 }
 
 // Recognize 同步识别。
@@ -51,10 +56,30 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 	if err != nil {
 		return nil, err
 	}
+
+	// 并行：识别 + 上传文件中心（上传失败不影响识别结果）
+	type uploadResult struct {
+		fileID uint32
+		err    error
+	}
+	uploadCh := make(chan uploadResult, 1)
+	go func() {
+		fileID, uerr := uc.uploadAudio(ctx, req)
+		uploadCh <- uploadResult{fileID: fileID, err: uerr}
+	}()
+
 	result, err := provider.Recognize(ctx, req.GetAudioData(), opts)
 	if err != nil {
 		return nil, err
 	}
+
+	var audioURL string
+	if up := <-uploadCh; up.err != nil {
+		uc.log.Warnf("upload audio to file center: %v", up.err)
+	} else if up.fileID > 0 {
+		audioURL = strconv.FormatUint(uint64(up.fileID), 10)
+	}
+
 	if result != nil && uc.recordRepo != nil {
 		if err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
@@ -62,6 +87,7 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 			RawText:     result.Text,
 			Confidence:  result.Confidence,
 			DurationMs:  result.DurationMs,
+			AudioURL:    audioURL,
 			AudioFormat: formatEncodingString(req.GetFormat().GetEncoding()),
 			Engine:      result.ProviderName,
 		}); err != nil {
@@ -69,6 +95,25 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 		}
 	}
 	return result, nil
+}
+
+// uploadAudio 将音频上传到文件中心，返回文件 ID。
+func (uc *ASRUsecase) uploadAudio(ctx context.Context, req *pb.RecognizeRequest) (uint32, error) {
+	if uc.fileCenter == nil || len(req.GetAudioData()) == 0 {
+		return 0, nil
+	}
+	file, err := uc.fileCenter.Upload(ctx, &corepb.CreateFileUploadSessionRequest{
+		FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.webm", req.GetSessionId())),
+		ContentType:  convert.ToPointer("audio/webm"),
+		Size:         convert.ToPointer(int64(len(req.GetAudioData()))),
+		BusinessType: convert.ToPointer("asr"),
+		BusinessId:   convert.ToPointer(req.GetSessionId()),
+		Visibility:   convert.ToPointer("private"),
+	}, req.GetAudioData())
+	if err != nil {
+		return 0, err
+	}
+	return file.GetId(), nil
 }
 
 // route 根据租户配置路由到 ASR Provider，并加载热词。
@@ -150,6 +195,73 @@ func (uc *ASRUsecase) ListRecords(ctx context.Context, req *pb.ListAsrRecordsReq
 // GetRecord 查询识别记录详情。
 func (uc *ASRUsecase) GetRecord(ctx context.Context, id uint32) (*pb.AsrRecord, error) {
 	return uc.recordRepo.Get(ctx, id)
+}
+
+// ReRecognize 对已有记录重新识别：复用文件中心音频，不重复上传。
+func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResult, error) {
+	record, err := uc.recordRepo.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if record.GetAudioUrl() == "" {
+		return nil, pb.ErrorResourceNotFound("该记录无原始音频，无法重新识别")
+	}
+	if uc.fileCenter == nil {
+		return nil, pb.ErrorResourceNotFound("文件中心未配置")
+	}
+	fileID, err := strconv.ParseUint(record.GetAudioUrl(), 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("parse audio file id: %w", err)
+	}
+	audio, _, err := uc.fileCenter.DownloadContent(ctx, uint32(fileID))
+	if err != nil {
+		return nil, fmt.Errorf("download audio: %w", err)
+	}
+
+	provider, opts, err := uc.route(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result, err := provider.Recognize(ctx, audio, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	// 保存新记录（复用原音频文件，避免重复上传）
+	if result != nil && uc.recordRepo != nil {
+		if err := uc.recordRepo.Save(ctx, &ASRRecord{
+			UserID:      authn.GetAuthUserID(ctx),
+			SessionID:   fmt.Sprintf("%s-re", record.GetSessionId()),
+			RawText:     result.Text,
+			Confidence:  result.Confidence,
+			DurationMs:  result.DurationMs,
+			AudioURL:    record.GetAudioUrl(),
+			AudioFormat: record.GetAudioFormat(),
+			Engine:      result.ProviderName,
+		}); err != nil {
+			uc.log.Errorf("save re-recognize record: %v", err)
+		}
+	}
+	return result, nil
+}
+
+// GetRecordAudio 获取识别记录音频内容（通过文件中心代理下载）。
+func (uc *ASRUsecase) GetRecordAudio(ctx context.Context, id uint32) ([]byte, string, error) {
+	record, err := uc.recordRepo.Get(ctx, id)
+	if err != nil {
+		return nil, "", err
+	}
+	if record.GetAudioUrl() == "" {
+		return nil, "", pb.ErrorResourceNotFound("该记录无原始音频")
+	}
+	if uc.fileCenter == nil {
+		return nil, "", pb.ErrorResourceNotFound("文件中心未配置")
+	}
+	fileID, err := strconv.ParseUint(record.GetAudioUrl(), 10, 32)
+	if err != nil {
+		return nil, "", fmt.Errorf("parse audio file id: %w", err)
+	}
+	return uc.fileCenter.DownloadContent(ctx, uint32(fileID))
 }
 
 func formatEncodingString(enc pb.AudioEncoding) string {

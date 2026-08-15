@@ -94,3 +94,5 @@ func (r *asrRecordRepo) Get(ctx context.Context, id uint32) (*pb.AsrRecord, erro
 	}
 	return asrRecordProto(row), nil
 }
+
+

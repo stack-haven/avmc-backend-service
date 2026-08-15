@@ -11,6 +11,7 @@ import (
 
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/notifier"
+	"backend-service/pkg/utils/convert"
 )
 
 // 通知渠道类型常量（业务维度：通知模板选渠道）。
@@ -225,17 +226,17 @@ func (s *inAppSender) Send(ctx context.Context, msg notifier.Message) (notifier.
 		messages = append(messages, &pb.NotificationMessage{
 			TenantId:        msg.TenantID,
 			RecipientUserId: recipient.UserID,
-			TemplateId:      notificationUint32Ptr(msg.TemplateID),
-			TemplateCode:    notificationStringPtr(msg.TemplateCode),
+			TemplateId:      convert.EmptyToNil(msg.TemplateID),
+			TemplateCode:    convert.EmptyToNil(msg.TemplateCode),
 			Channel:         pb.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP,
 			Title:           msg.Title,
 			Content:         msg.Content,
 			Status:          pb.NotificationMessageStatus_NOTIFICATION_MESSAGE_STATUS_UNREAD,
 			Priority:        &msg.Priority,
-			BusinessType:    notificationStringPtr(msg.BusinessType),
-			BusinessId:      notificationStringPtr(msg.BusinessID),
-			SenderUserId:    notificationUint32Ptr(msg.SenderUserID),
-			SenderName:      notificationStringPtr(msg.SenderName),
+			BusinessType:    convert.EmptyToNil(msg.BusinessType),
+			BusinessId:      convert.EmptyToNil(msg.BusinessID),
+			SenderUserId:    convert.EmptyToNil(msg.SenderUserID),
+			SenderName:      convert.EmptyToNil(msg.SenderName),
 		})
 	}
 	count, err := s.repo.CreateMessages(ctx, messages)

@@ -19,6 +19,7 @@ import (
 
 	"backend-service/api/common/enum"
 	pb "backend-service/api/core/service/v1"
+	"backend-service/pkg/utils/convert"
 )
 
 const (
@@ -345,7 +346,7 @@ func (h *webhookDeliveryHandler) Handle(ctx context.Context, raw json.RawMessage
 	}
 
 	created.ResponseCode = toInt32(resp.StatusCode)
-	created.ResponseBody = toStrPtr(string(responseBody))
+	created.ResponseBody = convert.ToPointer(string(responseBody))
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		created.DeliveryStatus = pb.WebhookDeliveryStatus_WEBHOOK_DELIVERY_STATUS_SUCCESS
@@ -388,8 +389,4 @@ func VerifyWebhookSignature(secret, payload, expectedSig string) bool {
 func toInt32(n int) *int32 {
 	v := int32(n)
 	return &v
-}
-
-func toStrPtr(s string) *string {
-	return &s
 }

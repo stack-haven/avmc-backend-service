@@ -49,7 +49,7 @@ func RegisterPostServiceHTTPServer(s *http.Server, srv PostServiceHTTPServer) {
 	r.POST("/admin/v1/posts", _PostService_CreatePost0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/posts/{id}", _PostService_UpdatePost0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/posts/{id}", _PostService_DeletePost0_HTTP_Handler(srv))
-	r.PUT("/admin/v1/posts/status-update/{id}", _PostService_UpdatePostByStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/posts/{id}:status-update", _PostService_UpdatePostByStatus0_HTTP_Handler(srv))
 }
 
 func _PostService_ListPosts0_HTTP_Handler(srv PostServiceHTTPServer) func(ctx http.Context) error {
@@ -283,11 +283,11 @@ func (c *PostServiceHTTPClientImpl) UpdatePost(ctx context.Context, in *v1.Updat
 // UpdatePostByStatus 更新岗位状态
 func (c *PostServiceHTTPClientImpl) UpdatePostByStatus(ctx context.Context, in *v1.UpdatePostByStatusRequest, opts ...http.CallOption) (*v1.UpdatePostByStatusResponse, error) {
 	var out v1.UpdatePostByStatusResponse
-	pattern := "/admin/v1/posts/status-update/{id}"
+	pattern := "/admin/v1/posts/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPostServiceUpdatePostByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in.Status, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in.Status, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

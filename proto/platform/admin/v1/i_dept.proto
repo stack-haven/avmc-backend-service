@@ -144,7 +144,7 @@ service DeptService {
 
   // 获取删除部门前的影响范围
   rpc GetDeptDeleteImpact(core.service.v1.GetDeptDeleteImpactRequest) returns (core.service.v1.GetDeptDeleteImpactResponse) {
-    option (google.api.http) = {get: "/admin/v1/depts/{id}/delete-impact"};
+    option (google.api.http) = {get: "/admin/v1/depts/{id}:delete-impact"};
   }
 
   // 转移部门人员并删除部门
@@ -158,7 +158,7 @@ service DeptService {
   // 更新部门状态
   rpc UpdateDeptByStatus(core.service.v1.UpdateDeptByStatusRequest) returns (core.service.v1.UpdateDeptByStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/depts/status-update/{id}"
+      post: "/admin/v1/depts/{id}:status-update"
       body: "status"
     };
     option (gnostic.openapi.v3.operation) = {

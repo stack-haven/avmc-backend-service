@@ -171,7 +171,7 @@ service RoleService {
   // 更新角色状态
   rpc UpdateRoleByStatus(core.service.v1.UpdateRoleByStatusRequest) returns (core.service.v1.UpdateRoleByStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/roles/status-update/{id}"
+      post: "/admin/v1/roles/{id}:status-update"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {

@@ -96,6 +96,11 @@ check: fmt-check lint
 	go test -timeout 90s ./...
 	git diff --check
 
+.PHONY: http-convention-check
+# verify HTTP paths follow AIP-136 (custom methods use ':', not '/')
+http-convention-check:
+	@./scripts/check-http-path-convention.sh
+
 .PHONY: race
 # run race detection for global backend packages
 race:

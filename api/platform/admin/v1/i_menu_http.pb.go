@@ -69,7 +69,7 @@ func RegisterMenuServiceHTTPServer(s *http.Server, srv MenuServiceHTTPServer) {
 	r.GET("/admin/v1/menus/path-exists/{id}", _MenuService_ExistMenuByPath1_HTTP_Handler(srv))
 	r.POST("/admin/v1/menus/name-exists", _MenuService_ExistMenuByName0_HTTP_Handler(srv))
 	r.GET("/admin/v1/menus/name-exists/{id}", _MenuService_ExistMenuByName1_HTTP_Handler(srv))
-	r.PUT("/admin/v1/menus/status-update/{id}", _MenuService_UpdateMenuByStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/menus/{id}:status-update", _MenuService_UpdateMenuByStatus0_HTTP_Handler(srv))
 }
 
 func _MenuService_ListMenusAll0_HTTP_Handler(srv MenuServiceHTTPServer) func(ctx http.Context) error {
@@ -515,11 +515,11 @@ func (c *MenuServiceHTTPClientImpl) UpdateMenu(ctx context.Context, in *v1.Updat
 // UpdateMenuByStatus 更新菜单状态
 func (c *MenuServiceHTTPClientImpl) UpdateMenuByStatus(ctx context.Context, in *v1.UpdateMenuByStatusRequest, opts ...http.CallOption) (*v1.UpdateMenuByStatusResponse, error) {
 	var out v1.UpdateMenuByStatusResponse
-	pattern := "/admin/v1/menus/status-update/{id}"
+	pattern := "/admin/v1/menus/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMenuServiceUpdateMenuByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in.Status, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in.Status, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

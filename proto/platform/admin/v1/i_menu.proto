@@ -218,7 +218,7 @@ service MenuService {
   // 更新菜单状态
   rpc UpdateMenuByStatus(core.service.v1.UpdateMenuByStatusRequest) returns (core.service.v1.UpdateMenuByStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/menus/status-update/{id}"
+      post: "/admin/v1/menus/{id}:status-update"
       body: "status"
     };
     option (gnostic.openapi.v3.operation) = {

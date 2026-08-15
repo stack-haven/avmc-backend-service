@@ -58,7 +58,7 @@ func RegisterRoleServiceHTTPServer(s *http.Server, srv RoleServiceHTTPServer) {
 	r.DELETE("/admin/v1/roles/{id}", _RoleService_DeleteRole0_HTTP_Handler(srv))
 	r.POST("/admin/v1/roles/name-exists", _RoleService_ExistRoleByName0_HTTP_Handler(srv))
 	r.GET("/admin/v1/roles/name-exists/{id}", _RoleService_ExistRoleByName1_HTTP_Handler(srv))
-	r.PUT("/admin/v1/roles/status-update/{id}", _RoleService_UpdateRoleByStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/roles/{id}:status-update", _RoleService_UpdateRoleByStatus0_HTTP_Handler(srv))
 }
 
 func _RoleService_ListRoleSimple0_HTTP_Handler(srv RoleServiceHTTPServer) func(ctx http.Context) error {
@@ -387,11 +387,11 @@ func (c *RoleServiceHTTPClientImpl) UpdateRole(ctx context.Context, in *v1.Updat
 // UpdateRoleByStatus 更新角色状态
 func (c *RoleServiceHTTPClientImpl) UpdateRoleByStatus(ctx context.Context, in *v1.UpdateRoleByStatusRequest, opts ...http.CallOption) (*v1.UpdateRoleByStatusResponse, error) {
 	var out v1.UpdateRoleByStatusResponse
-	pattern := "/admin/v1/roles/status-update/{id}"
+	pattern := "/admin/v1/roles/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationRoleServiceUpdateRoleByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -922,52 +922,52 @@ const file_ai_service_v1_i_chat_proto_rawDesc = "" +
 	"\achat_id\x18\x01 \x01(\rB\x15\xbaG\v\x92\x02\b对话ID\xbaH\x04*\x02 \x00R\x06chatId\x123\n" +
 	"\amessage\x18\x02 \x01(\tB\x19\xbaG\x0f\x92\x02\f消息内容\xbaH\x04r\x02\x10\x01R\amessage\">\n" +
 	"\x12StreamChatResponse\x12(\n" +
-	"\tstream_id\x18\x01 \x01(\tB\v\xbaG\b\x92\x02\x05流IDR\bstreamId2\xab\f\n" +
-	"\vChatService\x12\xd1\x01\n" +
-	"\x0fListChatsSimple\x12\x1f.ai.service.v1.ListChatsRequest\x1a .ai.service.v1.ListChatsResponse\"{\xbaGZ\n" +
+	"\tstream_id\x18\x01 \x01(\tB\v\xbaG\b\x92\x02\x05流IDR\bstreamId2\x93\f\n" +
+	"\vChatService\x12\xce\x01\n" +
+	"\x0fListChatsSimple\x12\x1f.ai.service.v1.ListChatsRequest\x1a .ai.service.v1.ListChatsResponse\"x\xbaGZ\n" +
 	"\x12对话管理服务\x12\x18获取对话简单列表\x1a\x18获取对话简单列表Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x18\x12\x16/ai/v1/ai/chats/simple\x12\xc4\x01\n" +
-	"\tListChats\x12\x1f.ai.service.v1.ListChatsRequest\x1a .ai.service.v1.ListChatsResponse\"t\xbaGZ\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15\x12\x13/ai/v1/chats/simple\x12\xc1\x01\n" +
+	"\tListChats\x12\x1f.ai.service.v1.ListChatsRequest\x1a .ai.service.v1.ListChatsResponse\"q\xbaGZ\n" +
 	"\x12对话管理服务\x12\x18获取对话列表分页\x1a\x18获取对话列表分页Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x11\x12\x0f/ai/v1/ai/chats\x12\xac\x01\n" +
-	"\aGetChat\x12\x1d.ai.service.v1.GetChatRequest\x1a\x13.ai.service.v1.Chat\"m\xbaGN\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x0e\x12\f/ai/v1/chats\x12\xa9\x01\n" +
+	"\aGetChat\x12\x1d.ai.service.v1.GetChatRequest\x1a\x13.ai.service.v1.Chat\"j\xbaGN\n" +
 	"\x12对话管理服务\x12\x12获取对话数据\x1a\x12获取对话数据Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x16\x12\x14/ai/v1/ai/chats/{id}\x12\xb5\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x13\x12\x11/ai/v1/chats/{id}\x12\xb2\x01\n" +
 	"\n" +
-	"CreateChat\x12 .ai.service.v1.CreateChatRequest\x1a!.ai.service.v1.CreateChatResponse\"b\xbaGB\n" +
+	"CreateChat\x12 .ai.service.v1.CreateChatRequest\x1a!.ai.service.v1.CreateChatResponse\"_\xbaGB\n" +
 	"\x12对话管理服务\x12\f创建对话\x1a\f创建对话Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x17:\x04chat\"\x0f/ai/v1/ai/chats\x12\xba\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x14:\x04chat\"\f/ai/v1/chats\x12\xb7\x01\n" +
 	"\n" +
-	"UpdateChat\x12 .ai.service.v1.UpdateChatRequest\x1a!.ai.service.v1.UpdateChatResponse\"g\xbaGB\n" +
+	"UpdateChat\x12 .ai.service.v1.UpdateChatRequest\x1a!.ai.service.v1.UpdateChatResponse\"d\xbaGB\n" +
 	"\x12对话管理服务\x12\f更新对话\x1a\f更新对话Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1c:\x04chat\x1a\x14/ai/v1/ai/chats/{id}\x12\xb4\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x19:\x04chat\x1a\x11/ai/v1/chats/{id}\x12\xb1\x01\n" +
 	"\n" +
-	"DeleteChat\x12 .ai.service.v1.DeleteChatRequest\x1a!.ai.service.v1.DeleteChatResponse\"a\xbaGB\n" +
+	"DeleteChat\x12 .ai.service.v1.DeleteChatRequest\x1a!.ai.service.v1.DeleteChatResponse\"^\xbaGB\n" +
 	"\x12对话管理服务\x12\f删除对话\x1a\f删除对话Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x16*\x14/ai/v1/ai/chats/{id}\x12\xe9\x01\n" +
-	"\x12UpdateChatByStatus\x12(.ai.service.v1.UpdateChatByStatusRequest\x1a).ai.service.v1.UpdateChatByStatusResponse\"~\xbaGN\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x13*\x11/ai/v1/chats/{id}\x12\xe6\x01\n" +
+	"\x12UpdateChatByStatus\x12(.ai.service.v1.UpdateChatByStatusRequest\x1a).ai.service.v1.UpdateChatByStatusResponse\"{\xbaGN\n" +
 	"\x12对话管理服务\x12\x12更新对话状态\x1a\x12更新对话状态Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02':\x01*\x1a\"/ai/v1/ai/chats/status-update/{id}\x12\xb9\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/ai/v1/chats/{id}:status-update\x12\xb6\x01\n" +
 	"\n" +
-	"StreamChat\x12 .ai.service.v1.StreamChatRequest\x1a!.ai.service.v1.StreamChatResponse\"f\xbaGB\n" +
+	"StreamChat\x12 .ai.service.v1.StreamChatRequest\x1a!.ai.service.v1.StreamChatResponse\"c\xbaGB\n" +
 	"\x12对话管理服务\x12\f流式对话\x1a\f流式对话Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/ai/v1/ai/chats/streamB\x9b\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/ai/v1/chats:streamB\x9b\x01\n" +
 	"\x11com.ai.service.v1B\n" +
 	"IChatProtoP\x01Z$backend-service/api/ai/service/v1;v1\xa2\x02\x03ASX\xaa\x02\rAi.Service.V1\xca\x02\rAi\\Service\\V1\xe2\x02\x19Ai\\Service\\V1\\GPBMetadata\xea\x02\x0fAi::Service::V1b\x06proto3"
 

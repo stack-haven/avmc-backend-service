@@ -49,7 +49,7 @@ func RegisterProjectServiceHTTPServer(s *http.Server, srv ProjectServiceHTTPServ
 	r.POST("/admin/v1/projects", _ProjectService_CreateProject0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/projects/{id}", _ProjectService_UpdateProject0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/projects/{id}", _ProjectService_DeleteProject0_HTTP_Handler(srv))
-	r.PUT("/admin/v1/projects/status-update/{id}", _ProjectService_UpdateProjectByStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/projects/{id}:status-update", _ProjectService_UpdateProjectByStatus0_HTTP_Handler(srv))
 }
 
 func _ProjectService_ListProjects0_HTTP_Handler(srv ProjectServiceHTTPServer) func(ctx http.Context) error {
@@ -283,11 +283,11 @@ func (c *ProjectServiceHTTPClientImpl) UpdateProject(ctx context.Context, in *v1
 // UpdateProjectByStatus 更新项目状态
 func (c *ProjectServiceHTTPClientImpl) UpdateProjectByStatus(ctx context.Context, in *v1.UpdateProjectByStatusRequest, opts ...http.CallOption) (*v1.UpdateProjectByStatusResponse, error) {
 	var out v1.UpdateProjectByStatusResponse
-	pattern := "/admin/v1/projects/status-update/{id}"
+	pattern := "/admin/v1/projects/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationProjectServiceUpdateProjectByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in.Status, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in.Status, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

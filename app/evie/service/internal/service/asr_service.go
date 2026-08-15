@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -101,6 +102,25 @@ func (s *ASRServiceService) RecognizeAndCorrect(ctx context.Context, req *pb.Rec
 	}, nil
 }
 
+// ReRecognize 对已有记录重新识别 + 纠错。
+func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognizeRequest) (*pb.RecognizeAndCorrectResponse, error) {
+	result, err := s.auc.ReRecognize(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	corrected, err := s.engine.Correct(ctx, &pb.CorrectRequest{Text: result.Text, SessionId: fmt.Sprintf("re-%d", req.GetId())})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.RecognizeAndCorrectResponse{
+		OriginalText:  result.Text,
+		CorrectedText: corrected.GetCorrectedText(),
+		Changes:       corrected.GetChanges(),
+		Confidence:    corrected.GetConfidence(),
+		ProviderName:  result.ProviderName,
+	}, nil
+}
+
 // ListAsrRecords 查询识别记录列表。
 func (s *ASRServiceService) ListAsrRecords(ctx context.Context, req *pb.ListAsrRecordsRequest) (*pb.ListAsrRecordsResponse, error) {
 	records, total, err := s.auc.ListRecords(ctx, req)
@@ -113,6 +133,15 @@ func (s *ASRServiceService) ListAsrRecords(ctx context.Context, req *pb.ListAsrR
 // GetAsrRecord 查询识别记录详情。
 func (s *ASRServiceService) GetAsrRecord(ctx context.Context, req *pb.GetAsrRecordRequest) (*pb.AsrRecord, error) {
 	return s.auc.GetRecord(ctx, req.GetId())
+}
+
+// GetAsrRecordAudio 获取识别记录音频内容。
+func (s *ASRServiceService) GetAsrRecordAudio(ctx context.Context, req *pb.GetAsrRecordAudioRequest) (*pb.GetAsrRecordAudioResponse, error) {
+	audio, contentType, err := s.auc.GetRecordAudio(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetAsrRecordAudioResponse{AudioData: audio, ContentType: contentType}, nil
 }
 
 func toPbSegments(segments []asr.Segment) []*pb.Segment {

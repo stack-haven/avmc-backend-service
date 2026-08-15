@@ -9,6 +9,7 @@ import (
 
 	pb "backend-service/api/core/service/v1"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/utils/convert"
 )
 
 // DeviceRepo 设备注册仓储。
@@ -54,9 +55,9 @@ func (uc *DeviceUsecase) Register(ctx context.Context, req *pb.RegisterDeviceReq
 		DeviceToken: strings.TrimSpace(req.GetDeviceToken()),
 		Platform:    platform,
 		AppKey:      strings.TrimSpace(req.GetAppKey()),
-		DeviceName:  deviceStringPtr(req.GetDeviceName()),
-		AppVersion:  deviceStringPtr(req.GetAppVersion()),
-		Status:      int32Ptr(1),
+		DeviceName:  convert.EmptyToNil(req.GetDeviceName()),
+		AppVersion:  convert.EmptyToNil(req.GetAppVersion()),
+		Status:      convert.ToPointer(int32(1)),
 	}
 	return uc.repo.Upsert(ctx, device)
 }
@@ -84,11 +85,4 @@ func (uc *DeviceUsecase) ListUserDevices(ctx context.Context, userID uint32) ([]
 		return nil, errors.BadRequest("DEVICE_USER_REQUIRED", "用户ID不能为空")
 	}
 	return uc.repo.ListByUser(ctx, userID)
-}
-
-func deviceStringPtr(value string) *string {
-	if value == "" {
-		return nil
-	}
-	return &value
 }

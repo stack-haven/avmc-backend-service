@@ -29,9 +29,25 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 	whiteList[v1.OperationAuthServiceLoginByEmail] = true
 	whiteList[v1.OperationAuthServiceLoginByUsername] = true
 	whiteList[v1.OperationAuthServiceRefreshToken] = true
+	whiteList[v1.OperationAuthServiceLogout] = true
 	whiteList[v1.OperationTenantServiceListTenantSimples] = true
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
+			return false
+		}
+		return true
+	}
+}
+
+// newHTTPAuthzMatcher 返回鉴权白名单：白名单（登录/刷新等）+ 自服务接口（profile/codes 等）
+// 跳过 Casbin 鉴权；其余操作都需要菜单权限。
+func newHTTPAuthzMatcher() selector.MatchFunc {
+	authn := newHTTPWhiteListMatcher()
+	return func(ctx context.Context, operation string) bool {
+		if !authn(ctx, operation) {
+			return false
+		}
+		if isSelfServiceOperation(operation) {
 			return false
 		}
 		return true
@@ -71,7 +87,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	if c.Http.Cors == nil {
 		return nil, fmt.Errorf("http cors config is required")
 	}
-	middlewares, err := newServerMiddleware(c.Http.Middleware, newHTTPWhiteListMatcher(), logger, authenticator, authorizer, operationAudit)
+	middlewares, err := newServerMiddleware(c.Http.Middleware, newHTTPWhiteListMatcher(), newHTTPAuthzMatcher(), logger, authenticator, authorizer, operationAudit)
 	if err != nil {
 		return nil, fmt.Errorf("building http middleware: %w", err)
 	}

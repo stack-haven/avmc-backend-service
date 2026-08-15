@@ -49,14 +49,14 @@ type ChatServiceHTTPServer interface {
 
 func RegisterChatServiceHTTPServer(s *http.Server, srv ChatServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/ai/v1/ai/chats/simple", _ChatService_ListChatsSimple0_HTTP_Handler(srv))
-	r.GET("/ai/v1/ai/chats", _ChatService_ListChats0_HTTP_Handler(srv))
-	r.GET("/ai/v1/ai/chats/{id}", _ChatService_GetChat0_HTTP_Handler(srv))
-	r.POST("/ai/v1/ai/chats", _ChatService_CreateChat0_HTTP_Handler(srv))
-	r.PUT("/ai/v1/ai/chats/{id}", _ChatService_UpdateChat0_HTTP_Handler(srv))
-	r.DELETE("/ai/v1/ai/chats/{id}", _ChatService_DeleteChat0_HTTP_Handler(srv))
-	r.PUT("/ai/v1/ai/chats/status-update/{id}", _ChatService_UpdateChatByStatus0_HTTP_Handler(srv))
-	r.POST("/ai/v1/ai/chats/stream", _ChatService_StreamChat0_HTTP_Handler(srv))
+	r.GET("/ai/v1/chats/simple", _ChatService_ListChatsSimple0_HTTP_Handler(srv))
+	r.GET("/ai/v1/chats", _ChatService_ListChats0_HTTP_Handler(srv))
+	r.GET("/ai/v1/chats/{id}", _ChatService_GetChat0_HTTP_Handler(srv))
+	r.POST("/ai/v1/chats", _ChatService_CreateChat0_HTTP_Handler(srv))
+	r.PUT("/ai/v1/chats/{id}", _ChatService_UpdateChat0_HTTP_Handler(srv))
+	r.DELETE("/ai/v1/chats/{id}", _ChatService_DeleteChat0_HTTP_Handler(srv))
+	r.POST("/ai/v1/chats/{id}:status-update", _ChatService_UpdateChatByStatus0_HTTP_Handler(srv))
+	r.POST("/ai/v1/chats:stream", _ChatService_StreamChat0_HTTP_Handler(srv))
 }
 
 func _ChatService_ListChatsSimple0_HTTP_Handler(srv ChatServiceHTTPServer) func(ctx http.Context) error {
@@ -265,7 +265,7 @@ func NewChatServiceHTTPClient(client *http.Client) ChatServiceHTTPClient {
 // CreateChat 创建对话
 func (c *ChatServiceHTTPClientImpl) CreateChat(ctx context.Context, in *CreateChatRequest, opts ...http.CallOption) (*CreateChatResponse, error) {
 	var out CreateChatResponse
-	pattern := "/ai/v1/ai/chats"
+	pattern := "/ai/v1/chats"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChatServiceCreateChat))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -279,7 +279,7 @@ func (c *ChatServiceHTTPClientImpl) CreateChat(ctx context.Context, in *CreateCh
 // DeleteChat 删除对话
 func (c *ChatServiceHTTPClientImpl) DeleteChat(ctx context.Context, in *DeleteChatRequest, opts ...http.CallOption) (*DeleteChatResponse, error) {
 	var out DeleteChatResponse
-	pattern := "/ai/v1/ai/chats/{id}"
+	pattern := "/ai/v1/chats/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChatServiceDeleteChat))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -293,7 +293,7 @@ func (c *ChatServiceHTTPClientImpl) DeleteChat(ctx context.Context, in *DeleteCh
 // GetChat 获取对话数据
 func (c *ChatServiceHTTPClientImpl) GetChat(ctx context.Context, in *GetChatRequest, opts ...http.CallOption) (*Chat, error) {
 	var out Chat
-	pattern := "/ai/v1/ai/chats/{id}"
+	pattern := "/ai/v1/chats/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChatServiceGetChat))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -307,7 +307,7 @@ func (c *ChatServiceHTTPClientImpl) GetChat(ctx context.Context, in *GetChatRequ
 // ListChats 获取对话列表分页
 func (c *ChatServiceHTTPClientImpl) ListChats(ctx context.Context, in *ListChatsRequest, opts ...http.CallOption) (*ListChatsResponse, error) {
 	var out ListChatsResponse
-	pattern := "/ai/v1/ai/chats"
+	pattern := "/ai/v1/chats"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChatServiceListChats))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -321,7 +321,7 @@ func (c *ChatServiceHTTPClientImpl) ListChats(ctx context.Context, in *ListChats
 // ListChatsSimple 获取对话简单列表
 func (c *ChatServiceHTTPClientImpl) ListChatsSimple(ctx context.Context, in *ListChatsRequest, opts ...http.CallOption) (*ListChatsResponse, error) {
 	var out ListChatsResponse
-	pattern := "/ai/v1/ai/chats/simple"
+	pattern := "/ai/v1/chats/simple"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChatServiceListChatsSimple))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -335,7 +335,7 @@ func (c *ChatServiceHTTPClientImpl) ListChatsSimple(ctx context.Context, in *Lis
 // StreamChat 流式对话
 func (c *ChatServiceHTTPClientImpl) StreamChat(ctx context.Context, in *StreamChatRequest, opts ...http.CallOption) (*StreamChatResponse, error) {
 	var out StreamChatResponse
-	pattern := "/ai/v1/ai/chats/stream"
+	pattern := "/ai/v1/chats:stream"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChatServiceStreamChat))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -349,7 +349,7 @@ func (c *ChatServiceHTTPClientImpl) StreamChat(ctx context.Context, in *StreamCh
 // UpdateChat 更新对话
 func (c *ChatServiceHTTPClientImpl) UpdateChat(ctx context.Context, in *UpdateChatRequest, opts ...http.CallOption) (*UpdateChatResponse, error) {
 	var out UpdateChatResponse
-	pattern := "/ai/v1/ai/chats/{id}"
+	pattern := "/ai/v1/chats/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChatServiceUpdateChat))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -363,11 +363,11 @@ func (c *ChatServiceHTTPClientImpl) UpdateChat(ctx context.Context, in *UpdateCh
 // UpdateChatByStatus 更新对话状态
 func (c *ChatServiceHTTPClientImpl) UpdateChatByStatus(ctx context.Context, in *UpdateChatByStatusRequest, opts ...http.CallOption) (*UpdateChatByStatusResponse, error) {
 	var out UpdateChatByStatusResponse
-	pattern := "/ai/v1/ai/chats/status-update/{id}"
+	pattern := "/ai/v1/chats/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChatServiceUpdateChatByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 
 	pbCore "backend-service/api/core/service/v1"
 	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/utils/convert"
 )
 
 type stubUserRepo struct {
@@ -92,7 +93,7 @@ func TestUserUsecaseCreateRequiresAndHashesStrongPassword(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "missing password", user: &pbCore.User{Name: &name}, wantErr: true},
-		{name: "weak password", user: &pbCore.User{Name: &name, Password: stringPtr("weakpass")}, wantErr: true},
+		{name: "weak password", user: &pbCore.User{Name: &name, Password: convert.ToPointer("weakpass")}, wantErr: true},
 		{name: "strong password", user: &pbCore.User{Name: &name, Password: &strong}},
 	}
 	for _, tt := range tests {
@@ -145,8 +146,4 @@ func TestUserUsecasePasswordChangeRevokesAllUserSessions(t *testing.T) {
 	if sessions.revokedUser != 42 {
 		t.Fatalf("revoked user = %d, want 42", sessions.revokedUser)
 	}
-}
-
-func stringPtr(value string) *string {
-	return &value
 }

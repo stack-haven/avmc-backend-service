@@ -121,7 +121,7 @@ service PostService {
   // 更新岗位状态
   rpc UpdatePostByStatus(core.service.v1.UpdatePostByStatusRequest) returns (core.service.v1.UpdatePostByStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/posts/status-update/{id}"
+      post: "/admin/v1/posts/{id}:status-update"
       body: "status"
     };
     option (gnostic.openapi.v3.operation) = {

@@ -81,16 +81,24 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*
 	return uc.repo.RefreshToken(ctx, refreshToken)
 }
 
-// Logout 处理后台登出业务逻辑
-// 参数：ctx 上下文，accessToken 访问令牌
-// 返回值：错误信息
+// Logout 处理后台登出业务逻辑。
+//
+// 宽容处理（幂等）：即使 token 无效或缺失，也视为登出成功。
+// 前端在 token 失效时会先清除本地 token 再调用登出，若后端要求有效 token，
+// 会导致登出接口返回 401 → 前端 401 拦截器再次触发登出 → 死循环。
+// 因此登出必须容忍无效 token，尽力清理会话，失败也不报错。
 func (uc *AuthUsecase) Logout(ctx context.Context) error {
 	claims, ok := authn.AuthClaimsFromContext(ctx)
 	if !ok || claims.GetID() == "" {
-		return v1.ErrorAuthInvalidToken("当前会话无效")
+		uc.log.Info("登出时 token 无效，忽略清理（宽容处理）")
+		return nil
 	}
 	uc.log.Infof("尝试登出")
-	return uc.repo.Logout(ctx, claims.GetID())
+	if err := uc.repo.Logout(ctx, claims.GetID()); err != nil {
+		// 会话可能已不存在或已过期，宽容处理，不阻断登出流程。
+		uc.log.Warnf("登出清理会话失败（忽略）: %v", err)
+	}
+	return nil
 }
 
 // Register 处理注册业务逻辑

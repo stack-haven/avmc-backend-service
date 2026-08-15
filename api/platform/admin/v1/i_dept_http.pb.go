@@ -60,9 +60,9 @@ func RegisterDeptServiceHTTPServer(s *http.Server, srv DeptServiceHTTPServer) {
 	r.POST("/admin/v1/depts", _DeptService_CreateDept0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/depts/{id}", _DeptService_UpdateDept0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/depts/{id}", _DeptService_DeleteDept0_HTTP_Handler(srv))
-	r.GET("/admin/v1/depts/{id}/delete-impact", _DeptService_GetDeptDeleteImpact0_HTTP_Handler(srv))
+	r.GET("/admin/v1/depts/{id}:delete-impact", _DeptService_GetDeptDeleteImpact0_HTTP_Handler(srv))
 	r.POST("/admin/v1/depts/{id}:transfer-and-delete", _DeptService_TransferAndDeleteDept0_HTTP_Handler(srv))
-	r.PUT("/admin/v1/depts/status-update/{id}", _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/depts/{id}:status-update", _DeptService_UpdateDeptByStatus0_HTTP_Handler(srv))
 }
 
 func _DeptService_ListDepts0_HTTP_Handler(srv DeptServiceHTTPServer) func(ctx http.Context) error {
@@ -362,7 +362,7 @@ func (c *DeptServiceHTTPClientImpl) GetDept(ctx context.Context, in *v1.GetDeptR
 // GetDeptDeleteImpact 获取删除部门前的影响范围
 func (c *DeptServiceHTTPClientImpl) GetDeptDeleteImpact(ctx context.Context, in *v1.GetDeptDeleteImpactRequest, opts ...http.CallOption) (*v1.GetDeptDeleteImpactResponse, error) {
 	var out v1.GetDeptDeleteImpactResponse
-	pattern := "/admin/v1/depts/{id}/delete-impact"
+	pattern := "/admin/v1/depts/{id}:delete-impact"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationDeptServiceGetDeptDeleteImpact))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -432,11 +432,11 @@ func (c *DeptServiceHTTPClientImpl) UpdateDept(ctx context.Context, in *v1.Updat
 // UpdateDeptByStatus 更新部门状态
 func (c *DeptServiceHTTPClientImpl) UpdateDeptByStatus(ctx context.Context, in *v1.UpdateDeptByStatusRequest, opts ...http.CallOption) (*v1.UpdateDeptByStatusResponse, error) {
 	var out v1.UpdateDeptByStatusResponse
-	pattern := "/admin/v1/depts/status-update/{id}"
+	pattern := "/admin/v1/depts/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationDeptServiceUpdateDeptByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in.Status, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in.Status, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

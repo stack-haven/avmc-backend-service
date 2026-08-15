@@ -6,17 +6,18 @@ import (
 	"entgo.io/ent/dialect/sql"
 
 	"backend-service/api/common/pagination"
+	"backend-service/pkg/utils/convert"
 )
 
 // ExampleUsage 展示如何使用分页封装
 func ExampleUsage() {
 	// 1. 创建一个分页请求
 	pageReq := &pagination.PagingRequest{
-		Page:     int32Ptr(1),                             // 第1页
-		PageSize: int32Ptr(10),                            // 每页10条
-		Query:    strPtr(`{"status": 1, "type": "user"}`), // JSON格式查询条件
-		OrderBy:  []string{"created_at desc"},             // 按创建时间降序
-		NoPaging: boolPtr(false),                          // 启用分页
+		Page:     convert.ToPointer(int32(1)),                        // 第1页
+		PageSize: convert.ToPointer(int32(10)),                       // 每页10条
+		Query:    convert.ToPointer(`{"status": 1, "type": "user"}`), // JSON格式查询条件
+		OrderBy:  []string{"created_at desc"},                        // 按创建时间降序
+		NoPaging: convert.ToPointer(false),                           // 启用分页
 		// FieldMask: 可以设置要返回的字段
 	}
 
@@ -66,8 +67,8 @@ func ExampleUsage() {
 func ExampleWithCustomConditions() {
 	// 1. 创建基础分页请求
 	pageReq := &pagination.PagingRequest{
-		Page:     int32Ptr(1),
-		PageSize: int32Ptr(20),
+		Page:     convert.ToPointer(int32(1)),
+		PageSize: convert.ToPointer(int32(20)),
 	}
 
 	// 2. 转换为 PagingOption
@@ -117,9 +118,9 @@ func ExampleWithCustomConditions() {
 func ExampleWithTextSearch() {
 	// 1. 创建包含文本搜索的分页请求
 	pageReq := &pagination.PagingRequest{
-		Page:     int32Ptr(1),
-		PageSize: int32Ptr(10),
-		Query:    strPtr("测试部门"), // 简单文本搜索
+		Page:     convert.ToPointer(int32(1)),
+		PageSize: convert.ToPointer(int32(10)),
+		Query:    convert.ToPointer("测试部门"), // 简单文本搜索
 	}
 
 	// 2. 转换为 PagingOption
@@ -143,9 +144,9 @@ func ExampleWithTextSearch() {
 func ExampleWithOrConditions() {
 	// 1. 创建包含OR条件的分页请求
 	pageReq := &pagination.PagingRequest{
-		Page:     int32Ptr(1),
-		PageSize: int32Ptr(10),
-		OrQuery:  strPtr(`{"type": "admin", "type": "super_admin"}`), // OR条件
+		Page:     convert.ToPointer(int32(1)),
+		PageSize: convert.ToPointer(int32(10)),
+		OrQuery:  convert.ToPointer(`{"type": "admin", "type": "super_admin"}`), // OR条件
 	}
 
 	// 2. 转换为 PagingOption

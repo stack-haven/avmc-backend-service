@@ -48,7 +48,7 @@ func storageProviderProto(row *gen.StorageProvider, includeSecret bool) *pbCore.
 	}
 	status := row.Status
 	if status == nil {
-		status = storageProviderInt32Ptr(biz.StorageProviderStatusEnabled)
+		status = convert.ToPointer(biz.StorageProviderStatusEnabled)
 	}
 	isDefault := row.IsDefault
 	secretConfigured := row.SecretKey != "" || row.SessionToken != ""
@@ -375,8 +375,8 @@ func (r *storageProviderRepo) resolveLegacyMinIO(_ context.Context) (*biz.Resolv
 
 func storageProviderObjectConfig(item *pbCore.StorageProvider) (json.RawMessage, error) {
 	cfg := map[string]interface{}{
-		"region":          item.GetRegion(),
-		"use_ssl":         item.GetUseSsl(),
+		"region":           item.GetRegion(),
+		"use_ssl":          item.GetUseSsl(),
 		"force_path_style": item.GetForcePathStyle(),
 		"public_base_url":  item.GetPublicBaseUrl(),
 	}
@@ -418,12 +418,6 @@ func cleanLocalBasePath(value string) string {
 	}
 	return abs
 }
-
-func boolPtr(value bool) *bool { return &value }
-
-func storageStringPtr(value string) *string { return &value }
-
-func storageProviderInt32Ptr(value int32) *int32 { return &value }
 
 const defaultStorageProviderBucket = "tenant-files"
 

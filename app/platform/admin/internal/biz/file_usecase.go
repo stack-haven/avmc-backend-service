@@ -18,6 +18,7 @@ import (
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/objectstorage"
+	"backend-service/pkg/utils/convert"
 )
 
 const (
@@ -121,19 +122,19 @@ func (uc *FileUsecase) CreateUploadSession(ctx context.Context, req *pbCore.Crea
 	file := &pbCore.FileObject{
 		TenantId:     &tenantID,
 		FileName:     &fileName,
-		ContentType:  fileStringPtr(defaultContentType(req.GetContentType())),
-		Size:         fileInt64Ptr(req.GetSize()),
-		Sha256:       fileStringPtr(strings.TrimSpace(req.GetSha256())),
-		Provider:     fileStringPtr(provider.Type),
-		ProviderId:   fileUint32Ptr(provider.ID),
-		ProviderCode: fileStringPtr(provider.Code),
+		ContentType:  convert.ToPointer(defaultContentType(req.GetContentType())),
+		Size:         convert.ToPointer(req.GetSize()),
+		Sha256:       convert.ToPointer(strings.TrimSpace(req.GetSha256())),
+		Provider:     convert.ToPointer(provider.Type),
+		ProviderId:   convert.ToPointer(provider.ID),
+		ProviderCode: convert.ToPointer(provider.Code),
 		Bucket:       &bucket,
 		ObjectKey:    &objectKey,
-		BusinessType: fileStringPtr(strings.TrimSpace(req.GetBusinessType())),
-		BusinessId:   fileStringPtr(strings.TrimSpace(req.GetBusinessId())),
+		BusinessType: convert.ToPointer(strings.TrimSpace(req.GetBusinessType())),
+		BusinessId:   convert.ToPointer(strings.TrimSpace(req.GetBusinessId())),
 		Visibility:   &visibility,
-		Status:       fileInt32Ptr(FileStatusPending),
-		CreatedBy:    fileUint32Ptr(authn.GetAuthUserID(ctx)),
+		Status:       convert.ToPointer(FileStatusPending),
+		CreatedBy:    convert.ToPointer(authn.GetAuthUserID(ctx)),
 		UploadId:     &uploadID,
 		PartSize:     &partSize,
 		TotalParts:   &totalParts,
@@ -665,14 +666,14 @@ func (uc *FileUsecase) appendAccessLog(ctx context.Context, file *pbCore.FileObj
 	clientIP, userAgent := fileRequestMeta(ctx)
 	entry := &pbCore.FileAccessLog{
 		FileId:       file.GetId(),
-		FileName:     fileStringPtr(file.GetFileName()),
-		Action:       fileStringPtr(action),
-		OperatorId:   fileUint32Ptr(operatorID),
-		OperatorName: fileStringPtr(operatorName),
-		ClientIp:     fileStringPtr(clientIP),
-		UserAgent:    fileStringPtr(userAgent),
-		Result:       fileStringPtr(result),
-		Message:      fileStringPtr(message),
+		FileName:     convert.ToPointer(file.GetFileName()),
+		Action:       convert.ToPointer(action),
+		OperatorId:   convert.ToPointer(operatorID),
+		OperatorName: convert.ToPointer(operatorName),
+		ClientIp:     convert.ToPointer(clientIP),
+		UserAgent:    convert.ToPointer(userAgent),
+		Result:       convert.ToPointer(result),
+		Message:      convert.ToPointer(message),
 	}
 	if err := uc.accessLog.Append(ctx, entry); err != nil {
 		uc.log.Warnf("append file access log failed: %v", err)
@@ -769,20 +770,4 @@ func parseDateTime(value string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.ParseInLocation(time.DateTime, value, time.Local)
-}
-
-func fileStringPtr(value string) *string {
-	return &value
-}
-
-func fileInt64Ptr(value int64) *int64 {
-	return &value
-}
-
-func fileInt32Ptr(value int32) *int32 {
-	return &value
-}
-
-func fileUint32Ptr(value uint32) *uint32 {
-	return &value
 }

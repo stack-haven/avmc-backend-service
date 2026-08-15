@@ -54,7 +54,7 @@ var (
 		{Name: "confidence", Type: field.TypeFloat64, Comment: "识别置信度"},
 		{Name: "duration_ms", Type: field.TypeInt64, Comment: "处理耗时(ms)"},
 		{Name: "audio_duration_ms", Type: field.TypeInt, Comment: "音频时长(ms)"},
-		{Name: "audio_url", Type: field.TypeString, Nullable: true, Size: 512, Comment: "音频文件URL"},
+		{Name: "audio_url", Type: field.TypeString, Nullable: true, Size: 512, Comment: "文件中心文件ID（供预览重识别）"},
 		{Name: "audio_format", Type: field.TypeString, Size: 16, Comment: "pcm/wav/mp3/opus", Default: "pcm"},
 		{Name: "engine", Type: field.TypeString, Size: 32, Comment: "funasr/whisper/sensevoice", Default: "funasr"},
 	}

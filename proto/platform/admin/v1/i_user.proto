@@ -141,7 +141,7 @@ service UserService {
   // 更新用户状态
   rpc UpdateUserByStatus(core.service.v1.UpdateUserByStatusRequest) returns (core.service.v1.UpdateUserByStatusResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/users/status-update/{id}"
+      post: "/admin/v1/users/{id}:status-update"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {

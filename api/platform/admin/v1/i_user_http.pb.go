@@ -53,7 +53,7 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r.POST("/admin/v1/users", _UserService_CreateUser0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}", _UserService_UpdateUser0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/users/{id}", _UserService_DeleteUser0_HTTP_Handler(srv))
-	r.PUT("/admin/v1/users/status-update/{id}", _UserService_UpdateUserByStatus0_HTTP_Handler(srv))
+	r.POST("/admin/v1/users/{id}:status-update", _UserService_UpdateUserByStatus0_HTTP_Handler(srv))
 }
 
 func _UserService_ListUsersSimple0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -322,11 +322,11 @@ func (c *UserServiceHTTPClientImpl) UpdateUser(ctx context.Context, in *v1.Updat
 // UpdateUserByStatus 更新用户状态
 func (c *UserServiceHTTPClientImpl) UpdateUserByStatus(ctx context.Context, in *v1.UpdateUserByStatusRequest, opts ...http.CallOption) (*v1.UpdateUserByStatusResponse, error) {
 	var out v1.UpdateUserByStatusResponse
-	pattern := "/admin/v1/users/status-update/{id}"
+	pattern := "/admin/v1/users/{id}:status-update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceUpdateUserByStatus))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

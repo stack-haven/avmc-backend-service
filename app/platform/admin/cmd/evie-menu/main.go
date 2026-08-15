@@ -74,6 +74,8 @@ var evieMenus = []menuSpec{
 	{name: "EvieASRRecognizeAndCorrect", title: "识别+纠错", authCode: "/evie.service.v1.ASRService/RecognizeAndCorrect", typ: 3, sort: 15, parent: "EvieASR"},
 	{name: "EvieASRRecordQuery", title: "记录查询", authCode: "/evie.service.v1.ASRService/ListAsrRecords", typ: 3, sort: 20, parent: "EvieASR"},
 	{name: "EvieASRRecordGet", title: "记录详情", authCode: "/evie.service.v1.ASRService/GetAsrRecord", typ: 3, sort: 30, parent: "EvieASR"},
+	{name: "EvieASRRecordAudio", title: "音频预览", authCode: "/evie.service.v1.ASRService/GetAsrRecordAudio", typ: 3, sort: 40, parent: "EvieASR"},
+	{name: "EvieASRReRecognize", title: "重新识别", authCode: "/evie.service.v1.ASRService/ReRecognize", typ: 3, sort: 50, parent: "EvieASR"},
 
 	{name: "EvieProvider", title: "供应商管理", path: "/evie/provider", component: "/evie/provider/list", icon: "mdi:server-network-outline", typ: 2, sort: 40, parent: "EviePlatform"},
 

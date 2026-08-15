@@ -38,7 +38,7 @@ type AsrRecord struct {
 	DurationMs int64 `json:"duration_ms,omitempty"`
 	// 音频时长(ms)
 	AudioDurationMs int `json:"audio_duration_ms,omitempty"`
-	// 音频文件URL
+	// 文件中心文件ID（供预览重识别）
 	AudioURL string `json:"audio_url,omitempty"`
 	// pcm/wav/mp3/opus
 	AudioFormat string `json:"audio_format,omitempty"`

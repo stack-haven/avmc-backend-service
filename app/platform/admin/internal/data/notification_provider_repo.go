@@ -37,7 +37,7 @@ func notificationProviderProto(row *gen.NotificationProvider, includeSecret bool
 	}
 	status := row.Status
 	if status == nil {
-		status = providerInt32Ptr(biz.StorageProviderStatusEnabled)
+		status = convert.ToPointer(biz.StorageProviderStatusEnabled)
 	}
 	isDefault := row.IsDefault
 	secretConfigured := row.AccessKeySecret != ""
@@ -282,8 +282,6 @@ func notificationProviderObjectConfig(item *pbCore.NotificationProvider) (json.R
 	}
 	return json.Marshal(cfg)
 }
-
-func providerInt32Ptr(value int32) *int32 { return &value }
 
 func providerStatus(row *gen.NotificationProvider) int32 {
 	if row == nil || row.Status == nil {

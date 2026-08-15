@@ -129,7 +129,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	}
 	authzService := service.NewAuthzService(authorizer, logger)
 	coreOperationLogService := service.NewCoreOperationLogService(operationLogUsecase, logger)
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, authzService, coreOperationLogService, authToken, authorizer, operationLogUsecase, logger)
+	coreFileCenterService := service.NewCoreFileCenterService(fileCenterServiceService)
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, authzService, coreOperationLogService, coreFileCenterService, authToken, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

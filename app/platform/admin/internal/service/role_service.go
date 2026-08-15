@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"go.einride.tech/aip/fieldmask"
 	"go.einride.tech/aip/filtering"
@@ -70,12 +71,18 @@ func (s *RoleServiceService) ListRoles(ctx context.Context, req *pbCore.ListRole
 
 // GetRole 获取角色详情
 func (s *RoleServiceService) GetRole(ctx context.Context, req *pbCore.GetRoleRequest) (*pbCore.Role, error) {
+	if req.GetId() == 0 {
+		return nil, pb.ErrorRoleInvalidId("角色ID不能为空")
+	}
 	s.log.Infof("获取角色详情 ID: %d", req.GetId())
 	return s.ruc.Get(ctx, req.GetId())
 }
 
 // CreateRole 创建角色
 func (s *RoleServiceService) CreateRole(ctx context.Context, req *pbCore.CreateRoleRequest) (*pbCore.CreateRoleResponse, error) {
+	if req.GetRole() == nil {
+		return nil, errors.BadRequest("ROLE_INVALID", "角色信息不能为空")
+	}
 	s.log.Infof("创建角色: %v", req.GetRole().GetName())
 	_, err := s.ruc.Create(ctx, req.GetRole())
 	if err != nil {
@@ -103,6 +110,9 @@ func (s *RoleServiceService) UpdateRole(ctx context.Context, req *pbCore.UpdateR
 
 // DeleteRole 删除角色
 func (s *RoleServiceService) DeleteRole(ctx context.Context, req *pbCore.DeleteRoleRequest) (*pbCore.DeleteRoleResponse, error) {
+	if req.GetId() == 0 {
+		return nil, pb.ErrorRoleInvalidId("角色ID不能为空")
+	}
 	s.log.Infof("删除角色 ID: %d", req.GetId())
 	if err := s.ruc.Delete(ctx, req.GetId()); err != nil {
 		return nil, err
