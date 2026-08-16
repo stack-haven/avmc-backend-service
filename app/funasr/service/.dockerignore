@@ -1,0 +1,8 @@
+# 模型权重与缓存不入镜像（体积大，运行时挂载卷下载）
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+models/
+tests/

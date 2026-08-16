@@ -1,0 +1,97 @@
+# FunASR 语音识别服务 Kubernetes 部署清单
+#
+# 用法：
+#   kubectl apply -f funasr.yaml
+#
+# 说明：
+#   - 镜像需先构建并推送（见 Dockerfile，位于 app/funasr/service）
+#   - 模型缓存通过 PVC 持久化，避免每次重启重新下载
+#   - 如需 GPU，取消 resources.limits 中的 nvidia.com/gpu 注释
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: funasr-models
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: funasr-server
+  labels:
+    app: funasr-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: funasr-server
+  template:
+    metadata:
+      labels:
+        app: funasr-server
+    spec:
+      containers:
+        - name: funasr-server
+          image: funasr-server:latest # 替换为实际镜像地址
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: batch
+              containerPort: 18000
+            - name: stream
+              containerPort: 18001
+          env:
+            - name: FUNASR_BATCH_PORT
+              value: "18000"
+            - name: FUNASR_STREAM_PORT
+              value: "18001"
+            - name: FUNASR_BATCH_MODEL
+              value: iic/SenseVoiceSmall
+            - name: FUNASR_STREAM_MODEL
+              value: paraformer-zh-streaming
+          volumeMounts:
+            - name: models
+              mountPath: /root/.cache/modelscope
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: batch
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: batch
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2"
+            limits:
+              memory: "8Gi"
+              cpu: "4"
+              # nvidia.com/gpu: "1"  # GPU 环境取消注释
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: funasr-models
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: funasr-server
+spec:
+  selector:
+    app: funasr-server
+  ports:
+    - name: batch
+      port: 18000
+      targetPort: batch
+    - name: stream
+      port: 18001
+      targetPort: stream

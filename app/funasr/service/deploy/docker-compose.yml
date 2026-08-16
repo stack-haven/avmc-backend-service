@@ -1,0 +1,34 @@
+# FunASR 语音识别服务部署（独立服务，可单独开源）
+#
+# 启动：
+#   docker compose up -d --build
+#
+# 端口：
+#   18000  批量识别（SenseVoice）
+#   18001  流式识别（paraformer-zh-streaming）
+
+# 项目名：Docker Desktop 中展示的 stack 名称
+name: funasr
+
+services:
+  funasr:
+    # 容器名：Docker Desktop 中容器显示为 funasr
+    container_name: funasr
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: funasr-server:latest
+    restart: unless-stopped
+    ports:
+      - '18000:18000' # 批量识别
+      - '18001:18001' # 流式识别
+    volumes:
+      # 离线模型目录：挂载宿主机 models/ 到容器模型缓存，避免每次启动重新下载。
+      # models/ 需包含完整模型结构（见 README「离线模型」章节）。
+      - ../models:/root/.cache/modelscope/hub/models
+    environment:
+      - TZ=Asia/Shanghai
+      - FUNASR_BATCH_PORT=18000
+      - FUNASR_STREAM_PORT=18001
+      - FUNASR_BATCH_MODEL=iic/SenseVoiceSmall
+      - FUNASR_STREAM_MODEL=paraformer-zh-streaming

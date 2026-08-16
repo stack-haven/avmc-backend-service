@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 测试与构建产物
+.pytest_cache/
+.coverage
+dist/
+build/
+
+# 模型不入库（体积大，离线部署时通过 scripts/prepare_models.sh 准备）
+models/

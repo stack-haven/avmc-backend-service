@@ -28,16 +28,17 @@ fi
 TYPE_ENUM="feat fix perf refactor style docs test build ci chore revert"
 
 # ── scope 枚举（严格按 backend-service 结构映射）──
-#   platform  app/platform/admin（平台基础服务：认证/用户/角色/菜单/权限/租户等）
+#   platform  app/platform/service（平台基础服务：认证/用户/角色/菜单/权限/租户等）
 #   evie      app/evie/service
 #   version   app/version/service（冻结中）
 #   ai        app/ai/service
+#   funasr    app/funasr/service（FunASR 语音识别服务）
 #   proto     proto/、api/（API 契约与生成代码）
 #   pkg       pkg/（共享包）
 #   make      Makefile、app.mk、scripts/、.golangci.yml（构建与工具链）
 #   deps      go.mod、go.sum（依赖）
 #   ci        .github/（CI/CD）
-SCOPE_ENUM="platform evie version ai proto pkg make deps ci"
+SCOPE_ENUM="platform evie version ai funasr proto pkg make deps ci"
 
 # ── 解析 header ──
 # 形如：feat(platform): 描述  或  chore: 描述
@@ -83,7 +84,7 @@ if [[ -n "$scope" ]] && ! grep -qw "$scope" <<< "$SCOPE_ENUM"; then
   echo "✗ 无效的 scope: \"$scope\"" >&2
   echo "" >&2
   echo "  允许的 scope（严格按 backend-service 结构）:" >&2
-  echo "    platform  app/platform/admin（平台基础服务）" >&2
+  echo "    platform  app/platform/service（平台基础服务）" >&2
   echo "    evie      app/evie/service" >&2
   echo "    version   app/version/service" >&2
   echo "    ai        app/ai/service" >&2
