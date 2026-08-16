@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"backend-service/pkg/asr"
+	asraudio "backend-service/pkg/asr/audio"
 )
 
 // Config 是租户 asr_provider_config.config_json 的解析结果。
@@ -80,7 +81,8 @@ func (p *Provider) Name() string { return "funasr" }
 // Capabilities 返回 FunASR 的能力声明。
 func (p *Provider) Capabilities() asr.ProviderCapabilities {
 	return asr.ProviderCapabilities{
-		Streaming:       false, // 当前 HTTP 服务仅同步识别，流式待后续 WebSocket
+		Name:            p.Name(),
+		Streaming:       p.cfg.StreamAddr != "",
 		MaxDurationMs:   0,
 		SupportedFormat: []string{"pcm", "wav", "mp3", "opus"},
 		SampleRates:     []int{8000, 16000},
@@ -94,12 +96,20 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, opts asr.Recogni
 	if len(audio) == 0 {
 		return nil, fmt.Errorf("funasr recognize: empty audio")
 	}
+	sampleRate := opts.SampleRate
+	if sampleRate == 0 {
+		sampleRate = p.cfg.SampleRate
+	}
+	// 后端 funasr 服务依赖 ffmpeg 探测音频格式，raw PCM 需封装为 WAV 才能识别。
+	if !asraudio.IsWAV(audio) {
+		audio = asraudio.PCMToWAV(audio, sampleRate, 1, 16)
+	}
 	url := strings.TrimRight(p.cfg.Addr, "/") + "/recognize"
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(audio))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Set("Content-Type", "audio/wav")
 	resp, err := p.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("funasr recognize: %w", err)

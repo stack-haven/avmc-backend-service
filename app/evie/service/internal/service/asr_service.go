@@ -45,16 +45,28 @@ func (s *ASRServiceService) Recognize(ctx context.Context, req *pb.RecognizeRequ
 // StreamRecognize 流式识别（双向流）：接收音频分片，回传增量文本。
 func (s *ASRServiceService) StreamRecognize(stream pb.ASRService_StreamRecognizeServer) error {
 	ctx := stream.Context()
+
+	// 先接收首个分片以获取 sessionID
+	first, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+	sessionID := first.GetSessionId()
+
 	audioCh := make(chan asr.PCMChunk, 16)
 	resultCh := make(chan asr.ASRStreamResult, 16)
 
-	errCh := make(chan error, 1)
+	outcomeCh := make(chan streamOutcome, 1)
 	go func() {
-		errCh <- s.auc.StreamRecognize(ctx, audioCh, resultCh)
+		recordID, audioURL, serr := s.auc.StreamRecognize(ctx, sessionID, audioCh, resultCh)
 		close(resultCh)
+		outcomeCh <- streamOutcome{recordID: recordID, audioURL: audioURL, err: serr}
 	}()
 
-	// 接收客户端音频分片 → audioCh
+	// 发送首个分片
+	audioCh <- asr.PCMChunk{Data: first.GetData(), Timestamp: first.GetTimestampMs()}
+
+	// 接收剩余音频分片 → audioCh
 	go func() {
 		defer close(audioCh)
 		for {
@@ -80,7 +92,11 @@ func (s *ASRServiceService) StreamRecognize(stream pb.ASRService_StreamRecognize
 			return err
 		}
 	}
-	return <-errCh
+	outcome := <-outcomeCh
+	if outcome.err != nil {
+		return outcome.err
+	}
+	return nil
 }
 
 // RecognizeAndCorrect 语音识别 + 纠错：一步输出标准企业语言。

@@ -38,8 +38,8 @@ func asrRecordProto(row *gen.AsrRecord) *pb.AsrRecord {
 	}
 }
 
-// Save 保存一条 ASR 识别记录（只追加）。
-func (r *asrRecordRepo) Save(ctx context.Context, record *biz.ASRRecord) error {
+// Save 保存一条 ASR 识别记录（只追加），返回记录 ID。
+func (r *asrRecordRepo) Save(ctx context.Context, record *biz.ASRRecord) (uint32, error) {
 	create := r.Data.DB(ctx).AsrRecord.Create().
 		SetSessionID(record.SessionID).
 		SetRawText(record.RawText).
@@ -54,10 +54,11 @@ func (r *asrRecordRepo) Save(ctx context.Context, record *biz.ASRRecord) error {
 	if record.AudioURL != "" {
 		create.SetAudioURL(record.AudioURL)
 	}
-	if _, err := create.Save(ctx); err != nil {
-		return err
+	row, err := create.Save(ctx)
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	return row.ID, nil
 }
 
 // List 分页查询识别记录。

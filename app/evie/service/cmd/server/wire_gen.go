@@ -65,7 +65,8 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 		cleanup()
 		return nil, nil, err
 	}
-	manager := session.NewManager(redisClient, logger, authenticator)
+	v := data.NewSessionOptions()
+	manager := session.NewManager(redisClient, logger, authenticator, v...)
 	enforcer, err := data.NewAuthorizer(client, logger)
 	if err != nil {
 		cleanup()
@@ -82,7 +83,8 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, manager, enforcer, checker, dictionaryServiceService, hotwordServiceService, asrServiceService, providerServiceService, correctionServiceService, auditClient)
+	asrStreamService := service.NewASRStreamService(asrUsecase, manager, logger)
+	httpServer, err := server.NewHTTPServer(confServer, logger, manager, enforcer, checker, dictionaryServiceService, hotwordServiceService, asrServiceService, asrStreamService, providerServiceService, correctionServiceService, auditClient)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

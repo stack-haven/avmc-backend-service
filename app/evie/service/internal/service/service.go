@@ -7,6 +7,7 @@ var ProviderSet = wire.NewSet(
 	NewDictionaryServiceService,
 	NewHotwordServiceService,
 	NewASRServiceService,
+	NewASRStreamService,
 	NewProviderServiceService,
 	NewCorrectionServiceService,
 )

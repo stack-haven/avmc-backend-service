@@ -65,6 +65,7 @@ func (p *Provider) Name() string { return "xunfei" }
 
 func (p *Provider) Capabilities() asr.ProviderCapabilities {
 	return asr.ProviderCapabilities{
+		Name:            p.Name(),
 		Streaming:       true,
 		MaxDurationMs:   3600000, // 1小时
 		SupportedFormat: []string{"pcm"},
@@ -106,41 +107,36 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, _ asr.RecognizeO
 	}
 	defer conn.Close()
 
-	// 读取结果协程：讯飞按帧异步返回
+	// 读取结果协程：讯飞按帧异步返回（rpl 文本为累积完整句）
 	resultCh := make(chan string, 32)
 	go func() {
-		var text strings.Builder
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil {
 				close(resultCh)
 				return
 			}
-			segment := parseResultText(msg)
-			if segment != "" {
-				text.WriteString(segment)
-				resultCh <- text.String()
+			if r := parseIatResult(msg); r.Text != "" {
+				resultCh <- r.Text
 			}
 		}
 	}()
 
-	// 分帧发送音频（40ms 一帧）。讯飞 IAT 是实时流式转写，音频必须按实时节奏
-	// 逐帧发送，一次性快速灌入会被服务端判定为异常数据而挂起或拒绝。
+	// 分帧发送音频。讯飞 IAT 为实时流式转写，帧间需保持节奏，但短音频（≤60s）
+	// 可适当加快发送；vad_eos 调小以减少音频结束后的静默等待。
 	chunkSize := 1280
 	for i := 0; i < len(audio); i += chunkSize {
 		end := i + chunkSize
 		if end > len(audio) {
 			end = len(audio)
 		}
-		// status：0=首帧，1=中间帧；最后一帧音频仍为 1，真正的结束帧（status=2）
-		// 为空音频单独发送，避免提前结束会话。
 		status := 1
 		if i == 0 {
 			status = 0
 		}
 		frame := map[string]any{
 			"common":   map[string]any{"app_id": p.cfg.AppID},
-			"business": map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "vad_eos": 10000},
+			"business": map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "vad_eos": 1000},
 			"data": map[string]any{
 				"status":   status,
 				"format":   "audio/L16;rate=16000",
@@ -151,9 +147,8 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, _ asr.RecognizeO
 		if err := conn.WriteJSON(frame); err != nil {
 			return nil, fmt.Errorf("xunfei write frame: %w", err)
 		}
-		// 实时节流：每帧 40ms，与讯飞 IAT 的实时流式节奏对齐，同时响应上下文取消。
 		select {
-		case <-time.After(40 * time.Millisecond):
+		case <-time.After(10 * time.Millisecond):
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		}
@@ -162,7 +157,7 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, _ asr.RecognizeO
 	// 发送结束帧（空音频，status=2）
 	endFrame := map[string]any{
 		"common":   map[string]any{"app_id": p.cfg.AppID},
-		"business": map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "vad_eos": 10000},
+		"business": map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "vad_eos": 1000},
 		"data": map[string]any{
 			"status":   2,
 			"format":   "audio/L16;rate=16000",
@@ -198,19 +193,102 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, _ asr.RecognizeO
 	}
 }
 
-// StreamRecognize 流式识别（讯飞 IAT 本身即流式，后续接入）。
-func (p *Provider) StreamRecognize(context.Context, <-chan asr.PCMChunk, chan<- asr.ASRStreamResult, asr.RecognizeOptions) error {
-	return fmt.Errorf("xunfei StreamRecognize not implemented")
+// buildFrame 构建讯飞 IAT 的音频帧。
+func (p *Provider) buildFrame(status int, audio []byte) map[string]any {
+	return map[string]any{
+		"common":   map[string]any{"app_id": p.cfg.AppID},
+		"business": map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "vad_eos": 3000, "dwa": "wpgs"},
+		"data": map[string]any{
+			"status":   status,
+			"format":   "audio/L16;rate=16000",
+			"encoding": "raw",
+			"audio":    base64.StdEncoding.EncodeToString(audio),
+		},
+	}
+}
+
+// StreamRecognize 流式识别：实时接收音频分片转发到讯飞 IAT，增量回传文本。
+func (p *Provider) StreamRecognize(ctx context.Context, audioCh <-chan asr.PCMChunk, resultCh chan<- asr.ASRStreamResult, _ asr.RecognizeOptions) error {
+	conn, _, err := websocket.DefaultDialer.DialContext(ctx, p.buildAuthURL(), nil)
+	if err != nil {
+		return fmt.Errorf("xunfei stream dial: %w", err)
+	}
+	defer conn.Close()
+
+	// 读取结果协程：增量回传文本（rpl=替换累积完整句，apd=追加片段）
+	resultDone := make(chan struct{})
+	var finalText string
+	go func() {
+		defer close(resultDone)
+		for {
+			_, msg, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+			r := parseIatResult(msg)
+			if r.Text == "" {
+				continue
+			}
+			if r.Pgs == "apd" {
+				finalText += r.Text
+			} else {
+				finalText = r.Text
+			}
+			resultCh <- asr.ASRStreamResult{Text: finalText, IsFinal: false}
+		}
+	}()
+
+	// 发送音频分片（前端按实时节奏发送，后端直接转发）
+	first := true
+	for chunk := range audioCh {
+		status := 1
+		if first {
+			status = 0
+			first = false
+		}
+		if err := conn.WriteJSON(p.buildFrame(status, chunk.Data)); err != nil {
+			return fmt.Errorf("xunfei stream write: %w", err)
+		}
+	}
+	if first {
+		if err := conn.WriteJSON(p.buildFrame(0, nil)); err != nil {
+			return err
+		}
+	}
+	if err := conn.WriteJSON(p.buildFrame(2, nil)); err != nil {
+		return err
+	}
+
+	// 等待结果读取结束
+	select {
+	case <-resultDone:
+	case <-time.After(15 * time.Second):
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	if finalText != "" {
+		resultCh <- asr.ASRStreamResult{Text: finalText, IsFinal: true}
+	}
+	return nil
 }
 
 func (p *Provider) Close() error { return nil }
 
-// parseResultText 解析讯飞 IAT 返回的 JSON 中的文本片段。
-func parseResultText(msg []byte) string {
+// iatResult 讯飞 IAT 返回的一条结果。
+type iatResult struct {
+	Text string // 本句文本
+	Pgs  string // rpl=替换（文本为累积完整句），apd=追加片段
+	Ls   bool   // 是否最后一句
+}
+
+// parseIatResult 解析讯飞 IAT 返回的 JSON 结果。
+func parseIatResult(msg []byte) iatResult {
 	var resp struct {
 		Data struct {
 			Result struct {
-				Ws []struct {
+				Pgs string `json:"pgs"`
+				Ls  bool   `json:"ls"`
+				Ws  []struct {
 					Cw []struct {
 						W string `json:"w"`
 					} `json:"cw"`
@@ -219,7 +297,7 @@ func parseResultText(msg []byte) string {
 		} `json:"data"`
 	}
 	if err := json.Unmarshal(msg, &resp); err != nil {
-		return ""
+		return iatResult{}
 	}
 	var b strings.Builder
 	for _, ws := range resp.Data.Result.Ws {
@@ -227,5 +305,10 @@ func parseResultText(msg []byte) string {
 			b.WriteString(cw.W)
 		}
 	}
-	return b.String()
+	return iatResult{Text: b.String(), Pgs: resp.Data.Result.Pgs, Ls: resp.Data.Result.Ls}
+}
+
+// parseResultText 兼容旧调用：仅返回文本（批量识别场景）。
+func parseResultText(msg []byte) string {
+	return parseIatResult(msg).Text
 }

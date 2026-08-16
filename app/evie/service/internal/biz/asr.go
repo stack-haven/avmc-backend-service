@@ -11,6 +11,7 @@ import (
 	platformpb "backend-service/api/platform/service/v1"
 	platformclient "backend-service/app/platform/service/client"
 	"backend-service/pkg/asr"
+	asraudio "backend-service/pkg/asr/audio"
 	"backend-service/pkg/asr/funasr"
 	"backend-service/pkg/asr/xunfei"
 	"backend-service/pkg/auth/authn"
@@ -19,7 +20,7 @@ import (
 
 // ASRRecordRepo ASR 识别记录仓库接口。
 type ASRRecordRepo interface {
-	Save(ctx context.Context, record *ASRRecord) error
+	Save(ctx context.Context, record *ASRRecord) (uint32, error)
 	List(ctx context.Context, req *pb.ListAsrRecordsRequest) ([]*pb.AsrRecord, int32, error)
 	Get(ctx context.Context, id uint32) (*pb.AsrRecord, error)
 }
@@ -53,20 +54,21 @@ func NewASRUsecase(providerRepo ProviderRepo, hotwordRepo HotwordRepo, recordRep
 
 // Recognize 同步识别。
 func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (*asr.ASRResult, error) {
-	provider, opts, err := uc.route(ctx)
+	provider, opts, err := uc.route(ctx, false)
 	if err != nil {
 		return nil, err
 	}
 
 	// 并行：识别 + 上传文件中心（上传失败不影响识别结果）
 	type uploadResult struct {
-		fileID uint32
-		err    error
+		fileID      uint32
+		audioFormat string
+		err         error
 	}
 	uploadCh := make(chan uploadResult, 1)
 	go func() {
-		fileID, uerr := uc.uploadAudio(ctx, req)
-		uploadCh <- uploadResult{fileID: fileID, err: uerr}
+		fileID, audioFormat, uerr := uc.uploadAudio(ctx, req)
+		uploadCh <- uploadResult{fileID: fileID, audioFormat: audioFormat, err: uerr}
 	}()
 
 	result, err := provider.Recognize(ctx, req.GetAudioData(), opts)
@@ -75,21 +77,23 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 	}
 
 	var audioURL string
+	var audioFormat string
 	if up := <-uploadCh; up.err != nil {
 		uc.log.Warnf("upload audio to file center: %v", up.err)
 	} else if up.fileID > 0 {
 		audioURL = strconv.FormatUint(uint64(up.fileID), 10)
+		audioFormat = up.audioFormat
 	}
 
 	if result != nil && uc.recordRepo != nil {
-		if err := uc.recordRepo.Save(ctx, &ASRRecord{
+		if _, err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
 			SessionID:   req.GetSessionId(),
 			RawText:     result.Text,
 			Confidence:  result.Confidence,
 			DurationMs:  result.DurationMs,
 			AudioURL:    audioURL,
-			AudioFormat: formatEncodingString(req.GetFormat().GetEncoding()),
+			AudioFormat: audioFormat,
 			Engine:      result.ProviderName,
 		}); err != nil {
 			uc.log.Errorf("save asr record: %v", err)
@@ -98,36 +102,71 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 	return result, nil
 }
 
-// uploadAudio 将音频上传到文件中心，返回文件 ID。
-func (uc *ASRUsecase) uploadAudio(ctx context.Context, req *pb.RecognizeRequest) (uint32, error) {
+// uploadAudio 将音频上传到文件中心，返回文件 ID 与实际存储格式。
+func (uc *ASRUsecase) uploadAudio(ctx context.Context, req *pb.RecognizeRequest) (uint32, string, error) {
 	if uc.fileCenter == nil || len(req.GetAudioData()) == 0 {
-		return 0, nil
+		return 0, "", nil
 	}
+	audio, ext, contentType := normalizeAudio(req)
 	file, err := uc.fileCenter.Upload(ctx, &platformpb.CreateFileUploadSessionRequest{
-		FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.webm", req.GetSessionId())),
-		ContentType:  convert.ToPointer("audio/webm"),
-		Size:         convert.ToPointer(int64(len(req.GetAudioData()))),
+		FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.%s", req.GetSessionId(), ext)),
+		ContentType:  convert.ToPointer(contentType),
+		Size:         convert.ToPointer(int64(len(audio))),
 		BusinessType: convert.ToPointer("asr"),
 		BusinessId:   convert.ToPointer(req.GetSessionId()),
 		Visibility:   convert.ToPointer("private"),
-	}, req.GetAudioData())
+	}, audio)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
-	return file.GetId(), nil
+	return file.GetId(), ext, nil
 }
 
-// route 根据租户配置路由到 ASR Provider，并加载热词。
-func (uc *ASRUsecase) route(ctx context.Context) (asr.ASRProvider, asr.RecognizeOptions, error) {
+// normalizeAudio 根据 encoding 规范化音频为可播放格式，返回音频字节、文件后缀与 content-type。
+// raw PCM 无容器头，播放器无法识别，统一封装为 WAV。
+func normalizeAudio(req *pb.RecognizeRequest) (audio []byte, ext, contentType string) {
+	audio = req.GetAudioData()
+	switch req.GetFormat().GetEncoding() {
+	case pb.AudioEncoding_AUDIO_ENCODING_WAV:
+		return audio, "wav", "audio/wav"
+	case pb.AudioEncoding_AUDIO_ENCODING_MP3:
+		return audio, "mp3", "audio/mpeg"
+	case pb.AudioEncoding_AUDIO_ENCODING_OPUS:
+		return audio, "opus", "audio/opus"
+	default: // PCM / UNSPECIFIED
+		if asraudio.IsWAV(audio) {
+			return audio, "wav", "audio/wav"
+		}
+		sampleRate := int(req.GetFormat().GetSampleRate())
+		return asraudio.PCMToWAV(audio, sampleRate, 1, 16), "wav", "audio/wav"
+	}
+}
+
+// route 根据租户配置与识别场景路由到 ASR Provider，并加载热词。
+// stream=true 走流式（实时逐帧）；stream=false 走整段批量（音频已完整）。
+// 整段批量优先本地自建供应商（funasr，推理快、无网络往返）；流式优先 active 供应商。
+func (uc *ASRUsecase) route(ctx context.Context, stream bool) (asr.ASRProvider, asr.RecognizeOptions, error) {
 	configs, err := uc.providerRepo.ListConfig(ctx)
 	if err != nil {
 		return nil, asr.RecognizeOptions{}, err
 	}
+
 	var active *pb.TenantProviderConfig
-	for _, c := range configs {
-		if c.GetIsActive() {
-			active = c
-			break
+	if !stream {
+		// 整段批量：优先 funasr（本地 SenseVoice，批量推理快），避免云实时转写 API 的逐帧节奏限制。
+		for _, c := range configs {
+			if c.GetProviderName() == "funasr" {
+				active = c
+				break
+			}
+		}
+	}
+	if active == nil {
+		for _, c := range configs {
+			if c.GetIsActive() {
+				active = c
+				break
+			}
 		}
 	}
 	if active == nil {
@@ -185,13 +224,90 @@ func toAsrHotwords(hotwords []*pb.Hotword) []asr.Hotword {
 	return result
 }
 
-// StreamRecognize 流式识别：路由到 Provider 并回传增量结果。
-func (uc *ASRUsecase) StreamRecognize(ctx context.Context, audioCh <-chan asr.PCMChunk, resultCh chan<- asr.ASRStreamResult) error {
-	provider, _, err := uc.route(ctx)
+// StreamRecognize 流式识别：路由到 Provider，收集完整音频，识别结束后上传文件中心并保存记录。
+// 通过 resultCh 增量回传纯 ASR 文本（不含业务字段）；返回保存后的记录 ID 与音频文件 ID。
+func (uc *ASRUsecase) StreamRecognize(ctx context.Context, sessionID string, audioCh <-chan asr.PCMChunk, resultCh chan<- asr.ASRStreamResult) (uint32, string, error) {
+	provider, opts, err := uc.route(ctx, true)
 	if err != nil {
-		return err
+		return 0, "", err
 	}
-	return provider.StreamRecognize(ctx, audioCh, resultCh, asr.RecognizeOptions{})
+
+	// 收集音频分片，同时转发给 provider（避免阻塞上层）
+	fwdCh := make(chan asr.PCMChunk, 32)
+	var audioBuf []byte
+	go func() {
+		for chunk := range audioCh {
+			audioBuf = append(audioBuf, chunk.Data...)
+			fwdCh <- chunk
+		}
+		close(fwdCh)
+	}()
+
+	// 内部结果 channel：转发增量 + 收集最终文本
+	inner := make(chan asr.ASRStreamResult, 32)
+	done := make(chan error, 1)
+	go func() {
+		err := provider.StreamRecognize(ctx, fwdCh, inner, opts)
+		close(inner)
+		done <- err
+	}()
+
+	var finalText string
+	for r := range inner {
+		if r.Text != "" {
+			finalText = r.Text
+		}
+		resultCh <- r
+	}
+	err = <-done
+
+	// 识别结束：完整音频（PCM）转 WAV 上传文件中心 + 保存识别记录
+	var recordID uint32
+	var audioURL string
+	if finalText != "" && len(audioBuf) > 0 {
+		recordID, audioURL = uc.saveStreamRecord(ctx, sessionID, finalText, audioBuf, provider.Name())
+	}
+
+	return recordID, audioURL, err
+}
+
+// saveStreamRecord 将完整 PCM 音频转 WAV 上传文件中心，并保存识别记录。
+func (uc *ASRUsecase) saveStreamRecord(ctx context.Context, sessionID, finalText string, audioPCM []byte, engine string) (uint32, string) {
+	audioURL := ""
+	if uc.fileCenter != nil && len(audioPCM) > 0 {
+		wav := asraudio.PCMToWAV(audioPCM, 16000, 1, 16)
+		file, err := uc.fileCenter.UploadAuto(ctx, &platformpb.CreateFileUploadSessionRequest{
+			FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.wav", sessionID)),
+			ContentType:  convert.ToPointer("audio/wav"),
+			Size:         convert.ToPointer(int64(len(wav))),
+			BusinessType: convert.ToPointer("asr"),
+			BusinessId:   convert.ToPointer(sessionID),
+			Visibility:   convert.ToPointer("private"),
+		}, wav)
+		if err != nil {
+			uc.log.Warnf("upload stream audio: %v", err)
+		} else {
+			audioURL = strconv.FormatUint(uint64(file.GetId()), 10)
+		}
+	}
+
+	var recordID uint32
+	if uc.recordRepo != nil {
+		id, err := uc.recordRepo.Save(ctx, &ASRRecord{
+			UserID:      authn.GetAuthUserID(ctx),
+			SessionID:   sessionID,
+			RawText:     finalText,
+			AudioURL:    audioURL,
+			AudioFormat: "wav",
+			Engine:      engine,
+		})
+		if err != nil {
+			uc.log.Errorf("save stream record: %v", err)
+		} else {
+			recordID = id
+		}
+	}
+	return recordID, audioURL
 }
 
 // ListRecords 查询识别记录列表。
@@ -224,8 +340,9 @@ func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResul
 	if err != nil {
 		return nil, fmt.Errorf("download audio: %w", err)
 	}
+	audio = asraudio.WAVToPCM(audio) // 流式记录存为 WAV，识别前提取 PCM
 
-	provider, opts, err := uc.route(ctx)
+	provider, opts, err := uc.route(ctx, false)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +353,7 @@ func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResul
 
 	// 保存新记录（复用原音频文件，避免重复上传）
 	if result != nil && uc.recordRepo != nil {
-		if err := uc.recordRepo.Save(ctx, &ASRRecord{
+		if _, err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
 			SessionID:   fmt.Sprintf("%s-re", record.GetSessionId()),
 			RawText:     result.Text,
@@ -271,15 +388,3 @@ func (uc *ASRUsecase) GetRecordAudio(ctx context.Context, id uint32) ([]byte, st
 	return uc.fileCenter.DownloadContent(ctx, uint32(fileID))
 }
 
-func formatEncodingString(enc pb.AudioEncoding) string {
-	switch enc {
-	case pb.AudioEncoding_AUDIO_ENCODING_WAV:
-		return "wav"
-	case pb.AudioEncoding_AUDIO_ENCODING_MP3:
-		return "mp3"
-	case pb.AudioEncoding_AUDIO_ENCODING_OPUS:
-		return "opus"
-	default:
-		return "pcm"
-	}
-}

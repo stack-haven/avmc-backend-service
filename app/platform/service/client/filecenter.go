@@ -70,6 +70,66 @@ func (c *FileCenterClient) Upload(ctx context.Context, req *corepb.CreateFileUpl
 	return confirmed.GetFile(), nil
 }
 
+// defaultPartSize 分块上传的默认分片大小（5MB）。
+const defaultPartSize = 5 * 1024 * 1024
+
+// UploadChunked 分块上传：创建分片会话 → 逐片上传 → 完成合并，返回文件对象。
+func (c *FileCenterClient) UploadChunked(ctx context.Context, req *corepb.CreateFileUploadSessionRequest, content []byte, partSize int) (*corepb.FileObject, error) {
+	if partSize <= 0 {
+		partSize = defaultPartSize
+	}
+	totalParts := (len(content) + partSize - 1) / partSize
+	req.PartSize = convert.ToPointer(int64(partSize))
+	req.TotalParts = convert.ToPointer(int32(totalParts))
+
+	session, err := c.fileClient.CreateFileUploadSession(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("create upload session: %w", err)
+	}
+	file := session.GetFile()
+	if file == nil || file.GetId() == 0 {
+		return nil, fmt.Errorf("create upload session: missing file id")
+	}
+
+	parts := make([]*corepb.FilePart, 0, totalParts)
+	for i := 0; i < totalParts; i++ {
+		start := i * partSize
+		end := start + partSize
+		if end > len(content) {
+			end = len(content)
+		}
+		resp, err := c.fileClient.UploadFilePart(ctx, &corepb.UploadFilePartRequest{
+			Id:         file.GetId(),
+			PartNumber: int32(i + 1),
+			Content:    content[start:end],
+		})
+		if err != nil {
+			return nil, fmt.Errorf("upload file part %d: %w", i+1, err)
+		}
+		parts = append(parts, &corepb.FilePart{
+			PartNumber: resp.GetPartNumber(),
+			Etag:       resp.GetEtag(),
+		})
+	}
+
+	completed, err := c.fileClient.CompleteFileUpload(ctx, &corepb.CompleteFileUploadRequest{
+		Id:    file.GetId(),
+		Parts: parts,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("complete file upload: %w", err)
+	}
+	return completed.GetFile(), nil
+}
+
+// UploadAuto 根据文件大小自动选择一次性上传或分块上传。
+func (c *FileCenterClient) UploadAuto(ctx context.Context, req *corepb.CreateFileUploadSessionRequest, content []byte) (*corepb.FileObject, error) {
+	if len(content) > defaultPartSize {
+		return c.UploadChunked(ctx, req, content, defaultPartSize)
+	}
+	return c.Upload(ctx, req, content)
+}
+
 // PresignDownload 获取文件的预签名下载 URL。
 func (c *FileCenterClient) PresignDownload(ctx context.Context, id uint32) (string, error) {
 	resp, err := c.fileClient.PresignFileDownload(ctx, &corepb.PresignFileDownloadRequest{Id: id})

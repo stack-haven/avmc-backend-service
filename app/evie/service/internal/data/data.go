@@ -44,7 +44,7 @@ var ProviderSet = wire.NewSet(
 	NewHealthChecker,
 	NewLoginAttemptGuard,
 	NewAuthenticator, NewAuthorizer, authn.NewSecurity,
-	session.NewManager,
+	NewSessionOptions, session.NewManager,
 	NewDictionaryRepo,
 	NewHotwordRepo,
 	NewASRRecordRepo,
@@ -326,6 +326,11 @@ func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Enforcer, e
 	log.NewHelper(log.With(logger, "module", "authz/grpc")).
 		Infof("initialized gRPC authorizer: endpoint=%s", cfg.Grpc.GetAddr())
 	return authorizer, nil
+}
+
+// NewSessionOptions 提供空的 session.Option 列表（wire 依赖注入）。
+func NewSessionOptions() []session.Option {
+	return nil
 }
 
 // NewFileCenterClient 创建文件中心客户端（用于音频上传/预览）。
