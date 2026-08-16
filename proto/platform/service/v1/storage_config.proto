@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "common/pagination/pagination.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "platform.admin.v1";
+
+service StorageConfigService {
+  rpc CreateStorageConfig(CreateStorageConfigRequest) returns (CreateStorageConfigResponse) {
+    option (google.api.http) = {
+      post: "/platform/v1/storage-configs"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建存储配置"
+      description: "为当前租户创建一条对象存储配置"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc UpdateStorageConfig(UpdateStorageConfigRequest) returns (UpdateStorageConfigResponse) {
+    option (google.api.http) = {
+      put: "/platform/v1/storage-configs/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新存储配置"
+      description: "更新当前租户的一条存储配置"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc DeleteStorageConfig(DeleteStorageConfigRequest) returns (DeleteStorageConfigResponse) {
+    option (google.api.http) = {delete: "/platform/v1/storage-configs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除存储配置"
+      description: "删除当前租户的一条存储配置"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc GetStorageConfig(GetStorageConfigRequest) returns (GetStorageConfigResponse) {
+    option (google.api.http) = {get: "/platform/v1/storage-configs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取存储配置详情"
+      description: "获取当前租户的一条存储配置详情"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc ListStorageConfigs(ListStorageConfigsRequest) returns (ListStorageConfigsResponse) {
+    option (google.api.http) = {get: "/platform/v1/storage-configs"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询存储配置"
+      description: "分页查询当前租户的存储配置列表"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc SetDefaultStorageConfig(SetDefaultStorageConfigRequest) returns (SetDefaultStorageConfigResponse) {
+    option (google.api.http) = {
+      post: "/platform/v1/storage-configs/{id}:set-default"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "设为默认存储配置"
+      description: "将指定存储配置设为当前租户的默认存储"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc TestStorageConfig(TestStorageConfigRequest) returns (TestStorageConfigResponse) {
+    option (google.api.http) = {
+      post: "/platform/v1/storage-configs:test"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "测试存储配置连接"
+      description: "测试存储配置是否可用"
+      tags: ["存储配置服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+}
+
+
+// 租户存储配置
+message StorageConfig {
+  // 配置ID
+  uint32 id = 1;
+  // 配置名称
+  optional string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 120
+    },
+    (gnostic.openapi.v3.property) = {description: "配置名称"}
+  ];
+  // 存储供应商
+  optional string provider = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 40
+      in: ["s3-compatible", "aliyun-oss", "tencent-cos", "qiniu-kodo", "local"]
+    },
+    (gnostic.openapi.v3.property) = {description: "存储供应商 s3-compatible/aliyun-oss/tencent-cos/qiniu-kodo/local"}
+  ];
+  // 用途标签
+  optional string purpose = 4 [
+    (buf.validate.field).string.max_len = 40,
+    (gnostic.openapi.v3.property) = {description: "用途 default/audio/backup"}
+  ];
+  // 默认桶名
+  optional string bucket = 5 [
+    (buf.validate.field).string.max_len = 120,
+    (gnostic.openapi.v3.property) = {description: "默认桶名"}
+  ];
+  // 是否默认
+  optional bool is_default = 6 [
+    (gnostic.openapi.v3.property) = {
+      description: "是否默认存储"
+      
+    }
+  ];
+  // 供应商专属配置JSON
+  optional string config_json = 7 [
+    (buf.validate.field).string.min_len = 1,
+    (gnostic.openapi.v3.property) = {description: "供应商专属配置JSON（加密传输）"}
+  ];
+  // 健康状态
+  optional string health_status = 8 [
+    (buf.validate.field).string = {
+      max_len: 20
+      in: ["unknown", "healthy", "unhealthy"]
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "健康状态 unknown/healthy/unhealthy"
+      
+    }
+  ];
+  // 创建时间
+  optional string created_at = 9 [
+    (gnostic.openapi.v3.property) = {description: "创建时间"}
+  ];
+  // 更新时间
+  optional string updated_at = 10 [
+    (gnostic.openapi.v3.property) = {description: "更新时间"}
+  ];
+}
+
+message CreateStorageConfigRequest {
+  optional string name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 120
+    },
+    (gnostic.openapi.v3.property) = {description: "配置名称"}
+  ];
+  optional string provider = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 40
+      in: ["s3-compatible", "aliyun-oss", "tencent-cos", "qiniu-kodo", "local"]
+    },
+    (gnostic.openapi.v3.property) = {description: "存储供应商"}
+  ];
+  optional string purpose = 3 [
+    (buf.validate.field).string.max_len = 40,
+    (gnostic.openapi.v3.property) = {description: "用途 default/audio/backup"}
+  ];
+  optional string bucket = 4 [
+    (buf.validate.field).string.max_len = 120,
+    (gnostic.openapi.v3.property) = {description: "默认桶名"}
+  ];
+  optional bool is_default = 5 [
+    (gnostic.openapi.v3.property) = {
+      description: "是否默认存储"
+      
+    }
+  ];
+  optional string config_json = 6 [
+    (buf.validate.field).string.min_len = 1,
+    (gnostic.openapi.v3.property) = {description: "供应商专属配置JSON"}
+  ];
+}
+
+message CreateStorageConfigResponse {
+  StorageConfig storage_config = 1;
+}
+
+message UpdateStorageConfigRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32 = {gte: 1},
+    (gnostic.openapi.v3.property) = {description: "配置ID"}
+  ];
+  optional string name = 2 [
+    (buf.validate.field).string = {max_len: 120},
+    (gnostic.openapi.v3.property) = {description: "配置名称"}
+  ];
+  optional string provider = 3 [
+    (buf.validate.field).string = {
+      max_len: 40
+      in: ["s3-compatible", "aliyun-oss", "tencent-cos", "qiniu-kodo", "local"]
+    },
+    (gnostic.openapi.v3.property) = {description: "存储供应商"}
+  ];
+  optional string purpose = 4 [
+    (buf.validate.field).string.max_len = 40,
+    (gnostic.openapi.v3.property) = {description: "用途"}
+  ];
+  optional string bucket = 5 [
+    (buf.validate.field).string.max_len = 120,
+    (gnostic.openapi.v3.property) = {description: "默认桶名"}
+  ];
+  optional bool is_default = 6 [
+    (gnostic.openapi.v3.property) = {description: "是否默认存储"}
+  ];
+  optional string config_json = 7 [
+    (gnostic.openapi.v3.property) = {description: "供应商专属配置JSON"}
+  ];
+}
+
+message UpdateStorageConfigResponse {
+  StorageConfig storage_config = 1;
+}
+
+message DeleteStorageConfigRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32 = {gte: 1},
+    (gnostic.openapi.v3.property) = {description: "配置ID"}
+  ];
+}
+
+message DeleteStorageConfigResponse {}
+
+message GetStorageConfigRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32 = {gte: 1},
+    (gnostic.openapi.v3.property) = {description: "配置ID"}
+  ];
+}
+
+message GetStorageConfigResponse {
+  StorageConfig storage_config = 1;
+}
+
+message ListStorageConfigsRequest {
+  // 当前页
+  optional int32 page_size = 1 [
+    (buf.validate.field).int32 = {
+      gte: 1
+      lte: 100
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "每页数量"
+      default: {number: 20}
+    }
+  ];
+  // 分页token
+  optional string page_token = 2 [
+    (gnostic.openapi.v3.property) = {description: "分页token"}
+  ];
+  // 过滤条件
+  optional string filter = 3 [
+    (gnostic.openapi.v3.property) = {description: "过滤条件"}
+  ];
+  // 排序条件
+  optional string order_by = 4 [
+    (gnostic.openapi.v3.property) = {description: "排序条件"}
+  ];
+}
+
+message ListStorageConfigsResponse {
+  repeated StorageConfig items = 1;
+  int32 total = 2;
+  optional string next_page_token = 3;
+}
+
+message SetDefaultStorageConfigRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32 = {gte: 1},
+    (gnostic.openapi.v3.property) = {description: "配置ID"}
+  ];
+}
+
+message SetDefaultStorageConfigResponse {}
+
+message TestStorageConfigRequest {
+  // 已有配置ID
+  uint32 id = 1 [
+    (gnostic.openapi.v3.property) = {description: "已有配置ID"}
+  ];
+  // 或内联测试配置
+  optional string provider = 2 [
+    (buf.validate.field).string = {
+      max_len: 40
+      in: ["s3-compatible", "aliyun-oss", "tencent-cos", "qiniu-kodo", "local"]
+    },
+    (gnostic.openapi.v3.property) = {description: "测试存储供应商"}
+  ];
+  optional string config_json = 3 [
+    (gnostic.openapi.v3.property) = {description: "测试配置JSON"}
+  ];
+}
+
+message TestStorageConfigResponse {
+  bool healthy = 1;
+  string message = 2;
+}

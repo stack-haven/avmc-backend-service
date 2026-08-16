@@ -16,7 +16,7 @@ managed:
 inputs:
   - directory: .
     paths:
-      - ./admin/interface
+      - ./service/api
 
 plugins:
   - remote: buf.build/bufbuild/es:v2.2.3

@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+
+service LoginLogService {
+  rpc ListLoginLogs(ListLoginLogsRequest) returns (ListLoginLogsResponse) {
+    option (google.api.http) = {get: "/platform/v1/login-logs"};
+  }
+
+  rpc GetLoginLog(GetLoginLogRequest) returns (LoginLog) {
+    option (google.api.http) = {get: "/platform/v1/login-logs/{id}"};
+  }
+}
+message LoginLog {
+  uint64 id = 1;
+  uint32 tenant_id = 2;
+  optional uint32 user_id = 3;
+  string identity = 4;
+  string login_type = 5;
+  string result = 6;
+  optional string failure_reason = 7;
+  optional string ip = 8;
+  optional string user_agent = 9;
+  optional string trace_id = 10;
+  optional string session_id = 11;
+  optional string created_at = 12;
+}
+
+message ListLoginLogsRequest {
+  string page_token = 1;
+  int32 page_size = 2;
+  optional uint32 user_id = 3;
+  optional string identity = 4 [(buf.validate.field).string.max_len = 100];
+  optional string login_type = 5 [(buf.validate.field).string.max_len = 32];
+  optional string result = 6 [(buf.validate.field).string.max_len = 32];
+  optional string ip = 7 [(buf.validate.field).string.max_len = 64];
+}
+
+message ListLoginLogsResponse {
+  repeated LoginLog items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetLoginLogRequest {
+  uint64 id = 1 [(buf.validate.field).uint64.gt = 0];
+}
+

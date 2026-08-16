@@ -11,8 +11,8 @@ managed:
 inputs:
   - directory: .
     paths:
-      - ./core/service/v1
-      - ./platform/admin/v1
+      - ./common
+      - ./platform/service/v1
       - ./version/service/v1
       - ./ai/service/v1
       - ./evie/service/v1

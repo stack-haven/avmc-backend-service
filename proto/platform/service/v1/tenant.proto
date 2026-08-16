@@ -1,0 +1,354 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "platform/service/v1/tenant_menu_permission_group.proto";
+import "platform/service/v1/user.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+
+
+// 租户管理服务
+service TenantService {
+  // 获取租户列表
+  rpc ListTenants(ListTenantsRequest) returns (ListTenantsResponse) {
+    option (google.api.http) = {get: "/platform/v1/tenants"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取租户列表"
+      description: "获取租户列表"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  // 获取租户简易列表（公开接口，无需登录）
+  rpc ListTenantSimples(ListTenantSimplesRequest) returns (ListTenantSimplesResponse) {
+    option (google.api.http) = {get: "/platform/v1/tenants/simples"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取租户简易列表"
+      description: "获取租户简易列表（公开接口，无需登录，用于登录页租户搜索）"
+      tags: ["租户管理服务"]
+    };
+  }
+
+  // 获取租户详情
+  rpc GetTenant(GetTenantRequest) returns (Tenant) {
+    option (google.api.http) = {get: "/platform/v1/tenants/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取租户"
+      description: "获取租户详情"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  // 创建租户（原子开通）
+  rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse) {
+    option (google.api.http) = {
+      post: "/platform/v1/tenants"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建租户"
+      description: "原子开通：创建租户+绑定套餐+创建根部门+创建管理员"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  // 更新租户基本信息
+  rpc UpdateTenant(UpdateTenantRequest) returns (UpdateTenantResponse) {
+    option (google.api.http) = {
+      put: "/platform/v1/tenants/{id}"
+      body: "tenant"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新租户"
+      description: "更新租户基本信息"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  // 删除租户
+  rpc DeleteTenant(DeleteTenantRequest) returns (DeleteTenantResponse) {
+    option (google.api.http) = {delete: "/platform/v1/tenants/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除租户"
+      description: "删除租户"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  // 更新租户生命周期状态
+  rpc UpdateTenantLifecycle(UpdateTenantLifecycleRequest) returns (UpdateTenantLifecycleResponse) {
+    option (google.api.http) = {
+      put: "/platform/v1/tenants/{id}/lifecycle"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新租户生命周期"
+      description: "按状态机更新租户生命周期"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  rpc ListTenantAdmins(ListTenantAdminsRequest) returns (ListTenantAdminsResponse) {
+    option (google.api.http) = {get: "/platform/v1/tenants/{tenant_id}/admins"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取租户管理员"
+      description: "获取目标租户中绑定系统租户管理员角色的账号"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  rpc UpdateTenantAdmin(UpdateTenantAdminRequest) returns (UpdateTenantAdminResponse) {
+    option (google.api.http) = {
+      put: "/platform/v1/tenants/{tenant_id}/admins/{admin_user_id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新租户管理员资料"
+      description: "更新目标租户管理员的姓名、邮箱和手机号"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+
+  rpc ResetTenantAdminPassword(ResetTenantAdminPasswordRequest) returns (ResetTenantAdminPasswordResponse) {
+    option (google.api.http) = {
+      post: "/platform/v1/tenants/{tenant_id}/admins/{admin_user_id}:reset-password"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "重置租户管理员密码"
+      description: "重置目标租户管理员密码并撤销其现有会话"
+      tags: ["租户管理服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+}
+
+
+enum TenantLifecycleStatus {
+  TENANT_LIFECYCLE_STATUS_UNSPECIFIED = 0;
+  TENANT_LIFECYCLE_STATUS_PENDING = 1;
+  TENANT_LIFECYCLE_STATUS_ACTIVE = 2;
+  TENANT_LIFECYCLE_STATUS_SUSPENDED = 3;
+  TENANT_LIFECYCLE_STATUS_EXPIRED = 4;
+  TENANT_LIFECYCLE_STATUS_CANCELLED = 5;
+}
+
+message TenantInitialAdmin {
+  string username = 1 [(buf.validate.field).string = {
+    min_len: 3
+    max_len: 32
+    pattern: "^[a-zA-Z0-9_-]+$"
+  }];
+  string password = 2 [(buf.validate.field).string = {
+    min_len: 6
+    max_len: 72
+  }];
+  optional string realname = 3 [(buf.validate.field).string.max_len = 50];
+  optional string email = 4 [(buf.validate.field).string = {
+    email: true
+    max_len: 100
+  }];
+}
+
+// 租户信息
+message Tenant {
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "租户ID"}];
+  optional string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 50
+    },
+    (gnostic.openapi.v3.property) = {description: "租户名称"}
+  ];
+  optional string code = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_-]+$"
+    },
+    (gnostic.openapi.v3.property) = {description: "租户编码"}
+  ];
+  optional int32 sort = 4 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 100
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "排序值"
+      default: {number: 10}
+    }
+  ];
+  optional string remark = 5 [
+    (buf.validate.field).string.max_len = 200,
+    (gnostic.openapi.v3.property) = {description: "备注信息"}
+  ];
+  optional string created_at = 6 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+  optional string updated_at = 7 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+  optional TenantLifecycleStatus lifecycle_status = 8 [
+    (buf.validate.field).enum = {defined_only: true, not_in: [0]},
+    (gnostic.openapi.v3.property) = {description: "租户生命周期状态"}
+  ];
+  optional string activated_at = 9 [(gnostic.openapi.v3.property) = {description: "激活时间"}];
+  optional string expires_at = 10 [(gnostic.openapi.v3.property) = {description: "到期时间"}];
+  optional string suspended_at = 11 [(gnostic.openapi.v3.property) = {description: "暂停时间"}];
+  optional string cancelled_at = 12 [(gnostic.openapi.v3.property) = {description: "注销时间"}];
+  optional bool is_platform = 13 [(gnostic.openapi.v3.property) = {description: "是否平台租户(只读)"}];
+  repeated uint32 group_ids = 14 [(gnostic.openapi.v3.property) = {description: "绑定的套餐ID列表"}];
+  repeated TenantMenuPermissionGroup groups = 15 [(gnostic.openapi.v3.property) = {description: "绑定的套餐"}];
+}
+
+// 创建租户请求（原子开通）
+message CreateTenantRequest {
+  Tenant tenant = 1 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "租户信息"}
+  ];
+  uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+  TenantInitialAdmin initial_admin = 3 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "初始租户管理员"}
+  ];
+}
+
+message CreateTenantResponse {
+  uint32 id = 1;
+  string name = 2;
+  uint32 admin_user_id = 3;
+  uint32 admin_role_id = 4;
+  uint32 root_dept_id = 5;
+}
+
+message UpdateTenantRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+  Tenant tenant = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "租户信息"}
+  ];
+  uint32 operator_id = 3 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message UpdateTenantResponse {
+  uint32 id = 1;
+}
+
+message DeleteTenantRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+  uint32 operator_id = 2 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "操作人ID"}
+  ];
+}
+
+message DeleteTenantResponse {
+  uint32 id = 1;
+}
+
+message GetTenantRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "租户ID"}
+  ];
+}
+
+message ListTenantsRequest {
+  string page_token = 1 [json_name = "pageToken"];
+  int32 page_size = 2 [json_name = "pageSize"];
+  optional bool no_paging = 3 [json_name = "nopaging"];
+  optional string name = 4 [(buf.validate.field).string.max_len = 50];
+  optional string code = 5 [(buf.validate.field).string.max_len = 64];
+  optional string filter = 10;
+  optional string order_by = 11;
+  int32 skip = 12;
+}
+
+message ListTenantsResponse {
+  repeated Tenant items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+// 租户简易信息（公开接口，无需登录）
+message TenantSimple {
+  uint32 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message ListTenantSimplesRequest {
+  optional string name = 1 [(buf.validate.field).string.max_len = 50];
+  int32 page_size = 2;
+}
+
+message ListTenantSimplesResponse {
+  repeated TenantSimple items = 1;
+}
+
+message UpdateTenantLifecycleRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  TenantLifecycleStatus lifecycle_status = 2 [
+    (buf.validate.field).enum = {
+      defined_only: true
+      not_in: [0]
+    }
+  ];
+  uint32 operator_id = 3 [(buf.validate.field).uint32.gt = 0];
+}
+
+message UpdateTenantLifecycleResponse {
+  Tenant tenant = 1;
+}
+
+message ListTenantAdminsRequest {
+  uint32 tenant_id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message ListTenantAdminsResponse {
+  repeated User items = 1;
+}
+
+message UpdateTenantAdminRequest {
+  uint32 tenant_id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 admin_user_id = 2 [(buf.validate.field).uint32.gt = 0];
+  optional string realname = 3 [(buf.validate.field).string.max_len = 50];
+  optional string email = 4 [(buf.validate.field).string.max_len = 100];
+  optional string phone = 5 [(buf.validate.field).string = {max_len: 20 pattern: "^$|^1[0-9]{10}$"}];
+  uint32 operator_id = 6 [(buf.validate.field).uint32.gt = 0];
+}
+
+message UpdateTenantAdminResponse {
+  User admin = 1;
+}
+
+message ResetTenantAdminPasswordRequest {
+  uint32 tenant_id = 1 [(buf.validate.field).uint32.gt = 0];
+  uint32 admin_user_id = 2 [(buf.validate.field).uint32.gt = 0];
+  string new_password = 3 [(buf.validate.field).string = {min_len: 8 max_len: 72}];
+  uint32 operator_id = 4 [(buf.validate.field).uint32.gt = 0];
+}
+
+message ResetTenantAdminPasswordResponse {}

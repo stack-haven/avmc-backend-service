@@ -213,6 +213,8 @@ func (m *Client_HTTP) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Addr
+
 	if all {
 		switch v := interface{}(m.GetTimeout()).(type) {
 		case interface{ ValidateAll() error }:
@@ -369,6 +371,8 @@ func (m *Client_GRPC) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for Addr
 
 	if all {
 		switch v := interface{}(m.GetTimeout()).(type) {

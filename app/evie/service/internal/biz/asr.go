@@ -7,12 +7,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	corepb "backend-service/api/core/service/v1"
 	pb "backend-service/api/evie/service/v1"
+	platformpb "backend-service/api/platform/service/v1"
+	platformclient "backend-service/app/platform/service/client"
 	"backend-service/pkg/asr"
 	"backend-service/pkg/asr/funasr"
 	"backend-service/pkg/auth/authn"
-	filecentergrpc "backend-service/pkg/filecenter/grpc"
 	"backend-service/pkg/utils/convert"
 )
 
@@ -41,12 +41,12 @@ type ASRUsecase struct {
 	providerRepo ProviderRepo
 	hotwordRepo  HotwordRepo
 	recordRepo   ASRRecordRepo
-	fileCenter   *filecentergrpc.Client
+	fileCenter   *platformclient.FileCenterClient
 	log          *log.Helper
 }
 
 // NewASRUsecase 创建 ASR usecase。
-func NewASRUsecase(providerRepo ProviderRepo, hotwordRepo HotwordRepo, recordRepo ASRRecordRepo, fileCenter *filecentergrpc.Client, logger log.Logger) *ASRUsecase {
+func NewASRUsecase(providerRepo ProviderRepo, hotwordRepo HotwordRepo, recordRepo ASRRecordRepo, fileCenter *platformclient.FileCenterClient, logger log.Logger) *ASRUsecase {
 	return &ASRUsecase{providerRepo: providerRepo, hotwordRepo: hotwordRepo, recordRepo: recordRepo, fileCenter: fileCenter, log: log.NewHelper(logger)}
 }
 
@@ -102,7 +102,7 @@ func (uc *ASRUsecase) uploadAudio(ctx context.Context, req *pb.RecognizeRequest)
 	if uc.fileCenter == nil || len(req.GetAudioData()) == 0 {
 		return 0, nil
 	}
-	file, err := uc.fileCenter.Upload(ctx, &corepb.CreateFileUploadSessionRequest{
+	file, err := uc.fileCenter.Upload(ctx, &platformpb.CreateFileUploadSessionRequest{
 		FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.webm", req.GetSessionId())),
 		ContentType:  convert.ToPointer("audio/webm"),
 		Size:         convert.ToPointer(int64(len(req.GetAudioData()))),

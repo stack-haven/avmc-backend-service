@@ -23,16 +23,14 @@ import (
 
 	// casbinmodel "github.com/casbin/casbin/v2/model"
 
+	"backend-service/pkg/audit"
 	"backend-service/pkg/auth"
 	authnEngine "backend-service/pkg/auth/authn"
 	authnJwt "backend-service/pkg/auth/authn/jwt"
 	"backend-service/pkg/auth/loginattempt"
-	"backend-service/pkg/audit"
-	auditgrpc "backend-service/pkg/audit/grpc"
-	filecentergrpc "backend-service/pkg/filecenter/grpc"
 
+	platformclient "backend-service/app/platform/service/client"
 	authzEngine "backend-service/pkg/auth/authz"
-	authzgrpc "backend-service/pkg/auth/authz/grpc"
 	pkgHealth "backend-service/pkg/health"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -341,7 +339,7 @@ func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Authorizer,
 	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
 		return nil, fmt.Errorf("client.grpc.addr is required for gRPC authorization delegation")
 	}
-	authorizer, err := authzgrpc.New(context.Background(), cfg.Grpc.GetAddr())
+	authorizer, err := platformclient.NewAuthorizer(context.Background(), cfg.Grpc.GetAddr())
 	if err != nil {
 		return nil, fmt.Errorf("creating gRPC authorizer: %w", err)
 	}
@@ -351,11 +349,11 @@ func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Authorizer,
 }
 
 // NewFileCenterClient 创建文件中心客户端（用于音频上传/预览）。
-func NewFileCenterClient(cfg *conf.Client, logger log.Logger) (*filecentergrpc.Client, error) {
+func NewFileCenterClient(cfg *conf.Client, logger log.Logger) (*platformclient.FileCenterClient, error) {
 	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
 		return nil, fmt.Errorf("client.grpc.addr is required for file center")
 	}
-	client, err := filecentergrpc.New(context.Background(), cfg.Grpc.GetAddr())
+	client, err := platformclient.NewFileCenterClient(context.Background(), cfg.Grpc.GetAddr())
 	if err != nil {
 		return nil, fmt.Errorf("creating file center client: %w", err)
 	}
@@ -371,7 +369,7 @@ func NewAuditClient(cfg *conf.Client, logger log.Logger) (audit.Client, error) {
 	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
 		return nil, fmt.Errorf("client.grpc.addr is required for gRPC audit delegation")
 	}
-	client, err := auditgrpc.New(context.Background(), cfg.Grpc.GetAddr())
+	client, err := platformclient.NewAuditClient(context.Background(), cfg.Grpc.GetAddr())
 	if err != nil {
 		return nil, fmt.Errorf("creating gRPC audit client: %w", err)
 	}

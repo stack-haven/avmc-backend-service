@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+
+
+service NotificationService {
+  rpc ListNotificationTemplates(ListNotificationTemplatesRequest) returns (ListNotificationTemplatesResponse) {
+    option (google.api.http) = {get: "/platform/v1/notification-templates"};
+  }
+
+  rpc GetNotificationTemplate(GetNotificationTemplateRequest) returns (NotificationTemplate) {
+    option (google.api.http) = {get: "/platform/v1/notification-templates/{id}"};
+  }
+
+  rpc CreateNotificationTemplate(CreateNotificationTemplateRequest) returns (NotificationTemplate) {
+    option (google.api.http) = {post: "/platform/v1/notification-templates" body: "template"};
+  }
+
+  rpc UpdateNotificationTemplate(UpdateNotificationTemplateRequest) returns (NotificationTemplate) {
+    option (google.api.http) = {put: "/platform/v1/notification-templates/{id}" body: "template"};
+  }
+
+  rpc DeleteNotificationTemplate(DeleteNotificationTemplateRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/platform/v1/notification-templates/{id}"};
+  }
+
+  rpc SendInAppNotification(SendInAppNotificationRequest) returns (SendInAppNotificationResponse) {
+    option (google.api.http) = {post: "/platform/v1/notifications:send-in-app" body: "*"};
+  }
+
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse) {
+    option (google.api.http) = {post: "/platform/v1/notifications:send" body: "*"};
+  }
+
+  rpc ListNotificationMessages(ListNotificationMessagesRequest) returns (ListNotificationMessagesResponse) {
+    option (google.api.http) = {get: "/platform/v1/notification-messages"};
+  }
+
+  rpc GetNotificationMessage(GetNotificationMessageRequest) returns (NotificationMessage) {
+    option (google.api.http) = {get: "/platform/v1/notification-messages/{id}"};
+  }
+
+  rpc ListMyNotifications(ListNotificationMessagesRequest) returns (ListNotificationMessagesResponse) {
+    option (google.api.http) = {get: "/platform/v1/my/notifications"};
+  }
+
+  rpc CountMyUnreadNotifications(CountMyUnreadNotificationsRequest) returns (CountMyUnreadNotificationsResponse) {
+    option (google.api.http) = {get: "/platform/v1/my/notifications:unread-count"};
+  }
+
+  rpc MarkNotificationRead(MarkNotificationReadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {post: "/platform/v1/my/notifications/{id}:read" body: "*"};
+  }
+
+  rpc MarkNotificationsRead(MarkNotificationsReadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {post: "/platform/v1/my/notifications:read" body: "*"};
+  }
+}
+
+
+enum NotificationChannel {
+  NOTIFICATION_CHANNEL_UNSPECIFIED = 0;
+  NOTIFICATION_CHANNEL_IN_APP = 1;
+  NOTIFICATION_CHANNEL_EMAIL = 2;
+  NOTIFICATION_CHANNEL_SMS = 3;
+  NOTIFICATION_CHANNEL_WEBHOOK = 4;
+}
+
+enum NotificationMessageStatus {
+  NOTIFICATION_MESSAGE_STATUS_UNSPECIFIED = 0;
+  NOTIFICATION_MESSAGE_STATUS_UNREAD = 1;
+  NOTIFICATION_MESSAGE_STATUS_READ = 2;
+  NOTIFICATION_MESSAGE_STATUS_ARCHIVED = 3;
+}
+
+message NotificationTemplate {
+  uint32 id = 1;
+  optional uint32 tenant_id = 2;
+  string code = 3 [(buf.validate.field).string = {min_len: 1, max_len: 100, pattern: "^[A-Za-z][A-Za-z0-9_.-]*$"}];
+  string name = 4 [(buf.validate.field).string = {min_len: 1, max_len: 100}];
+  NotificationChannel channel = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  string title = 6 [(buf.validate.field).string = {min_len: 1, max_len: 200}];
+  string content = 7 [(buf.validate.field).string = {min_len: 1, max_len: 4000}];
+  optional string variable_schema = 8 [(buf.validate.field).string.max_len = 4000];
+  optional string locale = 9 [(buf.validate.field).string.max_len = 20];
+  optional enum.Status status = 10 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional string remark = 11 [(buf.validate.field).string.max_len = 255];
+  optional string created_at = 12;
+  optional string updated_at = 13;
+}
+
+message NotificationMessage {
+  uint32 id = 1;
+  uint32 tenant_id = 2;
+  uint32 recipient_user_id = 3;
+  optional uint32 template_id = 4;
+  optional string template_code = 5;
+  NotificationChannel channel = 6 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  string title = 7 [(buf.validate.field).string = {min_len: 1, max_len: 200}];
+  string content = 8 [(buf.validate.field).string = {min_len: 1, max_len: 4000}];
+  NotificationMessageStatus status = 9 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional int32 priority = 10 [(buf.validate.field).int32 = {gte: -100, lte: 100}];
+  optional string business_type = 11 [(buf.validate.field).string.max_len = 100];
+  optional string business_id = 12 [(buf.validate.field).string.max_len = 100];
+  optional string read_at = 13;
+  optional uint32 sender_user_id = 14;
+  optional string sender_name = 15 [(buf.validate.field).string.max_len = 100];
+  optional string created_at = 16;
+  optional string updated_at = 17;
+}
+
+message ListNotificationTemplatesRequest {
+  string page_token = 1;
+  int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
+  optional string keyword = 3 [(buf.validate.field).string.max_len = 100];
+  optional NotificationChannel channel = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional enum.Status status = 5 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+}
+
+message ListNotificationTemplatesResponse {
+  repeated NotificationTemplate items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetNotificationTemplateRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message CreateNotificationTemplateRequest {
+  NotificationTemplate template = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateNotificationTemplateRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+  NotificationTemplate template = 2 [(buf.validate.field).required = true];
+}
+
+message DeleteNotificationTemplateRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message SendInAppNotificationRequest {
+  repeated uint32 recipient_user_ids = 1 [(buf.validate.field).repeated = {min_items: 1, max_items: 100}];
+  optional string template_code = 2 [(buf.validate.field).string.max_len = 100];
+  optional string title = 3 [(buf.validate.field).string.max_len = 200];
+  optional string content = 4 [(buf.validate.field).string.max_len = 4000];
+  optional string variables = 5 [(buf.validate.field).string.max_len = 4000];
+  optional int32 priority = 6 [(buf.validate.field).int32 = {gte: -100, lte: 100}];
+  optional string business_type = 7 [(buf.validate.field).string.max_len = 100];
+  optional string business_id = 8 [(buf.validate.field).string.max_len = 100];
+  optional string idempotency_key = 9 [(buf.validate.field).string.max_len = 100];
+}
+
+message SendInAppNotificationResponse {
+  uint32 task_id = 1;
+}
+
+// 通用通知发送（站内信 / 短信 / 邮件 / Webhook）。
+message SendNotificationRequest {
+  NotificationChannel channel = 1 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  repeated uint32 recipient_user_ids = 2 [(buf.validate.field).repeated.max_items = 100];
+  repeated string phones = 3 [(buf.validate.field).repeated.max_items = 100];
+  optional string template_code = 4 [(buf.validate.field).string.max_len = 100];
+  optional string title = 5 [(buf.validate.field).string.max_len = 200];
+  optional string content = 6 [(buf.validate.field).string.max_len = 4000];
+  optional string variables = 7 [(buf.validate.field).string.max_len = 4000];
+  optional int32 priority = 8 [(buf.validate.field).int32 = {gte: -100, lte: 100}];
+  optional string business_type = 9 [(buf.validate.field).string.max_len = 100];
+  optional string business_id = 10 [(buf.validate.field).string.max_len = 100];
+  optional string idempotency_key = 11 [(buf.validate.field).string.max_len = 100];
+}
+
+message SendNotificationResponse {
+  uint32 task_id = 1;
+}
+
+message ListNotificationMessagesRequest {
+  string page_token = 1;
+  int32 page_size = 2 [(buf.validate.field).int32 = {gte: 0, lte: 100}];
+  optional uint32 recipient_user_id = 3 [(buf.validate.field).uint32.gt = 0];
+  optional NotificationMessageStatus status = 4 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+  optional string business_type = 5 [(buf.validate.field).string.max_len = 100];
+  optional NotificationChannel channel = 6 [(buf.validate.field).enum = {defined_only: true, not_in: [0]}];
+}
+
+message ListNotificationMessagesResponse {
+  repeated NotificationMessage items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetNotificationMessageRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message CountMyUnreadNotificationsRequest {}
+
+message CountMyUnreadNotificationsResponse {
+  int32 total = 1;
+}
+
+message MarkNotificationReadRequest {
+  uint32 id = 1 [(buf.validate.field).uint32.gt = 0];
+}
+
+message MarkNotificationsReadRequest {
+  repeated uint32 ids = 1 [(buf.validate.field).repeated.max_items = 100];
+}

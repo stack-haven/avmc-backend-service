@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+
+
+service SessionService {
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = {get: "/platform/v1/sessions"};
+  }
+
+  rpc ListMySessions(ListMySessionsRequest) returns (ListMySessionsResponse) {
+    option (google.api.http) = {get: "/platform/v1/sessions/mine"};
+  }
+
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse) {
+    option (google.api.http) = {delete: "/platform/v1/sessions/{id}"};
+  }
+}
+
+
+message Session {
+  string id = 1;
+  uint32 tenant_id = 2;
+  uint32 user_id = 3;
+  string username = 4;
+  optional string ip = 5;
+  optional string user_agent = 6;
+  bool current = 7;
+  optional string created_at = 8;
+  optional string last_active_at = 9;
+  optional string expires_at = 10;
+}
+
+message ListSessionsRequest {
+  string page_token = 1;
+  int32 page_size = 2;
+  optional uint32 user_id = 3;
+  optional string username = 4 [(buf.validate.field).string.max_len = 100];
+  optional string ip = 5 [(buf.validate.field).string.max_len = 64];
+}
+
+message ListSessionsResponse {
+  repeated Session items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message ListMySessionsRequest {}
+
+message ListMySessionsResponse {
+  repeated Session items = 1;
+}
+
+message RevokeSessionRequest {
+  string id = 1 [(buf.validate.field).string = {min_len: 16, max_len: 64}];
+}
+
+message RevokeSessionResponse {}
+

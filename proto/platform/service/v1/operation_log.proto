@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "gnostic/openapi/v3/annotations.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+
+service OperationLogService {
+  rpc CreateOperationLog(CreateOperationLogRequest) returns (CreateOperationLogResponse) {
+    option (google.api.http) = {
+      post: "/platform/v1/operation-logs"
+      body: "entry"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建操作日志"
+      description: "记录一条操作日志（供内部服务调用）"
+      tags: ["操作日志服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc ListOperationLogs(ListOperationLogsRequest) returns (ListOperationLogsResponse) {
+    option (google.api.http) = {get: "/platform/v1/operation-logs"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询操作日志"
+      description: "分页查询操作日志列表"
+      tags: ["操作日志服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+  rpc GetOperationLog(GetOperationLogRequest) returns (OperationLog) {
+    option (google.api.http) = {get: "/platform/v1/operation-logs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取操作日志详情"
+      description: "获取指定操作日志的详细信息"
+      tags: ["操作日志服务"]
+      security: [{additional_properties: [{name: "BearerAuth" value: {}}]}]
+    };
+  }
+}
+
+
+// 操作日志
+message OperationLog {
+  uint64 id = 1;
+  uint32 tenant_id = 2;
+  optional uint32 operator_id = 3;
+  optional string operator_name = 4;
+  string module = 5;
+  string action = 6;
+  optional string resource_type = 7;
+  optional string resource_id = 8;
+  optional string operation = 9;
+  optional string method = 10;
+  optional string path = 11;
+  optional string request_summary = 12;
+  optional string before_data = 13;
+  optional string after_data = 14;
+  optional string ip = 15;
+  optional string user_agent = 16;
+  optional string trace_id = 17;
+  bool success = 18;
+  optional int64 duration_ms = 19;
+  optional string error_message = 20;
+  optional string created_at = 21;
+}
+
+message CreateOperationLogRequest {
+  OperationLog entry = 1 [(buf.validate.field).required = true];
+}
+
+message CreateOperationLogResponse {}
+
+message ListOperationLogsRequest {
+  string page_token = 1;
+  int32 page_size = 2;
+  optional string module = 3;
+  optional string action = 4;
+  optional uint32 operator_id = 5;
+  optional bool success = 6;
+  optional string resource_type = 7;
+  optional string resource_id = 8;
+  optional string trace_id = 9;
+}
+
+message ListOperationLogsResponse {
+  repeated OperationLog items = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetOperationLogRequest { uint64 id = 1 [(buf.validate.field).uint64.gt = 0]; }

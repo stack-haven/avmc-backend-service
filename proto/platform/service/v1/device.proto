@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package platform.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/platform/service/v1;v1";
+
+service DeviceService {
+  rpc RegisterDevice(RegisterDeviceRequest) returns (Device) {
+    option (google.api.http) = {
+      post: "/platform/v1/my/devices"
+      body: "*"
+    };
+  }
+  rpc UnregisterDevice(UnregisterDeviceRequest) returns (UnregisterDeviceResponse) {
+    option (google.api.http) = {
+      delete: "/platform/v1/my/devices/{device_token}"
+    };
+  }
+  rpc ListMyDevices(ListMyDevicesRequest) returns (ListMyDevicesResponse) {
+    option (google.api.http) = {get: "/platform/v1/my/devices"};
+  }
+  rpc ListUserDevices(ListUserDevicesRequest) returns (ListUserDevicesResponse) {
+    option (google.api.http) = {get: "/platform/v1/users/{user_id}/devices"};
+  }
+}
+
+
+// 设备信息
+message Device {
+  uint32 id = 1;
+  uint32 tenant_id = 2;
+  uint32 user_id = 3;
+  string device_token = 4 [(gnostic.openapi.v3.property) = {description: "设备令牌（极光 registration id / 个推 cid）"}];
+  string platform = 5 [(gnostic.openapi.v3.property) = {description: "平台 android/ios"}];
+  string app_key = 6 [(gnostic.openapi.v3.property) = {description: "应用标识（支持多 APP）"}];
+  optional string device_name = 7;
+  optional string app_version = 8;
+  optional int32 status = 9 [(gnostic.openapi.v3.property) = {description: "状态 1 启用 2 禁用"}];
+  optional string last_active_at = 10;
+  optional string created_at = 11;
+  optional string updated_at = 12;
+}
+
+message RegisterDeviceRequest {
+  string device_token = 1 [
+    (buf.validate.field).string = {min_len: 1, max_len: 200},
+    (gnostic.openapi.v3.property) = {description: "设备令牌"}
+  ];
+  string platform = 2 [
+    (buf.validate.field).string = {min_len: 1, max_len: 20},
+    (gnostic.openapi.v3.property) = {description: "平台 android/ios"}
+  ];
+  optional string app_key = 3 [(buf.validate.field).string.max_len = 80];
+  optional string device_name = 4 [(buf.validate.field).string.max_len = 120];
+  optional string app_version = 5 [(buf.validate.field).string.max_len = 40];
+}
+
+message UnregisterDeviceRequest {
+  string device_token = 1 [
+    (buf.validate.field).string = {min_len: 1, max_len: 200},
+    (gnostic.openapi.v3.property) = {description: "设备令牌"}
+  ];
+}
+
+message UnregisterDeviceResponse {}
+
+message ListMyDevicesRequest {}
+
+message ListMyDevicesResponse {
+  repeated Device items = 1;
+}
+
+message ListUserDevicesRequest {
+  uint32 user_id = 1 [(buf.validate.field).uint32.gt = 0];
+  optional string platform = 2 [(buf.validate.field).string.max_len = 20];
+}
+
+message ListUserDevicesResponse {
+  repeated Device items = 1;
+}

@@ -230,6 +230,35 @@ func (m *Server) validate(all bool) error {
 		}
 	}
 
+	if all {
+		switch v := interface{}(m.GetSse()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ServerValidationError{
+					field:  "Sse",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ServerValidationError{
+					field:  "Sse",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSse()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ServerValidationError{
+				field:  "Sse",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return ServerMultiError(errors)
 	}
@@ -1098,6 +1127,142 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = Server_RabbitMQValidationError{}
+
+// Validate checks the field values on Server_SSE with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Server_SSE) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Server_SSE with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in Server_SSEMultiError, or
+// nil if none found.
+func (m *Server_SSE) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Server_SSE) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Network
+
+	// no validation rules for Addr
+
+	// no validation rules for Path
+
+	if all {
+		switch v := interface{}(m.GetTimeout()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, Server_SSEValidationError{
+					field:  "Timeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, Server_SSEValidationError{
+					field:  "Timeout",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetTimeout()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return Server_SSEValidationError{
+				field:  "Timeout",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for EnableMetrics
+
+	if len(errors) > 0 {
+		return Server_SSEMultiError(errors)
+	}
+
+	return nil
+}
+
+// Server_SSEMultiError is an error wrapping multiple validation errors
+// returned by Server_SSE.ValidateAll() if the designated constraints aren't met.
+type Server_SSEMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m Server_SSEMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m Server_SSEMultiError) AllErrors() []error { return m }
+
+// Server_SSEValidationError is the validation error returned by
+// Server_SSE.Validate if the designated constraints aren't met.
+type Server_SSEValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e Server_SSEValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e Server_SSEValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e Server_SSEValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e Server_SSEValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e Server_SSEValidationError) ErrorName() string { return "Server_SSEValidationError" }
+
+// Error satisfies the builtin error interface
+func (e Server_SSEValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sServer_SSE.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = Server_SSEValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = Server_SSEValidationError{}
 
 // Validate checks the field values on Server_HTTP_CORS with the rules defined
 // in the proto definition for this message. If any rules are violated, the

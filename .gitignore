@@ -36,13 +36,17 @@ bin/
 .idea/
 *.swp
 __debug_*
-server
-mock
+cmd/server/server
+cmd/server/__debug_bin
+cmd/mock
 
 # 数据库备份（本地产物，不入库）
 deploy/sql/*.sql
 deploy/sql/*.sql.gz
 
 # 本地存储渠道运行时数据目录（local 渠道上传的文件）
-app/platform/admin/upload/
-app/platform/admin/uploads/
+app/platform/service/upload/
+app/platform/service/uploads/
+app/platform/service/data/files/
+./mock
+./server

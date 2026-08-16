@@ -3,7 +3,7 @@ package listing
 import (
 	"testing"
 
-	pbCore "backend-service/api/core/service/v1"
+	pb "backend-service/api/platform/service/v1"
 
 	"go.einride.tech/aip/filtering"
 )
@@ -39,7 +39,7 @@ func TestOptionsClampUnsafeValues(t *testing.T) {
 }
 
 func TestParseParamsNormalizesAndParses(t *testing.T) {
-	req := &pbCore.ListUsersRequest{
+	req := &pb.ListUsersRequest{
 		PageSize:  1000,
 		PageToken: "",
 		Filter:    ptr(`name = "mock_admin"`),
@@ -61,7 +61,7 @@ func TestParseParamsNormalizesAndParses(t *testing.T) {
 }
 
 func TestParseParamsRejectsUnknownFilterField(t *testing.T) {
-	req := &pbCore.ListUsersRequest{Filter: ptr(`email = "mock@example.com"`)}
+	req := &pb.ListUsersRequest{Filter: ptr(`email = "mock@example.com"`)}
 	if _, err := ParseParams(req, filtering.DeclareIdent("name", filtering.TypeString)); err == nil {
 		t.Fatal("ParseParams() error = nil")
 	}
@@ -70,7 +70,7 @@ func TestParseParamsRejectsUnknownFilterField(t *testing.T) {
 func TestParseParamsAcceptsNumericOffsetPageToken(t *testing.T) {
 	t.Parallel()
 
-	req := &pbCore.ListUsersRequest{
+	req := &pb.ListUsersRequest{
 		PageSize:  20,
 		PageToken: "40",
 	}
@@ -86,7 +86,7 @@ func TestParseParamsAcceptsNumericOffsetPageToken(t *testing.T) {
 func TestParseParamsRejectsNegativeNumericOffsetPageToken(t *testing.T) {
 	t.Parallel()
 
-	req := &pbCore.ListUsersRequest{PageToken: "-1"}
+	req := &pb.ListUsersRequest{PageToken: "-1"}
 	if _, err := ParseParams(req); err == nil {
 		t.Fatal("ParseParams() error = nil")
 	}
