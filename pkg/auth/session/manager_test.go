@@ -343,3 +343,77 @@ func (s *memoryTokenStore) SetMembers(_ context.Context, key string) ([]string, 
 func (s *memoryTokenStore) Expire(_ context.Context, _ string, _ time.Duration) error {
 	return nil
 }
+
+// faultingTokenStore 模拟 Redis 连接故障：Get 返回非 redis.Nil 的连接错误。
+type faultingTokenStore struct{}
+
+func (faultingTokenStore) Set(context.Context, string, string, time.Duration) error {
+	return errors.New("redis connection refused")
+}
+func (faultingTokenStore) Get(context.Context, string) (string, error) {
+	return "", errors.New("redis connection refused")
+}
+func (faultingTokenStore) Del(context.Context, string) error {
+	return errors.New("redis connection refused")
+}
+func (faultingTokenStore) Exists(context.Context, string) (bool, error) {
+	return false, errors.New("redis connection refused")
+}
+func (faultingTokenStore) SetAdd(context.Context, string, ...string) error {
+	return errors.New("redis connection refused")
+}
+func (faultingTokenStore) SetRemove(context.Context, string, ...string) error {
+	return errors.New("redis connection refused")
+}
+func (faultingTokenStore) SetMembers(context.Context, string) ([]string, error) {
+	return nil, errors.New("redis connection refused")
+}
+func (faultingTokenStore) Expire(context.Context, string, time.Duration) error {
+	return errors.New("redis connection refused")
+}
+
+func newTestAuthenticator(t *testing.T) authn.Authenticator {
+	t.Helper()
+	provider := authnJwt.NewProvider()
+	authenticator, err := provider.NewAuthenticator(
+		context.Background(),
+		authn.WithSigningKey([]byte("test-secret")),
+		authn.WithSigningMethod("HS256"),
+		authn.WithIssuer("go-auth"),
+		authn.WithAudience("go-auth-api"),
+		authn.WithTokenExpiration(time.Hour),
+		authn.WithRefreshTokenExpiration(24*time.Hour),
+		authn.WithUserFactory(func(claims *authn.AuthClaims) authn.SecurityUser {
+			return nil
+		}),
+	)
+	if err != nil {
+		t.Fatalf("new authenticator: %v", err)
+	}
+	return authenticator
+}
+
+func TestManagerFailOpenOnStoreFailure(t *testing.T) {
+	ctx := context.Background()
+	authenticator := newTestAuthenticator(t)
+
+	// 用正常 store 生成 token
+	normal := newManagerWithStore(newMemoryTokenStore(), log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
+	access, _, err := normal.GenerateToken(ctx, Info{UserId: 42, Username: "tester", TenantID: 1})
+	if err != nil {
+		t.Fatalf("generate token: %v", err)
+	}
+
+	// fail-open：Redis 故障时降级为仅 JWT 验签（放行）
+	failOpen := newManagerWithStore(faultingTokenStore{}, log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
+	failOpen.failOpen = true
+	if _, err := failOpen.ValidateToken(ctx, access); err != nil {
+		t.Fatalf("fail-open should accept token on store failure: %v", err)
+	}
+
+	// fail-closed（默认）：Redis 故障时拒绝认证
+	failClosed := newManagerWithStore(faultingTokenStore{}, log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
+	if _, err := failClosed.ValidateToken(ctx, access); err == nil {
+		t.Fatal("fail-closed should reject token on store failure")
+	}
+}

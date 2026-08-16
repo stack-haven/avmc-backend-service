@@ -69,6 +69,20 @@ type Manager struct {
 	accessTokenKeyPrefix  string
 	refreshTokenKeyPrefix string
 	sessionKeyPrefix      string
+	// failOpen 当为 true 时，Redis 故障降级为仅依赖 JWT 验签（跳过 session 校验）；
+	// 默认 false（安全优先，Redis 故障拒绝认证，保证踢下线永远生效）。
+	failOpen bool
+}
+
+// Option 会话管理器配置选项。
+type Option func(*Manager)
+
+// WithFailOpen 设置 Redis 故障时的降级策略：
+// true = 降级为仅 JWT 验签（可用性优先）；false = 拒绝认证（安全优先，默认）。
+func WithFailOpen(failOpen bool) Option {
+	return func(m *Manager) {
+		m.failOpen = failOpen
+	}
 }
 
 type Store interface {
@@ -137,6 +151,7 @@ func NewManager(
 	rdb *redis.Client,
 	logger log.Logger,
 	authenticator authn.Authenticator,
+	opts ...Option,
 ) *Manager {
 	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
@@ -144,7 +159,7 @@ func NewManager(
 		refreshTokenKeyPrefix = "admin_urt_"
 		sessionKeyPrefix      = "admin_session_"
 	)
-	return &Manager{
+	m := &Manager{
 		Authenticator:         authenticator,
 		log:                   log,
 		store:                 RedisStore{client: rdb},
@@ -152,6 +167,10 @@ func NewManager(
 		refreshTokenKeyPrefix: refreshTokenKeyPrefix,
 		sessionKeyPrefix:      sessionKeyPrefix,
 	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
 }
 
 // NewManager 创建认证令牌仓库实例
@@ -213,8 +232,21 @@ func (r *Manager) ValidateToken(ctx context.Context, tokenString string) (*authn
 	if sessionID == "" {
 		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "missing session id", nil)
 	}
-	stored := r.getSessionAccessToken(ctx, sessionID)
-	if stored == "" || subtle.ConstantTimeCompare([]byte(stored), []byte(tokenString)) != 1 {
+	// 从 Redis 读取 session 访问令牌，区分「session 不存在」与「Redis 故障」。
+	stored, err := r.store.Get(ctx, r.sessionAccessKey(sessionID))
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			// session 不存在：token 已被踢下线/过期，拒绝。
+			return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "token has been revoked", nil)
+		}
+		// Redis 连接故障：按 failOpen 决定降级或拒绝。
+		if r.failOpen {
+			r.log.WithContext(ctx).Warnf("session store unavailable, fail-open: session=%s", sessionID)
+			return claims, nil
+		}
+		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "session store unavailable", err)
+	}
+	if subtle.ConstantTimeCompare([]byte(stored), []byte(tokenString)) != 1 {
 		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "token has been revoked", nil)
 	}
 	return claims, nil
@@ -233,8 +265,18 @@ func (r *Manager) ValidateRefreshToken(ctx context.Context, tokenString string) 
 	if sessionID == "" {
 		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "missing session id", nil)
 	}
-	stored := r.getSessionRefreshToken(ctx, sessionID)
-	if stored == "" || subtle.ConstantTimeCompare([]byte(stored), []byte(tokenString)) != 1 {
+	stored, err := r.store.Get(ctx, r.sessionRefreshKey(sessionID))
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "refresh token has been revoked", nil)
+		}
+		if r.failOpen {
+			r.log.WithContext(ctx).Warnf("session store unavailable, fail-open: session=%s", sessionID)
+			return claims, nil
+		}
+		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "session store unavailable", err)
+	}
+	if subtle.ConstantTimeCompare([]byte(stored), []byte(tokenString)) != 1 {
 		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "refresh token has been revoked", nil)
 	}
 	return claims, nil
