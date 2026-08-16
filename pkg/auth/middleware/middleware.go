@@ -92,7 +92,7 @@ func AuthnMiddleware(authenticator authn.Authenticator) middleware.Middleware {
 }
 
 // AuthzMiddleware 创建身份鉴权中间件
-func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
+func AuthzMiddleware(authorizer authz.Enforcer) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			// 从上下文中提取授权信息
@@ -163,7 +163,7 @@ func AuthzMiddleware(authorizer authz.Authorizer) middleware.Middleware {
 }
 
 // CombinedAuthMiddleware 创建组合身份验证和身份鉴权中间件
-func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.Authorizer) middleware.Middleware {
+func CombinedAuthMiddleware(authenticator authn.Authenticator, authorizer authz.Enforcer) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			// 执行身份验证

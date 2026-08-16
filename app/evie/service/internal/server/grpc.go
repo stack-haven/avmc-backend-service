@@ -32,7 +32,7 @@ func NewGRPCServer(
 	providerService *service.ProviderServiceService,
 	correctionService *service.CorrectionServiceService,
 	authenticator *auth.AuthToken,
-	authorizer authzEngine.Authorizer,
+	authorizer authzEngine.Enforcer,
 	auditClient audit.Client,
 	logger log.Logger,
 ) (*grpc.Server, error) {

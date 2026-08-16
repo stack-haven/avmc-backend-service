@@ -45,6 +45,10 @@ type CasbinAuthorizer struct {
 // CasbinProvider Casbin授权提供者
 type CasbinProvider struct{}
 
+func init() {
+	authz.RegisterProvider(&CasbinProvider{})
+}
+
 // Name 获取提供者名称
 func (p *CasbinProvider) Name() string {
 	return "casbin"

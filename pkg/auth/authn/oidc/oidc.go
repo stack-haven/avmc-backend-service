@@ -20,6 +20,10 @@ var _ authn.AuthProvider = (*OIDCProvider)(nil)
 // OIDCProvider 实现OpenID Connect认证提供者
 type OIDCProvider struct{}
 
+func init() {
+	authn.RegisterProvider(&OIDCProvider{})
+}
+
 // OIDCOptions 定义OIDC特定的选项
 type OIDCOptions struct {
 	// ProviderURL OIDC提供者URL

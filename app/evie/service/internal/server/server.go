@@ -26,7 +26,7 @@ func newServerMiddleware(
 	matcher selector.MatchFunc,
 	logger log.Logger,
 	authenticator *auth.AuthToken,
-	authorizer authzEngine.Authorizer,
+	authorizer authzEngine.Enforcer,
 	auditClient audit.Client,
 ) ([]middleware.Middleware, error) {
 	if cfg == nil {

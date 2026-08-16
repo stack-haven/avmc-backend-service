@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"backend-service/pkg/auth/authn"
-	authnJwt "backend-service/pkg/auth/authn/jwt"
+	_ "backend-service/pkg/auth/authn/jwt" // blank import 触发 JWT provider 注册
 )
 
 // AuthConfig 认证配置，由各服务从自己的 conf 提取后传入。
@@ -40,9 +40,8 @@ func NewAuthenticator(cfg AuthConfig, security *AuthSecurity) (authn.Authenticat
 		cfg.RefreshExpiration = cfg.AccessExpiration * 10
 	}
 
-	provider := authnJwt.NewProvider()
-	authenticator, err := provider.NewAuthenticator(
-		context.Background(),
+	// 通过注册表按名称创建 JWT 认证器（而非直接依赖 jwt 包的 Provider 类型）。
+	authenticator, err := authn.NewAuthenticator("jwt", context.Background(),
 		authn.WithSigningKey([]byte(cfg.Key)),
 		authn.WithSigningMethod(cfg.Method),
 		authn.WithTokenExpiration(cfg.AccessExpiration),

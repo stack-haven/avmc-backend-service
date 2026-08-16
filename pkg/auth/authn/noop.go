@@ -19,6 +19,10 @@ func (a *NoopAuthenticator) Options() Options {
 // NoopAuthn Noop认证提供者
 type NoopAuthn struct{}
 
+func init() {
+	RegisterProvider(&NoopAuthn{})
+}
+
 // Name 获取提供者名称
 func (p *NoopAuthn) Name() string {
 	return "noop"

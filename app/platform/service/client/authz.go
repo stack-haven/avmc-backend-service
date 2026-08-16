@@ -13,9 +13,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var _ authz.Authorizer = (*Authorizer)(nil)
+var _ authz.Enforcer = (*Authorizer)(nil)
 
 // Authorizer 通过 gRPC 委托 platform 的 AuthService.IsAuthorized 做鉴权决策。
+// 仅实现 authz.Enforcer（最小契约），不承载策略/RBAC 管理能力。
 type Authorizer struct {
 	client pb.AuthServiceClient
 	conn   *grpc.ClientConn
@@ -40,9 +41,10 @@ func NewAuthorizer(ctx context.Context, endpoint string, opts ...authz.Option) (
 	return a, nil
 }
 
+// Enforce 委托 platform 执行授权检查。
+// 原样转发当前请求的 Authorization（含 "Bearer " 前缀），让 platform 独立验证 JWT，
+// 而非只信任 sub/tenant 参数（防产品服务被攻破后伪造身份）。
 func (a *Authorizer) Enforce(ctx context.Context, sub authz.Subject, obj authz.Object, act authz.Action, tenant authz.Tenant) (bool, error) {
-	// 原样转发当前请求的 Authorization（含 "Bearer " 前缀），让 platform 独立验证 JWT，
-	// 而非只信任 sub/tenant 参数（防产品服务被攻破后伪造身份）。
 	ctx = authn.ForwardAuthToken(ctx)
 	_, err := a.client.IsAuthorized(ctx, &pb.IsAuthorizedRequest{
 		Subject:  string(sub),
@@ -56,19 +58,7 @@ func (a *Authorizer) Enforce(ctx context.Context, sub authz.Subject, obj authz.O
 	return true, nil
 }
 
-func (a *Authorizer) Init(ctx context.Context, opts ...authz.Option) error {
-	for _, o := range opts {
-		o(&a.opts)
-	}
-	return nil
-}
-
-func (a *Authorizer) Name() string           { return "grpc" }
-func (a *Authorizer) Options() authz.Options { return a.opts }
-func (a *Authorizer) Close() error           { return a.conn.Close() }
-
-// ──────────────── Stubs for unimplemented methods ────────────────
-
+// BatchEnforce 逐个委托 platform 执行授权检查。
 func (a *Authorizer) BatchEnforce(ctx context.Context, subs []authz.Subject, objs []authz.Object, acts []authz.Action, tenants []authz.Tenant) ([]bool, error) {
 	result := make([]bool, len(subs))
 	for i := range subs {
@@ -81,37 +71,19 @@ func (a *Authorizer) BatchEnforce(ctx context.Context, subs []authz.Subject, obj
 	return result, nil
 }
 
-func (a *Authorizer) AddPolicy(ctx context.Context, p authz.Policy) (bool, error) {
-	return false, nil
+// Init 应用配置选项。
+func (a *Authorizer) Init(ctx context.Context, opts ...authz.Option) error {
+	for _, o := range opts {
+		o(&a.opts)
+	}
+	return nil
 }
-func (a *Authorizer) RemovePolicy(ctx context.Context, p authz.Policy) (bool, error) {
-	return false, nil
-}
-func (a *Authorizer) AddPolicies(ctx context.Context, ps []authz.Policy) (bool, error) {
-	return false, nil
-}
-func (a *Authorizer) RemovePolicies(ctx context.Context, ps []authz.Policy) (bool, error) {
-	return false, nil
-}
-func (a *Authorizer) GetAllSubjects(ctx context.Context) ([]authz.Subject, error) {
-	return nil, nil
-}
-func (a *Authorizer) GetAllObjects(ctx context.Context) ([]authz.Object, error) { return nil, nil }
-func (a *Authorizer) GetAllActions(ctx context.Context) ([]authz.Action, error) { return nil, nil }
-func (a *Authorizer) GetAllTenants(ctx context.Context) ([]authz.Tenant, error) { return nil, nil }
-func (a *Authorizer) GetAllRoles(ctx context.Context) ([]authz.Subject, error)  { return nil, nil }
-func (a *Authorizer) GetRolesForUser(ctx context.Context, user authz.Subject, tenant authz.Tenant) ([]authz.Subject, error) {
-	return nil, nil
-}
-func (a *Authorizer) GetUsersForRole(ctx context.Context, role authz.Subject, tenant authz.Tenant) ([]authz.Subject, error) {
-	return nil, nil
-}
-func (a *Authorizer) HasRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, tenant authz.Tenant) (bool, error) {
-	return false, nil
-}
-func (a *Authorizer) AddRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, tenant authz.Tenant) (bool, error) {
-	return false, nil
-}
-func (a *Authorizer) DeleteRoleForUser(ctx context.Context, user authz.Subject, role authz.Subject, tenant authz.Tenant) (bool, error) {
-	return false, nil
-}
+
+// Name 返回授权器名称。
+func (a *Authorizer) Name() string { return "grpc" }
+
+// Options 返回当前配置选项。
+func (a *Authorizer) Options() authz.Options { return a.opts }
+
+// Close 关闭 gRPC 连接。
+func (a *Authorizer) Close() error { return a.conn.Close() }

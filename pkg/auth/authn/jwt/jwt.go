@@ -16,6 +16,10 @@ var _ authn.AuthProvider = (*JWTProvider)(nil)
 // JWTProvider JWT认证提供者
 type JWTProvider struct{}
 
+func init() {
+	authn.RegisterProvider(&JWTProvider{})
+}
+
 // NewProvider 创建新的JWT认证提供者
 func NewProvider() authn.AuthProvider {
 	return &JWTProvider{}

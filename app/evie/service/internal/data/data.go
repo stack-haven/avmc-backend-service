@@ -313,7 +313,7 @@ func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.Auth
 // NewAuthorizer 创建权鉴器。
 // evie 作为产品服务不维护本地 Casbin 策略，鉴权通过 gRPC 委托给技术中台（platform/admin）的
 // core.service.v1.AuthService.IsAuthorized，复用中台的租户用户权限体系。
-func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Authorizer, error) {
+func NewAuthorizer(cfg *conf.Client, logger log.Logger) (authzEngine.Enforcer, error) {
 	if cfg == nil || cfg.Grpc == nil || cfg.Grpc.GetAddr() == "" {
 		return nil, fmt.Errorf("client.grpc.addr is required for gRPC authorization delegation")
 	}

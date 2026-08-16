@@ -30,7 +30,7 @@ func NewHTTPServer(
 	c *conf.Server,
 	logger log.Logger,
 	authenticator *auth.AuthToken,
-	authorizer authzEngine.Authorizer,
+	authorizer authzEngine.Enforcer,
 	checker pkgHealth.Checker,
 	dictionaryService *service.DictionaryServiceService,
 	hotwordService *service.HotwordServiceService,
