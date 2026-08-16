@@ -2,12 +2,14 @@ package authn
 
 import (
 	"errors"
-	"fmt"
+
+	"backend-service/pkg/auth/errs"
 )
 
-// 错误码定义
-type ErrorCode int
+// ErrorCode 错误码类型（别名，统一到 errs.ErrorCode）。
+type ErrorCode = errs.ErrorCode
 
+// 错误码定义
 const (
 	// ErrCodeUnknown 未知错误
 	ErrCodeUnknown ErrorCode = iota
@@ -51,93 +53,44 @@ const (
 	ErrCodeNotBeforeTime
 )
 
-// 预定义错误
+// 预定义错误（纯字符串错误，供 errors.Is 判断使用）
 var (
-	// ErrUnknown 未知错误
-	ErrUnknown = errors.New("unknown authentication error")
-	// ErrInvalidToken 无效令牌
-	ErrInvalidToken = errors.New("invalid token")
-	// ErrExpiredToken 令牌过期
-	ErrExpiredToken = errors.New("token has expired")
-	// ErrInvalidSignature 无效签名
-	ErrInvalidSignature = errors.New("invalid token signature")
-	// ErrInvalidClaims 无效声明
-	ErrInvalidClaims = errors.New("invalid token claims")
-	// ErrMissingToken 缺少令牌
-	ErrMissingToken = errors.New("missing authentication token")
-	// ErrUnsupportedTokenType 不支持的令牌类型
-	ErrUnsupportedTokenType = errors.New("unsupported token type")
-	// ErrInvalidTokenFormat 无效的令牌格式
-	ErrInvalidTokenFormat = errors.New("invalid token format")
-	// ErrUnsupportedTokenScheme 不支持的令牌方案
+	ErrUnknown                = errors.New("unknown authentication error")
+	ErrInvalidToken           = errors.New("invalid token")
+	ErrExpiredToken           = errors.New("token has expired")
+	ErrInvalidSignature       = errors.New("invalid token signature")
+	ErrInvalidClaims          = errors.New("invalid token claims")
+	ErrMissingToken           = errors.New("missing authentication token")
+	ErrUnsupportedTokenType   = errors.New("unsupported token type")
+	ErrInvalidTokenFormat     = errors.New("invalid token format")
 	ErrUnsupportedTokenScheme = errors.New("unsupported token scheme")
-	// ErrNoTransportContext 无传输上下文
-	ErrNoTransportContext = errors.New("no transport context found")
-	// ErrInitializationFailed 初始化失败
-	ErrInitializationFailed = errors.New("authenticator initialization failed")
-	// ErrProviderNotFound 提供者未找到
-	ErrProviderNotFound = errors.New("authentication provider not found")
-	// ErrInvalidConfiguration 无效配置
-	ErrInvalidConfiguration = errors.New("invalid authenticator configuration")
-	// ErrTokenCreationFailed 令牌创建失败
-	ErrTokenCreationFailed = errors.New("token creation failed")
-	// ErrTokenRefreshFailed 令牌刷新失败
-	ErrTokenRefreshFailed = errors.New("token refresh failed")
-	// ErrTokenRevocationFailed 令牌撤销失败
-	ErrTokenRevocationFailed = errors.New("token revocation failed")
-	// ErrInvalidSubject 无效主体
-	ErrInvalidSubject = errors.New("invalid subject in token")
-	// ErrInvalidIssuer 无效签发者
-	ErrInvalidIssuer = errors.New("invalid issuer in token")
-	// ErrInvalidAudience 无效接收者
-	ErrInvalidAudience = errors.New("invalid audience in token")
-	// ErrNotBeforeTime 未到生效时间
-	ErrNotBeforeTime = errors.New("token not valid yet")
+	ErrNoTransportContext     = errors.New("no transport context found")
+	ErrInitializationFailed   = errors.New("authenticator initialization failed")
+	ErrProviderNotFound       = errors.New("authentication provider not found")
+	ErrInvalidConfiguration   = errors.New("invalid authenticator configuration")
+	ErrTokenCreationFailed    = errors.New("token creation failed")
+	ErrTokenRefreshFailed     = errors.New("token refresh failed")
+	ErrTokenRevocationFailed  = errors.New("token revocation failed")
+	ErrInvalidSubject         = errors.New("invalid subject in token")
+	ErrInvalidIssuer          = errors.New("invalid issuer in token")
+	ErrInvalidAudience        = errors.New("invalid audience in token")
+	ErrNotBeforeTime          = errors.New("token not valid yet")
 )
 
-// AuthError 认证错误类型
-type AuthError struct {
-	// Code 错误码
-	Code ErrorCode
-	// Message 错误消息
-	Message string
-	// Err 原始错误
-	Err error
-}
+// AuthError 认证错误类型（别名，统一到 errs.Error）。
+type AuthError = errs.Error
 
-// Error 实现error接口
-func (e *AuthError) Error() string {
-	if e.Err != nil {
-		return fmt.Sprintf("authentication error [code=%d]: %s: %v", e.Code, e.Message, e.Err)
-	}
-	return fmt.Sprintf("authentication error [code=%d]: %s", e.Code, e.Message)
-}
-
-// Unwrap 解包错误
-func (e *AuthError) Unwrap() error {
-	return e.Err
-}
-
-// NewAuthError 创建新的认证错误
+// NewAuthError 创建认证错误（转发到统一错误结构）。
 func NewAuthError(code ErrorCode, message string, err error) *AuthError {
-	return &AuthError{
-		Code:    code,
-		Message: message,
-		Err:     err,
-	}
+	return errs.New(code, message, err)
 }
 
-// IsAuthError 检查错误是否为认证错误
+// IsAuthError 检查错误是否为认证错误。
 func IsAuthError(err error) bool {
-	var authErr *AuthError
-	return errors.As(err, &authErr)
+	return errs.Is(err)
 }
 
-// GetAuthErrorCode 获取认证错误码
+// GetAuthErrorCode 获取认证错误码。
 func GetAuthErrorCode(err error) (ErrorCode, bool) {
-	var authErr *AuthError
-	if errors.As(err, &authErr) {
-		return authErr.Code, true
-	}
-	return ErrCodeUnknown, false
+	return errs.GetCode(err)
 }
