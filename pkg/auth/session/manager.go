@@ -350,14 +350,13 @@ func (r *Manager) IsExistRefreshToken(ctx context.Context, userId uint32) bool {
 
 // createAccessJwtToken 生成JWT访问令牌
 func (r *Manager) createAccessToken(auth Info, sessionID string) string {
-	principal := authn.AuthClaims{
-		"jti":               sessionID,
-		"sub":               convert.Unit32ToString(auth.UserId),
-		"tenant":            convert.Unit32ToString(auth.TenantIdentifier()),
-		"platform_operator": auth.PlatformOperator,
-		"scope":             "",
-		"nonce":             tokenID(),
-	}
+	principal := authn.AuthClaims{}.
+		SetID(sessionID).
+		SetSubject(convert.Unit32ToString(auth.UserId)).
+		SetTenant(convert.Unit32ToString(auth.TenantIdentifier())).
+		SetPlatformOperator(auth.PlatformOperator).
+		SetScope("").
+		SetNonce(tokenID())
 
 	signedToken, err := r.Authenticator.CreateToken(context.Background(), principal, effectiveTokenExpiration(r.Authenticator.Options().TokenExpiration, auth.TenantExpiresAt))
 	if err != nil {
@@ -371,14 +370,13 @@ func (r *Manager) createAccessToken(auth Info, sessionID string) string {
 func (r *Manager) createRefreshToken(auth Info, sessionID string) string {
 	expiration := effectiveTokenExpiration(r.Authenticator.Options().RefreshTokenExpiration, auth.TenantExpiresAt)
 	// 刷新令牌信息中包含刷新过期时间
-	authClaims := authn.AuthClaims{
-		"jti":               sessionID,
-		"sub":               strconv.FormatUint(uint64(auth.UserId), 10),
-		"tenant":            convert.Unit32ToString(auth.TenantIdentifier()),
-		"platform_operator": auth.PlatformOperator,
-		"nonce":             tokenID(),
-		"refresh_exp":       time.Now().Add(expiration),
-	}
+	authClaims := authn.AuthClaims{}.
+		SetID(sessionID).
+		SetSubject(strconv.FormatUint(uint64(auth.UserId), 10)).
+		SetTenant(convert.Unit32ToString(auth.TenantIdentifier())).
+		SetPlatformOperator(auth.PlatformOperator).
+		SetNonce(tokenID()).
+		SetRefreshExp(time.Now().Add(expiration))
 	token, err := r.Authenticator.CreateToken(context.Background(), authClaims, expiration)
 	if err != nil {
 		return ""

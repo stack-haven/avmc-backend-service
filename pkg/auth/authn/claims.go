@@ -252,3 +252,71 @@ func (a *AuthClaims) IsExpired() bool {
 	}
 	return time.Now().After(exp)
 }
+
+// ── 类型安全的 Setter（链式，避免魔法字符串与类型错误） ────────
+
+// SetSubject 设置主体（用户 ID）。
+func (a AuthClaims) SetSubject(subject string) AuthClaims {
+	a["sub"] = subject
+	return a
+}
+
+// SetIssuer 设置签发者。
+func (a AuthClaims) SetIssuer(issuer string) AuthClaims {
+	a["iss"] = issuer
+	return a
+}
+
+// SetAudience 设置接收者。
+func (a AuthClaims) SetAudience(audience []string) AuthClaims {
+	a["aud"] = audience
+	return a
+}
+
+// SetID 设置唯一标识符（session ID）。
+func (a AuthClaims) SetID(id string) AuthClaims {
+	a["jti"] = id
+	return a
+}
+
+// SetTenant 设置租户。
+func (a AuthClaims) SetTenant(tenant string) AuthClaims {
+	a["tenant"] = tenant
+	return a
+}
+
+// SetPlatformOperator 设置平台控制面操作员标记。
+func (a AuthClaims) SetPlatformOperator(v bool) AuthClaims {
+	a["platform_operator"] = v
+	return a
+}
+
+// SetScope 设置权限范围。
+func (a AuthClaims) SetScope(scope string) AuthClaims {
+	a["scope"] = scope
+	return a
+}
+
+// SetNonce 设置随机数（防重放）。
+func (a AuthClaims) SetNonce(nonce string) AuthClaims {
+	a["nonce"] = nonce
+	return a
+}
+
+// SetExpiresAt 设置过期时间。
+func (a AuthClaims) SetExpiresAt(exp time.Time) AuthClaims {
+	a["exp"] = exp
+	return a
+}
+
+// SetIssuedAt 设置签发时间。
+func (a AuthClaims) SetIssuedAt(iat time.Time) AuthClaims {
+	a["iat"] = iat
+	return a
+}
+
+// SetRefreshExp 设置刷新令牌过期时间。
+func (a AuthClaims) SetRefreshExp(exp time.Time) AuthClaims {
+	a["refresh_exp"] = exp
+	return a
+}
