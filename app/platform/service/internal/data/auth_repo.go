@@ -7,8 +7,8 @@ import (
 	"backend-service/app/platform/service/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/service/internal/data/ent/gen/user"
 	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
-	"backend-service/pkg/auth"
 	"backend-service/pkg/auth/loginattempt"
+	"backend-service/pkg/auth/session"
 	"backend-service/pkg/utils/convert"
 	"backend-service/pkg/utils/crypto"
 	"context"
@@ -31,7 +31,7 @@ import (
 // 包含日志记录器
 type authRepo struct {
 	BaseRepo
-	atr   *auth.AuthToken
+	atr   *session.Manager
 	ur    *userRepo
 	mr    *menuRepo
 	mpr   *tenantMenuPermissionGroupRepo
@@ -43,7 +43,7 @@ type authRepo struct {
 // NewAuthRepo 创建新的用户数据仓库实例
 // 参数：logger 日志记录器
 // 返回值：用户数据仓库实例指针
-func NewAuthRepo(data *Data, atr *auth.AuthToken, guard loginattempt.Guard, loginLogs biz.LoginLogRepo, logger log.Logger) biz.AuthRepo {
+func NewAuthRepo(data *Data, atr *session.Manager, guard loginattempt.Guard, loginLogs biz.LoginLogRepo, logger log.Logger) biz.AuthRepo {
 	return &authRepo{
 		BaseRepo: NewBaseRepo(data, logger),
 		atr:      atr,
@@ -64,7 +64,7 @@ func (r *authRepo) LoginResponse(ctx context.Context, u *gen.User) (*pb.LoginRes
 	if err != nil {
 		return nil, err
 	}
-	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, auth.AuthTokenInfo{
+	accessToken, refreshToken, err := r.atr.GenerateToken(ctx, session.Info{
 		UserId:           u.ID,
 		Username:         convert.ToValue(u.Name),
 		TenantID:         u.TenantID,
@@ -332,7 +332,7 @@ func (r *authRepo) RefreshToken(ctx context.Context, refreshToken string) (*pb.R
 		return nil, err
 	}
 	sessionID := claims.GetID()
-	accessToken, newRefreshToken, err := r.atr.RotateSessionToken(ctx, auth.AuthTokenInfo{
+	accessToken, newRefreshToken, err := r.atr.RotateSessionToken(ctx, session.Info{
 		UserId:           userID,
 		Username:         convert.ToValue(res.Name),
 		TenantID:         res.TenantID,

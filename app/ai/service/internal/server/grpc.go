@@ -4,9 +4,9 @@ import (
 	v1 "backend-service/api/ai/service/v1"
 	"backend-service/app/ai/service/internal/conf"
 	"backend-service/app/ai/service/internal/service"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	"backend-service/pkg/auth/session"
 	"context"
 
 	"backend-service/pkg/middleware/safelogging"
@@ -23,7 +23,7 @@ import (
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(c *conf.Server,
 	chat *service.ChatServiceService,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Authorizer,
 	logger log.Logger,
 ) *grpc.Server {

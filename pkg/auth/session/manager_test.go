@@ -1,4 +1,4 @@
-package auth
+package session
 
 import (
 	"context"
@@ -17,9 +17,9 @@ import (
 
 func TestAuthTokenSupportsMultipleConcurrentSessions(t *testing.T) {
 	ctx := context.Background()
-	token := newTestAuthToken(t)
+	token := newTestManager(t)
 
-	access, refresh, err := token.GenerateToken(ctx, AuthTokenInfo{
+	access, refresh, err := token.GenerateToken(ctx, Info{
 		UserId:   42,
 		Username: "tester",
 		TenantID: 1,
@@ -39,7 +39,7 @@ func TestAuthTokenSupportsMultipleConcurrentSessions(t *testing.T) {
 		t.Fatalf("validate refresh token: %v", err)
 	}
 
-	secondAccess, secondRefresh, err := token.GenerateToken(ctx, AuthTokenInfo{
+	secondAccess, secondRefresh, err := token.GenerateToken(ctx, Info{
 		UserId:   42,
 		Username: "tester",
 		TenantID: 1,
@@ -73,8 +73,8 @@ func TestAuthTokenSupportsMultipleConcurrentSessions(t *testing.T) {
 
 func TestAuthTokenRotatesAndRevokesOneSessionIndependently(t *testing.T) {
 	ctx := context.Background()
-	token := newTestAuthToken(t)
-	authInfo := AuthTokenInfo{UserId: 42, Username: "tester", TenantID: 1}
+	token := newTestManager(t)
+	authInfo := Info{UserId: 42, Username: "tester", TenantID: 1}
 	firstAccess, firstRefresh, err := token.GenerateToken(ctx, authInfo)
 	if err != nil {
 		t.Fatalf("generate first session: %v", err)
@@ -119,9 +119,9 @@ func TestAuthTokenRotatesAndRevokesOneSessionIndependently(t *testing.T) {
 
 func TestAuthTokenRemoveRevokesAccessAndRefreshTokens(t *testing.T) {
 	ctx := context.Background()
-	token := newTestAuthToken(t)
+	token := newTestManager(t)
 
-	access, refresh, err := token.GenerateToken(ctx, AuthTokenInfo{
+	access, refresh, err := token.GenerateToken(ctx, Info{
 		UserId:   7,
 		Username: "tester",
 		TenantID: 2,
@@ -155,10 +155,10 @@ func TestAuthTokenRemoveRevokesAccessAndRefreshTokens(t *testing.T) {
 
 func TestAuthTokenCapsSessionAtTenantExpiration(t *testing.T) {
 	ctx := context.Background()
-	token := newTestAuthToken(t)
+	token := newTestManager(t)
 	tenantExpiresAt := time.Now().Add(2 * time.Minute)
 
-	access, _, err := token.GenerateToken(ctx, AuthTokenInfo{
+	access, _, err := token.GenerateToken(ctx, Info{
 		UserId:          9,
 		Username:        "expiring-user",
 		TenantID:        3,
@@ -185,8 +185,8 @@ func TestAuthTokenCapsSessionAtTenantExpiration(t *testing.T) {
 
 func TestAuthTokenCarriesPlatformOperatorClaimAcrossRotation(t *testing.T) {
 	ctx := context.Background()
-	token := newTestAuthToken(t)
-	info := AuthTokenInfo{
+	token := newTestManager(t)
+	info := Info{
 		UserId:           10,
 		Username:         "platform-user",
 		TenantID:         1,
@@ -228,7 +228,7 @@ func TestEffectiveTokenExpiration(t *testing.T) {
 	}
 }
 
-func newTestAuthToken(t *testing.T) *AuthToken {
+func newTestManager(t *testing.T) *Manager {
 	t.Helper()
 	provider := authnJwt.NewProvider()
 	authenticator, err := provider.NewAuthenticator(
@@ -246,7 +246,7 @@ func newTestAuthToken(t *testing.T) *AuthToken {
 	if err != nil {
 		t.Fatalf("new authenticator: %v", err)
 	}
-	return newAuthTokenWithStore(newMemoryTokenStore(), log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
+	return newManagerWithStore(newMemoryTokenStore(), log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
 }
 
 type memoryTokenStore struct {

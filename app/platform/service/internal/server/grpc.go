@@ -12,9 +12,9 @@ import (
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/app/platform/service/internal/conf"
 	"backend-service/app/platform/service/internal/service"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	"backend-service/pkg/auth/session"
 )
 
 // crossServiceMatcher 匹配转发 JWT 的跨服务 RPC，仅做认证（不做 Casbin 鉴权）。
@@ -54,7 +54,7 @@ func NewGRPCServer(c *conf.Server,
 	notificationProvider *service.NotificationProviderServiceService,
 	device *service.DeviceServiceService,
 	asyncTask *service.AsyncTaskServiceService,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Authorizer,
 	operationAudit *biz.OperationLogUsecase,
 	logger log.Logger,

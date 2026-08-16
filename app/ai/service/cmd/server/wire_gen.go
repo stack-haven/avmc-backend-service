@@ -12,7 +12,8 @@ import (
 	"backend-service/app/ai/service/internal/data"
 	"backend-service/app/ai/service/internal/server"
 	"backend-service/app/ai/service/internal/service"
-	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/auth/session"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
@@ -33,9 +34,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	}
 	chatRepo := data.NewChatRepo(dataData, logger)
 	chatUsecase := biz.NewChatUsecase(chatRepo, logger)
-	authSecurity := auth.NewAuthSecurity(logger)
+	authSecurity := authn.NewSecurity(logger)
 	authenticator := data.NewAuthenticator(confServer, logger, authSecurity)
-	authToken := auth.NewAuthToken(redisClient, logger, authenticator)
+	authToken := session.NewManager(redisClient, logger, authenticator)
 	chatServiceService := service.NewChatServiceService(chatUsecase, authToken, logger)
 	authorizer := data.NewAuthorizer(confData, logger)
 	grpcServer := server.NewGRPCServer(confServer, chatServiceService, authToken, authorizer, logger)

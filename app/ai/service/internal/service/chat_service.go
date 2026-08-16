@@ -10,8 +10,8 @@ import (
 
 	pb "backend-service/api/ai/service/v1"
 	"backend-service/app/ai/service/internal/biz"
-	"backend-service/pkg/auth"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/auth/session"
 	"backend-service/pkg/kratos/transport/sse"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -29,7 +29,7 @@ type ChatServiceService struct {
 	pb.UnimplementedChatServiceServer
 	ucc           *biz.ChatUsecase
 	sse           *sse.Server
-	authenticator *auth.AuthToken
+	authenticator *session.Manager
 	log           *log.Helper
 	wsUpgrader    websocket.Upgrader
 	router        *mux.Router
@@ -43,7 +43,7 @@ func (s *ChatServiceService) RegisterRoutes() *mux.Router {
 }
 
 // NewChatServiceService 创建新的对话服务实例
-func NewChatServiceService(ucc *biz.ChatUsecase, authenticator *auth.AuthToken, logger log.Logger) *ChatServiceService {
+func NewChatServiceService(ucc *biz.ChatUsecase, authenticator *session.Manager, logger log.Logger) *ChatServiceService {
 	return &ChatServiceService{
 		ucc:           ucc,
 		authenticator: authenticator,

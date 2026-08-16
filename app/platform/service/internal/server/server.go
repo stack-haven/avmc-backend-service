@@ -16,9 +16,9 @@ import (
 	v1 "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/app/platform/service/internal/conf"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	"backend-service/pkg/auth/session"
 	"backend-service/pkg/middleware/safelogging"
 )
 
@@ -110,7 +110,7 @@ func newServerMiddleware(
 	authnMatcher selector.MatchFunc,
 	authzMatcher selector.MatchFunc,
 	logger log.Logger,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Authorizer,
 	operationLog *biz.OperationLogUsecase,
 ) ([]middleware.Middleware, error) {

@@ -1,4 +1,4 @@
-package auth
+package session
 
 import (
 	"context"
@@ -26,19 +26,19 @@ type Token struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
-type AuthData struct {
+type Data struct {
 	Key   string `json:"key,omitempty"`
 	Value uint32 `json:"value,omitempty"`
 }
 
-type AuthTokenInfo struct {
+type Info struct {
 	Token            Token      `json:"token,omitempty"`
 	Username         string     `json:"username,omitempty"`
 	UserId           uint32     `json:"user_id,omitempty"`
 	TenantID         uint32     `json:"tenant_id,omitempty"`
 	PlatformOperator bool       `json:"platform_operator,omitempty"`
-	Roles            []AuthData `json:"roles,omitempty"`
-	Permissions      []AuthData `json:"permissions,omitempty"`
+	Roles            []Data     `json:"roles,omitempty"`
+	Permissions      []Data     `json:"permissions,omitempty"`
 	TenantExpiresAt  *time.Time `json:"tenant_expires_at,omitempty"`
 }
 
@@ -56,22 +56,22 @@ type Session struct {
 
 var ErrSessionNotFound = errors.New("session not found")
 
-func (i AuthTokenInfo) TenantIdentifier() uint32 {
+func (i Info) TenantIdentifier() uint32 {
 	return i.TenantID
 }
 
 // AuthTokenRepo 认证令牌仓库结构体
 // 包含Redis客户端、日志记录器、认证器、访问令牌和刷新令牌的键前缀
-type AuthToken struct {
+type Manager struct {
 	authn.Authenticator
-	store                 tokenStore
+	store                 Store
 	log                   *log.Helper
 	accessTokenKeyPrefix  string
 	refreshTokenKeyPrefix string
 	sessionKeyPrefix      string
 }
 
-type tokenStore interface {
+type Store interface {
 	Set(ctx context.Context, key string, value string, expiration time.Duration) error
 	Get(ctx context.Context, key string) (string, error)
 	Del(ctx context.Context, key string) error
@@ -82,23 +82,23 @@ type tokenStore interface {
 	Expire(ctx context.Context, key string, expiration time.Duration) error
 }
 
-type redisTokenStore struct {
+type RedisStore struct {
 	client *redis.Client
 }
 
-func (s redisTokenStore) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
+func (s RedisStore) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
 	return s.client.Set(ctx, key, value, expiration).Err()
 }
 
-func (s redisTokenStore) Get(ctx context.Context, key string) (string, error) {
+func (s RedisStore) Get(ctx context.Context, key string) (string, error) {
 	return s.client.Get(ctx, key).Result()
 }
 
-func (s redisTokenStore) Del(ctx context.Context, key string) error {
+func (s RedisStore) Del(ctx context.Context, key string) error {
 	return s.client.Del(ctx, key).Err()
 }
 
-func (s redisTokenStore) Exists(ctx context.Context, key string) (bool, error) {
+func (s RedisStore) Exists(ctx context.Context, key string) (bool, error) {
 	n, err := s.client.Exists(ctx, key).Result()
 	if err != nil {
 		return false, err
@@ -106,7 +106,7 @@ func (s redisTokenStore) Exists(ctx context.Context, key string) (bool, error) {
 	return n > 0, nil
 }
 
-func (s redisTokenStore) SetAdd(ctx context.Context, key string, values ...string) error {
+func (s RedisStore) SetAdd(ctx context.Context, key string, values ...string) error {
 	args := make([]any, 0, len(values))
 	for _, value := range values {
 		args = append(args, value)
@@ -114,7 +114,7 @@ func (s redisTokenStore) SetAdd(ctx context.Context, key string, values ...strin
 	return s.client.SAdd(ctx, key, args...).Err()
 }
 
-func (s redisTokenStore) SetRemove(ctx context.Context, key string, values ...string) error {
+func (s RedisStore) SetRemove(ctx context.Context, key string, values ...string) error {
 	args := make([]any, 0, len(values))
 	for _, value := range values {
 		args = append(args, value)
@@ -122,66 +122,66 @@ func (s redisTokenStore) SetRemove(ctx context.Context, key string, values ...st
 	return s.client.SRem(ctx, key, args...).Err()
 }
 
-func (s redisTokenStore) SetMembers(ctx context.Context, key string) ([]string, error) {
+func (s RedisStore) SetMembers(ctx context.Context, key string) ([]string, error) {
 	return s.client.SMembers(ctx, key).Result()
 }
 
-func (s redisTokenStore) Expire(ctx context.Context, key string, expiration time.Duration) error {
+func (s RedisStore) Expire(ctx context.Context, key string, expiration time.Duration) error {
 	return s.client.Expire(ctx, key, expiration).Err()
 }
 
-// NewAuthToken 创建认证令牌仓库实例
+// NewManager 创建认证令牌仓库实例
 // 参数：data 数据访问层实例，authenticator 认证器实例，logger 日志记录器实例
-// 返回：*AuthToken 认证令牌仓库实例
-func NewAuthToken(
+// 返回：*Manager 认证令牌仓库实例
+func NewManager(
 	rdb *redis.Client,
 	logger log.Logger,
 	authenticator authn.Authenticator,
-) *AuthToken {
+) *Manager {
 	log := log.NewHelper(log.With(logger, "module", "auth-token/cache"))
 	const (
 		accessTokenKeyPrefix  = "admin_uat_"
 		refreshTokenKeyPrefix = "admin_urt_"
 		sessionKeyPrefix      = "admin_session_"
 	)
-	return &AuthToken{
+	return &Manager{
 		Authenticator:         authenticator,
 		log:                   log,
-		store:                 redisTokenStore{client: rdb},
+		store:                 RedisStore{client: rdb},
 		accessTokenKeyPrefix:  accessTokenKeyPrefix,
 		refreshTokenKeyPrefix: refreshTokenKeyPrefix,
 		sessionKeyPrefix:      sessionKeyPrefix,
 	}
 }
 
-// NewAuthToken 创建认证令牌仓库实例
+// NewManager 创建认证令牌仓库实例
 // 参数：rdb Redis客户端实例，authenticator 认证器实例，logger 日志记录器实例，accessTokenKeyPrefix 访问令牌键前缀，refreshTokenKeyPrefix 刷新令牌键前缀
-// 返回：*AuthToken 认证令牌仓库实例
-func NewAuthTokenPrefix(
+// 返回：*Manager 认证令牌仓库实例
+func NewManagerPrefix(
 	rdb *redis.Client,
 	logger log.Logger,
 	authenticator authn.Authenticator,
 	accessTokenKeyPrefix string,
 	refreshTokenKeyPrefix string,
-) *AuthToken {
-	return &AuthToken{
+) *Manager {
+	return &Manager{
 		Authenticator:         authenticator,
 		log:                   log.NewHelper(log.With(logger, "module", "auth/token/redis")),
-		store:                 redisTokenStore{client: rdb},
+		store:                 RedisStore{client: rdb},
 		accessTokenKeyPrefix:  accessTokenKeyPrefix,
 		refreshTokenKeyPrefix: refreshTokenKeyPrefix,
 		sessionKeyPrefix:      "admin_session_",
 	}
 }
 
-func newAuthTokenWithStore(
-	store tokenStore,
+func newManagerWithStore(
+	store Store,
 	logger log.Logger,
 	authenticator authn.Authenticator,
 	accessTokenKeyPrefix string,
 	refreshTokenKeyPrefix string,
-) *AuthToken {
-	return &AuthToken{
+) *Manager {
+	return &Manager{
 		Authenticator:         authenticator,
 		log:                   log.NewHelper(log.With(logger, "module", "auth/token/store")),
 		store:                 store,
@@ -192,7 +192,7 @@ func newAuthTokenWithStore(
 }
 
 // Authenticate validates the request token and verifies it is still the active session in Redis.
-func (r *AuthToken) Authenticate(ctx context.Context) (*authn.AuthClaims, error) {
+func (r *Manager) Authenticate(ctx context.Context) (*authn.AuthClaims, error) {
 	tokenString, err := authn.ParseContextToken(authn.HeaderAuthorize, r.Authenticator.Options().TokenHeadName)(ctx)
 	if err != nil {
 		return nil, err
@@ -201,7 +201,7 @@ func (r *AuthToken) Authenticate(ctx context.Context) (*authn.AuthClaims, error)
 }
 
 // ValidateToken validates a JWT and checks that its session is still active.
-func (r *AuthToken) ValidateToken(ctx context.Context, tokenString string) (*authn.AuthClaims, error) {
+func (r *Manager) ValidateToken(ctx context.Context, tokenString string) (*authn.AuthClaims, error) {
 	claims, err := r.Authenticator.ValidateToken(ctx, tokenString)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (r *AuthToken) ValidateToken(ctx context.Context, tokenString string) (*aut
 }
 
 // ValidateRefreshToken validates a refresh token and checks that it matches the active refresh token in Redis.
-func (r *AuthToken) ValidateRefreshToken(ctx context.Context, tokenString string) (*authn.AuthClaims, error) {
+func (r *Manager) ValidateRefreshToken(ctx context.Context, tokenString string) (*authn.AuthClaims, error) {
 	claims, err := r.Authenticator.ValidateToken(ctx, tokenString)
 	if err != nil {
 		return nil, err
@@ -241,7 +241,7 @@ func (r *AuthToken) ValidateRefreshToken(ctx context.Context, tokenString string
 }
 
 // GenerateToken 创建令牌
-func (r *AuthToken) GenerateToken(ctx context.Context, auth AuthTokenInfo) (accessToken string, refreshToken string, err error) {
+func (r *Manager) GenerateToken(ctx context.Context, auth Info) (accessToken string, refreshToken string, err error) {
 	sessionID := tokenID()
 	if accessToken = r.createAccessToken(auth, sessionID); accessToken == "" {
 		err = errors.New("create access token failed")
@@ -258,7 +258,7 @@ func (r *AuthToken) GenerateToken(ctx context.Context, auth AuthTokenInfo) (acce
 }
 
 // RotateSessionToken rotates both tokens while retaining the current session.
-func (r *AuthToken) RotateSessionToken(ctx context.Context, auth AuthTokenInfo, sessionID string) (accessToken string, refreshToken string, err error) {
+func (r *Manager) RotateSessionToken(ctx context.Context, auth Info, sessionID string) (accessToken string, refreshToken string, err error) {
 	if sessionID == "" {
 		return "", "", errors.New("session id is required")
 	}
@@ -294,24 +294,24 @@ func (r *AuthToken) RotateSessionToken(ctx context.Context, auth AuthTokenInfo, 
 }
 
 // GenerateAccessToken creates a standalone session and returns its access token.
-func (r *AuthToken) GenerateAccessToken(ctx context.Context, auth AuthTokenInfo) (accessToken string, err error) {
+func (r *Manager) GenerateAccessToken(ctx context.Context, auth Info) (accessToken string, err error) {
 	accessToken, _, err = r.GenerateToken(ctx, auth)
 	return accessToken, err
 }
 
 // GenerateRefreshToken creates a standalone session and returns its refresh token.
-func (r *AuthToken) GenerateRefreshToken(ctx context.Context, auth AuthTokenInfo) (refreshToken string, err error) {
+func (r *Manager) GenerateRefreshToken(ctx context.Context, auth Info) (refreshToken string, err error) {
 	_, refreshToken, err = r.GenerateToken(ctx, auth)
 	return refreshToken, err
 }
 
 // RemoveToken revokes all active sessions for one user.
-func (r *AuthToken) RemoveToken(ctx context.Context, userId uint32) error {
+func (r *Manager) RemoveToken(ctx context.Context, userId uint32) error {
 	return r.RevokeUserSessions(ctx, 0, userId)
 }
 
 // GetAccessToken 获取访问令牌
-func (r *AuthToken) GetAccessToken(ctx context.Context, userId uint32) string {
+func (r *Manager) GetAccessToken(ctx context.Context, userId uint32) string {
 	sessions, err := r.ListUserSessions(ctx, 0, userId)
 	if err != nil || len(sessions) == 0 {
 		return ""
@@ -320,7 +320,7 @@ func (r *AuthToken) GetAccessToken(ctx context.Context, userId uint32) string {
 }
 
 // GetRefreshToken 获取刷新令牌
-func (r *AuthToken) GetRefreshToken(ctx context.Context, userId uint32) string {
+func (r *Manager) GetRefreshToken(ctx context.Context, userId uint32) string {
 	sessions, err := r.ListUserSessions(ctx, 0, userId)
 	if err != nil || len(sessions) == 0 {
 		return ""
@@ -329,13 +329,13 @@ func (r *AuthToken) GetRefreshToken(ctx context.Context, userId uint32) string {
 }
 
 // IsExistAccessToken 访问令牌是否存在
-func (r *AuthToken) IsExistAccessToken(ctx context.Context, userId uint32) bool {
+func (r *Manager) IsExistAccessToken(ctx context.Context, userId uint32) bool {
 	sessions, err := r.ListUserSessions(ctx, 0, userId)
 	return err == nil && len(sessions) > 0
 }
 
 // IsExistRefreshToken 刷新令牌是否存在
-func (r *AuthToken) IsExistRefreshToken(ctx context.Context, userId uint32) bool {
+func (r *Manager) IsExistRefreshToken(ctx context.Context, userId uint32) bool {
 	sessions, err := r.ListUserSessions(ctx, 0, userId)
 	if err != nil {
 		return false
@@ -349,7 +349,7 @@ func (r *AuthToken) IsExistRefreshToken(ctx context.Context, userId uint32) bool
 }
 
 // createAccessJwtToken 生成JWT访问令牌
-func (r *AuthToken) createAccessToken(auth AuthTokenInfo, sessionID string) string {
+func (r *Manager) createAccessToken(auth Info, sessionID string) string {
 	principal := authn.AuthClaims{
 		"jti":               sessionID,
 		"sub":               convert.Unit32ToString(auth.UserId),
@@ -368,7 +368,7 @@ func (r *AuthToken) createAccessToken(auth AuthTokenInfo, sessionID string) stri
 }
 
 // createRefreshToken 生成刷新令牌
-func (r *AuthToken) createRefreshToken(auth AuthTokenInfo, sessionID string) string {
+func (r *Manager) createRefreshToken(auth Info, sessionID string) string {
 	expiration := effectiveTokenExpiration(r.Authenticator.Options().RefreshTokenExpiration, auth.TenantExpiresAt)
 	// 刷新令牌信息中包含刷新过期时间
 	authClaims := authn.AuthClaims{
@@ -386,7 +386,7 @@ func (r *AuthToken) createRefreshToken(auth AuthTokenInfo, sessionID string) str
 	return token
 }
 
-func (r *AuthToken) saveSession(ctx context.Context, auth AuthTokenInfo, sessionID, accessToken, refreshToken string) error {
+func (r *Manager) saveSession(ctx context.Context, auth Info, sessionID, accessToken, refreshToken string) error {
 	now := time.Now()
 	accessExpiration := effectiveTokenExpiration(r.Authenticator.Options().TokenExpiration, auth.TenantExpiresAt)
 	refreshExpiration := effectiveTokenExpiration(r.Authenticator.Options().RefreshTokenExpiration, auth.TenantExpiresAt)
@@ -443,7 +443,7 @@ func effectiveTokenExpiration(defaultExpiration time.Duration, tenantExpiresAt *
 	return defaultExpiration
 }
 
-func (r *AuthToken) saveSessionMetadata(ctx context.Context, session *Session) error {
+func (r *Manager) saveSessionMetadata(ctx context.Context, session *Session) error {
 	data, err := json.Marshal(session)
 	if err != nil {
 		return err
@@ -455,7 +455,7 @@ func (r *AuthToken) saveSessionMetadata(ctx context.Context, session *Session) e
 	return r.store.Set(ctx, r.sessionMetadataKey(session.ID), string(data), expiration)
 }
 
-func (r *AuthToken) GetSession(ctx context.Context, sessionID string) (*Session, error) {
+func (r *Manager) GetSession(ctx context.Context, sessionID string) (*Session, error) {
 	raw, err := r.store.Get(ctx, r.sessionMetadataKey(sessionID))
 	if err != nil {
 		return nil, err
@@ -467,7 +467,7 @@ func (r *AuthToken) GetSession(ctx context.Context, sessionID string) (*Session,
 	return &session, nil
 }
 
-func (r *AuthToken) ListUserSessions(ctx context.Context, tenantID, userID uint32) ([]*Session, error) {
+func (r *Manager) ListUserSessions(ctx context.Context, tenantID, userID uint32) ([]*Session, error) {
 	ids, err := r.store.SetMembers(ctx, r.userSessionsKey(userID))
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
@@ -475,7 +475,7 @@ func (r *AuthToken) ListUserSessions(ctx context.Context, tenantID, userID uint3
 	return r.loadSessions(ctx, ids, tenantID)
 }
 
-func (r *AuthToken) ListTenantSessions(ctx context.Context, tenantID uint32) ([]*Session, error) {
+func (r *Manager) ListTenantSessions(ctx context.Context, tenantID uint32) ([]*Session, error) {
 	ids, err := r.store.SetMembers(ctx, r.tenantSessionsKey(tenantID))
 	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
@@ -483,7 +483,7 @@ func (r *AuthToken) ListTenantSessions(ctx context.Context, tenantID uint32) ([]
 	return r.loadSessions(ctx, ids, tenantID)
 }
 
-func (r *AuthToken) loadSessions(ctx context.Context, ids []string, tenantID uint32) ([]*Session, error) {
+func (r *Manager) loadSessions(ctx context.Context, ids []string, tenantID uint32) ([]*Session, error) {
 	result := make([]*Session, 0, len(ids))
 	for _, id := range ids {
 		session, err := r.GetSession(ctx, id)
@@ -501,7 +501,7 @@ func (r *AuthToken) loadSessions(ctx context.Context, ids []string, tenantID uin
 	return result, nil
 }
 
-func (r *AuthToken) RevokeSession(ctx context.Context, tenantID uint32, sessionID string) error {
+func (r *Manager) RevokeSession(ctx context.Context, tenantID uint32, sessionID string) error {
 	session, err := r.GetSession(ctx, sessionID)
 	if errors.Is(err, redis.Nil) {
 		return ErrSessionNotFound
@@ -526,7 +526,7 @@ func (r *AuthToken) RevokeSession(ctx context.Context, tenantID uint32, sessionI
 	return nil
 }
 
-func (r *AuthToken) RevokeUserSessions(ctx context.Context, tenantID, userID uint32) error {
+func (r *Manager) RevokeUserSessions(ctx context.Context, tenantID, userID uint32) error {
 	sessions, err := r.ListUserSessions(ctx, tenantID, userID)
 	if err != nil {
 		return err
@@ -539,7 +539,7 @@ func (r *AuthToken) RevokeUserSessions(ctx context.Context, tenantID, userID uin
 	return nil
 }
 
-func (r *AuthToken) RevokeTenantSessions(ctx context.Context, tenantID uint32) error {
+func (r *Manager) RevokeTenantSessions(ctx context.Context, tenantID uint32) error {
 	sessions, err := r.ListTenantSessions(ctx, tenantID)
 	if err != nil {
 		return err
@@ -552,15 +552,15 @@ func (r *AuthToken) RevokeTenantSessions(ctx context.Context, tenantID uint32) e
 	return nil
 }
 
-func (r *AuthToken) getSessionAccessToken(ctx context.Context, sessionID string) string {
+func (r *Manager) getSessionAccessToken(ctx context.Context, sessionID string) string {
 	return r.getStoredToken(ctx, r.sessionAccessKey(sessionID))
 }
 
-func (r *AuthToken) getSessionRefreshToken(ctx context.Context, sessionID string) string {
+func (r *Manager) getSessionRefreshToken(ctx context.Context, sessionID string) string {
 	return r.getStoredToken(ctx, r.sessionRefreshKey(sessionID))
 }
 
-func (r *AuthToken) getStoredToken(ctx context.Context, key string) string {
+func (r *Manager) getStoredToken(ctx context.Context, key string) string {
 	result, err := r.store.Get(ctx, key)
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
@@ -571,23 +571,23 @@ func (r *AuthToken) getStoredToken(ctx context.Context, key string) string {
 	return result
 }
 
-func (r *AuthToken) sessionAccessKey(sessionID string) string {
+func (r *Manager) sessionAccessKey(sessionID string) string {
 	return r.accessTokenKeyPrefix + "session:" + sessionID
 }
 
-func (r *AuthToken) sessionRefreshKey(sessionID string) string {
+func (r *Manager) sessionRefreshKey(sessionID string) string {
 	return r.refreshTokenKeyPrefix + "session:" + sessionID
 }
 
-func (r *AuthToken) sessionMetadataKey(sessionID string) string {
+func (r *Manager) sessionMetadataKey(sessionID string) string {
 	return r.sessionKeyPrefix + sessionID
 }
 
-func (r *AuthToken) userSessionsKey(userID uint32) string {
+func (r *Manager) userSessionsKey(userID uint32) string {
 	return fmt.Sprintf("%suser:%d", r.sessionKeyPrefix, userID)
 }
 
-func (r *AuthToken) tenantSessionsKey(tenantID uint32) string {
+func (r *Manager) tenantSessionsKey(tenantID uint32) string {
 	return fmt.Sprintf("%stenant:%d", r.sessionKeyPrefix, tenantID)
 }
 

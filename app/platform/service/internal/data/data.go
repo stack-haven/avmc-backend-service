@@ -23,8 +23,10 @@ import (
 	// casbinmodel "github.com/casbin/casbin/v2/model"
 
 	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/authn"
 	authnEngine "backend-service/pkg/auth/authn"
 	"backend-service/pkg/auth/loginattempt"
+	"backend-service/pkg/auth/session"
 	"backend-service/pkg/utils"
 
 	authzEngine "backend-service/pkg/auth/authz"
@@ -40,8 +42,8 @@ var ProviderSet = wire.NewSet(
 	NewEntClient, NewRedisClient,
 	NewHealthChecker,
 	NewLoginAttemptGuard,
-	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
-	auth.NewAuthToken,
+	NewAuthenticator, NewAuthorizer, authn.NewSecurity,
+	session.NewManager,
 	NewTenantRepo,
 	NewAuthRepo,
 	NewUserRepo,
@@ -313,7 +315,7 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (*redis.Client, error) {
 
 // NewAuthenticator 创建认证器
 // NewAuthenticator 创建认证器（JWT 本地验签，认证工厂已收敛到 pkg/auth）。
-func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) (authnEngine.Authenticator, error) {
+func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *authn.Security) (authnEngine.Authenticator, error) {
 	if c == nil || c.Http == nil || c.Http.Middleware == nil || c.Http.Middleware.Auth == nil {
 		return nil, fmt.Errorf("http auth config is required")
 	}

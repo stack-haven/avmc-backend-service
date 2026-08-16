@@ -12,7 +12,8 @@ import (
 	"backend-service/app/evie/service/internal/data"
 	"backend-service/app/evie/service/internal/server"
 	"backend-service/app/evie/service/internal/service"
-	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/auth/session"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -45,12 +46,12 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 	hotwordServiceService := service.NewHotwordServiceService(hotwordUsecase, logger)
 	providerRepo := data.NewProviderConfigRepo(dataData, logger)
 	asrRecordRepo := data.NewASRRecordRepo(dataData, logger)
-	grpcClient, err := data.NewFileCenterClient(client, logger)
+	fileCenterClient, err := data.NewFileCenterClient(client, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	asrUsecase := biz.NewASRUsecase(providerRepo, hotwordRepo, asrRecordRepo, grpcClient, logger)
+	asrUsecase := biz.NewASRUsecase(providerRepo, hotwordRepo, asrRecordRepo, fileCenterClient, logger)
 	correctionLogRepo := data.NewCorrectionLogRepo(dataData, logger)
 	correctionRuleRepo := data.NewCorrectionRuleRepo(dataData, logger)
 	correctionEngine := biz.NewCorrectionEngine(correctionLogRepo, correctionRuleRepo, logger)
@@ -58,14 +59,14 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 	providerUsecase := biz.NewProviderUsecase(providerRepo, logger)
 	providerServiceService := service.NewProviderServiceService(providerUsecase, logger)
 	correctionServiceService := service.NewCorrectionServiceService(correctionEngine, logger)
-	authSecurity := auth.NewAuthSecurity(logger)
-	authenticator, err := data.NewAuthenticator(confServer, logger, authSecurity)
+	security := authn.NewSecurity(logger)
+	authenticator, err := data.NewAuthenticator(confServer, logger, security)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	authToken := auth.NewAuthToken(redisClient, logger, authenticator)
-	authorizer, err := data.NewAuthorizer(client, logger)
+	manager := session.NewManager(redisClient, logger, authenticator)
+	enforcer, err := data.NewAuthorizer(client, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -75,13 +76,13 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 		cleanup()
 		return nil, nil, err
 	}
-	grpcServer, err := server.NewGRPCServer(confServer, dictionaryServiceService, hotwordServiceService, asrServiceService, providerServiceService, correctionServiceService, authToken, authorizer, auditClient, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, dictionaryServiceService, hotwordServiceService, asrServiceService, providerServiceService, correctionServiceService, manager, enforcer, auditClient, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, dictionaryServiceService, hotwordServiceService, asrServiceService, providerServiceService, correctionServiceService, auditClient)
+	httpServer, err := server.NewHTTPServer(confServer, logger, manager, enforcer, checker, dictionaryServiceService, hotwordServiceService, asrServiceService, providerServiceService, correctionServiceService, auditClient)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

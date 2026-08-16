@@ -7,8 +7,8 @@ import (
 	"backend-service/app/evie/service/internal/conf"
 	"backend-service/app/evie/service/internal/service"
 	"backend-service/pkg/audit"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
+	"backend-service/pkg/auth/session"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
@@ -31,7 +31,7 @@ func NewGRPCServer(
 	asrService *service.ASRServiceService,
 	providerService *service.ProviderServiceService,
 	correctionService *service.CorrectionServiceService,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Enforcer,
 	auditClient audit.Client,
 	logger log.Logger,

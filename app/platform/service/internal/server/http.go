@@ -14,14 +14,14 @@ import (
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/app/platform/service/internal/conf"
 	"backend-service/app/platform/service/internal/service"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
+	"backend-service/pkg/auth/session"
 	pkgHealth "backend-service/pkg/health"
 )
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
-	authenticator *auth.AuthToken, authorizer authzEngine.Authorizer,
+	authenticator *session.Manager, authorizer authzEngine.Authorizer,
 	checker pkgHealth.Checker,
 	operationAudit *biz.OperationLogUsecase,
 	auth *service.AuthServiceService,

@@ -10,9 +10,9 @@ func TestActionsForAuthCodeStatusUpdate(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name     string
-		code     string
-		want     []authz.Action
+		name string
+		code string
+		want []authz.Action
 	}{
 		{
 			name: "status-update 自定义动作返回 POST",

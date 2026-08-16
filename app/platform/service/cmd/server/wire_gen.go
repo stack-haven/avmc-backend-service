@@ -12,7 +12,8 @@ import (
 	"backend-service/app/platform/service/internal/data"
 	"backend-service/app/platform/service/internal/server"
 	"backend-service/app/platform/service/internal/service"
-	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/auth/session"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -42,23 +43,23 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 		cleanup()
 		return nil, nil, err
 	}
-	authSecurity := auth.NewAuthSecurity(logger)
-	authenticator, err := data.NewAuthenticator(confServer, logger, authSecurity)
+	security := authn.NewSecurity(logger)
+	authenticator, err := data.NewAuthenticator(confServer, logger, security)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	authToken := auth.NewAuthToken(redisClient, logger, authenticator)
+	manager := session.NewManager(redisClient, logger, authenticator)
 	guard, err := data.NewLoginAttemptGuard(redisClient)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	loginLogRepo := data.NewLoginLogRepo(dataData, logger)
-	authRepo := data.NewAuthRepo(dataData, authToken, guard, loginLogRepo, logger)
+	authRepo := data.NewAuthRepo(dataData, manager, guard, loginLogRepo, logger)
 	authUsecase := biz.NewAuthUsecase(logger, authRepo)
 	userRepo := data.NewUserRepo(dataData, logger)
-	sessionRepo := data.NewSessionRepo(authToken, logger)
+	sessionRepo := data.NewSessionRepo(manager, logger)
 	userUsecase := biz.NewUserUsecase(userRepo, sessionRepo, logger)
 	authServiceService := service.NewAuthServiceService(authorizer, authUsecase, userUsecase, logger)
 	tenantRepo := data.NewTenantRepo(dataData, logger)
@@ -127,13 +128,13 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	v := biz.NewAsyncTaskHandlers(asyncTaskRepo, permissionCacheInvalidator, asyncTaskHandler, webhookRepo, logger)
 	asyncTaskUsecase := biz.NewAsyncTaskUsecase(asyncTaskRepo, v, logger)
 	asyncTaskServiceService := service.NewAsyncTaskServiceService(asyncTaskUsecase, logger)
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, authToken, authorizer, operationLogUsecase, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, manager, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, authToken, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService)
+	httpServer, err := server.NewHTTPServer(confServer, logger, manager, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

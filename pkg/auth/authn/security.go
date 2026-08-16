@@ -1,32 +1,31 @@
-package auth
+package authn
 
 import (
 	"context"
 	"errors"
 
-	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
 )
 
-var _ authn.SecurityUser = (*securityUser)(nil)
+var _ SecurityUser = (*securityUser)(nil)
 
 type SecurityUserOptions struct {
 	log        *log.Helper
-	authClaims *authn.AuthClaims
+	authClaims *AuthClaims
 }
 
-type Option func(*SecurityUserOptions)
+type SecurityOption func(*SecurityUserOptions)
 
-func WithLog(log *log.Helper) Option {
+func WithLog(log *log.Helper) SecurityOption {
 	return func(opts *SecurityUserOptions) {
 		opts.log = log
 	}
 }
 
-func WithAuthClaims(authClaims *authn.AuthClaims) Option {
+func WithAuthClaims(authClaims *AuthClaims) SecurityOption {
 	return func(opts *SecurityUserOptions) {
 		opts.authClaims = authClaims
 	}
@@ -105,20 +104,20 @@ func (su *securityUser) GetTenantID() uint32 {
 	return convert.StringToUnit32(su.tenant)
 }
 
-// AuthSecurity 认证安全
-type AuthSecurity struct {
+// Security 认证安全
+type Security struct {
 	log *log.Helper
 }
 
-// NewAuthSecurity 创建新的认证安全实例
-func NewAuthSecurity(logger log.Logger) *AuthSecurity {
+// NewSecurity 创建新的认证安全实例
+func NewSecurity(logger log.Logger) *Security {
 	log := log.NewHelper(log.With(logger, "module", "auth/security/init"))
-	return &AuthSecurity{log: log}
+	return &Security{log: log}
 }
 
 // NewSecurityUserCreator 创建新的认证用户创建器
-func (p *AuthSecurity) NewSecurityUserCreator() authn.SecurityUserCreator {
-	return func(authClaims *authn.AuthClaims) authn.SecurityUser {
+func (p *Security) NewSecurityUserCreator() SecurityUserCreator {
+	return func(authClaims *AuthClaims) SecurityUser {
 		if authClaims == nil {
 			p.log.Error("auth claims creator fail ac == nil")
 		}
@@ -127,7 +126,7 @@ func (p *AuthSecurity) NewSecurityUserCreator() authn.SecurityUserCreator {
 }
 
 // NewAuthenticator 创建新的认证器实例
-func (p *AuthSecurity) NewSecurityUser(authClaims *authn.AuthClaims) authn.SecurityUser {
+func (p *Security) NewSecurityUser(authClaims *AuthClaims) SecurityUser {
 	// 创建认证声明
 	user := new(securityUser)
 	user.options = SecurityUserOptions{log: p.log, authClaims: authClaims}
@@ -135,6 +134,6 @@ func (p *AuthSecurity) NewSecurityUser(authClaims *authn.AuthClaims) authn.Secur
 }
 
 // Name 获取提供者名称
-func (p *AuthSecurity) Name() string {
+func (p *Security) Name() string {
 	return "auth security"
 }

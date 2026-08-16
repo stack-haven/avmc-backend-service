@@ -20,9 +20,10 @@ import (
 
 	// casbinmodel "github.com/casbin/casbin/v2/model"
 
-	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/authn"
 	authnEngine "backend-service/pkg/auth/authn"
 	authnJwt "backend-service/pkg/auth/authn/jwt"
+	"backend-service/pkg/auth/session"
 	"backend-service/pkg/utils"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -37,8 +38,8 @@ var ProviderSet = wire.NewSet(
 	NewData, NewTransaction, NewSnowflake,
 	NewEntClient, NewRedisClient,
 	NewHealthChecker,
-	NewAuthenticator, NewAuthorizer, auth.NewAuthSecurity,
-	auth.NewAuthToken,
+	NewAuthenticator, NewAuthorizer, authn.NewSecurity,
+	session.NewManager,
 	NewChatRepo,
 )
 
@@ -178,7 +179,7 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 }
 
 // NewAuthenticator 创建认证器
-func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) authnEngine.Authenticator {
+func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *authn.Security) authnEngine.Authenticator {
 	l := log.NewHelper(log.With(logger, "module", "authenticators/auth/initialize"))
 	if c == nil || c.Http == nil || c.Http.Middleware == nil || c.Http.Middleware.Auth == nil {
 		l.Fatalf("http auth config is required")

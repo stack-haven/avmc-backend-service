@@ -8,10 +8,11 @@ import (
 	"backend-service/app/evie/service/internal/conf"
 	"backend-service/app/evie/service/internal/service"
 	"backend-service/pkg/audit"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
+	"backend-service/pkg/auth/session"
 
 	pkgHealth "backend-service/pkg/health"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -29,7 +30,7 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 func NewHTTPServer(
 	c *conf.Server,
 	logger log.Logger,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Enforcer,
 	checker pkgHealth.Checker,
 	dictionaryService *service.DictionaryServiceService,

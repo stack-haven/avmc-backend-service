@@ -10,8 +10,6 @@ import (
 	nethttp "net/http"
 	"time"
 
-	"backend-service/pkg/auth"
-
 	"github.com/go-kratos/kratos/contrib/middleware/validate/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -23,6 +21,7 @@ import (
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	"backend-service/pkg/auth/session"
 	pkgHealth "backend-service/pkg/health"
 	"backend-service/pkg/middleware/safelogging"
 )
@@ -42,7 +41,7 @@ func newHTTPWhiteListMatcher() selector.MatchFunc {
 func newHTTPMiddleware(
 	cfg *conf.Middleware,
 	logger log.Logger,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Authorizer,
 ) []middleware.Middleware {
 	var ms []middleware.Middleware
@@ -62,7 +61,7 @@ func newHTTPMiddleware(
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger log.Logger,
-	authenticator *auth.AuthToken, authorizer authzEngine.Authorizer,
+	authenticator *session.Manager, authorizer authzEngine.Authorizer,
 	checker pkgHealth.Checker,
 	chat *service.ChatServiceService,
 ) *http.Server {

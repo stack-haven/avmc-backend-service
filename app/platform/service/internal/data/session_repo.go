@@ -9,22 +9,22 @@ import (
 	pb "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/pkg/aip/listing"
-	"backend-service/pkg/auth"
+	"backend-service/pkg/auth/session"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
 type sessionRepo struct {
-	token *auth.AuthToken
+	token *session.Manager
 	log   *log.Helper
 }
 
-func NewSessionRepo(token *auth.AuthToken, logger log.Logger) biz.SessionRepo {
+func NewSessionRepo(token *session.Manager, logger log.Logger) biz.SessionRepo {
 	return &sessionRepo{token: token, log: log.NewHelper(logger)}
 }
 
-func sessionProto(item *auth.Session, currentSessionID string) *pb.Session {
+func sessionProto(item *session.Session, currentSessionID string) *pb.Session {
 	createdAt := item.CreatedAt.Format(timeFormat)
 	lastActiveAt := item.LastActiveAt.Format(timeFormat)
 	expiresAt := item.ExpiresAt.Format(timeFormat)
@@ -53,7 +53,7 @@ func (r *sessionRepo) List(ctx context.Context, req *pb.ListSessionsRequest, cur
 	if err != nil {
 		return nil, 0, err
 	}
-	filtered := make([]*auth.Session, 0, len(sessions))
+	filtered := make([]*session.Session, 0, len(sessions))
 	for _, item := range sessions {
 		if req.UserId != nil && item.UserID != *req.UserId {
 			continue
@@ -111,7 +111,7 @@ func (r *sessionRepo) Revoke(ctx context.Context, sessionID string) error {
 		return err
 	}
 	if err := r.token.RevokeSession(ctx, tenantID, sessionID); err != nil {
-		if stderrors.Is(err, auth.ErrSessionNotFound) {
+		if stderrors.Is(err, session.ErrSessionNotFound) {
 			return errors.NotFound("SESSION_NOT_FOUND", "会话不存在")
 		}
 		return err

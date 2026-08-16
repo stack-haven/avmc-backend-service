@@ -21,9 +21,9 @@ type AuthConfig struct {
 // NewAuthenticator 根据统一配置创建 JWT 认证器（本地验签，无状态验证）。
 //
 // 认证工厂统一收敛在此，各服务只需提取自身 conf 的 auth 配置并调用，
-// 避免复制 30 行 JWT 组装代码。会话管理（AuthToken）与 SecurityUser 工厂
-// （AuthSecurity）本身已公共，见 auth_token.go / auth_security.go。
-func NewAuthenticator(cfg AuthConfig, security *AuthSecurity) (authn.Authenticator, error) {
+// 避免复制 30 行 JWT 组装代码。会话管理（session.Manager）与 SecurityUser 工厂
+// （authn.Security）本身已公共，见 session/ 与 authn/security.go。
+func NewAuthenticator(cfg AuthConfig, security *authn.Security) (authn.Authenticator, error) {
 	if security == nil {
 		return nil, fmt.Errorf("auth security is required")
 	}

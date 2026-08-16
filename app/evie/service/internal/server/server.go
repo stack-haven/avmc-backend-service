@@ -12,9 +12,9 @@ import (
 	"backend-service/app/evie/service/internal/conf"
 	"backend-service/pkg/audit"
 	auditMiddleware "backend-service/pkg/audit/middleware"
-	"backend-service/pkg/auth"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	"backend-service/pkg/auth/session"
 	"backend-service/pkg/middleware/safelogging"
 )
 
@@ -25,7 +25,7 @@ func newServerMiddleware(
 	cfg *conf.Middleware,
 	matcher selector.MatchFunc,
 	logger log.Logger,
-	authenticator *auth.AuthToken,
+	authenticator *session.Manager,
 	authorizer authzEngine.Enforcer,
 	auditClient audit.Client,
 ) ([]middleware.Middleware, error) {
