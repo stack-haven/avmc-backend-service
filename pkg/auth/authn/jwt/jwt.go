@@ -63,8 +63,10 @@ type JWTAuthenticator struct {
 	signingMethod jwt.SigningMethod
 	// signingKey 签名密钥
 	signingKey interface{}
-	// verificationKey 验证密钥
+	// verificationKey 验证密钥（单密钥场景）
 	verificationKey interface{}
+	// verificationKeys 验证密钥集（kid → key），支持密钥轮换
+	verificationKeys map[string]interface{}
 	// parseTokenFunc 解析令牌函数
 	parseTokenFunc authn.ParseContextTokenFunc
 }
@@ -106,12 +108,22 @@ func (a *JWTAuthenticator) Init(ctx context.Context, opts ...authn.Option) error
 	}
 	a.signingKey = a.options.SigningKey
 
-	// 设置验证密钥
+	// 设置验证密钥（单密钥场景）
 	if a.options.VerificationKey == nil {
 		// 如果未设置验证密钥，使用签名密钥
 		a.verificationKey = a.options.SigningKey
 	} else {
 		a.verificationKey = a.options.VerificationKey
+	}
+
+	// 设置验证密钥集（多密钥轮换场景）
+	if a.options.VerificationKeys != nil {
+		a.verificationKeys = a.options.VerificationKeys
+	} else {
+		a.verificationKeys = map[string]interface{}{}
+		if a.options.KeyID != "" {
+			a.verificationKeys[a.options.KeyID] = a.verificationKey
+		}
 	}
 
 	// 设置令牌解析函数
@@ -134,8 +146,9 @@ func (a *JWTAuthenticator) Authenticate(ctx context.Context) (*authn.AuthClaims,
 
 // ValidateToken 验证令牌的有效性
 func (a *JWTAuthenticator) ValidateToken(ctx context.Context, tokenString string) (*authn.AuthClaims, error) {
-	// 解析令牌
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	// 解析令牌（带时钟偏移容差）
+	parser := jwt.NewParser(jwt.WithLeeway(a.options.Leeway))
+	token, err := parser.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// 验证签名方法
 		if token.Method.Alg() != a.signingMethod.Alg() {
 			return nil, authn.NewAuthError(
@@ -145,6 +158,12 @@ func (a *JWTAuthenticator) ValidateToken(ctx context.Context, tokenString string
 			)
 		}
 
+		// 按 kid 查找验证密钥（支持密钥轮换）
+		if kid, ok := token.Header["kid"].(string); ok {
+			if key, exists := a.verificationKeys[kid]; exists {
+				return key, nil
+			}
+		}
 		return a.verificationKey, nil
 	})
 
@@ -263,6 +282,11 @@ func (a *JWTAuthenticator) CreateToken(ctx context.Context, claims authn.AuthCla
 	// 创建令牌
 	token := jwt.NewWithClaims(a.signingMethod, jwtClaims)
 
+	// 设置 kid（密钥标识），支持密钥轮换
+	if a.options.KeyID != "" {
+		token.Header["kid"] = a.options.KeyID
+	}
+
 	// 签名令牌
 	tokenString, err := token.SignedString(a.signingKey)
 	if err != nil {
@@ -272,20 +296,38 @@ func (a *JWTAuthenticator) CreateToken(ctx context.Context, claims authn.AuthCla
 	return tokenString, nil
 }
 
-// RefreshToken 刷新令牌，延长有效期
+// RefreshToken 刷新令牌，延长有效期。
+// 仅接受 refresh 类型的令牌（防止 access token 被复用为 refresh）。
 func (a *JWTAuthenticator) RefreshToken(ctx context.Context, token string) (string, error) {
-	// 验证令牌
-	claims, err := a.ValidateToken(ctx, token)
-	if err != nil {
-		// 如果是过期错误，我们可以继续刷新
-		var authErr *authn.AuthError
-		if errors.As(err, &authErr) && authErr.Code != authn.ErrCodeExpiredToken {
-			return "", err
+	// 解析令牌：允许过期（刷新场景），但必须通过签名验证。
+	parser := jwt.NewParser(jwt.WithLeeway(a.options.Leeway))
+	parsed, err := parser.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != a.signingMethod.Alg() {
+			return nil, authn.NewAuthError(authn.ErrCodeInvalidSignature, "unexpected signing method", nil)
 		}
+		if kid, ok := t.Header["kid"].(string); ok {
+			if key, exists := a.verificationKeys[kid]; exists {
+				return key, nil
+			}
+		}
+		return a.verificationKey, nil
+	})
+	if err != nil && !errors.Is(err, jwt.ErrTokenExpired) {
+		return "", err
 	}
-
-	// 创建新令牌
-	return a.CreateToken(ctx, *claims, a.options.RefreshTokenExpiration)
+	if parsed == nil {
+		return "", authn.ErrInvalidToken
+	}
+	claims, ok := parsed.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", authn.NewAuthError(authn.ErrCodeInvalidClaims, "invalid token claims", nil)
+	}
+	authClaims := authn.AuthClaims(claims)
+	// 校验令牌类型：仅 refresh 令牌可刷新，防止 access token 复用。
+	if authClaims.GetTokenType() != authn.TokenTypeRefresh {
+		return "", authn.NewAuthError(authn.ErrCodeInvalidToken, "token is not a refresh token", nil)
+	}
+	return a.CreateToken(ctx, authClaims, a.options.RefreshTokenExpiration)
 }
 
 // RevokeToken 撤销令牌，使其失效

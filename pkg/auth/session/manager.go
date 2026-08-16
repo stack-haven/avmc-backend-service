@@ -355,6 +355,7 @@ func (r *Manager) createAccessToken(auth Info, sessionID string) string {
 		SetSubject(convert.Unit32ToString(auth.UserId)).
 		SetTenant(convert.Unit32ToString(auth.TenantIdentifier())).
 		SetPlatformOperator(auth.PlatformOperator).
+		SetTokenType(authn.TokenTypeAccess).
 		SetScope("").
 		SetNonce(tokenID())
 
@@ -375,6 +376,7 @@ func (r *Manager) createRefreshToken(auth Info, sessionID string) string {
 		SetSubject(strconv.FormatUint(uint64(auth.UserId), 10)).
 		SetTenant(convert.Unit32ToString(auth.TenantIdentifier())).
 		SetPlatformOperator(auth.PlatformOperator).
+		SetTokenType(authn.TokenTypeRefresh).
 		SetNonce(tokenID()).
 		SetRefreshExp(time.Now().Add(expiration))
 	token, err := r.Authenticator.CreateToken(context.Background(), authClaims, expiration)

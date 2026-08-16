@@ -320,3 +320,30 @@ func (a AuthClaims) SetRefreshExp(exp time.Time) AuthClaims {
 	a["refresh_exp"] = exp
 	return a
 }
+
+// TokenType 令牌类型，用于区分 access/refresh，防止令牌混用。
+type TokenType string
+
+const (
+	// TokenTypeAccess 访问令牌
+	TokenTypeAccess TokenType = "access"
+	// TokenTypeRefresh 刷新令牌
+	TokenTypeRefresh TokenType = "refresh"
+)
+
+// SetTokenType 设置令牌类型。
+func (a AuthClaims) SetTokenType(t TokenType) AuthClaims {
+	a["token_type"] = string(t)
+	return a
+}
+
+// GetTokenType 获取令牌类型，未设置或非法时返回空串。
+func (a *AuthClaims) GetTokenType() TokenType {
+	if a == nil {
+		return ""
+	}
+	if t, ok := (*a)["token_type"].(string); ok {
+		return TokenType(t)
+	}
+	return ""
+}

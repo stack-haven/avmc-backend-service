@@ -18,8 +18,12 @@ type Options struct {
 	SigningMethod string
 	// SigningKey 签名密钥
 	SigningKey interface{}
-	// VerificationKey 验证密钥
+	// VerificationKey 验证密钥（单密钥场景）
 	VerificationKey interface{}
+	// KeyID 签名密钥标识（kid），用于多密钥轮换时标识当前签名密钥
+	KeyID string
+	// VerificationKeys 验证密钥集（kid → key），支持密钥轮换；为空时回退到 VerificationKey/SigningKey
+	VerificationKeys map[string]interface{}
 	// TokenLookup 令牌查找位置
 	TokenLookup string
 	// TokenHeadName 令牌头名称
@@ -34,6 +38,8 @@ type Options struct {
 	EnableRefresh bool
 	// EnableRevocation 是否启用撤销
 	EnableRevocation bool
+	// Leeway 时钟偏移容差，用于容忍分布式节点间的时钟不同步
+	Leeway time.Duration
 	// ProviderOptions 提供者特定选项
 	ProviderOptions map[string]interface{}
 }
@@ -153,6 +159,27 @@ func WithEnableRefresh(enable bool) Option {
 func WithEnableRevocation(enable bool) Option {
 	return func(o *Options) {
 		o.EnableRevocation = enable
+	}
+}
+
+// WithLeeway 设置时钟偏移容差（容忍分布式节点间的时钟不同步）。
+func WithLeeway(leeway time.Duration) Option {
+	return func(o *Options) {
+		o.Leeway = leeway
+	}
+}
+
+// WithKeyID 设置签名密钥标识（kid），配合 VerificationKeys 支持密钥轮换。
+func WithKeyID(kid string) Option {
+	return func(o *Options) {
+		o.KeyID = kid
+	}
+}
+
+// WithVerificationKeys 设置验证密钥集（kid → key），支持多密钥轮换。
+func WithVerificationKeys(keys map[string]interface{}) Option {
+	return func(o *Options) {
+		o.VerificationKeys = keys
 	}
 }
 
