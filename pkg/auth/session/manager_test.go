@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -415,5 +416,47 @@ func TestManagerFailOpenOnStoreFailure(t *testing.T) {
 	failClosed := newManagerWithStore(faultingTokenStore{}, log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
 	if _, err := failClosed.ValidateToken(ctx, access); err == nil {
 		t.Fatal("fail-closed should reject token on store failure")
+	}
+}
+
+// countingStore 包装 Store，统计 Get 调用次数（验证本地缓存命中）。
+type countingStore struct {
+	Store
+	gets atomic.Int32
+}
+
+func (s *countingStore) Get(ctx context.Context, key string) (string, error) {
+	s.gets.Add(1)
+	return s.Store.Get(ctx, key)
+}
+
+func TestManagerLocalCacheReducesStoreGets(t *testing.T) {
+	ctx := context.Background()
+	authenticator := newTestAuthenticator(t)
+
+	store := &countingStore{Store: newMemoryTokenStore()}
+	m := newManagerWithStore(store, log.NewStdLogger(io.Discard), authenticator, "uat_", "urt_")
+	m.localCache = newLocalCache()
+	m.localCacheTTL = time.Minute
+
+	access, _, err := m.GenerateToken(ctx, Info{UserId: 42, Username: "tester", TenantID: 1})
+	if err != nil {
+		t.Fatalf("generate token: %v", err)
+	}
+
+	// 第一次验证：未命中缓存，打 Redis
+	if _, err := m.ValidateToken(ctx, access); err != nil {
+		t.Fatalf("first validate: %v", err)
+	}
+	firstGets := store.gets.Load()
+
+	// 后续验证：命中本地缓存，不再打 Redis
+	for i := 0; i < 3; i++ {
+		if _, err := m.ValidateToken(ctx, access); err != nil {
+			t.Fatalf("validate #%d: %v", i, err)
+		}
+	}
+	if got := store.gets.Load(); got != firstGets {
+		t.Fatalf("store gets increased from %d to %d, local cache not effective", firstGets, got)
 	}
 }

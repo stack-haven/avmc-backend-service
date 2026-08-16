@@ -10,13 +10,13 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	"backend-service/pkg/auth/authn"
-	"backend-service/pkg/auth/authn/jwt"
+	_ "backend-service/pkg/auth/authn/jwt" // blank import 触发 JWT Provider 注册
 	"backend-service/pkg/auth/authz"
-	"backend-service/pkg/auth/authz/casbin"
+	_ "backend-service/pkg/auth/authz/casbin" // blank import 触发 Casbin Provider 注册
 	authModdleware "backend-service/pkg/auth/middleware"
 )
 
-// 示例：创建JWT认证器
+// 示例：创建JWT认证器（通过 Provider 注册机制按名称创建）
 func createJWTAuthenticator() authn.Authenticator {
 	// 配置JWT认证选项
 	options := []authn.Option{
@@ -26,10 +26,8 @@ func createJWTAuthenticator() authn.Authenticator {
 		authn.WithSigningMethod("HS256"),
 		authn.WithSigningKey([]byte("your-secret-key")),
 	}
-	// 创建JWT认证提供者
-	provider := jwt.NewProvider()
-	// 创建JWT认证器
-	authenticator, _ := provider.NewAuthenticator(context.Background(), options...)
+	// 按名称创建（jwt Provider 已通过 init 注册）
+	authenticator, _ := authn.NewAuthenticator("jwt", context.Background(), options...)
 
 	return authenticator
 }
@@ -54,17 +52,14 @@ func createCasbinAuthorizer() authz.Authorizer {
 	`
 	// 配置Casbin授权选项
 	options := []authz.Option{
-		authz.WithEngineType(authz.EngineCasbin),
-		authz.WithModelFormat(authz.ModelFormatFile),
+		authz.WithModelFormat(authz.ModelFormatText),
 		authz.WithModelText(mod),
 		authz.WithAdapterType(authz.AdapterMySQL),
 		authz.WithAdapterDSN("root:123456@tcp(localhost:3306)/platform"),
 	}
 
-	// 创建Casbin授权提供者
-	provider := casbin.NewProvider()
-	// 创建Casbin授权器
-	authorizer, _ := provider.NewAuthorizer(context.Background(), options...)
+	// 按名称创建（casbin Provider 已通过 init 注册）
+	authorizer, _ := authz.NewAuthorizer("casbin", context.Background(), options...)
 
 	// 添加策略
 	ctx := context.Background()

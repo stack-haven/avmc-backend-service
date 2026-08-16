@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -72,6 +73,10 @@ type Manager struct {
 	// failOpen 当为 true 时，Redis 故障降级为仅依赖 JWT 验签（跳过 session 校验）；
 	// 默认 false（安全优先，Redis 故障拒绝认证，保证踢下线永远生效）。
 	failOpen bool
+	// localCache 进程内本地缓存（可选，减少 Redis 打点）
+	localCache *localCache
+	// localCacheTTL 本地缓存有效期
+	localCacheTTL time.Duration
 }
 
 // Option 会话管理器配置选项。
@@ -82,6 +87,16 @@ type Option func(*Manager)
 func WithFailOpen(failOpen bool) Option {
 	return func(m *Manager) {
 		m.failOpen = failOpen
+	}
+}
+
+// WithLocalCache 开启进程内本地缓存 session 令牌，减少 Redis 打点。
+// ttl 为缓存有效期；开启后「踢下线」在 ttl 内可能存在延迟（多实例部署时尤其明显），
+// 需在性能与实时性之间权衡。默认关闭。
+func WithLocalCache(ttl time.Duration) Option {
+	return func(m *Manager) {
+		m.localCache = newLocalCache()
+		m.localCacheTTL = ttl
 	}
 }
 
@@ -232,8 +247,17 @@ func (r *Manager) ValidateToken(ctx context.Context, tokenString string) (*authn
 	if sessionID == "" {
 		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "missing session id", nil)
 	}
+	// 先查进程内本地缓存（可选，减少 Redis 打点）
+	cacheKey := r.sessionAccessKey(sessionID)
+	if stored, ok := r.localCache.Get(cacheKey); ok {
+		if subtle.ConstantTimeCompare([]byte(stored), []byte(tokenString)) != 1 {
+			return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "token has been revoked", nil)
+		}
+		return claims, nil
+	}
+
 	// 从 Redis 读取 session 访问令牌，区分「session 不存在」与「Redis 故障」。
-	stored, err := r.store.Get(ctx, r.sessionAccessKey(sessionID))
+	stored, err := r.store.Get(ctx, cacheKey)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			// session 不存在：token 已被踢下线/过期，拒绝。
@@ -249,6 +273,9 @@ func (r *Manager) ValidateToken(ctx context.Context, tokenString string) (*authn
 	if subtle.ConstantTimeCompare([]byte(stored), []byte(tokenString)) != 1 {
 		return nil, authn.NewAuthError(authn.ErrCodeInvalidToken, "token has been revoked", nil)
 	}
+
+	// 写本地缓存（若已开启）
+	r.localCache.Set(cacheKey, stored, r.localCacheTTL)
 	return claims, nil
 }
 
@@ -557,6 +584,9 @@ func (r *Manager) RevokeSession(ctx context.Context, tenantID uint32, sessionID 
 	if err := r.store.Del(ctx, r.sessionAccessKey(sessionID)); err != nil {
 		return err
 	}
+	// 删除本地缓存（保证踢下线即时生效）
+	r.localCache.Del(r.sessionAccessKey(sessionID))
+	r.localCache.Del(r.sessionRefreshKey(sessionID))
 	if err := r.store.Del(ctx, r.sessionRefreshKey(sessionID)); err != nil {
 		return err
 	}
@@ -659,4 +689,56 @@ func tokenID() string {
 		return strconv.FormatInt(time.Now().UnixNano(), 10)
 	}
 	return hex.EncodeToString(b[:])
+}
+
+// ── 进程内本地缓存 ─────────────────────────────────────
+
+// localCacheEntry 本地缓存条目。
+type localCacheEntry struct {
+	value     string
+	expiresAt time.Time
+}
+
+// localCache 进程内 session 令牌缓存，带 TTL 过期。
+type localCache struct {
+	mu     sync.RWMutex
+	values map[string]localCacheEntry
+}
+
+func newLocalCache() *localCache {
+	return &localCache{values: make(map[string]localCacheEntry)}
+}
+
+func (c *localCache) Get(key string) (string, bool) {
+	if c == nil {
+		return "", false
+	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	entry, ok := c.values[key]
+	if !ok {
+		return "", false
+	}
+	if !entry.expiresAt.IsZero() && time.Now().After(entry.expiresAt) {
+		return "", false
+	}
+	return entry.value, true
+}
+
+func (c *localCache) Set(key, value string, ttl time.Duration) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.values[key] = localCacheEntry{value: value, expiresAt: time.Now().Add(ttl)}
+}
+
+func (c *localCache) Del(key string) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.values, key)
 }
