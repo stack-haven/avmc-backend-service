@@ -124,19 +124,19 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, _ asr.RecognizeO
 		}
 	}()
 
-	// 分帧发送音频（40ms 一帧）
+	// 分帧发送音频（40ms 一帧）。讯飞 IAT 是实时流式转写，音频必须按实时节奏
+	// 逐帧发送，一次性快速灌入会被服务端判定为异常数据而挂起或拒绝。
 	chunkSize := 1280
 	for i := 0; i < len(audio); i += chunkSize {
 		end := i + chunkSize
 		if end > len(audio) {
 			end = len(audio)
 		}
+		// status：0=首帧，1=中间帧；最后一帧音频仍为 1，真正的结束帧（status=2）
+		// 为空音频单独发送，避免提前结束会话。
 		status := 1
 		if i == 0 {
 			status = 0
-		}
-		if end >= len(audio) {
-			status = 2
 		}
 		frame := map[string]any{
 			"common":   map[string]any{"app_id": p.cfg.AppID},
@@ -150,6 +150,12 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, _ asr.RecognizeO
 		}
 		if err := conn.WriteJSON(frame); err != nil {
 			return nil, fmt.Errorf("xunfei write frame: %w", err)
+		}
+		// 实时节流：每帧 40ms，与讯飞 IAT 的实时流式节奏对齐，同时响应上下文取消。
+		select {
+		case <-time.After(40 * time.Millisecond):
+		case <-ctx.Done():
+			return nil, ctx.Err()
 		}
 	}
 
