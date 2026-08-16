@@ -17,7 +17,6 @@ import (
 	"github.com/google/wire"
 	redisotel "github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
-	"google.golang.org/protobuf/types/known/durationpb"
 
 	// entrapper "github.com/casbin/ent-adapter"
 
@@ -25,8 +24,8 @@ import (
 
 	"backend-service/pkg/auth"
 	authnEngine "backend-service/pkg/auth/authn"
-	authnJwt "backend-service/pkg/auth/authn/jwt"
 	"backend-service/pkg/auth/loginattempt"
+	"backend-service/pkg/utils"
 
 	authzEngine "backend-service/pkg/auth/authz"
 	authzCasbin "backend-service/pkg/auth/authz/casbin"
@@ -290,9 +289,9 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (*redis.Client, error) {
 		Addr:         cfg.Redis.GetAddr(),
 		Password:     cfg.Redis.GetPassword(),
 		DB:           int(cfg.Redis.GetDb()),
-		DialTimeout:  configDuration(cfg.Redis.GetDialTimeout(), time.Second),
-		WriteTimeout: configDuration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
-		ReadTimeout:  configDuration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
+		DialTimeout:  utils.Duration(cfg.Redis.GetDialTimeout(), time.Second),
+		WriteTimeout: utils.Duration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
+		ReadTimeout:  utils.Duration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
 	})
 
 	// open tracing instrumentation.
@@ -313,42 +312,22 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (*redis.Client, error) {
 }
 
 // NewAuthenticator 创建认证器
+// NewAuthenticator 创建认证器（JWT 本地验签，认证工厂已收敛到 pkg/auth）。
 func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.AuthSecurity) (authnEngine.Authenticator, error) {
 	if c == nil || c.Http == nil || c.Http.Middleware == nil || c.Http.Middleware.Auth == nil {
 		return nil, fmt.Errorf("http auth config is required")
 	}
-	expires := configDuration(c.Http.Middleware.Auth.ExpiresTime, 7*24*time.Hour)
+	expires := utils.Duration(c.Http.Middleware.Auth.ExpiresTime, 7*24*time.Hour)
 	// 令牌过期时间默认 7天
 	if expires == 0 {
 		expires = time.Hour * 24 * 7
 	}
-	// 刷新令牌过期时间 = 令牌过期时间 * 10
-	refreshExpires := expires * 10
-	// 使用jwt提供者
-	provider := authnJwt.NewProvider()
-	authenticator, err := provider.NewAuthenticator(
-		context.Background(),
-		authnEngine.WithSigningKey([]byte(c.Http.Middleware.Auth.Key)),
-		authnEngine.WithSigningMethod(c.Http.Middleware.Auth.Method),
-		authnEngine.WithTokenExpiration(expires),
-		authnEngine.WithRefreshTokenExpiration(refreshExpires),
-		authnEngine.WithUserFactory(authSecurity.NewSecurityUser),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("creating authenticator: %w", err)
-	}
-	return authenticator, nil
-}
-
-func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duration {
-	if d == nil {
-		return fallback
-	}
-	v := d.AsDuration()
-	if v <= 0 {
-		return fallback
-	}
-	return v
+	return auth.NewAuthenticator(auth.AuthConfig{
+		Key:               c.Http.Middleware.Auth.Key,
+		Method:            c.Http.Middleware.Auth.Method,
+		AccessExpiration:  expires,
+		RefreshExpiration: expires * 10,
+	}, authSecurity)
 }
 
 // NewAuthorizer 创建权鉴器

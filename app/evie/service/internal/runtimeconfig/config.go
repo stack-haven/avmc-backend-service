@@ -59,7 +59,7 @@ func Validate(bc *conf.Bootstrap) error {
 		return ConfigError("server.http config is required")
 	}
 	if strings.TrimSpace(bc.Server.Http.Addr) == "" {
-		return ConfigError("platform_ADMIN_HTTP_ADDR must not be empty")
+		return ConfigError("EVIE_HTTP_ADDR must not be empty")
 	}
 	if err := validatePositiveDuration("server.http.timeout", bc.Server.Http.Timeout); err != nil {
 		return err
@@ -77,7 +77,7 @@ func Validate(bc *conf.Bootstrap) error {
 		return ConfigError("server.grpc config is required")
 	}
 	if strings.TrimSpace(bc.Server.Grpc.Addr) == "" {
-		return ConfigError("platform_ADMIN_GRPC_ADDR must not be empty")
+		return ConfigError("EVIE_GRPC_ADDR must not be empty")
 	}
 	if err := validatePositiveDuration("server.grpc.timeout", bc.Server.Grpc.Timeout); err != nil {
 		return err
@@ -109,10 +109,10 @@ func Validate(bc *conf.Bootstrap) error {
 	}
 	key := strings.TrimSpace(bc.Server.Http.Middleware.Auth.Key)
 	if key == "" {
-		return ConfigError("platform_ADMIN_JWT_KEY must not be empty")
+		return ConfigError("ARK_JWT_KEY must not be empty")
 	}
 	if IsProduction() && key == "some_api_key" {
-		return ConfigError("platform_ADMIN_JWT_KEY must override the development default in production")
+		return ConfigError("ARK_JWT_KEY must override the development default in production")
 	}
 	if bc.Data == nil {
 		return ConfigError("data config is required")
@@ -121,10 +121,10 @@ func Validate(bc *conf.Bootstrap) error {
 		return ConfigError("data.database config is required")
 	}
 	if strings.TrimSpace(bc.Data.Database.Driver) == "" {
-		return ConfigError("platform_ADMIN_DB_DRIVER must not be empty")
+		return ConfigError("EVIE_DB_DRIVER must not be empty")
 	}
 	if strings.TrimSpace(bc.Data.Database.Source) == "" {
-		return ConfigError("platform_ADMIN_DB_SOURCE must not be empty")
+		return ConfigError("EVIE_DB_SOURCE must not be empty")
 	}
 	if bc.Data.Database.MaxIdleConnections < 0 || bc.Data.Database.MaxOpenConnections < 0 {
 		return ConfigError("database connection pool sizes must not be negative")
@@ -136,7 +136,7 @@ func Validate(bc *conf.Bootstrap) error {
 		return ConfigError("data.redis config is required")
 	}
 	if strings.TrimSpace(bc.Data.Redis.Addr) == "" {
-		return ConfigError("platform_ADMIN_REDIS_ADDR must not be empty")
+		return ConfigError("EVIE_REDIS_ADDR must not be empty")
 	}
 	if bc.Data.Redis.Db < 0 {
 		return ConfigError("data.redis.db must not be negative")
@@ -144,33 +144,33 @@ func Validate(bc *conf.Bootstrap) error {
 	if IsProduction() {
 		lowerKey := strings.ToLower(key)
 		if len(key) < 32 || strings.Contains(lowerKey, "replace-with") || strings.Contains(lowerKey, "dev-only") {
-			return ConfigError("platform_ADMIN_JWT_KEY must be at least 32 bytes and must not be a placeholder in production")
+			return ConfigError("ARK_JWT_KEY must be at least 32 bytes and must not be a placeholder in production")
 		}
 		if unsafeProductionDatabaseSource(bc.Data.Database.Source) {
-			return ConfigError("platform_ADMIN_DB_SOURCE must not use root credentials or placeholders in production")
+			return ConfigError("EVIE_DB_SOURCE must not use root credentials or placeholders in production")
 		}
 		if strings.TrimSpace(bc.Data.Redis.Password) == "" || strings.Contains(strings.ToLower(bc.Data.Redis.Password), "replace-with") {
-			return ConfigError("platform_ADMIN_REDIS_PASSWORD must not be empty or a placeholder in production")
+			return ConfigError("EVIE_REDIS_PASSWORD must not be empty or a placeholder in production")
 		}
 		if len(bc.Server.Http.Cors.Origins) == 0 {
-			return ConfigError("platform_ADMIN_CORS_ORIGINS must not be empty in production")
+			return ConfigError("EVIE_CORS_ORIGINS must not be empty in production")
 		}
 		if bc.Server.Http.EnableSwagger {
-			return ConfigError("platform_ADMIN_ENABLE_SWAGGER must be false in production")
+			return ConfigError("EVIE_ENABLE_SWAGGER must be false in production")
 		}
 		if bc.Server.Http.EnablePprof {
 			return ConfigError("server.http.enable_pprof must be false in production")
 		}
 		for _, origin := range bc.Server.Http.Cors.Origins {
 			if strings.TrimSpace(origin) == "*" {
-				return ConfigError("platform_ADMIN_CORS_ORIGINS must not include * in production")
+				return ConfigError("EVIE_CORS_ORIGINS must not include * in production")
 			}
 		}
 		if bc.Data.Database.Debug {
-			return ConfigError("platform_ADMIN_DB_DEBUG must be false in production")
+			return ConfigError("EVIE_DB_DEBUG must be false in production")
 		}
 		if bc.Data.Database.Migrate {
-			return ConfigError("platform_ADMIN_DB_MIGRATE must be false in production; run migrations out of band")
+			return ConfigError("EVIE_DB_MIGRATE must be false in production; run migrations out of band")
 		}
 	}
 	return nil
@@ -203,7 +203,7 @@ func unsafeProductionDatabaseSource(source string) bool {
 }
 
 func IsProduction() bool {
-	for _, key := range []string{"platform_ADMIN_ENV", "DEPLOY_ENV", "APP_ENV"} {
+	for _, key := range []string{"EVIE_ENV", "DEPLOY_ENV", "APP_ENV"} {
 		switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
 		case "prod", "production":
 			return true
@@ -214,26 +214,26 @@ func IsProduction() bool {
 
 func applyServerEnv(server *conf.Server) {
 	if server.Http != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_ADMIN_HTTP_ADDR")); v != "" {
+		if v := strings.TrimSpace(os.Getenv("EVIE_HTTP_ADDR")); v != "" {
 			server.Http.Addr = v
 		}
-		if v, ok := envBool("platform_ADMIN_ENABLE_SWAGGER"); ok {
+		if v, ok := envBool("EVIE_ENABLE_SWAGGER"); ok {
 			server.Http.EnableSwagger = v
 		}
-		if v := splitCSV(os.Getenv("platform_ADMIN_CORS_ORIGINS")); len(v) > 0 {
+		if v := splitCSV(os.Getenv("EVIE_CORS_ORIGINS")); len(v) > 0 {
 			if server.Http.Cors == nil {
 				server.Http.Cors = &conf.Server_HTTP_CORS{}
 			}
 			server.Http.Cors.Origins = v
 		}
 		if server.Http.Middleware != nil && server.Http.Middleware.Auth != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_ADMIN_JWT_KEY")); v != "" {
+			if v := strings.TrimSpace(os.Getenv("ARK_JWT_KEY")); v != "" {
 				server.Http.Middleware.Auth.Key = v
 			}
 		}
 	}
 	if server.Grpc != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_ADMIN_GRPC_ADDR")); v != "" {
+		if v := strings.TrimSpace(os.Getenv("EVIE_GRPC_ADDR")); v != "" {
 			server.Grpc.Addr = v
 		}
 	}
@@ -241,24 +241,24 @@ func applyServerEnv(server *conf.Server) {
 
 func applyDataEnv(data *conf.Data) {
 	if data.Database != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_ADMIN_DB_DRIVER")); v != "" {
+		if v := strings.TrimSpace(os.Getenv("EVIE_DB_DRIVER")); v != "" {
 			data.Database.Driver = v
 		}
-		if v := strings.TrimSpace(os.Getenv("platform_ADMIN_DB_SOURCE")); v != "" {
+		if v := strings.TrimSpace(os.Getenv("EVIE_DB_SOURCE")); v != "" {
 			data.Database.Source = v
 		}
-		if v, ok := envBool("platform_ADMIN_DB_MIGRATE"); ok {
+		if v, ok := envBool("EVIE_DB_MIGRATE"); ok {
 			data.Database.Migrate = v
 		}
-		if v, ok := envBool("platform_ADMIN_DB_DEBUG"); ok {
+		if v, ok := envBool("EVIE_DB_DEBUG"); ok {
 			data.Database.Debug = v
 		}
 	}
 	if data.Redis != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_ADMIN_REDIS_ADDR")); v != "" {
+		if v := strings.TrimSpace(os.Getenv("EVIE_REDIS_ADDR")); v != "" {
 			data.Redis.Addr = v
 		}
-		if v, ok := os.LookupEnv("platform_ADMIN_REDIS_PASSWORD"); ok {
+		if v, ok := os.LookupEnv("EVIE_REDIS_PASSWORD"); ok {
 			data.Redis.Password = v
 		}
 	}

@@ -109,10 +109,10 @@ func Validate(bc *conf.Bootstrap) error {
 	}
 	key := strings.TrimSpace(bc.Server.Http.Middleware.Auth.Key)
 	if key == "" {
-		return ConfigError("platform_ADMIN_JWT_KEY must not be empty")
+		return ConfigError("ARK_JWT_KEY must not be empty")
 	}
 	if IsProduction() && key == "some_api_key" {
-		return ConfigError("platform_ADMIN_JWT_KEY must override the development default in production")
+		return ConfigError("ARK_JWT_KEY must override the development default in production")
 	}
 	if bc.Data == nil {
 		return ConfigError("data config is required")
@@ -144,7 +144,7 @@ func Validate(bc *conf.Bootstrap) error {
 	if IsProduction() {
 		lowerKey := strings.ToLower(key)
 		if len(key) < 32 || strings.Contains(lowerKey, "replace-with") || strings.Contains(lowerKey, "dev-only") {
-			return ConfigError("platform_ADMIN_JWT_KEY must be at least 32 bytes and must not be a placeholder in production")
+			return ConfigError("ARK_JWT_KEY must be at least 32 bytes and must not be a placeholder in production")
 		}
 		if unsafeProductionDatabaseSource(bc.Data.Database.Source) {
 			return ConfigError("platform_ADMIN_DB_SOURCE must not use root credentials or placeholders in production")
@@ -227,7 +227,7 @@ func applyServerEnv(server *conf.Server) {
 			server.Http.Cors.Origins = v
 		}
 		if server.Http.Middleware != nil && server.Http.Middleware.Auth != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_ADMIN_JWT_KEY")); v != "" {
+			if v := strings.TrimSpace(os.Getenv("ARK_JWT_KEY")); v != "" {
 				server.Http.Middleware.Auth.Key = v
 			}
 		}

@@ -35,16 +35,3 @@ func TestDatabasePoolDefaults(t *testing.T) {
 		t.Fatalf("max lifetime = %v", got)
 	}
 }
-
-func TestConfigDuration(t *testing.T) {
-	fallback := time.Second
-	if got := configDuration(nil, fallback); got != fallback {
-		t.Fatalf("nil duration = %v, want %v", got, fallback)
-	}
-	if got := configDuration(durationpb.New(0), fallback); got != fallback {
-		t.Fatalf("zero duration = %v, want %v", got, fallback)
-	}
-	if got := configDuration(durationpb.New(250*time.Millisecond), fallback); got != 250*time.Millisecond {
-		t.Fatalf("explicit duration = %v", got)
-	}
-}

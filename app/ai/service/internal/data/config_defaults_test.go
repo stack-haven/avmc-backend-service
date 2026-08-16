@@ -9,19 +9,6 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-func TestConfigDuration(t *testing.T) {
-	fallback := 2 * time.Second
-	if got := configDuration(nil, fallback); got != fallback {
-		t.Fatalf("nil duration = %v, want %v", got, fallback)
-	}
-	if got := configDuration(durationpb.New(0), fallback); got != fallback {
-		t.Fatalf("zero duration = %v, want %v", got, fallback)
-	}
-	if got := configDuration(durationpb.New(750*time.Millisecond), fallback); got != 750*time.Millisecond {
-		t.Fatalf("explicit duration = %v", got)
-	}
-}
-
 func TestDatabasePoolDefaults(t *testing.T) {
 	if got := databaseMaxIdleConnections(nil); got != 10 {
 		t.Fatalf("default max idle = %d", got)

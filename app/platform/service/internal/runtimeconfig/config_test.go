@@ -20,7 +20,7 @@ func TestValidateRejectsUnsafeProductionDefaults(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected production config validation to fail")
 	}
-	if !strings.Contains(err.Error(), "platform_ADMIN_JWT_KEY") {
+	if !strings.Contains(err.Error(), "ARK_JWT_KEY") {
 		t.Fatalf("expected jwt key validation error, got %v", err)
 	}
 }
@@ -49,14 +49,14 @@ func TestLoadRejectsDevelopmentConfigInProduction(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected production load to reject development config")
 	}
-	if !strings.Contains(err.Error(), "platform_ADMIN_JWT_KEY") {
+	if !strings.Contains(err.Error(), "ARK_JWT_KEY") {
 		t.Fatalf("Load() error = %v, want jwt production validation error", err)
 	}
 }
 
 func TestLoadAcceptsProductionEnvOverrides(t *testing.T) {
 	t.Setenv("platform_ADMIN_ENV", "production")
-	t.Setenv("platform_ADMIN_JWT_KEY", "0123456789abcdef0123456789abcdef")
+	t.Setenv("ARK_JWT_KEY", "0123456789abcdef0123456789abcdef")
 	t.Setenv("platform_ADMIN_DB_SOURCE", "admin:secret@tcp(db:3306)/platform_system")
 	t.Setenv("platform_ADMIN_DB_DEBUG", "false")
 	t.Setenv("platform_ADMIN_DB_MIGRATE", "false")
@@ -90,7 +90,7 @@ func TestLoadAcceptsProductionEnvOverrides(t *testing.T) {
 func TestApplyEnvOverrides(t *testing.T) {
 	t.Setenv("platform_ADMIN_HTTP_ADDR", "127.0.0.1:18000")
 	t.Setenv("platform_ADMIN_GRPC_ADDR", "127.0.0.1:19000")
-	t.Setenv("platform_ADMIN_JWT_KEY", "test-secret")
+	t.Setenv("ARK_JWT_KEY", "test-secret")
 	t.Setenv("platform_ADMIN_CORS_ORIGINS", "https://admin.example.com, https://ops.example.com")
 	t.Setenv("platform_ADMIN_DB_SOURCE", "user:pass@tcp(db:3306)/admin")
 	t.Setenv("platform_ADMIN_DB_DEBUG", "false")

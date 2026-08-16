@@ -13,20 +13,20 @@ import (
 )
 
 func TestValidateRejectsUnsafeProductionDefaults(t *testing.T) {
-	t.Setenv("platform_ADMIN_ENV", "production")
+	t.Setenv("EVIE_ENV", "production")
 	bc := bootstrapConfig()
 
 	err := Validate(bc)
 	if err == nil {
 		t.Fatal("expected production config validation to fail")
 	}
-	if !strings.Contains(err.Error(), "platform_ADMIN_JWT_KEY") {
+	if !strings.Contains(err.Error(), "ARK_JWT_KEY") {
 		t.Fatalf("expected jwt key validation error, got %v", err)
 	}
 }
 
 func TestValidateAcceptsSafeProductionConfig(t *testing.T) {
-	t.Setenv("platform_ADMIN_ENV", "production")
+	t.Setenv("EVIE_ENV", "production")
 	bc := bootstrapConfig()
 	bc.Server.Http.Middleware.Auth.Key = "0123456789abcdef0123456789abcdef"
 	bc.Server.Http.EnableSwagger = false
@@ -42,28 +42,28 @@ func TestValidateAcceptsSafeProductionConfig(t *testing.T) {
 }
 
 func TestLoadRejectsDevelopmentConfigInProduction(t *testing.T) {
-	t.Setenv("platform_ADMIN_ENV", "production")
+	t.Setenv("EVIE_ENV", "production")
 	confDir := writeRuntimeConfig(t, developmentRuntimeConfigYAML())
 
 	_, err := Load(confDir)
 	if err == nil {
 		t.Fatal("expected production load to reject development config")
 	}
-	if !strings.Contains(err.Error(), "platform_ADMIN_JWT_KEY") {
+	if !strings.Contains(err.Error(), "ARK_JWT_KEY") {
 		t.Fatalf("Load() error = %v, want jwt production validation error", err)
 	}
 }
 
 func TestLoadAcceptsProductionEnvOverrides(t *testing.T) {
-	t.Setenv("platform_ADMIN_ENV", "production")
-	t.Setenv("platform_ADMIN_JWT_KEY", "0123456789abcdef0123456789abcdef")
-	t.Setenv("platform_ADMIN_DB_SOURCE", "admin:secret@tcp(db:3306)/platform_system")
-	t.Setenv("platform_ADMIN_DB_DEBUG", "false")
-	t.Setenv("platform_ADMIN_DB_MIGRATE", "false")
-	t.Setenv("platform_ADMIN_REDIS_ADDR", "redis:6379")
-	t.Setenv("platform_ADMIN_REDIS_PASSWORD", "redis-secret")
-	t.Setenv("platform_ADMIN_CORS_ORIGINS", "https://admin.example.com")
-	t.Setenv("platform_ADMIN_ENABLE_SWAGGER", "false")
+	t.Setenv("EVIE_ENV", "production")
+	t.Setenv("ARK_JWT_KEY", "0123456789abcdef0123456789abcdef")
+	t.Setenv("EVIE_DB_SOURCE", "admin:secret@tcp(db:3306)/platform_system")
+	t.Setenv("EVIE_DB_DEBUG", "false")
+	t.Setenv("EVIE_DB_MIGRATE", "false")
+	t.Setenv("EVIE_REDIS_ADDR", "redis:6379")
+	t.Setenv("EVIE_REDIS_PASSWORD", "redis-secret")
+	t.Setenv("EVIE_CORS_ORIGINS", "https://admin.example.com")
+	t.Setenv("EVIE_ENABLE_SWAGGER", "false")
 	confDir := writeRuntimeConfig(t, developmentRuntimeConfigYAML())
 
 	bc, err := Load(confDir)
@@ -88,13 +88,13 @@ func TestLoadAcceptsProductionEnvOverrides(t *testing.T) {
 }
 
 func TestApplyEnvOverrides(t *testing.T) {
-	t.Setenv("platform_ADMIN_HTTP_ADDR", "127.0.0.1:18000")
-	t.Setenv("platform_ADMIN_GRPC_ADDR", "127.0.0.1:19000")
-	t.Setenv("platform_ADMIN_JWT_KEY", "test-secret")
-	t.Setenv("platform_ADMIN_CORS_ORIGINS", "https://admin.example.com, https://ops.example.com")
-	t.Setenv("platform_ADMIN_DB_SOURCE", "user:pass@tcp(db:3306)/admin")
-	t.Setenv("platform_ADMIN_DB_DEBUG", "false")
-	t.Setenv("platform_ADMIN_REDIS_PASSWORD", "")
+	t.Setenv("EVIE_HTTP_ADDR", "127.0.0.1:18000")
+	t.Setenv("EVIE_GRPC_ADDR", "127.0.0.1:19000")
+	t.Setenv("ARK_JWT_KEY", "test-secret")
+	t.Setenv("EVIE_CORS_ORIGINS", "https://admin.example.com, https://ops.example.com")
+	t.Setenv("EVIE_DB_SOURCE", "user:pass@tcp(db:3306)/admin")
+	t.Setenv("EVIE_DB_DEBUG", "false")
+	t.Setenv("EVIE_REDIS_PASSWORD", "")
 
 	bc := bootstrapConfig()
 	ApplyEnvOverrides(bc)
@@ -197,7 +197,7 @@ func TestValidateRejectsMissingRequiredConfig(t *testing.T) {
 				bc.Data.Database.Source = ""
 				return bc
 			}(),
-			want: "platform_ADMIN_DB_SOURCE",
+			want: "EVIE_DB_SOURCE",
 		},
 		{
 			name: "missing redis addr",
@@ -206,7 +206,7 @@ func TestValidateRejectsMissingRequiredConfig(t *testing.T) {
 				bc.Data.Redis.Addr = ""
 				return bc
 			}(),
-			want: "platform_ADMIN_REDIS_ADDR",
+			want: "EVIE_REDIS_ADDR",
 		},
 	}
 	for _, tt := range tests {
@@ -286,7 +286,7 @@ func TestValidateRejectsInvalidOperationalConfig(t *testing.T) {
 }
 
 func TestValidateRejectsPprofInProduction(t *testing.T) {
-	t.Setenv("platform_ADMIN_ENV", "production")
+	t.Setenv("EVIE_ENV", "production")
 	bc := bootstrapConfig()
 	bc.Server.Http.Middleware.Auth.Key = "0123456789abcdef0123456789abcdef"
 	bc.Server.Http.EnableSwagger = false

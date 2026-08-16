@@ -13,10 +13,10 @@ import (
 	"github.com/google/wire"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
-	"google.golang.org/protobuf/types/known/durationpb"
 
 	"backend-service/app/version/service/internal/data/ent"
 	pkgHealth "backend-service/pkg/health"
+	"backend-service/pkg/utils"
 
 	// init mysql driver
 	_ "github.com/go-sql-driver/mysql"
@@ -133,9 +133,9 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 		Addr:         cfg.Redis.GetAddr(),
 		Password:     cfg.Redis.GetPassword(),
 		DB:           int(cfg.Redis.GetDb()),
-		DialTimeout:  configDuration(cfg.Redis.GetDialTimeout(), time.Second),
-		WriteTimeout: configDuration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
-		ReadTimeout:  configDuration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
+		DialTimeout:  utils.Duration(cfg.Redis.GetDialTimeout(), time.Second),
+		WriteTimeout: utils.Duration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
+		ReadTimeout:  utils.Duration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
 	}); rdb == nil {
 		l.Fatalf("failed opening connection to redis")
 		return nil
@@ -157,15 +157,4 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 		}
 	}
 	return rdb
-}
-
-func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duration {
-	if d == nil {
-		return fallback
-	}
-	v := d.AsDuration()
-	if v <= 0 {
-		return fallback
-	}
-	return v
 }

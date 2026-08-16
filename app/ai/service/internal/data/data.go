@@ -15,7 +15,6 @@ import (
 	"github.com/google/wire"
 	redisotel "github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
-	"google.golang.org/protobuf/types/known/durationpb"
 
 	// entrapper "github.com/casbin/ent-adapter"
 
@@ -24,6 +23,7 @@ import (
 	"backend-service/pkg/auth"
 	authnEngine "backend-service/pkg/auth/authn"
 	authnJwt "backend-service/pkg/auth/authn/jwt"
+	"backend-service/pkg/utils"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -151,9 +151,9 @@ func NewRedisClient(cfg *conf.Data, logger log.Logger) (rdb *redis.Client) {
 		Addr:         cfg.Redis.GetAddr(),
 		Password:     cfg.Redis.GetPassword(),
 		DB:           int(cfg.Redis.GetDb()),
-		DialTimeout:  configDuration(cfg.Redis.GetDialTimeout(), time.Second),
-		WriteTimeout: configDuration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
-		ReadTimeout:  configDuration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
+		DialTimeout:  utils.Duration(cfg.Redis.GetDialTimeout(), time.Second),
+		WriteTimeout: utils.Duration(cfg.Redis.GetWriteTimeout(), 500*time.Millisecond),
+		ReadTimeout:  utils.Duration(cfg.Redis.GetReadTimeout(), 500*time.Millisecond),
 	}); rdb == nil {
 		l.Fatalf("failed opening connection to redis")
 		return nil
@@ -184,7 +184,7 @@ func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.Auth
 		l.Fatalf("http auth config is required")
 		return nil
 	}
-	expires := configDuration(c.Http.Middleware.Auth.ExpiresTime, 7*24*time.Hour)
+	expires := utils.Duration(c.Http.Middleware.Auth.ExpiresTime, 7*24*time.Hour)
 	// 令牌过期时间默认 7天
 	if expires == 0 {
 		expires = time.Hour * 24 * 7
@@ -206,17 +206,6 @@ func NewAuthenticator(c *conf.Server, logger log.Logger, authSecurity *auth.Auth
 		panic(err)
 	}
 	return authenticator
-}
-
-func configDuration(d *durationpb.Duration, fallback time.Duration) time.Duration {
-	if d == nil {
-		return fallback
-	}
-	v := d.AsDuration()
-	if v <= 0 {
-		return fallback
-	}
-	return v
 }
 
 // NewAuthorizer 创建权鉴器
