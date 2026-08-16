@@ -72,7 +72,7 @@ func TestCorrectionEngineCorrect(t *testing.T) {
 	logStub := &logRepoStub{}
 	engine := NewCorrectionEngine(logStub, &ruleRepoStub{rules: []CorrectionRule{
 		{Source: "金种子", Target: "金种籽", Type: "product", Priority: 100},
-	}}, log.NewStdLogger(nil))
+	}}, &dictRepoStub{words: []string{"金种籽"}}, &hotwordRepoStub{}, log.NewStdLogger(nil))
 	resp, err := engine.Correct(context.Background(), &pb.CorrectRequest{Text: "申请金种子奖励"})
 	if err != nil {
 		t.Fatalf("Correct error: %v", err)

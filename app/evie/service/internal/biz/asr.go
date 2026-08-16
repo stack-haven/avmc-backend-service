@@ -144,7 +144,7 @@ func normalizeAudio(req *pb.RecognizeRequest) (audio []byte, ext, contentType st
 
 // route 根据租户配置与识别场景路由到 ASR Provider，并加载热词。
 // stream=true 走流式（实时逐帧）；stream=false 走整段批量（音频已完整）。
-// 整段批量优先本地自建供应商（funasr，推理快、无网络往返）；流式优先 active 供应商。
+// 整段批量优先本地自建供应商（funasr，推理快）；流式优先讯飞（IAT 实时增量正常）。
 func (uc *ASRUsecase) route(ctx context.Context, stream bool) (asr.ASRProvider, asr.RecognizeOptions, error) {
 	configs, err := uc.providerRepo.ListConfig(ctx)
 	if err != nil {
@@ -152,7 +152,15 @@ func (uc *ASRUsecase) route(ctx context.Context, stream bool) (asr.ASRProvider, 
 	}
 
 	var active *pb.TenantProviderConfig
-	if !stream {
+	if stream {
+		// 流式：优先 active 的讯飞（IAT 逐帧增量输出正常）；funasr 流式当前无增量结果，故不作为首选。
+		for _, c := range configs {
+			if c.GetProviderName() == "xunfei" && c.GetIsActive() {
+				active = c
+				break
+			}
+		}
+	} else {
 		// 整段批量：优先 funasr（本地 SenseVoice，批量推理快），避免云实时转写 API 的逐帧节奏限制。
 		for _, c := range configs {
 			if c.GetProviderName() == "funasr" {
@@ -182,6 +190,7 @@ func (uc *ASRUsecase) route(ctx context.Context, stream bool) (asr.ASRProvider, 
 		SampleRate: int(active.GetSampleRate()),
 		Language:   active.GetLanguage(),
 	}
+	uc.log.Infof("route stream=%v -> provider=%s", stream, provider.Name())
 	if provider.Capabilities().HotwordSupport && uc.hotwordRepo != nil {
 		if hotwords, err := uc.hotwordRepo.List(ctx, ""); err == nil {
 			opts.Hotwords = toAsrHotwords(hotwords)

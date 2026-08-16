@@ -74,9 +74,13 @@ type CorrectionEngine struct {
 	log        *log.Helper
 }
 
-// NewCorrectionEngine 创建纠错引擎（wire 友好：注入规则纠错器）。
-func NewCorrectionEngine(logRepo CorrectionLogRepo, ruleRepo CorrectionRuleRepo, logger log.Logger) *CorrectionEngine {
-	return newCorrectionEngine(logRepo, logger, NewRuleCorrector(ruleRepo))
+// NewCorrectionEngine 创建纠错引擎（wire 友好：注入规则 + 热词 + 编辑距离纠错器）。
+func NewCorrectionEngine(logRepo CorrectionLogRepo, ruleRepo CorrectionRuleRepo, dictRepo DictionaryRepo, hotwordRepo HotwordRepo, logger log.Logger) *CorrectionEngine {
+	return newCorrectionEngine(logRepo, logger,
+		NewRuleCorrector(ruleRepo),
+		NewHotwordCorrector(hotwordRepo),
+		NewEditDistanceCorrector(dictRepo),
+	)
 }
 
 // newCorrectionEngine 内部构造函数，支持注入任意纠错器列表（测试用）。

@@ -11,12 +11,13 @@ import (
 
 // hotwordRepoStub is a minimal HotwordRepo stub for usecase tests.
 type hotwordRepoStub struct {
+	hotwords []*pb.Hotword
 	upserted *pb.Hotword
 	deleted  uint32
 }
 
 func (s *hotwordRepoStub) List(context.Context, string) ([]*pb.Hotword, error) {
-	return nil, nil
+	return s.hotwords, nil
 }
 func (s *hotwordRepoStub) Upsert(_ context.Context, h *pb.Hotword) (*pb.Hotword, error) {
 	s.upserted = h

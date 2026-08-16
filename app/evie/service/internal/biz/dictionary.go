@@ -15,6 +15,8 @@ type DictionaryRepo interface {
 	CreateWord(ctx context.Context, word *pb.DictionaryWord) (*pb.DictionaryWord, error)
 	UpdateWord(ctx context.Context, word *pb.DictionaryWord) (*pb.DictionaryWord, error)
 	DeleteWord(ctx context.Context, id uint32) error
+	// ListActiveWords 返回全量启用的标准词与别名（供纠错器模糊匹配）。
+	ListActiveWords(ctx context.Context) ([]string, error)
 }
 
 // DictionaryUsecase 字典中心业务逻辑。

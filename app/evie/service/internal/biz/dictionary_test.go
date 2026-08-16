@@ -34,6 +34,9 @@ func (s *dictionaryRepoStub) DeleteWord(_ context.Context, id uint32) error {
 	s.deleted = id
 	return nil
 }
+func (s *dictionaryRepoStub) ListActiveWords(context.Context) ([]string, error) {
+	return nil, nil
+}
 
 func TestDictionaryUsecaseCreateWordDefaults(t *testing.T) {
 	stub := &dictionaryRepoStub{}

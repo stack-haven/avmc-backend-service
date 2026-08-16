@@ -192,3 +192,35 @@ func (r *dictionaryRepo) DeleteWord(ctx context.Context, id uint32) error {
 		return nil
 	})
 }
+
+// ListActiveWords 返回全量启用的标准词与别名（去重），供纠错器模糊匹配。
+func (r *dictionaryRepo) ListActiveWords(ctx context.Context) ([]string, error) {
+	words, err := r.Data.DB(ctx).DictionaryWord.Query().
+		Where(dictionaryword.DeletedAtIsNil(), dictionaryword.StatusEQ(1)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	aliases, err := r.Data.DB(ctx).DictionaryAlias.Query().
+		Where(dictionaryalias.DeletedAtIsNil()).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	seen := make(map[string]struct{}, len(words)+len(aliases))
+	result := make([]string, 0, len(words)+len(aliases))
+	for _, w := range words {
+		if _, ok := seen[w.Word]; !ok {
+			seen[w.Word] = struct{}{}
+			result = append(result, w.Word)
+		}
+	}
+	for _, a := range aliases {
+		if _, ok := seen[a.Alias]; !ok {
+			seen[a.Alias] = struct{}{}
+			result = append(result, a.Alias)
+		}
+	}
+	return result, nil
+}

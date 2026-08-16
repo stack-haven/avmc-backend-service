@@ -54,7 +54,7 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 	asrUsecase := biz.NewASRUsecase(providerRepo, hotwordRepo, asrRecordRepo, fileCenterClient, logger)
 	correctionLogRepo := data.NewCorrectionLogRepo(dataData, logger)
 	correctionRuleRepo := data.NewCorrectionRuleRepo(dataData, logger)
-	correctionEngine := biz.NewCorrectionEngine(correctionLogRepo, correctionRuleRepo, logger)
+	correctionEngine := biz.NewCorrectionEngine(correctionLogRepo, correctionRuleRepo, dictionaryRepo, hotwordRepo, logger)
 	asrServiceService := service.NewASRServiceService(asrUsecase, correctionEngine, logger)
 	providerUsecase := biz.NewProviderUsecase(providerRepo, logger)
 	providerServiceService := service.NewProviderServiceService(providerUsecase, logger)
