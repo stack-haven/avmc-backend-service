@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"backend-service/pkg/audit"
+	"backend-service/pkg/auth/authn"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -35,8 +36,18 @@ func Server(client audit.Client, extractor audit.ContextExtractor, logger log.Lo
 
 			record := buildRecord(ctx, tr, extractor, err, time.Since(start))
 			if record != nil {
+				// 同步阶段提取 Authorization 头：异步 goroutine 使用 context.Background()
+				// 会丢失 server context，必须在离开同步路径前显式提取，再由
+				// client 转发到 platform 完成跨服务 JWT 认证。
+				authHeader := ""
+				if ht, ok := tr.(khttp.Transporter); ok && ht.Request() != nil {
+					authHeader = ht.Request().Header.Get(authn.HeaderAuthorize)
+				} else if h := tr.RequestHeader(); h != nil {
+					authHeader = h.Get(authn.HeaderAuthorize)
+				}
 				go func() {
-					if auditErr := client.Append(context.Background(), record); auditErr != nil {
+					ctx := authn.ForwardAuthHeader(context.Background(), authHeader)
+					if auditErr := client.Append(ctx, record); auditErr != nil {
 						h.Warnf("audit append failed: %v", auditErr)
 					}
 				}()

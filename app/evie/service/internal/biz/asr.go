@@ -12,6 +12,7 @@ import (
 	platformclient "backend-service/app/platform/service/client"
 	"backend-service/pkg/asr"
 	"backend-service/pkg/asr/funasr"
+	"backend-service/pkg/asr/xunfei"
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/utils/convert"
 )
@@ -160,6 +161,12 @@ func newProvider(name, configJSON string) (asr.ASRProvider, error) {
 			return nil, err
 		}
 		return funasr.New(*cfg)
+	case "xunfei":
+		cfg, err := xunfei.ParseConfig(configJSON)
+		if err != nil {
+			return nil, err
+		}
+		return xunfei.New(*cfg)
 	default:
 		return nil, fmt.Errorf("unsupported asr provider: %s", name)
 	}

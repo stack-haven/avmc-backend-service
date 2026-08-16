@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
+	"google.golang.org/grpc/metadata"
 )
 
 type testTransport struct {
@@ -21,7 +23,7 @@ type testTransport struct {
 	req       *http.Request
 }
 
-func (t *testTransport) Kind() transport.Kind  { return t.kind }
+func (t *testTransport) Kind() transport.Kind   { return t.kind }
 func (t *testTransport) Operation() string      { return t.operation }
 func (t *testTransport) Request() *http.Request { return t.req }
 
@@ -99,5 +101,59 @@ func TestAuditMiddlewareRecordsError(t *testing.T) {
 	}
 	if r.ErrorMessage == "" {
 		t.Fatal("expected non-empty error_message")
+	}
+}
+
+type captureClient struct {
+	mu     sync.Mutex
+	gotCtx context.Context
+}
+
+func (c *captureClient) Append(ctx context.Context, _ *audit.Record) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.gotCtx = ctx
+	return nil
+}
+
+// TestAuditMiddlewareForwardsAuthHeader 验证异步审计 goroutine 丢失 server context 后，
+// 中间件仍能在同步阶段提取 Authorization 头并注入出站 metadata，供 platform 跨服务认证。
+func TestAuditMiddlewareForwardsAuthHeader(t *testing.T) {
+	client := &captureClient{}
+	mw := Server(client, testExtractor, log.DefaultLogger)
+	handler := mw(func(_ context.Context, _ interface{}) (interface{}, error) { return "ok", nil })
+
+	req := httptest.NewRequest("POST", "/evie/v1/users", nil)
+	req.Header.Set("Authorization", "Bearer test-token")
+	tr := &testTransport{kind: transport.KindHTTP, operation: "/evie/v1/users", req: req}
+	ctx := transport.NewServerContext(context.Background(), tr)
+
+	if _, err := handler(ctx, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	// 等待异步 goroutine 写入 ctx
+	var gotCtx context.Context
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		client.mu.Lock()
+		gotCtx = client.gotCtx
+		client.mu.Unlock()
+		if gotCtx != nil {
+			break
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if gotCtx == nil {
+		t.Fatal("client.Append not called within deadline")
+	}
+
+	md, ok := metadata.FromOutgoingContext(gotCtx)
+	if !ok {
+		t.Fatal("expected outgoing metadata carrying authorization")
+	}
+	got := md.Get("authorization")
+	if len(got) == 0 || got[0] != "Bearer test-token" {
+		t.Fatalf("authorization = %v, want [Bearer test-token]", got)
 	}
 }
