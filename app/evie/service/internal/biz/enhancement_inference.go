@@ -61,6 +61,10 @@ func (FuzzyMatchingStep) Process(c *EnhancementContext) error {
 			if sub == text {
 				continue
 			}
+			// 跳过已被确定性层锁定的片段，避免对替换结果再产生模糊建议（如 金种籽→黑种籽）
+			if c.isLocked(sub) {
+				continue
+			}
 			dist := levenshteinDistance(sub, text)
 			if dist == 0 || dist > 2 {
 				continue

@@ -679,9 +679,10 @@ func (r *dictionaryRepo) LoadVocabularyEntries(ctx context.Context, tenantID uin
 		return nil, nil, nil
 	}
 
-	// 2. 查询这些词库的词条
+	// 2. 查询这些词库的词条（显式 Limit 避免 ent 全局默认 1000 限制丢失大数据）
 	entryRows, err := r.Data.DB(sysCtx).DictionaryEntry.Query().
 		Where(dictionaryentry.DictionaryIDIn(dictIDs...), dictionaryentry.DeletedAtIsNil()).
+		Limit(100000).
 		All(sysCtx)
 	if err != nil {
 		return nil, nil, err
@@ -701,6 +702,7 @@ func (r *dictionaryRepo) LoadVocabularyEntries(ctx context.Context, tenantID uin
 	relationRows, err := r.Data.DB(sysCtx).DictionaryRelation.Query().
 		Where(dictionaryrelation.DeletedAtIsNil()).
 		Where(dictionaryrelation.HasEntryWith(dictionaryentry.IDIn(entryIDs...))).
+		Limit(100000).
 		All(sysCtx)
 	if err != nil {
 		return nil, nil, err
