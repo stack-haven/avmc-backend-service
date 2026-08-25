@@ -18,7 +18,7 @@ import (
 var evieMenus = []menuSeed{
 	{Parent: "", Name: "EviePlatform", Title: "语音智能引擎", Path: "/evie", Component: "BasicLayout", Icon: "mdi:microphone-message-outline", Type: 1, Sort: 70},
 
-	{Parent: "EviePlatform", Name: "EvieDictionary", Title: "词库中心", Path: "/evie/dictionary", Component: "BasicLayout", Icon: "mdi:book-cog-outline", Type: 1, Sort: 10},
+	{Parent: "EviePlatform", Name: "EvieDictionary", Title: "词库中心", Path: "/evie/dictionary", Component: "", Icon: "mdi:book-cog-outline", Type: 1, Sort: 10},
 	{Parent: "EvieDictionary", Name: "EvieDictionaryList", Title: "词库管理", Path: "/evie/dictionary/dictionaries", Component: "/evie/dictionary/dictionaries/list", Icon: "mdi:bookshelf", Type: 2, Sort: 10},
 	{Parent: "EvieDictionary", Name: "EvieEntryList", Title: "词条管理", Path: "/evie/dictionary/entries", Component: "/evie/dictionary/entries/list", Icon: "mdi:format-list-bulleted", Type: 2, Sort: 20},
 	{Parent: "EvieDictionary", Name: "EvieRelationList", Title: "关系管理", Path: "/evie/dictionary/relations", Component: "/evie/dictionary/relations/list", Icon: "mdi:source-branch", Type: 2, Sort: 30},
@@ -27,7 +27,7 @@ var evieMenus = []menuSeed{
 	{Parent: "EvieDictionary", Name: "EvieConflictList", Title: "冲突记录", Path: "/evie/dictionary/conflicts", Component: "/evie/dictionary/conflicts/list", Icon: "mdi:alert-outline", Type: 2, Sort: 60},
 	{Parent: "EviePlatform", Name: "EvieASR", Title: "语音识别", Path: "/evie/asr", Component: "/evie/asr/index", Icon: "mdi:microphone-outline", Type: 2, Sort: 30},
 	{Parent: "EviePlatform", Name: "EvieProvider", Title: "供应商管理", Path: "/evie/provider", Component: "/evie/provider/list", Icon: "mdi:server-network-outline", Type: 2, Sort: 40},
-	{Parent: "EviePlatform", Name: "EvieEnhancement", Title: "文本增强", Path: "/evie/enhancement", Component: "BasicLayout", Icon: "mdi:auto-fix", Type: 1, Sort: 50},
+	{Parent: "EviePlatform", Name: "EvieEnhancement", Title: "文本增强", Path: "/evie/enhancement", Component: "", Icon: "mdi:auto-fix", Type: 1, Sort: 50},
 	{Parent: "EvieEnhancement", Name: "EviePolicyList", Title: "增强策略", Path: "/evie/enhancement/policies", Component: "/evie/enhancement/policies/list", Icon: "mdi:tune-variant", Type: 2, Sort: 10},
 	{Parent: "EvieEnhancement", Name: "EvieProfileList", Title: "增强场景", Path: "/evie/enhancement/profiles", Component: "/evie/enhancement/profiles/list", Icon: "mdi:view-list-outline", Type: 2, Sort: 20},
 	{Parent: "EvieEnhancement", Name: "EvieLogList", Title: "增强记录", Path: "/evie/enhancement/logs", Component: "/evie/enhancement/logs/list", Icon: "mdi:clipboard-text-clock-outline", Type: 2, Sort: 30},
