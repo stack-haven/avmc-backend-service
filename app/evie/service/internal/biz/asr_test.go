@@ -30,23 +30,6 @@ func TestNewProviderBadConfig(t *testing.T) {
 	}
 }
 
-func TestToAsrHotwords(t *testing.T) {
-	hotwords := []*pb.Hotword{
-		{Word: "金种子", Target: "金种籽", Weight: 5},
-		{Word: "田华", Weight: 3},
-	}
-	got := toAsrHotwords(hotwords)
-	if len(got) != 2 {
-		t.Fatalf("expected 2, got %d", len(got))
-	}
-	if got[0].Word != "金种子" || got[0].Target != "金种籽" || got[0].Weight != 5 {
-		t.Errorf("unexpected first hotword: %+v", got[0])
-	}
-	if got[1].Target != "" {
-		t.Errorf("expected empty target, got %q", got[1].Target)
-	}
-}
-
 func TestNormalizeAudio(t *testing.T) {
 	// raw PCM → 封装为 WAV（可播放）
 	req := &pb.RecognizeRequest{

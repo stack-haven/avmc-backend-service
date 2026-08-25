@@ -58,8 +58,11 @@ func seedRoles(ctx context.Context, c *gen.Client, authorizer authzEngine.Author
 	sa := ensureRole(ctx, c, 1, "超级管理员", allIDs, true)
 	normalRole := ensureRole(ctx, c, 1, "普通用户", basicIDs, false)
 
-	// 客户企业租户（ID=2）：租户管理员（基础菜单）
-	t2Role := ensureRole(ctx, c, 2, "租户管理员", basicIDs, true)
+	// 客户企业租户（ID=2）：租户管理员（基础菜单 + Evie 语音智能引擎菜单与按钮，供多租户隔离验收）
+	eviePageIDs, _ := c.Menu.Query().Where(menu.PathHasPrefix("/evie")).IDs(ctx)
+	evieBtnIDs, _ := c.Menu.Query().Where(menu.ParentIDIn(eviePageIDs...)).IDs(ctx)
+	evieAllIDs := append(eviePageIDs, evieBtnIDs...)
+	t2Role := ensureRole(ctx, c, 2, "租户管理员", append(basicIDs, evieAllIDs...), true)
 
 	// 用户-角色绑定（数据库：system_user_roles）
 	c.User.UpdateOneID(users.Admin.ID).AddRoleIDs(sa.ID).Exec(ctx)

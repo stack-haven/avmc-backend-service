@@ -219,11 +219,6 @@ func (_c *AsrProviderConfigCreate) check() error {
 	if _, ok := _c.mutation.TenantID(); !ok {
 		return &ValidationError{Name: "tenant_id", err: errors.New(`gen: missing required field "AsrProviderConfig.tenant_id"`)}
 	}
-	if v, ok := _c.mutation.TenantID(); ok {
-		if err := asrproviderconfig.TenantIDValidator(v); err != nil {
-			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "AsrProviderConfig.tenant_id": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.ProviderName(); !ok {
 		return &ValidationError{Name: "provider_name", err: errors.New(`gen: missing required field "AsrProviderConfig.provider_name"`)}
 	}

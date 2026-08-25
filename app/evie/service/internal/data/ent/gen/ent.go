@@ -5,11 +5,16 @@ package gen
 import (
 	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
 	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
-	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionary"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarychangelog"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryconflict"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
 	"context"
 	"errors"
 	"fmt"
@@ -79,13 +84,18 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			asrproviderconfig.Table: asrproviderconfig.ValidColumn,
-			asrrecord.Table:         asrrecord.ValidColumn,
-			correctionlog.Table:     correctionlog.ValidColumn,
-			correctionrule.Table:    correctionrule.ValidColumn,
-			dictionaryalias.Table:   dictionaryalias.ValidColumn,
-			dictionaryword.Table:    dictionaryword.ValidColumn,
-			hotword.Table:           hotword.ValidColumn,
+			asrproviderconfig.Table:   asrproviderconfig.ValidColumn,
+			asrrecord.Table:           asrrecord.ValidColumn,
+			dictionary.Table:          dictionary.ValidColumn,
+			dictionarycategory.Table:  dictionarycategory.ValidColumn,
+			dictionarychangelog.Table: dictionarychangelog.ValidColumn,
+			dictionaryconflict.Table:  dictionaryconflict.ValidColumn,
+			dictionaryentry.Table:     dictionaryentry.ValidColumn,
+			dictionaryrelation.Table:  dictionaryrelation.ValidColumn,
+			dictionaryversion.Table:   dictionaryversion.ValidColumn,
+			enhancementlog.Table:      enhancementlog.ValidColumn,
+			enhancementpolicy.Table:   enhancementpolicy.ValidColumn,
+			enhancementprofile.Table:  enhancementprofile.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

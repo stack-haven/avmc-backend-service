@@ -13,11 +13,16 @@ import (
 
 	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
 	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
-	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionary"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarychangelog"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryconflict"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -36,16 +41,26 @@ type Client struct {
 	AsrProviderConfig *AsrProviderConfigClient
 	// AsrRecord is the client for interacting with the AsrRecord builders.
 	AsrRecord *AsrRecordClient
-	// CorrectionLog is the client for interacting with the CorrectionLog builders.
-	CorrectionLog *CorrectionLogClient
-	// CorrectionRule is the client for interacting with the CorrectionRule builders.
-	CorrectionRule *CorrectionRuleClient
-	// DictionaryAlias is the client for interacting with the DictionaryAlias builders.
-	DictionaryAlias *DictionaryAliasClient
-	// DictionaryWord is the client for interacting with the DictionaryWord builders.
-	DictionaryWord *DictionaryWordClient
-	// Hotword is the client for interacting with the Hotword builders.
-	Hotword *HotwordClient
+	// Dictionary is the client for interacting with the Dictionary builders.
+	Dictionary *DictionaryClient
+	// DictionaryCategory is the client for interacting with the DictionaryCategory builders.
+	DictionaryCategory *DictionaryCategoryClient
+	// DictionaryChangeLog is the client for interacting with the DictionaryChangeLog builders.
+	DictionaryChangeLog *DictionaryChangeLogClient
+	// DictionaryConflict is the client for interacting with the DictionaryConflict builders.
+	DictionaryConflict *DictionaryConflictClient
+	// DictionaryEntry is the client for interacting with the DictionaryEntry builders.
+	DictionaryEntry *DictionaryEntryClient
+	// DictionaryRelation is the client for interacting with the DictionaryRelation builders.
+	DictionaryRelation *DictionaryRelationClient
+	// DictionaryVersion is the client for interacting with the DictionaryVersion builders.
+	DictionaryVersion *DictionaryVersionClient
+	// EnhancementLog is the client for interacting with the EnhancementLog builders.
+	EnhancementLog *EnhancementLogClient
+	// EnhancementPolicy is the client for interacting with the EnhancementPolicy builders.
+	EnhancementPolicy *EnhancementPolicyClient
+	// EnhancementProfile is the client for interacting with the EnhancementProfile builders.
+	EnhancementProfile *EnhancementProfileClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -59,11 +74,16 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AsrProviderConfig = NewAsrProviderConfigClient(c.config)
 	c.AsrRecord = NewAsrRecordClient(c.config)
-	c.CorrectionLog = NewCorrectionLogClient(c.config)
-	c.CorrectionRule = NewCorrectionRuleClient(c.config)
-	c.DictionaryAlias = NewDictionaryAliasClient(c.config)
-	c.DictionaryWord = NewDictionaryWordClient(c.config)
-	c.Hotword = NewHotwordClient(c.config)
+	c.Dictionary = NewDictionaryClient(c.config)
+	c.DictionaryCategory = NewDictionaryCategoryClient(c.config)
+	c.DictionaryChangeLog = NewDictionaryChangeLogClient(c.config)
+	c.DictionaryConflict = NewDictionaryConflictClient(c.config)
+	c.DictionaryEntry = NewDictionaryEntryClient(c.config)
+	c.DictionaryRelation = NewDictionaryRelationClient(c.config)
+	c.DictionaryVersion = NewDictionaryVersionClient(c.config)
+	c.EnhancementLog = NewEnhancementLogClient(c.config)
+	c.EnhancementPolicy = NewEnhancementPolicyClient(c.config)
+	c.EnhancementProfile = NewEnhancementProfileClient(c.config)
 }
 
 type (
@@ -154,15 +174,20 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		AsrProviderConfig: NewAsrProviderConfigClient(cfg),
-		AsrRecord:         NewAsrRecordClient(cfg),
-		CorrectionLog:     NewCorrectionLogClient(cfg),
-		CorrectionRule:    NewCorrectionRuleClient(cfg),
-		DictionaryAlias:   NewDictionaryAliasClient(cfg),
-		DictionaryWord:    NewDictionaryWordClient(cfg),
-		Hotword:           NewHotwordClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		AsrProviderConfig:   NewAsrProviderConfigClient(cfg),
+		AsrRecord:           NewAsrRecordClient(cfg),
+		Dictionary:          NewDictionaryClient(cfg),
+		DictionaryCategory:  NewDictionaryCategoryClient(cfg),
+		DictionaryChangeLog: NewDictionaryChangeLogClient(cfg),
+		DictionaryConflict:  NewDictionaryConflictClient(cfg),
+		DictionaryEntry:     NewDictionaryEntryClient(cfg),
+		DictionaryRelation:  NewDictionaryRelationClient(cfg),
+		DictionaryVersion:   NewDictionaryVersionClient(cfg),
+		EnhancementLog:      NewEnhancementLogClient(cfg),
+		EnhancementPolicy:   NewEnhancementPolicyClient(cfg),
+		EnhancementProfile:  NewEnhancementProfileClient(cfg),
 	}, nil
 }
 
@@ -180,15 +205,20 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		AsrProviderConfig: NewAsrProviderConfigClient(cfg),
-		AsrRecord:         NewAsrRecordClient(cfg),
-		CorrectionLog:     NewCorrectionLogClient(cfg),
-		CorrectionRule:    NewCorrectionRuleClient(cfg),
-		DictionaryAlias:   NewDictionaryAliasClient(cfg),
-		DictionaryWord:    NewDictionaryWordClient(cfg),
-		Hotword:           NewHotwordClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		AsrProviderConfig:   NewAsrProviderConfigClient(cfg),
+		AsrRecord:           NewAsrRecordClient(cfg),
+		Dictionary:          NewDictionaryClient(cfg),
+		DictionaryCategory:  NewDictionaryCategoryClient(cfg),
+		DictionaryChangeLog: NewDictionaryChangeLogClient(cfg),
+		DictionaryConflict:  NewDictionaryConflictClient(cfg),
+		DictionaryEntry:     NewDictionaryEntryClient(cfg),
+		DictionaryRelation:  NewDictionaryRelationClient(cfg),
+		DictionaryVersion:   NewDictionaryVersionClient(cfg),
+		EnhancementLog:      NewEnhancementLogClient(cfg),
+		EnhancementPolicy:   NewEnhancementPolicyClient(cfg),
+		EnhancementProfile:  NewEnhancementProfileClient(cfg),
 	}, nil
 }
 
@@ -218,8 +248,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AsrProviderConfig, c.AsrRecord, c.CorrectionLog, c.CorrectionRule,
-		c.DictionaryAlias, c.DictionaryWord, c.Hotword,
+		c.AsrProviderConfig, c.AsrRecord, c.Dictionary, c.DictionaryCategory,
+		c.DictionaryChangeLog, c.DictionaryConflict, c.DictionaryEntry,
+		c.DictionaryRelation, c.DictionaryVersion, c.EnhancementLog,
+		c.EnhancementPolicy, c.EnhancementProfile,
 	} {
 		n.Use(hooks...)
 	}
@@ -229,8 +261,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AsrProviderConfig, c.AsrRecord, c.CorrectionLog, c.CorrectionRule,
-		c.DictionaryAlias, c.DictionaryWord, c.Hotword,
+		c.AsrProviderConfig, c.AsrRecord, c.Dictionary, c.DictionaryCategory,
+		c.DictionaryChangeLog, c.DictionaryConflict, c.DictionaryEntry,
+		c.DictionaryRelation, c.DictionaryVersion, c.EnhancementLog,
+		c.EnhancementPolicy, c.EnhancementProfile,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -243,16 +277,26 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AsrProviderConfig.mutate(ctx, m)
 	case *AsrRecordMutation:
 		return c.AsrRecord.mutate(ctx, m)
-	case *CorrectionLogMutation:
-		return c.CorrectionLog.mutate(ctx, m)
-	case *CorrectionRuleMutation:
-		return c.CorrectionRule.mutate(ctx, m)
-	case *DictionaryAliasMutation:
-		return c.DictionaryAlias.mutate(ctx, m)
-	case *DictionaryWordMutation:
-		return c.DictionaryWord.mutate(ctx, m)
-	case *HotwordMutation:
-		return c.Hotword.mutate(ctx, m)
+	case *DictionaryMutation:
+		return c.Dictionary.mutate(ctx, m)
+	case *DictionaryCategoryMutation:
+		return c.DictionaryCategory.mutate(ctx, m)
+	case *DictionaryChangeLogMutation:
+		return c.DictionaryChangeLog.mutate(ctx, m)
+	case *DictionaryConflictMutation:
+		return c.DictionaryConflict.mutate(ctx, m)
+	case *DictionaryEntryMutation:
+		return c.DictionaryEntry.mutate(ctx, m)
+	case *DictionaryRelationMutation:
+		return c.DictionaryRelation.mutate(ctx, m)
+	case *DictionaryVersionMutation:
+		return c.DictionaryVersion.mutate(ctx, m)
+	case *EnhancementLogMutation:
+		return c.EnhancementLog.mutate(ctx, m)
+	case *EnhancementPolicyMutation:
+		return c.EnhancementPolicy.mutate(ctx, m)
+	case *EnhancementProfileMutation:
+		return c.EnhancementProfile.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("gen: unknown mutation type %T", m)
 	}
@@ -526,107 +570,107 @@ func (c *AsrRecordClient) mutate(ctx context.Context, m *AsrRecordMutation) (Val
 	}
 }
 
-// CorrectionLogClient is a client for the CorrectionLog schema.
-type CorrectionLogClient struct {
+// DictionaryClient is a client for the Dictionary schema.
+type DictionaryClient struct {
 	config
 }
 
-// NewCorrectionLogClient returns a client for the CorrectionLog from the given config.
-func NewCorrectionLogClient(c config) *CorrectionLogClient {
-	return &CorrectionLogClient{config: c}
+// NewDictionaryClient returns a client for the Dictionary from the given config.
+func NewDictionaryClient(c config) *DictionaryClient {
+	return &DictionaryClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `correctionlog.Hooks(f(g(h())))`.
-func (c *CorrectionLogClient) Use(hooks ...Hook) {
-	c.hooks.CorrectionLog = append(c.hooks.CorrectionLog, hooks...)
+// A call to `Use(f, g, h)` equals to `dictionary.Hooks(f(g(h())))`.
+func (c *DictionaryClient) Use(hooks ...Hook) {
+	c.hooks.Dictionary = append(c.hooks.Dictionary, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `correctionlog.Intercept(f(g(h())))`.
-func (c *CorrectionLogClient) Intercept(interceptors ...Interceptor) {
-	c.inters.CorrectionLog = append(c.inters.CorrectionLog, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `dictionary.Intercept(f(g(h())))`.
+func (c *DictionaryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Dictionary = append(c.inters.Dictionary, interceptors...)
 }
 
-// Create returns a builder for creating a CorrectionLog entity.
-func (c *CorrectionLogClient) Create() *CorrectionLogCreate {
-	mutation := newCorrectionLogMutation(c.config, OpCreate)
-	return &CorrectionLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Dictionary entity.
+func (c *DictionaryClient) Create() *DictionaryCreate {
+	mutation := newDictionaryMutation(c.config, OpCreate)
+	return &DictionaryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of CorrectionLog entities.
-func (c *CorrectionLogClient) CreateBulk(builders ...*CorrectionLogCreate) *CorrectionLogCreateBulk {
-	return &CorrectionLogCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Dictionary entities.
+func (c *DictionaryClient) CreateBulk(builders ...*DictionaryCreate) *DictionaryCreateBulk {
+	return &DictionaryCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *CorrectionLogClient) MapCreateBulk(slice any, setFunc func(*CorrectionLogCreate, int)) *CorrectionLogCreateBulk {
+func (c *DictionaryClient) MapCreateBulk(slice any, setFunc func(*DictionaryCreate, int)) *DictionaryCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &CorrectionLogCreateBulk{err: fmt.Errorf("calling to CorrectionLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &DictionaryCreateBulk{err: fmt.Errorf("calling to DictionaryClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*CorrectionLogCreate, rv.Len())
+	builders := make([]*DictionaryCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &CorrectionLogCreateBulk{config: c.config, builders: builders}
+	return &DictionaryCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for CorrectionLog.
-func (c *CorrectionLogClient) Update() *CorrectionLogUpdate {
-	mutation := newCorrectionLogMutation(c.config, OpUpdate)
-	return &CorrectionLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Dictionary.
+func (c *DictionaryClient) Update() *DictionaryUpdate {
+	mutation := newDictionaryMutation(c.config, OpUpdate)
+	return &DictionaryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CorrectionLogClient) UpdateOne(_m *CorrectionLog) *CorrectionLogUpdateOne {
-	mutation := newCorrectionLogMutation(c.config, OpUpdateOne, withCorrectionLog(_m))
-	return &CorrectionLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DictionaryClient) UpdateOne(_m *Dictionary) *DictionaryUpdateOne {
+	mutation := newDictionaryMutation(c.config, OpUpdateOne, withDictionary(_m))
+	return &DictionaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CorrectionLogClient) UpdateOneID(id uint32) *CorrectionLogUpdateOne {
-	mutation := newCorrectionLogMutation(c.config, OpUpdateOne, withCorrectionLogID(id))
-	return &CorrectionLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DictionaryClient) UpdateOneID(id uint32) *DictionaryUpdateOne {
+	mutation := newDictionaryMutation(c.config, OpUpdateOne, withDictionaryID(id))
+	return &DictionaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for CorrectionLog.
-func (c *CorrectionLogClient) Delete() *CorrectionLogDelete {
-	mutation := newCorrectionLogMutation(c.config, OpDelete)
-	return &CorrectionLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Dictionary.
+func (c *DictionaryClient) Delete() *DictionaryDelete {
+	mutation := newDictionaryMutation(c.config, OpDelete)
+	return &DictionaryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CorrectionLogClient) DeleteOne(_m *CorrectionLog) *CorrectionLogDeleteOne {
+func (c *DictionaryClient) DeleteOne(_m *Dictionary) *DictionaryDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CorrectionLogClient) DeleteOneID(id uint32) *CorrectionLogDeleteOne {
-	builder := c.Delete().Where(correctionlog.ID(id))
+func (c *DictionaryClient) DeleteOneID(id uint32) *DictionaryDeleteOne {
+	builder := c.Delete().Where(dictionary.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CorrectionLogDeleteOne{builder}
+	return &DictionaryDeleteOne{builder}
 }
 
-// Query returns a query builder for CorrectionLog.
-func (c *CorrectionLogClient) Query() *CorrectionLogQuery {
-	return &CorrectionLogQuery{
+// Query returns a query builder for Dictionary.
+func (c *DictionaryClient) Query() *DictionaryQuery {
+	return &DictionaryQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeCorrectionLog},
+		ctx:    &QueryContext{Type: TypeDictionary},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a CorrectionLog entity by its id.
-func (c *CorrectionLogClient) Get(ctx context.Context, id uint32) (*CorrectionLog, error) {
-	return c.Query().Where(correctionlog.ID(id)).Only(ctx)
+// Get returns a Dictionary entity by its id.
+func (c *DictionaryClient) Get(ctx context.Context, id uint32) (*Dictionary, error) {
+	return c.Query().Where(dictionary.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CorrectionLogClient) GetX(ctx context.Context, id uint32) *CorrectionLog {
+func (c *DictionaryClient) GetX(ctx context.Context, id uint32) *Dictionary {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -634,284 +678,31 @@ func (c *CorrectionLogClient) GetX(ctx context.Context, id uint32) *CorrectionLo
 	return obj
 }
 
-// Hooks returns the client hooks.
-func (c *CorrectionLogClient) Hooks() []Hook {
-	hooks := c.hooks.CorrectionLog
-	return append(hooks[:len(hooks):len(hooks)], correctionlog.Hooks[:]...)
-}
-
-// Interceptors returns the client interceptors.
-func (c *CorrectionLogClient) Interceptors() []Interceptor {
-	return c.inters.CorrectionLog
-}
-
-func (c *CorrectionLogClient) mutate(ctx context.Context, m *CorrectionLogMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&CorrectionLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&CorrectionLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&CorrectionLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&CorrectionLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("gen: unknown CorrectionLog mutation op: %q", m.Op())
-	}
-}
-
-// CorrectionRuleClient is a client for the CorrectionRule schema.
-type CorrectionRuleClient struct {
-	config
-}
-
-// NewCorrectionRuleClient returns a client for the CorrectionRule from the given config.
-func NewCorrectionRuleClient(c config) *CorrectionRuleClient {
-	return &CorrectionRuleClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `correctionrule.Hooks(f(g(h())))`.
-func (c *CorrectionRuleClient) Use(hooks ...Hook) {
-	c.hooks.CorrectionRule = append(c.hooks.CorrectionRule, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `correctionrule.Intercept(f(g(h())))`.
-func (c *CorrectionRuleClient) Intercept(interceptors ...Interceptor) {
-	c.inters.CorrectionRule = append(c.inters.CorrectionRule, interceptors...)
-}
-
-// Create returns a builder for creating a CorrectionRule entity.
-func (c *CorrectionRuleClient) Create() *CorrectionRuleCreate {
-	mutation := newCorrectionRuleMutation(c.config, OpCreate)
-	return &CorrectionRuleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of CorrectionRule entities.
-func (c *CorrectionRuleClient) CreateBulk(builders ...*CorrectionRuleCreate) *CorrectionRuleCreateBulk {
-	return &CorrectionRuleCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *CorrectionRuleClient) MapCreateBulk(slice any, setFunc func(*CorrectionRuleCreate, int)) *CorrectionRuleCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &CorrectionRuleCreateBulk{err: fmt.Errorf("calling to CorrectionRuleClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*CorrectionRuleCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &CorrectionRuleCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for CorrectionRule.
-func (c *CorrectionRuleClient) Update() *CorrectionRuleUpdate {
-	mutation := newCorrectionRuleMutation(c.config, OpUpdate)
-	return &CorrectionRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *CorrectionRuleClient) UpdateOne(_m *CorrectionRule) *CorrectionRuleUpdateOne {
-	mutation := newCorrectionRuleMutation(c.config, OpUpdateOne, withCorrectionRule(_m))
-	return &CorrectionRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *CorrectionRuleClient) UpdateOneID(id uint32) *CorrectionRuleUpdateOne {
-	mutation := newCorrectionRuleMutation(c.config, OpUpdateOne, withCorrectionRuleID(id))
-	return &CorrectionRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for CorrectionRule.
-func (c *CorrectionRuleClient) Delete() *CorrectionRuleDelete {
-	mutation := newCorrectionRuleMutation(c.config, OpDelete)
-	return &CorrectionRuleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *CorrectionRuleClient) DeleteOne(_m *CorrectionRule) *CorrectionRuleDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CorrectionRuleClient) DeleteOneID(id uint32) *CorrectionRuleDeleteOne {
-	builder := c.Delete().Where(correctionrule.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &CorrectionRuleDeleteOne{builder}
-}
-
-// Query returns a query builder for CorrectionRule.
-func (c *CorrectionRuleClient) Query() *CorrectionRuleQuery {
-	return &CorrectionRuleQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeCorrectionRule},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a CorrectionRule entity by its id.
-func (c *CorrectionRuleClient) Get(ctx context.Context, id uint32) (*CorrectionRule, error) {
-	return c.Query().Where(correctionrule.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *CorrectionRuleClient) GetX(ctx context.Context, id uint32) *CorrectionRule {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *CorrectionRuleClient) Hooks() []Hook {
-	hooks := c.hooks.CorrectionRule
-	return append(hooks[:len(hooks):len(hooks)], correctionrule.Hooks[:]...)
-}
-
-// Interceptors returns the client interceptors.
-func (c *CorrectionRuleClient) Interceptors() []Interceptor {
-	inters := c.inters.CorrectionRule
-	return append(inters[:len(inters):len(inters)], correctionrule.Interceptors[:]...)
-}
-
-func (c *CorrectionRuleClient) mutate(ctx context.Context, m *CorrectionRuleMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&CorrectionRuleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&CorrectionRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&CorrectionRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&CorrectionRuleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("gen: unknown CorrectionRule mutation op: %q", m.Op())
-	}
-}
-
-// DictionaryAliasClient is a client for the DictionaryAlias schema.
-type DictionaryAliasClient struct {
-	config
-}
-
-// NewDictionaryAliasClient returns a client for the DictionaryAlias from the given config.
-func NewDictionaryAliasClient(c config) *DictionaryAliasClient {
-	return &DictionaryAliasClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `dictionaryalias.Hooks(f(g(h())))`.
-func (c *DictionaryAliasClient) Use(hooks ...Hook) {
-	c.hooks.DictionaryAlias = append(c.hooks.DictionaryAlias, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `dictionaryalias.Intercept(f(g(h())))`.
-func (c *DictionaryAliasClient) Intercept(interceptors ...Interceptor) {
-	c.inters.DictionaryAlias = append(c.inters.DictionaryAlias, interceptors...)
-}
-
-// Create returns a builder for creating a DictionaryAlias entity.
-func (c *DictionaryAliasClient) Create() *DictionaryAliasCreate {
-	mutation := newDictionaryAliasMutation(c.config, OpCreate)
-	return &DictionaryAliasCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of DictionaryAlias entities.
-func (c *DictionaryAliasClient) CreateBulk(builders ...*DictionaryAliasCreate) *DictionaryAliasCreateBulk {
-	return &DictionaryAliasCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *DictionaryAliasClient) MapCreateBulk(slice any, setFunc func(*DictionaryAliasCreate, int)) *DictionaryAliasCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &DictionaryAliasCreateBulk{err: fmt.Errorf("calling to DictionaryAliasClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*DictionaryAliasCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &DictionaryAliasCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for DictionaryAlias.
-func (c *DictionaryAliasClient) Update() *DictionaryAliasUpdate {
-	mutation := newDictionaryAliasMutation(c.config, OpUpdate)
-	return &DictionaryAliasUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *DictionaryAliasClient) UpdateOne(_m *DictionaryAlias) *DictionaryAliasUpdateOne {
-	mutation := newDictionaryAliasMutation(c.config, OpUpdateOne, withDictionaryAlias(_m))
-	return &DictionaryAliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *DictionaryAliasClient) UpdateOneID(id uint32) *DictionaryAliasUpdateOne {
-	mutation := newDictionaryAliasMutation(c.config, OpUpdateOne, withDictionaryAliasID(id))
-	return &DictionaryAliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for DictionaryAlias.
-func (c *DictionaryAliasClient) Delete() *DictionaryAliasDelete {
-	mutation := newDictionaryAliasMutation(c.config, OpDelete)
-	return &DictionaryAliasDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *DictionaryAliasClient) DeleteOne(_m *DictionaryAlias) *DictionaryAliasDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DictionaryAliasClient) DeleteOneID(id uint32) *DictionaryAliasDeleteOne {
-	builder := c.Delete().Where(dictionaryalias.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &DictionaryAliasDeleteOne{builder}
-}
-
-// Query returns a query builder for DictionaryAlias.
-func (c *DictionaryAliasClient) Query() *DictionaryAliasQuery {
-	return &DictionaryAliasQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeDictionaryAlias},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a DictionaryAlias entity by its id.
-func (c *DictionaryAliasClient) Get(ctx context.Context, id uint32) (*DictionaryAlias, error) {
-	return c.Query().Where(dictionaryalias.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *DictionaryAliasClient) GetX(ctx context.Context, id uint32) *DictionaryAlias {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryWord queries the word edge of a DictionaryAlias.
-func (c *DictionaryAliasClient) QueryWord(_m *DictionaryAlias) *DictionaryWordQuery {
-	query := (&DictionaryWordClient{config: c.config}).Query()
+// QueryEntries queries the entries edge of a Dictionary.
+func (c *DictionaryClient) QueryEntries(_m *Dictionary) *DictionaryEntryQuery {
+	query := (&DictionaryEntryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(dictionaryalias.Table, dictionaryalias.FieldID, id),
-			sqlgraph.To(dictionaryword.Table, dictionaryword.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, dictionaryalias.WordTable, dictionaryalias.WordColumn),
+			sqlgraph.From(dictionary.Table, dictionary.FieldID, id),
+			sqlgraph.To(dictionaryentry.Table, dictionaryentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dictionary.EntriesTable, dictionary.EntriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVersions queries the versions edge of a Dictionary.
+func (c *DictionaryClient) QueryVersions(_m *Dictionary) *DictionaryVersionQuery {
+	query := (&DictionaryVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dictionary.Table, dictionary.FieldID, id),
+			sqlgraph.To(dictionaryversion.Table, dictionaryversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dictionary.VersionsTable, dictionary.VersionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -920,133 +711,133 @@ func (c *DictionaryAliasClient) QueryWord(_m *DictionaryAlias) *DictionaryWordQu
 }
 
 // Hooks returns the client hooks.
-func (c *DictionaryAliasClient) Hooks() []Hook {
-	hooks := c.hooks.DictionaryAlias
-	return append(hooks[:len(hooks):len(hooks)], dictionaryalias.Hooks[:]...)
+func (c *DictionaryClient) Hooks() []Hook {
+	hooks := c.hooks.Dictionary
+	return append(hooks[:len(hooks):len(hooks)], dictionary.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
-func (c *DictionaryAliasClient) Interceptors() []Interceptor {
-	inters := c.inters.DictionaryAlias
-	return append(inters[:len(inters):len(inters)], dictionaryalias.Interceptors[:]...)
+func (c *DictionaryClient) Interceptors() []Interceptor {
+	inters := c.inters.Dictionary
+	return append(inters[:len(inters):len(inters)], dictionary.Interceptors[:]...)
 }
 
-func (c *DictionaryAliasClient) mutate(ctx context.Context, m *DictionaryAliasMutation) (Value, error) {
+func (c *DictionaryClient) mutate(ctx context.Context, m *DictionaryMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&DictionaryAliasCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DictionaryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&DictionaryAliasUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DictionaryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&DictionaryAliasUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DictionaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&DictionaryAliasDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&DictionaryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("gen: unknown DictionaryAlias mutation op: %q", m.Op())
+		return nil, fmt.Errorf("gen: unknown Dictionary mutation op: %q", m.Op())
 	}
 }
 
-// DictionaryWordClient is a client for the DictionaryWord schema.
-type DictionaryWordClient struct {
+// DictionaryCategoryClient is a client for the DictionaryCategory schema.
+type DictionaryCategoryClient struct {
 	config
 }
 
-// NewDictionaryWordClient returns a client for the DictionaryWord from the given config.
-func NewDictionaryWordClient(c config) *DictionaryWordClient {
-	return &DictionaryWordClient{config: c}
+// NewDictionaryCategoryClient returns a client for the DictionaryCategory from the given config.
+func NewDictionaryCategoryClient(c config) *DictionaryCategoryClient {
+	return &DictionaryCategoryClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `dictionaryword.Hooks(f(g(h())))`.
-func (c *DictionaryWordClient) Use(hooks ...Hook) {
-	c.hooks.DictionaryWord = append(c.hooks.DictionaryWord, hooks...)
+// A call to `Use(f, g, h)` equals to `dictionarycategory.Hooks(f(g(h())))`.
+func (c *DictionaryCategoryClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryCategory = append(c.hooks.DictionaryCategory, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `dictionaryword.Intercept(f(g(h())))`.
-func (c *DictionaryWordClient) Intercept(interceptors ...Interceptor) {
-	c.inters.DictionaryWord = append(c.inters.DictionaryWord, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `dictionarycategory.Intercept(f(g(h())))`.
+func (c *DictionaryCategoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryCategory = append(c.inters.DictionaryCategory, interceptors...)
 }
 
-// Create returns a builder for creating a DictionaryWord entity.
-func (c *DictionaryWordClient) Create() *DictionaryWordCreate {
-	mutation := newDictionaryWordMutation(c.config, OpCreate)
-	return &DictionaryWordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a DictionaryCategory entity.
+func (c *DictionaryCategoryClient) Create() *DictionaryCategoryCreate {
+	mutation := newDictionaryCategoryMutation(c.config, OpCreate)
+	return &DictionaryCategoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of DictionaryWord entities.
-func (c *DictionaryWordClient) CreateBulk(builders ...*DictionaryWordCreate) *DictionaryWordCreateBulk {
-	return &DictionaryWordCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of DictionaryCategory entities.
+func (c *DictionaryCategoryClient) CreateBulk(builders ...*DictionaryCategoryCreate) *DictionaryCategoryCreateBulk {
+	return &DictionaryCategoryCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *DictionaryWordClient) MapCreateBulk(slice any, setFunc func(*DictionaryWordCreate, int)) *DictionaryWordCreateBulk {
+func (c *DictionaryCategoryClient) MapCreateBulk(slice any, setFunc func(*DictionaryCategoryCreate, int)) *DictionaryCategoryCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &DictionaryWordCreateBulk{err: fmt.Errorf("calling to DictionaryWordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &DictionaryCategoryCreateBulk{err: fmt.Errorf("calling to DictionaryCategoryClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*DictionaryWordCreate, rv.Len())
+	builders := make([]*DictionaryCategoryCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &DictionaryWordCreateBulk{config: c.config, builders: builders}
+	return &DictionaryCategoryCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for DictionaryWord.
-func (c *DictionaryWordClient) Update() *DictionaryWordUpdate {
-	mutation := newDictionaryWordMutation(c.config, OpUpdate)
-	return &DictionaryWordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for DictionaryCategory.
+func (c *DictionaryCategoryClient) Update() *DictionaryCategoryUpdate {
+	mutation := newDictionaryCategoryMutation(c.config, OpUpdate)
+	return &DictionaryCategoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DictionaryWordClient) UpdateOne(_m *DictionaryWord) *DictionaryWordUpdateOne {
-	mutation := newDictionaryWordMutation(c.config, OpUpdateOne, withDictionaryWord(_m))
-	return &DictionaryWordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DictionaryCategoryClient) UpdateOne(_m *DictionaryCategory) *DictionaryCategoryUpdateOne {
+	mutation := newDictionaryCategoryMutation(c.config, OpUpdateOne, withDictionaryCategory(_m))
+	return &DictionaryCategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DictionaryWordClient) UpdateOneID(id uint32) *DictionaryWordUpdateOne {
-	mutation := newDictionaryWordMutation(c.config, OpUpdateOne, withDictionaryWordID(id))
-	return &DictionaryWordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DictionaryCategoryClient) UpdateOneID(id uint32) *DictionaryCategoryUpdateOne {
+	mutation := newDictionaryCategoryMutation(c.config, OpUpdateOne, withDictionaryCategoryID(id))
+	return &DictionaryCategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for DictionaryWord.
-func (c *DictionaryWordClient) Delete() *DictionaryWordDelete {
-	mutation := newDictionaryWordMutation(c.config, OpDelete)
-	return &DictionaryWordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for DictionaryCategory.
+func (c *DictionaryCategoryClient) Delete() *DictionaryCategoryDelete {
+	mutation := newDictionaryCategoryMutation(c.config, OpDelete)
+	return &DictionaryCategoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *DictionaryWordClient) DeleteOne(_m *DictionaryWord) *DictionaryWordDeleteOne {
+func (c *DictionaryCategoryClient) DeleteOne(_m *DictionaryCategory) *DictionaryCategoryDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DictionaryWordClient) DeleteOneID(id uint32) *DictionaryWordDeleteOne {
-	builder := c.Delete().Where(dictionaryword.ID(id))
+func (c *DictionaryCategoryClient) DeleteOneID(id uint32) *DictionaryCategoryDeleteOne {
+	builder := c.Delete().Where(dictionarycategory.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &DictionaryWordDeleteOne{builder}
+	return &DictionaryCategoryDeleteOne{builder}
 }
 
-// Query returns a query builder for DictionaryWord.
-func (c *DictionaryWordClient) Query() *DictionaryWordQuery {
-	return &DictionaryWordQuery{
+// Query returns a query builder for DictionaryCategory.
+func (c *DictionaryCategoryClient) Query() *DictionaryCategoryQuery {
+	return &DictionaryCategoryQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeDictionaryWord},
+		ctx:    &QueryContext{Type: TypeDictionaryCategory},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a DictionaryWord entity by its id.
-func (c *DictionaryWordClient) Get(ctx context.Context, id uint32) (*DictionaryWord, error) {
-	return c.Query().Where(dictionaryword.ID(id)).Only(ctx)
+// Get returns a DictionaryCategory entity by its id.
+func (c *DictionaryCategoryClient) Get(ctx context.Context, id uint32) (*DictionaryCategory, error) {
+	return c.Query().Where(dictionarycategory.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DictionaryWordClient) GetX(ctx context.Context, id uint32) *DictionaryWord {
+func (c *DictionaryCategoryClient) GetX(ctx context.Context, id uint32) *DictionaryCategory {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1054,15 +845,433 @@ func (c *DictionaryWordClient) GetX(ctx context.Context, id uint32) *DictionaryW
 	return obj
 }
 
-// QueryAliases queries the aliases edge of a DictionaryWord.
-func (c *DictionaryWordClient) QueryAliases(_m *DictionaryWord) *DictionaryAliasQuery {
-	query := (&DictionaryAliasClient{config: c.config}).Query()
+// Hooks returns the client hooks.
+func (c *DictionaryCategoryClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryCategory
+	return append(hooks[:len(hooks):len(hooks)], dictionarycategory.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryCategoryClient) Interceptors() []Interceptor {
+	return c.inters.DictionaryCategory
+}
+
+func (c *DictionaryCategoryClient) mutate(ctx context.Context, m *DictionaryCategoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryCategoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryCategoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryCategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryCategoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryCategory mutation op: %q", m.Op())
+	}
+}
+
+// DictionaryChangeLogClient is a client for the DictionaryChangeLog schema.
+type DictionaryChangeLogClient struct {
+	config
+}
+
+// NewDictionaryChangeLogClient returns a client for the DictionaryChangeLog from the given config.
+func NewDictionaryChangeLogClient(c config) *DictionaryChangeLogClient {
+	return &DictionaryChangeLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dictionarychangelog.Hooks(f(g(h())))`.
+func (c *DictionaryChangeLogClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryChangeLog = append(c.hooks.DictionaryChangeLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dictionarychangelog.Intercept(f(g(h())))`.
+func (c *DictionaryChangeLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryChangeLog = append(c.inters.DictionaryChangeLog, interceptors...)
+}
+
+// Create returns a builder for creating a DictionaryChangeLog entity.
+func (c *DictionaryChangeLogClient) Create() *DictionaryChangeLogCreate {
+	mutation := newDictionaryChangeLogMutation(c.config, OpCreate)
+	return &DictionaryChangeLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DictionaryChangeLog entities.
+func (c *DictionaryChangeLogClient) CreateBulk(builders ...*DictionaryChangeLogCreate) *DictionaryChangeLogCreateBulk {
+	return &DictionaryChangeLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DictionaryChangeLogClient) MapCreateBulk(slice any, setFunc func(*DictionaryChangeLogCreate, int)) *DictionaryChangeLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DictionaryChangeLogCreateBulk{err: fmt.Errorf("calling to DictionaryChangeLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DictionaryChangeLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DictionaryChangeLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DictionaryChangeLog.
+func (c *DictionaryChangeLogClient) Update() *DictionaryChangeLogUpdate {
+	mutation := newDictionaryChangeLogMutation(c.config, OpUpdate)
+	return &DictionaryChangeLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DictionaryChangeLogClient) UpdateOne(_m *DictionaryChangeLog) *DictionaryChangeLogUpdateOne {
+	mutation := newDictionaryChangeLogMutation(c.config, OpUpdateOne, withDictionaryChangeLog(_m))
+	return &DictionaryChangeLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DictionaryChangeLogClient) UpdateOneID(id uint32) *DictionaryChangeLogUpdateOne {
+	mutation := newDictionaryChangeLogMutation(c.config, OpUpdateOne, withDictionaryChangeLogID(id))
+	return &DictionaryChangeLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DictionaryChangeLog.
+func (c *DictionaryChangeLogClient) Delete() *DictionaryChangeLogDelete {
+	mutation := newDictionaryChangeLogMutation(c.config, OpDelete)
+	return &DictionaryChangeLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DictionaryChangeLogClient) DeleteOne(_m *DictionaryChangeLog) *DictionaryChangeLogDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DictionaryChangeLogClient) DeleteOneID(id uint32) *DictionaryChangeLogDeleteOne {
+	builder := c.Delete().Where(dictionarychangelog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DictionaryChangeLogDeleteOne{builder}
+}
+
+// Query returns a query builder for DictionaryChangeLog.
+func (c *DictionaryChangeLogClient) Query() *DictionaryChangeLogQuery {
+	return &DictionaryChangeLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDictionaryChangeLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DictionaryChangeLog entity by its id.
+func (c *DictionaryChangeLogClient) Get(ctx context.Context, id uint32) (*DictionaryChangeLog, error) {
+	return c.Query().Where(dictionarychangelog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DictionaryChangeLogClient) GetX(ctx context.Context, id uint32) *DictionaryChangeLog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DictionaryChangeLogClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryChangeLog
+	return append(hooks[:len(hooks):len(hooks)], dictionarychangelog.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryChangeLogClient) Interceptors() []Interceptor {
+	return c.inters.DictionaryChangeLog
+}
+
+func (c *DictionaryChangeLogClient) mutate(ctx context.Context, m *DictionaryChangeLogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryChangeLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryChangeLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryChangeLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryChangeLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryChangeLog mutation op: %q", m.Op())
+	}
+}
+
+// DictionaryConflictClient is a client for the DictionaryConflict schema.
+type DictionaryConflictClient struct {
+	config
+}
+
+// NewDictionaryConflictClient returns a client for the DictionaryConflict from the given config.
+func NewDictionaryConflictClient(c config) *DictionaryConflictClient {
+	return &DictionaryConflictClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dictionaryconflict.Hooks(f(g(h())))`.
+func (c *DictionaryConflictClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryConflict = append(c.hooks.DictionaryConflict, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dictionaryconflict.Intercept(f(g(h())))`.
+func (c *DictionaryConflictClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryConflict = append(c.inters.DictionaryConflict, interceptors...)
+}
+
+// Create returns a builder for creating a DictionaryConflict entity.
+func (c *DictionaryConflictClient) Create() *DictionaryConflictCreate {
+	mutation := newDictionaryConflictMutation(c.config, OpCreate)
+	return &DictionaryConflictCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DictionaryConflict entities.
+func (c *DictionaryConflictClient) CreateBulk(builders ...*DictionaryConflictCreate) *DictionaryConflictCreateBulk {
+	return &DictionaryConflictCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DictionaryConflictClient) MapCreateBulk(slice any, setFunc func(*DictionaryConflictCreate, int)) *DictionaryConflictCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DictionaryConflictCreateBulk{err: fmt.Errorf("calling to DictionaryConflictClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DictionaryConflictCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DictionaryConflictCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DictionaryConflict.
+func (c *DictionaryConflictClient) Update() *DictionaryConflictUpdate {
+	mutation := newDictionaryConflictMutation(c.config, OpUpdate)
+	return &DictionaryConflictUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DictionaryConflictClient) UpdateOne(_m *DictionaryConflict) *DictionaryConflictUpdateOne {
+	mutation := newDictionaryConflictMutation(c.config, OpUpdateOne, withDictionaryConflict(_m))
+	return &DictionaryConflictUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DictionaryConflictClient) UpdateOneID(id uint32) *DictionaryConflictUpdateOne {
+	mutation := newDictionaryConflictMutation(c.config, OpUpdateOne, withDictionaryConflictID(id))
+	return &DictionaryConflictUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DictionaryConflict.
+func (c *DictionaryConflictClient) Delete() *DictionaryConflictDelete {
+	mutation := newDictionaryConflictMutation(c.config, OpDelete)
+	return &DictionaryConflictDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DictionaryConflictClient) DeleteOne(_m *DictionaryConflict) *DictionaryConflictDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DictionaryConflictClient) DeleteOneID(id uint32) *DictionaryConflictDeleteOne {
+	builder := c.Delete().Where(dictionaryconflict.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DictionaryConflictDeleteOne{builder}
+}
+
+// Query returns a query builder for DictionaryConflict.
+func (c *DictionaryConflictClient) Query() *DictionaryConflictQuery {
+	return &DictionaryConflictQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDictionaryConflict},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DictionaryConflict entity by its id.
+func (c *DictionaryConflictClient) Get(ctx context.Context, id uint32) (*DictionaryConflict, error) {
+	return c.Query().Where(dictionaryconflict.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DictionaryConflictClient) GetX(ctx context.Context, id uint32) *DictionaryConflict {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DictionaryConflictClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryConflict
+	return append(hooks[:len(hooks):len(hooks)], dictionaryconflict.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryConflictClient) Interceptors() []Interceptor {
+	return c.inters.DictionaryConflict
+}
+
+func (c *DictionaryConflictClient) mutate(ctx context.Context, m *DictionaryConflictMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryConflictCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryConflictUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryConflictUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryConflictDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryConflict mutation op: %q", m.Op())
+	}
+}
+
+// DictionaryEntryClient is a client for the DictionaryEntry schema.
+type DictionaryEntryClient struct {
+	config
+}
+
+// NewDictionaryEntryClient returns a client for the DictionaryEntry from the given config.
+func NewDictionaryEntryClient(c config) *DictionaryEntryClient {
+	return &DictionaryEntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dictionaryentry.Hooks(f(g(h())))`.
+func (c *DictionaryEntryClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryEntry = append(c.hooks.DictionaryEntry, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dictionaryentry.Intercept(f(g(h())))`.
+func (c *DictionaryEntryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryEntry = append(c.inters.DictionaryEntry, interceptors...)
+}
+
+// Create returns a builder for creating a DictionaryEntry entity.
+func (c *DictionaryEntryClient) Create() *DictionaryEntryCreate {
+	mutation := newDictionaryEntryMutation(c.config, OpCreate)
+	return &DictionaryEntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DictionaryEntry entities.
+func (c *DictionaryEntryClient) CreateBulk(builders ...*DictionaryEntryCreate) *DictionaryEntryCreateBulk {
+	return &DictionaryEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DictionaryEntryClient) MapCreateBulk(slice any, setFunc func(*DictionaryEntryCreate, int)) *DictionaryEntryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DictionaryEntryCreateBulk{err: fmt.Errorf("calling to DictionaryEntryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DictionaryEntryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DictionaryEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DictionaryEntry.
+func (c *DictionaryEntryClient) Update() *DictionaryEntryUpdate {
+	mutation := newDictionaryEntryMutation(c.config, OpUpdate)
+	return &DictionaryEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DictionaryEntryClient) UpdateOne(_m *DictionaryEntry) *DictionaryEntryUpdateOne {
+	mutation := newDictionaryEntryMutation(c.config, OpUpdateOne, withDictionaryEntry(_m))
+	return &DictionaryEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DictionaryEntryClient) UpdateOneID(id uint32) *DictionaryEntryUpdateOne {
+	mutation := newDictionaryEntryMutation(c.config, OpUpdateOne, withDictionaryEntryID(id))
+	return &DictionaryEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DictionaryEntry.
+func (c *DictionaryEntryClient) Delete() *DictionaryEntryDelete {
+	mutation := newDictionaryEntryMutation(c.config, OpDelete)
+	return &DictionaryEntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DictionaryEntryClient) DeleteOne(_m *DictionaryEntry) *DictionaryEntryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DictionaryEntryClient) DeleteOneID(id uint32) *DictionaryEntryDeleteOne {
+	builder := c.Delete().Where(dictionaryentry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DictionaryEntryDeleteOne{builder}
+}
+
+// Query returns a query builder for DictionaryEntry.
+func (c *DictionaryEntryClient) Query() *DictionaryEntryQuery {
+	return &DictionaryEntryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDictionaryEntry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DictionaryEntry entity by its id.
+func (c *DictionaryEntryClient) Get(ctx context.Context, id uint32) (*DictionaryEntry, error) {
+	return c.Query().Where(dictionaryentry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DictionaryEntryClient) GetX(ctx context.Context, id uint32) *DictionaryEntry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDictionary queries the dictionary edge of a DictionaryEntry.
+func (c *DictionaryEntryClient) QueryDictionary(_m *DictionaryEntry) *DictionaryQuery {
+	query := (&DictionaryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(dictionaryword.Table, dictionaryword.FieldID, id),
-			sqlgraph.To(dictionaryalias.Table, dictionaryalias.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, dictionaryword.AliasesTable, dictionaryword.AliasesColumn),
+			sqlgraph.From(dictionaryentry.Table, dictionaryentry.FieldID, id),
+			sqlgraph.To(dictionary.Table, dictionary.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dictionaryentry.DictionaryTable, dictionaryentry.DictionaryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRelations queries the relations edge of a DictionaryEntry.
+func (c *DictionaryEntryClient) QueryRelations(_m *DictionaryEntry) *DictionaryRelationQuery {
+	query := (&DictionaryRelationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dictionaryentry.Table, dictionaryentry.FieldID, id),
+			sqlgraph.To(dictionaryrelation.Table, dictionaryrelation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dictionaryentry.RelationsTable, dictionaryentry.RelationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1071,133 +1280,434 @@ func (c *DictionaryWordClient) QueryAliases(_m *DictionaryWord) *DictionaryAlias
 }
 
 // Hooks returns the client hooks.
-func (c *DictionaryWordClient) Hooks() []Hook {
-	hooks := c.hooks.DictionaryWord
-	return append(hooks[:len(hooks):len(hooks)], dictionaryword.Hooks[:]...)
+func (c *DictionaryEntryClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryEntry
+	return append(hooks[:len(hooks):len(hooks)], dictionaryentry.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
-func (c *DictionaryWordClient) Interceptors() []Interceptor {
-	inters := c.inters.DictionaryWord
-	return append(inters[:len(inters):len(inters)], dictionaryword.Interceptors[:]...)
+func (c *DictionaryEntryClient) Interceptors() []Interceptor {
+	inters := c.inters.DictionaryEntry
+	return append(inters[:len(inters):len(inters)], dictionaryentry.Interceptors[:]...)
 }
 
-func (c *DictionaryWordClient) mutate(ctx context.Context, m *DictionaryWordMutation) (Value, error) {
+func (c *DictionaryEntryClient) mutate(ctx context.Context, m *DictionaryEntryMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&DictionaryWordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DictionaryEntryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&DictionaryWordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DictionaryEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&DictionaryWordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DictionaryEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&DictionaryWordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&DictionaryEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("gen: unknown DictionaryWord mutation op: %q", m.Op())
+		return nil, fmt.Errorf("gen: unknown DictionaryEntry mutation op: %q", m.Op())
 	}
 }
 
-// HotwordClient is a client for the Hotword schema.
-type HotwordClient struct {
+// DictionaryRelationClient is a client for the DictionaryRelation schema.
+type DictionaryRelationClient struct {
 	config
 }
 
-// NewHotwordClient returns a client for the Hotword from the given config.
-func NewHotwordClient(c config) *HotwordClient {
-	return &HotwordClient{config: c}
+// NewDictionaryRelationClient returns a client for the DictionaryRelation from the given config.
+func NewDictionaryRelationClient(c config) *DictionaryRelationClient {
+	return &DictionaryRelationClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `hotword.Hooks(f(g(h())))`.
-func (c *HotwordClient) Use(hooks ...Hook) {
-	c.hooks.Hotword = append(c.hooks.Hotword, hooks...)
+// A call to `Use(f, g, h)` equals to `dictionaryrelation.Hooks(f(g(h())))`.
+func (c *DictionaryRelationClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryRelation = append(c.hooks.DictionaryRelation, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `hotword.Intercept(f(g(h())))`.
-func (c *HotwordClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Hotword = append(c.inters.Hotword, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `dictionaryrelation.Intercept(f(g(h())))`.
+func (c *DictionaryRelationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryRelation = append(c.inters.DictionaryRelation, interceptors...)
 }
 
-// Create returns a builder for creating a Hotword entity.
-func (c *HotwordClient) Create() *HotwordCreate {
-	mutation := newHotwordMutation(c.config, OpCreate)
-	return &HotwordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a DictionaryRelation entity.
+func (c *DictionaryRelationClient) Create() *DictionaryRelationCreate {
+	mutation := newDictionaryRelationMutation(c.config, OpCreate)
+	return &DictionaryRelationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Hotword entities.
-func (c *HotwordClient) CreateBulk(builders ...*HotwordCreate) *HotwordCreateBulk {
-	return &HotwordCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of DictionaryRelation entities.
+func (c *DictionaryRelationClient) CreateBulk(builders ...*DictionaryRelationCreate) *DictionaryRelationCreateBulk {
+	return &DictionaryRelationCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *HotwordClient) MapCreateBulk(slice any, setFunc func(*HotwordCreate, int)) *HotwordCreateBulk {
+func (c *DictionaryRelationClient) MapCreateBulk(slice any, setFunc func(*DictionaryRelationCreate, int)) *DictionaryRelationCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &HotwordCreateBulk{err: fmt.Errorf("calling to HotwordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &DictionaryRelationCreateBulk{err: fmt.Errorf("calling to DictionaryRelationClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*HotwordCreate, rv.Len())
+	builders := make([]*DictionaryRelationCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &HotwordCreateBulk{config: c.config, builders: builders}
+	return &DictionaryRelationCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Hotword.
-func (c *HotwordClient) Update() *HotwordUpdate {
-	mutation := newHotwordMutation(c.config, OpUpdate)
-	return &HotwordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for DictionaryRelation.
+func (c *DictionaryRelationClient) Update() *DictionaryRelationUpdate {
+	mutation := newDictionaryRelationMutation(c.config, OpUpdate)
+	return &DictionaryRelationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *HotwordClient) UpdateOne(_m *Hotword) *HotwordUpdateOne {
-	mutation := newHotwordMutation(c.config, OpUpdateOne, withHotword(_m))
-	return &HotwordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DictionaryRelationClient) UpdateOne(_m *DictionaryRelation) *DictionaryRelationUpdateOne {
+	mutation := newDictionaryRelationMutation(c.config, OpUpdateOne, withDictionaryRelation(_m))
+	return &DictionaryRelationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *HotwordClient) UpdateOneID(id uint32) *HotwordUpdateOne {
-	mutation := newHotwordMutation(c.config, OpUpdateOne, withHotwordID(id))
-	return &HotwordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DictionaryRelationClient) UpdateOneID(id uint32) *DictionaryRelationUpdateOne {
+	mutation := newDictionaryRelationMutation(c.config, OpUpdateOne, withDictionaryRelationID(id))
+	return &DictionaryRelationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Hotword.
-func (c *HotwordClient) Delete() *HotwordDelete {
-	mutation := newHotwordMutation(c.config, OpDelete)
-	return &HotwordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for DictionaryRelation.
+func (c *DictionaryRelationClient) Delete() *DictionaryRelationDelete {
+	mutation := newDictionaryRelationMutation(c.config, OpDelete)
+	return &DictionaryRelationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *HotwordClient) DeleteOne(_m *Hotword) *HotwordDeleteOne {
+func (c *DictionaryRelationClient) DeleteOne(_m *DictionaryRelation) *DictionaryRelationDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *HotwordClient) DeleteOneID(id uint32) *HotwordDeleteOne {
-	builder := c.Delete().Where(hotword.ID(id))
+func (c *DictionaryRelationClient) DeleteOneID(id uint32) *DictionaryRelationDeleteOne {
+	builder := c.Delete().Where(dictionaryrelation.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &HotwordDeleteOne{builder}
+	return &DictionaryRelationDeleteOne{builder}
 }
 
-// Query returns a query builder for Hotword.
-func (c *HotwordClient) Query() *HotwordQuery {
-	return &HotwordQuery{
+// Query returns a query builder for DictionaryRelation.
+func (c *DictionaryRelationClient) Query() *DictionaryRelationQuery {
+	return &DictionaryRelationQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeHotword},
+		ctx:    &QueryContext{Type: TypeDictionaryRelation},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a Hotword entity by its id.
-func (c *HotwordClient) Get(ctx context.Context, id uint32) (*Hotword, error) {
-	return c.Query().Where(hotword.ID(id)).Only(ctx)
+// Get returns a DictionaryRelation entity by its id.
+func (c *DictionaryRelationClient) Get(ctx context.Context, id uint32) (*DictionaryRelation, error) {
+	return c.Query().Where(dictionaryrelation.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *HotwordClient) GetX(ctx context.Context, id uint32) *Hotword {
+func (c *DictionaryRelationClient) GetX(ctx context.Context, id uint32) *DictionaryRelation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEntry queries the entry edge of a DictionaryRelation.
+func (c *DictionaryRelationClient) QueryEntry(_m *DictionaryRelation) *DictionaryEntryQuery {
+	query := (&DictionaryEntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dictionaryrelation.Table, dictionaryrelation.FieldID, id),
+			sqlgraph.To(dictionaryentry.Table, dictionaryentry.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dictionaryrelation.EntryTable, dictionaryrelation.EntryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DictionaryRelationClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryRelation
+	return append(hooks[:len(hooks):len(hooks)], dictionaryrelation.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryRelationClient) Interceptors() []Interceptor {
+	inters := c.inters.DictionaryRelation
+	return append(inters[:len(inters):len(inters)], dictionaryrelation.Interceptors[:]...)
+}
+
+func (c *DictionaryRelationClient) mutate(ctx context.Context, m *DictionaryRelationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryRelationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryRelationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryRelationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryRelationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryRelation mutation op: %q", m.Op())
+	}
+}
+
+// DictionaryVersionClient is a client for the DictionaryVersion schema.
+type DictionaryVersionClient struct {
+	config
+}
+
+// NewDictionaryVersionClient returns a client for the DictionaryVersion from the given config.
+func NewDictionaryVersionClient(c config) *DictionaryVersionClient {
+	return &DictionaryVersionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dictionaryversion.Hooks(f(g(h())))`.
+func (c *DictionaryVersionClient) Use(hooks ...Hook) {
+	c.hooks.DictionaryVersion = append(c.hooks.DictionaryVersion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dictionaryversion.Intercept(f(g(h())))`.
+func (c *DictionaryVersionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DictionaryVersion = append(c.inters.DictionaryVersion, interceptors...)
+}
+
+// Create returns a builder for creating a DictionaryVersion entity.
+func (c *DictionaryVersionClient) Create() *DictionaryVersionCreate {
+	mutation := newDictionaryVersionMutation(c.config, OpCreate)
+	return &DictionaryVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DictionaryVersion entities.
+func (c *DictionaryVersionClient) CreateBulk(builders ...*DictionaryVersionCreate) *DictionaryVersionCreateBulk {
+	return &DictionaryVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DictionaryVersionClient) MapCreateBulk(slice any, setFunc func(*DictionaryVersionCreate, int)) *DictionaryVersionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DictionaryVersionCreateBulk{err: fmt.Errorf("calling to DictionaryVersionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DictionaryVersionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DictionaryVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DictionaryVersion.
+func (c *DictionaryVersionClient) Update() *DictionaryVersionUpdate {
+	mutation := newDictionaryVersionMutation(c.config, OpUpdate)
+	return &DictionaryVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DictionaryVersionClient) UpdateOne(_m *DictionaryVersion) *DictionaryVersionUpdateOne {
+	mutation := newDictionaryVersionMutation(c.config, OpUpdateOne, withDictionaryVersion(_m))
+	return &DictionaryVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DictionaryVersionClient) UpdateOneID(id uint32) *DictionaryVersionUpdateOne {
+	mutation := newDictionaryVersionMutation(c.config, OpUpdateOne, withDictionaryVersionID(id))
+	return &DictionaryVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DictionaryVersion.
+func (c *DictionaryVersionClient) Delete() *DictionaryVersionDelete {
+	mutation := newDictionaryVersionMutation(c.config, OpDelete)
+	return &DictionaryVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DictionaryVersionClient) DeleteOne(_m *DictionaryVersion) *DictionaryVersionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DictionaryVersionClient) DeleteOneID(id uint32) *DictionaryVersionDeleteOne {
+	builder := c.Delete().Where(dictionaryversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DictionaryVersionDeleteOne{builder}
+}
+
+// Query returns a query builder for DictionaryVersion.
+func (c *DictionaryVersionClient) Query() *DictionaryVersionQuery {
+	return &DictionaryVersionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDictionaryVersion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DictionaryVersion entity by its id.
+func (c *DictionaryVersionClient) Get(ctx context.Context, id uint32) (*DictionaryVersion, error) {
+	return c.Query().Where(dictionaryversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DictionaryVersionClient) GetX(ctx context.Context, id uint32) *DictionaryVersion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDictionary queries the dictionary edge of a DictionaryVersion.
+func (c *DictionaryVersionClient) QueryDictionary(_m *DictionaryVersion) *DictionaryQuery {
+	query := (&DictionaryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dictionaryversion.Table, dictionaryversion.FieldID, id),
+			sqlgraph.To(dictionary.Table, dictionary.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dictionaryversion.DictionaryTable, dictionaryversion.DictionaryColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DictionaryVersionClient) Hooks() []Hook {
+	hooks := c.hooks.DictionaryVersion
+	return append(hooks[:len(hooks):len(hooks)], dictionaryversion.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DictionaryVersionClient) Interceptors() []Interceptor {
+	return c.inters.DictionaryVersion
+}
+
+func (c *DictionaryVersionClient) mutate(ctx context.Context, m *DictionaryVersionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DictionaryVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DictionaryVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DictionaryVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DictionaryVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown DictionaryVersion mutation op: %q", m.Op())
+	}
+}
+
+// EnhancementLogClient is a client for the EnhancementLog schema.
+type EnhancementLogClient struct {
+	config
+}
+
+// NewEnhancementLogClient returns a client for the EnhancementLog from the given config.
+func NewEnhancementLogClient(c config) *EnhancementLogClient {
+	return &EnhancementLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `enhancementlog.Hooks(f(g(h())))`.
+func (c *EnhancementLogClient) Use(hooks ...Hook) {
+	c.hooks.EnhancementLog = append(c.hooks.EnhancementLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `enhancementlog.Intercept(f(g(h())))`.
+func (c *EnhancementLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EnhancementLog = append(c.inters.EnhancementLog, interceptors...)
+}
+
+// Create returns a builder for creating a EnhancementLog entity.
+func (c *EnhancementLogClient) Create() *EnhancementLogCreate {
+	mutation := newEnhancementLogMutation(c.config, OpCreate)
+	return &EnhancementLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EnhancementLog entities.
+func (c *EnhancementLogClient) CreateBulk(builders ...*EnhancementLogCreate) *EnhancementLogCreateBulk {
+	return &EnhancementLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EnhancementLogClient) MapCreateBulk(slice any, setFunc func(*EnhancementLogCreate, int)) *EnhancementLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EnhancementLogCreateBulk{err: fmt.Errorf("calling to EnhancementLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EnhancementLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EnhancementLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EnhancementLog.
+func (c *EnhancementLogClient) Update() *EnhancementLogUpdate {
+	mutation := newEnhancementLogMutation(c.config, OpUpdate)
+	return &EnhancementLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EnhancementLogClient) UpdateOne(_m *EnhancementLog) *EnhancementLogUpdateOne {
+	mutation := newEnhancementLogMutation(c.config, OpUpdateOne, withEnhancementLog(_m))
+	return &EnhancementLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EnhancementLogClient) UpdateOneID(id uint32) *EnhancementLogUpdateOne {
+	mutation := newEnhancementLogMutation(c.config, OpUpdateOne, withEnhancementLogID(id))
+	return &EnhancementLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EnhancementLog.
+func (c *EnhancementLogClient) Delete() *EnhancementLogDelete {
+	mutation := newEnhancementLogMutation(c.config, OpDelete)
+	return &EnhancementLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EnhancementLogClient) DeleteOne(_m *EnhancementLog) *EnhancementLogDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EnhancementLogClient) DeleteOneID(id uint32) *EnhancementLogDeleteOne {
+	builder := c.Delete().Where(enhancementlog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EnhancementLogDeleteOne{builder}
+}
+
+// Query returns a query builder for EnhancementLog.
+func (c *EnhancementLogClient) Query() *EnhancementLogQuery {
+	return &EnhancementLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEnhancementLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EnhancementLog entity by its id.
+func (c *EnhancementLogClient) Get(ctx context.Context, id uint32) (*EnhancementLog, error) {
+	return c.Query().Where(enhancementlog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EnhancementLogClient) GetX(ctx context.Context, id uint32) *EnhancementLog {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1206,40 +1716,344 @@ func (c *HotwordClient) GetX(ctx context.Context, id uint32) *Hotword {
 }
 
 // Hooks returns the client hooks.
-func (c *HotwordClient) Hooks() []Hook {
-	hooks := c.hooks.Hotword
-	return append(hooks[:len(hooks):len(hooks)], hotword.Hooks[:]...)
+func (c *EnhancementLogClient) Hooks() []Hook {
+	hooks := c.hooks.EnhancementLog
+	return append(hooks[:len(hooks):len(hooks)], enhancementlog.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
-func (c *HotwordClient) Interceptors() []Interceptor {
-	return c.inters.Hotword
+func (c *EnhancementLogClient) Interceptors() []Interceptor {
+	return c.inters.EnhancementLog
 }
 
-func (c *HotwordClient) mutate(ctx context.Context, m *HotwordMutation) (Value, error) {
+func (c *EnhancementLogClient) mutate(ctx context.Context, m *EnhancementLogMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&HotwordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&EnhancementLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&HotwordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&EnhancementLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&HotwordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&EnhancementLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&HotwordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&EnhancementLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("gen: unknown Hotword mutation op: %q", m.Op())
+		return nil, fmt.Errorf("gen: unknown EnhancementLog mutation op: %q", m.Op())
+	}
+}
+
+// EnhancementPolicyClient is a client for the EnhancementPolicy schema.
+type EnhancementPolicyClient struct {
+	config
+}
+
+// NewEnhancementPolicyClient returns a client for the EnhancementPolicy from the given config.
+func NewEnhancementPolicyClient(c config) *EnhancementPolicyClient {
+	return &EnhancementPolicyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `enhancementpolicy.Hooks(f(g(h())))`.
+func (c *EnhancementPolicyClient) Use(hooks ...Hook) {
+	c.hooks.EnhancementPolicy = append(c.hooks.EnhancementPolicy, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `enhancementpolicy.Intercept(f(g(h())))`.
+func (c *EnhancementPolicyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EnhancementPolicy = append(c.inters.EnhancementPolicy, interceptors...)
+}
+
+// Create returns a builder for creating a EnhancementPolicy entity.
+func (c *EnhancementPolicyClient) Create() *EnhancementPolicyCreate {
+	mutation := newEnhancementPolicyMutation(c.config, OpCreate)
+	return &EnhancementPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EnhancementPolicy entities.
+func (c *EnhancementPolicyClient) CreateBulk(builders ...*EnhancementPolicyCreate) *EnhancementPolicyCreateBulk {
+	return &EnhancementPolicyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EnhancementPolicyClient) MapCreateBulk(slice any, setFunc func(*EnhancementPolicyCreate, int)) *EnhancementPolicyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EnhancementPolicyCreateBulk{err: fmt.Errorf("calling to EnhancementPolicyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EnhancementPolicyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EnhancementPolicyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EnhancementPolicy.
+func (c *EnhancementPolicyClient) Update() *EnhancementPolicyUpdate {
+	mutation := newEnhancementPolicyMutation(c.config, OpUpdate)
+	return &EnhancementPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EnhancementPolicyClient) UpdateOne(_m *EnhancementPolicy) *EnhancementPolicyUpdateOne {
+	mutation := newEnhancementPolicyMutation(c.config, OpUpdateOne, withEnhancementPolicy(_m))
+	return &EnhancementPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EnhancementPolicyClient) UpdateOneID(id uint32) *EnhancementPolicyUpdateOne {
+	mutation := newEnhancementPolicyMutation(c.config, OpUpdateOne, withEnhancementPolicyID(id))
+	return &EnhancementPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EnhancementPolicy.
+func (c *EnhancementPolicyClient) Delete() *EnhancementPolicyDelete {
+	mutation := newEnhancementPolicyMutation(c.config, OpDelete)
+	return &EnhancementPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EnhancementPolicyClient) DeleteOne(_m *EnhancementPolicy) *EnhancementPolicyDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EnhancementPolicyClient) DeleteOneID(id uint32) *EnhancementPolicyDeleteOne {
+	builder := c.Delete().Where(enhancementpolicy.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EnhancementPolicyDeleteOne{builder}
+}
+
+// Query returns a query builder for EnhancementPolicy.
+func (c *EnhancementPolicyClient) Query() *EnhancementPolicyQuery {
+	return &EnhancementPolicyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEnhancementPolicy},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EnhancementPolicy entity by its id.
+func (c *EnhancementPolicyClient) Get(ctx context.Context, id uint32) (*EnhancementPolicy, error) {
+	return c.Query().Where(enhancementpolicy.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EnhancementPolicyClient) GetX(ctx context.Context, id uint32) *EnhancementPolicy {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProfiles queries the profiles edge of a EnhancementPolicy.
+func (c *EnhancementPolicyClient) QueryProfiles(_m *EnhancementPolicy) *EnhancementProfileQuery {
+	query := (&EnhancementProfileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(enhancementpolicy.Table, enhancementpolicy.FieldID, id),
+			sqlgraph.To(enhancementprofile.Table, enhancementprofile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, enhancementpolicy.ProfilesTable, enhancementpolicy.ProfilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EnhancementPolicyClient) Hooks() []Hook {
+	hooks := c.hooks.EnhancementPolicy
+	return append(hooks[:len(hooks):len(hooks)], enhancementpolicy.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *EnhancementPolicyClient) Interceptors() []Interceptor {
+	return c.inters.EnhancementPolicy
+}
+
+func (c *EnhancementPolicyClient) mutate(ctx context.Context, m *EnhancementPolicyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EnhancementPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EnhancementPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EnhancementPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EnhancementPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown EnhancementPolicy mutation op: %q", m.Op())
+	}
+}
+
+// EnhancementProfileClient is a client for the EnhancementProfile schema.
+type EnhancementProfileClient struct {
+	config
+}
+
+// NewEnhancementProfileClient returns a client for the EnhancementProfile from the given config.
+func NewEnhancementProfileClient(c config) *EnhancementProfileClient {
+	return &EnhancementProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `enhancementprofile.Hooks(f(g(h())))`.
+func (c *EnhancementProfileClient) Use(hooks ...Hook) {
+	c.hooks.EnhancementProfile = append(c.hooks.EnhancementProfile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `enhancementprofile.Intercept(f(g(h())))`.
+func (c *EnhancementProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EnhancementProfile = append(c.inters.EnhancementProfile, interceptors...)
+}
+
+// Create returns a builder for creating a EnhancementProfile entity.
+func (c *EnhancementProfileClient) Create() *EnhancementProfileCreate {
+	mutation := newEnhancementProfileMutation(c.config, OpCreate)
+	return &EnhancementProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EnhancementProfile entities.
+func (c *EnhancementProfileClient) CreateBulk(builders ...*EnhancementProfileCreate) *EnhancementProfileCreateBulk {
+	return &EnhancementProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EnhancementProfileClient) MapCreateBulk(slice any, setFunc func(*EnhancementProfileCreate, int)) *EnhancementProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EnhancementProfileCreateBulk{err: fmt.Errorf("calling to EnhancementProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EnhancementProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EnhancementProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EnhancementProfile.
+func (c *EnhancementProfileClient) Update() *EnhancementProfileUpdate {
+	mutation := newEnhancementProfileMutation(c.config, OpUpdate)
+	return &EnhancementProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EnhancementProfileClient) UpdateOne(_m *EnhancementProfile) *EnhancementProfileUpdateOne {
+	mutation := newEnhancementProfileMutation(c.config, OpUpdateOne, withEnhancementProfile(_m))
+	return &EnhancementProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EnhancementProfileClient) UpdateOneID(id uint32) *EnhancementProfileUpdateOne {
+	mutation := newEnhancementProfileMutation(c.config, OpUpdateOne, withEnhancementProfileID(id))
+	return &EnhancementProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EnhancementProfile.
+func (c *EnhancementProfileClient) Delete() *EnhancementProfileDelete {
+	mutation := newEnhancementProfileMutation(c.config, OpDelete)
+	return &EnhancementProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EnhancementProfileClient) DeleteOne(_m *EnhancementProfile) *EnhancementProfileDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EnhancementProfileClient) DeleteOneID(id uint32) *EnhancementProfileDeleteOne {
+	builder := c.Delete().Where(enhancementprofile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EnhancementProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for EnhancementProfile.
+func (c *EnhancementProfileClient) Query() *EnhancementProfileQuery {
+	return &EnhancementProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEnhancementProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EnhancementProfile entity by its id.
+func (c *EnhancementProfileClient) Get(ctx context.Context, id uint32) (*EnhancementProfile, error) {
+	return c.Query().Where(enhancementprofile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EnhancementProfileClient) GetX(ctx context.Context, id uint32) *EnhancementProfile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPolicy queries the policy edge of a EnhancementProfile.
+func (c *EnhancementProfileClient) QueryPolicy(_m *EnhancementProfile) *EnhancementPolicyQuery {
+	query := (&EnhancementPolicyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(enhancementprofile.Table, enhancementprofile.FieldID, id),
+			sqlgraph.To(enhancementpolicy.Table, enhancementpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, enhancementprofile.PolicyTable, enhancementprofile.PolicyColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EnhancementProfileClient) Hooks() []Hook {
+	hooks := c.hooks.EnhancementProfile
+	return append(hooks[:len(hooks):len(hooks)], enhancementprofile.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *EnhancementProfileClient) Interceptors() []Interceptor {
+	return c.inters.EnhancementProfile
+}
+
+func (c *EnhancementProfileClient) mutate(ctx context.Context, m *EnhancementProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EnhancementProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EnhancementProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EnhancementProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EnhancementProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("gen: unknown EnhancementProfile mutation op: %q", m.Op())
 	}
 }
 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AsrProviderConfig, AsrRecord, CorrectionLog, CorrectionRule, DictionaryAlias,
-		DictionaryWord, Hotword []ent.Hook
+		AsrProviderConfig, AsrRecord, Dictionary, DictionaryCategory,
+		DictionaryChangeLog, DictionaryConflict, DictionaryEntry, DictionaryRelation,
+		DictionaryVersion, EnhancementLog, EnhancementPolicy,
+		EnhancementProfile []ent.Hook
 	}
 	inters struct {
-		AsrProviderConfig, AsrRecord, CorrectionLog, CorrectionRule, DictionaryAlias,
-		DictionaryWord, Hotword []ent.Interceptor
+		AsrProviderConfig, AsrRecord, Dictionary, DictionaryCategory,
+		DictionaryChangeLog, DictionaryConflict, DictionaryEntry, DictionaryRelation,
+		DictionaryVersion, EnhancementLog, EnhancementPolicy,
+		EnhancementProfile []ent.Interceptor
 	}
 )
 

@@ -30,7 +30,7 @@ func (_m *AsrRecordQuery) Page(ctx context.Context, page, size int) ([]*AsrRecor
 	return rs, cnt, nil
 }
 
-func (_m *CorrectionLogQuery) Page(ctx context.Context, page, size int) ([]*CorrectionLog, int, error) {
+func (_m *DictionaryQuery) Page(ctx context.Context, page, size int) ([]*Dictionary, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -43,7 +43,7 @@ func (_m *CorrectionLogQuery) Page(ctx context.Context, page, size int) ([]*Corr
 	return rs, cnt, nil
 }
 
-func (_m *CorrectionRuleQuery) Page(ctx context.Context, page, size int) ([]*CorrectionRule, int, error) {
+func (_m *DictionaryCategoryQuery) Page(ctx context.Context, page, size int) ([]*DictionaryCategory, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -56,7 +56,7 @@ func (_m *CorrectionRuleQuery) Page(ctx context.Context, page, size int) ([]*Cor
 	return rs, cnt, nil
 }
 
-func (_m *DictionaryAliasQuery) Page(ctx context.Context, page, size int) ([]*DictionaryAlias, int, error) {
+func (_m *DictionaryChangeLogQuery) Page(ctx context.Context, page, size int) ([]*DictionaryChangeLog, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -69,7 +69,7 @@ func (_m *DictionaryAliasQuery) Page(ctx context.Context, page, size int) ([]*Di
 	return rs, cnt, nil
 }
 
-func (_m *DictionaryWordQuery) Page(ctx context.Context, page, size int) ([]*DictionaryWord, int, error) {
+func (_m *DictionaryConflictQuery) Page(ctx context.Context, page, size int) ([]*DictionaryConflict, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -82,7 +82,72 @@ func (_m *DictionaryWordQuery) Page(ctx context.Context, page, size int) ([]*Dic
 	return rs, cnt, nil
 }
 
-func (_m *HotwordQuery) Page(ctx context.Context, page, size int) ([]*Hotword, int, error) {
+func (_m *DictionaryEntryQuery) Page(ctx context.Context, page, size int) ([]*DictionaryEntry, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *DictionaryRelationQuery) Page(ctx context.Context, page, size int) ([]*DictionaryRelation, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *DictionaryVersionQuery) Page(ctx context.Context, page, size int) ([]*DictionaryVersion, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *EnhancementLogQuery) Page(ctx context.Context, page, size int) ([]*EnhancementLog, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *EnhancementPolicyQuery) Page(ctx context.Context, page, size int) ([]*EnhancementPolicy, int, error) {
+	cnt, err := _m.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	offset := size * (page - 1)
+	rs, err := _m.Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return rs, cnt, nil
+}
+
+func (_m *EnhancementProfileQuery) Page(ctx context.Context, page, size int) ([]*EnhancementProfile, int, error) {
 	cnt, err := _m.Count(ctx)
 	if err != nil {
 		return nil, 0, err

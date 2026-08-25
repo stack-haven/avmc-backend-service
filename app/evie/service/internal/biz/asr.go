@@ -41,15 +41,14 @@ type ASRRecord struct {
 // ASRUsecase ASR 语音识别编排。
 type ASRUsecase struct {
 	providerRepo ProviderRepo
-	hotwordRepo  HotwordRepo
 	recordRepo   ASRRecordRepo
 	fileCenter   *platformclient.FileCenterClient
 	log          *log.Helper
 }
 
 // NewASRUsecase 创建 ASR usecase。
-func NewASRUsecase(providerRepo ProviderRepo, hotwordRepo HotwordRepo, recordRepo ASRRecordRepo, fileCenter *platformclient.FileCenterClient, logger log.Logger) *ASRUsecase {
-	return &ASRUsecase{providerRepo: providerRepo, hotwordRepo: hotwordRepo, recordRepo: recordRepo, fileCenter: fileCenter, log: log.NewHelper(logger)}
+func NewASRUsecase(providerRepo ProviderRepo, recordRepo ASRRecordRepo, fileCenter *platformclient.FileCenterClient, logger log.Logger) *ASRUsecase {
+	return &ASRUsecase{providerRepo: providerRepo, recordRepo: recordRepo, fileCenter: fileCenter, log: log.NewHelper(logger)}
 }
 
 // Recognize 同步识别。
@@ -191,11 +190,6 @@ func (uc *ASRUsecase) route(ctx context.Context, stream bool) (asr.ASRProvider, 
 		Language:   active.GetLanguage(),
 	}
 	uc.log.Infof("route stream=%v -> provider=%s", stream, provider.Name())
-	if provider.Capabilities().HotwordSupport && uc.hotwordRepo != nil {
-		if hotwords, err := uc.hotwordRepo.List(ctx, ""); err == nil {
-			opts.Hotwords = toAsrHotwords(hotwords)
-		}
-	}
 	return provider, opts, nil
 }
 
@@ -218,19 +212,6 @@ func newProvider(name, configJSON string) (asr.ASRProvider, error) {
 	default:
 		return nil, fmt.Errorf("unsupported asr provider: %s", name)
 	}
-}
-
-// toAsrHotwords 将 proto 热词转为 asr.Hotword。
-func toAsrHotwords(hotwords []*pb.Hotword) []asr.Hotword {
-	result := make([]asr.Hotword, 0, len(hotwords))
-	for _, h := range hotwords {
-		result = append(result, asr.Hotword{
-			Word:   h.GetWord(),
-			Target: h.GetTarget(),
-			Weight: float64(h.GetWeight()),
-		})
-	}
-	return result
 }
 
 // StreamRecognize 流式识别：路由到 Provider，收集完整音频，识别结束后上传文件中心并保存记录。

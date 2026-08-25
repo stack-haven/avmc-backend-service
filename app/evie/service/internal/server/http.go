@@ -34,11 +34,11 @@ func NewHTTPServer(
 	authorizer authzEngine.Enforcer,
 	checker pkgHealth.Checker,
 	dictionaryService *service.DictionaryServiceService,
-	hotwordService *service.HotwordServiceService,
 	asrService *service.ASRServiceService,
 	asrStreamService *service.ASRStreamService,
 	providerService *service.ProviderServiceService,
 	correctionService *service.CorrectionServiceService,
+	enhancementService *service.EnhancementServiceService,
 	auditClient audit.Client,
 ) (*http.Server, error) {
 	if c == nil || c.Http == nil {
@@ -66,9 +66,9 @@ func NewHTTPServer(
 	// WebSocket 流式识别入口（绕过 auth 中间件，service 层内部自行鉴权）
 	srv.HandleFunc("/evie/v1/asr/stream", asrStreamService.ServeHTTP)
 	v1.RegisterDictionaryServiceHTTPServer(srv, dictionaryService)
-	v1.RegisterHotwordServiceHTTPServer(srv, hotwordService)
 	v1.RegisterASRServiceHTTPServer(srv, asrService)
 	v1.RegisterProviderServiceHTTPServer(srv, providerService)
 	v1.RegisterCorrectionServiceHTTPServer(srv, correctionService)
+	v1.RegisterEnhancementServiceHTTPServer(srv, enhancementService)
 	return srv, nil
 }

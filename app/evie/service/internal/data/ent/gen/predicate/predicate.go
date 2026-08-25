@@ -12,17 +12,32 @@ type AsrProviderConfig func(*sql.Selector)
 // AsrRecord is the predicate function for asrrecord builders.
 type AsrRecord func(*sql.Selector)
 
-// CorrectionLog is the predicate function for correctionlog builders.
-type CorrectionLog func(*sql.Selector)
+// Dictionary is the predicate function for dictionary builders.
+type Dictionary func(*sql.Selector)
 
-// CorrectionRule is the predicate function for correctionrule builders.
-type CorrectionRule func(*sql.Selector)
+// DictionaryCategory is the predicate function for dictionarycategory builders.
+type DictionaryCategory func(*sql.Selector)
 
-// DictionaryAlias is the predicate function for dictionaryalias builders.
-type DictionaryAlias func(*sql.Selector)
+// DictionaryChangeLog is the predicate function for dictionarychangelog builders.
+type DictionaryChangeLog func(*sql.Selector)
 
-// DictionaryWord is the predicate function for dictionaryword builders.
-type DictionaryWord func(*sql.Selector)
+// DictionaryConflict is the predicate function for dictionaryconflict builders.
+type DictionaryConflict func(*sql.Selector)
 
-// Hotword is the predicate function for hotword builders.
-type Hotword func(*sql.Selector)
+// DictionaryEntry is the predicate function for dictionaryentry builders.
+type DictionaryEntry func(*sql.Selector)
+
+// DictionaryRelation is the predicate function for dictionaryrelation builders.
+type DictionaryRelation func(*sql.Selector)
+
+// DictionaryVersion is the predicate function for dictionaryversion builders.
+type DictionaryVersion func(*sql.Selector)
+
+// EnhancementLog is the predicate function for enhancementlog builders.
+type EnhancementLog func(*sql.Selector)
+
+// EnhancementPolicy is the predicate function for enhancementpolicy builders.
+type EnhancementPolicy func(*sql.Selector)
+
+// EnhancementProfile is the predicate function for enhancementprofile builders.
+type EnhancementProfile func(*sql.Selector)

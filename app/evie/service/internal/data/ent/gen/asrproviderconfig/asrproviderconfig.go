@@ -78,8 +78,6 @@ var (
 	DefaultStatus int32
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int32) error
-	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	TenantIDValidator func(uint32) error
 	// ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
 	ProviderNameValidator func(string) error
 	// DefaultIsActive holds the default value on creation for the "is_active" field.

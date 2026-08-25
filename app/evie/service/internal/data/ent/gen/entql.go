@@ -5,11 +5,16 @@ package gen
 import (
 	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
 	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
-	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionary"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarychangelog"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryconflict"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
 	"backend-service/app/evie/service/internal/data/ent/gen/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -20,7 +25,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 7)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 12)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   asrproviderconfig.Table,
@@ -71,145 +76,346 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   correctionlog.Table,
-			Columns: correctionlog.Columns,
+			Table:   dictionary.Table,
+			Columns: dictionary.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint32,
-				Column: correctionlog.FieldID,
+				Column: dictionary.FieldID,
 			},
 		},
-		Type: "CorrectionLog",
+		Type: "Dictionary",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			correctionlog.FieldCreatedAt:     {Type: field.TypeTime, Column: correctionlog.FieldCreatedAt},
-			correctionlog.FieldUpdatedAt:     {Type: field.TypeTime, Column: correctionlog.FieldUpdatedAt},
-			correctionlog.FieldStatus:        {Type: field.TypeInt32, Column: correctionlog.FieldStatus},
-			correctionlog.FieldTenantID:      {Type: field.TypeUint32, Column: correctionlog.FieldTenantID},
-			correctionlog.FieldUserID:        {Type: field.TypeUint32, Column: correctionlog.FieldUserID},
-			correctionlog.FieldSessionID:     {Type: field.TypeString, Column: correctionlog.FieldSessionID},
-			correctionlog.FieldOriginalText:  {Type: field.TypeString, Column: correctionlog.FieldOriginalText},
-			correctionlog.FieldCorrectedText: {Type: field.TypeString, Column: correctionlog.FieldCorrectedText},
-			correctionlog.FieldChangesJSON:   {Type: field.TypeString, Column: correctionlog.FieldChangesJSON},
-			correctionlog.FieldConfidence:    {Type: field.TypeFloat64, Column: correctionlog.FieldConfidence},
-			correctionlog.FieldNeedConfirm:   {Type: field.TypeBool, Column: correctionlog.FieldNeedConfirm},
-			correctionlog.FieldDurationMs:    {Type: field.TypeInt64, Column: correctionlog.FieldDurationMs},
-			correctionlog.FieldRuleHits:      {Type: field.TypeInt, Column: correctionlog.FieldRuleHits},
-			correctionlog.FieldPinyinHits:    {Type: field.TypeInt, Column: correctionlog.FieldPinyinHits},
-			correctionlog.FieldEntityHits:    {Type: field.TypeInt, Column: correctionlog.FieldEntityHits},
-			correctionlog.FieldLlmHits:       {Type: field.TypeInt, Column: correctionlog.FieldLlmHits},
+			dictionary.FieldCreatedAt:   {Type: field.TypeTime, Column: dictionary.FieldCreatedAt},
+			dictionary.FieldUpdatedAt:   {Type: field.TypeTime, Column: dictionary.FieldUpdatedAt},
+			dictionary.FieldStatus:      {Type: field.TypeInt32, Column: dictionary.FieldStatus},
+			dictionary.FieldTenantID:    {Type: field.TypeUint32, Column: dictionary.FieldTenantID},
+			dictionary.FieldDeletedAt:   {Type: field.TypeTime, Column: dictionary.FieldDeletedAt},
+			dictionary.FieldName:        {Type: field.TypeString, Column: dictionary.FieldName},
+			dictionary.FieldScope:       {Type: field.TypeString, Column: dictionary.FieldScope},
+			dictionary.FieldSource:      {Type: field.TypeString, Column: dictionary.FieldSource},
+			dictionary.FieldDescription: {Type: field.TypeString, Column: dictionary.FieldDescription},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   correctionrule.Table,
-			Columns: correctionrule.Columns,
+			Table:   dictionarycategory.Table,
+			Columns: dictionarycategory.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint32,
-				Column: correctionrule.FieldID,
+				Column: dictionarycategory.FieldID,
 			},
 		},
-		Type: "CorrectionRule",
+		Type: "DictionaryCategory",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			correctionrule.FieldCreatedAt: {Type: field.TypeTime, Column: correctionrule.FieldCreatedAt},
-			correctionrule.FieldUpdatedAt: {Type: field.TypeTime, Column: correctionrule.FieldUpdatedAt},
-			correctionrule.FieldStatus:    {Type: field.TypeInt32, Column: correctionrule.FieldStatus},
-			correctionrule.FieldTenantID:  {Type: field.TypeUint32, Column: correctionrule.FieldTenantID},
-			correctionrule.FieldDeletedAt: {Type: field.TypeTime, Column: correctionrule.FieldDeletedAt},
-			correctionrule.FieldSource:    {Type: field.TypeString, Column: correctionrule.FieldSource},
-			correctionrule.FieldTarget:    {Type: field.TypeString, Column: correctionrule.FieldTarget},
-			correctionrule.FieldType:      {Type: field.TypeString, Column: correctionrule.FieldType},
-			correctionrule.FieldPriority:  {Type: field.TypeInt32, Column: correctionrule.FieldPriority},
+			dictionarycategory.FieldCreatedAt: {Type: field.TypeTime, Column: dictionarycategory.FieldCreatedAt},
+			dictionarycategory.FieldUpdatedAt: {Type: field.TypeTime, Column: dictionarycategory.FieldUpdatedAt},
+			dictionarycategory.FieldStatus:    {Type: field.TypeInt32, Column: dictionarycategory.FieldStatus},
+			dictionarycategory.FieldTenantID:  {Type: field.TypeUint32, Column: dictionarycategory.FieldTenantID},
+			dictionarycategory.FieldCode:      {Type: field.TypeString, Column: dictionarycategory.FieldCode},
+			dictionarycategory.FieldName:      {Type: field.TypeString, Column: dictionarycategory.FieldName},
+			dictionarycategory.FieldBuiltin:   {Type: field.TypeBool, Column: dictionarycategory.FieldBuiltin},
+			dictionarycategory.FieldSort:      {Type: field.TypeInt32, Column: dictionarycategory.FieldSort},
 		},
 	}
 	graph.Nodes[4] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   dictionaryalias.Table,
-			Columns: dictionaryalias.Columns,
+			Table:   dictionarychangelog.Table,
+			Columns: dictionarychangelog.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint32,
-				Column: dictionaryalias.FieldID,
+				Column: dictionarychangelog.FieldID,
 			},
 		},
-		Type: "DictionaryAlias",
+		Type: "DictionaryChangeLog",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			dictionaryalias.FieldCreatedAt: {Type: field.TypeTime, Column: dictionaryalias.FieldCreatedAt},
-			dictionaryalias.FieldUpdatedAt: {Type: field.TypeTime, Column: dictionaryalias.FieldUpdatedAt},
-			dictionaryalias.FieldStatus:    {Type: field.TypeInt32, Column: dictionaryalias.FieldStatus},
-			dictionaryalias.FieldTenantID:  {Type: field.TypeUint32, Column: dictionaryalias.FieldTenantID},
-			dictionaryalias.FieldDeletedAt: {Type: field.TypeTime, Column: dictionaryalias.FieldDeletedAt},
-			dictionaryalias.FieldWordID:    {Type: field.TypeUint32, Column: dictionaryalias.FieldWordID},
-			dictionaryalias.FieldAlias:     {Type: field.TypeString, Column: dictionaryalias.FieldAlias},
-			dictionaryalias.FieldPinyin:    {Type: field.TypeString, Column: dictionaryalias.FieldPinyin},
-			dictionaryalias.FieldWeight:    {Type: field.TypeFloat64, Column: dictionaryalias.FieldWeight},
-			dictionaryalias.FieldSource:    {Type: field.TypeString, Column: dictionaryalias.FieldSource},
+			dictionarychangelog.FieldCreatedAt:      {Type: field.TypeTime, Column: dictionarychangelog.FieldCreatedAt},
+			dictionarychangelog.FieldUpdatedAt:      {Type: field.TypeTime, Column: dictionarychangelog.FieldUpdatedAt},
+			dictionarychangelog.FieldStatus:         {Type: field.TypeInt32, Column: dictionarychangelog.FieldStatus},
+			dictionarychangelog.FieldTenantID:       {Type: field.TypeUint32, Column: dictionarychangelog.FieldTenantID},
+			dictionarychangelog.FieldEntityType:     {Type: field.TypeString, Column: dictionarychangelog.FieldEntityType},
+			dictionarychangelog.FieldEntityID:       {Type: field.TypeUint32, Column: dictionarychangelog.FieldEntityID},
+			dictionarychangelog.FieldAction:         {Type: field.TypeString, Column: dictionarychangelog.FieldAction},
+			dictionarychangelog.FieldBeforeSnapshot: {Type: field.TypeString, Column: dictionarychangelog.FieldBeforeSnapshot},
+			dictionarychangelog.FieldAfterSnapshot:  {Type: field.TypeString, Column: dictionarychangelog.FieldAfterSnapshot},
+			dictionarychangelog.FieldOperatorID:     {Type: field.TypeUint32, Column: dictionarychangelog.FieldOperatorID},
 		},
 	}
 	graph.Nodes[5] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   dictionaryword.Table,
-			Columns: dictionaryword.Columns,
+			Table:   dictionaryconflict.Table,
+			Columns: dictionaryconflict.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint32,
-				Column: dictionaryword.FieldID,
+				Column: dictionaryconflict.FieldID,
 			},
 		},
-		Type: "DictionaryWord",
+		Type: "DictionaryConflict",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			dictionaryword.FieldCreatedAt: {Type: field.TypeTime, Column: dictionaryword.FieldCreatedAt},
-			dictionaryword.FieldUpdatedAt: {Type: field.TypeTime, Column: dictionaryword.FieldUpdatedAt},
-			dictionaryword.FieldStatus:    {Type: field.TypeInt32, Column: dictionaryword.FieldStatus},
-			dictionaryword.FieldTenantID:  {Type: field.TypeUint32, Column: dictionaryword.FieldTenantID},
-			dictionaryword.FieldDeletedAt: {Type: field.TypeTime, Column: dictionaryword.FieldDeletedAt},
-			dictionaryword.FieldWord:      {Type: field.TypeString, Column: dictionaryword.FieldWord},
-			dictionaryword.FieldLevel:     {Type: field.TypeString, Column: dictionaryword.FieldLevel},
-			dictionaryword.FieldCategory:  {Type: field.TypeString, Column: dictionaryword.FieldCategory},
-			dictionaryword.FieldSource:    {Type: field.TypeString, Column: dictionaryword.FieldSource},
-			dictionaryword.FieldPriority:  {Type: field.TypeInt32, Column: dictionaryword.FieldPriority},
+			dictionaryconflict.FieldCreatedAt:         {Type: field.TypeTime, Column: dictionaryconflict.FieldCreatedAt},
+			dictionaryconflict.FieldUpdatedAt:         {Type: field.TypeTime, Column: dictionaryconflict.FieldUpdatedAt},
+			dictionaryconflict.FieldStatus:            {Type: field.TypeInt32, Column: dictionaryconflict.FieldStatus},
+			dictionaryconflict.FieldTenantID:          {Type: field.TypeUint32, Column: dictionaryconflict.FieldTenantID},
+			dictionaryconflict.FieldInput:             {Type: field.TypeString, Column: dictionaryconflict.FieldInput},
+			dictionaryconflict.FieldCandidate:         {Type: field.TypeString, Column: dictionaryconflict.FieldCandidate},
+			dictionaryconflict.FieldSourceScope:       {Type: field.TypeString, Column: dictionaryconflict.FieldSourceScope},
+			dictionaryconflict.FieldSourceDictionary:  {Type: field.TypeString, Column: dictionaryconflict.FieldSourceDictionary},
+			dictionaryconflict.FieldPriority:          {Type: field.TypeInt32, Column: dictionaryconflict.FieldPriority},
+			dictionaryconflict.FieldResolvedCandidate: {Type: field.TypeString, Column: dictionaryconflict.FieldResolvedCandidate},
 		},
 	}
 	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   hotword.Table,
-			Columns: hotword.Columns,
+			Table:   dictionaryentry.Table,
+			Columns: dictionaryentry.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint32,
-				Column: hotword.FieldID,
+				Column: dictionaryentry.FieldID,
 			},
 		},
-		Type: "Hotword",
+		Type: "DictionaryEntry",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			hotword.FieldCreatedAt: {Type: field.TypeTime, Column: hotword.FieldCreatedAt},
-			hotword.FieldUpdatedAt: {Type: field.TypeTime, Column: hotword.FieldUpdatedAt},
-			hotword.FieldStatus:    {Type: field.TypeInt32, Column: hotword.FieldStatus},
-			hotword.FieldTenantID:  {Type: field.TypeUint32, Column: hotword.FieldTenantID},
-			hotword.FieldWord:      {Type: field.TypeString, Column: hotword.FieldWord},
-			hotword.FieldTarget:    {Type: field.TypeString, Column: hotword.FieldTarget},
-			hotword.FieldWeight:    {Type: field.TypeFloat64, Column: hotword.FieldWeight},
-			hotword.FieldCategory:  {Type: field.TypeString, Column: hotword.FieldCategory},
+			dictionaryentry.FieldCreatedAt:      {Type: field.TypeTime, Column: dictionaryentry.FieldCreatedAt},
+			dictionaryentry.FieldUpdatedAt:      {Type: field.TypeTime, Column: dictionaryentry.FieldUpdatedAt},
+			dictionaryentry.FieldStatus:         {Type: field.TypeInt32, Column: dictionaryentry.FieldStatus},
+			dictionaryentry.FieldTenantID:       {Type: field.TypeUint32, Column: dictionaryentry.FieldTenantID},
+			dictionaryentry.FieldDeletedAt:      {Type: field.TypeTime, Column: dictionaryentry.FieldDeletedAt},
+			dictionaryentry.FieldDictionaryID:   {Type: field.TypeUint32, Column: dictionaryentry.FieldDictionaryID},
+			dictionaryentry.FieldStandardText:   {Type: field.TypeString, Column: dictionaryentry.FieldStandardText},
+			dictionaryentry.FieldEntryType:      {Type: field.TypeString, Column: dictionaryentry.FieldEntryType},
+			dictionaryentry.FieldCategory:       {Type: field.TypeString, Column: dictionaryentry.FieldCategory},
+			dictionaryentry.FieldDescription:    {Type: field.TypeString, Column: dictionaryentry.FieldDescription},
+			dictionaryentry.FieldSource:         {Type: field.TypeString, Column: dictionaryentry.FieldSource},
+			dictionaryentry.FieldSourceID:       {Type: field.TypeString, Column: dictionaryentry.FieldSourceID},
+			dictionaryentry.FieldPriority:       {Type: field.TypeInt32, Column: dictionaryentry.FieldPriority},
+			dictionaryentry.FieldPinyin:         {Type: field.TypeString, Column: dictionaryentry.FieldPinyin},
+			dictionaryentry.FieldPinyinInitial:  {Type: field.TypeString, Column: dictionaryentry.FieldPinyinInitial},
+			dictionaryentry.FieldNormalizedText: {Type: field.TypeString, Column: dictionaryentry.FieldNormalizedText},
+		},
+	}
+	graph.Nodes[7] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   dictionaryrelation.Table,
+			Columns: dictionaryrelation.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: dictionaryrelation.FieldID,
+			},
+		},
+		Type: "DictionaryRelation",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			dictionaryrelation.FieldCreatedAt:     {Type: field.TypeTime, Column: dictionaryrelation.FieldCreatedAt},
+			dictionaryrelation.FieldUpdatedAt:     {Type: field.TypeTime, Column: dictionaryrelation.FieldUpdatedAt},
+			dictionaryrelation.FieldStatus:        {Type: field.TypeInt32, Column: dictionaryrelation.FieldStatus},
+			dictionaryrelation.FieldTenantID:      {Type: field.TypeUint32, Column: dictionaryrelation.FieldTenantID},
+			dictionaryrelation.FieldDeletedAt:     {Type: field.TypeTime, Column: dictionaryrelation.FieldDeletedAt},
+			dictionaryrelation.FieldEntryID:       {Type: field.TypeUint32, Column: dictionaryrelation.FieldEntryID},
+			dictionaryrelation.FieldRelationType:  {Type: field.TypeString, Column: dictionaryrelation.FieldRelationType},
+			dictionaryrelation.FieldRelatedText:   {Type: field.TypeString, Column: dictionaryrelation.FieldRelatedText},
+			dictionaryrelation.FieldTargetEntryID: {Type: field.TypeUint32, Column: dictionaryrelation.FieldTargetEntryID},
+			dictionaryrelation.FieldSource:        {Type: field.TypeString, Column: dictionaryrelation.FieldSource},
+			dictionaryrelation.FieldDescription:   {Type: field.TypeString, Column: dictionaryrelation.FieldDescription},
+		},
+	}
+	graph.Nodes[8] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   dictionaryversion.Table,
+			Columns: dictionaryversion.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: dictionaryversion.FieldID,
+			},
+		},
+		Type: "DictionaryVersion",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			dictionaryversion.FieldCreatedAt:    {Type: field.TypeTime, Column: dictionaryversion.FieldCreatedAt},
+			dictionaryversion.FieldUpdatedAt:    {Type: field.TypeTime, Column: dictionaryversion.FieldUpdatedAt},
+			dictionaryversion.FieldStatus:       {Type: field.TypeInt32, Column: dictionaryversion.FieldStatus},
+			dictionaryversion.FieldTenantID:     {Type: field.TypeUint32, Column: dictionaryversion.FieldTenantID},
+			dictionaryversion.FieldDictionaryID: {Type: field.TypeUint32, Column: dictionaryversion.FieldDictionaryID},
+			dictionaryversion.FieldVersionNo:    {Type: field.TypeInt32, Column: dictionaryversion.FieldVersionNo},
+			dictionaryversion.FieldSnapshot:     {Type: field.TypeString, Column: dictionaryversion.FieldSnapshot},
+			dictionaryversion.FieldDescription:  {Type: field.TypeString, Column: dictionaryversion.FieldDescription},
+		},
+	}
+	graph.Nodes[9] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   enhancementlog.Table,
+			Columns: enhancementlog.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: enhancementlog.FieldID,
+			},
+		},
+		Type: "EnhancementLog",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			enhancementlog.FieldCreatedAt:           {Type: field.TypeTime, Column: enhancementlog.FieldCreatedAt},
+			enhancementlog.FieldUpdatedAt:           {Type: field.TypeTime, Column: enhancementlog.FieldUpdatedAt},
+			enhancementlog.FieldStatus:              {Type: field.TypeInt32, Column: enhancementlog.FieldStatus},
+			enhancementlog.FieldTenantID:            {Type: field.TypeUint32, Column: enhancementlog.FieldTenantID},
+			enhancementlog.FieldRequestID:           {Type: field.TypeString, Column: enhancementlog.FieldRequestID},
+			enhancementlog.FieldSessionID:           {Type: field.TypeString, Column: enhancementlog.FieldSessionID},
+			enhancementlog.FieldPolicyID:            {Type: field.TypeUint32, Column: enhancementlog.FieldPolicyID},
+			enhancementlog.FieldPolicyMode:          {Type: field.TypeString, Column: enhancementlog.FieldPolicyMode},
+			enhancementlog.FieldContextVersion:      {Type: field.TypeString, Column: enhancementlog.FieldContextVersion},
+			enhancementlog.FieldRawText:             {Type: field.TypeString, Column: enhancementlog.FieldRawText},
+			enhancementlog.FieldEnhancedText:        {Type: field.TypeString, Column: enhancementlog.FieldEnhancedText},
+			enhancementlog.FieldChangesJSON:         {Type: field.TypeString, Column: enhancementlog.FieldChangesJSON},
+			enhancementlog.FieldProcessingTimeMs:    {Type: field.TypeInt64, Column: enhancementlog.FieldProcessingTimeMs},
+			enhancementlog.FieldCleaningTimeMs:      {Type: field.TypeInt64, Column: enhancementlog.FieldCleaningTimeMs},
+			enhancementlog.FieldFillerTimeMs:        {Type: field.TypeInt64, Column: enhancementlog.FieldFillerTimeMs},
+			enhancementlog.FieldVocabMatchTimeMs:    {Type: field.TypeInt64, Column: enhancementlog.FieldVocabMatchTimeMs},
+			enhancementlog.FieldAliasTimeMs:         {Type: field.TypeInt64, Column: enhancementlog.FieldAliasTimeMs},
+			enhancementlog.FieldDeterministicTimeMs: {Type: field.TypeInt64, Column: enhancementlog.FieldDeterministicTimeMs},
+			enhancementlog.FieldPinyinTimeMs:        {Type: field.TypeInt64, Column: enhancementlog.FieldPinyinTimeMs},
+			enhancementlog.FieldFuzzyTimeMs:         {Type: field.TypeInt64, Column: enhancementlog.FieldFuzzyTimeMs},
+			enhancementlog.FieldContextTimeMs:       {Type: field.TypeInt64, Column: enhancementlog.FieldContextTimeMs},
+			enhancementlog.FieldUserCorrected:       {Type: field.TypeBool, Column: enhancementlog.FieldUserCorrected},
+			enhancementlog.FieldFeedbackText:        {Type: field.TypeString, Column: enhancementlog.FieldFeedbackText},
+			enhancementlog.FieldErrorMessage:        {Type: field.TypeString, Column: enhancementlog.FieldErrorMessage},
+		},
+	}
+	graph.Nodes[10] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   enhancementpolicy.Table,
+			Columns: enhancementpolicy.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: enhancementpolicy.FieldID,
+			},
+		},
+		Type: "EnhancementPolicy",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			enhancementpolicy.FieldCreatedAt:                {Type: field.TypeTime, Column: enhancementpolicy.FieldCreatedAt},
+			enhancementpolicy.FieldUpdatedAt:                {Type: field.TypeTime, Column: enhancementpolicy.FieldUpdatedAt},
+			enhancementpolicy.FieldStatus:                   {Type: field.TypeInt32, Column: enhancementpolicy.FieldStatus},
+			enhancementpolicy.FieldTenantID:                 {Type: field.TypeUint32, Column: enhancementpolicy.FieldTenantID},
+			enhancementpolicy.FieldName:                     {Type: field.TypeString, Column: enhancementpolicy.FieldName},
+			enhancementpolicy.FieldMode:                     {Type: field.TypeString, Column: enhancementpolicy.FieldMode},
+			enhancementpolicy.FieldTextCleaning:             {Type: field.TypeBool, Column: enhancementpolicy.FieldTextCleaning},
+			enhancementpolicy.FieldFillerRemoval:            {Type: field.TypeBool, Column: enhancementpolicy.FieldFillerRemoval},
+			enhancementpolicy.FieldAliasResolution:          {Type: field.TypeBool, Column: enhancementpolicy.FieldAliasResolution},
+			enhancementpolicy.FieldDeterministicReplacement: {Type: field.TypeBool, Column: enhancementpolicy.FieldDeterministicReplacement},
+			enhancementpolicy.FieldPinyinCorrection:         {Type: field.TypeBool, Column: enhancementpolicy.FieldPinyinCorrection},
+			enhancementpolicy.FieldFuzzyMatching:            {Type: field.TypeBool, Column: enhancementpolicy.FieldFuzzyMatching},
+			enhancementpolicy.FieldContextCorrection:        {Type: field.TypeBool, Column: enhancementpolicy.FieldContextCorrection},
+			enhancementpolicy.FieldDescription:              {Type: field.TypeString, Column: enhancementpolicy.FieldDescription},
+		},
+	}
+	graph.Nodes[11] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   enhancementprofile.Table,
+			Columns: enhancementprofile.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: enhancementprofile.FieldID,
+			},
+		},
+		Type: "EnhancementProfile",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			enhancementprofile.FieldCreatedAt:   {Type: field.TypeTime, Column: enhancementprofile.FieldCreatedAt},
+			enhancementprofile.FieldUpdatedAt:   {Type: field.TypeTime, Column: enhancementprofile.FieldUpdatedAt},
+			enhancementprofile.FieldStatus:      {Type: field.TypeInt32, Column: enhancementprofile.FieldStatus},
+			enhancementprofile.FieldTenantID:    {Type: field.TypeUint32, Column: enhancementprofile.FieldTenantID},
+			enhancementprofile.FieldPolicyID:    {Type: field.TypeUint32, Column: enhancementprofile.FieldPolicyID},
+			enhancementprofile.FieldName:        {Type: field.TypeString, Column: enhancementprofile.FieldName},
+			enhancementprofile.FieldDescription: {Type: field.TypeString, Column: enhancementprofile.FieldDescription},
 		},
 	}
 	graph.MustAddE(
-		"word",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   dictionaryalias.WordTable,
-			Columns: []string{dictionaryalias.WordColumn},
-			Bidi:    false,
-		},
-		"DictionaryAlias",
-		"DictionaryWord",
-	)
-	graph.MustAddE(
-		"aliases",
+		"entries",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dictionaryword.AliasesTable,
-			Columns: []string{dictionaryword.AliasesColumn},
+			Table:   dictionary.EntriesTable,
+			Columns: []string{dictionary.EntriesColumn},
 			Bidi:    false,
 		},
-		"DictionaryWord",
-		"DictionaryAlias",
+		"Dictionary",
+		"DictionaryEntry",
+	)
+	graph.MustAddE(
+		"versions",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dictionary.VersionsTable,
+			Columns: []string{dictionary.VersionsColumn},
+			Bidi:    false,
+		},
+		"Dictionary",
+		"DictionaryVersion",
+	)
+	graph.MustAddE(
+		"dictionary",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dictionaryentry.DictionaryTable,
+			Columns: []string{dictionaryentry.DictionaryColumn},
+			Bidi:    false,
+		},
+		"DictionaryEntry",
+		"Dictionary",
+	)
+	graph.MustAddE(
+		"relations",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dictionaryentry.RelationsTable,
+			Columns: []string{dictionaryentry.RelationsColumn},
+			Bidi:    false,
+		},
+		"DictionaryEntry",
+		"DictionaryRelation",
+	)
+	graph.MustAddE(
+		"entry",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dictionaryrelation.EntryTable,
+			Columns: []string{dictionaryrelation.EntryColumn},
+			Bidi:    false,
+		},
+		"DictionaryRelation",
+		"DictionaryEntry",
+	)
+	graph.MustAddE(
+		"dictionary",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   dictionaryversion.DictionaryTable,
+			Columns: []string{dictionaryversion.DictionaryColumn},
+			Bidi:    false,
+		},
+		"DictionaryVersion",
+		"Dictionary",
+	)
+	graph.MustAddE(
+		"profiles",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   enhancementpolicy.ProfilesTable,
+			Columns: []string{enhancementpolicy.ProfilesColumn},
+			Bidi:    false,
+		},
+		"EnhancementPolicy",
+		"EnhancementProfile",
+	)
+	graph.MustAddE(
+		"policy",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   enhancementprofile.PolicyTable,
+			Columns: []string{enhancementprofile.PolicyColumn},
+			Bidi:    false,
+		},
+		"EnhancementProfile",
+		"EnhancementPolicy",
 	)
 	return graph
 }()
@@ -411,33 +617,33 @@ func (f *AsrRecordFilter) WhereEngine(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *CorrectionLogQuery) addPredicate(pred func(s *sql.Selector)) {
+func (_q *DictionaryQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
-// Filter returns a Filter implementation to apply filters on the CorrectionLogQuery builder.
-func (_q *CorrectionLogQuery) Filter() *CorrectionLogFilter {
-	return &CorrectionLogFilter{config: _q.config, predicateAdder: _q}
+// Filter returns a Filter implementation to apply filters on the DictionaryQuery builder.
+func (_q *DictionaryQuery) Filter() *DictionaryFilter {
+	return &DictionaryFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
-func (m *CorrectionLogMutation) addPredicate(pred func(s *sql.Selector)) {
+func (m *DictionaryMutation) addPredicate(pred func(s *sql.Selector)) {
 	m.predicates = append(m.predicates, pred)
 }
 
-// Filter returns an entql.Where implementation to apply filters on the CorrectionLogMutation builder.
-func (m *CorrectionLogMutation) Filter() *CorrectionLogFilter {
-	return &CorrectionLogFilter{config: m.config, predicateAdder: m}
+// Filter returns an entql.Where implementation to apply filters on the DictionaryMutation builder.
+func (m *DictionaryMutation) Filter() *DictionaryFilter {
+	return &DictionaryFilter{config: m.config, predicateAdder: m}
 }
 
-// CorrectionLogFilter provides a generic filtering capability at runtime for CorrectionLogQuery.
-type CorrectionLogFilter struct {
+// DictionaryFilter provides a generic filtering capability at runtime for DictionaryQuery.
+type DictionaryFilter struct {
 	predicateAdder
 	config
 }
 
 // Where applies the entql predicate on the query filter.
-func (f *CorrectionLogFilter) Where(p entql.P) {
+func (f *DictionaryFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
 			s.AddError(err)
@@ -446,118 +652,111 @@ func (f *CorrectionLogFilter) Where(p entql.P) {
 }
 
 // WhereID applies the entql uint32 predicate on the id field.
-func (f *CorrectionLogFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(correctionlog.FieldID))
+func (f *DictionaryFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionary.FieldID))
 }
 
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *CorrectionLogFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(correctionlog.FieldCreatedAt))
+func (f *DictionaryFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionary.FieldCreatedAt))
 }
 
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *CorrectionLogFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(correctionlog.FieldUpdatedAt))
+func (f *DictionaryFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionary.FieldUpdatedAt))
 }
 
 // WhereStatus applies the entql int32 predicate on the status field.
-func (f *CorrectionLogFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(correctionlog.FieldStatus))
+func (f *DictionaryFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionary.FieldStatus))
 }
 
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *CorrectionLogFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(correctionlog.FieldTenantID))
+func (f *DictionaryFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionary.FieldTenantID))
 }
 
-// WhereUserID applies the entql uint32 predicate on the user_id field.
-func (f *CorrectionLogFilter) WhereUserID(p entql.Uint32P) {
-	f.Where(p.Field(correctionlog.FieldUserID))
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *DictionaryFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionary.FieldDeletedAt))
 }
 
-// WhereSessionID applies the entql string predicate on the session_id field.
-func (f *CorrectionLogFilter) WhereSessionID(p entql.StringP) {
-	f.Where(p.Field(correctionlog.FieldSessionID))
+// WhereName applies the entql string predicate on the name field.
+func (f *DictionaryFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(dictionary.FieldName))
 }
 
-// WhereOriginalText applies the entql string predicate on the original_text field.
-func (f *CorrectionLogFilter) WhereOriginalText(p entql.StringP) {
-	f.Where(p.Field(correctionlog.FieldOriginalText))
+// WhereScope applies the entql string predicate on the scope field.
+func (f *DictionaryFilter) WhereScope(p entql.StringP) {
+	f.Where(p.Field(dictionary.FieldScope))
 }
 
-// WhereCorrectedText applies the entql string predicate on the corrected_text field.
-func (f *CorrectionLogFilter) WhereCorrectedText(p entql.StringP) {
-	f.Where(p.Field(correctionlog.FieldCorrectedText))
+// WhereSource applies the entql string predicate on the source field.
+func (f *DictionaryFilter) WhereSource(p entql.StringP) {
+	f.Where(p.Field(dictionary.FieldSource))
 }
 
-// WhereChangesJSON applies the entql string predicate on the changes_json field.
-func (f *CorrectionLogFilter) WhereChangesJSON(p entql.StringP) {
-	f.Where(p.Field(correctionlog.FieldChangesJSON))
+// WhereDescription applies the entql string predicate on the description field.
+func (f *DictionaryFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(dictionary.FieldDescription))
 }
 
-// WhereConfidence applies the entql float64 predicate on the confidence field.
-func (f *CorrectionLogFilter) WhereConfidence(p entql.Float64P) {
-	f.Where(p.Field(correctionlog.FieldConfidence))
+// WhereHasEntries applies a predicate to check if query has an edge entries.
+func (f *DictionaryFilter) WhereHasEntries() {
+	f.Where(entql.HasEdge("entries"))
 }
 
-// WhereNeedConfirm applies the entql bool predicate on the need_confirm field.
-func (f *CorrectionLogFilter) WhereNeedConfirm(p entql.BoolP) {
-	f.Where(p.Field(correctionlog.FieldNeedConfirm))
+// WhereHasEntriesWith applies a predicate to check if query has an edge entries with a given conditions (other predicates).
+func (f *DictionaryFilter) WhereHasEntriesWith(preds ...predicate.DictionaryEntry) {
+	f.Where(entql.HasEdgeWith("entries", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
 }
 
-// WhereDurationMs applies the entql int64 predicate on the duration_ms field.
-func (f *CorrectionLogFilter) WhereDurationMs(p entql.Int64P) {
-	f.Where(p.Field(correctionlog.FieldDurationMs))
+// WhereHasVersions applies a predicate to check if query has an edge versions.
+func (f *DictionaryFilter) WhereHasVersions() {
+	f.Where(entql.HasEdge("versions"))
 }
 
-// WhereRuleHits applies the entql int predicate on the rule_hits field.
-func (f *CorrectionLogFilter) WhereRuleHits(p entql.IntP) {
-	f.Where(p.Field(correctionlog.FieldRuleHits))
-}
-
-// WherePinyinHits applies the entql int predicate on the pinyin_hits field.
-func (f *CorrectionLogFilter) WherePinyinHits(p entql.IntP) {
-	f.Where(p.Field(correctionlog.FieldPinyinHits))
-}
-
-// WhereEntityHits applies the entql int predicate on the entity_hits field.
-func (f *CorrectionLogFilter) WhereEntityHits(p entql.IntP) {
-	f.Where(p.Field(correctionlog.FieldEntityHits))
-}
-
-// WhereLlmHits applies the entql int predicate on the llm_hits field.
-func (f *CorrectionLogFilter) WhereLlmHits(p entql.IntP) {
-	f.Where(p.Field(correctionlog.FieldLlmHits))
+// WhereHasVersionsWith applies a predicate to check if query has an edge versions with a given conditions (other predicates).
+func (f *DictionaryFilter) WhereHasVersionsWith(preds ...predicate.DictionaryVersion) {
+	f.Where(entql.HasEdgeWith("versions", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *CorrectionRuleQuery) addPredicate(pred func(s *sql.Selector)) {
+func (_q *DictionaryCategoryQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
-// Filter returns a Filter implementation to apply filters on the CorrectionRuleQuery builder.
-func (_q *CorrectionRuleQuery) Filter() *CorrectionRuleFilter {
-	return &CorrectionRuleFilter{config: _q.config, predicateAdder: _q}
+// Filter returns a Filter implementation to apply filters on the DictionaryCategoryQuery builder.
+func (_q *DictionaryCategoryQuery) Filter() *DictionaryCategoryFilter {
+	return &DictionaryCategoryFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
-func (m *CorrectionRuleMutation) addPredicate(pred func(s *sql.Selector)) {
+func (m *DictionaryCategoryMutation) addPredicate(pred func(s *sql.Selector)) {
 	m.predicates = append(m.predicates, pred)
 }
 
-// Filter returns an entql.Where implementation to apply filters on the CorrectionRuleMutation builder.
-func (m *CorrectionRuleMutation) Filter() *CorrectionRuleFilter {
-	return &CorrectionRuleFilter{config: m.config, predicateAdder: m}
+// Filter returns an entql.Where implementation to apply filters on the DictionaryCategoryMutation builder.
+func (m *DictionaryCategoryMutation) Filter() *DictionaryCategoryFilter {
+	return &DictionaryCategoryFilter{config: m.config, predicateAdder: m}
 }
 
-// CorrectionRuleFilter provides a generic filtering capability at runtime for CorrectionRuleQuery.
-type CorrectionRuleFilter struct {
+// DictionaryCategoryFilter provides a generic filtering capability at runtime for DictionaryCategoryQuery.
+type DictionaryCategoryFilter struct {
 	predicateAdder
 	config
 }
 
 // Where applies the entql predicate on the query filter.
-func (f *CorrectionRuleFilter) Where(p entql.P) {
+func (f *DictionaryCategoryFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
 			s.AddError(err)
@@ -566,83 +765,78 @@ func (f *CorrectionRuleFilter) Where(p entql.P) {
 }
 
 // WhereID applies the entql uint32 predicate on the id field.
-func (f *CorrectionRuleFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(correctionrule.FieldID))
+func (f *DictionaryCategoryFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionarycategory.FieldID))
 }
 
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *CorrectionRuleFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(correctionrule.FieldCreatedAt))
+func (f *DictionaryCategoryFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionarycategory.FieldCreatedAt))
 }
 
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *CorrectionRuleFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(correctionrule.FieldUpdatedAt))
+func (f *DictionaryCategoryFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionarycategory.FieldUpdatedAt))
 }
 
 // WhereStatus applies the entql int32 predicate on the status field.
-func (f *CorrectionRuleFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(correctionrule.FieldStatus))
+func (f *DictionaryCategoryFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionarycategory.FieldStatus))
 }
 
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *CorrectionRuleFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(correctionrule.FieldTenantID))
+func (f *DictionaryCategoryFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionarycategory.FieldTenantID))
 }
 
-// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
-func (f *CorrectionRuleFilter) WhereDeletedAt(p entql.TimeP) {
-	f.Where(p.Field(correctionrule.FieldDeletedAt))
+// WhereCode applies the entql string predicate on the code field.
+func (f *DictionaryCategoryFilter) WhereCode(p entql.StringP) {
+	f.Where(p.Field(dictionarycategory.FieldCode))
 }
 
-// WhereSource applies the entql string predicate on the source field.
-func (f *CorrectionRuleFilter) WhereSource(p entql.StringP) {
-	f.Where(p.Field(correctionrule.FieldSource))
+// WhereName applies the entql string predicate on the name field.
+func (f *DictionaryCategoryFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(dictionarycategory.FieldName))
 }
 
-// WhereTarget applies the entql string predicate on the target field.
-func (f *CorrectionRuleFilter) WhereTarget(p entql.StringP) {
-	f.Where(p.Field(correctionrule.FieldTarget))
+// WhereBuiltin applies the entql bool predicate on the builtin field.
+func (f *DictionaryCategoryFilter) WhereBuiltin(p entql.BoolP) {
+	f.Where(p.Field(dictionarycategory.FieldBuiltin))
 }
 
-// WhereType applies the entql string predicate on the type field.
-func (f *CorrectionRuleFilter) WhereType(p entql.StringP) {
-	f.Where(p.Field(correctionrule.FieldType))
-}
-
-// WherePriority applies the entql int32 predicate on the priority field.
-func (f *CorrectionRuleFilter) WherePriority(p entql.Int32P) {
-	f.Where(p.Field(correctionrule.FieldPriority))
+// WhereSort applies the entql int32 predicate on the sort field.
+func (f *DictionaryCategoryFilter) WhereSort(p entql.Int32P) {
+	f.Where(p.Field(dictionarycategory.FieldSort))
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *DictionaryAliasQuery) addPredicate(pred func(s *sql.Selector)) {
+func (_q *DictionaryChangeLogQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
-// Filter returns a Filter implementation to apply filters on the DictionaryAliasQuery builder.
-func (_q *DictionaryAliasQuery) Filter() *DictionaryAliasFilter {
-	return &DictionaryAliasFilter{config: _q.config, predicateAdder: _q}
+// Filter returns a Filter implementation to apply filters on the DictionaryChangeLogQuery builder.
+func (_q *DictionaryChangeLogQuery) Filter() *DictionaryChangeLogFilter {
+	return &DictionaryChangeLogFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
-func (m *DictionaryAliasMutation) addPredicate(pred func(s *sql.Selector)) {
+func (m *DictionaryChangeLogMutation) addPredicate(pred func(s *sql.Selector)) {
 	m.predicates = append(m.predicates, pred)
 }
 
-// Filter returns an entql.Where implementation to apply filters on the DictionaryAliasMutation builder.
-func (m *DictionaryAliasMutation) Filter() *DictionaryAliasFilter {
-	return &DictionaryAliasFilter{config: m.config, predicateAdder: m}
+// Filter returns an entql.Where implementation to apply filters on the DictionaryChangeLogMutation builder.
+func (m *DictionaryChangeLogMutation) Filter() *DictionaryChangeLogFilter {
+	return &DictionaryChangeLogFilter{config: m.config, predicateAdder: m}
 }
 
-// DictionaryAliasFilter provides a generic filtering capability at runtime for DictionaryAliasQuery.
-type DictionaryAliasFilter struct {
+// DictionaryChangeLogFilter provides a generic filtering capability at runtime for DictionaryChangeLogQuery.
+type DictionaryChangeLogFilter struct {
 	predicateAdder
 	config
 }
 
 // Where applies the entql predicate on the query filter.
-func (f *DictionaryAliasFilter) Where(p entql.P) {
+func (f *DictionaryChangeLogFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
@@ -651,102 +845,88 @@ func (f *DictionaryAliasFilter) Where(p entql.P) {
 }
 
 // WhereID applies the entql uint32 predicate on the id field.
-func (f *DictionaryAliasFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(dictionaryalias.FieldID))
+func (f *DictionaryChangeLogFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionarychangelog.FieldID))
 }
 
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *DictionaryAliasFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(dictionaryalias.FieldCreatedAt))
+func (f *DictionaryChangeLogFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionarychangelog.FieldCreatedAt))
 }
 
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *DictionaryAliasFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(dictionaryalias.FieldUpdatedAt))
+func (f *DictionaryChangeLogFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionarychangelog.FieldUpdatedAt))
 }
 
 // WhereStatus applies the entql int32 predicate on the status field.
-func (f *DictionaryAliasFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(dictionaryalias.FieldStatus))
+func (f *DictionaryChangeLogFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionarychangelog.FieldStatus))
 }
 
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *DictionaryAliasFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(dictionaryalias.FieldTenantID))
+func (f *DictionaryChangeLogFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionarychangelog.FieldTenantID))
 }
 
-// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
-func (f *DictionaryAliasFilter) WhereDeletedAt(p entql.TimeP) {
-	f.Where(p.Field(dictionaryalias.FieldDeletedAt))
+// WhereEntityType applies the entql string predicate on the entity_type field.
+func (f *DictionaryChangeLogFilter) WhereEntityType(p entql.StringP) {
+	f.Where(p.Field(dictionarychangelog.FieldEntityType))
 }
 
-// WhereWordID applies the entql uint32 predicate on the word_id field.
-func (f *DictionaryAliasFilter) WhereWordID(p entql.Uint32P) {
-	f.Where(p.Field(dictionaryalias.FieldWordID))
+// WhereEntityID applies the entql uint32 predicate on the entity_id field.
+func (f *DictionaryChangeLogFilter) WhereEntityID(p entql.Uint32P) {
+	f.Where(p.Field(dictionarychangelog.FieldEntityID))
 }
 
-// WhereAlias applies the entql string predicate on the alias field.
-func (f *DictionaryAliasFilter) WhereAlias(p entql.StringP) {
-	f.Where(p.Field(dictionaryalias.FieldAlias))
+// WhereAction applies the entql string predicate on the action field.
+func (f *DictionaryChangeLogFilter) WhereAction(p entql.StringP) {
+	f.Where(p.Field(dictionarychangelog.FieldAction))
 }
 
-// WherePinyin applies the entql string predicate on the pinyin field.
-func (f *DictionaryAliasFilter) WherePinyin(p entql.StringP) {
-	f.Where(p.Field(dictionaryalias.FieldPinyin))
+// WhereBeforeSnapshot applies the entql string predicate on the before_snapshot field.
+func (f *DictionaryChangeLogFilter) WhereBeforeSnapshot(p entql.StringP) {
+	f.Where(p.Field(dictionarychangelog.FieldBeforeSnapshot))
 }
 
-// WhereWeight applies the entql float64 predicate on the weight field.
-func (f *DictionaryAliasFilter) WhereWeight(p entql.Float64P) {
-	f.Where(p.Field(dictionaryalias.FieldWeight))
+// WhereAfterSnapshot applies the entql string predicate on the after_snapshot field.
+func (f *DictionaryChangeLogFilter) WhereAfterSnapshot(p entql.StringP) {
+	f.Where(p.Field(dictionarychangelog.FieldAfterSnapshot))
 }
 
-// WhereSource applies the entql string predicate on the source field.
-func (f *DictionaryAliasFilter) WhereSource(p entql.StringP) {
-	f.Where(p.Field(dictionaryalias.FieldSource))
-}
-
-// WhereHasWord applies a predicate to check if query has an edge word.
-func (f *DictionaryAliasFilter) WhereHasWord() {
-	f.Where(entql.HasEdge("word"))
-}
-
-// WhereHasWordWith applies a predicate to check if query has an edge word with a given conditions (other predicates).
-func (f *DictionaryAliasFilter) WhereHasWordWith(preds ...predicate.DictionaryWord) {
-	f.Where(entql.HasEdgeWith("word", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
+// WhereOperatorID applies the entql uint32 predicate on the operator_id field.
+func (f *DictionaryChangeLogFilter) WhereOperatorID(p entql.Uint32P) {
+	f.Where(p.Field(dictionarychangelog.FieldOperatorID))
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *DictionaryWordQuery) addPredicate(pred func(s *sql.Selector)) {
+func (_q *DictionaryConflictQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
-// Filter returns a Filter implementation to apply filters on the DictionaryWordQuery builder.
-func (_q *DictionaryWordQuery) Filter() *DictionaryWordFilter {
-	return &DictionaryWordFilter{config: _q.config, predicateAdder: _q}
+// Filter returns a Filter implementation to apply filters on the DictionaryConflictQuery builder.
+func (_q *DictionaryConflictQuery) Filter() *DictionaryConflictFilter {
+	return &DictionaryConflictFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
-func (m *DictionaryWordMutation) addPredicate(pred func(s *sql.Selector)) {
+func (m *DictionaryConflictMutation) addPredicate(pred func(s *sql.Selector)) {
 	m.predicates = append(m.predicates, pred)
 }
 
-// Filter returns an entql.Where implementation to apply filters on the DictionaryWordMutation builder.
-func (m *DictionaryWordMutation) Filter() *DictionaryWordFilter {
-	return &DictionaryWordFilter{config: m.config, predicateAdder: m}
+// Filter returns an entql.Where implementation to apply filters on the DictionaryConflictMutation builder.
+func (m *DictionaryConflictMutation) Filter() *DictionaryConflictFilter {
+	return &DictionaryConflictFilter{config: m.config, predicateAdder: m}
 }
 
-// DictionaryWordFilter provides a generic filtering capability at runtime for DictionaryWordQuery.
-type DictionaryWordFilter struct {
+// DictionaryConflictFilter provides a generic filtering capability at runtime for DictionaryConflictQuery.
+type DictionaryConflictFilter struct {
 	predicateAdder
 	config
 }
 
 // Where applies the entql predicate on the query filter.
-func (f *DictionaryWordFilter) Where(p entql.P) {
+func (f *DictionaryConflictFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
@@ -755,102 +935,88 @@ func (f *DictionaryWordFilter) Where(p entql.P) {
 }
 
 // WhereID applies the entql uint32 predicate on the id field.
-func (f *DictionaryWordFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(dictionaryword.FieldID))
+func (f *DictionaryConflictFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryconflict.FieldID))
 }
 
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *DictionaryWordFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(dictionaryword.FieldCreatedAt))
+func (f *DictionaryConflictFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryconflict.FieldCreatedAt))
 }
 
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *DictionaryWordFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(dictionaryword.FieldUpdatedAt))
+func (f *DictionaryConflictFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryconflict.FieldUpdatedAt))
 }
 
 // WhereStatus applies the entql int32 predicate on the status field.
-func (f *DictionaryWordFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(dictionaryword.FieldStatus))
+func (f *DictionaryConflictFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionaryconflict.FieldStatus))
 }
 
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *DictionaryWordFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(dictionaryword.FieldTenantID))
+func (f *DictionaryConflictFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryconflict.FieldTenantID))
 }
 
-// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
-func (f *DictionaryWordFilter) WhereDeletedAt(p entql.TimeP) {
-	f.Where(p.Field(dictionaryword.FieldDeletedAt))
+// WhereInput applies the entql string predicate on the input field.
+func (f *DictionaryConflictFilter) WhereInput(p entql.StringP) {
+	f.Where(p.Field(dictionaryconflict.FieldInput))
 }
 
-// WhereWord applies the entql string predicate on the word field.
-func (f *DictionaryWordFilter) WhereWord(p entql.StringP) {
-	f.Where(p.Field(dictionaryword.FieldWord))
+// WhereCandidate applies the entql string predicate on the candidate field.
+func (f *DictionaryConflictFilter) WhereCandidate(p entql.StringP) {
+	f.Where(p.Field(dictionaryconflict.FieldCandidate))
 }
 
-// WhereLevel applies the entql string predicate on the level field.
-func (f *DictionaryWordFilter) WhereLevel(p entql.StringP) {
-	f.Where(p.Field(dictionaryword.FieldLevel))
+// WhereSourceScope applies the entql string predicate on the source_scope field.
+func (f *DictionaryConflictFilter) WhereSourceScope(p entql.StringP) {
+	f.Where(p.Field(dictionaryconflict.FieldSourceScope))
 }
 
-// WhereCategory applies the entql string predicate on the category field.
-func (f *DictionaryWordFilter) WhereCategory(p entql.StringP) {
-	f.Where(p.Field(dictionaryword.FieldCategory))
-}
-
-// WhereSource applies the entql string predicate on the source field.
-func (f *DictionaryWordFilter) WhereSource(p entql.StringP) {
-	f.Where(p.Field(dictionaryword.FieldSource))
+// WhereSourceDictionary applies the entql string predicate on the source_dictionary field.
+func (f *DictionaryConflictFilter) WhereSourceDictionary(p entql.StringP) {
+	f.Where(p.Field(dictionaryconflict.FieldSourceDictionary))
 }
 
 // WherePriority applies the entql int32 predicate on the priority field.
-func (f *DictionaryWordFilter) WherePriority(p entql.Int32P) {
-	f.Where(p.Field(dictionaryword.FieldPriority))
+func (f *DictionaryConflictFilter) WherePriority(p entql.Int32P) {
+	f.Where(p.Field(dictionaryconflict.FieldPriority))
 }
 
-// WhereHasAliases applies a predicate to check if query has an edge aliases.
-func (f *DictionaryWordFilter) WhereHasAliases() {
-	f.Where(entql.HasEdge("aliases"))
-}
-
-// WhereHasAliasesWith applies a predicate to check if query has an edge aliases with a given conditions (other predicates).
-func (f *DictionaryWordFilter) WhereHasAliasesWith(preds ...predicate.DictionaryAlias) {
-	f.Where(entql.HasEdgeWith("aliases", sqlgraph.WrapFunc(func(s *sql.Selector) {
-		for _, p := range preds {
-			p(s)
-		}
-	})))
+// WhereResolvedCandidate applies the entql string predicate on the resolved_candidate field.
+func (f *DictionaryConflictFilter) WhereResolvedCandidate(p entql.StringP) {
+	f.Where(p.Field(dictionaryconflict.FieldResolvedCandidate))
 }
 
 // addPredicate implements the predicateAdder interface.
-func (_q *HotwordQuery) addPredicate(pred func(s *sql.Selector)) {
+func (_q *DictionaryEntryQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
-// Filter returns a Filter implementation to apply filters on the HotwordQuery builder.
-func (_q *HotwordQuery) Filter() *HotwordFilter {
-	return &HotwordFilter{config: _q.config, predicateAdder: _q}
+// Filter returns a Filter implementation to apply filters on the DictionaryEntryQuery builder.
+func (_q *DictionaryEntryQuery) Filter() *DictionaryEntryFilter {
+	return &DictionaryEntryFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
-func (m *HotwordMutation) addPredicate(pred func(s *sql.Selector)) {
+func (m *DictionaryEntryMutation) addPredicate(pred func(s *sql.Selector)) {
 	m.predicates = append(m.predicates, pred)
 }
 
-// Filter returns an entql.Where implementation to apply filters on the HotwordMutation builder.
-func (m *HotwordMutation) Filter() *HotwordFilter {
-	return &HotwordFilter{config: m.config, predicateAdder: m}
+// Filter returns an entql.Where implementation to apply filters on the DictionaryEntryMutation builder.
+func (m *DictionaryEntryMutation) Filter() *DictionaryEntryFilter {
+	return &DictionaryEntryFilter{config: m.config, predicateAdder: m}
 }
 
-// HotwordFilter provides a generic filtering capability at runtime for HotwordQuery.
-type HotwordFilter struct {
+// DictionaryEntryFilter provides a generic filtering capability at runtime for DictionaryEntryQuery.
+type DictionaryEntryFilter struct {
 	predicateAdder
 	config
 }
 
 // Where applies the entql predicate on the query filter.
-func (f *HotwordFilter) Where(p entql.P) {
+func (f *DictionaryEntryFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
@@ -859,46 +1025,690 @@ func (f *HotwordFilter) Where(p entql.P) {
 }
 
 // WhereID applies the entql uint32 predicate on the id field.
-func (f *HotwordFilter) WhereID(p entql.Uint32P) {
-	f.Where(p.Field(hotword.FieldID))
+func (f *DictionaryEntryFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryentry.FieldID))
 }
 
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *HotwordFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(hotword.FieldCreatedAt))
+func (f *DictionaryEntryFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryentry.FieldCreatedAt))
 }
 
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *HotwordFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(hotword.FieldUpdatedAt))
+func (f *DictionaryEntryFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryentry.FieldUpdatedAt))
 }
 
 // WhereStatus applies the entql int32 predicate on the status field.
-func (f *HotwordFilter) WhereStatus(p entql.Int32P) {
-	f.Where(p.Field(hotword.FieldStatus))
+func (f *DictionaryEntryFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionaryentry.FieldStatus))
 }
 
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
-func (f *HotwordFilter) WhereTenantID(p entql.Uint32P) {
-	f.Where(p.Field(hotword.FieldTenantID))
+func (f *DictionaryEntryFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryentry.FieldTenantID))
 }
 
-// WhereWord applies the entql string predicate on the word field.
-func (f *HotwordFilter) WhereWord(p entql.StringP) {
-	f.Where(p.Field(hotword.FieldWord))
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *DictionaryEntryFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryentry.FieldDeletedAt))
 }
 
-// WhereTarget applies the entql string predicate on the target field.
-func (f *HotwordFilter) WhereTarget(p entql.StringP) {
-	f.Where(p.Field(hotword.FieldTarget))
+// WhereDictionaryID applies the entql uint32 predicate on the dictionary_id field.
+func (f *DictionaryEntryFilter) WhereDictionaryID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryentry.FieldDictionaryID))
 }
 
-// WhereWeight applies the entql float64 predicate on the weight field.
-func (f *HotwordFilter) WhereWeight(p entql.Float64P) {
-	f.Where(p.Field(hotword.FieldWeight))
+// WhereStandardText applies the entql string predicate on the standard_text field.
+func (f *DictionaryEntryFilter) WhereStandardText(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldStandardText))
+}
+
+// WhereEntryType applies the entql string predicate on the entry_type field.
+func (f *DictionaryEntryFilter) WhereEntryType(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldEntryType))
 }
 
 // WhereCategory applies the entql string predicate on the category field.
-func (f *HotwordFilter) WhereCategory(p entql.StringP) {
-	f.Where(p.Field(hotword.FieldCategory))
+func (f *DictionaryEntryFilter) WhereCategory(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldCategory))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *DictionaryEntryFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldDescription))
+}
+
+// WhereSource applies the entql string predicate on the source field.
+func (f *DictionaryEntryFilter) WhereSource(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldSource))
+}
+
+// WhereSourceID applies the entql string predicate on the source_id field.
+func (f *DictionaryEntryFilter) WhereSourceID(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldSourceID))
+}
+
+// WherePriority applies the entql int32 predicate on the priority field.
+func (f *DictionaryEntryFilter) WherePriority(p entql.Int32P) {
+	f.Where(p.Field(dictionaryentry.FieldPriority))
+}
+
+// WherePinyin applies the entql string predicate on the pinyin field.
+func (f *DictionaryEntryFilter) WherePinyin(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldPinyin))
+}
+
+// WherePinyinInitial applies the entql string predicate on the pinyin_initial field.
+func (f *DictionaryEntryFilter) WherePinyinInitial(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldPinyinInitial))
+}
+
+// WhereNormalizedText applies the entql string predicate on the normalized_text field.
+func (f *DictionaryEntryFilter) WhereNormalizedText(p entql.StringP) {
+	f.Where(p.Field(dictionaryentry.FieldNormalizedText))
+}
+
+// WhereHasDictionary applies a predicate to check if query has an edge dictionary.
+func (f *DictionaryEntryFilter) WhereHasDictionary() {
+	f.Where(entql.HasEdge("dictionary"))
+}
+
+// WhereHasDictionaryWith applies a predicate to check if query has an edge dictionary with a given conditions (other predicates).
+func (f *DictionaryEntryFilter) WhereHasDictionaryWith(preds ...predicate.Dictionary) {
+	f.Where(entql.HasEdgeWith("dictionary", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasRelations applies a predicate to check if query has an edge relations.
+func (f *DictionaryEntryFilter) WhereHasRelations() {
+	f.Where(entql.HasEdge("relations"))
+}
+
+// WhereHasRelationsWith applies a predicate to check if query has an edge relations with a given conditions (other predicates).
+func (f *DictionaryEntryFilter) WhereHasRelationsWith(preds ...predicate.DictionaryRelation) {
+	f.Where(entql.HasEdgeWith("relations", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *DictionaryRelationQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the DictionaryRelationQuery builder.
+func (_q *DictionaryRelationQuery) Filter() *DictionaryRelationFilter {
+	return &DictionaryRelationFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *DictionaryRelationMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the DictionaryRelationMutation builder.
+func (m *DictionaryRelationMutation) Filter() *DictionaryRelationFilter {
+	return &DictionaryRelationFilter{config: m.config, predicateAdder: m}
+}
+
+// DictionaryRelationFilter provides a generic filtering capability at runtime for DictionaryRelationQuery.
+type DictionaryRelationFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *DictionaryRelationFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *DictionaryRelationFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryrelation.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *DictionaryRelationFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryrelation.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *DictionaryRelationFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryrelation.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *DictionaryRelationFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionaryrelation.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *DictionaryRelationFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryrelation.FieldTenantID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *DictionaryRelationFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryrelation.FieldDeletedAt))
+}
+
+// WhereEntryID applies the entql uint32 predicate on the entry_id field.
+func (f *DictionaryRelationFilter) WhereEntryID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryrelation.FieldEntryID))
+}
+
+// WhereRelationType applies the entql string predicate on the relation_type field.
+func (f *DictionaryRelationFilter) WhereRelationType(p entql.StringP) {
+	f.Where(p.Field(dictionaryrelation.FieldRelationType))
+}
+
+// WhereRelatedText applies the entql string predicate on the related_text field.
+func (f *DictionaryRelationFilter) WhereRelatedText(p entql.StringP) {
+	f.Where(p.Field(dictionaryrelation.FieldRelatedText))
+}
+
+// WhereTargetEntryID applies the entql uint32 predicate on the target_entry_id field.
+func (f *DictionaryRelationFilter) WhereTargetEntryID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryrelation.FieldTargetEntryID))
+}
+
+// WhereSource applies the entql string predicate on the source field.
+func (f *DictionaryRelationFilter) WhereSource(p entql.StringP) {
+	f.Where(p.Field(dictionaryrelation.FieldSource))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *DictionaryRelationFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(dictionaryrelation.FieldDescription))
+}
+
+// WhereHasEntry applies a predicate to check if query has an edge entry.
+func (f *DictionaryRelationFilter) WhereHasEntry() {
+	f.Where(entql.HasEdge("entry"))
+}
+
+// WhereHasEntryWith applies a predicate to check if query has an edge entry with a given conditions (other predicates).
+func (f *DictionaryRelationFilter) WhereHasEntryWith(preds ...predicate.DictionaryEntry) {
+	f.Where(entql.HasEdgeWith("entry", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *DictionaryVersionQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the DictionaryVersionQuery builder.
+func (_q *DictionaryVersionQuery) Filter() *DictionaryVersionFilter {
+	return &DictionaryVersionFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *DictionaryVersionMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the DictionaryVersionMutation builder.
+func (m *DictionaryVersionMutation) Filter() *DictionaryVersionFilter {
+	return &DictionaryVersionFilter{config: m.config, predicateAdder: m}
+}
+
+// DictionaryVersionFilter provides a generic filtering capability at runtime for DictionaryVersionQuery.
+type DictionaryVersionFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *DictionaryVersionFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *DictionaryVersionFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryversion.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *DictionaryVersionFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryversion.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *DictionaryVersionFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryversion.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *DictionaryVersionFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(dictionaryversion.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *DictionaryVersionFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryversion.FieldTenantID))
+}
+
+// WhereDictionaryID applies the entql uint32 predicate on the dictionary_id field.
+func (f *DictionaryVersionFilter) WhereDictionaryID(p entql.Uint32P) {
+	f.Where(p.Field(dictionaryversion.FieldDictionaryID))
+}
+
+// WhereVersionNo applies the entql int32 predicate on the version_no field.
+func (f *DictionaryVersionFilter) WhereVersionNo(p entql.Int32P) {
+	f.Where(p.Field(dictionaryversion.FieldVersionNo))
+}
+
+// WhereSnapshot applies the entql string predicate on the snapshot field.
+func (f *DictionaryVersionFilter) WhereSnapshot(p entql.StringP) {
+	f.Where(p.Field(dictionaryversion.FieldSnapshot))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *DictionaryVersionFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(dictionaryversion.FieldDescription))
+}
+
+// WhereHasDictionary applies a predicate to check if query has an edge dictionary.
+func (f *DictionaryVersionFilter) WhereHasDictionary() {
+	f.Where(entql.HasEdge("dictionary"))
+}
+
+// WhereHasDictionaryWith applies a predicate to check if query has an edge dictionary with a given conditions (other predicates).
+func (f *DictionaryVersionFilter) WhereHasDictionaryWith(preds ...predicate.Dictionary) {
+	f.Where(entql.HasEdgeWith("dictionary", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *EnhancementLogQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the EnhancementLogQuery builder.
+func (_q *EnhancementLogQuery) Filter() *EnhancementLogFilter {
+	return &EnhancementLogFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *EnhancementLogMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the EnhancementLogMutation builder.
+func (m *EnhancementLogMutation) Filter() *EnhancementLogFilter {
+	return &EnhancementLogFilter{config: m.config, predicateAdder: m}
+}
+
+// EnhancementLogFilter provides a generic filtering capability at runtime for EnhancementLogQuery.
+type EnhancementLogFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *EnhancementLogFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[9].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *EnhancementLogFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementlog.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *EnhancementLogFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementlog.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *EnhancementLogFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementlog.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *EnhancementLogFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(enhancementlog.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *EnhancementLogFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementlog.FieldTenantID))
+}
+
+// WhereRequestID applies the entql string predicate on the request_id field.
+func (f *EnhancementLogFilter) WhereRequestID(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldRequestID))
+}
+
+// WhereSessionID applies the entql string predicate on the session_id field.
+func (f *EnhancementLogFilter) WhereSessionID(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldSessionID))
+}
+
+// WherePolicyID applies the entql uint32 predicate on the policy_id field.
+func (f *EnhancementLogFilter) WherePolicyID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementlog.FieldPolicyID))
+}
+
+// WherePolicyMode applies the entql string predicate on the policy_mode field.
+func (f *EnhancementLogFilter) WherePolicyMode(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldPolicyMode))
+}
+
+// WhereContextVersion applies the entql string predicate on the context_version field.
+func (f *EnhancementLogFilter) WhereContextVersion(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldContextVersion))
+}
+
+// WhereRawText applies the entql string predicate on the raw_text field.
+func (f *EnhancementLogFilter) WhereRawText(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldRawText))
+}
+
+// WhereEnhancedText applies the entql string predicate on the enhanced_text field.
+func (f *EnhancementLogFilter) WhereEnhancedText(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldEnhancedText))
+}
+
+// WhereChangesJSON applies the entql string predicate on the changes_json field.
+func (f *EnhancementLogFilter) WhereChangesJSON(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldChangesJSON))
+}
+
+// WhereProcessingTimeMs applies the entql int64 predicate on the processing_time_ms field.
+func (f *EnhancementLogFilter) WhereProcessingTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldProcessingTimeMs))
+}
+
+// WhereCleaningTimeMs applies the entql int64 predicate on the cleaning_time_ms field.
+func (f *EnhancementLogFilter) WhereCleaningTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldCleaningTimeMs))
+}
+
+// WhereFillerTimeMs applies the entql int64 predicate on the filler_time_ms field.
+func (f *EnhancementLogFilter) WhereFillerTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldFillerTimeMs))
+}
+
+// WhereVocabMatchTimeMs applies the entql int64 predicate on the vocab_match_time_ms field.
+func (f *EnhancementLogFilter) WhereVocabMatchTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldVocabMatchTimeMs))
+}
+
+// WhereAliasTimeMs applies the entql int64 predicate on the alias_time_ms field.
+func (f *EnhancementLogFilter) WhereAliasTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldAliasTimeMs))
+}
+
+// WhereDeterministicTimeMs applies the entql int64 predicate on the deterministic_time_ms field.
+func (f *EnhancementLogFilter) WhereDeterministicTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldDeterministicTimeMs))
+}
+
+// WherePinyinTimeMs applies the entql int64 predicate on the pinyin_time_ms field.
+func (f *EnhancementLogFilter) WherePinyinTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldPinyinTimeMs))
+}
+
+// WhereFuzzyTimeMs applies the entql int64 predicate on the fuzzy_time_ms field.
+func (f *EnhancementLogFilter) WhereFuzzyTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldFuzzyTimeMs))
+}
+
+// WhereContextTimeMs applies the entql int64 predicate on the context_time_ms field.
+func (f *EnhancementLogFilter) WhereContextTimeMs(p entql.Int64P) {
+	f.Where(p.Field(enhancementlog.FieldContextTimeMs))
+}
+
+// WhereUserCorrected applies the entql bool predicate on the user_corrected field.
+func (f *EnhancementLogFilter) WhereUserCorrected(p entql.BoolP) {
+	f.Where(p.Field(enhancementlog.FieldUserCorrected))
+}
+
+// WhereFeedbackText applies the entql string predicate on the feedback_text field.
+func (f *EnhancementLogFilter) WhereFeedbackText(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldFeedbackText))
+}
+
+// WhereErrorMessage applies the entql string predicate on the error_message field.
+func (f *EnhancementLogFilter) WhereErrorMessage(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldErrorMessage))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *EnhancementPolicyQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the EnhancementPolicyQuery builder.
+func (_q *EnhancementPolicyQuery) Filter() *EnhancementPolicyFilter {
+	return &EnhancementPolicyFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *EnhancementPolicyMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the EnhancementPolicyMutation builder.
+func (m *EnhancementPolicyMutation) Filter() *EnhancementPolicyFilter {
+	return &EnhancementPolicyFilter{config: m.config, predicateAdder: m}
+}
+
+// EnhancementPolicyFilter provides a generic filtering capability at runtime for EnhancementPolicyQuery.
+type EnhancementPolicyFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *EnhancementPolicyFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[10].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *EnhancementPolicyFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementpolicy.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *EnhancementPolicyFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementpolicy.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *EnhancementPolicyFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementpolicy.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *EnhancementPolicyFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(enhancementpolicy.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *EnhancementPolicyFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementpolicy.FieldTenantID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *EnhancementPolicyFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(enhancementpolicy.FieldName))
+}
+
+// WhereMode applies the entql string predicate on the mode field.
+func (f *EnhancementPolicyFilter) WhereMode(p entql.StringP) {
+	f.Where(p.Field(enhancementpolicy.FieldMode))
+}
+
+// WhereTextCleaning applies the entql bool predicate on the text_cleaning field.
+func (f *EnhancementPolicyFilter) WhereTextCleaning(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldTextCleaning))
+}
+
+// WhereFillerRemoval applies the entql bool predicate on the filler_removal field.
+func (f *EnhancementPolicyFilter) WhereFillerRemoval(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldFillerRemoval))
+}
+
+// WhereAliasResolution applies the entql bool predicate on the alias_resolution field.
+func (f *EnhancementPolicyFilter) WhereAliasResolution(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldAliasResolution))
+}
+
+// WhereDeterministicReplacement applies the entql bool predicate on the deterministic_replacement field.
+func (f *EnhancementPolicyFilter) WhereDeterministicReplacement(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldDeterministicReplacement))
+}
+
+// WherePinyinCorrection applies the entql bool predicate on the pinyin_correction field.
+func (f *EnhancementPolicyFilter) WherePinyinCorrection(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldPinyinCorrection))
+}
+
+// WhereFuzzyMatching applies the entql bool predicate on the fuzzy_matching field.
+func (f *EnhancementPolicyFilter) WhereFuzzyMatching(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldFuzzyMatching))
+}
+
+// WhereContextCorrection applies the entql bool predicate on the context_correction field.
+func (f *EnhancementPolicyFilter) WhereContextCorrection(p entql.BoolP) {
+	f.Where(p.Field(enhancementpolicy.FieldContextCorrection))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *EnhancementPolicyFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(enhancementpolicy.FieldDescription))
+}
+
+// WhereHasProfiles applies a predicate to check if query has an edge profiles.
+func (f *EnhancementPolicyFilter) WhereHasProfiles() {
+	f.Where(entql.HasEdge("profiles"))
+}
+
+// WhereHasProfilesWith applies a predicate to check if query has an edge profiles with a given conditions (other predicates).
+func (f *EnhancementPolicyFilter) WhereHasProfilesWith(preds ...predicate.EnhancementProfile) {
+	f.Where(entql.HasEdgeWith("profiles", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *EnhancementProfileQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the EnhancementProfileQuery builder.
+func (_q *EnhancementProfileQuery) Filter() *EnhancementProfileFilter {
+	return &EnhancementProfileFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *EnhancementProfileMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the EnhancementProfileMutation builder.
+func (m *EnhancementProfileMutation) Filter() *EnhancementProfileFilter {
+	return &EnhancementProfileFilter{config: m.config, predicateAdder: m}
+}
+
+// EnhancementProfileFilter provides a generic filtering capability at runtime for EnhancementProfileQuery.
+type EnhancementProfileFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *EnhancementProfileFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[11].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *EnhancementProfileFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementprofile.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *EnhancementProfileFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementprofile.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *EnhancementProfileFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementprofile.FieldUpdatedAt))
+}
+
+// WhereStatus applies the entql int32 predicate on the status field.
+func (f *EnhancementProfileFilter) WhereStatus(p entql.Int32P) {
+	f.Where(p.Field(enhancementprofile.FieldStatus))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *EnhancementProfileFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementprofile.FieldTenantID))
+}
+
+// WherePolicyID applies the entql uint32 predicate on the policy_id field.
+func (f *EnhancementProfileFilter) WherePolicyID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementprofile.FieldPolicyID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *EnhancementProfileFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(enhancementprofile.FieldName))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *EnhancementProfileFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(enhancementprofile.FieldDescription))
+}
+
+// WhereHasPolicy applies a predicate to check if query has an edge policy.
+func (f *EnhancementProfileFilter) WhereHasPolicy() {
+	f.Where(entql.HasEdge("policy"))
+}
+
+// WhereHasPolicyWith applies a predicate to check if query has an edge policy with a given conditions (other predicates).
+func (f *EnhancementProfileFilter) WhereHasPolicyWith(preds ...predicate.EnhancementPolicy) {
+	f.Where(entql.HasEdgeWith("policy", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
 }

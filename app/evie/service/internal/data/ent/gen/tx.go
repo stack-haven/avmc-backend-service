@@ -18,16 +18,26 @@ type Tx struct {
 	AsrProviderConfig *AsrProviderConfigClient
 	// AsrRecord is the client for interacting with the AsrRecord builders.
 	AsrRecord *AsrRecordClient
-	// CorrectionLog is the client for interacting with the CorrectionLog builders.
-	CorrectionLog *CorrectionLogClient
-	// CorrectionRule is the client for interacting with the CorrectionRule builders.
-	CorrectionRule *CorrectionRuleClient
-	// DictionaryAlias is the client for interacting with the DictionaryAlias builders.
-	DictionaryAlias *DictionaryAliasClient
-	// DictionaryWord is the client for interacting with the DictionaryWord builders.
-	DictionaryWord *DictionaryWordClient
-	// Hotword is the client for interacting with the Hotword builders.
-	Hotword *HotwordClient
+	// Dictionary is the client for interacting with the Dictionary builders.
+	Dictionary *DictionaryClient
+	// DictionaryCategory is the client for interacting with the DictionaryCategory builders.
+	DictionaryCategory *DictionaryCategoryClient
+	// DictionaryChangeLog is the client for interacting with the DictionaryChangeLog builders.
+	DictionaryChangeLog *DictionaryChangeLogClient
+	// DictionaryConflict is the client for interacting with the DictionaryConflict builders.
+	DictionaryConflict *DictionaryConflictClient
+	// DictionaryEntry is the client for interacting with the DictionaryEntry builders.
+	DictionaryEntry *DictionaryEntryClient
+	// DictionaryRelation is the client for interacting with the DictionaryRelation builders.
+	DictionaryRelation *DictionaryRelationClient
+	// DictionaryVersion is the client for interacting with the DictionaryVersion builders.
+	DictionaryVersion *DictionaryVersionClient
+	// EnhancementLog is the client for interacting with the EnhancementLog builders.
+	EnhancementLog *EnhancementLogClient
+	// EnhancementPolicy is the client for interacting with the EnhancementPolicy builders.
+	EnhancementPolicy *EnhancementPolicyClient
+	// EnhancementProfile is the client for interacting with the EnhancementProfile builders.
+	EnhancementProfile *EnhancementProfileClient
 
 	// lazily loaded.
 	client     *Client
@@ -161,11 +171,16 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.AsrProviderConfig = NewAsrProviderConfigClient(tx.config)
 	tx.AsrRecord = NewAsrRecordClient(tx.config)
-	tx.CorrectionLog = NewCorrectionLogClient(tx.config)
-	tx.CorrectionRule = NewCorrectionRuleClient(tx.config)
-	tx.DictionaryAlias = NewDictionaryAliasClient(tx.config)
-	tx.DictionaryWord = NewDictionaryWordClient(tx.config)
-	tx.Hotword = NewHotwordClient(tx.config)
+	tx.Dictionary = NewDictionaryClient(tx.config)
+	tx.DictionaryCategory = NewDictionaryCategoryClient(tx.config)
+	tx.DictionaryChangeLog = NewDictionaryChangeLogClient(tx.config)
+	tx.DictionaryConflict = NewDictionaryConflictClient(tx.config)
+	tx.DictionaryEntry = NewDictionaryEntryClient(tx.config)
+	tx.DictionaryRelation = NewDictionaryRelationClient(tx.config)
+	tx.DictionaryVersion = NewDictionaryVersionClient(tx.config)
+	tx.EnhancementLog = NewEnhancementLogClient(tx.config)
+	tx.EnhancementPolicy = NewEnhancementPolicyClient(tx.config)
+	tx.EnhancementProfile = NewEnhancementProfileClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

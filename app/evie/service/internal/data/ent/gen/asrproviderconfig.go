@@ -24,7 +24,7 @@ type AsrProviderConfig struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 状态：0=未知 1=启用 2=禁用
 	Status *int32 `json:"status,omitempty"`
-	// 租户ID
+	// 租户ID（0=平台级全局共享，>0=租户隔离）
 	TenantID uint32 `json:"tenant_id,omitempty"`
 	// funasr/whisper/xunfei/aliyun
 	ProviderName string `json:"provider_name,omitempty"`

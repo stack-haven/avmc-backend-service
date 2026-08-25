@@ -39,11 +39,10 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 		return nil, nil, err
 	}
 	dictionaryRepo := data.NewDictionaryRepo(dataData, logger)
-	dictionaryUsecase := biz.NewDictionaryUsecase(dictionaryRepo, logger)
-	dictionaryServiceService := service.NewDictionaryServiceService(dictionaryUsecase, logger)
-	hotwordRepo := data.NewHotwordRepo(dataData, logger)
-	hotwordUsecase := biz.NewHotwordUsecase(hotwordRepo, logger)
-	hotwordServiceService := service.NewHotwordServiceService(hotwordUsecase, logger)
+	dictionaryConflictRecorder := data.NewDictionaryConflictRepo(dataData, logger)
+	dictionaryUsecase := biz.NewDictionaryUsecase(dictionaryRepo, dictionaryConflictRecorder, logger)
+	vocabularyBuilder := biz.NewVocabularyBuilder(dictionaryRepo, dictionaryConflictRecorder, logger)
+	dictionaryServiceService := service.NewDictionaryServiceService(dictionaryUsecase, vocabularyBuilder, logger)
 	providerRepo := data.NewProviderConfigRepo(dataData, logger)
 	asrRecordRepo := data.NewASRRecordRepo(dataData, logger)
 	fileCenterClient, err := data.NewFileCenterClient(client, logger)
@@ -51,14 +50,17 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 		cleanup()
 		return nil, nil, err
 	}
-	asrUsecase := biz.NewASRUsecase(providerRepo, hotwordRepo, asrRecordRepo, fileCenterClient, logger)
-	correctionLogRepo := data.NewCorrectionLogRepo(dataData, logger)
-	correctionRuleRepo := data.NewCorrectionRuleRepo(dataData, logger)
-	correctionEngine := biz.NewCorrectionEngine(correctionLogRepo, correctionRuleRepo, dictionaryRepo, hotwordRepo, logger)
-	asrServiceService := service.NewASRServiceService(asrUsecase, correctionEngine, logger)
+	asrUsecase := biz.NewASRUsecase(providerRepo, asrRecordRepo, fileCenterClient, logger)
+	enhancementEngine := biz.NewEnhancementEngine(vocabularyBuilder, logger)
+	asrServiceService := service.NewASRServiceService(asrUsecase, enhancementEngine, logger)
 	providerUsecase := biz.NewProviderUsecase(providerRepo, logger)
 	providerServiceService := service.NewProviderServiceService(providerUsecase, logger)
-	correctionServiceService := service.NewCorrectionServiceService(correctionEngine, logger)
+	enhancementLogRepo := data.NewEnhancementLogRepo(dataData, logger)
+	enhancementLogUsecase := biz.NewEnhancementLogUsecase(enhancementLogRepo, logger)
+	correctionServiceService := service.NewCorrectionServiceService(enhancementEngine, enhancementLogUsecase, logger)
+	enhancementPolicyRepo := data.NewEnhancementPolicyRepo(dataData, logger)
+	enhancementPolicyUsecase := biz.NewEnhancementPolicyUsecase(enhancementPolicyRepo, logger)
+	enhancementServiceService := service.NewEnhancementServiceService(enhancementPolicyUsecase, enhancementLogUsecase, logger)
 	security := authn.NewSecurity(logger)
 	authenticator, err := data.NewAuthenticator(confServer, logger, security)
 	if err != nil {
@@ -77,14 +79,14 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 		cleanup()
 		return nil, nil, err
 	}
-	grpcServer, err := server.NewGRPCServer(confServer, dictionaryServiceService, hotwordServiceService, asrServiceService, providerServiceService, correctionServiceService, manager, enforcer, auditClient, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, dictionaryServiceService, asrServiceService, providerServiceService, correctionServiceService, enhancementServiceService, manager, enforcer, auditClient, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
 	asrStreamService := service.NewASRStreamService(asrUsecase, manager, logger)
-	httpServer, err := server.NewHTTPServer(confServer, logger, manager, enforcer, checker, dictionaryServiceService, hotwordServiceService, asrServiceService, asrStreamService, providerServiceService, correctionServiceService, auditClient)
+	httpServer, err := server.NewHTTPServer(confServer, logger, manager, enforcer, checker, dictionaryServiceService, asrServiceService, asrStreamService, providerServiceService, correctionServiceService, enhancementServiceService, auditClient)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

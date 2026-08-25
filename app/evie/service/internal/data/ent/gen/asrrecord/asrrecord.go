@@ -90,8 +90,6 @@ var (
 	DefaultStatus int32
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int32) error
-	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	TenantIDValidator func(uint32) error
 	// SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
 	SessionIDValidator func(string) error
 	// AudioURLValidator is a validator for the "audio_url" field. It is called by the builders before save.

@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"backend-service/app/evie/service/internal/data/ent/gen"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
 	"backend-service/app/evie/service/internal/data/ent/gen/intercept"
 	"backend-service/app/evie/service/internal/data/ent/gen/migrate"
+	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
 
 	_ "backend-service/app/evie/service/internal/data/ent/gen/runtime"
 
@@ -89,7 +91,50 @@ func RunSchemaMigration(ctx context.Context, cfg *conf.Data, logger log.Logger) 
 	); err != nil {
 		return err
 	}
+	if err := seedBuiltinCategories(ctx, client, l); err != nil {
+		return err
+	}
 	return backfillTenantAdminRoleMarker(ctx, client, l)
+}
+
+// seedBuiltinCategories 幂等插入内置词条分类（tenant_id=0 全局共享）。
+func seedBuiltinCategories(ctx context.Context, client *gen.Client, l *log.Helper) error {
+	builtins := []struct {
+		code, name string
+		sort       int32
+	}{
+		{"PERSON", "人物", 10},
+		{"ORGANIZATION", "组织", 20},
+		{"PRODUCT", "产品", 30},
+		{"LOCATION", "地点", 40},
+		{"PERSON_TITLE", "职务", 50},
+		{"BUSINESS_TERM", "业务术语", 60},
+		{"TECH_TERM", "技术术语", 70},
+		{"OTHER", "其他", 99},
+	}
+	sysCtx := entviewer.NewSystemContext(ctx)
+	for _, b := range builtins {
+		exists, err := client.DictionaryCategory.Query().
+			Where(dictionarycategory.CodeEQ(b.code), dictionarycategory.BuiltinEQ(true)).
+			Exist(sysCtx)
+		if err != nil {
+			return err
+		}
+		if exists {
+			continue
+		}
+		if _, err := client.DictionaryCategory.Create().
+			SetTenantID(0).
+			SetCode(b.code).
+			SetName(b.name).
+			SetBuiltin(true).
+			SetSort(b.sort).
+			Save(sysCtx); err != nil {
+			return err
+		}
+	}
+	l.Infof("seeded %d builtin dictionary categories", len(builtins))
+	return nil
 }
 
 func backfillTenantAdminRoleMarker(_ context.Context, _ *gen.Client, _ *log.Helper) error {

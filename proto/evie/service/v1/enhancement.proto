@@ -1,0 +1,287 @@
+syntax = "proto3";
+
+package evie.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/evie/service/v1;v1";
+
+// 文本增强策略与场景管理服务。
+// 策略决定增强引擎执行哪些层；场景绑定策略供业务按需选择。
+service EnhancementService {
+  // 分页查询策略列表
+  rpc ListPolicies(ListPoliciesRequest) returns (ListPoliciesResponse) {
+    option (google.api.http) = {get: "/evie/v1/enhancement-policies"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询增强策略列表"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 查询策略详情
+  rpc GetPolicy(GetPolicyRequest) returns (EnhancementPolicy) {
+    option (google.api.http) = {get: "/evie/v1/enhancement-policies/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询增强策略详情"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 创建策略
+  rpc CreatePolicy(CreatePolicyRequest) returns (EnhancementPolicy) {
+    option (google.api.http) = {
+      post: "/evie/v1/enhancement-policies"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建增强策略"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 更新策略
+  rpc UpdatePolicy(UpdatePolicyRequest) returns (EnhancementPolicy) {
+    option (google.api.http) = {
+      put: "/evie/v1/enhancement-policies/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新增强策略"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 删除策略
+  rpc DeletePolicy(DeletePolicyRequest) returns (DeletePolicyResponse) {
+    option (google.api.http) = {delete: "/evie/v1/enhancement-policies/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除增强策略"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 分页查询场景列表
+  rpc ListProfiles(ListProfilesRequest) returns (ListProfilesResponse) {
+    option (google.api.http) = {get: "/evie/v1/enhancement-profiles"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询增强场景列表"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 查询场景详情
+  rpc GetProfile(GetProfileRequest) returns (EnhancementProfile) {
+    option (google.api.http) = {get: "/evie/v1/enhancement-profiles/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询增强场景详情"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 创建场景
+  rpc CreateProfile(CreateProfileRequest) returns (EnhancementProfile) {
+    option (google.api.http) = {
+      post: "/evie/v1/enhancement-profiles"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建增强场景"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 更新场景
+  rpc UpdateProfile(UpdateProfileRequest) returns (EnhancementProfile) {
+    option (google.api.http) = {
+      put: "/evie/v1/enhancement-profiles/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新增强场景"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 删除场景
+  rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse) {
+    option (google.api.http) = {delete: "/evie/v1/enhancement-profiles/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除增强场景"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 分页查询增强记录列表
+  rpc ListLogs(ListEnhancementLogsRequest) returns (ListEnhancementLogsResponse) {
+    option (google.api.http) = {get: "/evie/v1/enhancement-logs"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询增强记录列表"
+      tags: ["文本增强"]
+    };
+  }
+
+  // 查询增强记录详情
+  rpc GetLog(GetEnhancementLogRequest) returns (EnhancementLog) {
+    option (google.api.http) = {get: "/evie/v1/enhancement-logs/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询增强记录详情"
+      tags: ["文本增强"]
+    };
+  }
+}
+
+// EnhancementPolicy 增强策略。
+message EnhancementPolicy {
+  uint32 id = 1;
+  string name = 2;
+  string mode = 3;  // HIGH_PERFORMANCE/STANDARD/HIGH_ACCURACY
+  bool text_cleaning = 4;
+  bool filler_removal = 5;
+  bool alias_resolution = 6;
+  bool deterministic_replacement = 7;
+  bool pinyin_correction = 8;
+  bool fuzzy_matching = 9;
+  bool context_correction = 10;
+  string description = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+// EnhancementProfile 增强场景（绑定策略）。
+message EnhancementProfile {
+  uint32 id = 1;
+  uint32 policy_id = 2;
+  string name = 3;
+  string description = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message ListPoliciesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string keyword = 3;
+}
+
+message ListPoliciesResponse {
+  repeated EnhancementPolicy policies = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetPolicyRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message CreatePolicyRequest {
+  string name = 1 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
+  string mode = 2 [(buf.validate.field).string = {max_len: 32}];
+  bool text_cleaning = 3;
+  bool filler_removal = 4;
+  bool alias_resolution = 5;
+  bool deterministic_replacement = 6;
+  bool pinyin_correction = 7;
+  bool fuzzy_matching = 8;
+  bool context_correction = 9;
+  string description = 10 [(buf.validate.field).string = {max_len: 512}];
+}
+
+message UpdatePolicyRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string name = 2 [(buf.validate.field).string = {max_len: 128}];
+  string mode = 3 [(buf.validate.field).string = {max_len: 32}];
+  bool text_cleaning = 4;
+  bool filler_removal = 5;
+  bool alias_resolution = 6;
+  bool deterministic_replacement = 7;
+  bool pinyin_correction = 8;
+  bool fuzzy_matching = 9;
+  bool context_correction = 10;
+  string description = 11 [(buf.validate.field).string = {max_len: 512}];
+}
+
+message DeletePolicyRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message DeletePolicyResponse {}
+
+message ListProfilesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string keyword = 3;
+}
+
+message ListProfilesResponse {
+  repeated EnhancementProfile profiles = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetProfileRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message CreateProfileRequest {
+  uint32 policy_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string name = 2 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
+  string description = 3 [(buf.validate.field).string = {max_len: 512}];
+}
+
+message UpdateProfileRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  uint32 policy_id = 2;
+  string name = 3 [(buf.validate.field).string = {max_len: 128}];
+  string description = 4 [(buf.validate.field).string = {max_len: 512}];
+}
+
+message DeleteProfileRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message DeleteProfileResponse {}
+
+// EnhancementLog 文本增强记录（含分阶段耗时 + 反馈预留）。
+message EnhancementLog {
+  uint32 id = 1;
+  string request_id = 2;
+  string session_id = 3;
+  uint32 policy_id = 4;
+  string policy_mode = 5;
+  string context_version = 6;
+  string raw_text = 7;
+  string enhanced_text = 8;
+  string changes_json = 9;
+  int64 processing_time_ms = 10;
+  int64 cleaning_time_ms = 11;
+  int64 filler_time_ms = 12;
+  int64 vocab_match_time_ms = 13;
+  int64 alias_time_ms = 14;
+  int64 deterministic_time_ms = 15;
+  int64 pinyin_time_ms = 16;
+  int64 fuzzy_time_ms = 17;
+  int64 context_time_ms = 18;
+  int32 status = 19;
+  string error_message = 20;
+  bool user_corrected = 21;
+  string feedback_text = 22;
+  string created_at = 23;
+}
+
+message ListEnhancementLogsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string session_id = 3;
+}
+
+message ListEnhancementLogsResponse {
+  repeated EnhancementLog logs = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetEnhancementLogRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}

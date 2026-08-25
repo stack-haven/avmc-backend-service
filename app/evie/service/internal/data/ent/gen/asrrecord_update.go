@@ -297,11 +297,6 @@ func (_u *AsrRecordUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "AsrRecord.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.TenantID(); ok {
-		if err := asrrecord.TenantIDValidator(v); err != nil {
-			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "AsrRecord.tenant_id": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.SessionID(); ok {
 		if err := asrrecord.SessionIDValidator(v); err != nil {
 			return &ValidationError{Name: "session_id", err: fmt.Errorf(`gen: validator failed for field "AsrRecord.session_id": %w`, err)}
@@ -704,11 +699,6 @@ func (_u *AsrRecordUpdateOne) check() error {
 	if v, ok := _u.mutation.Status(); ok {
 		if err := asrrecord.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "AsrRecord.status": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.TenantID(); ok {
-		if err := asrrecord.TenantIDValidator(v); err != nil {
-			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "AsrRecord.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.SessionID(); ok {

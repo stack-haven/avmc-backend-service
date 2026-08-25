@@ -19,8 +19,7 @@ type TenantID struct {
 func (TenantID) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("tenant_id").
-			Comment("租户ID").
-			Positive().
+			Comment("租户ID（0=平台级全局共享，>0=租户隔离）").
 			StructTag(`json:"tenant_id,omitempty"`).
 			SchemaType(map[string]string{
 				dialect.MySQL:    "bigint",

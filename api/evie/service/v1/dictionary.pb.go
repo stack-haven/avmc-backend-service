@@ -24,37 +24,35 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// DictionaryWord 标准词。
-type DictionaryWord struct {
+// Dictionary 词库。
+type Dictionary struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Word          string                 `protobuf:"bytes,2,opt,name=word,proto3" json:"word,omitempty"`          // 标准词
-	Level         string                 `protobuf:"bytes,3,opt,name=level,proto3" json:"level,omitempty"`        // 字典层级: platform/system/tenant/user
-	Category      string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`  // 实体分类: person/org/product/term
-	Source        string                 `protobuf:"bytes,5,opt,name=source,proto3" json:"source,omitempty"`      // 来源: manual/sync_org/sync_biz/feedback
-	Priority      int32                  `protobuf:"varint,6,opt,name=priority,proto3" json:"priority,omitempty"` // 匹配优先级，越大越优先
-	Status        int32                  `protobuf:"varint,7,opt,name=status,proto3" json:"status,omitempty"`     // 1=启用 2=禁用
-	Aliases       []*DictionaryAlias     `protobuf:"bytes,8,rep,name=aliases,proto3" json:"aliases,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`               // 词库名称
+	Scope         string                 `protobuf:"bytes,3,opt,name=scope,proto3" json:"scope,omitempty"`             // 作用域: PLATFORM/SYSTEM/TENANT
+	Source        string                 `protobuf:"bytes,4,opt,name=source,proto3" json:"source,omitempty"`           // 来源: PLATFORM/SYSTEM/MANUAL/IMPORT/SYNC/API
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"` // 描述
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`          // 状态: 1=启用 2=禁用
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DictionaryWord) Reset() {
-	*x = DictionaryWord{}
+func (x *Dictionary) Reset() {
+	*x = Dictionary{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DictionaryWord) String() string {
+func (x *Dictionary) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DictionaryWord) ProtoMessage() {}
+func (*Dictionary) ProtoMessage() {}
 
-func (x *DictionaryWord) ProtoReflect() protoreflect.Message {
+func (x *Dictionary) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -66,108 +64,103 @@ func (x *DictionaryWord) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DictionaryWord.ProtoReflect.Descriptor instead.
-func (*DictionaryWord) Descriptor() ([]byte, []int) {
+// Deprecated: Use Dictionary.ProtoReflect.Descriptor instead.
+func (*Dictionary) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DictionaryWord) GetId() uint32 {
+func (x *Dictionary) GetId() uint32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *DictionaryWord) GetWord() string {
+func (x *Dictionary) GetName() string {
 	if x != nil {
-		return x.Word
+		return x.Name
 	}
 	return ""
 }
 
-func (x *DictionaryWord) GetLevel() string {
+func (x *Dictionary) GetScope() string {
 	if x != nil {
-		return x.Level
+		return x.Scope
 	}
 	return ""
 }
 
-func (x *DictionaryWord) GetCategory() string {
-	if x != nil {
-		return x.Category
-	}
-	return ""
-}
-
-func (x *DictionaryWord) GetSource() string {
+func (x *Dictionary) GetSource() string {
 	if x != nil {
 		return x.Source
 	}
 	return ""
 }
 
-func (x *DictionaryWord) GetPriority() int32 {
+func (x *Dictionary) GetDescription() string {
 	if x != nil {
-		return x.Priority
+		return x.Description
 	}
-	return 0
+	return ""
 }
 
-func (x *DictionaryWord) GetStatus() int32 {
+func (x *Dictionary) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-func (x *DictionaryWord) GetAliases() []*DictionaryAlias {
-	if x != nil {
-		return x.Aliases
-	}
-	return nil
-}
-
-func (x *DictionaryWord) GetCreatedAt() string {
+func (x *Dictionary) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return ""
 }
 
-func (x *DictionaryWord) GetUpdatedAt() string {
+func (x *Dictionary) GetUpdatedAt() string {
 	if x != nil {
 		return x.UpdatedAt
 	}
 	return ""
 }
 
-// DictionaryAlias 标准词别名。
-type DictionaryAlias struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	WordId        uint32                 `protobuf:"varint,2,opt,name=word_id,json=wordId,proto3" json:"word_id,omitempty"` // 关联标准词ID
-	Alias         string                 `protobuf:"bytes,3,opt,name=alias,proto3" json:"alias,omitempty"`                  // 别名
-	Pinyin        string                 `protobuf:"bytes,4,opt,name=pinyin,proto3" json:"pinyin,omitempty"`                // 拼音
-	Weight        float32                `protobuf:"fixed32,5,opt,name=weight,proto3" json:"weight,omitempty"`              // 匹配权重
-	Source        string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`                // manual/auto/feedback
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+// DictionaryEntry 词条（标准语言概念，词或短语）。
+type DictionaryEntry struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	DictionaryId   uint32                 `protobuf:"varint,2,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"` // 所属词库 ID
+	StandardText   string                 `protobuf:"bytes,3,opt,name=standard_text,json=standardText,proto3" json:"standard_text,omitempty"`  // 标准词/短语
+	EntryType      string                 `protobuf:"bytes,4,opt,name=entry_type,json=entryType,proto3" json:"entry_type,omitempty"`           // 词条类型: WORD/PHRASE
+	Category       string                 `protobuf:"bytes,5,opt,name=category,proto3" json:"category,omitempty"`                              // 分类: PERSON/ORGANIZATION/PRODUCT/...
+	Description    string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	Source         string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`                                        // 来源
+	SourceId       string                 `protobuf:"bytes,8,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"`                    // 外部来源 ID
+	Priority       int32                  `protobuf:"varint,9,opt,name=priority,proto3" json:"priority,omitempty"`                                   // 匹配优先级
+	Pinyin         string                 `protobuf:"bytes,10,opt,name=pinyin,proto3" json:"pinyin,omitempty"`                                       // 全拼
+	PinyinInitial  string                 `protobuf:"bytes,11,opt,name=pinyin_initial,json=pinyinInitial,proto3" json:"pinyin_initial,omitempty"`    // 拼音首字母
+	NormalizedText string                 `protobuf:"bytes,12,opt,name=normalized_text,json=normalizedText,proto3" json:"normalized_text,omitempty"` // 规范化文本
+	Status         int32                  `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`                                      // 状态: 1=启用 2=禁用
+	CreatedAt      string                 `protobuf:"bytes,14,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      string                 `protobuf:"bytes,15,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
-func (x *DictionaryAlias) Reset() {
-	*x = DictionaryAlias{}
+func (x *DictionaryEntry) Reset() {
+	*x = DictionaryEntry{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DictionaryAlias) String() string {
+func (x *DictionaryEntry) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DictionaryAlias) ProtoMessage() {}
+func (*DictionaryEntry) ProtoMessage() {}
 
-func (x *DictionaryAlias) ProtoReflect() protoreflect.Message {
+func (x *DictionaryEntry) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -179,78 +172,141 @@ func (x *DictionaryAlias) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DictionaryAlias.ProtoReflect.Descriptor instead.
-func (*DictionaryAlias) Descriptor() ([]byte, []int) {
+// Deprecated: Use DictionaryEntry.ProtoReflect.Descriptor instead.
+func (*DictionaryEntry) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *DictionaryAlias) GetId() uint32 {
+func (x *DictionaryEntry) GetId() uint32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *DictionaryAlias) GetWordId() uint32 {
+func (x *DictionaryEntry) GetDictionaryId() uint32 {
 	if x != nil {
-		return x.WordId
+		return x.DictionaryId
 	}
 	return 0
 }
 
-func (x *DictionaryAlias) GetAlias() string {
+func (x *DictionaryEntry) GetStandardText() string {
 	if x != nil {
-		return x.Alias
+		return x.StandardText
 	}
 	return ""
 }
 
-func (x *DictionaryAlias) GetPinyin() string {
+func (x *DictionaryEntry) GetEntryType() string {
 	if x != nil {
-		return x.Pinyin
+		return x.EntryType
 	}
 	return ""
 }
 
-func (x *DictionaryAlias) GetWeight() float32 {
+func (x *DictionaryEntry) GetCategory() string {
 	if x != nil {
-		return x.Weight
+		return x.Category
 	}
-	return 0
+	return ""
 }
 
-func (x *DictionaryAlias) GetSource() string {
+func (x *DictionaryEntry) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetSource() string {
 	if x != nil {
 		return x.Source
 	}
 	return ""
 }
 
-type ListWordsRequest struct {
+func (x *DictionaryEntry) GetSourceId() string {
+	if x != nil {
+		return x.SourceId
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetPriority() int32 {
+	if x != nil {
+		return x.Priority
+	}
+	return 0
+}
+
+func (x *DictionaryEntry) GetPinyin() string {
+	if x != nil {
+		return x.Pinyin
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetPinyinInitial() string {
+	if x != nil {
+		return x.PinyinInitial
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetNormalizedText() string {
+	if x != nil {
+		return x.NormalizedText
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *DictionaryEntry) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListDictionariesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // 每页行数
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"` // 页码 token（偏移量）
-	Category      string                 `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"`                    // 按实体分类筛选
-	Keyword       string                 `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`                      // 按标准词模糊搜索
-	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`                       // 按状态筛选
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Scope         string                 `protobuf:"bytes,3,opt,name=scope,proto3" json:"scope,omitempty"`     // 按作用域筛选
+	Keyword       string                 `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"` // 按名称模糊搜索
+	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`  // 按状态筛选
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListWordsRequest) Reset() {
-	*x = ListWordsRequest{}
+func (x *ListDictionariesRequest) Reset() {
+	*x = ListDictionariesRequest{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListWordsRequest) String() string {
+func (x *ListDictionariesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListWordsRequest) ProtoMessage() {}
+func (*ListDictionariesRequest) ProtoMessage() {}
 
-func (x *ListWordsRequest) ProtoReflect() protoreflect.Message {
+func (x *ListDictionariesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -262,69 +318,69 @@ func (x *ListWordsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListWordsRequest.ProtoReflect.Descriptor instead.
-func (*ListWordsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDictionariesRequest.ProtoReflect.Descriptor instead.
+func (*ListDictionariesRequest) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ListWordsRequest) GetPageSize() int32 {
+func (x *ListDictionariesRequest) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
 	}
 	return 0
 }
 
-func (x *ListWordsRequest) GetPageToken() string {
+func (x *ListDictionariesRequest) GetPageToken() string {
 	if x != nil {
 		return x.PageToken
 	}
 	return ""
 }
 
-func (x *ListWordsRequest) GetCategory() string {
+func (x *ListDictionariesRequest) GetScope() string {
 	if x != nil {
-		return x.Category
+		return x.Scope
 	}
 	return ""
 }
 
-func (x *ListWordsRequest) GetKeyword() string {
+func (x *ListDictionariesRequest) GetKeyword() string {
 	if x != nil {
 		return x.Keyword
 	}
 	return ""
 }
 
-func (x *ListWordsRequest) GetStatus() int32 {
+func (x *ListDictionariesRequest) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-type ListWordsResponse struct {
+type ListDictionariesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Words         []*DictionaryWord      `protobuf:"bytes,1,rep,name=words,proto3" json:"words,omitempty"`
+	Dictionaries  []*Dictionary          `protobuf:"bytes,1,rep,name=dictionaries,proto3" json:"dictionaries,omitempty"`
 	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListWordsResponse) Reset() {
-	*x = ListWordsResponse{}
+func (x *ListDictionariesResponse) Reset() {
+	*x = ListDictionariesResponse{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListWordsResponse) String() string {
+func (x *ListDictionariesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListWordsResponse) ProtoMessage() {}
+func (*ListDictionariesResponse) ProtoMessage() {}
 
-func (x *ListWordsResponse) ProtoReflect() protoreflect.Message {
+func (x *ListDictionariesResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -336,53 +392,53 @@ func (x *ListWordsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListWordsResponse.ProtoReflect.Descriptor instead.
-func (*ListWordsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListDictionariesResponse.ProtoReflect.Descriptor instead.
+func (*ListDictionariesResponse) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ListWordsResponse) GetWords() []*DictionaryWord {
+func (x *ListDictionariesResponse) GetDictionaries() []*Dictionary {
 	if x != nil {
-		return x.Words
+		return x.Dictionaries
 	}
 	return nil
 }
 
-func (x *ListWordsResponse) GetTotal() int32 {
+func (x *ListDictionariesResponse) GetTotal() int32 {
 	if x != nil {
 		return x.Total
 	}
 	return 0
 }
 
-func (x *ListWordsResponse) GetNextPageToken() string {
+func (x *ListDictionariesResponse) GetNextPageToken() string {
 	if x != nil {
 		return x.NextPageToken
 	}
 	return ""
 }
 
-type GetWordRequest struct {
+type GetDictionaryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetWordRequest) Reset() {
-	*x = GetWordRequest{}
+func (x *GetDictionaryRequest) Reset() {
+	*x = GetDictionaryRequest{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetWordRequest) String() string {
+func (x *GetDictionaryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetWordRequest) ProtoMessage() {}
+func (*GetDictionaryRequest) ProtoMessage() {}
 
-func (x *GetWordRequest) ProtoReflect() protoreflect.Message {
+func (x *GetDictionaryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -394,39 +450,42 @@ func (x *GetWordRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetWordRequest.ProtoReflect.Descriptor instead.
-func (*GetWordRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetDictionaryRequest.ProtoReflect.Descriptor instead.
+func (*GetDictionaryRequest) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetWordRequest) GetId() uint32 {
+func (x *GetDictionaryRequest) GetId() uint32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type GetWordResponse struct {
+type CreateDictionaryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Word          *DictionaryWord        `protobuf:"bytes,1,opt,name=word,proto3" json:"word,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Scope         string                 `protobuf:"bytes,2,opt,name=scope,proto3" json:"scope,omitempty"`
+	Source        string                 `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetWordResponse) Reset() {
-	*x = GetWordResponse{}
+func (x *CreateDictionaryRequest) Reset() {
+	*x = CreateDictionaryRequest{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetWordResponse) String() string {
+func (x *CreateDictionaryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetWordResponse) ProtoMessage() {}
+func (*CreateDictionaryRequest) ProtoMessage() {}
 
-func (x *GetWordResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateDictionaryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -438,43 +497,63 @@ func (x *GetWordResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetWordResponse.ProtoReflect.Descriptor instead.
-func (*GetWordResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CreateDictionaryRequest.ProtoReflect.Descriptor instead.
+func (*CreateDictionaryRequest) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetWordResponse) GetWord() *DictionaryWord {
+func (x *CreateDictionaryRequest) GetName() string {
 	if x != nil {
-		return x.Word
+		return x.Name
 	}
-	return nil
+	return ""
 }
 
-type CreateWordRequest struct {
+func (x *CreateDictionaryRequest) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+func (x *CreateDictionaryRequest) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *CreateDictionaryRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type UpdateDictionaryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Word          string                 `protobuf:"bytes,1,opt,name=word,proto3" json:"word,omitempty"`
-	Category      string                 `protobuf:"bytes,2,opt,name=category,proto3" json:"category,omitempty"`
-	Level         string                 `protobuf:"bytes,3,opt,name=level,proto3" json:"level,omitempty"`
-	Priority      int32                  `protobuf:"varint,4,opt,name=priority,proto3" json:"priority,omitempty"`
-	Aliases       []*DictionaryAlias     `protobuf:"bytes,5,rep,name=aliases,proto3" json:"aliases,omitempty"` // 创建时一并指定的别名
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CreateWordRequest) Reset() {
-	*x = CreateWordRequest{}
+func (x *UpdateDictionaryRequest) Reset() {
+	*x = UpdateDictionaryRequest{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateWordRequest) String() string {
+func (x *UpdateDictionaryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateWordRequest) ProtoMessage() {}
+func (*UpdateDictionaryRequest) ProtoMessage() {}
 
-func (x *CreateWordRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateDictionaryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -486,232 +565,61 @@ func (x *CreateWordRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateWordRequest.ProtoReflect.Descriptor instead.
-func (*CreateWordRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateDictionaryRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDictionaryRequest) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateWordRequest) GetWord() string {
-	if x != nil {
-		return x.Word
-	}
-	return ""
-}
-
-func (x *CreateWordRequest) GetCategory() string {
-	if x != nil {
-		return x.Category
-	}
-	return ""
-}
-
-func (x *CreateWordRequest) GetLevel() string {
-	if x != nil {
-		return x.Level
-	}
-	return ""
-}
-
-func (x *CreateWordRequest) GetPriority() int32 {
-	if x != nil {
-		return x.Priority
-	}
-	return 0
-}
-
-func (x *CreateWordRequest) GetAliases() []*DictionaryAlias {
-	if x != nil {
-		return x.Aliases
-	}
-	return nil
-}
-
-type CreateWordResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Word          *DictionaryWord        `protobuf:"bytes,1,opt,name=word,proto3" json:"word,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateWordResponse) Reset() {
-	*x = CreateWordResponse{}
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateWordResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateWordResponse) ProtoMessage() {}
-
-func (x *CreateWordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateWordResponse.ProtoReflect.Descriptor instead.
-func (*CreateWordResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *CreateWordResponse) GetWord() *DictionaryWord {
-	if x != nil {
-		return x.Word
-	}
-	return nil
-}
-
-type UpdateWordRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Word          string                 `protobuf:"bytes,2,opt,name=word,proto3" json:"word,omitempty"`
-	Category      string                 `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"`
-	Priority      int32                  `protobuf:"varint,4,opt,name=priority,proto3" json:"priority,omitempty"`
-	Status        int32                  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateWordRequest) Reset() {
-	*x = UpdateWordRequest{}
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateWordRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateWordRequest) ProtoMessage() {}
-
-func (x *UpdateWordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateWordRequest.ProtoReflect.Descriptor instead.
-func (*UpdateWordRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *UpdateWordRequest) GetId() uint32 {
+func (x *UpdateDictionaryRequest) GetId() uint32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *UpdateWordRequest) GetWord() string {
+func (x *UpdateDictionaryRequest) GetName() string {
 	if x != nil {
-		return x.Word
+		return x.Name
 	}
 	return ""
 }
 
-func (x *UpdateWordRequest) GetCategory() string {
+func (x *UpdateDictionaryRequest) GetDescription() string {
 	if x != nil {
-		return x.Category
+		return x.Description
 	}
 	return ""
 }
 
-func (x *UpdateWordRequest) GetPriority() int32 {
-	if x != nil {
-		return x.Priority
-	}
-	return 0
-}
-
-func (x *UpdateWordRequest) GetStatus() int32 {
+func (x *UpdateDictionaryRequest) GetStatus() int32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-type UpdateWordResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Word          *DictionaryWord        `protobuf:"bytes,1,opt,name=word,proto3" json:"word,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateWordResponse) Reset() {
-	*x = UpdateWordResponse{}
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateWordResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateWordResponse) ProtoMessage() {}
-
-func (x *UpdateWordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateWordResponse.ProtoReflect.Descriptor instead.
-func (*UpdateWordResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *UpdateWordResponse) GetWord() *DictionaryWord {
-	if x != nil {
-		return x.Word
-	}
-	return nil
-}
-
-type DeleteWordRequest struct {
+type DeleteDictionaryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteWordRequest) Reset() {
-	*x = DeleteWordRequest{}
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[10]
+func (x *DeleteDictionaryRequest) Reset() {
+	*x = DeleteDictionaryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteWordRequest) String() string {
+func (x *DeleteDictionaryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteWordRequest) ProtoMessage() {}
+func (*DeleteDictionaryRequest) ProtoMessage() {}
 
-func (x *DeleteWordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_dictionary_proto_msgTypes[10]
+func (x *DeleteDictionaryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -722,38 +630,219 @@ func (x *DeleteWordRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteWordRequest.ProtoReflect.Descriptor instead.
-func (*DeleteWordRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{10}
+// Deprecated: Use DeleteDictionaryRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDictionaryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *DeleteWordRequest) GetId() uint32 {
+func (x *DeleteDictionaryRequest) GetId() uint32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-type DeleteWordResponse struct {
+type DeleteDictionaryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DeleteWordResponse) Reset() {
-	*x = DeleteWordResponse{}
+func (x *DeleteDictionaryResponse) Reset() {
+	*x = DeleteDictionaryResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDictionaryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDictionaryResponse) ProtoMessage() {}
+
+func (x *DeleteDictionaryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDictionaryResponse.ProtoReflect.Descriptor instead.
+func (*DeleteDictionaryResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{8}
+}
+
+type ListEntriesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Category      string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"` // 按分类筛选
+	Keyword       string                 `protobuf:"bytes,5,opt,name=keyword,proto3" json:"keyword,omitempty"`   // 按标准词模糊搜索
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`    // 按状态筛选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEntriesRequest) Reset() {
+	*x = ListEntriesRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEntriesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEntriesRequest) ProtoMessage() {}
+
+func (x *ListEntriesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEntriesRequest.ProtoReflect.Descriptor instead.
+func (*ListEntriesRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListEntriesRequest) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *ListEntriesRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListEntriesRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListEntriesRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *ListEntriesRequest) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+func (x *ListEntriesRequest) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type ListEntriesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Entries       []*DictionaryEntry     `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEntriesResponse) Reset() {
+	*x = ListEntriesResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEntriesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEntriesResponse) ProtoMessage() {}
+
+func (x *ListEntriesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEntriesResponse.ProtoReflect.Descriptor instead.
+func (*ListEntriesResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ListEntriesResponse) GetEntries() []*DictionaryEntry {
+	if x != nil {
+		return x.Entries
+	}
+	return nil
+}
+
+func (x *ListEntriesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListEntriesResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+type GetEntryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEntryRequest) Reset() {
+	*x = GetEntryRequest{}
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DeleteWordResponse) String() string {
+func (x *GetEntryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteWordResponse) ProtoMessage() {}
+func (*GetEntryRequest) ProtoMessage() {}
 
-func (x *DeleteWordResponse) ProtoReflect() protoreflect.Message {
+func (x *GetEntryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_dictionary_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -765,86 +854,2114 @@ func (x *DeleteWordResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteWordResponse.ProtoReflect.Descriptor instead.
-func (*DeleteWordResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetEntryRequest.ProtoReflect.Descriptor instead.
+func (*GetEntryRequest) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetEntryRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type CreateEntryRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId   uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	StandardText   string                 `protobuf:"bytes,2,opt,name=standard_text,json=standardText,proto3" json:"standard_text,omitempty"`
+	EntryType      string                 `protobuf:"bytes,3,opt,name=entry_type,json=entryType,proto3" json:"entry_type,omitempty"`
+	Category       string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
+	Description    string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Source         string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`
+	SourceId       string                 `protobuf:"bytes,7,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"`
+	Priority       int32                  `protobuf:"varint,8,opt,name=priority,proto3" json:"priority,omitempty"`
+	Pinyin         string                 `protobuf:"bytes,9,opt,name=pinyin,proto3" json:"pinyin,omitempty"`
+	PinyinInitial  string                 `protobuf:"bytes,10,opt,name=pinyin_initial,json=pinyinInitial,proto3" json:"pinyin_initial,omitempty"`
+	NormalizedText string                 `protobuf:"bytes,11,opt,name=normalized_text,json=normalizedText,proto3" json:"normalized_text,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CreateEntryRequest) Reset() {
+	*x = CreateEntryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateEntryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateEntryRequest) ProtoMessage() {}
+
+func (x *CreateEntryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateEntryRequest.ProtoReflect.Descriptor instead.
+func (*CreateEntryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CreateEntryRequest) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *CreateEntryRequest) GetStandardText() string {
+	if x != nil {
+		return x.StandardText
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetEntryType() string {
+	if x != nil {
+		return x.EntryType
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetSourceId() string {
+	if x != nil {
+		return x.SourceId
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetPriority() int32 {
+	if x != nil {
+		return x.Priority
+	}
+	return 0
+}
+
+func (x *CreateEntryRequest) GetPinyin() string {
+	if x != nil {
+		return x.Pinyin
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetPinyinInitial() string {
+	if x != nil {
+		return x.PinyinInitial
+	}
+	return ""
+}
+
+func (x *CreateEntryRequest) GetNormalizedText() string {
+	if x != nil {
+		return x.NormalizedText
+	}
+	return ""
+}
+
+type UpdateEntryRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	StandardText   string                 `protobuf:"bytes,2,opt,name=standard_text,json=standardText,proto3" json:"standard_text,omitempty"`
+	EntryType      string                 `protobuf:"bytes,3,opt,name=entry_type,json=entryType,proto3" json:"entry_type,omitempty"`
+	Category       string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
+	Description    string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Priority       int32                  `protobuf:"varint,6,opt,name=priority,proto3" json:"priority,omitempty"`
+	Pinyin         string                 `protobuf:"bytes,7,opt,name=pinyin,proto3" json:"pinyin,omitempty"`
+	PinyinInitial  string                 `protobuf:"bytes,8,opt,name=pinyin_initial,json=pinyinInitial,proto3" json:"pinyin_initial,omitempty"`
+	NormalizedText string                 `protobuf:"bytes,9,opt,name=normalized_text,json=normalizedText,proto3" json:"normalized_text,omitempty"`
+	Status         int32                  `protobuf:"varint,10,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *UpdateEntryRequest) Reset() {
+	*x = UpdateEntryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEntryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEntryRequest) ProtoMessage() {}
+
+func (x *UpdateEntryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEntryRequest.ProtoReflect.Descriptor instead.
+func (*UpdateEntryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *UpdateEntryRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateEntryRequest) GetStandardText() string {
+	if x != nil {
+		return x.StandardText
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetEntryType() string {
+	if x != nil {
+		return x.EntryType
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetPriority() int32 {
+	if x != nil {
+		return x.Priority
+	}
+	return 0
+}
+
+func (x *UpdateEntryRequest) GetPinyin() string {
+	if x != nil {
+		return x.Pinyin
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetPinyinInitial() string {
+	if x != nil {
+		return x.PinyinInitial
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetNormalizedText() string {
+	if x != nil {
+		return x.NormalizedText
+	}
+	return ""
+}
+
+func (x *UpdateEntryRequest) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type DeleteEntryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEntryRequest) Reset() {
+	*x = DeleteEntryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEntryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEntryRequest) ProtoMessage() {}
+
+func (x *DeleteEntryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEntryRequest.ProtoReflect.Descriptor instead.
+func (*DeleteEntryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DeleteEntryRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteEntryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEntryResponse) Reset() {
+	*x = DeleteEntryResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEntryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEntryResponse) ProtoMessage() {}
+
+func (x *DeleteEntryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEntryResponse.ProtoReflect.Descriptor instead.
+func (*DeleteEntryResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{15}
+}
+
+// DictionaryRelation 词条关系（别名/纠错/同音/近音/简称/相关）。
+type DictionaryRelation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	EntryId       uint32                 `protobuf:"varint,2,opt,name=entry_id,json=entryId,proto3" json:"entry_id,omitempty"`                     // 所属词条 ID
+	RelationType  string                 `protobuf:"bytes,3,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"`       // 关系类型: ALIAS/CORRECTION/HOMOPHONE/PHONETIC_SIMILAR/ABBREVIATION/RELATED
+	RelatedText   string                 `protobuf:"bytes,4,opt,name=related_text,json=relatedText,proto3" json:"related_text,omitempty"`          // 关联表达（如别名「小田」、错误表达「金种子」）
+	TargetEntryId uint32                 `protobuf:"varint,5,opt,name=target_entry_id,json=targetEntryId,proto3" json:"target_entry_id,omitempty"` // 目标词条 ID（可选）
+	Source        string                 `protobuf:"bytes,6,opt,name=source,proto3" json:"source,omitempty"`                                       // 来源: MANUAL/SYNC/IMPORT/API
+	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"` // 状态: 1=启用 2=禁用
+	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DictionaryRelation) Reset() {
+	*x = DictionaryRelation{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DictionaryRelation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DictionaryRelation) ProtoMessage() {}
+
+func (x *DictionaryRelation) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DictionaryRelation.ProtoReflect.Descriptor instead.
+func (*DictionaryRelation) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DictionaryRelation) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DictionaryRelation) GetEntryId() uint32 {
+	if x != nil {
+		return x.EntryId
+	}
+	return 0
+}
+
+func (x *DictionaryRelation) GetRelationType() string {
+	if x != nil {
+		return x.RelationType
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetRelatedText() string {
+	if x != nil {
+		return x.RelatedText
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetTargetEntryId() uint32 {
+	if x != nil {
+		return x.TargetEntryId
+	}
+	return 0
+}
+
+func (x *DictionaryRelation) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *DictionaryRelation) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListRelationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EntryId       uint32                 `protobuf:"varint,1,opt,name=entry_id,json=entryId,proto3" json:"entry_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	RelationType  string                 `protobuf:"bytes,4,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"` // 按关系类型筛选
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRelationsRequest) Reset() {
+	*x = ListRelationsRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRelationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRelationsRequest) ProtoMessage() {}
+
+func (x *ListRelationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRelationsRequest.ProtoReflect.Descriptor instead.
+func (*ListRelationsRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListRelationsRequest) GetEntryId() uint32 {
+	if x != nil {
+		return x.EntryId
+	}
+	return 0
+}
+
+func (x *ListRelationsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListRelationsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListRelationsRequest) GetRelationType() string {
+	if x != nil {
+		return x.RelationType
+	}
+	return ""
+}
+
+type ListRelationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Relations     []*DictionaryRelation  `protobuf:"bytes,1,rep,name=relations,proto3" json:"relations,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRelationsResponse) Reset() {
+	*x = ListRelationsResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRelationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRelationsResponse) ProtoMessage() {}
+
+func (x *ListRelationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRelationsResponse.ProtoReflect.Descriptor instead.
+func (*ListRelationsResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListRelationsResponse) GetRelations() []*DictionaryRelation {
+	if x != nil {
+		return x.Relations
+	}
+	return nil
+}
+
+func (x *ListRelationsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListRelationsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+type GetRelationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRelationRequest) Reset() {
+	*x = GetRelationRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRelationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRelationRequest) ProtoMessage() {}
+
+func (x *GetRelationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRelationRequest.ProtoReflect.Descriptor instead.
+func (*GetRelationRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetRelationRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type CreateRelationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EntryId       uint32                 `protobuf:"varint,1,opt,name=entry_id,json=entryId,proto3" json:"entry_id,omitempty"`
+	RelationType  string                 `protobuf:"bytes,2,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"`
+	RelatedText   string                 `protobuf:"bytes,3,opt,name=related_text,json=relatedText,proto3" json:"related_text,omitempty"`
+	TargetEntryId uint32                 `protobuf:"varint,4,opt,name=target_entry_id,json=targetEntryId,proto3" json:"target_entry_id,omitempty"`
+	Source        string                 `protobuf:"bytes,5,opt,name=source,proto3" json:"source,omitempty"`
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateRelationRequest) Reset() {
+	*x = CreateRelationRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateRelationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateRelationRequest) ProtoMessage() {}
+
+func (x *CreateRelationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateRelationRequest.ProtoReflect.Descriptor instead.
+func (*CreateRelationRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *CreateRelationRequest) GetEntryId() uint32 {
+	if x != nil {
+		return x.EntryId
+	}
+	return 0
+}
+
+func (x *CreateRelationRequest) GetRelationType() string {
+	if x != nil {
+		return x.RelationType
+	}
+	return ""
+}
+
+func (x *CreateRelationRequest) GetRelatedText() string {
+	if x != nil {
+		return x.RelatedText
+	}
+	return ""
+}
+
+func (x *CreateRelationRequest) GetTargetEntryId() uint32 {
+	if x != nil {
+		return x.TargetEntryId
+	}
+	return 0
+}
+
+func (x *CreateRelationRequest) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *CreateRelationRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type UpdateRelationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	RelationType  string                 `protobuf:"bytes,2,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"`
+	RelatedText   string                 `protobuf:"bytes,3,opt,name=related_text,json=relatedText,proto3" json:"related_text,omitempty"`
+	TargetEntryId uint32                 `protobuf:"varint,4,opt,name=target_entry_id,json=targetEntryId,proto3" json:"target_entry_id,omitempty"`
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateRelationRequest) Reset() {
+	*x = UpdateRelationRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRelationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRelationRequest) ProtoMessage() {}
+
+func (x *UpdateRelationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRelationRequest.ProtoReflect.Descriptor instead.
+func (*UpdateRelationRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *UpdateRelationRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateRelationRequest) GetRelationType() string {
+	if x != nil {
+		return x.RelationType
+	}
+	return ""
+}
+
+func (x *UpdateRelationRequest) GetRelatedText() string {
+	if x != nil {
+		return x.RelatedText
+	}
+	return ""
+}
+
+func (x *UpdateRelationRequest) GetTargetEntryId() uint32 {
+	if x != nil {
+		return x.TargetEntryId
+	}
+	return 0
+}
+
+func (x *UpdateRelationRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateRelationRequest) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type DeleteRelationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteRelationRequest) Reset() {
+	*x = DeleteRelationRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteRelationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteRelationRequest) ProtoMessage() {}
+
+func (x *DeleteRelationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteRelationRequest.ProtoReflect.Descriptor instead.
+func (*DeleteRelationRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DeleteRelationRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteRelationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteRelationResponse) Reset() {
+	*x = DeleteRelationResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteRelationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteRelationResponse) ProtoMessage() {}
+
+func (x *DeleteRelationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteRelationResponse.ProtoReflect.Descriptor instead.
+func (*DeleteRelationResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{23}
+}
+
+// DictionaryCategory 词条分类（性质）。内置分类只读，自定义分类租户可管理。
+type DictionaryCategory struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`        // 分类编码: PERSON/ORGANIZATION/PRODUCT/...
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`        // 分类名称
+	Builtin       bool                   `protobuf:"varint,4,opt,name=builtin,proto3" json:"builtin,omitempty"` // 是否内置分类
+	Sort          int32                  `protobuf:"varint,5,opt,name=sort,proto3" json:"sort,omitempty"`
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DictionaryCategory) Reset() {
+	*x = DictionaryCategory{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DictionaryCategory) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DictionaryCategory) ProtoMessage() {}
+
+func (x *DictionaryCategory) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DictionaryCategory.ProtoReflect.Descriptor instead.
+func (*DictionaryCategory) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *DictionaryCategory) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DictionaryCategory) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *DictionaryCategory) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DictionaryCategory) GetBuiltin() bool {
+	if x != nil {
+		return x.Builtin
+	}
+	return false
+}
+
+func (x *DictionaryCategory) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *DictionaryCategory) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *DictionaryCategory) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *DictionaryCategory) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+// DictionaryVersion 词库版本（时点快照）。
+type DictionaryVersion struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	DictionaryId  uint32                 `protobuf:"varint,2,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	VersionNo     int32                  `protobuf:"varint,3,opt,name=version_no,json=versionNo,proto3" json:"version_no,omitempty"` // 版本号，递增
+	Snapshot      string                 `protobuf:"bytes,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`                     // 词条/关系时点快照（JSON）
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DictionaryVersion) Reset() {
+	*x = DictionaryVersion{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DictionaryVersion) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DictionaryVersion) ProtoMessage() {}
+
+func (x *DictionaryVersion) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DictionaryVersion.ProtoReflect.Descriptor instead.
+func (*DictionaryVersion) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *DictionaryVersion) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DictionaryVersion) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *DictionaryVersion) GetVersionNo() int32 {
+	if x != nil {
+		return x.VersionNo
+	}
+	return 0
+}
+
+func (x *DictionaryVersion) GetSnapshot() string {
+	if x != nil {
+		return x.Snapshot
+	}
+	return ""
+}
+
+func (x *DictionaryVersion) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *DictionaryVersion) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *DictionaryVersion) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *DictionaryVersion) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListCategoriesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Keyword       string                 `protobuf:"bytes,3,opt,name=keyword,proto3" json:"keyword,omitempty"` // 按名称/编码模糊搜索
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCategoriesRequest) Reset() {
+	*x = ListCategoriesRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCategoriesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCategoriesRequest) ProtoMessage() {}
+
+func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCategoriesRequest.ProtoReflect.Descriptor instead.
+func (*ListCategoriesRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ListCategoriesRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListCategoriesRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListCategoriesRequest) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+type ListCategoriesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Categories    []*DictionaryCategory  `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListCategoriesResponse) Reset() {
+	*x = ListCategoriesResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListCategoriesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListCategoriesResponse) ProtoMessage() {}
+
+func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListCategoriesResponse.ProtoReflect.Descriptor instead.
+func (*ListCategoriesResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ListCategoriesResponse) GetCategories() []*DictionaryCategory {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
+func (x *ListCategoriesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListCategoriesResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+type CreateCategoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Sort          int32                  `protobuf:"varint,3,opt,name=sort,proto3" json:"sort,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateCategoryRequest) Reset() {
+	*x = CreateCategoryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateCategoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateCategoryRequest) ProtoMessage() {}
+
+func (x *CreateCategoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateCategoryRequest.ProtoReflect.Descriptor instead.
+func (*CreateCategoryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *CreateCategoryRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *CreateCategoryRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateCategoryRequest) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type UpdateCategoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Sort          int32                  `protobuf:"varint,3,opt,name=sort,proto3" json:"sort,omitempty"`
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCategoryRequest) Reset() {
+	*x = UpdateCategoryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCategoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCategoryRequest) ProtoMessage() {}
+
+func (x *UpdateCategoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCategoryRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCategoryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *UpdateCategoryRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateCategoryRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateCategoryRequest) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *UpdateCategoryRequest) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+type DeleteCategoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCategoryRequest) Reset() {
+	*x = DeleteCategoryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCategoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCategoryRequest) ProtoMessage() {}
+
+func (x *DeleteCategoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCategoryRequest.ProtoReflect.Descriptor instead.
+func (*DeleteCategoryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *DeleteCategoryRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type DeleteCategoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCategoryResponse) Reset() {
+	*x = DeleteCategoryResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCategoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCategoryResponse) ProtoMessage() {}
+
+func (x *DeleteCategoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCategoryResponse.ProtoReflect.Descriptor instead.
+func (*DeleteCategoryResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{31}
+}
+
+type ListVersionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListVersionsRequest) Reset() {
+	*x = ListVersionsRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListVersionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListVersionsRequest) ProtoMessage() {}
+
+func (x *ListVersionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListVersionsRequest.ProtoReflect.Descriptor instead.
+func (*ListVersionsRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ListVersionsRequest) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *ListVersionsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListVersionsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+type ListVersionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Versions      []*DictionaryVersion   `protobuf:"bytes,1,rep,name=versions,proto3" json:"versions,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListVersionsResponse) Reset() {
+	*x = ListVersionsResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListVersionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListVersionsResponse) ProtoMessage() {}
+
+func (x *ListVersionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListVersionsResponse.ProtoReflect.Descriptor instead.
+func (*ListVersionsResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *ListVersionsResponse) GetVersions() []*DictionaryVersion {
+	if x != nil {
+		return x.Versions
+	}
+	return nil
+}
+
+func (x *ListVersionsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListVersionsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+type GetVersionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetVersionRequest) Reset() {
+	*x = GetVersionRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetVersionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetVersionRequest) ProtoMessage() {}
+
+func (x *GetVersionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetVersionRequest.ProtoReflect.Descriptor instead.
+func (*GetVersionRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *GetVersionRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type PublishDictionaryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishDictionaryRequest) Reset() {
+	*x = PublishDictionaryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishDictionaryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishDictionaryRequest) ProtoMessage() {}
+
+func (x *PublishDictionaryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishDictionaryRequest.ProtoReflect.Descriptor instead.
+func (*PublishDictionaryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *PublishDictionaryRequest) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *PublishDictionaryRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+// DictionaryConflict 词库冲突记录。
+type DictionaryConflict struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Input             string                 `protobuf:"bytes,2,opt,name=input,proto3" json:"input,omitempty"`                                                  // 输入表达
+	Candidate         string                 `protobuf:"bytes,3,opt,name=candidate,proto3" json:"candidate,omitempty"`                                          // 候选结果
+	SourceScope       string                 `protobuf:"bytes,4,opt,name=source_scope,json=sourceScope,proto3" json:"source_scope,omitempty"`                   // 来源作用域: PLATFORM/SYSTEM/TENANT
+	SourceDictionary  string                 `protobuf:"bytes,5,opt,name=source_dictionary,json=sourceDictionary,proto3" json:"source_dictionary,omitempty"`    // 来源词库标识
+	Priority          int32                  `protobuf:"varint,6,opt,name=priority,proto3" json:"priority,omitempty"`                                           // 候选优先级
+	ResolvedCandidate string                 `protobuf:"bytes,7,opt,name=resolved_candidate,json=resolvedCandidate,proto3" json:"resolved_candidate,omitempty"` // 解析后的候选
+	CreatedAt         string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *DictionaryConflict) Reset() {
+	*x = DictionaryConflict{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DictionaryConflict) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DictionaryConflict) ProtoMessage() {}
+
+func (x *DictionaryConflict) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DictionaryConflict.ProtoReflect.Descriptor instead.
+func (*DictionaryConflict) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *DictionaryConflict) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DictionaryConflict) GetInput() string {
+	if x != nil {
+		return x.Input
+	}
+	return ""
+}
+
+func (x *DictionaryConflict) GetCandidate() string {
+	if x != nil {
+		return x.Candidate
+	}
+	return ""
+}
+
+func (x *DictionaryConflict) GetSourceScope() string {
+	if x != nil {
+		return x.SourceScope
+	}
+	return ""
+}
+
+func (x *DictionaryConflict) GetSourceDictionary() string {
+	if x != nil {
+		return x.SourceDictionary
+	}
+	return ""
+}
+
+func (x *DictionaryConflict) GetPriority() int32 {
+	if x != nil {
+		return x.Priority
+	}
+	return 0
+}
+
+func (x *DictionaryConflict) GetResolvedCandidate() string {
+	if x != nil {
+		return x.ResolvedCandidate
+	}
+	return ""
+}
+
+func (x *DictionaryConflict) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type ListConflictsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListConflictsRequest) Reset() {
+	*x = ListConflictsRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListConflictsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListConflictsRequest) ProtoMessage() {}
+
+func (x *ListConflictsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListConflictsRequest.ProtoReflect.Descriptor instead.
+func (*ListConflictsRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *ListConflictsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListConflictsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+type ListConflictsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Conflicts     []*DictionaryConflict  `protobuf:"bytes,1,rep,name=conflicts,proto3" json:"conflicts,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListConflictsResponse) Reset() {
+	*x = ListConflictsResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListConflictsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListConflictsResponse) ProtoMessage() {}
+
+func (x *ListConflictsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListConflictsResponse.ProtoReflect.Descriptor instead.
+func (*ListConflictsResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *ListConflictsResponse) GetConflicts() []*DictionaryConflict {
+	if x != nil {
+		return x.Conflicts
+	}
+	return nil
+}
+
+func (x *ListConflictsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListConflictsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
 }
 
 var File_evie_service_v1_dictionary_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\n" +
-	" evie/service/v1/dictionary.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"\xac\x02\n" +
-	"\x0eDictionaryWord\x12\x0e\n" +
+	" evie/service/v1/dictionary.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"\xd6\x01\n" +
+	"\n" +
+	"Dictionary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
-	"\x04word\x18\x02 \x01(\tR\x04word\x12\x14\n" +
-	"\x05level\x18\x03 \x01(\tR\x05level\x12\x1a\n" +
-	"\bcategory\x18\x04 \x01(\tR\bcategory\x12\x16\n" +
-	"\x06source\x18\x05 \x01(\tR\x06source\x12\x1a\n" +
-	"\bpriority\x18\x06 \x01(\x05R\bpriority\x12\x16\n" +
-	"\x06status\x18\a \x01(\x05R\x06status\x12:\n" +
-	"\aaliases\x18\b \x03(\v2 .evie.service.v1.DictionaryAliasR\aaliases\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\x12\x16\n" +
+	"\x06source\x18\x04 \x01(\tR\x06source\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\xd7\x03\n" +
+	"\x0fDictionaryEntry\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12#\n" +
+	"\rdictionary_id\x18\x02 \x01(\rR\fdictionaryId\x12#\n" +
+	"\rstandard_text\x18\x03 \x01(\tR\fstandardText\x12\x1d\n" +
+	"\n" +
+	"entry_type\x18\x04 \x01(\tR\tentryType\x12\x1a\n" +
+	"\bcategory\x18\x05 \x01(\tR\bcategory\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06source\x18\a \x01(\tR\x06source\x12\x1b\n" +
+	"\tsource_id\x18\b \x01(\tR\bsourceId\x12\x1a\n" +
+	"\bpriority\x18\t \x01(\x05R\bpriority\x12\x16\n" +
+	"\x06pinyin\x18\n" +
+	" \x01(\tR\x06pinyin\x12%\n" +
+	"\x0epinyin_initial\x18\v \x01(\tR\rpinyinInitial\x12'\n" +
+	"\x0fnormalized_text\x18\f \x01(\tR\x0enormalizedText\x12\x16\n" +
+	"\x06status\x18\r \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x0e \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"\x9d\x01\n" +
+	"\x17ListDictionariesRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x14\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\x12\x18\n" +
+	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\x05R\x06status\"\x99\x01\n" +
+	"\x18ListDictionariesResponse\x12?\n" +
+	"\fdictionaries\x18\x01 \x03(\v2\x1b.evie.service.v1.DictionaryR\fdictionaries\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"/\n" +
+	"\x14GetDictionaryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\xa5\x01\n" +
+	"\x17CreateDictionaryRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\x80\x01R\x04name\x12\x1d\n" +
+	"\x05scope\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18 R\x05scope\x12\x1f\n" +
+	"\x06source\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18 R\x06source\x12*\n" +
+	"\vdescription\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\"\x94\x01\n" +
+	"\x17UpdateDictionaryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12\x1c\n" +
+	"\x04name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04name\x12*\n" +
+	"\vdescription\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\"2\n" +
+	"\x17DeleteDictionaryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x1a\n" +
+	"\x18DeleteDictionaryResponse\"\xcc\x01\n" +
+	"\x12ListEntriesRequest\x12,\n" +
+	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\x12\x1a\n" +
+	"\bcategory\x18\x04 \x01(\tR\bcategory\x12\x18\n" +
+	"\akeyword\x18\x05 \x01(\tR\akeyword\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\"\x8f\x01\n" +
+	"\x13ListEntriesResponse\x12:\n" +
+	"\aentries\x18\x01 \x03(\v2 .evie.service.v1.DictionaryEntryR\aentries\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"*\n" +
+	"\x0fGetEntryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\xd6\x03\n" +
+	"\x12CreateEntryRequest\x12,\n" +
+	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12/\n" +
+	"\rstandard_text\x18\x02 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\xff\x01R\fstandardText\x12&\n" +
+	"\n" +
+	"entry_type\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18\x10R\tentryType\x12#\n" +
+	"\bcategory\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@R\bcategory\x12*\n" +
+	"\vdescription\x18\x05 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\x12\x1f\n" +
+	"\x06source\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x18 R\x06source\x12%\n" +
+	"\tsource_id\x18\a \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\bsourceId\x12\x1a\n" +
+	"\bpriority\x18\b \x01(\x05R\bpriority\x12 \n" +
+	"\x06pinyin\x18\t \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\x06pinyin\x12/\n" +
+	"\x0epinyin_initial\x18\n" +
+	" \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\rpinyinInitial\x121\n" +
+	"\x0fnormalized_text\x18\v \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\x0enormalizedText\"\x8f\x03\n" +
+	"\x12UpdateEntryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12-\n" +
+	"\rstandard_text\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\fstandardText\x12&\n" +
+	"\n" +
+	"entry_type\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18\x10R\tentryType\x12#\n" +
+	"\bcategory\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@R\bcategory\x12*\n" +
+	"\vdescription\x18\x05 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\x12\x1a\n" +
+	"\bpriority\x18\x06 \x01(\x05R\bpriority\x12 \n" +
+	"\x06pinyin\x18\a \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\x06pinyin\x12/\n" +
+	"\x0epinyin_initial\x18\b \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\rpinyinInitial\x121\n" +
+	"\x0fnormalized_text\x18\t \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\x0enormalizedText\x12\x16\n" +
+	"\x06status\x18\n" +
+	" \x01(\x05R\x06status\"-\n" +
+	"\x12DeleteEntryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x15\n" +
+	"\x13DeleteEntryResponse\"\xbf\x02\n" +
+	"\x12DictionaryRelation\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x19\n" +
+	"\bentry_id\x18\x02 \x01(\rR\aentryId\x12#\n" +
+	"\rrelation_type\x18\x03 \x01(\tR\frelationType\x12!\n" +
+	"\frelated_text\x18\x04 \x01(\tR\vrelatedText\x12&\n" +
+	"\x0ftarget_entry_id\x18\x05 \x01(\rR\rtargetEntryId\x12\x16\n" +
+	"\x06source\x18\x06 \x01(\tR\x06source\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\b \x01(\x05R\x06status\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\n" +
-	" \x01(\tR\tupdatedAt\"\x98\x01\n" +
-	"\x0fDictionaryAlias\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\x12\x17\n" +
-	"\aword_id\x18\x02 \x01(\rR\x06wordId\x12\x14\n" +
-	"\x05alias\x18\x03 \x01(\tR\x05alias\x12\x16\n" +
-	"\x06pinyin\x18\x04 \x01(\tR\x06pinyin\x12\x16\n" +
-	"\x06weight\x18\x05 \x01(\x02R\x06weight\x12\x16\n" +
-	"\x06source\x18\x06 \x01(\tR\x06source\"\x9c\x01\n" +
-	"\x10ListWordsRequest\x12\x1b\n" +
+	" \x01(\tR\tupdatedAt\"\x9b\x01\n" +
+	"\x14ListRelationsRequest\x12\"\n" +
+	"\bentry_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\aentryId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\x12#\n" +
+	"\rrelation_type\x18\x04 \x01(\tR\frelationType\"\x98\x01\n" +
+	"\x15ListRelationsResponse\x12A\n" +
+	"\trelations\x18\x01 \x03(\v2#.evie.service.v1.DictionaryRelationR\trelations\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"-\n" +
+	"\x12GetRelationRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x8f\x02\n" +
+	"\x15CreateRelationRequest\x12\"\n" +
+	"\bentry_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\aentryId\x12.\n" +
+	"\rrelation_type\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 R\frelationType\x12-\n" +
+	"\frelated_text\x18\x03 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\xff\x01R\vrelatedText\x12&\n" +
+	"\x0ftarget_entry_id\x18\x04 \x01(\rR\rtargetEntryId\x12\x1f\n" +
+	"\x06source\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x18 R\x06source\x12*\n" +
+	"\vdescription\x18\x06 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\"\xf7\x01\n" +
+	"\x15UpdateRelationRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12,\n" +
+	"\rrelation_type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18 R\frelationType\x12+\n" +
+	"\frelated_text\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\xff\x01R\vrelatedText\x12&\n" +
+	"\x0ftarget_entry_id\x18\x04 \x01(\rR\rtargetEntryId\x12*\n" +
+	"\vdescription\x18\x05 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\"0\n" +
+	"\x15DeleteRelationRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x18\n" +
+	"\x16DeleteRelationResponse\"\xd0\x01\n" +
+	"\x12DictionaryCategory\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x18\n" +
+	"\abuiltin\x18\x04 \x01(\bR\abuiltin\x12\x12\n" +
+	"\x04sort\x18\x05 \x01(\x05R\x04sort\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\xfb\x01\n" +
+	"\x11DictionaryVersion\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12#\n" +
+	"\rdictionary_id\x18\x02 \x01(\rR\fdictionaryId\x12\x1d\n" +
+	"\n" +
+	"version_no\x18\x03 \x01(\x05R\tversionNo\x12\x1a\n" +
+	"\bsnapshot\x18\x04 \x01(\tR\bsnapshot\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"m\n" +
+	"\x15ListCategoriesRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x1a\n" +
-	"\bcategory\x18\x03 \x01(\tR\bcategory\x12\x18\n" +
-	"\akeyword\x18\x04 \x01(\tR\akeyword\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\x05R\x06status\"\x88\x01\n" +
-	"\x11ListWordsResponse\x125\n" +
-	"\x05words\x18\x01 \x03(\v2\x1f.evie.service.v1.DictionaryWordR\x05words\x12\x14\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x18\n" +
+	"\akeyword\x18\x03 \x01(\tR\akeyword\"\x9b\x01\n" +
+	"\x16ListCategoriesResponse\x12C\n" +
+	"\n" +
+	"categories\x18\x01 \x03(\v2#.evie.service.v1.DictionaryCategoryR\n" +
+	"categories\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
-	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\")\n" +
-	"\x0eGetWordRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"F\n" +
-	"\x0fGetWordResponse\x123\n" +
-	"\x04word\x18\x01 \x01(\v2\x1f.evie.service.v1.DictionaryWordR\x04word\"\xcf\x01\n" +
-	"\x11CreateWordRequest\x12\x1e\n" +
-	"\x04word\x18\x01 \x01(\tB\n" +
-	"\xbaH\ar\x05\x10\x01\x18\x80\x01R\x04word\x12#\n" +
-	"\bcategory\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x18 R\bcategory\x12\x1d\n" +
-	"\x05level\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18 R\x05level\x12\x1a\n" +
-	"\bpriority\x18\x04 \x01(\x05R\bpriority\x12:\n" +
-	"\aaliases\x18\x05 \x03(\v2 .evie.service.v1.DictionaryAliasR\aaliases\"I\n" +
-	"\x12CreateWordResponse\x123\n" +
-	"\x04word\x18\x01 \x01(\v2\x1f.evie.service.v1.DictionaryWordR\x04word\"\xa3\x01\n" +
-	"\x11UpdateWordRequest\x12\x17\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"j\n" +
+	"\x15CreateCategoryRequest\x12\x1d\n" +
+	"\x04code\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18@R\x04code\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\x80\x01R\x04name\x12\x12\n" +
+	"\x04sort\x18\x03 \x01(\x05R\x04sort\"z\n" +
+	"\x15UpdateCategoryRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12\x1c\n" +
-	"\x04word\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04word\x12#\n" +
-	"\bcategory\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18 R\bcategory\x12\x1a\n" +
-	"\bpriority\x18\x04 \x01(\x05R\bpriority\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\x05R\x06status\"I\n" +
-	"\x12UpdateWordResponse\x123\n" +
-	"\x04word\x18\x01 \x01(\v2\x1f.evie.service.v1.DictionaryWordR\x04word\",\n" +
-	"\x11DeleteWordRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x14\n" +
-	"\x12DeleteWordResponse2\xbf\x06\n" +
-	"\x11DictionaryService\x12\xa3\x01\n" +
-	"\tListWords\x12!.evie.service.v1.ListWordsRequest\x1a\".evie.service.v1.ListWordsResponse\"O\xbaG+\n" +
-	"\f字典中心\x12\x1b分页查询标准词列表\x82\xd3\xe4\x93\x02\x1b\x12\x19/evie/v1/dictionary/words\x12\x9c\x01\n" +
-	"\aGetWord\x12\x1f.evie.service.v1.GetWordRequest\x1a .evie.service.v1.GetWordResponse\"N\xbaG%\n" +
-	"\f字典中心\x12\x15查询标准词详情\x82\xd3\xe4\x93\x02 \x12\x1e/evie/v1/dictionary/words/{id}\x12\x9d\x01\n" +
+	"\x04name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04name\x12\x12\n" +
+	"\x04sort\x18\x03 \x01(\x05R\x04sort\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\"0\n" +
+	"\x15DeleteCategoryRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x18\n" +
+	"\x16DeleteCategoryResponse\"\x7f\n" +
+	"\x13ListVersionsRequest\x12,\n" +
+	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"CreateWord\x12\".evie.service.v1.CreateWordRequest\x1a#.evie.service.v1.CreateWordResponse\"F\xbaG\x1f\n" +
-	"\f字典中心\x12\x0f创建标准词\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/evie/v1/dictionary/words\x12\xa2\x01\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"\x94\x01\n" +
+	"\x14ListVersionsResponse\x12>\n" +
+	"\bversions\x18\x01 \x03(\v2\".evie.service.v1.DictionaryVersionR\bversions\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\",\n" +
+	"\x11GetVersionRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"t\n" +
+	"\x18PublishDictionaryRequest\x12,\n" +
+	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12*\n" +
+	"\vdescription\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\"\x92\x02\n" +
+	"\x12DictionaryConflict\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x14\n" +
+	"\x05input\x18\x02 \x01(\tR\x05input\x12\x1c\n" +
+	"\tcandidate\x18\x03 \x01(\tR\tcandidate\x12!\n" +
+	"\fsource_scope\x18\x04 \x01(\tR\vsourceScope\x12+\n" +
+	"\x11source_dictionary\x18\x05 \x01(\tR\x10sourceDictionary\x12\x1a\n" +
+	"\bpriority\x18\x06 \x01(\x05R\bpriority\x12-\n" +
+	"\x12resolved_candidate\x18\a \x01(\tR\x11resolvedCandidate\x12\x1d\n" +
 	"\n" +
-	"UpdateWord\x12\".evie.service.v1.UpdateWordRequest\x1a#.evie.service.v1.UpdateWordResponse\"K\xbaG\x1f\n" +
-	"\f字典中心\x12\x0f更新标准词\x82\xd3\xe4\x93\x02#:\x01*\x1a\x1e/evie/v1/dictionary/words/{id}\x12\x9f\x01\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"R\n" +
+	"\x14ListConflictsRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"DeleteWord\x12\".evie.service.v1.DeleteWordRequest\x1a#.evie.service.v1.DeleteWordResponse\"H\xbaG\x1f\n" +
-	"\f字典中心\x12\x0f删除标准词\x82\xd3\xe4\x93\x02 *\x1e/evie/v1/dictionary/words/{id}B\xac\x01\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\"\x98\x01\n" +
+	"\x15ListConflictsResponse\x12A\n" +
+	"\tconflicts\x18\x01 \x03(\v2#.evie.service.v1.DictionaryConflictR\tconflicts\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken2\xb9\x1f\n" +
+	"\x11DictionaryService\x12\xb1\x01\n" +
+	"\x10ListDictionaries\x12(.evie.service.v1.ListDictionariesRequest\x1a).evie.service.v1.ListDictionariesResponse\"H\xbaG(\n" +
+	"\f词库中心\x12\x18分页查询词库列表\x82\xd3\xe4\x93\x02\x17\x12\x15/evie/v1/dictionaries\x12\x9c\x01\n" +
+	"\rGetDictionary\x12%.evie.service.v1.GetDictionaryRequest\x1a\x1b.evie.service.v1.Dictionary\"G\xbaG\"\n" +
+	"\f词库中心\x12\x12查询词库详情\x82\xd3\xe4\x93\x02\x1c\x12\x1a/evie/v1/dictionaries/{id}\x12\x9a\x01\n" +
+	"\x10CreateDictionary\x12(.evie.service.v1.CreateDictionaryRequest\x1a\x1b.evie.service.v1.Dictionary\"?\xbaG\x1c\n" +
+	"\f词库中心\x12\f创建词库\x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/evie/v1/dictionaries\x12\x9f\x01\n" +
+	"\x10UpdateDictionary\x12(.evie.service.v1.UpdateDictionaryRequest\x1a\x1b.evie.service.v1.Dictionary\"D\xbaG\x1c\n" +
+	"\f词库中心\x12\f更新词库\x82\xd3\xe4\x93\x02\x1f:\x01*\x1a\x1a/evie/v1/dictionaries/{id}\x12\xaa\x01\n" +
+	"\x10DeleteDictionary\x12(.evie.service.v1.DeleteDictionaryRequest\x1a).evie.service.v1.DeleteDictionaryResponse\"A\xbaG\x1c\n" +
+	"\f词库中心\x12\f删除词库\x82\xd3\xe4\x93\x02\x1c*\x1a/evie/v1/dictionaries/{id}\x12\xba\x01\n" +
+	"\vListEntries\x12#.evie.service.v1.ListEntriesRequest\x1a$.evie.service.v1.ListEntriesResponse\"`\xbaG(\n" +
+	"\f词库中心\x12\x18分页查询词条列表\x82\xd3\xe4\x93\x02/\x12-/evie/v1/dictionaries/{dictionary_id}/entries\x12\x92\x01\n" +
+	"\bGetEntry\x12 .evie.service.v1.GetEntryRequest\x1a .evie.service.v1.DictionaryEntry\"B\xbaG\"\n" +
+	"\f词库中心\x12\x12查询词条详情\x82\xd3\xe4\x93\x02\x17\x12\x15/evie/v1/entries/{id}\x12\xad\x01\n" +
+	"\vCreateEntry\x12#.evie.service.v1.CreateEntryRequest\x1a .evie.service.v1.DictionaryEntry\"W\xbaG\x1c\n" +
+	"\f词库中心\x12\f创建词条\x82\xd3\xe4\x93\x022:\x01*\"-/evie/v1/dictionaries/{dictionary_id}/entries\x12\x95\x01\n" +
+	"\vUpdateEntry\x12#.evie.service.v1.UpdateEntryRequest\x1a .evie.service.v1.DictionaryEntry\"?\xbaG\x1c\n" +
+	"\f词库中心\x12\f更新词条\x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/evie/v1/entries/{id}\x12\x96\x01\n" +
+	"\vDeleteEntry\x12#.evie.service.v1.DeleteEntryRequest\x1a$.evie.service.v1.DeleteEntryResponse\"<\xbaG\x1c\n" +
+	"\f词库中心\x12\f删除词条\x82\xd3\xe4\x93\x02\x17*\x15/evie/v1/entries/{id}\x12\xbe\x01\n" +
+	"\rListRelations\x12%.evie.service.v1.ListRelationsRequest\x1a&.evie.service.v1.ListRelationsResponse\"^\xbaG.\n" +
+	"\f词库中心\x12\x1e分页查询词条关系列表\x82\xd3\xe4\x93\x02'\x12%/evie/v1/entries/{entry_id}/relations\x12\xa3\x01\n" +
+	"\vGetRelation\x12#.evie.service.v1.GetRelationRequest\x1a#.evie.service.v1.DictionaryRelation\"J\xbaG(\n" +
+	"\f词库中心\x12\x18查询词条关系详情\x82\xd3\xe4\x93\x02\x19\x12\x17/evie/v1/relations/{id}\x12\xb4\x01\n" +
+	"\x0eCreateRelation\x12&.evie.service.v1.CreateRelationRequest\x1a#.evie.service.v1.DictionaryRelation\"U\xbaG\"\n" +
+	"\f词库中心\x12\x12创建词条关系\x82\xd3\xe4\x93\x02*:\x01*\"%/evie/v1/entries/{entry_id}/relations\x12\xa6\x01\n" +
+	"\x0eUpdateRelation\x12&.evie.service.v1.UpdateRelationRequest\x1a#.evie.service.v1.DictionaryRelation\"G\xbaG\"\n" +
+	"\f词库中心\x12\x12更新词条关系\x82\xd3\xe4\x93\x02\x1c:\x01*\x1a\x17/evie/v1/relations/{id}\x12\xa7\x01\n" +
+	"\x0eDeleteRelation\x12&.evie.service.v1.DeleteRelationRequest\x1a'.evie.service.v1.DeleteRelationResponse\"D\xbaG\"\n" +
+	"\f词库中心\x12\x12删除词条关系\x82\xd3\xe4\x93\x02\x19*\x17/evie/v1/relations/{id}\x12\xba\x01\n" +
+	"\x0eListCategories\x12&.evie.service.v1.ListCategoriesRequest\x1a'.evie.service.v1.ListCategoriesResponse\"W\xbaG.\n" +
+	"\f词库中心\x12\x1e分页查询词条分类列表\x82\xd3\xe4\x93\x02 \x12\x1e/evie/v1/dictionary-categories\x12\xad\x01\n" +
+	"\x0eCreateCategory\x12&.evie.service.v1.CreateCategoryRequest\x1a#.evie.service.v1.DictionaryCategory\"N\xbaG\"\n" +
+	"\f词库中心\x12\x12创建词条分类\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/evie/v1/dictionary-categories\x12\xb2\x01\n" +
+	"\x0eUpdateCategory\x12&.evie.service.v1.UpdateCategoryRequest\x1a#.evie.service.v1.DictionaryCategory\"S\xbaG\"\n" +
+	"\f词库中心\x12\x12更新词条分类\x82\xd3\xe4\x93\x02(:\x01*\x1a#/evie/v1/dictionary-categories/{id}\x12\xb3\x01\n" +
+	"\x0eDeleteCategory\x12&.evie.service.v1.DeleteCategoryRequest\x1a'.evie.service.v1.DeleteCategoryResponse\"P\xbaG\"\n" +
+	"\f词库中心\x12\x12删除词条分类\x82\xd3\xe4\x93\x02%*#/evie/v1/dictionary-categories/{id}\x12\xc4\x01\n" +
+	"\fListVersions\x12$.evie.service.v1.ListVersionsRequest\x1a%.evie.service.v1.ListVersionsResponse\"g\xbaG.\n" +
+	"\f词库中心\x12\x1e分页查询词库版本列表\x82\xd3\xe4\x93\x020\x12./evie/v1/dictionaries/{dictionary_id}/versions\x12\xaa\x01\n" +
+	"\n" +
+	"GetVersion\x12\".evie.service.v1.GetVersionRequest\x1a\".evie.service.v1.DictionaryVersion\"T\xbaG(\n" +
+	"\f词库中心\x12\x18查询词库版本详情\x82\xd3\xe4\x93\x02#\x12!/evie/v1/dictionary-versions/{id}\x12\xc1\x01\n" +
+	"\x11PublishDictionary\x12).evie.service.v1.PublishDictionaryRequest\x1a\".evie.service.v1.DictionaryVersion\"]\xbaG\"\n" +
+	"\f词库中心\x12\x12发布词库版本\x82\xd3\xe4\x93\x022:\x01*\"-/evie/v1/dictionaries/{dictionary_id}:publish\x12\xb0\x01\n" +
+	"\rListConflicts\x12%.evie.service.v1.ListConflictsRequest\x1a&.evie.service.v1.ListConflictsResponse\"P\xbaG(\n" +
+	"\f词库中心\x12\x18查询词库冲突记录\x82\xd3\xe4\x93\x02\x1f\x12\x1d/evie/v1/dictionary-conflictsB\xac\x01\n" +
 	"\x13com.evie.service.v1B\x0fDictionaryProtoP\x01Z&backend-service/api/evie/service/v1;v1\xa2\x02\x03ESX\xaa\x02\x0fEvie.Service.V1\xca\x02\x0fEvie\\Service\\V1\xe2\x02\x1bEvie\\Service\\V1\\GPBMetadata\xea\x02\x11Evie::Service::V1b\x06proto3"
 
 var (
@@ -859,40 +2976,103 @@ func file_evie_service_v1_dictionary_proto_rawDescGZIP() []byte {
 	return file_evie_service_v1_dictionary_proto_rawDescData
 }
 
-var file_evie_service_v1_dictionary_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_evie_service_v1_dictionary_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_evie_service_v1_dictionary_proto_goTypes = []any{
-	(*DictionaryWord)(nil),     // 0: evie.service.v1.DictionaryWord
-	(*DictionaryAlias)(nil),    // 1: evie.service.v1.DictionaryAlias
-	(*ListWordsRequest)(nil),   // 2: evie.service.v1.ListWordsRequest
-	(*ListWordsResponse)(nil),  // 3: evie.service.v1.ListWordsResponse
-	(*GetWordRequest)(nil),     // 4: evie.service.v1.GetWordRequest
-	(*GetWordResponse)(nil),    // 5: evie.service.v1.GetWordResponse
-	(*CreateWordRequest)(nil),  // 6: evie.service.v1.CreateWordRequest
-	(*CreateWordResponse)(nil), // 7: evie.service.v1.CreateWordResponse
-	(*UpdateWordRequest)(nil),  // 8: evie.service.v1.UpdateWordRequest
-	(*UpdateWordResponse)(nil), // 9: evie.service.v1.UpdateWordResponse
-	(*DeleteWordRequest)(nil),  // 10: evie.service.v1.DeleteWordRequest
-	(*DeleteWordResponse)(nil), // 11: evie.service.v1.DeleteWordResponse
+	(*Dictionary)(nil),               // 0: evie.service.v1.Dictionary
+	(*DictionaryEntry)(nil),          // 1: evie.service.v1.DictionaryEntry
+	(*ListDictionariesRequest)(nil),  // 2: evie.service.v1.ListDictionariesRequest
+	(*ListDictionariesResponse)(nil), // 3: evie.service.v1.ListDictionariesResponse
+	(*GetDictionaryRequest)(nil),     // 4: evie.service.v1.GetDictionaryRequest
+	(*CreateDictionaryRequest)(nil),  // 5: evie.service.v1.CreateDictionaryRequest
+	(*UpdateDictionaryRequest)(nil),  // 6: evie.service.v1.UpdateDictionaryRequest
+	(*DeleteDictionaryRequest)(nil),  // 7: evie.service.v1.DeleteDictionaryRequest
+	(*DeleteDictionaryResponse)(nil), // 8: evie.service.v1.DeleteDictionaryResponse
+	(*ListEntriesRequest)(nil),       // 9: evie.service.v1.ListEntriesRequest
+	(*ListEntriesResponse)(nil),      // 10: evie.service.v1.ListEntriesResponse
+	(*GetEntryRequest)(nil),          // 11: evie.service.v1.GetEntryRequest
+	(*CreateEntryRequest)(nil),       // 12: evie.service.v1.CreateEntryRequest
+	(*UpdateEntryRequest)(nil),       // 13: evie.service.v1.UpdateEntryRequest
+	(*DeleteEntryRequest)(nil),       // 14: evie.service.v1.DeleteEntryRequest
+	(*DeleteEntryResponse)(nil),      // 15: evie.service.v1.DeleteEntryResponse
+	(*DictionaryRelation)(nil),       // 16: evie.service.v1.DictionaryRelation
+	(*ListRelationsRequest)(nil),     // 17: evie.service.v1.ListRelationsRequest
+	(*ListRelationsResponse)(nil),    // 18: evie.service.v1.ListRelationsResponse
+	(*GetRelationRequest)(nil),       // 19: evie.service.v1.GetRelationRequest
+	(*CreateRelationRequest)(nil),    // 20: evie.service.v1.CreateRelationRequest
+	(*UpdateRelationRequest)(nil),    // 21: evie.service.v1.UpdateRelationRequest
+	(*DeleteRelationRequest)(nil),    // 22: evie.service.v1.DeleteRelationRequest
+	(*DeleteRelationResponse)(nil),   // 23: evie.service.v1.DeleteRelationResponse
+	(*DictionaryCategory)(nil),       // 24: evie.service.v1.DictionaryCategory
+	(*DictionaryVersion)(nil),        // 25: evie.service.v1.DictionaryVersion
+	(*ListCategoriesRequest)(nil),    // 26: evie.service.v1.ListCategoriesRequest
+	(*ListCategoriesResponse)(nil),   // 27: evie.service.v1.ListCategoriesResponse
+	(*CreateCategoryRequest)(nil),    // 28: evie.service.v1.CreateCategoryRequest
+	(*UpdateCategoryRequest)(nil),    // 29: evie.service.v1.UpdateCategoryRequest
+	(*DeleteCategoryRequest)(nil),    // 30: evie.service.v1.DeleteCategoryRequest
+	(*DeleteCategoryResponse)(nil),   // 31: evie.service.v1.DeleteCategoryResponse
+	(*ListVersionsRequest)(nil),      // 32: evie.service.v1.ListVersionsRequest
+	(*ListVersionsResponse)(nil),     // 33: evie.service.v1.ListVersionsResponse
+	(*GetVersionRequest)(nil),        // 34: evie.service.v1.GetVersionRequest
+	(*PublishDictionaryRequest)(nil), // 35: evie.service.v1.PublishDictionaryRequest
+	(*DictionaryConflict)(nil),       // 36: evie.service.v1.DictionaryConflict
+	(*ListConflictsRequest)(nil),     // 37: evie.service.v1.ListConflictsRequest
+	(*ListConflictsResponse)(nil),    // 38: evie.service.v1.ListConflictsResponse
 }
 var file_evie_service_v1_dictionary_proto_depIdxs = []int32{
-	1,  // 0: evie.service.v1.DictionaryWord.aliases:type_name -> evie.service.v1.DictionaryAlias
-	0,  // 1: evie.service.v1.ListWordsResponse.words:type_name -> evie.service.v1.DictionaryWord
-	0,  // 2: evie.service.v1.GetWordResponse.word:type_name -> evie.service.v1.DictionaryWord
-	1,  // 3: evie.service.v1.CreateWordRequest.aliases:type_name -> evie.service.v1.DictionaryAlias
-	0,  // 4: evie.service.v1.CreateWordResponse.word:type_name -> evie.service.v1.DictionaryWord
-	0,  // 5: evie.service.v1.UpdateWordResponse.word:type_name -> evie.service.v1.DictionaryWord
-	2,  // 6: evie.service.v1.DictionaryService.ListWords:input_type -> evie.service.v1.ListWordsRequest
-	4,  // 7: evie.service.v1.DictionaryService.GetWord:input_type -> evie.service.v1.GetWordRequest
-	6,  // 8: evie.service.v1.DictionaryService.CreateWord:input_type -> evie.service.v1.CreateWordRequest
-	8,  // 9: evie.service.v1.DictionaryService.UpdateWord:input_type -> evie.service.v1.UpdateWordRequest
-	10, // 10: evie.service.v1.DictionaryService.DeleteWord:input_type -> evie.service.v1.DeleteWordRequest
-	3,  // 11: evie.service.v1.DictionaryService.ListWords:output_type -> evie.service.v1.ListWordsResponse
-	5,  // 12: evie.service.v1.DictionaryService.GetWord:output_type -> evie.service.v1.GetWordResponse
-	7,  // 13: evie.service.v1.DictionaryService.CreateWord:output_type -> evie.service.v1.CreateWordResponse
-	9,  // 14: evie.service.v1.DictionaryService.UpdateWord:output_type -> evie.service.v1.UpdateWordResponse
-	11, // 15: evie.service.v1.DictionaryService.DeleteWord:output_type -> evie.service.v1.DeleteWordResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
+	0,  // 0: evie.service.v1.ListDictionariesResponse.dictionaries:type_name -> evie.service.v1.Dictionary
+	1,  // 1: evie.service.v1.ListEntriesResponse.entries:type_name -> evie.service.v1.DictionaryEntry
+	16, // 2: evie.service.v1.ListRelationsResponse.relations:type_name -> evie.service.v1.DictionaryRelation
+	24, // 3: evie.service.v1.ListCategoriesResponse.categories:type_name -> evie.service.v1.DictionaryCategory
+	25, // 4: evie.service.v1.ListVersionsResponse.versions:type_name -> evie.service.v1.DictionaryVersion
+	36, // 5: evie.service.v1.ListConflictsResponse.conflicts:type_name -> evie.service.v1.DictionaryConflict
+	2,  // 6: evie.service.v1.DictionaryService.ListDictionaries:input_type -> evie.service.v1.ListDictionariesRequest
+	4,  // 7: evie.service.v1.DictionaryService.GetDictionary:input_type -> evie.service.v1.GetDictionaryRequest
+	5,  // 8: evie.service.v1.DictionaryService.CreateDictionary:input_type -> evie.service.v1.CreateDictionaryRequest
+	6,  // 9: evie.service.v1.DictionaryService.UpdateDictionary:input_type -> evie.service.v1.UpdateDictionaryRequest
+	7,  // 10: evie.service.v1.DictionaryService.DeleteDictionary:input_type -> evie.service.v1.DeleteDictionaryRequest
+	9,  // 11: evie.service.v1.DictionaryService.ListEntries:input_type -> evie.service.v1.ListEntriesRequest
+	11, // 12: evie.service.v1.DictionaryService.GetEntry:input_type -> evie.service.v1.GetEntryRequest
+	12, // 13: evie.service.v1.DictionaryService.CreateEntry:input_type -> evie.service.v1.CreateEntryRequest
+	13, // 14: evie.service.v1.DictionaryService.UpdateEntry:input_type -> evie.service.v1.UpdateEntryRequest
+	14, // 15: evie.service.v1.DictionaryService.DeleteEntry:input_type -> evie.service.v1.DeleteEntryRequest
+	17, // 16: evie.service.v1.DictionaryService.ListRelations:input_type -> evie.service.v1.ListRelationsRequest
+	19, // 17: evie.service.v1.DictionaryService.GetRelation:input_type -> evie.service.v1.GetRelationRequest
+	20, // 18: evie.service.v1.DictionaryService.CreateRelation:input_type -> evie.service.v1.CreateRelationRequest
+	21, // 19: evie.service.v1.DictionaryService.UpdateRelation:input_type -> evie.service.v1.UpdateRelationRequest
+	22, // 20: evie.service.v1.DictionaryService.DeleteRelation:input_type -> evie.service.v1.DeleteRelationRequest
+	26, // 21: evie.service.v1.DictionaryService.ListCategories:input_type -> evie.service.v1.ListCategoriesRequest
+	28, // 22: evie.service.v1.DictionaryService.CreateCategory:input_type -> evie.service.v1.CreateCategoryRequest
+	29, // 23: evie.service.v1.DictionaryService.UpdateCategory:input_type -> evie.service.v1.UpdateCategoryRequest
+	30, // 24: evie.service.v1.DictionaryService.DeleteCategory:input_type -> evie.service.v1.DeleteCategoryRequest
+	32, // 25: evie.service.v1.DictionaryService.ListVersions:input_type -> evie.service.v1.ListVersionsRequest
+	34, // 26: evie.service.v1.DictionaryService.GetVersion:input_type -> evie.service.v1.GetVersionRequest
+	35, // 27: evie.service.v1.DictionaryService.PublishDictionary:input_type -> evie.service.v1.PublishDictionaryRequest
+	37, // 28: evie.service.v1.DictionaryService.ListConflicts:input_type -> evie.service.v1.ListConflictsRequest
+	3,  // 29: evie.service.v1.DictionaryService.ListDictionaries:output_type -> evie.service.v1.ListDictionariesResponse
+	0,  // 30: evie.service.v1.DictionaryService.GetDictionary:output_type -> evie.service.v1.Dictionary
+	0,  // 31: evie.service.v1.DictionaryService.CreateDictionary:output_type -> evie.service.v1.Dictionary
+	0,  // 32: evie.service.v1.DictionaryService.UpdateDictionary:output_type -> evie.service.v1.Dictionary
+	8,  // 33: evie.service.v1.DictionaryService.DeleteDictionary:output_type -> evie.service.v1.DeleteDictionaryResponse
+	10, // 34: evie.service.v1.DictionaryService.ListEntries:output_type -> evie.service.v1.ListEntriesResponse
+	1,  // 35: evie.service.v1.DictionaryService.GetEntry:output_type -> evie.service.v1.DictionaryEntry
+	1,  // 36: evie.service.v1.DictionaryService.CreateEntry:output_type -> evie.service.v1.DictionaryEntry
+	1,  // 37: evie.service.v1.DictionaryService.UpdateEntry:output_type -> evie.service.v1.DictionaryEntry
+	15, // 38: evie.service.v1.DictionaryService.DeleteEntry:output_type -> evie.service.v1.DeleteEntryResponse
+	18, // 39: evie.service.v1.DictionaryService.ListRelations:output_type -> evie.service.v1.ListRelationsResponse
+	16, // 40: evie.service.v1.DictionaryService.GetRelation:output_type -> evie.service.v1.DictionaryRelation
+	16, // 41: evie.service.v1.DictionaryService.CreateRelation:output_type -> evie.service.v1.DictionaryRelation
+	16, // 42: evie.service.v1.DictionaryService.UpdateRelation:output_type -> evie.service.v1.DictionaryRelation
+	23, // 43: evie.service.v1.DictionaryService.DeleteRelation:output_type -> evie.service.v1.DeleteRelationResponse
+	27, // 44: evie.service.v1.DictionaryService.ListCategories:output_type -> evie.service.v1.ListCategoriesResponse
+	24, // 45: evie.service.v1.DictionaryService.CreateCategory:output_type -> evie.service.v1.DictionaryCategory
+	24, // 46: evie.service.v1.DictionaryService.UpdateCategory:output_type -> evie.service.v1.DictionaryCategory
+	31, // 47: evie.service.v1.DictionaryService.DeleteCategory:output_type -> evie.service.v1.DeleteCategoryResponse
+	33, // 48: evie.service.v1.DictionaryService.ListVersions:output_type -> evie.service.v1.ListVersionsResponse
+	25, // 49: evie.service.v1.DictionaryService.GetVersion:output_type -> evie.service.v1.DictionaryVersion
+	25, // 50: evie.service.v1.DictionaryService.PublishDictionary:output_type -> evie.service.v1.DictionaryVersion
+	38, // 51: evie.service.v1.DictionaryService.ListConflicts:output_type -> evie.service.v1.ListConflictsResponse
+	29, // [29:52] is the sub-list for method output_type
+	6,  // [6:29] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -909,7 +3089,7 @@ func file_evie_service_v1_dictionary_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_evie_service_v1_dictionary_proto_rawDesc), len(file_evie_service_v1_dictionary_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

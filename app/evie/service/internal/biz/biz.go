@@ -9,10 +9,12 @@ import (
 // ProviderSet is biz providers.
 var ProviderSet = wire.NewSet(
 	NewDictionaryUsecase,
-	NewHotwordUsecase,
 	NewASRUsecase,
 	NewProviderUsecase,
-	NewCorrectionEngine,
+	NewVocabularyBuilder,
+	NewEnhancementEngine,
+	NewEnhancementPolicyUsecase,
+	NewEnhancementLogUsecase,
 )
 
 type Transaction interface {

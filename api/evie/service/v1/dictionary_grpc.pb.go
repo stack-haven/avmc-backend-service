@@ -19,29 +19,85 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DictionaryService_ListWords_FullMethodName  = "/evie.service.v1.DictionaryService/ListWords"
-	DictionaryService_GetWord_FullMethodName    = "/evie.service.v1.DictionaryService/GetWord"
-	DictionaryService_CreateWord_FullMethodName = "/evie.service.v1.DictionaryService/CreateWord"
-	DictionaryService_UpdateWord_FullMethodName = "/evie.service.v1.DictionaryService/UpdateWord"
-	DictionaryService_DeleteWord_FullMethodName = "/evie.service.v1.DictionaryService/DeleteWord"
+	DictionaryService_ListDictionaries_FullMethodName  = "/evie.service.v1.DictionaryService/ListDictionaries"
+	DictionaryService_GetDictionary_FullMethodName     = "/evie.service.v1.DictionaryService/GetDictionary"
+	DictionaryService_CreateDictionary_FullMethodName  = "/evie.service.v1.DictionaryService/CreateDictionary"
+	DictionaryService_UpdateDictionary_FullMethodName  = "/evie.service.v1.DictionaryService/UpdateDictionary"
+	DictionaryService_DeleteDictionary_FullMethodName  = "/evie.service.v1.DictionaryService/DeleteDictionary"
+	DictionaryService_ListEntries_FullMethodName       = "/evie.service.v1.DictionaryService/ListEntries"
+	DictionaryService_GetEntry_FullMethodName          = "/evie.service.v1.DictionaryService/GetEntry"
+	DictionaryService_CreateEntry_FullMethodName       = "/evie.service.v1.DictionaryService/CreateEntry"
+	DictionaryService_UpdateEntry_FullMethodName       = "/evie.service.v1.DictionaryService/UpdateEntry"
+	DictionaryService_DeleteEntry_FullMethodName       = "/evie.service.v1.DictionaryService/DeleteEntry"
+	DictionaryService_ListRelations_FullMethodName     = "/evie.service.v1.DictionaryService/ListRelations"
+	DictionaryService_GetRelation_FullMethodName       = "/evie.service.v1.DictionaryService/GetRelation"
+	DictionaryService_CreateRelation_FullMethodName    = "/evie.service.v1.DictionaryService/CreateRelation"
+	DictionaryService_UpdateRelation_FullMethodName    = "/evie.service.v1.DictionaryService/UpdateRelation"
+	DictionaryService_DeleteRelation_FullMethodName    = "/evie.service.v1.DictionaryService/DeleteRelation"
+	DictionaryService_ListCategories_FullMethodName    = "/evie.service.v1.DictionaryService/ListCategories"
+	DictionaryService_CreateCategory_FullMethodName    = "/evie.service.v1.DictionaryService/CreateCategory"
+	DictionaryService_UpdateCategory_FullMethodName    = "/evie.service.v1.DictionaryService/UpdateCategory"
+	DictionaryService_DeleteCategory_FullMethodName    = "/evie.service.v1.DictionaryService/DeleteCategory"
+	DictionaryService_ListVersions_FullMethodName      = "/evie.service.v1.DictionaryService/ListVersions"
+	DictionaryService_GetVersion_FullMethodName        = "/evie.service.v1.DictionaryService/GetVersion"
+	DictionaryService_PublishDictionary_FullMethodName = "/evie.service.v1.DictionaryService/PublishDictionary"
+	DictionaryService_ListConflicts_FullMethodName     = "/evie.service.v1.DictionaryService/ListConflicts"
 )
 
 // DictionaryServiceClient is the client API for DictionaryService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// 企业知识字典中心：标准词与别名的管理服务。
+// 词库中心：词库（Dictionary）与词条（DictionaryEntry）管理服务。
+// 词库表示一组具有共同作用域和生命周期的语言知识集合；
+// 词条表示一个标准语言概念（词或短语）。
 type DictionaryServiceClient interface {
-	// 分页查询标准词列表
-	ListWords(ctx context.Context, in *ListWordsRequest, opts ...grpc.CallOption) (*ListWordsResponse, error)
-	// 查询标准词详情（含别名）
-	GetWord(ctx context.Context, in *GetWordRequest, opts ...grpc.CallOption) (*GetWordResponse, error)
-	// 创建标准词（可同时指定别名）
-	CreateWord(ctx context.Context, in *CreateWordRequest, opts ...grpc.CallOption) (*CreateWordResponse, error)
-	// 更新标准词
-	UpdateWord(ctx context.Context, in *UpdateWordRequest, opts ...grpc.CallOption) (*UpdateWordResponse, error)
-	// 删除标准词（级联软删除别名）
-	DeleteWord(ctx context.Context, in *DeleteWordRequest, opts ...grpc.CallOption) (*DeleteWordResponse, error)
+	// 分页查询词库列表
+	ListDictionaries(ctx context.Context, in *ListDictionariesRequest, opts ...grpc.CallOption) (*ListDictionariesResponse, error)
+	// 查询词库详情
+	GetDictionary(ctx context.Context, in *GetDictionaryRequest, opts ...grpc.CallOption) (*Dictionary, error)
+	// 创建词库
+	CreateDictionary(ctx context.Context, in *CreateDictionaryRequest, opts ...grpc.CallOption) (*Dictionary, error)
+	// 更新词库
+	UpdateDictionary(ctx context.Context, in *UpdateDictionaryRequest, opts ...grpc.CallOption) (*Dictionary, error)
+	// 删除词库（软删除）
+	DeleteDictionary(ctx context.Context, in *DeleteDictionaryRequest, opts ...grpc.CallOption) (*DeleteDictionaryResponse, error)
+	// 分页查询词条列表
+	ListEntries(ctx context.Context, in *ListEntriesRequest, opts ...grpc.CallOption) (*ListEntriesResponse, error)
+	// 查询词条详情
+	GetEntry(ctx context.Context, in *GetEntryRequest, opts ...grpc.CallOption) (*DictionaryEntry, error)
+	// 创建词条
+	CreateEntry(ctx context.Context, in *CreateEntryRequest, opts ...grpc.CallOption) (*DictionaryEntry, error)
+	// 更新词条
+	UpdateEntry(ctx context.Context, in *UpdateEntryRequest, opts ...grpc.CallOption) (*DictionaryEntry, error)
+	// 删除词条（软删除）
+	DeleteEntry(ctx context.Context, in *DeleteEntryRequest, opts ...grpc.CallOption) (*DeleteEntryResponse, error)
+	// 分页查询词条关系列表
+	ListRelations(ctx context.Context, in *ListRelationsRequest, opts ...grpc.CallOption) (*ListRelationsResponse, error)
+	// 查询词条关系详情
+	GetRelation(ctx context.Context, in *GetRelationRequest, opts ...grpc.CallOption) (*DictionaryRelation, error)
+	// 创建词条关系
+	CreateRelation(ctx context.Context, in *CreateRelationRequest, opts ...grpc.CallOption) (*DictionaryRelation, error)
+	// 更新词条关系
+	UpdateRelation(ctx context.Context, in *UpdateRelationRequest, opts ...grpc.CallOption) (*DictionaryRelation, error)
+	// 删除词条关系
+	DeleteRelation(ctx context.Context, in *DeleteRelationRequest, opts ...grpc.CallOption) (*DeleteRelationResponse, error)
+	// 分页查询词条分类列表
+	ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error)
+	// 创建词条分类（仅自定义）
+	CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*DictionaryCategory, error)
+	// 更新词条分类（仅自定义）
+	UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*DictionaryCategory, error)
+	// 删除词条分类（仅自定义）
+	DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*DeleteCategoryResponse, error)
+	// 分页查询词库版本列表
+	ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...grpc.CallOption) (*ListVersionsResponse, error)
+	// 查询词库版本详情
+	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*DictionaryVersion, error)
+	// 发布词库版本（生成时点快照）
+	PublishDictionary(ctx context.Context, in *PublishDictionaryRequest, opts ...grpc.CallOption) (*DictionaryVersion, error)
+	// 查询词库冲突记录
+	ListConflicts(ctx context.Context, in *ListConflictsRequest, opts ...grpc.CallOption) (*ListConflictsResponse, error)
 }
 
 type dictionaryServiceClient struct {
@@ -52,50 +108,230 @@ func NewDictionaryServiceClient(cc grpc.ClientConnInterface) DictionaryServiceCl
 	return &dictionaryServiceClient{cc}
 }
 
-func (c *dictionaryServiceClient) ListWords(ctx context.Context, in *ListWordsRequest, opts ...grpc.CallOption) (*ListWordsResponse, error) {
+func (c *dictionaryServiceClient) ListDictionaries(ctx context.Context, in *ListDictionariesRequest, opts ...grpc.CallOption) (*ListDictionariesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListWordsResponse)
-	err := c.cc.Invoke(ctx, DictionaryService_ListWords_FullMethodName, in, out, cOpts...)
+	out := new(ListDictionariesResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListDictionaries_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dictionaryServiceClient) GetWord(ctx context.Context, in *GetWordRequest, opts ...grpc.CallOption) (*GetWordResponse, error) {
+func (c *dictionaryServiceClient) GetDictionary(ctx context.Context, in *GetDictionaryRequest, opts ...grpc.CallOption) (*Dictionary, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetWordResponse)
-	err := c.cc.Invoke(ctx, DictionaryService_GetWord_FullMethodName, in, out, cOpts...)
+	out := new(Dictionary)
+	err := c.cc.Invoke(ctx, DictionaryService_GetDictionary_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dictionaryServiceClient) CreateWord(ctx context.Context, in *CreateWordRequest, opts ...grpc.CallOption) (*CreateWordResponse, error) {
+func (c *dictionaryServiceClient) CreateDictionary(ctx context.Context, in *CreateDictionaryRequest, opts ...grpc.CallOption) (*Dictionary, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateWordResponse)
-	err := c.cc.Invoke(ctx, DictionaryService_CreateWord_FullMethodName, in, out, cOpts...)
+	out := new(Dictionary)
+	err := c.cc.Invoke(ctx, DictionaryService_CreateDictionary_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dictionaryServiceClient) UpdateWord(ctx context.Context, in *UpdateWordRequest, opts ...grpc.CallOption) (*UpdateWordResponse, error) {
+func (c *dictionaryServiceClient) UpdateDictionary(ctx context.Context, in *UpdateDictionaryRequest, opts ...grpc.CallOption) (*Dictionary, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateWordResponse)
-	err := c.cc.Invoke(ctx, DictionaryService_UpdateWord_FullMethodName, in, out, cOpts...)
+	out := new(Dictionary)
+	err := c.cc.Invoke(ctx, DictionaryService_UpdateDictionary_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dictionaryServiceClient) DeleteWord(ctx context.Context, in *DeleteWordRequest, opts ...grpc.CallOption) (*DeleteWordResponse, error) {
+func (c *dictionaryServiceClient) DeleteDictionary(ctx context.Context, in *DeleteDictionaryRequest, opts ...grpc.CallOption) (*DeleteDictionaryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteWordResponse)
-	err := c.cc.Invoke(ctx, DictionaryService_DeleteWord_FullMethodName, in, out, cOpts...)
+	out := new(DeleteDictionaryResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_DeleteDictionary_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) ListEntries(ctx context.Context, in *ListEntriesRequest, opts ...grpc.CallOption) (*ListEntriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEntriesResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListEntries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) GetEntry(ctx context.Context, in *GetEntryRequest, opts ...grpc.CallOption) (*DictionaryEntry, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryEntry)
+	err := c.cc.Invoke(ctx, DictionaryService_GetEntry_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) CreateEntry(ctx context.Context, in *CreateEntryRequest, opts ...grpc.CallOption) (*DictionaryEntry, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryEntry)
+	err := c.cc.Invoke(ctx, DictionaryService_CreateEntry_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) UpdateEntry(ctx context.Context, in *UpdateEntryRequest, opts ...grpc.CallOption) (*DictionaryEntry, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryEntry)
+	err := c.cc.Invoke(ctx, DictionaryService_UpdateEntry_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) DeleteEntry(ctx context.Context, in *DeleteEntryRequest, opts ...grpc.CallOption) (*DeleteEntryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteEntryResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_DeleteEntry_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) ListRelations(ctx context.Context, in *ListRelationsRequest, opts ...grpc.CallOption) (*ListRelationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListRelationsResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListRelations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) GetRelation(ctx context.Context, in *GetRelationRequest, opts ...grpc.CallOption) (*DictionaryRelation, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryRelation)
+	err := c.cc.Invoke(ctx, DictionaryService_GetRelation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) CreateRelation(ctx context.Context, in *CreateRelationRequest, opts ...grpc.CallOption) (*DictionaryRelation, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryRelation)
+	err := c.cc.Invoke(ctx, DictionaryService_CreateRelation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) UpdateRelation(ctx context.Context, in *UpdateRelationRequest, opts ...grpc.CallOption) (*DictionaryRelation, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryRelation)
+	err := c.cc.Invoke(ctx, DictionaryService_UpdateRelation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) DeleteRelation(ctx context.Context, in *DeleteRelationRequest, opts ...grpc.CallOption) (*DeleteRelationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteRelationResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_DeleteRelation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCategoriesResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListCategories_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*DictionaryCategory, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryCategory)
+	err := c.cc.Invoke(ctx, DictionaryService_CreateCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*DictionaryCategory, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryCategory)
+	err := c.cc.Invoke(ctx, DictionaryService_UpdateCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*DeleteCategoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCategoryResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_DeleteCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...grpc.CallOption) (*ListVersionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListVersionsResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*DictionaryVersion, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryVersion)
+	err := c.cc.Invoke(ctx, DictionaryService_GetVersion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) PublishDictionary(ctx context.Context, in *PublishDictionaryRequest, opts ...grpc.CallOption) (*DictionaryVersion, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DictionaryVersion)
+	err := c.cc.Invoke(ctx, DictionaryService_PublishDictionary_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) ListConflicts(ctx context.Context, in *ListConflictsRequest, opts ...grpc.CallOption) (*ListConflictsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListConflictsResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListConflicts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,18 +342,56 @@ func (c *dictionaryServiceClient) DeleteWord(ctx context.Context, in *DeleteWord
 // All implementations must embed UnimplementedDictionaryServiceServer
 // for forward compatibility.
 //
-// 企业知识字典中心：标准词与别名的管理服务。
+// 词库中心：词库（Dictionary）与词条（DictionaryEntry）管理服务。
+// 词库表示一组具有共同作用域和生命周期的语言知识集合；
+// 词条表示一个标准语言概念（词或短语）。
 type DictionaryServiceServer interface {
-	// 分页查询标准词列表
-	ListWords(context.Context, *ListWordsRequest) (*ListWordsResponse, error)
-	// 查询标准词详情（含别名）
-	GetWord(context.Context, *GetWordRequest) (*GetWordResponse, error)
-	// 创建标准词（可同时指定别名）
-	CreateWord(context.Context, *CreateWordRequest) (*CreateWordResponse, error)
-	// 更新标准词
-	UpdateWord(context.Context, *UpdateWordRequest) (*UpdateWordResponse, error)
-	// 删除标准词（级联软删除别名）
-	DeleteWord(context.Context, *DeleteWordRequest) (*DeleteWordResponse, error)
+	// 分页查询词库列表
+	ListDictionaries(context.Context, *ListDictionariesRequest) (*ListDictionariesResponse, error)
+	// 查询词库详情
+	GetDictionary(context.Context, *GetDictionaryRequest) (*Dictionary, error)
+	// 创建词库
+	CreateDictionary(context.Context, *CreateDictionaryRequest) (*Dictionary, error)
+	// 更新词库
+	UpdateDictionary(context.Context, *UpdateDictionaryRequest) (*Dictionary, error)
+	// 删除词库（软删除）
+	DeleteDictionary(context.Context, *DeleteDictionaryRequest) (*DeleteDictionaryResponse, error)
+	// 分页查询词条列表
+	ListEntries(context.Context, *ListEntriesRequest) (*ListEntriesResponse, error)
+	// 查询词条详情
+	GetEntry(context.Context, *GetEntryRequest) (*DictionaryEntry, error)
+	// 创建词条
+	CreateEntry(context.Context, *CreateEntryRequest) (*DictionaryEntry, error)
+	// 更新词条
+	UpdateEntry(context.Context, *UpdateEntryRequest) (*DictionaryEntry, error)
+	// 删除词条（软删除）
+	DeleteEntry(context.Context, *DeleteEntryRequest) (*DeleteEntryResponse, error)
+	// 分页查询词条关系列表
+	ListRelations(context.Context, *ListRelationsRequest) (*ListRelationsResponse, error)
+	// 查询词条关系详情
+	GetRelation(context.Context, *GetRelationRequest) (*DictionaryRelation, error)
+	// 创建词条关系
+	CreateRelation(context.Context, *CreateRelationRequest) (*DictionaryRelation, error)
+	// 更新词条关系
+	UpdateRelation(context.Context, *UpdateRelationRequest) (*DictionaryRelation, error)
+	// 删除词条关系
+	DeleteRelation(context.Context, *DeleteRelationRequest) (*DeleteRelationResponse, error)
+	// 分页查询词条分类列表
+	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
+	// 创建词条分类（仅自定义）
+	CreateCategory(context.Context, *CreateCategoryRequest) (*DictionaryCategory, error)
+	// 更新词条分类（仅自定义）
+	UpdateCategory(context.Context, *UpdateCategoryRequest) (*DictionaryCategory, error)
+	// 删除词条分类（仅自定义）
+	DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error)
+	// 分页查询词库版本列表
+	ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error)
+	// 查询词库版本详情
+	GetVersion(context.Context, *GetVersionRequest) (*DictionaryVersion, error)
+	// 发布词库版本（生成时点快照）
+	PublishDictionary(context.Context, *PublishDictionaryRequest) (*DictionaryVersion, error)
+	// 查询词库冲突记录
+	ListConflicts(context.Context, *ListConflictsRequest) (*ListConflictsResponse, error)
 	mustEmbedUnimplementedDictionaryServiceServer()
 }
 
@@ -128,20 +402,74 @@ type DictionaryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDictionaryServiceServer struct{}
 
-func (UnimplementedDictionaryServiceServer) ListWords(context.Context, *ListWordsRequest) (*ListWordsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListWords not implemented")
+func (UnimplementedDictionaryServiceServer) ListDictionaries(context.Context, *ListDictionariesRequest) (*ListDictionariesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDictionaries not implemented")
 }
-func (UnimplementedDictionaryServiceServer) GetWord(context.Context, *GetWordRequest) (*GetWordResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetWord not implemented")
+func (UnimplementedDictionaryServiceServer) GetDictionary(context.Context, *GetDictionaryRequest) (*Dictionary, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDictionary not implemented")
 }
-func (UnimplementedDictionaryServiceServer) CreateWord(context.Context, *CreateWordRequest) (*CreateWordResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreateWord not implemented")
+func (UnimplementedDictionaryServiceServer) CreateDictionary(context.Context, *CreateDictionaryRequest) (*Dictionary, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateDictionary not implemented")
 }
-func (UnimplementedDictionaryServiceServer) UpdateWord(context.Context, *UpdateWordRequest) (*UpdateWordResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateWord not implemented")
+func (UnimplementedDictionaryServiceServer) UpdateDictionary(context.Context, *UpdateDictionaryRequest) (*Dictionary, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateDictionary not implemented")
 }
-func (UnimplementedDictionaryServiceServer) DeleteWord(context.Context, *DeleteWordRequest) (*DeleteWordResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteWord not implemented")
+func (UnimplementedDictionaryServiceServer) DeleteDictionary(context.Context, *DeleteDictionaryRequest) (*DeleteDictionaryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteDictionary not implemented")
+}
+func (UnimplementedDictionaryServiceServer) ListEntries(context.Context, *ListEntriesRequest) (*ListEntriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEntries not implemented")
+}
+func (UnimplementedDictionaryServiceServer) GetEntry(context.Context, *GetEntryRequest) (*DictionaryEntry, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetEntry not implemented")
+}
+func (UnimplementedDictionaryServiceServer) CreateEntry(context.Context, *CreateEntryRequest) (*DictionaryEntry, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateEntry not implemented")
+}
+func (UnimplementedDictionaryServiceServer) UpdateEntry(context.Context, *UpdateEntryRequest) (*DictionaryEntry, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateEntry not implemented")
+}
+func (UnimplementedDictionaryServiceServer) DeleteEntry(context.Context, *DeleteEntryRequest) (*DeleteEntryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteEntry not implemented")
+}
+func (UnimplementedDictionaryServiceServer) ListRelations(context.Context, *ListRelationsRequest) (*ListRelationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListRelations not implemented")
+}
+func (UnimplementedDictionaryServiceServer) GetRelation(context.Context, *GetRelationRequest) (*DictionaryRelation, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetRelation not implemented")
+}
+func (UnimplementedDictionaryServiceServer) CreateRelation(context.Context, *CreateRelationRequest) (*DictionaryRelation, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateRelation not implemented")
+}
+func (UnimplementedDictionaryServiceServer) UpdateRelation(context.Context, *UpdateRelationRequest) (*DictionaryRelation, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateRelation not implemented")
+}
+func (UnimplementedDictionaryServiceServer) DeleteRelation(context.Context, *DeleteRelationRequest) (*DeleteRelationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteRelation not implemented")
+}
+func (UnimplementedDictionaryServiceServer) ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListCategories not implemented")
+}
+func (UnimplementedDictionaryServiceServer) CreateCategory(context.Context, *CreateCategoryRequest) (*DictionaryCategory, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateCategory not implemented")
+}
+func (UnimplementedDictionaryServiceServer) UpdateCategory(context.Context, *UpdateCategoryRequest) (*DictionaryCategory, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCategory not implemented")
+}
+func (UnimplementedDictionaryServiceServer) DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteCategory not implemented")
+}
+func (UnimplementedDictionaryServiceServer) ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListVersions not implemented")
+}
+func (UnimplementedDictionaryServiceServer) GetVersion(context.Context, *GetVersionRequest) (*DictionaryVersion, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetVersion not implemented")
+}
+func (UnimplementedDictionaryServiceServer) PublishDictionary(context.Context, *PublishDictionaryRequest) (*DictionaryVersion, error) {
+	return nil, status.Error(codes.Unimplemented, "method PublishDictionary not implemented")
+}
+func (UnimplementedDictionaryServiceServer) ListConflicts(context.Context, *ListConflictsRequest) (*ListConflictsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListConflicts not implemented")
 }
 func (UnimplementedDictionaryServiceServer) mustEmbedUnimplementedDictionaryServiceServer() {}
 func (UnimplementedDictionaryServiceServer) testEmbeddedByValue()                           {}
@@ -164,92 +492,416 @@ func RegisterDictionaryServiceServer(s grpc.ServiceRegistrar, srv DictionaryServ
 	s.RegisterService(&DictionaryService_ServiceDesc, srv)
 }
 
-func _DictionaryService_ListWords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListWordsRequest)
+func _DictionaryService_ListDictionaries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDictionariesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DictionaryServiceServer).ListWords(ctx, in)
+		return srv.(DictionaryServiceServer).ListDictionaries(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DictionaryService_ListWords_FullMethodName,
+		FullMethod: DictionaryService_ListDictionaries_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DictionaryServiceServer).ListWords(ctx, req.(*ListWordsRequest))
+		return srv.(DictionaryServiceServer).ListDictionaries(ctx, req.(*ListDictionariesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DictionaryService_GetWord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetWordRequest)
+func _DictionaryService_GetDictionary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDictionaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DictionaryServiceServer).GetWord(ctx, in)
+		return srv.(DictionaryServiceServer).GetDictionary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DictionaryService_GetWord_FullMethodName,
+		FullMethod: DictionaryService_GetDictionary_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DictionaryServiceServer).GetWord(ctx, req.(*GetWordRequest))
+		return srv.(DictionaryServiceServer).GetDictionary(ctx, req.(*GetDictionaryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DictionaryService_CreateWord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateWordRequest)
+func _DictionaryService_CreateDictionary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDictionaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DictionaryServiceServer).CreateWord(ctx, in)
+		return srv.(DictionaryServiceServer).CreateDictionary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DictionaryService_CreateWord_FullMethodName,
+		FullMethod: DictionaryService_CreateDictionary_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DictionaryServiceServer).CreateWord(ctx, req.(*CreateWordRequest))
+		return srv.(DictionaryServiceServer).CreateDictionary(ctx, req.(*CreateDictionaryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DictionaryService_UpdateWord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateWordRequest)
+func _DictionaryService_UpdateDictionary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDictionaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DictionaryServiceServer).UpdateWord(ctx, in)
+		return srv.(DictionaryServiceServer).UpdateDictionary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DictionaryService_UpdateWord_FullMethodName,
+		FullMethod: DictionaryService_UpdateDictionary_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DictionaryServiceServer).UpdateWord(ctx, req.(*UpdateWordRequest))
+		return srv.(DictionaryServiceServer).UpdateDictionary(ctx, req.(*UpdateDictionaryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DictionaryService_DeleteWord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteWordRequest)
+func _DictionaryService_DeleteDictionary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDictionaryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DictionaryServiceServer).DeleteWord(ctx, in)
+		return srv.(DictionaryServiceServer).DeleteDictionary(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DictionaryService_DeleteWord_FullMethodName,
+		FullMethod: DictionaryService_DeleteDictionary_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DictionaryServiceServer).DeleteWord(ctx, req.(*DeleteWordRequest))
+		return srv.(DictionaryServiceServer).DeleteDictionary(ctx, req.(*DeleteDictionaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_ListEntries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEntriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).ListEntries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_ListEntries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).ListEntries(ctx, req.(*ListEntriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_GetEntry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEntryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).GetEntry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_GetEntry_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).GetEntry(ctx, req.(*GetEntryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_CreateEntry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateEntryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).CreateEntry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_CreateEntry_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).CreateEntry(ctx, req.(*CreateEntryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_UpdateEntry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateEntryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).UpdateEntry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_UpdateEntry_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).UpdateEntry(ctx, req.(*UpdateEntryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_DeleteEntry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteEntryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).DeleteEntry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_DeleteEntry_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).DeleteEntry(ctx, req.(*DeleteEntryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_ListRelations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRelationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).ListRelations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_ListRelations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).ListRelations(ctx, req.(*ListRelationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_GetRelation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRelationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).GetRelation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_GetRelation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).GetRelation(ctx, req.(*GetRelationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_CreateRelation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRelationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).CreateRelation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_CreateRelation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).CreateRelation(ctx, req.(*CreateRelationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_UpdateRelation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRelationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).UpdateRelation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_UpdateRelation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).UpdateRelation(ctx, req.(*UpdateRelationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_DeleteRelation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRelationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).DeleteRelation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_DeleteRelation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).DeleteRelation(ctx, req.(*DeleteRelationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_ListCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCategoriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).ListCategories(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_ListCategories_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).ListCategories(ctx, req.(*ListCategoriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_CreateCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).CreateCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_CreateCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).CreateCategory(ctx, req.(*CreateCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_UpdateCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).UpdateCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_UpdateCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).UpdateCategory(ctx, req.(*UpdateCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_DeleteCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).DeleteCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_DeleteCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).DeleteCategory(ctx, req.(*DeleteCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_ListVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVersionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).ListVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_ListVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).ListVersions(ctx, req.(*ListVersionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVersionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).GetVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_GetVersion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).GetVersion(ctx, req.(*GetVersionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_PublishDictionary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishDictionaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).PublishDictionary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_PublishDictionary_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).PublishDictionary(ctx, req.(*PublishDictionaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_ListConflicts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListConflictsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).ListConflicts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_ListConflicts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).ListConflicts(ctx, req.(*ListConflictsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -262,24 +914,96 @@ var DictionaryService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DictionaryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListWords",
-			Handler:    _DictionaryService_ListWords_Handler,
+			MethodName: "ListDictionaries",
+			Handler:    _DictionaryService_ListDictionaries_Handler,
 		},
 		{
-			MethodName: "GetWord",
-			Handler:    _DictionaryService_GetWord_Handler,
+			MethodName: "GetDictionary",
+			Handler:    _DictionaryService_GetDictionary_Handler,
 		},
 		{
-			MethodName: "CreateWord",
-			Handler:    _DictionaryService_CreateWord_Handler,
+			MethodName: "CreateDictionary",
+			Handler:    _DictionaryService_CreateDictionary_Handler,
 		},
 		{
-			MethodName: "UpdateWord",
-			Handler:    _DictionaryService_UpdateWord_Handler,
+			MethodName: "UpdateDictionary",
+			Handler:    _DictionaryService_UpdateDictionary_Handler,
 		},
 		{
-			MethodName: "DeleteWord",
-			Handler:    _DictionaryService_DeleteWord_Handler,
+			MethodName: "DeleteDictionary",
+			Handler:    _DictionaryService_DeleteDictionary_Handler,
+		},
+		{
+			MethodName: "ListEntries",
+			Handler:    _DictionaryService_ListEntries_Handler,
+		},
+		{
+			MethodName: "GetEntry",
+			Handler:    _DictionaryService_GetEntry_Handler,
+		},
+		{
+			MethodName: "CreateEntry",
+			Handler:    _DictionaryService_CreateEntry_Handler,
+		},
+		{
+			MethodName: "UpdateEntry",
+			Handler:    _DictionaryService_UpdateEntry_Handler,
+		},
+		{
+			MethodName: "DeleteEntry",
+			Handler:    _DictionaryService_DeleteEntry_Handler,
+		},
+		{
+			MethodName: "ListRelations",
+			Handler:    _DictionaryService_ListRelations_Handler,
+		},
+		{
+			MethodName: "GetRelation",
+			Handler:    _DictionaryService_GetRelation_Handler,
+		},
+		{
+			MethodName: "CreateRelation",
+			Handler:    _DictionaryService_CreateRelation_Handler,
+		},
+		{
+			MethodName: "UpdateRelation",
+			Handler:    _DictionaryService_UpdateRelation_Handler,
+		},
+		{
+			MethodName: "DeleteRelation",
+			Handler:    _DictionaryService_DeleteRelation_Handler,
+		},
+		{
+			MethodName: "ListCategories",
+			Handler:    _DictionaryService_ListCategories_Handler,
+		},
+		{
+			MethodName: "CreateCategory",
+			Handler:    _DictionaryService_CreateCategory_Handler,
+		},
+		{
+			MethodName: "UpdateCategory",
+			Handler:    _DictionaryService_UpdateCategory_Handler,
+		},
+		{
+			MethodName: "DeleteCategory",
+			Handler:    _DictionaryService_DeleteCategory_Handler,
+		},
+		{
+			MethodName: "ListVersions",
+			Handler:    _DictionaryService_ListVersions_Handler,
+		},
+		{
+			MethodName: "GetVersion",
+			Handler:    _DictionaryService_GetVersion_Handler,
+		},
+		{
+			MethodName: "PublishDictionary",
+			Handler:    _DictionaryService_PublishDictionary_Handler,
+		},
+		{
+			MethodName: "ListConflicts",
+			Handler:    _DictionaryService_ListConflicts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

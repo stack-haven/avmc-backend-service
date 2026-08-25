@@ -32,64 +32,124 @@ func (f AsrRecordFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.AsrRecordMutation", m)
 }
 
-// The CorrectionLogFunc type is an adapter to allow the use of ordinary
-// function as CorrectionLog mutator.
-type CorrectionLogFunc func(context.Context, *gen.CorrectionLogMutation) (gen.Value, error)
+// The DictionaryFunc type is an adapter to allow the use of ordinary
+// function as Dictionary mutator.
+type DictionaryFunc func(context.Context, *gen.DictionaryMutation) (gen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CorrectionLogFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.CorrectionLogMutation); ok {
+func (f DictionaryFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.CorrectionLogMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryMutation", m)
 }
 
-// The CorrectionRuleFunc type is an adapter to allow the use of ordinary
-// function as CorrectionRule mutator.
-type CorrectionRuleFunc func(context.Context, *gen.CorrectionRuleMutation) (gen.Value, error)
+// The DictionaryCategoryFunc type is an adapter to allow the use of ordinary
+// function as DictionaryCategory mutator.
+type DictionaryCategoryFunc func(context.Context, *gen.DictionaryCategoryMutation) (gen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CorrectionRuleFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.CorrectionRuleMutation); ok {
+func (f DictionaryCategoryFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryCategoryMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.CorrectionRuleMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryCategoryMutation", m)
 }
 
-// The DictionaryAliasFunc type is an adapter to allow the use of ordinary
-// function as DictionaryAlias mutator.
-type DictionaryAliasFunc func(context.Context, *gen.DictionaryAliasMutation) (gen.Value, error)
+// The DictionaryChangeLogFunc type is an adapter to allow the use of ordinary
+// function as DictionaryChangeLog mutator.
+type DictionaryChangeLogFunc func(context.Context, *gen.DictionaryChangeLogMutation) (gen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f DictionaryAliasFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.DictionaryAliasMutation); ok {
+func (f DictionaryChangeLogFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryChangeLogMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryAliasMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryChangeLogMutation", m)
 }
 
-// The DictionaryWordFunc type is an adapter to allow the use of ordinary
-// function as DictionaryWord mutator.
-type DictionaryWordFunc func(context.Context, *gen.DictionaryWordMutation) (gen.Value, error)
+// The DictionaryConflictFunc type is an adapter to allow the use of ordinary
+// function as DictionaryConflict mutator.
+type DictionaryConflictFunc func(context.Context, *gen.DictionaryConflictMutation) (gen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f DictionaryWordFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.DictionaryWordMutation); ok {
+func (f DictionaryConflictFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryConflictMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryWordMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryConflictMutation", m)
 }
 
-// The HotwordFunc type is an adapter to allow the use of ordinary
-// function as Hotword mutator.
-type HotwordFunc func(context.Context, *gen.HotwordMutation) (gen.Value, error)
+// The DictionaryEntryFunc type is an adapter to allow the use of ordinary
+// function as DictionaryEntry mutator.
+type DictionaryEntryFunc func(context.Context, *gen.DictionaryEntryMutation) (gen.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f HotwordFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
-	if mv, ok := m.(*gen.HotwordMutation); ok {
+func (f DictionaryEntryFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryEntryMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.HotwordMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryEntryMutation", m)
+}
+
+// The DictionaryRelationFunc type is an adapter to allow the use of ordinary
+// function as DictionaryRelation mutator.
+type DictionaryRelationFunc func(context.Context, *gen.DictionaryRelationMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DictionaryRelationFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryRelationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryRelationMutation", m)
+}
+
+// The DictionaryVersionFunc type is an adapter to allow the use of ordinary
+// function as DictionaryVersion mutator.
+type DictionaryVersionFunc func(context.Context, *gen.DictionaryVersionMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DictionaryVersionFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.DictionaryVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.DictionaryVersionMutation", m)
+}
+
+// The EnhancementLogFunc type is an adapter to allow the use of ordinary
+// function as EnhancementLog mutator.
+type EnhancementLogFunc func(context.Context, *gen.EnhancementLogMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EnhancementLogFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.EnhancementLogMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.EnhancementLogMutation", m)
+}
+
+// The EnhancementPolicyFunc type is an adapter to allow the use of ordinary
+// function as EnhancementPolicy mutator.
+type EnhancementPolicyFunc func(context.Context, *gen.EnhancementPolicyMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EnhancementPolicyFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.EnhancementPolicyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.EnhancementPolicyMutation", m)
+}
+
+// The EnhancementProfileFunc type is an adapter to allow the use of ordinary
+// function as EnhancementProfile mutator.
+type EnhancementProfileFunc func(context.Context, *gen.EnhancementProfileMutation) (gen.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EnhancementProfileFunc) Mutate(ctx context.Context, m gen.Mutation) (gen.Value, error) {
+	if mv, ok := m.(*gen.EnhancementProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *gen.EnhancementProfileMutation", m)
 }
 
 // Condition is a hook condition function.

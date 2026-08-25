@@ -247,11 +247,6 @@ func (_c *AsrRecordCreate) check() error {
 	if _, ok := _c.mutation.TenantID(); !ok {
 		return &ValidationError{Name: "tenant_id", err: errors.New(`gen: missing required field "AsrRecord.tenant_id"`)}
 	}
-	if v, ok := _c.mutation.TenantID(); ok {
-		if err := asrrecord.TenantIDValidator(v); err != nil {
-			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "AsrRecord.tenant_id": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.SessionID(); !ok {
 		return &ValidationError{Name: "session_id", err: errors.New(`gen: missing required field "AsrRecord.session_id"`)}
 	}

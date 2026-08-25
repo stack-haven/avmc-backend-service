@@ -208,11 +208,6 @@ func (_u *AsrProviderConfigUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "AsrProviderConfig.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.TenantID(); ok {
-		if err := asrproviderconfig.TenantIDValidator(v); err != nil {
-			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "AsrProviderConfig.tenant_id": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.ProviderName(); ok {
 		if err := asrproviderconfig.ProviderNameValidator(v); err != nil {
 			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`gen: validator failed for field "AsrProviderConfig.provider_name": %w`, err)}
@@ -489,11 +484,6 @@ func (_u *AsrProviderConfigUpdateOne) check() error {
 	if v, ok := _u.mutation.Status(); ok {
 		if err := asrproviderconfig.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "AsrProviderConfig.status": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.TenantID(); ok {
-		if err := asrproviderconfig.TenantIDValidator(v); err != nil {
-			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "AsrProviderConfig.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ProviderName(); ok {

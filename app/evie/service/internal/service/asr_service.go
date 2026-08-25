@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -10,19 +9,20 @@ import (
 	pb "backend-service/api/evie/service/v1"
 	"backend-service/app/evie/service/internal/biz"
 	"backend-service/pkg/asr"
+	"backend-service/pkg/auth/authn"
 )
 
 // ASRServiceService ASR 语音识别服务。
 type ASRServiceService struct {
 	pb.UnimplementedASRServiceServer
-	auc    *biz.ASRUsecase
-	engine *biz.CorrectionEngine
-	log    *log.Helper
+	auc     *biz.ASRUsecase
+	enhancer *biz.EnhancementEngine
+	log     *log.Helper
 }
 
 // NewASRServiceService 创建 ASR 服务实例。
-func NewASRServiceService(auc *biz.ASRUsecase, engine *biz.CorrectionEngine, logger log.Logger) *ASRServiceService {
-	return &ASRServiceService{auc: auc, engine: engine, log: log.NewHelper(logger)}
+func NewASRServiceService(auc *biz.ASRUsecase, enhancer *biz.EnhancementEngine, logger log.Logger) *ASRServiceService {
+	return &ASRServiceService{auc: auc, enhancer: enhancer, log: log.NewHelper(logger)}
 }
 
 // Recognize 同步识别。
@@ -99,13 +99,13 @@ func (s *ASRServiceService) StreamRecognize(stream pb.ASRService_StreamRecognize
 	return nil
 }
 
-// RecognizeAndCorrect 语音识别 + 纠错：一步输出标准企业语言。
+// RecognizeAndCorrect 语音识别 + 文本增强：一步输出标准企业语言。
 func (s *ASRServiceService) RecognizeAndCorrect(ctx context.Context, req *pb.RecognizeRequest) (*pb.RecognizeAndCorrectResponse, error) {
 	result, err := s.auc.Recognize(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.engine.Correct(ctx, &pb.CorrectRequest{Text: result.Text, SessionId: req.GetSessionId()})
+	corrected, err := s.enhance(ctx, result.Text)
 	if err != nil {
 		return nil, err
 	}
@@ -118,13 +118,13 @@ func (s *ASRServiceService) RecognizeAndCorrect(ctx context.Context, req *pb.Rec
 	}, nil
 }
 
-// ReRecognize 对已有记录重新识别 + 纠错。
+// ReRecognize 对已有记录重新识别 + 文本增强。
 func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognizeRequest) (*pb.RecognizeAndCorrectResponse, error) {
 	result, err := s.auc.ReRecognize(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.engine.Correct(ctx, &pb.CorrectRequest{Text: result.Text, SessionId: fmt.Sprintf("re-%d", req.GetId())})
+	corrected, err := s.enhance(ctx, result.Text)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +134,34 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 		Changes:       corrected.GetChanges(),
 		Confidence:    corrected.GetConfidence(),
 		ProviderName:  result.ProviderName,
+	}, nil
+}
+
+// enhance 调用文本增强引擎，映射为 CorrectResponse。
+func (s *ASRServiceService) enhance(ctx context.Context, text string) (*pb.CorrectResponse, error) {
+	tenantID := authn.GetAuthUserTenantID(ctx)
+	result, err := s.enhancer.Enhance(ctx, tenantID, text)
+	if err != nil {
+		return nil, err
+	}
+	changes := make([]*pb.CorrectionChange, 0, len(result.Changes))
+	needConfirm := false
+	for _, ch := range result.Changes {
+		changes = append(changes, &pb.CorrectionChange{
+			From:       ch.OriginalText,
+			To:         ch.ResultText,
+			Type:       ch.Type,
+			Confidence: float32(ch.Confidence),
+		})
+		if ch.Action == biz.ActionSuggest {
+			needConfirm = true
+		}
+	}
+	return &pb.CorrectResponse{
+		OriginalText:  result.RawText,
+		CorrectedText: result.EnhancedText,
+		Changes:       changes,
+		NeedConfirm:   needConfirm,
 	}, nil
 }
 

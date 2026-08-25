@@ -27,10 +27,10 @@ func newGRPCWhiteListMatcher() selector.MatchFunc {
 func NewGRPCServer(
 	c *conf.Server,
 	dictionaryService *service.DictionaryServiceService,
-	hotwordService *service.HotwordServiceService,
 	asrService *service.ASRServiceService,
 	providerService *service.ProviderServiceService,
 	correctionService *service.CorrectionServiceService,
+	enhancementService *service.EnhancementServiceService,
 	authenticator *session.Manager,
 	authorizer authzEngine.Enforcer,
 	auditClient audit.Client,
@@ -48,9 +48,9 @@ func NewGRPCServer(
 		grpc.Address(c.Grpc.Addr),
 	)
 	v1.RegisterDictionaryServiceServer(srv, dictionaryService)
-	v1.RegisterHotwordServiceServer(srv, hotwordService)
 	v1.RegisterASRServiceServer(srv, asrService)
 	v1.RegisterProviderServiceServer(srv, providerService)
 	v1.RegisterCorrectionServiceServer(srv, correctionService)
+	v1.RegisterEnhancementServiceServer(srv, enhancementService)
 	return srv, nil
 }

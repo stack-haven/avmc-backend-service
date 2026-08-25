@@ -46,11 +46,11 @@ var ProviderSet = wire.NewSet(
 	NewAuthenticator, NewAuthorizer, authn.NewSecurity,
 	NewSessionOptions, session.NewManager,
 	NewDictionaryRepo,
-	NewHotwordRepo,
+	NewDictionaryConflictRepo,
+	NewEnhancementPolicyRepo,
+	NewEnhancementLogRepo,
 	NewASRRecordRepo,
 	NewProviderConfigRepo,
-	NewCorrectionRuleRepo,
-	NewCorrectionLogRepo,
 	NewFileCenterClient,
 	NewAuditClient,
 )
@@ -203,7 +203,7 @@ func (c *platformHealthChecker) Ready(ctx context.Context) error {
 	var errs []error
 	if c == nil || c.data == nil || c.data.db == nil {
 		errs = append(errs, fmt.Errorf("database: unavailable"))
-	} else if _, err := c.data.db.DictionaryWord.Query().Limit(1).Count(ctx); err != nil {
+	} else if _, err := c.data.db.Dictionary.Query().Limit(1).Count(ctx); err != nil {
 		errs = append(errs, fmt.Errorf("database: %w", err))
 	}
 	if c == nil || c.data == nil || c.data.rdb == nil {

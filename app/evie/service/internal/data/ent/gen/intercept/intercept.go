@@ -9,11 +9,16 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen"
 	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
 	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
-	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionary"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarychangelog"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryconflict"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
 	"backend-service/app/evie/service/internal/data/ent/gen/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -129,139 +134,274 @@ func (f TraverseAsrRecord) Traverse(ctx context.Context, q gen.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *gen.AsrRecordQuery", q)
 }
 
-// The CorrectionLogFunc type is an adapter to allow the use of ordinary function as a Querier.
-type CorrectionLogFunc func(context.Context, *gen.CorrectionLogQuery) (gen.Value, error)
+// The DictionaryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryFunc func(context.Context, *gen.DictionaryQuery) (gen.Value, error)
 
 // Query calls f(ctx, q).
-func (f CorrectionLogFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.CorrectionLogQuery); ok {
+func (f DictionaryFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryQuery); ok {
 		return f(ctx, q)
 	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.CorrectionLogQuery", q)
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryQuery", q)
 }
 
-// The TraverseCorrectionLog type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseCorrectionLog func(context.Context, *gen.CorrectionLogQuery) error
+// The TraverseDictionary type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionary func(context.Context, *gen.DictionaryQuery) error
 
 // Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseCorrectionLog) Intercept(next gen.Querier) gen.Querier {
+func (f TraverseDictionary) Intercept(next gen.Querier) gen.Querier {
 	return next
 }
 
 // Traverse calls f(ctx, q).
-func (f TraverseCorrectionLog) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.CorrectionLogQuery); ok {
+func (f TraverseDictionary) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryQuery); ok {
 		return f(ctx, q)
 	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.CorrectionLogQuery", q)
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryQuery", q)
 }
 
-// The CorrectionRuleFunc type is an adapter to allow the use of ordinary function as a Querier.
-type CorrectionRuleFunc func(context.Context, *gen.CorrectionRuleQuery) (gen.Value, error)
+// The DictionaryCategoryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryCategoryFunc func(context.Context, *gen.DictionaryCategoryQuery) (gen.Value, error)
 
 // Query calls f(ctx, q).
-func (f CorrectionRuleFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.CorrectionRuleQuery); ok {
+func (f DictionaryCategoryFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryCategoryQuery); ok {
 		return f(ctx, q)
 	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.CorrectionRuleQuery", q)
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryCategoryQuery", q)
 }
 
-// The TraverseCorrectionRule type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseCorrectionRule func(context.Context, *gen.CorrectionRuleQuery) error
+// The TraverseDictionaryCategory type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionaryCategory func(context.Context, *gen.DictionaryCategoryQuery) error
 
 // Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseCorrectionRule) Intercept(next gen.Querier) gen.Querier {
+func (f TraverseDictionaryCategory) Intercept(next gen.Querier) gen.Querier {
 	return next
 }
 
 // Traverse calls f(ctx, q).
-func (f TraverseCorrectionRule) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.CorrectionRuleQuery); ok {
+func (f TraverseDictionaryCategory) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryCategoryQuery); ok {
 		return f(ctx, q)
 	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.CorrectionRuleQuery", q)
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryCategoryQuery", q)
 }
 
-// The DictionaryAliasFunc type is an adapter to allow the use of ordinary function as a Querier.
-type DictionaryAliasFunc func(context.Context, *gen.DictionaryAliasQuery) (gen.Value, error)
+// The DictionaryChangeLogFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryChangeLogFunc func(context.Context, *gen.DictionaryChangeLogQuery) (gen.Value, error)
 
 // Query calls f(ctx, q).
-func (f DictionaryAliasFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.DictionaryAliasQuery); ok {
+func (f DictionaryChangeLogFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryChangeLogQuery); ok {
 		return f(ctx, q)
 	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryAliasQuery", q)
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryChangeLogQuery", q)
 }
 
-// The TraverseDictionaryAlias type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseDictionaryAlias func(context.Context, *gen.DictionaryAliasQuery) error
+// The TraverseDictionaryChangeLog type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionaryChangeLog func(context.Context, *gen.DictionaryChangeLogQuery) error
 
 // Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseDictionaryAlias) Intercept(next gen.Querier) gen.Querier {
+func (f TraverseDictionaryChangeLog) Intercept(next gen.Querier) gen.Querier {
 	return next
 }
 
 // Traverse calls f(ctx, q).
-func (f TraverseDictionaryAlias) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.DictionaryAliasQuery); ok {
+func (f TraverseDictionaryChangeLog) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryChangeLogQuery); ok {
 		return f(ctx, q)
 	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryAliasQuery", q)
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryChangeLogQuery", q)
 }
 
-// The DictionaryWordFunc type is an adapter to allow the use of ordinary function as a Querier.
-type DictionaryWordFunc func(context.Context, *gen.DictionaryWordQuery) (gen.Value, error)
+// The DictionaryConflictFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryConflictFunc func(context.Context, *gen.DictionaryConflictQuery) (gen.Value, error)
 
 // Query calls f(ctx, q).
-func (f DictionaryWordFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.DictionaryWordQuery); ok {
+func (f DictionaryConflictFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryConflictQuery); ok {
 		return f(ctx, q)
 	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryWordQuery", q)
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryConflictQuery", q)
 }
 
-// The TraverseDictionaryWord type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseDictionaryWord func(context.Context, *gen.DictionaryWordQuery) error
+// The TraverseDictionaryConflict type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionaryConflict func(context.Context, *gen.DictionaryConflictQuery) error
 
 // Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseDictionaryWord) Intercept(next gen.Querier) gen.Querier {
+func (f TraverseDictionaryConflict) Intercept(next gen.Querier) gen.Querier {
 	return next
 }
 
 // Traverse calls f(ctx, q).
-func (f TraverseDictionaryWord) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.DictionaryWordQuery); ok {
+func (f TraverseDictionaryConflict) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryConflictQuery); ok {
 		return f(ctx, q)
 	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryWordQuery", q)
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryConflictQuery", q)
 }
 
-// The HotwordFunc type is an adapter to allow the use of ordinary function as a Querier.
-type HotwordFunc func(context.Context, *gen.HotwordQuery) (gen.Value, error)
+// The DictionaryEntryFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryEntryFunc func(context.Context, *gen.DictionaryEntryQuery) (gen.Value, error)
 
 // Query calls f(ctx, q).
-func (f HotwordFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
-	if q, ok := q.(*gen.HotwordQuery); ok {
+func (f DictionaryEntryFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryEntryQuery); ok {
 		return f(ctx, q)
 	}
-	return nil, fmt.Errorf("unexpected query type %T. expect *gen.HotwordQuery", q)
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryEntryQuery", q)
 }
 
-// The TraverseHotword type is an adapter to allow the use of ordinary function as Traverser.
-type TraverseHotword func(context.Context, *gen.HotwordQuery) error
+// The TraverseDictionaryEntry type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionaryEntry func(context.Context, *gen.DictionaryEntryQuery) error
 
 // Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
-func (f TraverseHotword) Intercept(next gen.Querier) gen.Querier {
+func (f TraverseDictionaryEntry) Intercept(next gen.Querier) gen.Querier {
 	return next
 }
 
 // Traverse calls f(ctx, q).
-func (f TraverseHotword) Traverse(ctx context.Context, q gen.Query) error {
-	if q, ok := q.(*gen.HotwordQuery); ok {
+func (f TraverseDictionaryEntry) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryEntryQuery); ok {
 		return f(ctx, q)
 	}
-	return fmt.Errorf("unexpected query type %T. expect *gen.HotwordQuery", q)
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryEntryQuery", q)
+}
+
+// The DictionaryRelationFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryRelationFunc func(context.Context, *gen.DictionaryRelationQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f DictionaryRelationFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryRelationQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryRelationQuery", q)
+}
+
+// The TraverseDictionaryRelation type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionaryRelation func(context.Context, *gen.DictionaryRelationQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDictionaryRelation) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDictionaryRelation) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryRelationQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryRelationQuery", q)
+}
+
+// The DictionaryVersionFunc type is an adapter to allow the use of ordinary function as a Querier.
+type DictionaryVersionFunc func(context.Context, *gen.DictionaryVersionQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f DictionaryVersionFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.DictionaryVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.DictionaryVersionQuery", q)
+}
+
+// The TraverseDictionaryVersion type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseDictionaryVersion func(context.Context, *gen.DictionaryVersionQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseDictionaryVersion) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseDictionaryVersion) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.DictionaryVersionQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.DictionaryVersionQuery", q)
+}
+
+// The EnhancementLogFunc type is an adapter to allow the use of ordinary function as a Querier.
+type EnhancementLogFunc func(context.Context, *gen.EnhancementLogQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f EnhancementLogFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.EnhancementLogQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.EnhancementLogQuery", q)
+}
+
+// The TraverseEnhancementLog type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseEnhancementLog func(context.Context, *gen.EnhancementLogQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseEnhancementLog) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseEnhancementLog) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.EnhancementLogQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.EnhancementLogQuery", q)
+}
+
+// The EnhancementPolicyFunc type is an adapter to allow the use of ordinary function as a Querier.
+type EnhancementPolicyFunc func(context.Context, *gen.EnhancementPolicyQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f EnhancementPolicyFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.EnhancementPolicyQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.EnhancementPolicyQuery", q)
+}
+
+// The TraverseEnhancementPolicy type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseEnhancementPolicy func(context.Context, *gen.EnhancementPolicyQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseEnhancementPolicy) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseEnhancementPolicy) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.EnhancementPolicyQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.EnhancementPolicyQuery", q)
+}
+
+// The EnhancementProfileFunc type is an adapter to allow the use of ordinary function as a Querier.
+type EnhancementProfileFunc func(context.Context, *gen.EnhancementProfileQuery) (gen.Value, error)
+
+// Query calls f(ctx, q).
+func (f EnhancementProfileFunc) Query(ctx context.Context, q gen.Query) (gen.Value, error) {
+	if q, ok := q.(*gen.EnhancementProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *gen.EnhancementProfileQuery", q)
+}
+
+// The TraverseEnhancementProfile type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseEnhancementProfile func(context.Context, *gen.EnhancementProfileQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseEnhancementProfile) Intercept(next gen.Querier) gen.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseEnhancementProfile) Traverse(ctx context.Context, q gen.Query) error {
+	if q, ok := q.(*gen.EnhancementProfileQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *gen.EnhancementProfileQuery", q)
 }
 
 // NewQuery returns the generic Query interface for the given typed query.
@@ -271,16 +411,26 @@ func NewQuery(q gen.Query) (Query, error) {
 		return &query[*gen.AsrProviderConfigQuery, predicate.AsrProviderConfig, asrproviderconfig.OrderOption]{typ: gen.TypeAsrProviderConfig, tq: q}, nil
 	case *gen.AsrRecordQuery:
 		return &query[*gen.AsrRecordQuery, predicate.AsrRecord, asrrecord.OrderOption]{typ: gen.TypeAsrRecord, tq: q}, nil
-	case *gen.CorrectionLogQuery:
-		return &query[*gen.CorrectionLogQuery, predicate.CorrectionLog, correctionlog.OrderOption]{typ: gen.TypeCorrectionLog, tq: q}, nil
-	case *gen.CorrectionRuleQuery:
-		return &query[*gen.CorrectionRuleQuery, predicate.CorrectionRule, correctionrule.OrderOption]{typ: gen.TypeCorrectionRule, tq: q}, nil
-	case *gen.DictionaryAliasQuery:
-		return &query[*gen.DictionaryAliasQuery, predicate.DictionaryAlias, dictionaryalias.OrderOption]{typ: gen.TypeDictionaryAlias, tq: q}, nil
-	case *gen.DictionaryWordQuery:
-		return &query[*gen.DictionaryWordQuery, predicate.DictionaryWord, dictionaryword.OrderOption]{typ: gen.TypeDictionaryWord, tq: q}, nil
-	case *gen.HotwordQuery:
-		return &query[*gen.HotwordQuery, predicate.Hotword, hotword.OrderOption]{typ: gen.TypeHotword, tq: q}, nil
+	case *gen.DictionaryQuery:
+		return &query[*gen.DictionaryQuery, predicate.Dictionary, dictionary.OrderOption]{typ: gen.TypeDictionary, tq: q}, nil
+	case *gen.DictionaryCategoryQuery:
+		return &query[*gen.DictionaryCategoryQuery, predicate.DictionaryCategory, dictionarycategory.OrderOption]{typ: gen.TypeDictionaryCategory, tq: q}, nil
+	case *gen.DictionaryChangeLogQuery:
+		return &query[*gen.DictionaryChangeLogQuery, predicate.DictionaryChangeLog, dictionarychangelog.OrderOption]{typ: gen.TypeDictionaryChangeLog, tq: q}, nil
+	case *gen.DictionaryConflictQuery:
+		return &query[*gen.DictionaryConflictQuery, predicate.DictionaryConflict, dictionaryconflict.OrderOption]{typ: gen.TypeDictionaryConflict, tq: q}, nil
+	case *gen.DictionaryEntryQuery:
+		return &query[*gen.DictionaryEntryQuery, predicate.DictionaryEntry, dictionaryentry.OrderOption]{typ: gen.TypeDictionaryEntry, tq: q}, nil
+	case *gen.DictionaryRelationQuery:
+		return &query[*gen.DictionaryRelationQuery, predicate.DictionaryRelation, dictionaryrelation.OrderOption]{typ: gen.TypeDictionaryRelation, tq: q}, nil
+	case *gen.DictionaryVersionQuery:
+		return &query[*gen.DictionaryVersionQuery, predicate.DictionaryVersion, dictionaryversion.OrderOption]{typ: gen.TypeDictionaryVersion, tq: q}, nil
+	case *gen.EnhancementLogQuery:
+		return &query[*gen.EnhancementLogQuery, predicate.EnhancementLog, enhancementlog.OrderOption]{typ: gen.TypeEnhancementLog, tq: q}, nil
+	case *gen.EnhancementPolicyQuery:
+		return &query[*gen.EnhancementPolicyQuery, predicate.EnhancementPolicy, enhancementpolicy.OrderOption]{typ: gen.TypeEnhancementPolicy, tq: q}, nil
+	case *gen.EnhancementProfileQuery:
+		return &query[*gen.EnhancementProfileQuery, predicate.EnhancementProfile, enhancementprofile.OrderOption]{typ: gen.TypeEnhancementProfile, tq: q}, nil
 	default:
 		return nil, fmt.Errorf("unknown query type %T", q)
 	}

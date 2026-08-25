@@ -5,11 +5,16 @@ package runtime
 import (
 	"backend-service/app/evie/service/internal/data/ent/gen/asrproviderconfig"
 	"backend-service/app/evie/service/internal/data/ent/gen/asrrecord"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionlog"
-	"backend-service/app/evie/service/internal/data/ent/gen/correctionrule"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryalias"
-	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryword"
-	"backend-service/app/evie/service/internal/data/ent/gen/hotword"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionary"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarychangelog"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryconflict"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
 	"backend-service/app/evie/service/internal/data/ent/schema"
 	"context"
 	"time"
@@ -66,10 +71,6 @@ func init() {
 			return nil
 		}
 	}()
-	// asrproviderconfigDescTenantID is the schema descriptor for tenant_id field.
-	asrproviderconfigDescTenantID := asrproviderconfigMixinFields0[4].Descriptor()
-	// asrproviderconfig.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	asrproviderconfig.TenantIDValidator = asrproviderconfigDescTenantID.Validators[0].(func(uint32) error)
 	// asrproviderconfigDescProviderName is the schema descriptor for provider_name field.
 	asrproviderconfigDescProviderName := asrproviderconfigFields[0].Descriptor()
 	// asrproviderconfig.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
@@ -150,10 +151,6 @@ func init() {
 			return nil
 		}
 	}()
-	// asrrecordDescTenantID is the schema descriptor for tenant_id field.
-	asrrecordDescTenantID := asrrecordMixinFields0[4].Descriptor()
-	// asrrecord.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	asrrecord.TenantIDValidator = asrrecordDescTenantID.Validators[0].(func(uint32) error)
 	// asrrecordDescSessionID is the schema descriptor for session_id field.
 	asrrecordDescSessionID := asrrecordFields[1].Descriptor()
 	// asrrecord.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
@@ -178,122 +175,42 @@ func init() {
 	asrrecordDescID := asrrecordMixinFields0[0].Descriptor()
 	// asrrecord.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	asrrecord.IDValidator = asrrecordDescID.Validators[0].(func(uint32) error)
-	correctionlogMixin := schema.CorrectionLog{}.Mixin()
-	correctionlog.Policy = privacy.NewPolicies(correctionlogMixin[0], schema.CorrectionLog{})
-	correctionlog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	dictionaryMixin := schema.Dictionary{}.Mixin()
+	dictionary.Policy = privacy.NewPolicies(dictionaryMixin[0], schema.Dictionary{})
+	dictionary.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := correctionlog.Policy.EvalMutation(ctx, m); err != nil {
+			if err := dictionary.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
 	}
-	correctionlogMixinFields0 := correctionlogMixin[0].Fields()
-	_ = correctionlogMixinFields0
-	correctionlogFields := schema.CorrectionLog{}.Fields()
-	_ = correctionlogFields
-	// correctionlogDescCreatedAt is the schema descriptor for created_at field.
-	correctionlogDescCreatedAt := correctionlogMixinFields0[1].Descriptor()
-	// correctionlog.DefaultCreatedAt holds the default value on creation for the created_at field.
-	correctionlog.DefaultCreatedAt = correctionlogDescCreatedAt.Default.(func() time.Time)
-	// correctionlogDescUpdatedAt is the schema descriptor for updated_at field.
-	correctionlogDescUpdatedAt := correctionlogMixinFields0[2].Descriptor()
-	// correctionlog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	correctionlog.DefaultUpdatedAt = correctionlogDescUpdatedAt.Default.(func() time.Time)
-	// correctionlog.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	correctionlog.UpdateDefaultUpdatedAt = correctionlogDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// correctionlogDescStatus is the schema descriptor for status field.
-	correctionlogDescStatus := correctionlogMixinFields0[3].Descriptor()
-	// correctionlog.DefaultStatus holds the default value on creation for the status field.
-	correctionlog.DefaultStatus = correctionlogDescStatus.Default.(int32)
-	// correctionlog.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	correctionlog.StatusValidator = func() func(int32) error {
-		validators := correctionlogDescStatus.Validators
-		fns := [...]func(int32) error{
-			validators[0].(func(int32) error),
-			validators[1].(func(int32) error),
-		}
-		return func(status int32) error {
-			for _, fn := range fns {
-				if err := fn(status); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// correctionlogDescTenantID is the schema descriptor for tenant_id field.
-	correctionlogDescTenantID := correctionlogMixinFields0[4].Descriptor()
-	// correctionlog.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	correctionlog.TenantIDValidator = correctionlogDescTenantID.Validators[0].(func(uint32) error)
-	// correctionlogDescSessionID is the schema descriptor for session_id field.
-	correctionlogDescSessionID := correctionlogFields[1].Descriptor()
-	// correctionlog.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
-	correctionlog.SessionIDValidator = correctionlogDescSessionID.Validators[0].(func(string) error)
-	// correctionlogDescOriginalText is the schema descriptor for original_text field.
-	correctionlogDescOriginalText := correctionlogFields[2].Descriptor()
-	// correctionlog.OriginalTextValidator is a validator for the "original_text" field. It is called by the builders before save.
-	correctionlog.OriginalTextValidator = correctionlogDescOriginalText.Validators[0].(func(string) error)
-	// correctionlogDescNeedConfirm is the schema descriptor for need_confirm field.
-	correctionlogDescNeedConfirm := correctionlogFields[6].Descriptor()
-	// correctionlog.DefaultNeedConfirm holds the default value on creation for the need_confirm field.
-	correctionlog.DefaultNeedConfirm = correctionlogDescNeedConfirm.Default.(bool)
-	// correctionlogDescRuleHits is the schema descriptor for rule_hits field.
-	correctionlogDescRuleHits := correctionlogFields[8].Descriptor()
-	// correctionlog.DefaultRuleHits holds the default value on creation for the rule_hits field.
-	correctionlog.DefaultRuleHits = correctionlogDescRuleHits.Default.(int)
-	// correctionlogDescPinyinHits is the schema descriptor for pinyin_hits field.
-	correctionlogDescPinyinHits := correctionlogFields[9].Descriptor()
-	// correctionlog.DefaultPinyinHits holds the default value on creation for the pinyin_hits field.
-	correctionlog.DefaultPinyinHits = correctionlogDescPinyinHits.Default.(int)
-	// correctionlogDescEntityHits is the schema descriptor for entity_hits field.
-	correctionlogDescEntityHits := correctionlogFields[10].Descriptor()
-	// correctionlog.DefaultEntityHits holds the default value on creation for the entity_hits field.
-	correctionlog.DefaultEntityHits = correctionlogDescEntityHits.Default.(int)
-	// correctionlogDescLlmHits is the schema descriptor for llm_hits field.
-	correctionlogDescLlmHits := correctionlogFields[11].Descriptor()
-	// correctionlog.DefaultLlmHits holds the default value on creation for the llm_hits field.
-	correctionlog.DefaultLlmHits = correctionlogDescLlmHits.Default.(int)
-	// correctionlogDescID is the schema descriptor for id field.
-	correctionlogDescID := correctionlogMixinFields0[0].Descriptor()
-	// correctionlog.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	correctionlog.IDValidator = correctionlogDescID.Validators[0].(func(uint32) error)
-	correctionruleMixin := schema.CorrectionRule{}.Mixin()
-	correctionrule.Policy = privacy.NewPolicies(correctionruleMixin[0], schema.CorrectionRule{})
-	correctionrule.Hooks[0] = func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := correctionrule.Policy.EvalMutation(ctx, m); err != nil {
-				return nil, err
-			}
-			return next.Mutate(ctx, m)
-		})
-	}
-	correctionruleMixinHooks1 := correctionruleMixin[1].Hooks()
+	dictionaryMixinHooks1 := dictionaryMixin[1].Hooks()
 
-	correctionrule.Hooks[1] = correctionruleMixinHooks1[0]
-	correctionruleMixinInters1 := correctionruleMixin[1].Interceptors()
-	correctionrule.Interceptors[0] = correctionruleMixinInters1[0]
-	correctionruleMixinFields0 := correctionruleMixin[0].Fields()
-	_ = correctionruleMixinFields0
-	correctionruleFields := schema.CorrectionRule{}.Fields()
-	_ = correctionruleFields
-	// correctionruleDescCreatedAt is the schema descriptor for created_at field.
-	correctionruleDescCreatedAt := correctionruleMixinFields0[1].Descriptor()
-	// correctionrule.DefaultCreatedAt holds the default value on creation for the created_at field.
-	correctionrule.DefaultCreatedAt = correctionruleDescCreatedAt.Default.(func() time.Time)
-	// correctionruleDescUpdatedAt is the schema descriptor for updated_at field.
-	correctionruleDescUpdatedAt := correctionruleMixinFields0[2].Descriptor()
-	// correctionrule.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	correctionrule.DefaultUpdatedAt = correctionruleDescUpdatedAt.Default.(func() time.Time)
-	// correctionrule.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	correctionrule.UpdateDefaultUpdatedAt = correctionruleDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// correctionruleDescStatus is the schema descriptor for status field.
-	correctionruleDescStatus := correctionruleMixinFields0[3].Descriptor()
-	// correctionrule.DefaultStatus holds the default value on creation for the status field.
-	correctionrule.DefaultStatus = correctionruleDescStatus.Default.(int32)
-	// correctionrule.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	correctionrule.StatusValidator = func() func(int32) error {
-		validators := correctionruleDescStatus.Validators
+	dictionary.Hooks[1] = dictionaryMixinHooks1[0]
+	dictionaryMixinInters1 := dictionaryMixin[1].Interceptors()
+	dictionary.Interceptors[0] = dictionaryMixinInters1[0]
+	dictionaryMixinFields0 := dictionaryMixin[0].Fields()
+	_ = dictionaryMixinFields0
+	dictionaryFields := schema.Dictionary{}.Fields()
+	_ = dictionaryFields
+	// dictionaryDescCreatedAt is the schema descriptor for created_at field.
+	dictionaryDescCreatedAt := dictionaryMixinFields0[1].Descriptor()
+	// dictionary.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionary.DefaultCreatedAt = dictionaryDescCreatedAt.Default.(func() time.Time)
+	// dictionaryDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionaryDescUpdatedAt := dictionaryMixinFields0[2].Descriptor()
+	// dictionary.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionary.DefaultUpdatedAt = dictionaryDescUpdatedAt.Default.(func() time.Time)
+	// dictionary.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionary.UpdateDefaultUpdatedAt = dictionaryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionaryDescStatus is the schema descriptor for status field.
+	dictionaryDescStatus := dictionaryMixinFields0[3].Descriptor()
+	// dictionary.DefaultStatus holds the default value on creation for the status field.
+	dictionary.DefaultStatus = dictionaryDescStatus.Default.(int32)
+	// dictionary.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionary.StatusValidator = func() func(int32) error {
+		validators := dictionaryDescStatus.Validators
 		fns := [...]func(int32) error{
 			validators[0].(func(int32) error),
 			validators[1].(func(int32) error),
@@ -307,96 +224,364 @@ func init() {
 			return nil
 		}
 	}()
-	// correctionruleDescTenantID is the schema descriptor for tenant_id field.
-	correctionruleDescTenantID := correctionruleMixinFields0[4].Descriptor()
-	// correctionrule.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	correctionrule.TenantIDValidator = correctionruleDescTenantID.Validators[0].(func(uint32) error)
-	// correctionruleDescSource is the schema descriptor for source field.
-	correctionruleDescSource := correctionruleFields[0].Descriptor()
-	// correctionrule.SourceValidator is a validator for the "source" field. It is called by the builders before save.
-	correctionrule.SourceValidator = func() func(string) error {
-		validators := correctionruleDescSource.Validators
+	// dictionaryDescName is the schema descriptor for name field.
+	dictionaryDescName := dictionaryFields[0].Descriptor()
+	// dictionary.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	dictionary.NameValidator = func() func(string) error {
+		validators := dictionaryDescName.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(source string) error {
+		return func(name string) error {
 			for _, fn := range fns {
-				if err := fn(source); err != nil {
+				if err := fn(name); err != nil {
 					return err
 				}
 			}
 			return nil
 		}
 	}()
-	// correctionruleDescTarget is the schema descriptor for target field.
-	correctionruleDescTarget := correctionruleFields[1].Descriptor()
-	// correctionrule.TargetValidator is a validator for the "target" field. It is called by the builders before save.
-	correctionrule.TargetValidator = func() func(string) error {
-		validators := correctionruleDescTarget.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(target string) error {
-			for _, fn := range fns {
-				if err := fn(target); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// correctionruleDescType is the schema descriptor for type field.
-	correctionruleDescType := correctionruleFields[2].Descriptor()
-	// correctionrule.DefaultType holds the default value on creation for the type field.
-	correctionrule.DefaultType = correctionruleDescType.Default.(string)
-	// correctionrule.TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	correctionrule.TypeValidator = correctionruleDescType.Validators[0].(func(string) error)
-	// correctionruleDescPriority is the schema descriptor for priority field.
-	correctionruleDescPriority := correctionruleFields[3].Descriptor()
-	// correctionrule.DefaultPriority holds the default value on creation for the priority field.
-	correctionrule.DefaultPriority = correctionruleDescPriority.Default.(int32)
-	// correctionruleDescID is the schema descriptor for id field.
-	correctionruleDescID := correctionruleMixinFields0[0].Descriptor()
-	// correctionrule.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	correctionrule.IDValidator = correctionruleDescID.Validators[0].(func(uint32) error)
-	dictionaryaliasMixin := schema.DictionaryAlias{}.Mixin()
-	dictionaryalias.Policy = privacy.NewPolicies(dictionaryaliasMixin[0], schema.DictionaryAlias{})
-	dictionaryalias.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	// dictionaryDescScope is the schema descriptor for scope field.
+	dictionaryDescScope := dictionaryFields[1].Descriptor()
+	// dictionary.DefaultScope holds the default value on creation for the scope field.
+	dictionary.DefaultScope = dictionaryDescScope.Default.(string)
+	// dictionary.ScopeValidator is a validator for the "scope" field. It is called by the builders before save.
+	dictionary.ScopeValidator = dictionaryDescScope.Validators[0].(func(string) error)
+	// dictionaryDescSource is the schema descriptor for source field.
+	dictionaryDescSource := dictionaryFields[2].Descriptor()
+	// dictionary.DefaultSource holds the default value on creation for the source field.
+	dictionary.DefaultSource = dictionaryDescSource.Default.(string)
+	// dictionary.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	dictionary.SourceValidator = dictionaryDescSource.Validators[0].(func(string) error)
+	// dictionaryDescDescription is the schema descriptor for description field.
+	dictionaryDescDescription := dictionaryFields[3].Descriptor()
+	// dictionary.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	dictionary.DescriptionValidator = dictionaryDescDescription.Validators[0].(func(string) error)
+	// dictionaryDescID is the schema descriptor for id field.
+	dictionaryDescID := dictionaryMixinFields0[0].Descriptor()
+	// dictionary.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionary.IDValidator = dictionaryDescID.Validators[0].(func(uint32) error)
+	dictionarycategoryMixin := schema.DictionaryCategory{}.Mixin()
+	dictionarycategory.Policy = privacy.NewPolicies(dictionarycategoryMixin[0], schema.DictionaryCategory{})
+	dictionarycategory.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := dictionaryalias.Policy.EvalMutation(ctx, m); err != nil {
+			if err := dictionarycategory.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
 	}
-	dictionaryaliasMixinHooks1 := dictionaryaliasMixin[1].Hooks()
+	dictionarycategoryMixinFields0 := dictionarycategoryMixin[0].Fields()
+	_ = dictionarycategoryMixinFields0
+	dictionarycategoryFields := schema.DictionaryCategory{}.Fields()
+	_ = dictionarycategoryFields
+	// dictionarycategoryDescCreatedAt is the schema descriptor for created_at field.
+	dictionarycategoryDescCreatedAt := dictionarycategoryMixinFields0[1].Descriptor()
+	// dictionarycategory.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionarycategory.DefaultCreatedAt = dictionarycategoryDescCreatedAt.Default.(func() time.Time)
+	// dictionarycategoryDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionarycategoryDescUpdatedAt := dictionarycategoryMixinFields0[2].Descriptor()
+	// dictionarycategory.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionarycategory.DefaultUpdatedAt = dictionarycategoryDescUpdatedAt.Default.(func() time.Time)
+	// dictionarycategory.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionarycategory.UpdateDefaultUpdatedAt = dictionarycategoryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionarycategoryDescStatus is the schema descriptor for status field.
+	dictionarycategoryDescStatus := dictionarycategoryMixinFields0[3].Descriptor()
+	// dictionarycategory.DefaultStatus holds the default value on creation for the status field.
+	dictionarycategory.DefaultStatus = dictionarycategoryDescStatus.Default.(int32)
+	// dictionarycategory.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionarycategory.StatusValidator = func() func(int32) error {
+		validators := dictionarycategoryDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionarycategoryDescCode is the schema descriptor for code field.
+	dictionarycategoryDescCode := dictionarycategoryFields[0].Descriptor()
+	// dictionarycategory.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	dictionarycategory.CodeValidator = func() func(string) error {
+		validators := dictionarycategoryDescCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(code string) error {
+			for _, fn := range fns {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionarycategoryDescName is the schema descriptor for name field.
+	dictionarycategoryDescName := dictionarycategoryFields[1].Descriptor()
+	// dictionarycategory.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	dictionarycategory.NameValidator = func() func(string) error {
+		validators := dictionarycategoryDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionarycategoryDescBuiltin is the schema descriptor for builtin field.
+	dictionarycategoryDescBuiltin := dictionarycategoryFields[2].Descriptor()
+	// dictionarycategory.DefaultBuiltin holds the default value on creation for the builtin field.
+	dictionarycategory.DefaultBuiltin = dictionarycategoryDescBuiltin.Default.(bool)
+	// dictionarycategoryDescSort is the schema descriptor for sort field.
+	dictionarycategoryDescSort := dictionarycategoryFields[3].Descriptor()
+	// dictionarycategory.DefaultSort holds the default value on creation for the sort field.
+	dictionarycategory.DefaultSort = dictionarycategoryDescSort.Default.(int32)
+	// dictionarycategoryDescID is the schema descriptor for id field.
+	dictionarycategoryDescID := dictionarycategoryMixinFields0[0].Descriptor()
+	// dictionarycategory.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionarycategory.IDValidator = dictionarycategoryDescID.Validators[0].(func(uint32) error)
+	dictionarychangelogMixin := schema.DictionaryChangeLog{}.Mixin()
+	dictionarychangelog.Policy = privacy.NewPolicies(dictionarychangelogMixin[0], schema.DictionaryChangeLog{})
+	dictionarychangelog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := dictionarychangelog.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	dictionarychangelogMixinFields0 := dictionarychangelogMixin[0].Fields()
+	_ = dictionarychangelogMixinFields0
+	dictionarychangelogFields := schema.DictionaryChangeLog{}.Fields()
+	_ = dictionarychangelogFields
+	// dictionarychangelogDescCreatedAt is the schema descriptor for created_at field.
+	dictionarychangelogDescCreatedAt := dictionarychangelogMixinFields0[1].Descriptor()
+	// dictionarychangelog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionarychangelog.DefaultCreatedAt = dictionarychangelogDescCreatedAt.Default.(func() time.Time)
+	// dictionarychangelogDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionarychangelogDescUpdatedAt := dictionarychangelogMixinFields0[2].Descriptor()
+	// dictionarychangelog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionarychangelog.DefaultUpdatedAt = dictionarychangelogDescUpdatedAt.Default.(func() time.Time)
+	// dictionarychangelog.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionarychangelog.UpdateDefaultUpdatedAt = dictionarychangelogDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionarychangelogDescStatus is the schema descriptor for status field.
+	dictionarychangelogDescStatus := dictionarychangelogMixinFields0[3].Descriptor()
+	// dictionarychangelog.DefaultStatus holds the default value on creation for the status field.
+	dictionarychangelog.DefaultStatus = dictionarychangelogDescStatus.Default.(int32)
+	// dictionarychangelog.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionarychangelog.StatusValidator = func() func(int32) error {
+		validators := dictionarychangelogDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionarychangelogDescEntityType is the schema descriptor for entity_type field.
+	dictionarychangelogDescEntityType := dictionarychangelogFields[0].Descriptor()
+	// dictionarychangelog.EntityTypeValidator is a validator for the "entity_type" field. It is called by the builders before save.
+	dictionarychangelog.EntityTypeValidator = func() func(string) error {
+		validators := dictionarychangelogDescEntityType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(entity_type string) error {
+			for _, fn := range fns {
+				if err := fn(entity_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionarychangelogDescAction is the schema descriptor for action field.
+	dictionarychangelogDescAction := dictionarychangelogFields[2].Descriptor()
+	// dictionarychangelog.ActionValidator is a validator for the "action" field. It is called by the builders before save.
+	dictionarychangelog.ActionValidator = func() func(string) error {
+		validators := dictionarychangelogDescAction.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(action string) error {
+			for _, fn := range fns {
+				if err := fn(action); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionarychangelogDescBeforeSnapshot is the schema descriptor for before_snapshot field.
+	dictionarychangelogDescBeforeSnapshot := dictionarychangelogFields[3].Descriptor()
+	// dictionarychangelog.BeforeSnapshotValidator is a validator for the "before_snapshot" field. It is called by the builders before save.
+	dictionarychangelog.BeforeSnapshotValidator = dictionarychangelogDescBeforeSnapshot.Validators[0].(func(string) error)
+	// dictionarychangelogDescAfterSnapshot is the schema descriptor for after_snapshot field.
+	dictionarychangelogDescAfterSnapshot := dictionarychangelogFields[4].Descriptor()
+	// dictionarychangelog.AfterSnapshotValidator is a validator for the "after_snapshot" field. It is called by the builders before save.
+	dictionarychangelog.AfterSnapshotValidator = dictionarychangelogDescAfterSnapshot.Validators[0].(func(string) error)
+	// dictionarychangelogDescID is the schema descriptor for id field.
+	dictionarychangelogDescID := dictionarychangelogMixinFields0[0].Descriptor()
+	// dictionarychangelog.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionarychangelog.IDValidator = dictionarychangelogDescID.Validators[0].(func(uint32) error)
+	dictionaryconflictMixin := schema.DictionaryConflict{}.Mixin()
+	dictionaryconflict.Policy = privacy.NewPolicies(dictionaryconflictMixin[0], schema.DictionaryConflict{})
+	dictionaryconflict.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := dictionaryconflict.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	dictionaryconflictMixinFields0 := dictionaryconflictMixin[0].Fields()
+	_ = dictionaryconflictMixinFields0
+	dictionaryconflictFields := schema.DictionaryConflict{}.Fields()
+	_ = dictionaryconflictFields
+	// dictionaryconflictDescCreatedAt is the schema descriptor for created_at field.
+	dictionaryconflictDescCreatedAt := dictionaryconflictMixinFields0[1].Descriptor()
+	// dictionaryconflict.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionaryconflict.DefaultCreatedAt = dictionaryconflictDescCreatedAt.Default.(func() time.Time)
+	// dictionaryconflictDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionaryconflictDescUpdatedAt := dictionaryconflictMixinFields0[2].Descriptor()
+	// dictionaryconflict.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionaryconflict.DefaultUpdatedAt = dictionaryconflictDescUpdatedAt.Default.(func() time.Time)
+	// dictionaryconflict.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionaryconflict.UpdateDefaultUpdatedAt = dictionaryconflictDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionaryconflictDescStatus is the schema descriptor for status field.
+	dictionaryconflictDescStatus := dictionaryconflictMixinFields0[3].Descriptor()
+	// dictionaryconflict.DefaultStatus holds the default value on creation for the status field.
+	dictionaryconflict.DefaultStatus = dictionaryconflictDescStatus.Default.(int32)
+	// dictionaryconflict.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionaryconflict.StatusValidator = func() func(int32) error {
+		validators := dictionaryconflictDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionaryconflictDescInput is the schema descriptor for input field.
+	dictionaryconflictDescInput := dictionaryconflictFields[0].Descriptor()
+	// dictionaryconflict.InputValidator is a validator for the "input" field. It is called by the builders before save.
+	dictionaryconflict.InputValidator = func() func(string) error {
+		validators := dictionaryconflictDescInput.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(input string) error {
+			for _, fn := range fns {
+				if err := fn(input); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionaryconflictDescCandidate is the schema descriptor for candidate field.
+	dictionaryconflictDescCandidate := dictionaryconflictFields[1].Descriptor()
+	// dictionaryconflict.CandidateValidator is a validator for the "candidate" field. It is called by the builders before save.
+	dictionaryconflict.CandidateValidator = func() func(string) error {
+		validators := dictionaryconflictDescCandidate.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(candidate string) error {
+			for _, fn := range fns {
+				if err := fn(candidate); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionaryconflictDescSourceScope is the schema descriptor for source_scope field.
+	dictionaryconflictDescSourceScope := dictionaryconflictFields[2].Descriptor()
+	// dictionaryconflict.SourceScopeValidator is a validator for the "source_scope" field. It is called by the builders before save.
+	dictionaryconflict.SourceScopeValidator = dictionaryconflictDescSourceScope.Validators[0].(func(string) error)
+	// dictionaryconflictDescSourceDictionary is the schema descriptor for source_dictionary field.
+	dictionaryconflictDescSourceDictionary := dictionaryconflictFields[3].Descriptor()
+	// dictionaryconflict.SourceDictionaryValidator is a validator for the "source_dictionary" field. It is called by the builders before save.
+	dictionaryconflict.SourceDictionaryValidator = dictionaryconflictDescSourceDictionary.Validators[0].(func(string) error)
+	// dictionaryconflictDescPriority is the schema descriptor for priority field.
+	dictionaryconflictDescPriority := dictionaryconflictFields[4].Descriptor()
+	// dictionaryconflict.DefaultPriority holds the default value on creation for the priority field.
+	dictionaryconflict.DefaultPriority = dictionaryconflictDescPriority.Default.(int32)
+	// dictionaryconflictDescResolvedCandidate is the schema descriptor for resolved_candidate field.
+	dictionaryconflictDescResolvedCandidate := dictionaryconflictFields[5].Descriptor()
+	// dictionaryconflict.ResolvedCandidateValidator is a validator for the "resolved_candidate" field. It is called by the builders before save.
+	dictionaryconflict.ResolvedCandidateValidator = dictionaryconflictDescResolvedCandidate.Validators[0].(func(string) error)
+	// dictionaryconflictDescID is the schema descriptor for id field.
+	dictionaryconflictDescID := dictionaryconflictMixinFields0[0].Descriptor()
+	// dictionaryconflict.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionaryconflict.IDValidator = dictionaryconflictDescID.Validators[0].(func(uint32) error)
+	dictionaryentryMixin := schema.DictionaryEntry{}.Mixin()
+	dictionaryentry.Policy = privacy.NewPolicies(dictionaryentryMixin[0], schema.DictionaryEntry{})
+	dictionaryentry.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := dictionaryentry.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	dictionaryentryMixinHooks1 := dictionaryentryMixin[1].Hooks()
 
-	dictionaryalias.Hooks[1] = dictionaryaliasMixinHooks1[0]
-	dictionaryaliasMixinInters1 := dictionaryaliasMixin[1].Interceptors()
-	dictionaryalias.Interceptors[0] = dictionaryaliasMixinInters1[0]
-	dictionaryaliasMixinFields0 := dictionaryaliasMixin[0].Fields()
-	_ = dictionaryaliasMixinFields0
-	dictionaryaliasFields := schema.DictionaryAlias{}.Fields()
-	_ = dictionaryaliasFields
-	// dictionaryaliasDescCreatedAt is the schema descriptor for created_at field.
-	dictionaryaliasDescCreatedAt := dictionaryaliasMixinFields0[1].Descriptor()
-	// dictionaryalias.DefaultCreatedAt holds the default value on creation for the created_at field.
-	dictionaryalias.DefaultCreatedAt = dictionaryaliasDescCreatedAt.Default.(func() time.Time)
-	// dictionaryaliasDescUpdatedAt is the schema descriptor for updated_at field.
-	dictionaryaliasDescUpdatedAt := dictionaryaliasMixinFields0[2].Descriptor()
-	// dictionaryalias.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	dictionaryalias.DefaultUpdatedAt = dictionaryaliasDescUpdatedAt.Default.(func() time.Time)
-	// dictionaryalias.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	dictionaryalias.UpdateDefaultUpdatedAt = dictionaryaliasDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// dictionaryaliasDescStatus is the schema descriptor for status field.
-	dictionaryaliasDescStatus := dictionaryaliasMixinFields0[3].Descriptor()
-	// dictionaryalias.DefaultStatus holds the default value on creation for the status field.
-	dictionaryalias.DefaultStatus = dictionaryaliasDescStatus.Default.(int32)
-	// dictionaryalias.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	dictionaryalias.StatusValidator = func() func(int32) error {
-		validators := dictionaryaliasDescStatus.Validators
+	dictionaryentry.Hooks[1] = dictionaryentryMixinHooks1[0]
+	dictionaryentryMixinInters1 := dictionaryentryMixin[1].Interceptors()
+	dictionaryentry.Interceptors[0] = dictionaryentryMixinInters1[0]
+	dictionaryentryMixinFields0 := dictionaryentryMixin[0].Fields()
+	_ = dictionaryentryMixinFields0
+	dictionaryentryFields := schema.DictionaryEntry{}.Fields()
+	_ = dictionaryentryFields
+	// dictionaryentryDescCreatedAt is the schema descriptor for created_at field.
+	dictionaryentryDescCreatedAt := dictionaryentryMixinFields0[1].Descriptor()
+	// dictionaryentry.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionaryentry.DefaultCreatedAt = dictionaryentryDescCreatedAt.Default.(func() time.Time)
+	// dictionaryentryDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionaryentryDescUpdatedAt := dictionaryentryMixinFields0[2].Descriptor()
+	// dictionaryentry.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionaryentry.DefaultUpdatedAt = dictionaryentryDescUpdatedAt.Default.(func() time.Time)
+	// dictionaryentry.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionaryentry.UpdateDefaultUpdatedAt = dictionaryentryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionaryentryDescStatus is the schema descriptor for status field.
+	dictionaryentryDescStatus := dictionaryentryMixinFields0[3].Descriptor()
+	// dictionaryentry.DefaultStatus holds the default value on creation for the status field.
+	dictionaryentry.DefaultStatus = dictionaryentryDescStatus.Default.(int32)
+	// dictionaryentry.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionaryentry.StatusValidator = func() func(int32) error {
+		validators := dictionaryentryDescStatus.Validators
 		fns := [...]func(int32) error{
 			validators[0].(func(int32) error),
 			validators[1].(func(int32) error),
@@ -410,86 +595,110 @@ func init() {
 			return nil
 		}
 	}()
-	// dictionaryaliasDescTenantID is the schema descriptor for tenant_id field.
-	dictionaryaliasDescTenantID := dictionaryaliasMixinFields0[4].Descriptor()
-	// dictionaryalias.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	dictionaryalias.TenantIDValidator = dictionaryaliasDescTenantID.Validators[0].(func(uint32) error)
-	// dictionaryaliasDescWordID is the schema descriptor for word_id field.
-	dictionaryaliasDescWordID := dictionaryaliasFields[0].Descriptor()
-	// dictionaryalias.WordIDValidator is a validator for the "word_id" field. It is called by the builders before save.
-	dictionaryalias.WordIDValidator = dictionaryaliasDescWordID.Validators[0].(func(uint32) error)
-	// dictionaryaliasDescAlias is the schema descriptor for alias field.
-	dictionaryaliasDescAlias := dictionaryaliasFields[1].Descriptor()
-	// dictionaryalias.AliasValidator is a validator for the "alias" field. It is called by the builders before save.
-	dictionaryalias.AliasValidator = func() func(string) error {
-		validators := dictionaryaliasDescAlias.Validators
+	// dictionaryentryDescDictionaryID is the schema descriptor for dictionary_id field.
+	dictionaryentryDescDictionaryID := dictionaryentryFields[0].Descriptor()
+	// dictionaryentry.DictionaryIDValidator is a validator for the "dictionary_id" field. It is called by the builders before save.
+	dictionaryentry.DictionaryIDValidator = dictionaryentryDescDictionaryID.Validators[0].(func(uint32) error)
+	// dictionaryentryDescStandardText is the schema descriptor for standard_text field.
+	dictionaryentryDescStandardText := dictionaryentryFields[1].Descriptor()
+	// dictionaryentry.StandardTextValidator is a validator for the "standard_text" field. It is called by the builders before save.
+	dictionaryentry.StandardTextValidator = func() func(string) error {
+		validators := dictionaryentryDescStandardText.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(alias string) error {
+		return func(standard_text string) error {
 			for _, fn := range fns {
-				if err := fn(alias); err != nil {
+				if err := fn(standard_text); err != nil {
 					return err
 				}
 			}
 			return nil
 		}
 	}()
-	// dictionaryaliasDescPinyin is the schema descriptor for pinyin field.
-	dictionaryaliasDescPinyin := dictionaryaliasFields[2].Descriptor()
-	// dictionaryalias.PinyinValidator is a validator for the "pinyin" field. It is called by the builders before save.
-	dictionaryalias.PinyinValidator = dictionaryaliasDescPinyin.Validators[0].(func(string) error)
-	// dictionaryaliasDescWeight is the schema descriptor for weight field.
-	dictionaryaliasDescWeight := dictionaryaliasFields[3].Descriptor()
-	// dictionaryalias.DefaultWeight holds the default value on creation for the weight field.
-	dictionaryalias.DefaultWeight = dictionaryaliasDescWeight.Default.(float64)
-	// dictionaryaliasDescSource is the schema descriptor for source field.
-	dictionaryaliasDescSource := dictionaryaliasFields[4].Descriptor()
-	// dictionaryalias.DefaultSource holds the default value on creation for the source field.
-	dictionaryalias.DefaultSource = dictionaryaliasDescSource.Default.(string)
-	// dictionaryalias.SourceValidator is a validator for the "source" field. It is called by the builders before save.
-	dictionaryalias.SourceValidator = dictionaryaliasDescSource.Validators[0].(func(string) error)
-	// dictionaryaliasDescID is the schema descriptor for id field.
-	dictionaryaliasDescID := dictionaryaliasMixinFields0[0].Descriptor()
-	// dictionaryalias.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	dictionaryalias.IDValidator = dictionaryaliasDescID.Validators[0].(func(uint32) error)
-	dictionarywordMixin := schema.DictionaryWord{}.Mixin()
-	dictionaryword.Policy = privacy.NewPolicies(dictionarywordMixin[0], schema.DictionaryWord{})
-	dictionaryword.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	// dictionaryentryDescEntryType is the schema descriptor for entry_type field.
+	dictionaryentryDescEntryType := dictionaryentryFields[2].Descriptor()
+	// dictionaryentry.DefaultEntryType holds the default value on creation for the entry_type field.
+	dictionaryentry.DefaultEntryType = dictionaryentryDescEntryType.Default.(string)
+	// dictionaryentry.EntryTypeValidator is a validator for the "entry_type" field. It is called by the builders before save.
+	dictionaryentry.EntryTypeValidator = dictionaryentryDescEntryType.Validators[0].(func(string) error)
+	// dictionaryentryDescCategory is the schema descriptor for category field.
+	dictionaryentryDescCategory := dictionaryentryFields[3].Descriptor()
+	// dictionaryentry.DefaultCategory holds the default value on creation for the category field.
+	dictionaryentry.DefaultCategory = dictionaryentryDescCategory.Default.(string)
+	// dictionaryentry.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	dictionaryentry.CategoryValidator = dictionaryentryDescCategory.Validators[0].(func(string) error)
+	// dictionaryentryDescDescription is the schema descriptor for description field.
+	dictionaryentryDescDescription := dictionaryentryFields[4].Descriptor()
+	// dictionaryentry.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	dictionaryentry.DescriptionValidator = dictionaryentryDescDescription.Validators[0].(func(string) error)
+	// dictionaryentryDescSource is the schema descriptor for source field.
+	dictionaryentryDescSource := dictionaryentryFields[5].Descriptor()
+	// dictionaryentry.DefaultSource holds the default value on creation for the source field.
+	dictionaryentry.DefaultSource = dictionaryentryDescSource.Default.(string)
+	// dictionaryentry.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	dictionaryentry.SourceValidator = dictionaryentryDescSource.Validators[0].(func(string) error)
+	// dictionaryentryDescSourceID is the schema descriptor for source_id field.
+	dictionaryentryDescSourceID := dictionaryentryFields[6].Descriptor()
+	// dictionaryentry.SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
+	dictionaryentry.SourceIDValidator = dictionaryentryDescSourceID.Validators[0].(func(string) error)
+	// dictionaryentryDescPriority is the schema descriptor for priority field.
+	dictionaryentryDescPriority := dictionaryentryFields[7].Descriptor()
+	// dictionaryentry.DefaultPriority holds the default value on creation for the priority field.
+	dictionaryentry.DefaultPriority = dictionaryentryDescPriority.Default.(int32)
+	// dictionaryentryDescPinyin is the schema descriptor for pinyin field.
+	dictionaryentryDescPinyin := dictionaryentryFields[8].Descriptor()
+	// dictionaryentry.PinyinValidator is a validator for the "pinyin" field. It is called by the builders before save.
+	dictionaryentry.PinyinValidator = dictionaryentryDescPinyin.Validators[0].(func(string) error)
+	// dictionaryentryDescPinyinInitial is the schema descriptor for pinyin_initial field.
+	dictionaryentryDescPinyinInitial := dictionaryentryFields[9].Descriptor()
+	// dictionaryentry.PinyinInitialValidator is a validator for the "pinyin_initial" field. It is called by the builders before save.
+	dictionaryentry.PinyinInitialValidator = dictionaryentryDescPinyinInitial.Validators[0].(func(string) error)
+	// dictionaryentryDescNormalizedText is the schema descriptor for normalized_text field.
+	dictionaryentryDescNormalizedText := dictionaryentryFields[10].Descriptor()
+	// dictionaryentry.NormalizedTextValidator is a validator for the "normalized_text" field. It is called by the builders before save.
+	dictionaryentry.NormalizedTextValidator = dictionaryentryDescNormalizedText.Validators[0].(func(string) error)
+	// dictionaryentryDescID is the schema descriptor for id field.
+	dictionaryentryDescID := dictionaryentryMixinFields0[0].Descriptor()
+	// dictionaryentry.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionaryentry.IDValidator = dictionaryentryDescID.Validators[0].(func(uint32) error)
+	dictionaryrelationMixin := schema.DictionaryRelation{}.Mixin()
+	dictionaryrelation.Policy = privacy.NewPolicies(dictionaryrelationMixin[0], schema.DictionaryRelation{})
+	dictionaryrelation.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := dictionaryword.Policy.EvalMutation(ctx, m); err != nil {
+			if err := dictionaryrelation.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
 	}
-	dictionarywordMixinHooks1 := dictionarywordMixin[1].Hooks()
+	dictionaryrelationMixinHooks1 := dictionaryrelationMixin[1].Hooks()
 
-	dictionaryword.Hooks[1] = dictionarywordMixinHooks1[0]
-	dictionarywordMixinInters1 := dictionarywordMixin[1].Interceptors()
-	dictionaryword.Interceptors[0] = dictionarywordMixinInters1[0]
-	dictionarywordMixinFields0 := dictionarywordMixin[0].Fields()
-	_ = dictionarywordMixinFields0
-	dictionarywordFields := schema.DictionaryWord{}.Fields()
-	_ = dictionarywordFields
-	// dictionarywordDescCreatedAt is the schema descriptor for created_at field.
-	dictionarywordDescCreatedAt := dictionarywordMixinFields0[1].Descriptor()
-	// dictionaryword.DefaultCreatedAt holds the default value on creation for the created_at field.
-	dictionaryword.DefaultCreatedAt = dictionarywordDescCreatedAt.Default.(func() time.Time)
-	// dictionarywordDescUpdatedAt is the schema descriptor for updated_at field.
-	dictionarywordDescUpdatedAt := dictionarywordMixinFields0[2].Descriptor()
-	// dictionaryword.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	dictionaryword.DefaultUpdatedAt = dictionarywordDescUpdatedAt.Default.(func() time.Time)
-	// dictionaryword.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	dictionaryword.UpdateDefaultUpdatedAt = dictionarywordDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// dictionarywordDescStatus is the schema descriptor for status field.
-	dictionarywordDescStatus := dictionarywordMixinFields0[3].Descriptor()
-	// dictionaryword.DefaultStatus holds the default value on creation for the status field.
-	dictionaryword.DefaultStatus = dictionarywordDescStatus.Default.(int32)
-	// dictionaryword.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	dictionaryword.StatusValidator = func() func(int32) error {
-		validators := dictionarywordDescStatus.Validators
+	dictionaryrelation.Hooks[1] = dictionaryrelationMixinHooks1[0]
+	dictionaryrelationMixinInters1 := dictionaryrelationMixin[1].Interceptors()
+	dictionaryrelation.Interceptors[0] = dictionaryrelationMixinInters1[0]
+	dictionaryrelationMixinFields0 := dictionaryrelationMixin[0].Fields()
+	_ = dictionaryrelationMixinFields0
+	dictionaryrelationFields := schema.DictionaryRelation{}.Fields()
+	_ = dictionaryrelationFields
+	// dictionaryrelationDescCreatedAt is the schema descriptor for created_at field.
+	dictionaryrelationDescCreatedAt := dictionaryrelationMixinFields0[1].Descriptor()
+	// dictionaryrelation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionaryrelation.DefaultCreatedAt = dictionaryrelationDescCreatedAt.Default.(func() time.Time)
+	// dictionaryrelationDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionaryrelationDescUpdatedAt := dictionaryrelationMixinFields0[2].Descriptor()
+	// dictionaryrelation.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionaryrelation.DefaultUpdatedAt = dictionaryrelationDescUpdatedAt.Default.(func() time.Time)
+	// dictionaryrelation.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionaryrelation.UpdateDefaultUpdatedAt = dictionaryrelationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionaryrelationDescStatus is the schema descriptor for status field.
+	dictionaryrelationDescStatus := dictionaryrelationMixinFields0[3].Descriptor()
+	// dictionaryrelation.DefaultStatus holds the default value on creation for the status field.
+	dictionaryrelation.DefaultStatus = dictionaryrelationDescStatus.Default.(int32)
+	// dictionaryrelation.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionaryrelation.StatusValidator = func() func(int32) error {
+		validators := dictionaryrelationDescStatus.Validators
 		fns := [...]func(int32) error{
 			validators[0].(func(int32) error),
 			validators[1].(func(int32) error),
@@ -503,85 +712,91 @@ func init() {
 			return nil
 		}
 	}()
-	// dictionarywordDescTenantID is the schema descriptor for tenant_id field.
-	dictionarywordDescTenantID := dictionarywordMixinFields0[4].Descriptor()
-	// dictionaryword.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	dictionaryword.TenantIDValidator = dictionarywordDescTenantID.Validators[0].(func(uint32) error)
-	// dictionarywordDescWord is the schema descriptor for word field.
-	dictionarywordDescWord := dictionarywordFields[0].Descriptor()
-	// dictionaryword.WordValidator is a validator for the "word" field. It is called by the builders before save.
-	dictionaryword.WordValidator = func() func(string) error {
-		validators := dictionarywordDescWord.Validators
+	// dictionaryrelationDescEntryID is the schema descriptor for entry_id field.
+	dictionaryrelationDescEntryID := dictionaryrelationFields[0].Descriptor()
+	// dictionaryrelation.EntryIDValidator is a validator for the "entry_id" field. It is called by the builders before save.
+	dictionaryrelation.EntryIDValidator = dictionaryrelationDescEntryID.Validators[0].(func(uint32) error)
+	// dictionaryrelationDescRelationType is the schema descriptor for relation_type field.
+	dictionaryrelationDescRelationType := dictionaryrelationFields[1].Descriptor()
+	// dictionaryrelation.RelationTypeValidator is a validator for the "relation_type" field. It is called by the builders before save.
+	dictionaryrelation.RelationTypeValidator = func() func(string) error {
+		validators := dictionaryrelationDescRelationType.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(word string) error {
+		return func(relation_type string) error {
 			for _, fn := range fns {
-				if err := fn(word); err != nil {
+				if err := fn(relation_type); err != nil {
 					return err
 				}
 			}
 			return nil
 		}
 	}()
-	// dictionarywordDescLevel is the schema descriptor for level field.
-	dictionarywordDescLevel := dictionarywordFields[1].Descriptor()
-	// dictionaryword.DefaultLevel holds the default value on creation for the level field.
-	dictionaryword.DefaultLevel = dictionarywordDescLevel.Default.(string)
-	// dictionaryword.LevelValidator is a validator for the "level" field. It is called by the builders before save.
-	dictionaryword.LevelValidator = dictionarywordDescLevel.Validators[0].(func(string) error)
-	// dictionarywordDescCategory is the schema descriptor for category field.
-	dictionarywordDescCategory := dictionarywordFields[2].Descriptor()
-	// dictionaryword.DefaultCategory holds the default value on creation for the category field.
-	dictionaryword.DefaultCategory = dictionarywordDescCategory.Default.(string)
-	// dictionaryword.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
-	dictionaryword.CategoryValidator = dictionarywordDescCategory.Validators[0].(func(string) error)
-	// dictionarywordDescSource is the schema descriptor for source field.
-	dictionarywordDescSource := dictionarywordFields[3].Descriptor()
-	// dictionaryword.DefaultSource holds the default value on creation for the source field.
-	dictionaryword.DefaultSource = dictionarywordDescSource.Default.(string)
-	// dictionaryword.SourceValidator is a validator for the "source" field. It is called by the builders before save.
-	dictionaryword.SourceValidator = dictionarywordDescSource.Validators[0].(func(string) error)
-	// dictionarywordDescPriority is the schema descriptor for priority field.
-	dictionarywordDescPriority := dictionarywordFields[4].Descriptor()
-	// dictionaryword.DefaultPriority holds the default value on creation for the priority field.
-	dictionaryword.DefaultPriority = dictionarywordDescPriority.Default.(int32)
-	// dictionarywordDescID is the schema descriptor for id field.
-	dictionarywordDescID := dictionarywordMixinFields0[0].Descriptor()
-	// dictionaryword.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	dictionaryword.IDValidator = dictionarywordDescID.Validators[0].(func(uint32) error)
-	hotwordMixin := schema.Hotword{}.Mixin()
-	hotword.Policy = privacy.NewPolicies(hotwordMixin[0], schema.Hotword{})
-	hotword.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+	// dictionaryrelationDescRelatedText is the schema descriptor for related_text field.
+	dictionaryrelationDescRelatedText := dictionaryrelationFields[2].Descriptor()
+	// dictionaryrelation.RelatedTextValidator is a validator for the "related_text" field. It is called by the builders before save.
+	dictionaryrelation.RelatedTextValidator = func() func(string) error {
+		validators := dictionaryrelationDescRelatedText.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(related_text string) error {
+			for _, fn := range fns {
+				if err := fn(related_text); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// dictionaryrelationDescSource is the schema descriptor for source field.
+	dictionaryrelationDescSource := dictionaryrelationFields[4].Descriptor()
+	// dictionaryrelation.DefaultSource holds the default value on creation for the source field.
+	dictionaryrelation.DefaultSource = dictionaryrelationDescSource.Default.(string)
+	// dictionaryrelation.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	dictionaryrelation.SourceValidator = dictionaryrelationDescSource.Validators[0].(func(string) error)
+	// dictionaryrelationDescDescription is the schema descriptor for description field.
+	dictionaryrelationDescDescription := dictionaryrelationFields[5].Descriptor()
+	// dictionaryrelation.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	dictionaryrelation.DescriptionValidator = dictionaryrelationDescDescription.Validators[0].(func(string) error)
+	// dictionaryrelationDescID is the schema descriptor for id field.
+	dictionaryrelationDescID := dictionaryrelationMixinFields0[0].Descriptor()
+	// dictionaryrelation.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionaryrelation.IDValidator = dictionaryrelationDescID.Validators[0].(func(uint32) error)
+	dictionaryversionMixin := schema.DictionaryVersion{}.Mixin()
+	dictionaryversion.Policy = privacy.NewPolicies(dictionaryversionMixin[0], schema.DictionaryVersion{})
+	dictionaryversion.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := hotword.Policy.EvalMutation(ctx, m); err != nil {
+			if err := dictionaryversion.Policy.EvalMutation(ctx, m); err != nil {
 				return nil, err
 			}
 			return next.Mutate(ctx, m)
 		})
 	}
-	hotwordMixinFields0 := hotwordMixin[0].Fields()
-	_ = hotwordMixinFields0
-	hotwordFields := schema.Hotword{}.Fields()
-	_ = hotwordFields
-	// hotwordDescCreatedAt is the schema descriptor for created_at field.
-	hotwordDescCreatedAt := hotwordMixinFields0[1].Descriptor()
-	// hotword.DefaultCreatedAt holds the default value on creation for the created_at field.
-	hotword.DefaultCreatedAt = hotwordDescCreatedAt.Default.(func() time.Time)
-	// hotwordDescUpdatedAt is the schema descriptor for updated_at field.
-	hotwordDescUpdatedAt := hotwordMixinFields0[2].Descriptor()
-	// hotword.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	hotword.DefaultUpdatedAt = hotwordDescUpdatedAt.Default.(func() time.Time)
-	// hotword.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	hotword.UpdateDefaultUpdatedAt = hotwordDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// hotwordDescStatus is the schema descriptor for status field.
-	hotwordDescStatus := hotwordMixinFields0[3].Descriptor()
-	// hotword.DefaultStatus holds the default value on creation for the status field.
-	hotword.DefaultStatus = hotwordDescStatus.Default.(int32)
-	// hotword.StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	hotword.StatusValidator = func() func(int32) error {
-		validators := hotwordDescStatus.Validators
+	dictionaryversionMixinFields0 := dictionaryversionMixin[0].Fields()
+	_ = dictionaryversionMixinFields0
+	dictionaryversionFields := schema.DictionaryVersion{}.Fields()
+	_ = dictionaryversionFields
+	// dictionaryversionDescCreatedAt is the schema descriptor for created_at field.
+	dictionaryversionDescCreatedAt := dictionaryversionMixinFields0[1].Descriptor()
+	// dictionaryversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dictionaryversion.DefaultCreatedAt = dictionaryversionDescCreatedAt.Default.(func() time.Time)
+	// dictionaryversionDescUpdatedAt is the schema descriptor for updated_at field.
+	dictionaryversionDescUpdatedAt := dictionaryversionMixinFields0[2].Descriptor()
+	// dictionaryversion.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dictionaryversion.DefaultUpdatedAt = dictionaryversionDescUpdatedAt.Default.(func() time.Time)
+	// dictionaryversion.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dictionaryversion.UpdateDefaultUpdatedAt = dictionaryversionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dictionaryversionDescStatus is the schema descriptor for status field.
+	dictionaryversionDescStatus := dictionaryversionMixinFields0[3].Descriptor()
+	// dictionaryversion.DefaultStatus holds the default value on creation for the status field.
+	dictionaryversion.DefaultStatus = dictionaryversionDescStatus.Default.(int32)
+	// dictionaryversion.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	dictionaryversion.StatusValidator = func() func(int32) error {
+		validators := dictionaryversionDescStatus.Validators
 		fns := [...]func(int32) error{
 			validators[0].(func(int32) error),
 			validators[1].(func(int32) error),
@@ -595,46 +810,316 @@ func init() {
 			return nil
 		}
 	}()
-	// hotwordDescTenantID is the schema descriptor for tenant_id field.
-	hotwordDescTenantID := hotwordMixinFields0[4].Descriptor()
-	// hotword.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	hotword.TenantIDValidator = hotwordDescTenantID.Validators[0].(func(uint32) error)
-	// hotwordDescWord is the schema descriptor for word field.
-	hotwordDescWord := hotwordFields[0].Descriptor()
-	// hotword.WordValidator is a validator for the "word" field. It is called by the builders before save.
-	hotword.WordValidator = func() func(string) error {
-		validators := hotwordDescWord.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
+	// dictionaryversionDescDictionaryID is the schema descriptor for dictionary_id field.
+	dictionaryversionDescDictionaryID := dictionaryversionFields[0].Descriptor()
+	// dictionaryversion.DictionaryIDValidator is a validator for the "dictionary_id" field. It is called by the builders before save.
+	dictionaryversion.DictionaryIDValidator = dictionaryversionDescDictionaryID.Validators[0].(func(uint32) error)
+	// dictionaryversionDescVersionNo is the schema descriptor for version_no field.
+	dictionaryversionDescVersionNo := dictionaryversionFields[1].Descriptor()
+	// dictionaryversion.DefaultVersionNo holds the default value on creation for the version_no field.
+	dictionaryversion.DefaultVersionNo = dictionaryversionDescVersionNo.Default.(int32)
+	// dictionaryversionDescDescription is the schema descriptor for description field.
+	dictionaryversionDescDescription := dictionaryversionFields[3].Descriptor()
+	// dictionaryversion.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	dictionaryversion.DescriptionValidator = dictionaryversionDescDescription.Validators[0].(func(string) error)
+	// dictionaryversionDescID is the schema descriptor for id field.
+	dictionaryversionDescID := dictionaryversionMixinFields0[0].Descriptor()
+	// dictionaryversion.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	dictionaryversion.IDValidator = dictionaryversionDescID.Validators[0].(func(uint32) error)
+	enhancementlogMixin := schema.EnhancementLog{}.Mixin()
+	enhancementlog.Policy = privacy.NewPolicies(enhancementlogMixin[0], schema.EnhancementLog{})
+	enhancementlog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := enhancementlog.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	enhancementlogMixinFields0 := enhancementlogMixin[0].Fields()
+	_ = enhancementlogMixinFields0
+	enhancementlogFields := schema.EnhancementLog{}.Fields()
+	_ = enhancementlogFields
+	// enhancementlogDescCreatedAt is the schema descriptor for created_at field.
+	enhancementlogDescCreatedAt := enhancementlogMixinFields0[1].Descriptor()
+	// enhancementlog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	enhancementlog.DefaultCreatedAt = enhancementlogDescCreatedAt.Default.(func() time.Time)
+	// enhancementlogDescUpdatedAt is the schema descriptor for updated_at field.
+	enhancementlogDescUpdatedAt := enhancementlogMixinFields0[2].Descriptor()
+	// enhancementlog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	enhancementlog.DefaultUpdatedAt = enhancementlogDescUpdatedAt.Default.(func() time.Time)
+	// enhancementlog.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	enhancementlog.UpdateDefaultUpdatedAt = enhancementlogDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// enhancementlogDescStatus is the schema descriptor for status field.
+	enhancementlogDescStatus := enhancementlogMixinFields0[3].Descriptor()
+	// enhancementlog.DefaultStatus holds the default value on creation for the status field.
+	enhancementlog.DefaultStatus = enhancementlogDescStatus.Default.(int32)
+	// enhancementlog.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	enhancementlog.StatusValidator = func() func(int32) error {
+		validators := enhancementlogDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
 		}
-		return func(word string) error {
+		return func(status int32) error {
 			for _, fn := range fns {
-				if err := fn(word); err != nil {
+				if err := fn(status); err != nil {
 					return err
 				}
 			}
 			return nil
 		}
 	}()
-	// hotwordDescTarget is the schema descriptor for target field.
-	hotwordDescTarget := hotwordFields[1].Descriptor()
-	// hotword.TargetValidator is a validator for the "target" field. It is called by the builders before save.
-	hotword.TargetValidator = hotwordDescTarget.Validators[0].(func(string) error)
-	// hotwordDescWeight is the schema descriptor for weight field.
-	hotwordDescWeight := hotwordFields[2].Descriptor()
-	// hotword.DefaultWeight holds the default value on creation for the weight field.
-	hotword.DefaultWeight = hotwordDescWeight.Default.(float64)
-	// hotwordDescCategory is the schema descriptor for category field.
-	hotwordDescCategory := hotwordFields[3].Descriptor()
-	// hotword.DefaultCategory holds the default value on creation for the category field.
-	hotword.DefaultCategory = hotwordDescCategory.Default.(string)
-	// hotword.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
-	hotword.CategoryValidator = hotwordDescCategory.Validators[0].(func(string) error)
-	// hotwordDescID is the schema descriptor for id field.
-	hotwordDescID := hotwordMixinFields0[0].Descriptor()
-	// hotword.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	hotword.IDValidator = hotwordDescID.Validators[0].(func(uint32) error)
+	// enhancementlogDescRequestID is the schema descriptor for request_id field.
+	enhancementlogDescRequestID := enhancementlogFields[0].Descriptor()
+	// enhancementlog.RequestIDValidator is a validator for the "request_id" field. It is called by the builders before save.
+	enhancementlog.RequestIDValidator = enhancementlogDescRequestID.Validators[0].(func(string) error)
+	// enhancementlogDescSessionID is the schema descriptor for session_id field.
+	enhancementlogDescSessionID := enhancementlogFields[1].Descriptor()
+	// enhancementlog.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
+	enhancementlog.SessionIDValidator = enhancementlogDescSessionID.Validators[0].(func(string) error)
+	// enhancementlogDescPolicyMode is the schema descriptor for policy_mode field.
+	enhancementlogDescPolicyMode := enhancementlogFields[3].Descriptor()
+	// enhancementlog.PolicyModeValidator is a validator for the "policy_mode" field. It is called by the builders before save.
+	enhancementlog.PolicyModeValidator = enhancementlogDescPolicyMode.Validators[0].(func(string) error)
+	// enhancementlogDescContextVersion is the schema descriptor for context_version field.
+	enhancementlogDescContextVersion := enhancementlogFields[4].Descriptor()
+	// enhancementlog.ContextVersionValidator is a validator for the "context_version" field. It is called by the builders before save.
+	enhancementlog.ContextVersionValidator = enhancementlogDescContextVersion.Validators[0].(func(string) error)
+	// enhancementlogDescRawText is the schema descriptor for raw_text field.
+	enhancementlogDescRawText := enhancementlogFields[5].Descriptor()
+	// enhancementlog.RawTextValidator is a validator for the "raw_text" field. It is called by the builders before save.
+	enhancementlog.RawTextValidator = enhancementlogDescRawText.Validators[0].(func(string) error)
+	// enhancementlogDescProcessingTimeMs is the schema descriptor for processing_time_ms field.
+	enhancementlogDescProcessingTimeMs := enhancementlogFields[8].Descriptor()
+	// enhancementlog.DefaultProcessingTimeMs holds the default value on creation for the processing_time_ms field.
+	enhancementlog.DefaultProcessingTimeMs = enhancementlogDescProcessingTimeMs.Default.(int64)
+	// enhancementlogDescCleaningTimeMs is the schema descriptor for cleaning_time_ms field.
+	enhancementlogDescCleaningTimeMs := enhancementlogFields[9].Descriptor()
+	// enhancementlog.DefaultCleaningTimeMs holds the default value on creation for the cleaning_time_ms field.
+	enhancementlog.DefaultCleaningTimeMs = enhancementlogDescCleaningTimeMs.Default.(int64)
+	// enhancementlogDescFillerTimeMs is the schema descriptor for filler_time_ms field.
+	enhancementlogDescFillerTimeMs := enhancementlogFields[10].Descriptor()
+	// enhancementlog.DefaultFillerTimeMs holds the default value on creation for the filler_time_ms field.
+	enhancementlog.DefaultFillerTimeMs = enhancementlogDescFillerTimeMs.Default.(int64)
+	// enhancementlogDescVocabMatchTimeMs is the schema descriptor for vocab_match_time_ms field.
+	enhancementlogDescVocabMatchTimeMs := enhancementlogFields[11].Descriptor()
+	// enhancementlog.DefaultVocabMatchTimeMs holds the default value on creation for the vocab_match_time_ms field.
+	enhancementlog.DefaultVocabMatchTimeMs = enhancementlogDescVocabMatchTimeMs.Default.(int64)
+	// enhancementlogDescAliasTimeMs is the schema descriptor for alias_time_ms field.
+	enhancementlogDescAliasTimeMs := enhancementlogFields[12].Descriptor()
+	// enhancementlog.DefaultAliasTimeMs holds the default value on creation for the alias_time_ms field.
+	enhancementlog.DefaultAliasTimeMs = enhancementlogDescAliasTimeMs.Default.(int64)
+	// enhancementlogDescDeterministicTimeMs is the schema descriptor for deterministic_time_ms field.
+	enhancementlogDescDeterministicTimeMs := enhancementlogFields[13].Descriptor()
+	// enhancementlog.DefaultDeterministicTimeMs holds the default value on creation for the deterministic_time_ms field.
+	enhancementlog.DefaultDeterministicTimeMs = enhancementlogDescDeterministicTimeMs.Default.(int64)
+	// enhancementlogDescPinyinTimeMs is the schema descriptor for pinyin_time_ms field.
+	enhancementlogDescPinyinTimeMs := enhancementlogFields[14].Descriptor()
+	// enhancementlog.DefaultPinyinTimeMs holds the default value on creation for the pinyin_time_ms field.
+	enhancementlog.DefaultPinyinTimeMs = enhancementlogDescPinyinTimeMs.Default.(int64)
+	// enhancementlogDescFuzzyTimeMs is the schema descriptor for fuzzy_time_ms field.
+	enhancementlogDescFuzzyTimeMs := enhancementlogFields[15].Descriptor()
+	// enhancementlog.DefaultFuzzyTimeMs holds the default value on creation for the fuzzy_time_ms field.
+	enhancementlog.DefaultFuzzyTimeMs = enhancementlogDescFuzzyTimeMs.Default.(int64)
+	// enhancementlogDescContextTimeMs is the schema descriptor for context_time_ms field.
+	enhancementlogDescContextTimeMs := enhancementlogFields[16].Descriptor()
+	// enhancementlog.DefaultContextTimeMs holds the default value on creation for the context_time_ms field.
+	enhancementlog.DefaultContextTimeMs = enhancementlogDescContextTimeMs.Default.(int64)
+	// enhancementlogDescUserCorrected is the schema descriptor for user_corrected field.
+	enhancementlogDescUserCorrected := enhancementlogFields[17].Descriptor()
+	// enhancementlog.DefaultUserCorrected holds the default value on creation for the user_corrected field.
+	enhancementlog.DefaultUserCorrected = enhancementlogDescUserCorrected.Default.(bool)
+	// enhancementlogDescFeedbackText is the schema descriptor for feedback_text field.
+	enhancementlogDescFeedbackText := enhancementlogFields[18].Descriptor()
+	// enhancementlog.FeedbackTextValidator is a validator for the "feedback_text" field. It is called by the builders before save.
+	enhancementlog.FeedbackTextValidator = enhancementlogDescFeedbackText.Validators[0].(func(string) error)
+	// enhancementlogDescErrorMessage is the schema descriptor for error_message field.
+	enhancementlogDescErrorMessage := enhancementlogFields[19].Descriptor()
+	// enhancementlog.ErrorMessageValidator is a validator for the "error_message" field. It is called by the builders before save.
+	enhancementlog.ErrorMessageValidator = enhancementlogDescErrorMessage.Validators[0].(func(string) error)
+	// enhancementlogDescID is the schema descriptor for id field.
+	enhancementlogDescID := enhancementlogMixinFields0[0].Descriptor()
+	// enhancementlog.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	enhancementlog.IDValidator = enhancementlogDescID.Validators[0].(func(uint32) error)
+	enhancementpolicyMixin := schema.EnhancementPolicy{}.Mixin()
+	enhancementpolicy.Policy = privacy.NewPolicies(enhancementpolicyMixin[0], schema.EnhancementPolicy{})
+	enhancementpolicy.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := enhancementpolicy.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	enhancementpolicyMixinFields0 := enhancementpolicyMixin[0].Fields()
+	_ = enhancementpolicyMixinFields0
+	enhancementpolicyFields := schema.EnhancementPolicy{}.Fields()
+	_ = enhancementpolicyFields
+	// enhancementpolicyDescCreatedAt is the schema descriptor for created_at field.
+	enhancementpolicyDescCreatedAt := enhancementpolicyMixinFields0[1].Descriptor()
+	// enhancementpolicy.DefaultCreatedAt holds the default value on creation for the created_at field.
+	enhancementpolicy.DefaultCreatedAt = enhancementpolicyDescCreatedAt.Default.(func() time.Time)
+	// enhancementpolicyDescUpdatedAt is the schema descriptor for updated_at field.
+	enhancementpolicyDescUpdatedAt := enhancementpolicyMixinFields0[2].Descriptor()
+	// enhancementpolicy.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	enhancementpolicy.DefaultUpdatedAt = enhancementpolicyDescUpdatedAt.Default.(func() time.Time)
+	// enhancementpolicy.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	enhancementpolicy.UpdateDefaultUpdatedAt = enhancementpolicyDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// enhancementpolicyDescStatus is the schema descriptor for status field.
+	enhancementpolicyDescStatus := enhancementpolicyMixinFields0[3].Descriptor()
+	// enhancementpolicy.DefaultStatus holds the default value on creation for the status field.
+	enhancementpolicy.DefaultStatus = enhancementpolicyDescStatus.Default.(int32)
+	// enhancementpolicy.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	enhancementpolicy.StatusValidator = func() func(int32) error {
+		validators := enhancementpolicyDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// enhancementpolicyDescName is the schema descriptor for name field.
+	enhancementpolicyDescName := enhancementpolicyFields[0].Descriptor()
+	// enhancementpolicy.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	enhancementpolicy.NameValidator = func() func(string) error {
+		validators := enhancementpolicyDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// enhancementpolicyDescMode is the schema descriptor for mode field.
+	enhancementpolicyDescMode := enhancementpolicyFields[1].Descriptor()
+	// enhancementpolicy.DefaultMode holds the default value on creation for the mode field.
+	enhancementpolicy.DefaultMode = enhancementpolicyDescMode.Default.(string)
+	// enhancementpolicy.ModeValidator is a validator for the "mode" field. It is called by the builders before save.
+	enhancementpolicy.ModeValidator = enhancementpolicyDescMode.Validators[0].(func(string) error)
+	// enhancementpolicyDescTextCleaning is the schema descriptor for text_cleaning field.
+	enhancementpolicyDescTextCleaning := enhancementpolicyFields[2].Descriptor()
+	// enhancementpolicy.DefaultTextCleaning holds the default value on creation for the text_cleaning field.
+	enhancementpolicy.DefaultTextCleaning = enhancementpolicyDescTextCleaning.Default.(bool)
+	// enhancementpolicyDescFillerRemoval is the schema descriptor for filler_removal field.
+	enhancementpolicyDescFillerRemoval := enhancementpolicyFields[3].Descriptor()
+	// enhancementpolicy.DefaultFillerRemoval holds the default value on creation for the filler_removal field.
+	enhancementpolicy.DefaultFillerRemoval = enhancementpolicyDescFillerRemoval.Default.(bool)
+	// enhancementpolicyDescAliasResolution is the schema descriptor for alias_resolution field.
+	enhancementpolicyDescAliasResolution := enhancementpolicyFields[4].Descriptor()
+	// enhancementpolicy.DefaultAliasResolution holds the default value on creation for the alias_resolution field.
+	enhancementpolicy.DefaultAliasResolution = enhancementpolicyDescAliasResolution.Default.(bool)
+	// enhancementpolicyDescDeterministicReplacement is the schema descriptor for deterministic_replacement field.
+	enhancementpolicyDescDeterministicReplacement := enhancementpolicyFields[5].Descriptor()
+	// enhancementpolicy.DefaultDeterministicReplacement holds the default value on creation for the deterministic_replacement field.
+	enhancementpolicy.DefaultDeterministicReplacement = enhancementpolicyDescDeterministicReplacement.Default.(bool)
+	// enhancementpolicyDescPinyinCorrection is the schema descriptor for pinyin_correction field.
+	enhancementpolicyDescPinyinCorrection := enhancementpolicyFields[6].Descriptor()
+	// enhancementpolicy.DefaultPinyinCorrection holds the default value on creation for the pinyin_correction field.
+	enhancementpolicy.DefaultPinyinCorrection = enhancementpolicyDescPinyinCorrection.Default.(bool)
+	// enhancementpolicyDescFuzzyMatching is the schema descriptor for fuzzy_matching field.
+	enhancementpolicyDescFuzzyMatching := enhancementpolicyFields[7].Descriptor()
+	// enhancementpolicy.DefaultFuzzyMatching holds the default value on creation for the fuzzy_matching field.
+	enhancementpolicy.DefaultFuzzyMatching = enhancementpolicyDescFuzzyMatching.Default.(bool)
+	// enhancementpolicyDescContextCorrection is the schema descriptor for context_correction field.
+	enhancementpolicyDescContextCorrection := enhancementpolicyFields[8].Descriptor()
+	// enhancementpolicy.DefaultContextCorrection holds the default value on creation for the context_correction field.
+	enhancementpolicy.DefaultContextCorrection = enhancementpolicyDescContextCorrection.Default.(bool)
+	// enhancementpolicyDescDescription is the schema descriptor for description field.
+	enhancementpolicyDescDescription := enhancementpolicyFields[9].Descriptor()
+	// enhancementpolicy.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	enhancementpolicy.DescriptionValidator = enhancementpolicyDescDescription.Validators[0].(func(string) error)
+	// enhancementpolicyDescID is the schema descriptor for id field.
+	enhancementpolicyDescID := enhancementpolicyMixinFields0[0].Descriptor()
+	// enhancementpolicy.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	enhancementpolicy.IDValidator = enhancementpolicyDescID.Validators[0].(func(uint32) error)
+	enhancementprofileMixin := schema.EnhancementProfile{}.Mixin()
+	enhancementprofile.Policy = privacy.NewPolicies(enhancementprofileMixin[0], schema.EnhancementProfile{})
+	enhancementprofile.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := enhancementprofile.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	enhancementprofileMixinFields0 := enhancementprofileMixin[0].Fields()
+	_ = enhancementprofileMixinFields0
+	enhancementprofileFields := schema.EnhancementProfile{}.Fields()
+	_ = enhancementprofileFields
+	// enhancementprofileDescCreatedAt is the schema descriptor for created_at field.
+	enhancementprofileDescCreatedAt := enhancementprofileMixinFields0[1].Descriptor()
+	// enhancementprofile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	enhancementprofile.DefaultCreatedAt = enhancementprofileDescCreatedAt.Default.(func() time.Time)
+	// enhancementprofileDescUpdatedAt is the schema descriptor for updated_at field.
+	enhancementprofileDescUpdatedAt := enhancementprofileMixinFields0[2].Descriptor()
+	// enhancementprofile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	enhancementprofile.DefaultUpdatedAt = enhancementprofileDescUpdatedAt.Default.(func() time.Time)
+	// enhancementprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	enhancementprofile.UpdateDefaultUpdatedAt = enhancementprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// enhancementprofileDescStatus is the schema descriptor for status field.
+	enhancementprofileDescStatus := enhancementprofileMixinFields0[3].Descriptor()
+	// enhancementprofile.DefaultStatus holds the default value on creation for the status field.
+	enhancementprofile.DefaultStatus = enhancementprofileDescStatus.Default.(int32)
+	// enhancementprofile.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	enhancementprofile.StatusValidator = func() func(int32) error {
+		validators := enhancementprofileDescStatus.Validators
+		fns := [...]func(int32) error{
+			validators[0].(func(int32) error),
+			validators[1].(func(int32) error),
+		}
+		return func(status int32) error {
+			for _, fn := range fns {
+				if err := fn(status); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// enhancementprofileDescPolicyID is the schema descriptor for policy_id field.
+	enhancementprofileDescPolicyID := enhancementprofileFields[0].Descriptor()
+	// enhancementprofile.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
+	enhancementprofile.PolicyIDValidator = enhancementprofileDescPolicyID.Validators[0].(func(uint32) error)
+	// enhancementprofileDescName is the schema descriptor for name field.
+	enhancementprofileDescName := enhancementprofileFields[1].Descriptor()
+	// enhancementprofile.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	enhancementprofile.NameValidator = func() func(string) error {
+		validators := enhancementprofileDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// enhancementprofileDescDescription is the schema descriptor for description field.
+	enhancementprofileDescDescription := enhancementprofileFields[2].Descriptor()
+	// enhancementprofile.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	enhancementprofile.DescriptionValidator = enhancementprofileDescDescription.Validators[0].(func(string) error)
+	// enhancementprofileDescID is the schema descriptor for id field.
+	enhancementprofileDescID := enhancementprofileMixinFields0[0].Descriptor()
+	// enhancementprofile.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	enhancementprofile.IDValidator = enhancementprofileDescID.Validators[0].(func(uint32) error)
 }
 
 const (

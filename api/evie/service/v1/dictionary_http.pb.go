@@ -19,100 +19,172 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationDictionaryServiceCreateWord = "/evie.service.v1.DictionaryService/CreateWord"
-const OperationDictionaryServiceDeleteWord = "/evie.service.v1.DictionaryService/DeleteWord"
-const OperationDictionaryServiceGetWord = "/evie.service.v1.DictionaryService/GetWord"
-const OperationDictionaryServiceListWords = "/evie.service.v1.DictionaryService/ListWords"
-const OperationDictionaryServiceUpdateWord = "/evie.service.v1.DictionaryService/UpdateWord"
+const OperationDictionaryServiceCreateCategory = "/evie.service.v1.DictionaryService/CreateCategory"
+const OperationDictionaryServiceCreateDictionary = "/evie.service.v1.DictionaryService/CreateDictionary"
+const OperationDictionaryServiceCreateEntry = "/evie.service.v1.DictionaryService/CreateEntry"
+const OperationDictionaryServiceCreateRelation = "/evie.service.v1.DictionaryService/CreateRelation"
+const OperationDictionaryServiceDeleteCategory = "/evie.service.v1.DictionaryService/DeleteCategory"
+const OperationDictionaryServiceDeleteDictionary = "/evie.service.v1.DictionaryService/DeleteDictionary"
+const OperationDictionaryServiceDeleteEntry = "/evie.service.v1.DictionaryService/DeleteEntry"
+const OperationDictionaryServiceDeleteRelation = "/evie.service.v1.DictionaryService/DeleteRelation"
+const OperationDictionaryServiceGetDictionary = "/evie.service.v1.DictionaryService/GetDictionary"
+const OperationDictionaryServiceGetEntry = "/evie.service.v1.DictionaryService/GetEntry"
+const OperationDictionaryServiceGetRelation = "/evie.service.v1.DictionaryService/GetRelation"
+const OperationDictionaryServiceGetVersion = "/evie.service.v1.DictionaryService/GetVersion"
+const OperationDictionaryServiceListCategories = "/evie.service.v1.DictionaryService/ListCategories"
+const OperationDictionaryServiceListConflicts = "/evie.service.v1.DictionaryService/ListConflicts"
+const OperationDictionaryServiceListDictionaries = "/evie.service.v1.DictionaryService/ListDictionaries"
+const OperationDictionaryServiceListEntries = "/evie.service.v1.DictionaryService/ListEntries"
+const OperationDictionaryServiceListRelations = "/evie.service.v1.DictionaryService/ListRelations"
+const OperationDictionaryServiceListVersions = "/evie.service.v1.DictionaryService/ListVersions"
+const OperationDictionaryServicePublishDictionary = "/evie.service.v1.DictionaryService/PublishDictionary"
+const OperationDictionaryServiceUpdateCategory = "/evie.service.v1.DictionaryService/UpdateCategory"
+const OperationDictionaryServiceUpdateDictionary = "/evie.service.v1.DictionaryService/UpdateDictionary"
+const OperationDictionaryServiceUpdateEntry = "/evie.service.v1.DictionaryService/UpdateEntry"
+const OperationDictionaryServiceUpdateRelation = "/evie.service.v1.DictionaryService/UpdateRelation"
 
 type DictionaryServiceHTTPServer interface {
-	// CreateWord 创建标准词（可同时指定别名）
-	CreateWord(context.Context, *CreateWordRequest) (*CreateWordResponse, error)
-	// DeleteWord 删除标准词（级联软删除别名）
-	DeleteWord(context.Context, *DeleteWordRequest) (*DeleteWordResponse, error)
-	// GetWord 查询标准词详情（含别名）
-	GetWord(context.Context, *GetWordRequest) (*GetWordResponse, error)
-	// ListWords 分页查询标准词列表
-	ListWords(context.Context, *ListWordsRequest) (*ListWordsResponse, error)
-	// UpdateWord 更新标准词
-	UpdateWord(context.Context, *UpdateWordRequest) (*UpdateWordResponse, error)
+	// CreateCategory 创建词条分类（仅自定义）
+	CreateCategory(context.Context, *CreateCategoryRequest) (*DictionaryCategory, error)
+	// CreateDictionary 创建词库
+	CreateDictionary(context.Context, *CreateDictionaryRequest) (*Dictionary, error)
+	// CreateEntry 创建词条
+	CreateEntry(context.Context, *CreateEntryRequest) (*DictionaryEntry, error)
+	// CreateRelation 创建词条关系
+	CreateRelation(context.Context, *CreateRelationRequest) (*DictionaryRelation, error)
+	// DeleteCategory 删除词条分类（仅自定义）
+	DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error)
+	// DeleteDictionary 删除词库（软删除）
+	DeleteDictionary(context.Context, *DeleteDictionaryRequest) (*DeleteDictionaryResponse, error)
+	// DeleteEntry 删除词条（软删除）
+	DeleteEntry(context.Context, *DeleteEntryRequest) (*DeleteEntryResponse, error)
+	// DeleteRelation 删除词条关系
+	DeleteRelation(context.Context, *DeleteRelationRequest) (*DeleteRelationResponse, error)
+	// GetDictionary 查询词库详情
+	GetDictionary(context.Context, *GetDictionaryRequest) (*Dictionary, error)
+	// GetEntry 查询词条详情
+	GetEntry(context.Context, *GetEntryRequest) (*DictionaryEntry, error)
+	// GetRelation 查询词条关系详情
+	GetRelation(context.Context, *GetRelationRequest) (*DictionaryRelation, error)
+	// GetVersion 查询词库版本详情
+	GetVersion(context.Context, *GetVersionRequest) (*DictionaryVersion, error)
+	// ListCategories 分页查询词条分类列表
+	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
+	// ListConflicts 查询词库冲突记录
+	ListConflicts(context.Context, *ListConflictsRequest) (*ListConflictsResponse, error)
+	// ListDictionaries 分页查询词库列表
+	ListDictionaries(context.Context, *ListDictionariesRequest) (*ListDictionariesResponse, error)
+	// ListEntries 分页查询词条列表
+	ListEntries(context.Context, *ListEntriesRequest) (*ListEntriesResponse, error)
+	// ListRelations 分页查询词条关系列表
+	ListRelations(context.Context, *ListRelationsRequest) (*ListRelationsResponse, error)
+	// ListVersions 分页查询词库版本列表
+	ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error)
+	// PublishDictionary 发布词库版本（生成时点快照）
+	PublishDictionary(context.Context, *PublishDictionaryRequest) (*DictionaryVersion, error)
+	// UpdateCategory 更新词条分类（仅自定义）
+	UpdateCategory(context.Context, *UpdateCategoryRequest) (*DictionaryCategory, error)
+	// UpdateDictionary 更新词库
+	UpdateDictionary(context.Context, *UpdateDictionaryRequest) (*Dictionary, error)
+	// UpdateEntry 更新词条
+	UpdateEntry(context.Context, *UpdateEntryRequest) (*DictionaryEntry, error)
+	// UpdateRelation 更新词条关系
+	UpdateRelation(context.Context, *UpdateRelationRequest) (*DictionaryRelation, error)
 }
 
 func RegisterDictionaryServiceHTTPServer(s *http.Server, srv DictionaryServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/evie/v1/dictionary/words", _DictionaryService_ListWords0_HTTP_Handler(srv))
-	r.GET("/evie/v1/dictionary/words/{id}", _DictionaryService_GetWord0_HTTP_Handler(srv))
-	r.POST("/evie/v1/dictionary/words", _DictionaryService_CreateWord0_HTTP_Handler(srv))
-	r.PUT("/evie/v1/dictionary/words/{id}", _DictionaryService_UpdateWord0_HTTP_Handler(srv))
-	r.DELETE("/evie/v1/dictionary/words/{id}", _DictionaryService_DeleteWord0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionaries", _DictionaryService_ListDictionaries0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionaries/{id}", _DictionaryService_GetDictionary0_HTTP_Handler(srv))
+	r.POST("/evie/v1/dictionaries", _DictionaryService_CreateDictionary0_HTTP_Handler(srv))
+	r.PUT("/evie/v1/dictionaries/{id}", _DictionaryService_UpdateDictionary0_HTTP_Handler(srv))
+	r.DELETE("/evie/v1/dictionaries/{id}", _DictionaryService_DeleteDictionary0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionaries/{dictionary_id}/entries", _DictionaryService_ListEntries0_HTTP_Handler(srv))
+	r.GET("/evie/v1/entries/{id}", _DictionaryService_GetEntry0_HTTP_Handler(srv))
+	r.POST("/evie/v1/dictionaries/{dictionary_id}/entries", _DictionaryService_CreateEntry0_HTTP_Handler(srv))
+	r.PUT("/evie/v1/entries/{id}", _DictionaryService_UpdateEntry0_HTTP_Handler(srv))
+	r.DELETE("/evie/v1/entries/{id}", _DictionaryService_DeleteEntry0_HTTP_Handler(srv))
+	r.GET("/evie/v1/entries/{entry_id}/relations", _DictionaryService_ListRelations0_HTTP_Handler(srv))
+	r.GET("/evie/v1/relations/{id}", _DictionaryService_GetRelation0_HTTP_Handler(srv))
+	r.POST("/evie/v1/entries/{entry_id}/relations", _DictionaryService_CreateRelation0_HTTP_Handler(srv))
+	r.PUT("/evie/v1/relations/{id}", _DictionaryService_UpdateRelation0_HTTP_Handler(srv))
+	r.DELETE("/evie/v1/relations/{id}", _DictionaryService_DeleteRelation0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionary-categories", _DictionaryService_ListCategories0_HTTP_Handler(srv))
+	r.POST("/evie/v1/dictionary-categories", _DictionaryService_CreateCategory0_HTTP_Handler(srv))
+	r.PUT("/evie/v1/dictionary-categories/{id}", _DictionaryService_UpdateCategory0_HTTP_Handler(srv))
+	r.DELETE("/evie/v1/dictionary-categories/{id}", _DictionaryService_DeleteCategory0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionaries/{dictionary_id}/versions", _DictionaryService_ListVersions0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionary-versions/{id}", _DictionaryService_GetVersion0_HTTP_Handler(srv))
+	r.POST("/evie/v1/dictionaries/{dictionary_id}:publish", _DictionaryService_PublishDictionary0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dictionary-conflicts", _DictionaryService_ListConflicts0_HTTP_Handler(srv))
 }
 
-func _DictionaryService_ListWords0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+func _DictionaryService_ListDictionaries0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ListWordsRequest
+		var in ListDictionariesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDictionaryServiceListWords)
+		http.SetOperation(ctx, OperationDictionaryServiceListDictionaries)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListWords(ctx, req.(*ListWordsRequest))
+			return srv.ListDictionaries(ctx, req.(*ListDictionariesRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*ListWordsResponse)
+		reply := out.(*ListDictionariesResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _DictionaryService_GetWord0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+func _DictionaryService_GetDictionary0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetWordRequest
+		var in GetDictionaryRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDictionaryServiceGetWord)
+		http.SetOperation(ctx, OperationDictionaryServiceGetDictionary)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetWord(ctx, req.(*GetWordRequest))
+			return srv.GetDictionary(ctx, req.(*GetDictionaryRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetWordResponse)
+		reply := out.(*Dictionary)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _DictionaryService_CreateWord0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+func _DictionaryService_CreateDictionary0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateWordRequest
+		var in CreateDictionaryRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDictionaryServiceCreateWord)
+		http.SetOperation(ctx, OperationDictionaryServiceCreateDictionary)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateWord(ctx, req.(*CreateWordRequest))
+			return srv.CreateDictionary(ctx, req.(*CreateDictionaryRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*CreateWordResponse)
+		reply := out.(*Dictionary)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _DictionaryService_UpdateWord0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+func _DictionaryService_UpdateDictionary0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in UpdateWordRequest
+		var in UpdateDictionaryRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -122,52 +194,496 @@ func _DictionaryService_UpdateWord0_HTTP_Handler(srv DictionaryServiceHTTPServer
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDictionaryServiceUpdateWord)
+		http.SetOperation(ctx, OperationDictionaryServiceUpdateDictionary)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateWord(ctx, req.(*UpdateWordRequest))
+			return srv.UpdateDictionary(ctx, req.(*UpdateDictionaryRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*UpdateWordResponse)
+		reply := out.(*Dictionary)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _DictionaryService_DeleteWord0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+func _DictionaryService_DeleteDictionary0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in DeleteWordRequest
+		var in DeleteDictionaryRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationDictionaryServiceDeleteWord)
+		http.SetOperation(ctx, OperationDictionaryServiceDeleteDictionary)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteWord(ctx, req.(*DeleteWordRequest))
+			return srv.DeleteDictionary(ctx, req.(*DeleteDictionaryRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*DeleteWordResponse)
+		reply := out.(*DeleteDictionaryResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_ListEntries0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListEntriesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceListEntries)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListEntries(ctx, req.(*ListEntriesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListEntriesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_GetEntry0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetEntryRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceGetEntry)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetEntry(ctx, req.(*GetEntryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryEntry)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_CreateEntry0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateEntryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceCreateEntry)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateEntry(ctx, req.(*CreateEntryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryEntry)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_UpdateEntry0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateEntryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceUpdateEntry)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateEntry(ctx, req.(*UpdateEntryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryEntry)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_DeleteEntry0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteEntryRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceDeleteEntry)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteEntry(ctx, req.(*DeleteEntryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteEntryResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_ListRelations0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListRelationsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceListRelations)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListRelations(ctx, req.(*ListRelationsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListRelationsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_GetRelation0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetRelationRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceGetRelation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetRelation(ctx, req.(*GetRelationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryRelation)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_CreateRelation0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateRelationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceCreateRelation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateRelation(ctx, req.(*CreateRelationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryRelation)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_UpdateRelation0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateRelationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceUpdateRelation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateRelation(ctx, req.(*UpdateRelationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryRelation)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_DeleteRelation0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteRelationRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceDeleteRelation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteRelation(ctx, req.(*DeleteRelationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteRelationResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_ListCategories0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListCategoriesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceListCategories)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListCategories(ctx, req.(*ListCategoriesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListCategoriesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_CreateCategory0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateCategoryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceCreateCategory)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateCategory(ctx, req.(*CreateCategoryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryCategory)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_UpdateCategory0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateCategoryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceUpdateCategory)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateCategory(ctx, req.(*UpdateCategoryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryCategory)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_DeleteCategory0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteCategoryRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceDeleteCategory)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteCategory(ctx, req.(*DeleteCategoryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteCategoryResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_ListVersions0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListVersionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceListVersions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListVersions(ctx, req.(*ListVersionsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListVersionsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_GetVersion0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetVersionRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceGetVersion)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetVersion(ctx, req.(*GetVersionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryVersion)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_PublishDictionary0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PublishDictionaryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServicePublishDictionary)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PublishDictionary(ctx, req.(*PublishDictionaryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DictionaryVersion)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_ListConflicts0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListConflictsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceListConflicts)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListConflicts(ctx, req.(*ListConflictsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListConflictsResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
 type DictionaryServiceHTTPClient interface {
-	// CreateWord 创建标准词（可同时指定别名）
-	CreateWord(ctx context.Context, req *CreateWordRequest, opts ...http.CallOption) (rsp *CreateWordResponse, err error)
-	// DeleteWord 删除标准词（级联软删除别名）
-	DeleteWord(ctx context.Context, req *DeleteWordRequest, opts ...http.CallOption) (rsp *DeleteWordResponse, err error)
-	// GetWord 查询标准词详情（含别名）
-	GetWord(ctx context.Context, req *GetWordRequest, opts ...http.CallOption) (rsp *GetWordResponse, err error)
-	// ListWords 分页查询标准词列表
-	ListWords(ctx context.Context, req *ListWordsRequest, opts ...http.CallOption) (rsp *ListWordsResponse, err error)
-	// UpdateWord 更新标准词
-	UpdateWord(ctx context.Context, req *UpdateWordRequest, opts ...http.CallOption) (rsp *UpdateWordResponse, err error)
+	// CreateCategory 创建词条分类（仅自定义）
+	CreateCategory(ctx context.Context, req *CreateCategoryRequest, opts ...http.CallOption) (rsp *DictionaryCategory, err error)
+	// CreateDictionary 创建词库
+	CreateDictionary(ctx context.Context, req *CreateDictionaryRequest, opts ...http.CallOption) (rsp *Dictionary, err error)
+	// CreateEntry 创建词条
+	CreateEntry(ctx context.Context, req *CreateEntryRequest, opts ...http.CallOption) (rsp *DictionaryEntry, err error)
+	// CreateRelation 创建词条关系
+	CreateRelation(ctx context.Context, req *CreateRelationRequest, opts ...http.CallOption) (rsp *DictionaryRelation, err error)
+	// DeleteCategory 删除词条分类（仅自定义）
+	DeleteCategory(ctx context.Context, req *DeleteCategoryRequest, opts ...http.CallOption) (rsp *DeleteCategoryResponse, err error)
+	// DeleteDictionary 删除词库（软删除）
+	DeleteDictionary(ctx context.Context, req *DeleteDictionaryRequest, opts ...http.CallOption) (rsp *DeleteDictionaryResponse, err error)
+	// DeleteEntry 删除词条（软删除）
+	DeleteEntry(ctx context.Context, req *DeleteEntryRequest, opts ...http.CallOption) (rsp *DeleteEntryResponse, err error)
+	// DeleteRelation 删除词条关系
+	DeleteRelation(ctx context.Context, req *DeleteRelationRequest, opts ...http.CallOption) (rsp *DeleteRelationResponse, err error)
+	// GetDictionary 查询词库详情
+	GetDictionary(ctx context.Context, req *GetDictionaryRequest, opts ...http.CallOption) (rsp *Dictionary, err error)
+	// GetEntry 查询词条详情
+	GetEntry(ctx context.Context, req *GetEntryRequest, opts ...http.CallOption) (rsp *DictionaryEntry, err error)
+	// GetRelation 查询词条关系详情
+	GetRelation(ctx context.Context, req *GetRelationRequest, opts ...http.CallOption) (rsp *DictionaryRelation, err error)
+	// GetVersion 查询词库版本详情
+	GetVersion(ctx context.Context, req *GetVersionRequest, opts ...http.CallOption) (rsp *DictionaryVersion, err error)
+	// ListCategories 分页查询词条分类列表
+	ListCategories(ctx context.Context, req *ListCategoriesRequest, opts ...http.CallOption) (rsp *ListCategoriesResponse, err error)
+	// ListConflicts 查询词库冲突记录
+	ListConflicts(ctx context.Context, req *ListConflictsRequest, opts ...http.CallOption) (rsp *ListConflictsResponse, err error)
+	// ListDictionaries 分页查询词库列表
+	ListDictionaries(ctx context.Context, req *ListDictionariesRequest, opts ...http.CallOption) (rsp *ListDictionariesResponse, err error)
+	// ListEntries 分页查询词条列表
+	ListEntries(ctx context.Context, req *ListEntriesRequest, opts ...http.CallOption) (rsp *ListEntriesResponse, err error)
+	// ListRelations 分页查询词条关系列表
+	ListRelations(ctx context.Context, req *ListRelationsRequest, opts ...http.CallOption) (rsp *ListRelationsResponse, err error)
+	// ListVersions 分页查询词库版本列表
+	ListVersions(ctx context.Context, req *ListVersionsRequest, opts ...http.CallOption) (rsp *ListVersionsResponse, err error)
+	// PublishDictionary 发布词库版本（生成时点快照）
+	PublishDictionary(ctx context.Context, req *PublishDictionaryRequest, opts ...http.CallOption) (rsp *DictionaryVersion, err error)
+	// UpdateCategory 更新词条分类（仅自定义）
+	UpdateCategory(ctx context.Context, req *UpdateCategoryRequest, opts ...http.CallOption) (rsp *DictionaryCategory, err error)
+	// UpdateDictionary 更新词库
+	UpdateDictionary(ctx context.Context, req *UpdateDictionaryRequest, opts ...http.CallOption) (rsp *Dictionary, err error)
+	// UpdateEntry 更新词条
+	UpdateEntry(ctx context.Context, req *UpdateEntryRequest, opts ...http.CallOption) (rsp *DictionaryEntry, err error)
+	// UpdateRelation 更新词条关系
+	UpdateRelation(ctx context.Context, req *UpdateRelationRequest, opts ...http.CallOption) (rsp *DictionaryRelation, err error)
 }
 
 type DictionaryServiceHTTPClientImpl struct {
@@ -178,12 +694,12 @@ func NewDictionaryServiceHTTPClient(client *http.Client) DictionaryServiceHTTPCl
 	return &DictionaryServiceHTTPClientImpl{client}
 }
 
-// CreateWord 创建标准词（可同时指定别名）
-func (c *DictionaryServiceHTTPClientImpl) CreateWord(ctx context.Context, in *CreateWordRequest, opts ...http.CallOption) (*CreateWordResponse, error) {
-	var out CreateWordResponse
-	pattern := "/evie/v1/dictionary/words"
+// CreateCategory 创建词条分类（仅自定义）
+func (c *DictionaryServiceHTTPClientImpl) CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...http.CallOption) (*DictionaryCategory, error) {
+	var out DictionaryCategory
+	pattern := "/evie/v1/dictionary-categories"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationDictionaryServiceCreateWord))
+	opts = append(opts, http.Operation(OperationDictionaryServiceCreateCategory))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -192,12 +708,54 @@ func (c *DictionaryServiceHTTPClientImpl) CreateWord(ctx context.Context, in *Cr
 	return &out, nil
 }
 
-// DeleteWord 删除标准词（级联软删除别名）
-func (c *DictionaryServiceHTTPClientImpl) DeleteWord(ctx context.Context, in *DeleteWordRequest, opts ...http.CallOption) (*DeleteWordResponse, error) {
-	var out DeleteWordResponse
-	pattern := "/evie/v1/dictionary/words/{id}"
+// CreateDictionary 创建词库
+func (c *DictionaryServiceHTTPClientImpl) CreateDictionary(ctx context.Context, in *CreateDictionaryRequest, opts ...http.CallOption) (*Dictionary, error) {
+	var out Dictionary
+	pattern := "/evie/v1/dictionaries"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceCreateDictionary))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CreateEntry 创建词条
+func (c *DictionaryServiceHTTPClientImpl) CreateEntry(ctx context.Context, in *CreateEntryRequest, opts ...http.CallOption) (*DictionaryEntry, error) {
+	var out DictionaryEntry
+	pattern := "/evie/v1/dictionaries/{dictionary_id}/entries"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceCreateEntry))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CreateRelation 创建词条关系
+func (c *DictionaryServiceHTTPClientImpl) CreateRelation(ctx context.Context, in *CreateRelationRequest, opts ...http.CallOption) (*DictionaryRelation, error) {
+	var out DictionaryRelation
+	pattern := "/evie/v1/entries/{entry_id}/relations"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceCreateRelation))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteCategory 删除词条分类（仅自定义）
+func (c *DictionaryServiceHTTPClientImpl) DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...http.CallOption) (*DeleteCategoryResponse, error) {
+	var out DeleteCategoryResponse
+	pattern := "/evie/v1/dictionary-categories/{id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationDictionaryServiceDeleteWord))
+	opts = append(opts, http.Operation(OperationDictionaryServiceDeleteCategory))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
@@ -206,12 +764,54 @@ func (c *DictionaryServiceHTTPClientImpl) DeleteWord(ctx context.Context, in *De
 	return &out, nil
 }
 
-// GetWord 查询标准词详情（含别名）
-func (c *DictionaryServiceHTTPClientImpl) GetWord(ctx context.Context, in *GetWordRequest, opts ...http.CallOption) (*GetWordResponse, error) {
-	var out GetWordResponse
-	pattern := "/evie/v1/dictionary/words/{id}"
+// DeleteDictionary 删除词库（软删除）
+func (c *DictionaryServiceHTTPClientImpl) DeleteDictionary(ctx context.Context, in *DeleteDictionaryRequest, opts ...http.CallOption) (*DeleteDictionaryResponse, error) {
+	var out DeleteDictionaryResponse
+	pattern := "/evie/v1/dictionaries/{id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationDictionaryServiceGetWord))
+	opts = append(opts, http.Operation(OperationDictionaryServiceDeleteDictionary))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteEntry 删除词条（软删除）
+func (c *DictionaryServiceHTTPClientImpl) DeleteEntry(ctx context.Context, in *DeleteEntryRequest, opts ...http.CallOption) (*DeleteEntryResponse, error) {
+	var out DeleteEntryResponse
+	pattern := "/evie/v1/entries/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceDeleteEntry))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteRelation 删除词条关系
+func (c *DictionaryServiceHTTPClientImpl) DeleteRelation(ctx context.Context, in *DeleteRelationRequest, opts ...http.CallOption) (*DeleteRelationResponse, error) {
+	var out DeleteRelationResponse
+	pattern := "/evie/v1/relations/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceDeleteRelation))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetDictionary 查询词库详情
+func (c *DictionaryServiceHTTPClientImpl) GetDictionary(ctx context.Context, in *GetDictionaryRequest, opts ...http.CallOption) (*Dictionary, error) {
+	var out Dictionary
+	pattern := "/evie/v1/dictionaries/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceGetDictionary))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -220,12 +820,12 @@ func (c *DictionaryServiceHTTPClientImpl) GetWord(ctx context.Context, in *GetWo
 	return &out, nil
 }
 
-// ListWords 分页查询标准词列表
-func (c *DictionaryServiceHTTPClientImpl) ListWords(ctx context.Context, in *ListWordsRequest, opts ...http.CallOption) (*ListWordsResponse, error) {
-	var out ListWordsResponse
-	pattern := "/evie/v1/dictionary/words"
+// GetEntry 查询词条详情
+func (c *DictionaryServiceHTTPClientImpl) GetEntry(ctx context.Context, in *GetEntryRequest, opts ...http.CallOption) (*DictionaryEntry, error) {
+	var out DictionaryEntry
+	pattern := "/evie/v1/entries/{id}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationDictionaryServiceListWords))
+	opts = append(opts, http.Operation(OperationDictionaryServiceGetEntry))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -234,12 +834,180 @@ func (c *DictionaryServiceHTTPClientImpl) ListWords(ctx context.Context, in *Lis
 	return &out, nil
 }
 
-// UpdateWord 更新标准词
-func (c *DictionaryServiceHTTPClientImpl) UpdateWord(ctx context.Context, in *UpdateWordRequest, opts ...http.CallOption) (*UpdateWordResponse, error) {
-	var out UpdateWordResponse
-	pattern := "/evie/v1/dictionary/words/{id}"
+// GetRelation 查询词条关系详情
+func (c *DictionaryServiceHTTPClientImpl) GetRelation(ctx context.Context, in *GetRelationRequest, opts ...http.CallOption) (*DictionaryRelation, error) {
+	var out DictionaryRelation
+	pattern := "/evie/v1/relations/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceGetRelation))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetVersion 查询词库版本详情
+func (c *DictionaryServiceHTTPClientImpl) GetVersion(ctx context.Context, in *GetVersionRequest, opts ...http.CallOption) (*DictionaryVersion, error) {
+	var out DictionaryVersion
+	pattern := "/evie/v1/dictionary-versions/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceGetVersion))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListCategories 分页查询词条分类列表
+func (c *DictionaryServiceHTTPClientImpl) ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...http.CallOption) (*ListCategoriesResponse, error) {
+	var out ListCategoriesResponse
+	pattern := "/evie/v1/dictionary-categories"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceListCategories))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListConflicts 查询词库冲突记录
+func (c *DictionaryServiceHTTPClientImpl) ListConflicts(ctx context.Context, in *ListConflictsRequest, opts ...http.CallOption) (*ListConflictsResponse, error) {
+	var out ListConflictsResponse
+	pattern := "/evie/v1/dictionary-conflicts"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceListConflicts))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListDictionaries 分页查询词库列表
+func (c *DictionaryServiceHTTPClientImpl) ListDictionaries(ctx context.Context, in *ListDictionariesRequest, opts ...http.CallOption) (*ListDictionariesResponse, error) {
+	var out ListDictionariesResponse
+	pattern := "/evie/v1/dictionaries"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceListDictionaries))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListEntries 分页查询词条列表
+func (c *DictionaryServiceHTTPClientImpl) ListEntries(ctx context.Context, in *ListEntriesRequest, opts ...http.CallOption) (*ListEntriesResponse, error) {
+	var out ListEntriesResponse
+	pattern := "/evie/v1/dictionaries/{dictionary_id}/entries"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceListEntries))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListRelations 分页查询词条关系列表
+func (c *DictionaryServiceHTTPClientImpl) ListRelations(ctx context.Context, in *ListRelationsRequest, opts ...http.CallOption) (*ListRelationsResponse, error) {
+	var out ListRelationsResponse
+	pattern := "/evie/v1/entries/{entry_id}/relations"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceListRelations))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListVersions 分页查询词库版本列表
+func (c *DictionaryServiceHTTPClientImpl) ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...http.CallOption) (*ListVersionsResponse, error) {
+	var out ListVersionsResponse
+	pattern := "/evie/v1/dictionaries/{dictionary_id}/versions"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceListVersions))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PublishDictionary 发布词库版本（生成时点快照）
+func (c *DictionaryServiceHTTPClientImpl) PublishDictionary(ctx context.Context, in *PublishDictionaryRequest, opts ...http.CallOption) (*DictionaryVersion, error) {
+	var out DictionaryVersion
+	pattern := "/evie/v1/dictionaries/{dictionary_id}:publish"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationDictionaryServiceUpdateWord))
+	opts = append(opts, http.Operation(OperationDictionaryServicePublishDictionary))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateCategory 更新词条分类（仅自定义）
+func (c *DictionaryServiceHTTPClientImpl) UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...http.CallOption) (*DictionaryCategory, error) {
+	var out DictionaryCategory
+	pattern := "/evie/v1/dictionary-categories/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceUpdateCategory))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateDictionary 更新词库
+func (c *DictionaryServiceHTTPClientImpl) UpdateDictionary(ctx context.Context, in *UpdateDictionaryRequest, opts ...http.CallOption) (*Dictionary, error) {
+	var out Dictionary
+	pattern := "/evie/v1/dictionaries/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceUpdateDictionary))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateEntry 更新词条
+func (c *DictionaryServiceHTTPClientImpl) UpdateEntry(ctx context.Context, in *UpdateEntryRequest, opts ...http.CallOption) (*DictionaryEntry, error) {
+	var out DictionaryEntry
+	pattern := "/evie/v1/entries/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceUpdateEntry))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateRelation 更新词条关系
+func (c *DictionaryServiceHTTPClientImpl) UpdateRelation(ctx context.Context, in *UpdateRelationRequest, opts ...http.CallOption) (*DictionaryRelation, error) {
+	var out DictionaryRelation
+	pattern := "/evie/v1/relations/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationDictionaryServiceUpdateRelation))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {

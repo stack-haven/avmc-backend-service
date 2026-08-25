@@ -8,132 +8,516 @@ import "google/api/annotations.proto";
 
 option go_package = "backend-service/api/evie/service/v1;v1";
 
-// 企业知识字典中心：标准词与别名的管理服务。
+// 词库中心：词库（Dictionary）与词条（DictionaryEntry）管理服务。
+// 词库表示一组具有共同作用域和生命周期的语言知识集合；
+// 词条表示一个标准语言概念（词或短语）。
 service DictionaryService {
-  // 分页查询标准词列表
-  rpc ListWords(ListWordsRequest) returns (ListWordsResponse) {
-    option (google.api.http) = {get: "/evie/v1/dictionary/words"};
+  // 分页查询词库列表
+  rpc ListDictionaries(ListDictionariesRequest) returns (ListDictionariesResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionaries"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "分页查询标准词列表"
-      tags: ["字典中心"]
+      summary: "分页查询词库列表"
+      tags: ["词库中心"]
     };
   }
 
-  // 查询标准词详情（含别名）
-  rpc GetWord(GetWordRequest) returns (GetWordResponse) {
-    option (google.api.http) = {get: "/evie/v1/dictionary/words/{id}"};
+  // 查询词库详情
+  rpc GetDictionary(GetDictionaryRequest) returns (Dictionary) {
+    option (google.api.http) = {get: "/evie/v1/dictionaries/{id}"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "查询标准词详情"
-      tags: ["字典中心"]
+      summary: "查询词库详情"
+      tags: ["词库中心"]
     };
   }
 
-  // 创建标准词（可同时指定别名）
-  rpc CreateWord(CreateWordRequest) returns (CreateWordResponse) {
+  // 创建词库
+  rpc CreateDictionary(CreateDictionaryRequest) returns (Dictionary) {
     option (google.api.http) = {
-      post: "/evie/v1/dictionary/words"
+      post: "/evie/v1/dictionaries"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "创建标准词"
-      tags: ["字典中心"]
+      summary: "创建词库"
+      tags: ["词库中心"]
     };
   }
 
-  // 更新标准词
-  rpc UpdateWord(UpdateWordRequest) returns (UpdateWordResponse) {
+  // 更新词库
+  rpc UpdateDictionary(UpdateDictionaryRequest) returns (Dictionary) {
     option (google.api.http) = {
-      put: "/evie/v1/dictionary/words/{id}"
+      put: "/evie/v1/dictionaries/{id}"
       body: "*"
     };
     option (gnostic.openapi.v3.operation) = {
-      summary: "更新标准词"
-      tags: ["字典中心"]
+      summary: "更新词库"
+      tags: ["词库中心"]
     };
   }
 
-  // 删除标准词（级联软删除别名）
-  rpc DeleteWord(DeleteWordRequest) returns (DeleteWordResponse) {
-    option (google.api.http) = {delete: "/evie/v1/dictionary/words/{id}"};
+  // 删除词库（软删除）
+  rpc DeleteDictionary(DeleteDictionaryRequest) returns (DeleteDictionaryResponse) {
+    option (google.api.http) = {delete: "/evie/v1/dictionaries/{id}"};
     option (gnostic.openapi.v3.operation) = {
-      summary: "删除标准词"
-      tags: ["字典中心"]
+      summary: "删除词库"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 分页查询词条列表
+  rpc ListEntries(ListEntriesRequest) returns (ListEntriesResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionaries/{dictionary_id}/entries"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询词条列表"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 查询词条详情
+  rpc GetEntry(GetEntryRequest) returns (DictionaryEntry) {
+    option (google.api.http) = {get: "/evie/v1/entries/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词条详情"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 创建词条
+  rpc CreateEntry(CreateEntryRequest) returns (DictionaryEntry) {
+    option (google.api.http) = {
+      post: "/evie/v1/dictionaries/{dictionary_id}/entries"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建词条"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 更新词条
+  rpc UpdateEntry(UpdateEntryRequest) returns (DictionaryEntry) {
+    option (google.api.http) = {
+      put: "/evie/v1/entries/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新词条"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 删除词条（软删除）
+  rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse) {
+    option (google.api.http) = {delete: "/evie/v1/entries/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除词条"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 分页查询词条关系列表
+  rpc ListRelations(ListRelationsRequest) returns (ListRelationsResponse) {
+    option (google.api.http) = {get: "/evie/v1/entries/{entry_id}/relations"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询词条关系列表"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 查询词条关系详情
+  rpc GetRelation(GetRelationRequest) returns (DictionaryRelation) {
+    option (google.api.http) = {get: "/evie/v1/relations/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词条关系详情"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 创建词条关系
+  rpc CreateRelation(CreateRelationRequest) returns (DictionaryRelation) {
+    option (google.api.http) = {
+      post: "/evie/v1/entries/{entry_id}/relations"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建词条关系"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 更新词条关系
+  rpc UpdateRelation(UpdateRelationRequest) returns (DictionaryRelation) {
+    option (google.api.http) = {
+      put: "/evie/v1/relations/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新词条关系"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 删除词条关系
+  rpc DeleteRelation(DeleteRelationRequest) returns (DeleteRelationResponse) {
+    option (google.api.http) = {delete: "/evie/v1/relations/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除词条关系"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 分页查询词条分类列表
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionary-categories"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询词条分类列表"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 创建词条分类（仅自定义）
+  rpc CreateCategory(CreateCategoryRequest) returns (DictionaryCategory) {
+    option (google.api.http) = {
+      post: "/evie/v1/dictionary-categories"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建词条分类"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 更新词条分类（仅自定义）
+  rpc UpdateCategory(UpdateCategoryRequest) returns (DictionaryCategory) {
+    option (google.api.http) = {
+      put: "/evie/v1/dictionary-categories/{id}"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新词条分类"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 删除词条分类（仅自定义）
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {
+    option (google.api.http) = {delete: "/evie/v1/dictionary-categories/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除词条分类"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 分页查询词库版本列表
+  rpc ListVersions(ListVersionsRequest) returns (ListVersionsResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionaries/{dictionary_id}/versions"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "分页查询词库版本列表"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 查询词库版本详情
+  rpc GetVersion(GetVersionRequest) returns (DictionaryVersion) {
+    option (google.api.http) = {get: "/evie/v1/dictionary-versions/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词库版本详情"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 发布词库版本（生成时点快照）
+  rpc PublishDictionary(PublishDictionaryRequest) returns (DictionaryVersion) {
+    option (google.api.http) = {
+      post: "/evie/v1/dictionaries/{dictionary_id}:publish"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "发布词库版本"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 查询词库冲突记录
+  rpc ListConflicts(ListConflictsRequest) returns (ListConflictsResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionary-conflicts"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词库冲突记录"
+      tags: ["词库中心"]
     };
   }
 }
 
-// DictionaryWord 标准词。
-message DictionaryWord {
+// Dictionary 词库。
+message Dictionary {
   uint32 id = 1;
-  string word = 2;      // 标准词
-  string level = 3;     // 字典层级: platform/system/tenant/user
-  string category = 4;  // 实体分类: person/org/product/term
-  string source = 5;    // 来源: manual/sync_org/sync_biz/feedback
-  int32 priority = 6;   // 匹配优先级，越大越优先
-  int32 status = 7;     // 1=启用 2=禁用
-  repeated DictionaryAlias aliases = 8;
-  string created_at = 9;
-  string updated_at = 10;
+  string name = 2;        // 词库名称
+  string scope = 3;       // 作用域: PLATFORM/SYSTEM/TENANT
+  string source = 4;      // 来源: PLATFORM/SYSTEM/MANUAL/IMPORT/SYNC/API
+  string description = 5; // 描述
+  int32 status = 6;       // 状态: 1=启用 2=禁用
+  string created_at = 7;
+  string updated_at = 8;
 }
 
-// DictionaryAlias 标准词别名。
-message DictionaryAlias {
+// DictionaryEntry 词条（标准语言概念，词或短语）。
+message DictionaryEntry {
   uint32 id = 1;
-  uint32 word_id = 2;  // 关联标准词ID
-  string alias = 3;    // 别名
-  string pinyin = 4;   // 拼音
-  float weight = 5;    // 匹配权重
-  string source = 6;   // manual/auto/feedback
+  uint32 dictionary_id = 2; // 所属词库 ID
+  string standard_text = 3; // 标准词/短语
+  string entry_type = 4;    // 词条类型: WORD/PHRASE
+  string category = 5;      // 分类: PERSON/ORGANIZATION/PRODUCT/...
+  string description = 6;
+  string source = 7;        // 来源
+  string source_id = 8;     // 外部来源 ID
+  int32 priority = 9;       // 匹配优先级
+  string pinyin = 10;       // 全拼
+  string pinyin_initial = 11; // 拼音首字母
+  string normalized_text = 12; // 规范化文本
+  int32 status = 13;        // 状态: 1=启用 2=禁用
+  string created_at = 14;
+  string updated_at = 15;
 }
 
-message ListWordsRequest {
-  int32 page_size = 1;   // 每页行数
-  string page_token = 2; // 页码 token（偏移量）
-  string category = 3;   // 按实体分类筛选
-  string keyword = 4;    // 按标准词模糊搜索
-  int32 status = 5;      // 按状态筛选
+message ListDictionariesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string scope = 3;   // 按作用域筛选
+  string keyword = 4; // 按名称模糊搜索
+  int32 status = 5;   // 按状态筛选
 }
 
-message ListWordsResponse {
-  repeated DictionaryWord words = 1;
+message ListDictionariesResponse {
+  repeated Dictionary dictionaries = 1;
   int32 total = 2;
   string next_page_token = 3;
 }
 
-message GetWordRequest {
+message GetDictionaryRequest {
   uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
 }
 
-message GetWordResponse {
-  DictionaryWord word = 1;
+message CreateDictionaryRequest {
+  string name = 1 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
+  string scope = 2 [(buf.validate.field).string = {max_len: 32}];
+  string source = 3 [(buf.validate.field).string = {max_len: 32}];
+  string description = 4 [(buf.validate.field).string = {max_len: 512}];
 }
 
-message CreateWordRequest {
-  string word = 1 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
-  string category = 2 [(buf.validate.field).string = {max_len: 32}];
-  string level = 3 [(buf.validate.field).string = {max_len: 32}];
-  int32 priority = 4;
-  repeated DictionaryAlias aliases = 5;  // 创建时一并指定的别名
-}
-
-message CreateWordResponse {
-  DictionaryWord word = 1;
-}
-
-message UpdateWordRequest {
+message UpdateDictionaryRequest {
   uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
-  string word = 2 [(buf.validate.field).string = {max_len: 128}];
-  string category = 3 [(buf.validate.field).string = {max_len: 32}];
-  int32 priority = 4;
-  int32 status = 5;
+  string name = 2 [(buf.validate.field).string = {max_len: 128}];
+  string description = 3 [(buf.validate.field).string = {max_len: 512}];
+  int32 status = 4;
 }
 
-message UpdateWordResponse {
-  DictionaryWord word = 1;
-}
-
-message DeleteWordRequest {
+message DeleteDictionaryRequest {
   uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
 }
 
-message DeleteWordResponse {}
+message DeleteDictionaryResponse {}
+
+message ListEntriesRequest {
+  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  int32 page_size = 2;
+  string page_token = 3;
+  string category = 4;   // 按分类筛选
+  string keyword = 5;     // 按标准词模糊搜索
+  int32 status = 6;       // 按状态筛选
+}
+
+message ListEntriesResponse {
+  repeated DictionaryEntry entries = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetEntryRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message CreateEntryRequest {
+  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string standard_text = 2 [(buf.validate.field).string = {min_len: 1, max_len: 255}];
+  string entry_type = 3 [(buf.validate.field).string = {max_len: 16}];
+  string category = 4 [(buf.validate.field).string = {max_len: 64}];
+  string description = 5 [(buf.validate.field).string = {max_len: 512}];
+  string source = 6 [(buf.validate.field).string = {max_len: 32}];
+  string source_id = 7 [(buf.validate.field).string = {max_len: 128}];
+  int32 priority = 8;
+  string pinyin = 9 [(buf.validate.field).string = {max_len: 512}];
+  string pinyin_initial = 10 [(buf.validate.field).string = {max_len: 128}];
+  string normalized_text = 11 [(buf.validate.field).string = {max_len: 255}];
+}
+
+message UpdateEntryRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string standard_text = 2 [(buf.validate.field).string = {max_len: 255}];
+  string entry_type = 3 [(buf.validate.field).string = {max_len: 16}];
+  string category = 4 [(buf.validate.field).string = {max_len: 64}];
+  string description = 5 [(buf.validate.field).string = {max_len: 512}];
+  int32 priority = 6;
+  string pinyin = 7 [(buf.validate.field).string = {max_len: 512}];
+  string pinyin_initial = 8 [(buf.validate.field).string = {max_len: 128}];
+  string normalized_text = 9 [(buf.validate.field).string = {max_len: 255}];
+  int32 status = 10;
+}
+
+message DeleteEntryRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message DeleteEntryResponse {}
+
+// DictionaryRelation 词条关系（别名/纠错/同音/近音/简称/相关）。
+message DictionaryRelation {
+  uint32 id = 1;
+  uint32 entry_id = 2;       // 所属词条 ID
+  string relation_type = 3;  // 关系类型: ALIAS/CORRECTION/HOMOPHONE/PHONETIC_SIMILAR/ABBREVIATION/RELATED
+  string related_text = 4;   // 关联表达（如别名「小田」、错误表达「金种子」）
+  uint32 target_entry_id = 5; // 目标词条 ID（可选）
+  string source = 6;         // 来源: MANUAL/SYNC/IMPORT/API
+  string description = 7;
+  int32 status = 8;          // 状态: 1=启用 2=禁用
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message ListRelationsRequest {
+  uint32 entry_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  int32 page_size = 2;
+  string page_token = 3;
+  string relation_type = 4; // 按关系类型筛选
+}
+
+message ListRelationsResponse {
+  repeated DictionaryRelation relations = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetRelationRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message CreateRelationRequest {
+  uint32 entry_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string relation_type = 2 [(buf.validate.field).string = {min_len: 1, max_len: 32}];
+  string related_text = 3 [(buf.validate.field).string = {min_len: 1, max_len: 255}];
+  uint32 target_entry_id = 4;
+  string source = 5 [(buf.validate.field).string = {max_len: 32}];
+  string description = 6 [(buf.validate.field).string = {max_len: 512}];
+}
+
+message UpdateRelationRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string relation_type = 2 [(buf.validate.field).string = {max_len: 32}];
+  string related_text = 3 [(buf.validate.field).string = {max_len: 255}];
+  uint32 target_entry_id = 4;
+  string description = 5 [(buf.validate.field).string = {max_len: 512}];
+  int32 status = 6;
+}
+
+message DeleteRelationRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message DeleteRelationResponse {}
+
+// DictionaryCategory 词条分类（性质）。内置分类只读，自定义分类租户可管理。
+message DictionaryCategory {
+  uint32 id = 1;
+  string code = 2;  // 分类编码: PERSON/ORGANIZATION/PRODUCT/...
+  string name = 3;  // 分类名称
+  bool builtin = 4; // 是否内置分类
+  int32 sort = 5;
+  int32 status = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+// DictionaryVersion 词库版本（时点快照）。
+message DictionaryVersion {
+  uint32 id = 1;
+  uint32 dictionary_id = 2;
+  int32 version_no = 3;  // 版本号，递增
+  string snapshot = 4;   // 词条/关系时点快照（JSON）
+  string description = 5;
+  int32 status = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message ListCategoriesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string keyword = 3; // 按名称/编码模糊搜索
+}
+
+message ListCategoriesResponse {
+  repeated DictionaryCategory categories = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message CreateCategoryRequest {
+  string code = 1 [(buf.validate.field).string = {min_len: 1, max_len: 64}];
+  string name = 2 [(buf.validate.field).string = {min_len: 1, max_len: 128}];
+  int32 sort = 3;
+}
+
+message UpdateCategoryRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string name = 2 [(buf.validate.field).string = {max_len: 128}];
+  int32 sort = 3;
+  int32 status = 4;
+}
+
+message DeleteCategoryRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message DeleteCategoryResponse {}
+
+message ListVersionsRequest {
+  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListVersionsResponse {
+  repeated DictionaryVersion versions = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetVersionRequest {
+  uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message PublishDictionaryRequest {
+  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  string description = 2 [(buf.validate.field).string = {max_len: 512}];
+}
+
+// DictionaryConflict 词库冲突记录。
+message DictionaryConflict {
+  uint32 id = 1;
+  string input = 2;               // 输入表达
+  string candidate = 3;           // 候选结果
+  string source_scope = 4;        // 来源作用域: PLATFORM/SYSTEM/TENANT
+  string source_dictionary = 5;   // 来源词库标识
+  int32 priority = 6;             // 候选优先级
+  string resolved_candidate = 7;  // 解析后的候选
+  string created_at = 8;
+}
+
+message ListConflictsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListConflictsResponse {
+  repeated DictionaryConflict conflicts = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
