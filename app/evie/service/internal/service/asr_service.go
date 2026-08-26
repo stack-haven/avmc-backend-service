@@ -131,7 +131,7 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.enhance(ctx, result.Text, 0, record.GetSessionId())
+	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId(), record.GetSessionId())
 	if err != nil {
 		return nil, err
 	}

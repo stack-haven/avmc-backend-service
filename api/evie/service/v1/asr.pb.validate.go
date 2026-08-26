@@ -1946,6 +1946,8 @@ func (m *ReRecognizeRequest) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for ProfileId
+
 	if len(errors) > 0 {
 		return ReRecognizeRequestMultiError(errors)
 	}

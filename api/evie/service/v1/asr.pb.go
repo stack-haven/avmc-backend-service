@@ -1148,6 +1148,7 @@ func (x *RecognizeAndCorrectResponse) GetProviderName() string {
 type ReRecognizeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProfileId     uint32                 `protobuf:"varint,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=默认增强方案）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1185,6 +1186,13 @@ func (*ReRecognizeRequest) Descriptor() ([]byte, []int) {
 func (x *ReRecognizeRequest) GetId() uint32 {
 	if x != nil {
 		return x.Id
+	}
+	return 0
+}
+
+func (x *ReRecognizeRequest) GetProfileId() uint32 {
+	if x != nil {
+		return x.ProfileId
 	}
 	return 0
 }
@@ -1302,9 +1310,11 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\n" +
 	"confidence\x18\x04 \x01(\x02R\n" +
 	"confidence\x12#\n" +
-	"\rprovider_name\x18\x05 \x01(\tR\fproviderName\"-\n" +
+	"\rprovider_name\x18\x05 \x01(\tR\fproviderName\"L\n" +
 	"\x12ReRecognizeRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id*\x90\x01\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12\x1d\n" +
+	"\n" +
+	"profile_id\x18\x02 \x01(\rR\tprofileId*\x90\x01\n" +
 	"\rAudioEncoding\x12\x1e\n" +
 	"\x1aAUDIO_ENCODING_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12AUDIO_ENCODING_PCM\x10\x01\x12\x16\n" +

@@ -24,13 +24,21 @@ func resolveEnhancePolicy(ctx context.Context, uc *biz.EnhancementPolicyUsecase,
 		}
 		return uc.GetPolicy(ctx, profile.GetPolicyId())
 	}
-	// 默认增强方案：取租户第一个策略
-	policies, _, err := uc.ListPolicies(ctx, &pb.ListPoliciesRequest{PageSize: 1})
+	// 默认增强方案：优先选择「高性能模式且启用口水词+别名+确定性替换」的策略；
+	// 其次选启用核心步骤（口水词+别名+确定性替换）的策略；没有则 nil（执行全部步骤）。
+	policies, _, err := uc.ListPolicies(ctx, &pb.ListPoliciesRequest{PageSize: 100})
 	if err != nil {
 		return nil, err
 	}
-	if len(policies) > 0 {
-		return policies[0], nil
+	for _, p := range policies {
+		if p.GetMode() == "HIGH_PERFORMANCE" && p.GetFillerRemoval() && p.GetAliasResolution() && p.GetDeterministicReplacement() {
+			return p, nil
+		}
+	}
+	for _, p := range policies {
+		if p.GetFillerRemoval() && p.GetAliasResolution() && p.GetDeterministicReplacement() {
+			return p, nil
+		}
 	}
 	return nil, nil
 }

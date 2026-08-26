@@ -219,4 +219,5 @@ message RecognizeAndCorrectResponse {
 
 message ReRecognizeRequest {
   uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  uint32 profile_id = 2; // 增强场景 ID（0=默认增强方案）
 }

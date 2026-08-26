@@ -52,13 +52,15 @@ func (s *CorrectionServiceService) Correct(ctx context.Context, req *pb.CorrectR
 		}
 	}
 
-	// 保存增强日志（分阶段耗时 + 变更）
+	// 保存增强日志（分阶段耗时 + 变更 + 步骤快照）
 	if s.logUc != nil && result.StepTimings != nil {
 		changesJSON, _ := json.Marshal(result.Changes)
+		snapshotsJSON, _ := json.Marshal(result.StepSnapshots)
 		s.logUc.Save(ctx, &biz.EnhancementLogData{
 			RawText:             result.RawText,
 			EnhancedText:        result.EnhancedText,
 			ChangesJSON:         string(changesJSON),
+			StepSnapshotsJSON:   string(snapshotsJSON),
 			ProcessingTimeMs:    result.TotalTime.Milliseconds(),
 			CleaningTimeMs:      stepMs(result.StepTimings, "cleaning"),
 			FillerTimeMs:        stepMs(result.StepTimings, "filler"),
