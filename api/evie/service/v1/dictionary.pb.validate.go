@@ -202,6 +202,8 @@ func (m *DictionaryEntry) validate(all bool) error {
 
 	// no validation rules for UpdatedAt
 
+	// no validation rules for DictionaryName
+
 	if len(errors) > 0 {
 		return DictionaryEntryMultiError(errors)
 	}

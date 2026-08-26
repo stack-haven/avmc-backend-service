@@ -170,6 +170,13 @@ func (r *dictionaryRepo) ListEntries(ctx context.Context, req *pb.ListEntriesReq
 	query := r.Data.DB(ctx).DictionaryEntry.Query().Where(dictionaryentry.DeletedAtIsNil())
 	if req.GetDictionaryId() != 0 {
 		query.Where(dictionaryentry.DictionaryIDEQ(req.GetDictionaryId()))
+	} else {
+		// 全部词库：只查未删除词库下的词条（词库已删除则其词条不再展示）
+		dictIDs, err := r.activeDictionaryIDs(ctx)
+		if err != nil {
+			return nil, 0, err
+		}
+		query.Where(dictionaryentry.DictionaryIDIn(dictIDs...))
 	}
 	if req.GetCategory() != "" {
 		query.Where(dictionaryentry.CategoryEQ(req.GetCategory()))
@@ -192,9 +199,22 @@ func (r *dictionaryRepo) ListEntries(ctx context.Context, req *pb.ListEntriesReq
 	if err != nil {
 		return nil, 0, err
 	}
+	// JOIN 词库名称（列表展示用）
+	dictIDs := make([]uint32, 0, len(rows))
+	for _, row := range rows {
+		dictIDs = append(dictIDs, row.DictionaryID)
+	}
+	dictsByID, err := r.loadDictionariesByIDs(ctx, dictIDs)
+	if err != nil {
+		return nil, 0, err
+	}
 	result := make([]*pb.DictionaryEntry, 0, len(rows))
 	for _, row := range rows {
-		result = append(result, dictionaryEntryProto(row))
+		item := dictionaryEntryProto(row)
+		if d, ok := dictsByID[row.DictionaryID]; ok && d != nil {
+			item.DictionaryName = d.Name
+		}
+		result = append(result, item)
 	}
 	return result, int32(total), nil
 }
@@ -411,6 +431,22 @@ func (r *dictionaryRepo) loadDictionariesByIDs(ctx context.Context, ids []uint32
 		out[d.ID] = d
 	}
 	return out, nil
+}
+
+// activeDictionaryIDs 返回未删除词库的 ID 列表（用于 ListEntries 全部查询时过滤已删除词库）。
+func (r *dictionaryRepo) activeDictionaryIDs(ctx context.Context) ([]uint32, error) {
+	rows, err := r.Data.DB(ctx).Dictionary.Query().
+		Where(dictionary.DeletedAtIsNil()).
+		Select(dictionary.FieldID).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]uint32, 0, len(rows))
+	for _, d := range rows {
+		ids = append(ids, d.ID)
+	}
+	return ids, nil
 }
 
 // ListRelations 分页查询词条关系（响应含 JOIN 字段）。

@@ -143,6 +143,7 @@ type DictionaryEntry struct {
 	Status         int32                  `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`                                      // 状态: 1=启用 2=禁用
 	CreatedAt      string                 `protobuf:"bytes,14,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      string                 `protobuf:"bytes,15,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DictionaryName string                 `protobuf:"bytes,16,opt,name=dictionary_name,json=dictionaryName,proto3" json:"dictionary_name,omitempty"` // 所属词库名称（列表展示用）
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -278,6 +279,13 @@ func (x *DictionaryEntry) GetCreatedAt() string {
 func (x *DictionaryEntry) GetUpdatedAt() string {
 	if x != nil {
 		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *DictionaryEntry) GetDictionaryName() string {
+	if x != nil {
+		return x.DictionaryName
 	}
 	return ""
 }
@@ -3829,7 +3837,7 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\tR\tupdatedAt\"\xd7\x03\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x80\x04\n" +
 	"\x0fDictionaryEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12#\n" +
 	"\rdictionary_id\x18\x02 \x01(\rR\fdictionaryId\x12#\n" +
@@ -3849,7 +3857,8 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x0e \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"\x9d\x01\n" +
+	"updated_at\x18\x0f \x01(\tR\tupdatedAt\x12'\n" +
+	"\x0fdictionary_name\x18\x10 \x01(\tR\x0edictionaryName\"\x9d\x01\n" +
 	"\x17ListDictionariesRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +

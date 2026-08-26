@@ -312,6 +312,7 @@ message DictionaryEntry {
   int32 status = 13;        // 状态: 1=启用 2=禁用
   string created_at = 14;
   string updated_at = 15;
+  string dictionary_name = 16; // 所属词库名称（列表展示用）
 }
 
 message ListDictionariesRequest {
