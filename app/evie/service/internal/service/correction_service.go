@@ -16,19 +16,24 @@ import (
 type CorrectionServiceService struct {
 	pb.UnimplementedCorrectionServiceServer
 	enhancer *biz.EnhancementEngine
+	policyUc *biz.EnhancementPolicyUsecase
 	logUc    *biz.EnhancementLogUsecase
 	log      *log.Helper
 }
 
 // NewCorrectionServiceService 创建文本增强服务实例。
-func NewCorrectionServiceService(enhancer *biz.EnhancementEngine, logUc *biz.EnhancementLogUsecase, logger log.Logger) *CorrectionServiceService {
-	return &CorrectionServiceService{enhancer: enhancer, logUc: logUc, log: log.NewHelper(logger)}
+func NewCorrectionServiceService(enhancer *biz.EnhancementEngine, policyUc *biz.EnhancementPolicyUsecase, logUc *biz.EnhancementLogUsecase, logger log.Logger) *CorrectionServiceService {
+	return &CorrectionServiceService{enhancer: enhancer, policyUc: policyUc, logUc: logUc, log: log.NewHelper(logger)}
 }
 
 // Correct 文本增强（清洗 → 口水词 → 词库匹配 → 别名/纠错 → 拼音/模糊/上下文）。
 func (s *CorrectionServiceService) Correct(ctx context.Context, req *pb.CorrectRequest) (*pb.CorrectResponse, error) {
 	tenantID := authn.GetAuthUserTenantID(ctx)
-	result, err := s.enhancer.Enhance(ctx, tenantID, req.GetText())
+	policy, err := resolveEnhancePolicy(ctx, s.policyUc, req.GetProfileId())
+	if err != nil {
+		return nil, err
+	}
+	result, err := s.enhancer.EnhanceWithPolicy(ctx, tenantID, req.GetText(), policy)
 	if err != nil {
 		return nil, err
 	}

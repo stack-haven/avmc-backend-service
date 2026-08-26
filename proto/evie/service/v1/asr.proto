@@ -105,6 +105,7 @@ message RecognizeRequest {
   string session_id = 1;
   AudioFormat format = 2;
   bytes audio_data = 3 [(buf.validate.field).bytes = {max_len: 10485760}]; // max 10MB
+  uint32 profile_id = 4; // 增强场景 ID（0=默认增强方案）
 }
 
 message RecognizeResponse {

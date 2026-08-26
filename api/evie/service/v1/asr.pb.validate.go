@@ -197,6 +197,8 @@ func (m *RecognizeRequest) validate(all bool) error {
 
 	// no validation rules for AudioData
 
+	// no validation rules for ProfileId
+
 	if len(errors) > 0 {
 		return RecognizeRequestMultiError(errors)
 	}

@@ -28,7 +28,8 @@ type CorrectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Context       string                 `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"` // 上下文（前几轮对话），可选
+	Context       string                 `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`                       // 上下文（前几轮对话），可选
+	ProfileId     uint32                 `protobuf:"varint,4,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=默认增强方案）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -82,6 +83,13 @@ func (x *CorrectRequest) GetContext() string {
 		return x.Context
 	}
 	return ""
+}
+
+func (x *CorrectRequest) GetProfileId() uint32 {
+	if x != nil {
+		return x.ProfileId
+	}
+	return 0
 }
 
 type CorrectResponse struct {
@@ -232,12 +240,14 @@ var File_evie_service_v1_correction_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_correction_proto_rawDesc = "" +
 	"\n" +
-	" evie/service/v1/correction.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"f\n" +
+	" evie/service/v1/correction.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"\x85\x01\n" +
 	"\x0eCorrectRequest\x12\x1b\n" +
 	"\x04text\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04text\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x18\n" +
-	"\acontext\x18\x03 \x01(\tR\acontext\"\xdd\x01\n" +
+	"\acontext\x18\x03 \x01(\tR\acontext\x12\x1d\n" +
+	"\n" +
+	"profile_id\x18\x04 \x01(\rR\tprofileId\"\xdd\x01\n" +
 	"\x0fCorrectResponse\x12#\n" +
 	"\roriginal_text\x18\x01 \x01(\tR\foriginalText\x12%\n" +
 	"\x0ecorrected_text\x18\x02 \x01(\tR\rcorrectedText\x12;\n" +

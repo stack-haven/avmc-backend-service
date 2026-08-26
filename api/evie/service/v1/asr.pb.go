@@ -153,7 +153,8 @@ type RecognizeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Format        *AudioFormat           `protobuf:"bytes,2,opt,name=format,proto3" json:"format,omitempty"`
-	AudioData     []byte                 `protobuf:"bytes,3,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"` // max 10MB
+	AudioData     []byte                 `protobuf:"bytes,3,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`  // max 10MB
+	ProfileId     uint32                 `protobuf:"varint,4,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=默认增强方案）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -207,6 +208,13 @@ func (x *RecognizeRequest) GetAudioData() []byte {
 		return x.AudioData
 	}
 	return nil
+}
+
+func (x *RecognizeRequest) GetProfileId() uint32 {
+	if x != nil {
+		return x.ProfileId
+	}
+	return 0
 }
 
 type RecognizeResponse struct {
@@ -1021,14 +1029,16 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\vsample_rate\x18\x02 \x01(\x05R\n" +
 	"sampleRate\x12\x1b\n" +
 	"\tbit_depth\x18\x03 \x01(\x05R\bbitDepth\x12\x1a\n" +
-	"\bchannels\x18\x04 \x01(\x05R\bchannels\"\x92\x01\n" +
+	"\bchannels\x18\x04 \x01(\x05R\bchannels\"\xb1\x01\n" +
 	"\x10RecognizeRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x124\n" +
 	"\x06format\x18\x02 \x01(\v2\x1c.evie.service.v1.AudioFormatR\x06format\x12)\n" +
 	"\n" +
 	"audio_data\x18\x03 \x01(\fB\n" +
-	"\xbaH\az\x05\x18\x80\x80\x80\x05R\taudioData\"\xfd\x01\n" +
+	"\xbaH\az\x05\x18\x80\x80\x80\x05R\taudioData\x12\x1d\n" +
+	"\n" +
+	"profile_id\x18\x04 \x01(\rR\tprofileId\"\xfd\x01\n" +
 	"\x11RecognizeResponse\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x12\n" +

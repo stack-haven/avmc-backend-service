@@ -27,6 +27,7 @@ message CorrectRequest {
   string text = 1 [(buf.validate.field).string = {min_len: 1}];
   string session_id = 2;
   string context = 3;  // 上下文（前几轮对话），可选
+  uint32 profile_id = 4; // 增强场景 ID（0=默认增强方案）
 }
 
 message CorrectResponse {

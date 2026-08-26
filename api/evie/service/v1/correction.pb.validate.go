@@ -63,6 +63,8 @@ func (m *CorrectRequest) validate(all bool) error {
 
 	// no validation rules for Context
 
+	// no validation rules for ProfileId
+
 	if len(errors) > 0 {
 		return CorrectRequestMultiError(errors)
 	}

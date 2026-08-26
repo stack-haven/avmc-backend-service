@@ -15,14 +15,15 @@ import (
 // ASRServiceService ASR 语音识别服务。
 type ASRServiceService struct {
 	pb.UnimplementedASRServiceServer
-	auc     *biz.ASRUsecase
+	auc      *biz.ASRUsecase
 	enhancer *biz.EnhancementEngine
-	log     *log.Helper
+	policyUc *biz.EnhancementPolicyUsecase
+	log      *log.Helper
 }
 
 // NewASRServiceService 创建 ASR 服务实例。
-func NewASRServiceService(auc *biz.ASRUsecase, enhancer *biz.EnhancementEngine, logger log.Logger) *ASRServiceService {
-	return &ASRServiceService{auc: auc, enhancer: enhancer, log: log.NewHelper(logger)}
+func NewASRServiceService(auc *biz.ASRUsecase, enhancer *biz.EnhancementEngine, policyUc *biz.EnhancementPolicyUsecase, logger log.Logger) *ASRServiceService {
+	return &ASRServiceService{auc: auc, enhancer: enhancer, policyUc: policyUc, log: log.NewHelper(logger)}
 }
 
 // Recognize 同步识别。
@@ -105,7 +106,7 @@ func (s *ASRServiceService) RecognizeAndCorrect(ctx context.Context, req *pb.Rec
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.enhance(ctx, result.Text)
+	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId())
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +125,7 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.enhance(ctx, result.Text)
+	corrected, err := s.enhance(ctx, result.Text, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +139,13 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 }
 
 // enhance 调用文本增强引擎，映射为 CorrectResponse。
-func (s *ASRServiceService) enhance(ctx context.Context, text string) (*pb.CorrectResponse, error) {
+func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID uint32) (*pb.CorrectResponse, error) {
 	tenantID := authn.GetAuthUserTenantID(ctx)
-	result, err := s.enhancer.Enhance(ctx, tenantID, text)
+	policy, err := resolveEnhancePolicy(ctx, s.policyUc, profileID)
+	if err != nil {
+		return nil, err
+	}
+	result, err := s.enhancer.EnhanceWithPolicy(ctx, tenantID, text, policy)
 	if err != nil {
 		return nil, err
 	}
