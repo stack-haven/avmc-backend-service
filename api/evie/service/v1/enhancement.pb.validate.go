@@ -2353,3 +2353,217 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetEnhancementLogRequestValidationError{}
+
+// Validate checks the field values on GeneratePinyinRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GeneratePinyinRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GeneratePinyinRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GeneratePinyinRequestMultiError, or nil if none found.
+func (m *GeneratePinyinRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GeneratePinyinRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Text
+
+	// no validation rules for IncludeInitials
+
+	if len(errors) > 0 {
+		return GeneratePinyinRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GeneratePinyinRequestMultiError is an error wrapping multiple validation
+// errors returned by GeneratePinyinRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GeneratePinyinRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GeneratePinyinRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GeneratePinyinRequestMultiError) AllErrors() []error { return m }
+
+// GeneratePinyinRequestValidationError is the validation error returned by
+// GeneratePinyinRequest.Validate if the designated constraints aren't met.
+type GeneratePinyinRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GeneratePinyinRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GeneratePinyinRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GeneratePinyinRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GeneratePinyinRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GeneratePinyinRequestValidationError) ErrorName() string {
+	return "GeneratePinyinRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GeneratePinyinRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGeneratePinyinRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GeneratePinyinRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GeneratePinyinRequestValidationError{}
+
+// Validate checks the field values on GeneratePinyinResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GeneratePinyinResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GeneratePinyinResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GeneratePinyinResponseMultiError, or nil if none found.
+func (m *GeneratePinyinResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GeneratePinyinResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Pinyin
+
+	// no validation rules for PinyinInitial
+
+	// no validation rules for NormalizedText
+
+	if len(errors) > 0 {
+		return GeneratePinyinResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GeneratePinyinResponseMultiError is an error wrapping multiple validation
+// errors returned by GeneratePinyinResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GeneratePinyinResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GeneratePinyinResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GeneratePinyinResponseMultiError) AllErrors() []error { return m }
+
+// GeneratePinyinResponseValidationError is the validation error returned by
+// GeneratePinyinResponse.Validate if the designated constraints aren't met.
+type GeneratePinyinResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GeneratePinyinResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GeneratePinyinResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GeneratePinyinResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GeneratePinyinResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GeneratePinyinResponseValidationError) ErrorName() string {
+	return "GeneratePinyinResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GeneratePinyinResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGeneratePinyinResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GeneratePinyinResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GeneratePinyinResponseValidationError{}

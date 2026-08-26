@@ -1491,6 +1491,120 @@ func (x *GetEnhancementLogRequest) GetId() uint32 {
 	return 0
 }
 
+// GeneratePinyinRequest 拼音生成请求。
+type GeneratePinyinRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Text            string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	IncludeInitials bool                   `protobuf:"varint,2,opt,name=include_initials,json=includeInitials,proto3" json:"include_initials,omitempty"` // 是否同时返回拼音首字母（默认 true）
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GeneratePinyinRequest) Reset() {
+	*x = GeneratePinyinRequest{}
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GeneratePinyinRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GeneratePinyinRequest) ProtoMessage() {}
+
+func (x *GeneratePinyinRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GeneratePinyinRequest.ProtoReflect.Descriptor instead.
+func (*GeneratePinyinRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GeneratePinyinRequest) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *GeneratePinyinRequest) GetIncludeInitials() bool {
+	if x != nil {
+		return x.IncludeInitials
+	}
+	return false
+}
+
+// GeneratePinyinResponse 拼音生成响应。
+type GeneratePinyinResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Pinyin         string                 `protobuf:"bytes,1,opt,name=pinyin,proto3" json:"pinyin,omitempty"`                                       // 全拼（空格分隔，如 "ke fu nin hao"）
+	PinyinInitial  string                 `protobuf:"bytes,2,opt,name=pinyin_initial,json=pinyinInitial,proto3" json:"pinyin_initial,omitempty"`    // 拼音首字母（如 "kfnh"）
+	NormalizedText string                 `protobuf:"bytes,3,opt,name=normalized_text,json=normalizedText,proto3" json:"normalized_text,omitempty"` // 规范化后文本（去标点、空格归一）
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GeneratePinyinResponse) Reset() {
+	*x = GeneratePinyinResponse{}
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GeneratePinyinResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GeneratePinyinResponse) ProtoMessage() {}
+
+func (x *GeneratePinyinResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GeneratePinyinResponse.ProtoReflect.Descriptor instead.
+func (*GeneratePinyinResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GeneratePinyinResponse) GetPinyin() string {
+	if x != nil {
+		return x.Pinyin
+	}
+	return ""
+}
+
+func (x *GeneratePinyinResponse) GetPinyinInitial() string {
+	if x != nil {
+		return x.PinyinInitial
+	}
+	return ""
+}
+
+func (x *GeneratePinyinResponse) GetNormalizedText() string {
+	if x != nil {
+		return x.NormalizedText
+	}
+	return ""
+}
+
 var File_evie_service_v1_enhancement_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_enhancement_proto_rawDesc = "" +
@@ -1626,7 +1740,15 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
 	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"3\n" +
 	"\x18GetEnhancementLogRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id2\xda\x10\n" +
+	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"b\n" +
+	"\x15GeneratePinyinRequest\x12\x1e\n" +
+	"\x04text\x18\x01 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\x80\x02R\x04text\x12)\n" +
+	"\x10include_initials\x18\x02 \x01(\bR\x0fincludeInitials\"\x80\x01\n" +
+	"\x16GeneratePinyinResponse\x12\x16\n" +
+	"\x06pinyin\x18\x01 \x01(\tR\x06pinyin\x12%\n" +
+	"\x0epinyin_initial\x18\x02 \x01(\tR\rpinyinInitial\x12'\n" +
+	"\x0fnormalized_text\x18\x03 \x01(\tR\x0enormalizedText2\x82\x12\n" +
 	"\x12EnhancementService\x12\xb3\x01\n" +
 	"\fListPolicies\x12$.evie.service.v1.ListPoliciesRequest\x1a%.evie.service.v1.ListPoliciesResponse\"V\xbaG.\n" +
 	"\f文本增强\x12\x1e分页查询增强策略列表\x82\xd3\xe4\x93\x02\x1f\x12\x1d/evie/v1/enhancement-policies\x12\xa9\x01\n" +
@@ -1652,7 +1774,9 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\bListLogs\x12+.evie.service.v1.ListEnhancementLogsRequest\x1a,.evie.service.v1.ListEnhancementLogsResponse\"R\xbaG.\n" +
 	"\f文本增强\x12\x1e分页查询增强记录列表\x82\xd3\xe4\x93\x02\x1b\x12\x19/evie/v1/enhancement-logs\x12\xa7\x01\n" +
 	"\x06GetLog\x12).evie.service.v1.GetEnhancementLogRequest\x1a\x1f.evie.service.v1.EnhancementLog\"Q\xbaG(\n" +
-	"\f文本增强\x12\x18查询增强记录详情\x82\xd3\xe4\x93\x02 \x12\x1e/evie/v1/enhancement-logs/{id}B\xad\x01\n" +
+	"\f文本增强\x12\x18查询增强记录详情\x82\xd3\xe4\x93\x02 \x12\x1e/evie/v1/enhancement-logs/{id}\x12\xa5\x01\n" +
+	"\x0eGeneratePinyin\x12&.evie.service.v1.GeneratePinyinRequest\x1a'.evie.service.v1.GeneratePinyinResponse\"B\xbaG\x1c\n" +
+	"\f文本增强\x12\f生成拼音\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/evie/v1/pinyin:generateB\xad\x01\n" +
 	"\x13com.evie.service.v1B\x10EnhancementProtoP\x01Z&backend-service/api/evie/service/v1;v1\xa2\x02\x03ESX\xaa\x02\x0fEvie.Service.V1\xca\x02\x0fEvie\\Service\\V1\xe2\x02\x1bEvie\\Service\\V1\\GPBMetadata\xea\x02\x11Evie::Service::V1b\x06proto3"
 
 var (
@@ -1667,7 +1791,7 @@ func file_evie_service_v1_enhancement_proto_rawDescGZIP() []byte {
 	return file_evie_service_v1_enhancement_proto_rawDescData
 }
 
-var file_evie_service_v1_enhancement_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_evie_service_v1_enhancement_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_evie_service_v1_enhancement_proto_goTypes = []any{
 	(*EnhancementPolicy)(nil),           // 0: evie.service.v1.EnhancementPolicy
 	(*EnhancementProfile)(nil),          // 1: evie.service.v1.EnhancementProfile
@@ -1689,6 +1813,8 @@ var file_evie_service_v1_enhancement_proto_goTypes = []any{
 	(*ListEnhancementLogsRequest)(nil),  // 17: evie.service.v1.ListEnhancementLogsRequest
 	(*ListEnhancementLogsResponse)(nil), // 18: evie.service.v1.ListEnhancementLogsResponse
 	(*GetEnhancementLogRequest)(nil),    // 19: evie.service.v1.GetEnhancementLogRequest
+	(*GeneratePinyinRequest)(nil),       // 20: evie.service.v1.GeneratePinyinRequest
+	(*GeneratePinyinResponse)(nil),      // 21: evie.service.v1.GeneratePinyinResponse
 }
 var file_evie_service_v1_enhancement_proto_depIdxs = []int32{
 	0,  // 0: evie.service.v1.ListPoliciesResponse.policies:type_name -> evie.service.v1.EnhancementPolicy
@@ -1706,20 +1832,22 @@ var file_evie_service_v1_enhancement_proto_depIdxs = []int32{
 	14, // 12: evie.service.v1.EnhancementService.DeleteProfile:input_type -> evie.service.v1.DeleteProfileRequest
 	17, // 13: evie.service.v1.EnhancementService.ListLogs:input_type -> evie.service.v1.ListEnhancementLogsRequest
 	19, // 14: evie.service.v1.EnhancementService.GetLog:input_type -> evie.service.v1.GetEnhancementLogRequest
-	3,  // 15: evie.service.v1.EnhancementService.ListPolicies:output_type -> evie.service.v1.ListPoliciesResponse
-	0,  // 16: evie.service.v1.EnhancementService.GetPolicy:output_type -> evie.service.v1.EnhancementPolicy
-	0,  // 17: evie.service.v1.EnhancementService.CreatePolicy:output_type -> evie.service.v1.EnhancementPolicy
-	0,  // 18: evie.service.v1.EnhancementService.UpdatePolicy:output_type -> evie.service.v1.EnhancementPolicy
-	8,  // 19: evie.service.v1.EnhancementService.DeletePolicy:output_type -> evie.service.v1.DeletePolicyResponse
-	10, // 20: evie.service.v1.EnhancementService.ListProfiles:output_type -> evie.service.v1.ListProfilesResponse
-	1,  // 21: evie.service.v1.EnhancementService.GetProfile:output_type -> evie.service.v1.EnhancementProfile
-	1,  // 22: evie.service.v1.EnhancementService.CreateProfile:output_type -> evie.service.v1.EnhancementProfile
-	1,  // 23: evie.service.v1.EnhancementService.UpdateProfile:output_type -> evie.service.v1.EnhancementProfile
-	15, // 24: evie.service.v1.EnhancementService.DeleteProfile:output_type -> evie.service.v1.DeleteProfileResponse
-	18, // 25: evie.service.v1.EnhancementService.ListLogs:output_type -> evie.service.v1.ListEnhancementLogsResponse
-	16, // 26: evie.service.v1.EnhancementService.GetLog:output_type -> evie.service.v1.EnhancementLog
-	15, // [15:27] is the sub-list for method output_type
-	3,  // [3:15] is the sub-list for method input_type
+	20, // 15: evie.service.v1.EnhancementService.GeneratePinyin:input_type -> evie.service.v1.GeneratePinyinRequest
+	3,  // 16: evie.service.v1.EnhancementService.ListPolicies:output_type -> evie.service.v1.ListPoliciesResponse
+	0,  // 17: evie.service.v1.EnhancementService.GetPolicy:output_type -> evie.service.v1.EnhancementPolicy
+	0,  // 18: evie.service.v1.EnhancementService.CreatePolicy:output_type -> evie.service.v1.EnhancementPolicy
+	0,  // 19: evie.service.v1.EnhancementService.UpdatePolicy:output_type -> evie.service.v1.EnhancementPolicy
+	8,  // 20: evie.service.v1.EnhancementService.DeletePolicy:output_type -> evie.service.v1.DeletePolicyResponse
+	10, // 21: evie.service.v1.EnhancementService.ListProfiles:output_type -> evie.service.v1.ListProfilesResponse
+	1,  // 22: evie.service.v1.EnhancementService.GetProfile:output_type -> evie.service.v1.EnhancementProfile
+	1,  // 23: evie.service.v1.EnhancementService.CreateProfile:output_type -> evie.service.v1.EnhancementProfile
+	1,  // 24: evie.service.v1.EnhancementService.UpdateProfile:output_type -> evie.service.v1.EnhancementProfile
+	15, // 25: evie.service.v1.EnhancementService.DeleteProfile:output_type -> evie.service.v1.DeleteProfileResponse
+	18, // 26: evie.service.v1.EnhancementService.ListLogs:output_type -> evie.service.v1.ListEnhancementLogsResponse
+	16, // 27: evie.service.v1.EnhancementService.GetLog:output_type -> evie.service.v1.EnhancementLog
+	21, // 28: evie.service.v1.EnhancementService.GeneratePinyin:output_type -> evie.service.v1.GeneratePinyinResponse
+	16, // [16:29] is the sub-list for method output_type
+	3,  // [3:16] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1736,7 +1864,7 @@ func file_evie_service_v1_enhancement_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_evie_service_v1_enhancement_proto_rawDesc), len(file_evie_service_v1_enhancement_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

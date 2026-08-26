@@ -1199,8 +1199,16 @@ type DictionaryRelation struct {
 	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"` // 状态: 1=启用 2=禁用
 	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// —— 以下字段为词库中心交互优化补全（2026-08-25），用于关系表格自然语言化展示。
+	// —— biz 层在返回前已 JOIN dictionary_entries 与 dictionary 表。
+	// —— proto3 新增字段不影响 wire 兼容性，老客户端会安全忽略。
+	EntryStandardText   string `protobuf:"bytes,11,opt,name=entry_standard_text,json=entryStandardText,proto3" json:"entry_standard_text,omitempty"`       // 所属词条的标准词/短语（用于展示「您 → ALIAS → 客服您好」）
+	EntryCategory       string `protobuf:"bytes,12,opt,name=entry_category,json=entryCategory,proto3" json:"entry_category,omitempty"`                     // 所属词条的分类（PERSON/ORGANIZATION/PRODUCT/...）
+	DictionaryName      string `protobuf:"bytes,13,opt,name=dictionary_name,json=dictionaryName,proto3" json:"dictionary_name,omitempty"`                  // 所属词库名（跨词库聚合时显示，避免纯 ID）
+	RelatedStandardText string `protobuf:"bytes,14,opt,name=related_standard_text,json=relatedStandardText,proto3" json:"related_standard_text,omitempty"` // 关联目标的标准词（同义词关系时填 target_entry 的 standard_text）
+	RelatedTenantId     uint32 `protobuf:"varint,15,opt,name=related_tenant_id,json=relatedTenantId,proto3" json:"related_tenant_id,omitempty"`            // 关联目标所在租户（跨租户场景，用于权限判断与 UI 徽章）
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *DictionaryRelation) Reset() {
@@ -1301,6 +1309,41 @@ func (x *DictionaryRelation) GetUpdatedAt() string {
 		return x.UpdatedAt
 	}
 	return ""
+}
+
+func (x *DictionaryRelation) GetEntryStandardText() string {
+	if x != nil {
+		return x.EntryStandardText
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetEntryCategory() string {
+	if x != nil {
+		return x.EntryCategory
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetDictionaryName() string {
+	if x != nil {
+		return x.DictionaryName
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetRelatedStandardText() string {
+	if x != nil {
+		return x.RelatedStandardText
+	}
+	return ""
+}
+
+func (x *DictionaryRelation) GetRelatedTenantId() uint32 {
+	if x != nil {
+		return x.RelatedTenantId
+	}
+	return 0
 }
 
 type ListRelationsRequest struct {
@@ -2682,6 +2725,344 @@ func (x *ListConflictsResponse) GetNextPageToken() string {
 	return ""
 }
 
+// DictionaryStats 词库统计指标。
+type DictionaryStats struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	// 基础计数
+	EntryCount              int32 `protobuf:"varint,2,opt,name=entry_count,json=entryCount,proto3" json:"entry_count,omitempty"`                                          // 词条总数（含已禁用）
+	EnabledEntryCount       int32 `protobuf:"varint,3,opt,name=enabled_entry_count,json=enabledEntryCount,proto3" json:"enabled_entry_count,omitempty"`                   // 启用词条数
+	RelationCount           int32 `protobuf:"varint,4,opt,name=relation_count,json=relationCount,proto3" json:"relation_count,omitempty"`                                 // 关系总数
+	VersionCount            int32 `protobuf:"varint,5,opt,name=version_count,json=versionCount,proto3" json:"version_count,omitempty"`                                    // 已发布版本数
+	UnresolvedConflictCount int32 `protobuf:"varint,6,opt,name=unresolved_conflict_count,json=unresolvedConflictCount,proto3" json:"unresolved_conflict_count,omitempty"` // 未解决冲突数（status=PENDING）
+	// 健康度（基于近 7 天 EnhancementLog + AsrRecord 聚合）
+	HitRate                  float64 `protobuf:"fixed64,7,opt,name=hit_rate,json=hitRate,proto3" json:"hit_rate,omitempty"`                                                      // 词库命中率（命中词条 / 总请求）
+	AvgRecognitionConfidence float64 `protobuf:"fixed64,8,opt,name=avg_recognition_confidence,json=avgRecognitionConfidence,proto3" json:"avg_recognition_confidence,omitempty"` // 平均识别置信度（来自关联的 AsrRecord）
+	// 时间戳
+	LastModifiedAt string `protobuf:"bytes,20,opt,name=last_modified_at,json=lastModifiedAt,proto3" json:"last_modified_at,omitempty"` // 最近一次词条/关系变更时间
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DictionaryStats) Reset() {
+	*x = DictionaryStats{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DictionaryStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DictionaryStats) ProtoMessage() {}
+
+func (x *DictionaryStats) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DictionaryStats.ProtoReflect.Descriptor instead.
+func (*DictionaryStats) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *DictionaryStats) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetEntryCount() int32 {
+	if x != nil {
+		return x.EntryCount
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetEnabledEntryCount() int32 {
+	if x != nil {
+		return x.EnabledEntryCount
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetRelationCount() int32 {
+	if x != nil {
+		return x.RelationCount
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetVersionCount() int32 {
+	if x != nil {
+		return x.VersionCount
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetUnresolvedConflictCount() int32 {
+	if x != nil {
+		return x.UnresolvedConflictCount
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetHitRate() float64 {
+	if x != nil {
+		return x.HitRate
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetAvgRecognitionConfidence() float64 {
+	if x != nil {
+		return x.AvgRecognitionConfidence
+	}
+	return 0
+}
+
+func (x *DictionaryStats) GetLastModifiedAt() string {
+	if x != nil {
+		return x.LastModifiedAt
+	}
+	return ""
+}
+
+type GetDictionaryStatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDictionaryStatsRequest) Reset() {
+	*x = GetDictionaryStatsRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDictionaryStatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDictionaryStatsRequest) ProtoMessage() {}
+
+func (x *GetDictionaryStatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDictionaryStatsRequest.ProtoReflect.Descriptor instead.
+func (*GetDictionaryStatsRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *GetDictionaryStatsRequest) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+type GetDictionaryStatsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Stats         *DictionaryStats       `protobuf:"bytes,1,opt,name=stats,proto3" json:"stats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDictionaryStatsResponse) Reset() {
+	*x = GetDictionaryStatsResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDictionaryStatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDictionaryStatsResponse) ProtoMessage() {}
+
+func (x *GetDictionaryStatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDictionaryStatsResponse.ProtoReflect.Descriptor instead.
+func (*GetDictionaryStatsResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *GetDictionaryStatsResponse) GetStats() *DictionaryStats {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
+}
+
+// ListRelationsByDictionaryRequest 词库级别关系列表请求。
+// 与 ListRelations 的区别：不需先选 entryId，一次性返回词库下所有词条的关系。
+type ListRelationsByDictionaryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	RelationType  string                 `protobuf:"bytes,4,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"` // 可选筛选
+	Keyword       string                 `protobuf:"bytes,5,opt,name=keyword,proto3" json:"keyword,omitempty"`                               // 可选筛选（匹配 entry.standard_text 或 relation.related_text）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRelationsByDictionaryRequest) Reset() {
+	*x = ListRelationsByDictionaryRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRelationsByDictionaryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRelationsByDictionaryRequest) ProtoMessage() {}
+
+func (x *ListRelationsByDictionaryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRelationsByDictionaryRequest.ProtoReflect.Descriptor instead.
+func (*ListRelationsByDictionaryRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *ListRelationsByDictionaryRequest) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *ListRelationsByDictionaryRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListRelationsByDictionaryRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListRelationsByDictionaryRequest) GetRelationType() string {
+	if x != nil {
+		return x.RelationType
+	}
+	return ""
+}
+
+func (x *ListRelationsByDictionaryRequest) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+type ListRelationsByDictionaryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Relations     []*DictionaryRelation  `protobuf:"bytes,1,rep,name=relations,proto3" json:"relations,omitempty"` // DictionaryRelation 已补全 entry_standard_text 等字段
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,3,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRelationsByDictionaryResponse) Reset() {
+	*x = ListRelationsByDictionaryResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRelationsByDictionaryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRelationsByDictionaryResponse) ProtoMessage() {}
+
+func (x *ListRelationsByDictionaryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRelationsByDictionaryResponse.ProtoReflect.Descriptor instead.
+func (*ListRelationsByDictionaryResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *ListRelationsByDictionaryResponse) GetRelations() []*DictionaryRelation {
+	if x != nil {
+		return x.Relations
+	}
+	return nil
+}
+
+func (x *ListRelationsByDictionaryResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListRelationsByDictionaryResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
 var File_evie_service_v1_dictionary_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_dictionary_proto_rawDesc = "" +
@@ -2790,7 +3171,7 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	" \x01(\x05R\x06status\"-\n" +
 	"\x12DeleteEntryRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x15\n" +
-	"\x13DeleteEntryResponse\"\xbf\x02\n" +
+	"\x13DeleteEntryResponse\"\x9f\x04\n" +
 	"\x12DictionaryRelation\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x19\n" +
 	"\bentry_id\x18\x02 \x01(\rR\aentryId\x12#\n" +
@@ -2804,7 +3185,12 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\n" +
-	" \x01(\tR\tupdatedAt\"\x9b\x01\n" +
+	" \x01(\tR\tupdatedAt\x12.\n" +
+	"\x13entry_standard_text\x18\v \x01(\tR\x11entryStandardText\x12%\n" +
+	"\x0eentry_category\x18\f \x01(\tR\rentryCategory\x12'\n" +
+	"\x0fdictionary_name\x18\r \x01(\tR\x0edictionaryName\x122\n" +
+	"\x15related_standard_text\x18\x0e \x01(\tR\x13relatedStandardText\x12*\n" +
+	"\x11related_tenant_id\x18\x0f \x01(\rR\x0frelatedTenantId\"\x9b\x01\n" +
 	"\x14ListRelationsRequest\x12\"\n" +
 	"\bentry_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\aentryId\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
@@ -2913,7 +3299,33 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\x15ListConflictsResponse\x12A\n" +
 	"\tconflicts\x18\x01 \x03(\v2#.evie.service.v1.DictionaryConflictR\tconflicts\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
-	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken2\xb9\x1f\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"\x92\x03\n" +
+	"\x0fDictionaryStats\x12#\n" +
+	"\rdictionary_id\x18\x01 \x01(\rR\fdictionaryId\x12\x1f\n" +
+	"\ventry_count\x18\x02 \x01(\x05R\n" +
+	"entryCount\x12.\n" +
+	"\x13enabled_entry_count\x18\x03 \x01(\x05R\x11enabledEntryCount\x12%\n" +
+	"\x0erelation_count\x18\x04 \x01(\x05R\rrelationCount\x12#\n" +
+	"\rversion_count\x18\x05 \x01(\x05R\fversionCount\x12:\n" +
+	"\x19unresolved_conflict_count\x18\x06 \x01(\x05R\x17unresolvedConflictCount\x12\x19\n" +
+	"\bhit_rate\x18\a \x01(\x01R\ahitRate\x12<\n" +
+	"\x1aavg_recognition_confidence\x18\b \x01(\x01R\x18avgRecognitionConfidence\x12(\n" +
+	"\x10last_modified_at\x18\x14 \x01(\tR\x0elastModifiedAt\"I\n" +
+	"\x19GetDictionaryStatsRequest\x12,\n" +
+	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\"T\n" +
+	"\x1aGetDictionaryStatsResponse\x126\n" +
+	"\x05stats\x18\x01 \x01(\v2 .evie.service.v1.DictionaryStatsR\x05stats\"\xcb\x01\n" +
+	" ListRelationsByDictionaryRequest\x12,\n" +
+	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\x12#\n" +
+	"\rrelation_type\x18\x04 \x01(\tR\frelationType\x12\x18\n" +
+	"\akeyword\x18\x05 \x01(\tR\akeyword\"\xa4\x01\n" +
+	"!ListRelationsByDictionaryResponse\x12A\n" +
+	"\trelations\x18\x01 \x03(\v2#.evie.service.v1.DictionaryRelationR\trelations\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken2\xf2\"\n" +
 	"\x11DictionaryService\x12\xb1\x01\n" +
 	"\x10ListDictionaries\x12(.evie.service.v1.ListDictionariesRequest\x1a).evie.service.v1.ListDictionariesResponse\"H\xbaG(\n" +
 	"\f词库中心\x12\x18分页查询词库列表\x82\xd3\xe4\x93\x02\x17\x12\x15/evie/v1/dictionaries\x12\x9c\x01\n" +
@@ -2961,7 +3373,11 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\x11PublishDictionary\x12).evie.service.v1.PublishDictionaryRequest\x1a\".evie.service.v1.DictionaryVersion\"]\xbaG\"\n" +
 	"\f词库中心\x12\x12发布词库版本\x82\xd3\xe4\x93\x022:\x01*\"-/evie/v1/dictionaries/{dictionary_id}:publish\x12\xb0\x01\n" +
 	"\rListConflicts\x12%.evie.service.v1.ListConflictsRequest\x1a&.evie.service.v1.ListConflictsResponse\"P\xbaG(\n" +
-	"\f词库中心\x12\x18查询词库冲突记录\x82\xd3\xe4\x93\x02\x1f\x12\x1d/evie/v1/dictionary-conflictsB\xac\x01\n" +
+	"\f词库中心\x12\x18查询词库冲突记录\x82\xd3\xe4\x93\x02\x1f\x12\x1d/evie/v1/dictionary-conflicts\x12\xcd\x01\n" +
+	"\x12GetDictionaryStats\x12*.evie.service.v1.GetDictionaryStatsRequest\x1a+.evie.service.v1.GetDictionaryStatsResponse\"^\xbaG(\n" +
+	"\f词库中心\x12\x18查询词库统计指标\x82\xd3\xe4\x93\x02-\x12+/evie/v1/dictionaries/{dictionary_id}:stats\x12\xe6\x01\n" +
+	"\x19ListRelationsByDictionary\x121.evie.service.v1.ListRelationsByDictionaryRequest\x1a2.evie.service.v1.ListRelationsByDictionaryResponse\"b\xbaG(\n" +
+	"\f词库中心\x12\x18词库级别关系列表\x82\xd3\xe4\x93\x021\x12//evie/v1/dictionaries/{dictionary_id}/relationsB\xac\x01\n" +
 	"\x13com.evie.service.v1B\x0fDictionaryProtoP\x01Z&backend-service/api/evie/service/v1;v1\xa2\x02\x03ESX\xaa\x02\x0fEvie.Service.V1\xca\x02\x0fEvie\\Service\\V1\xe2\x02\x1bEvie\\Service\\V1\\GPBMetadata\xea\x02\x11Evie::Service::V1b\x06proto3"
 
 var (
@@ -2976,47 +3392,52 @@ func file_evie_service_v1_dictionary_proto_rawDescGZIP() []byte {
 	return file_evie_service_v1_dictionary_proto_rawDescData
 }
 
-var file_evie_service_v1_dictionary_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_evie_service_v1_dictionary_proto_msgTypes = make([]protoimpl.MessageInfo, 44)
 var file_evie_service_v1_dictionary_proto_goTypes = []any{
-	(*Dictionary)(nil),               // 0: evie.service.v1.Dictionary
-	(*DictionaryEntry)(nil),          // 1: evie.service.v1.DictionaryEntry
-	(*ListDictionariesRequest)(nil),  // 2: evie.service.v1.ListDictionariesRequest
-	(*ListDictionariesResponse)(nil), // 3: evie.service.v1.ListDictionariesResponse
-	(*GetDictionaryRequest)(nil),     // 4: evie.service.v1.GetDictionaryRequest
-	(*CreateDictionaryRequest)(nil),  // 5: evie.service.v1.CreateDictionaryRequest
-	(*UpdateDictionaryRequest)(nil),  // 6: evie.service.v1.UpdateDictionaryRequest
-	(*DeleteDictionaryRequest)(nil),  // 7: evie.service.v1.DeleteDictionaryRequest
-	(*DeleteDictionaryResponse)(nil), // 8: evie.service.v1.DeleteDictionaryResponse
-	(*ListEntriesRequest)(nil),       // 9: evie.service.v1.ListEntriesRequest
-	(*ListEntriesResponse)(nil),      // 10: evie.service.v1.ListEntriesResponse
-	(*GetEntryRequest)(nil),          // 11: evie.service.v1.GetEntryRequest
-	(*CreateEntryRequest)(nil),       // 12: evie.service.v1.CreateEntryRequest
-	(*UpdateEntryRequest)(nil),       // 13: evie.service.v1.UpdateEntryRequest
-	(*DeleteEntryRequest)(nil),       // 14: evie.service.v1.DeleteEntryRequest
-	(*DeleteEntryResponse)(nil),      // 15: evie.service.v1.DeleteEntryResponse
-	(*DictionaryRelation)(nil),       // 16: evie.service.v1.DictionaryRelation
-	(*ListRelationsRequest)(nil),     // 17: evie.service.v1.ListRelationsRequest
-	(*ListRelationsResponse)(nil),    // 18: evie.service.v1.ListRelationsResponse
-	(*GetRelationRequest)(nil),       // 19: evie.service.v1.GetRelationRequest
-	(*CreateRelationRequest)(nil),    // 20: evie.service.v1.CreateRelationRequest
-	(*UpdateRelationRequest)(nil),    // 21: evie.service.v1.UpdateRelationRequest
-	(*DeleteRelationRequest)(nil),    // 22: evie.service.v1.DeleteRelationRequest
-	(*DeleteRelationResponse)(nil),   // 23: evie.service.v1.DeleteRelationResponse
-	(*DictionaryCategory)(nil),       // 24: evie.service.v1.DictionaryCategory
-	(*DictionaryVersion)(nil),        // 25: evie.service.v1.DictionaryVersion
-	(*ListCategoriesRequest)(nil),    // 26: evie.service.v1.ListCategoriesRequest
-	(*ListCategoriesResponse)(nil),   // 27: evie.service.v1.ListCategoriesResponse
-	(*CreateCategoryRequest)(nil),    // 28: evie.service.v1.CreateCategoryRequest
-	(*UpdateCategoryRequest)(nil),    // 29: evie.service.v1.UpdateCategoryRequest
-	(*DeleteCategoryRequest)(nil),    // 30: evie.service.v1.DeleteCategoryRequest
-	(*DeleteCategoryResponse)(nil),   // 31: evie.service.v1.DeleteCategoryResponse
-	(*ListVersionsRequest)(nil),      // 32: evie.service.v1.ListVersionsRequest
-	(*ListVersionsResponse)(nil),     // 33: evie.service.v1.ListVersionsResponse
-	(*GetVersionRequest)(nil),        // 34: evie.service.v1.GetVersionRequest
-	(*PublishDictionaryRequest)(nil), // 35: evie.service.v1.PublishDictionaryRequest
-	(*DictionaryConflict)(nil),       // 36: evie.service.v1.DictionaryConflict
-	(*ListConflictsRequest)(nil),     // 37: evie.service.v1.ListConflictsRequest
-	(*ListConflictsResponse)(nil),    // 38: evie.service.v1.ListConflictsResponse
+	(*Dictionary)(nil),                        // 0: evie.service.v1.Dictionary
+	(*DictionaryEntry)(nil),                   // 1: evie.service.v1.DictionaryEntry
+	(*ListDictionariesRequest)(nil),           // 2: evie.service.v1.ListDictionariesRequest
+	(*ListDictionariesResponse)(nil),          // 3: evie.service.v1.ListDictionariesResponse
+	(*GetDictionaryRequest)(nil),              // 4: evie.service.v1.GetDictionaryRequest
+	(*CreateDictionaryRequest)(nil),           // 5: evie.service.v1.CreateDictionaryRequest
+	(*UpdateDictionaryRequest)(nil),           // 6: evie.service.v1.UpdateDictionaryRequest
+	(*DeleteDictionaryRequest)(nil),           // 7: evie.service.v1.DeleteDictionaryRequest
+	(*DeleteDictionaryResponse)(nil),          // 8: evie.service.v1.DeleteDictionaryResponse
+	(*ListEntriesRequest)(nil),                // 9: evie.service.v1.ListEntriesRequest
+	(*ListEntriesResponse)(nil),               // 10: evie.service.v1.ListEntriesResponse
+	(*GetEntryRequest)(nil),                   // 11: evie.service.v1.GetEntryRequest
+	(*CreateEntryRequest)(nil),                // 12: evie.service.v1.CreateEntryRequest
+	(*UpdateEntryRequest)(nil),                // 13: evie.service.v1.UpdateEntryRequest
+	(*DeleteEntryRequest)(nil),                // 14: evie.service.v1.DeleteEntryRequest
+	(*DeleteEntryResponse)(nil),               // 15: evie.service.v1.DeleteEntryResponse
+	(*DictionaryRelation)(nil),                // 16: evie.service.v1.DictionaryRelation
+	(*ListRelationsRequest)(nil),              // 17: evie.service.v1.ListRelationsRequest
+	(*ListRelationsResponse)(nil),             // 18: evie.service.v1.ListRelationsResponse
+	(*GetRelationRequest)(nil),                // 19: evie.service.v1.GetRelationRequest
+	(*CreateRelationRequest)(nil),             // 20: evie.service.v1.CreateRelationRequest
+	(*UpdateRelationRequest)(nil),             // 21: evie.service.v1.UpdateRelationRequest
+	(*DeleteRelationRequest)(nil),             // 22: evie.service.v1.DeleteRelationRequest
+	(*DeleteRelationResponse)(nil),            // 23: evie.service.v1.DeleteRelationResponse
+	(*DictionaryCategory)(nil),                // 24: evie.service.v1.DictionaryCategory
+	(*DictionaryVersion)(nil),                 // 25: evie.service.v1.DictionaryVersion
+	(*ListCategoriesRequest)(nil),             // 26: evie.service.v1.ListCategoriesRequest
+	(*ListCategoriesResponse)(nil),            // 27: evie.service.v1.ListCategoriesResponse
+	(*CreateCategoryRequest)(nil),             // 28: evie.service.v1.CreateCategoryRequest
+	(*UpdateCategoryRequest)(nil),             // 29: evie.service.v1.UpdateCategoryRequest
+	(*DeleteCategoryRequest)(nil),             // 30: evie.service.v1.DeleteCategoryRequest
+	(*DeleteCategoryResponse)(nil),            // 31: evie.service.v1.DeleteCategoryResponse
+	(*ListVersionsRequest)(nil),               // 32: evie.service.v1.ListVersionsRequest
+	(*ListVersionsResponse)(nil),              // 33: evie.service.v1.ListVersionsResponse
+	(*GetVersionRequest)(nil),                 // 34: evie.service.v1.GetVersionRequest
+	(*PublishDictionaryRequest)(nil),          // 35: evie.service.v1.PublishDictionaryRequest
+	(*DictionaryConflict)(nil),                // 36: evie.service.v1.DictionaryConflict
+	(*ListConflictsRequest)(nil),              // 37: evie.service.v1.ListConflictsRequest
+	(*ListConflictsResponse)(nil),             // 38: evie.service.v1.ListConflictsResponse
+	(*DictionaryStats)(nil),                   // 39: evie.service.v1.DictionaryStats
+	(*GetDictionaryStatsRequest)(nil),         // 40: evie.service.v1.GetDictionaryStatsRequest
+	(*GetDictionaryStatsResponse)(nil),        // 41: evie.service.v1.GetDictionaryStatsResponse
+	(*ListRelationsByDictionaryRequest)(nil),  // 42: evie.service.v1.ListRelationsByDictionaryRequest
+	(*ListRelationsByDictionaryResponse)(nil), // 43: evie.service.v1.ListRelationsByDictionaryResponse
 }
 var file_evie_service_v1_dictionary_proto_depIdxs = []int32{
 	0,  // 0: evie.service.v1.ListDictionariesResponse.dictionaries:type_name -> evie.service.v1.Dictionary
@@ -3025,57 +3446,63 @@ var file_evie_service_v1_dictionary_proto_depIdxs = []int32{
 	24, // 3: evie.service.v1.ListCategoriesResponse.categories:type_name -> evie.service.v1.DictionaryCategory
 	25, // 4: evie.service.v1.ListVersionsResponse.versions:type_name -> evie.service.v1.DictionaryVersion
 	36, // 5: evie.service.v1.ListConflictsResponse.conflicts:type_name -> evie.service.v1.DictionaryConflict
-	2,  // 6: evie.service.v1.DictionaryService.ListDictionaries:input_type -> evie.service.v1.ListDictionariesRequest
-	4,  // 7: evie.service.v1.DictionaryService.GetDictionary:input_type -> evie.service.v1.GetDictionaryRequest
-	5,  // 8: evie.service.v1.DictionaryService.CreateDictionary:input_type -> evie.service.v1.CreateDictionaryRequest
-	6,  // 9: evie.service.v1.DictionaryService.UpdateDictionary:input_type -> evie.service.v1.UpdateDictionaryRequest
-	7,  // 10: evie.service.v1.DictionaryService.DeleteDictionary:input_type -> evie.service.v1.DeleteDictionaryRequest
-	9,  // 11: evie.service.v1.DictionaryService.ListEntries:input_type -> evie.service.v1.ListEntriesRequest
-	11, // 12: evie.service.v1.DictionaryService.GetEntry:input_type -> evie.service.v1.GetEntryRequest
-	12, // 13: evie.service.v1.DictionaryService.CreateEntry:input_type -> evie.service.v1.CreateEntryRequest
-	13, // 14: evie.service.v1.DictionaryService.UpdateEntry:input_type -> evie.service.v1.UpdateEntryRequest
-	14, // 15: evie.service.v1.DictionaryService.DeleteEntry:input_type -> evie.service.v1.DeleteEntryRequest
-	17, // 16: evie.service.v1.DictionaryService.ListRelations:input_type -> evie.service.v1.ListRelationsRequest
-	19, // 17: evie.service.v1.DictionaryService.GetRelation:input_type -> evie.service.v1.GetRelationRequest
-	20, // 18: evie.service.v1.DictionaryService.CreateRelation:input_type -> evie.service.v1.CreateRelationRequest
-	21, // 19: evie.service.v1.DictionaryService.UpdateRelation:input_type -> evie.service.v1.UpdateRelationRequest
-	22, // 20: evie.service.v1.DictionaryService.DeleteRelation:input_type -> evie.service.v1.DeleteRelationRequest
-	26, // 21: evie.service.v1.DictionaryService.ListCategories:input_type -> evie.service.v1.ListCategoriesRequest
-	28, // 22: evie.service.v1.DictionaryService.CreateCategory:input_type -> evie.service.v1.CreateCategoryRequest
-	29, // 23: evie.service.v1.DictionaryService.UpdateCategory:input_type -> evie.service.v1.UpdateCategoryRequest
-	30, // 24: evie.service.v1.DictionaryService.DeleteCategory:input_type -> evie.service.v1.DeleteCategoryRequest
-	32, // 25: evie.service.v1.DictionaryService.ListVersions:input_type -> evie.service.v1.ListVersionsRequest
-	34, // 26: evie.service.v1.DictionaryService.GetVersion:input_type -> evie.service.v1.GetVersionRequest
-	35, // 27: evie.service.v1.DictionaryService.PublishDictionary:input_type -> evie.service.v1.PublishDictionaryRequest
-	37, // 28: evie.service.v1.DictionaryService.ListConflicts:input_type -> evie.service.v1.ListConflictsRequest
-	3,  // 29: evie.service.v1.DictionaryService.ListDictionaries:output_type -> evie.service.v1.ListDictionariesResponse
-	0,  // 30: evie.service.v1.DictionaryService.GetDictionary:output_type -> evie.service.v1.Dictionary
-	0,  // 31: evie.service.v1.DictionaryService.CreateDictionary:output_type -> evie.service.v1.Dictionary
-	0,  // 32: evie.service.v1.DictionaryService.UpdateDictionary:output_type -> evie.service.v1.Dictionary
-	8,  // 33: evie.service.v1.DictionaryService.DeleteDictionary:output_type -> evie.service.v1.DeleteDictionaryResponse
-	10, // 34: evie.service.v1.DictionaryService.ListEntries:output_type -> evie.service.v1.ListEntriesResponse
-	1,  // 35: evie.service.v1.DictionaryService.GetEntry:output_type -> evie.service.v1.DictionaryEntry
-	1,  // 36: evie.service.v1.DictionaryService.CreateEntry:output_type -> evie.service.v1.DictionaryEntry
-	1,  // 37: evie.service.v1.DictionaryService.UpdateEntry:output_type -> evie.service.v1.DictionaryEntry
-	15, // 38: evie.service.v1.DictionaryService.DeleteEntry:output_type -> evie.service.v1.DeleteEntryResponse
-	18, // 39: evie.service.v1.DictionaryService.ListRelations:output_type -> evie.service.v1.ListRelationsResponse
-	16, // 40: evie.service.v1.DictionaryService.GetRelation:output_type -> evie.service.v1.DictionaryRelation
-	16, // 41: evie.service.v1.DictionaryService.CreateRelation:output_type -> evie.service.v1.DictionaryRelation
-	16, // 42: evie.service.v1.DictionaryService.UpdateRelation:output_type -> evie.service.v1.DictionaryRelation
-	23, // 43: evie.service.v1.DictionaryService.DeleteRelation:output_type -> evie.service.v1.DeleteRelationResponse
-	27, // 44: evie.service.v1.DictionaryService.ListCategories:output_type -> evie.service.v1.ListCategoriesResponse
-	24, // 45: evie.service.v1.DictionaryService.CreateCategory:output_type -> evie.service.v1.DictionaryCategory
-	24, // 46: evie.service.v1.DictionaryService.UpdateCategory:output_type -> evie.service.v1.DictionaryCategory
-	31, // 47: evie.service.v1.DictionaryService.DeleteCategory:output_type -> evie.service.v1.DeleteCategoryResponse
-	33, // 48: evie.service.v1.DictionaryService.ListVersions:output_type -> evie.service.v1.ListVersionsResponse
-	25, // 49: evie.service.v1.DictionaryService.GetVersion:output_type -> evie.service.v1.DictionaryVersion
-	25, // 50: evie.service.v1.DictionaryService.PublishDictionary:output_type -> evie.service.v1.DictionaryVersion
-	38, // 51: evie.service.v1.DictionaryService.ListConflicts:output_type -> evie.service.v1.ListConflictsResponse
-	29, // [29:52] is the sub-list for method output_type
-	6,  // [6:29] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	39, // 6: evie.service.v1.GetDictionaryStatsResponse.stats:type_name -> evie.service.v1.DictionaryStats
+	16, // 7: evie.service.v1.ListRelationsByDictionaryResponse.relations:type_name -> evie.service.v1.DictionaryRelation
+	2,  // 8: evie.service.v1.DictionaryService.ListDictionaries:input_type -> evie.service.v1.ListDictionariesRequest
+	4,  // 9: evie.service.v1.DictionaryService.GetDictionary:input_type -> evie.service.v1.GetDictionaryRequest
+	5,  // 10: evie.service.v1.DictionaryService.CreateDictionary:input_type -> evie.service.v1.CreateDictionaryRequest
+	6,  // 11: evie.service.v1.DictionaryService.UpdateDictionary:input_type -> evie.service.v1.UpdateDictionaryRequest
+	7,  // 12: evie.service.v1.DictionaryService.DeleteDictionary:input_type -> evie.service.v1.DeleteDictionaryRequest
+	9,  // 13: evie.service.v1.DictionaryService.ListEntries:input_type -> evie.service.v1.ListEntriesRequest
+	11, // 14: evie.service.v1.DictionaryService.GetEntry:input_type -> evie.service.v1.GetEntryRequest
+	12, // 15: evie.service.v1.DictionaryService.CreateEntry:input_type -> evie.service.v1.CreateEntryRequest
+	13, // 16: evie.service.v1.DictionaryService.UpdateEntry:input_type -> evie.service.v1.UpdateEntryRequest
+	14, // 17: evie.service.v1.DictionaryService.DeleteEntry:input_type -> evie.service.v1.DeleteEntryRequest
+	17, // 18: evie.service.v1.DictionaryService.ListRelations:input_type -> evie.service.v1.ListRelationsRequest
+	19, // 19: evie.service.v1.DictionaryService.GetRelation:input_type -> evie.service.v1.GetRelationRequest
+	20, // 20: evie.service.v1.DictionaryService.CreateRelation:input_type -> evie.service.v1.CreateRelationRequest
+	21, // 21: evie.service.v1.DictionaryService.UpdateRelation:input_type -> evie.service.v1.UpdateRelationRequest
+	22, // 22: evie.service.v1.DictionaryService.DeleteRelation:input_type -> evie.service.v1.DeleteRelationRequest
+	26, // 23: evie.service.v1.DictionaryService.ListCategories:input_type -> evie.service.v1.ListCategoriesRequest
+	28, // 24: evie.service.v1.DictionaryService.CreateCategory:input_type -> evie.service.v1.CreateCategoryRequest
+	29, // 25: evie.service.v1.DictionaryService.UpdateCategory:input_type -> evie.service.v1.UpdateCategoryRequest
+	30, // 26: evie.service.v1.DictionaryService.DeleteCategory:input_type -> evie.service.v1.DeleteCategoryRequest
+	32, // 27: evie.service.v1.DictionaryService.ListVersions:input_type -> evie.service.v1.ListVersionsRequest
+	34, // 28: evie.service.v1.DictionaryService.GetVersion:input_type -> evie.service.v1.GetVersionRequest
+	35, // 29: evie.service.v1.DictionaryService.PublishDictionary:input_type -> evie.service.v1.PublishDictionaryRequest
+	37, // 30: evie.service.v1.DictionaryService.ListConflicts:input_type -> evie.service.v1.ListConflictsRequest
+	40, // 31: evie.service.v1.DictionaryService.GetDictionaryStats:input_type -> evie.service.v1.GetDictionaryStatsRequest
+	42, // 32: evie.service.v1.DictionaryService.ListRelationsByDictionary:input_type -> evie.service.v1.ListRelationsByDictionaryRequest
+	3,  // 33: evie.service.v1.DictionaryService.ListDictionaries:output_type -> evie.service.v1.ListDictionariesResponse
+	0,  // 34: evie.service.v1.DictionaryService.GetDictionary:output_type -> evie.service.v1.Dictionary
+	0,  // 35: evie.service.v1.DictionaryService.CreateDictionary:output_type -> evie.service.v1.Dictionary
+	0,  // 36: evie.service.v1.DictionaryService.UpdateDictionary:output_type -> evie.service.v1.Dictionary
+	8,  // 37: evie.service.v1.DictionaryService.DeleteDictionary:output_type -> evie.service.v1.DeleteDictionaryResponse
+	10, // 38: evie.service.v1.DictionaryService.ListEntries:output_type -> evie.service.v1.ListEntriesResponse
+	1,  // 39: evie.service.v1.DictionaryService.GetEntry:output_type -> evie.service.v1.DictionaryEntry
+	1,  // 40: evie.service.v1.DictionaryService.CreateEntry:output_type -> evie.service.v1.DictionaryEntry
+	1,  // 41: evie.service.v1.DictionaryService.UpdateEntry:output_type -> evie.service.v1.DictionaryEntry
+	15, // 42: evie.service.v1.DictionaryService.DeleteEntry:output_type -> evie.service.v1.DeleteEntryResponse
+	18, // 43: evie.service.v1.DictionaryService.ListRelations:output_type -> evie.service.v1.ListRelationsResponse
+	16, // 44: evie.service.v1.DictionaryService.GetRelation:output_type -> evie.service.v1.DictionaryRelation
+	16, // 45: evie.service.v1.DictionaryService.CreateRelation:output_type -> evie.service.v1.DictionaryRelation
+	16, // 46: evie.service.v1.DictionaryService.UpdateRelation:output_type -> evie.service.v1.DictionaryRelation
+	23, // 47: evie.service.v1.DictionaryService.DeleteRelation:output_type -> evie.service.v1.DeleteRelationResponse
+	27, // 48: evie.service.v1.DictionaryService.ListCategories:output_type -> evie.service.v1.ListCategoriesResponse
+	24, // 49: evie.service.v1.DictionaryService.CreateCategory:output_type -> evie.service.v1.DictionaryCategory
+	24, // 50: evie.service.v1.DictionaryService.UpdateCategory:output_type -> evie.service.v1.DictionaryCategory
+	31, // 51: evie.service.v1.DictionaryService.DeleteCategory:output_type -> evie.service.v1.DeleteCategoryResponse
+	33, // 52: evie.service.v1.DictionaryService.ListVersions:output_type -> evie.service.v1.ListVersionsResponse
+	25, // 53: evie.service.v1.DictionaryService.GetVersion:output_type -> evie.service.v1.DictionaryVersion
+	25, // 54: evie.service.v1.DictionaryService.PublishDictionary:output_type -> evie.service.v1.DictionaryVersion
+	38, // 55: evie.service.v1.DictionaryService.ListConflicts:output_type -> evie.service.v1.ListConflictsResponse
+	41, // 56: evie.service.v1.DictionaryService.GetDictionaryStats:output_type -> evie.service.v1.GetDictionaryStatsResponse
+	43, // 57: evie.service.v1.DictionaryService.ListRelationsByDictionary:output_type -> evie.service.v1.ListRelationsByDictionaryResponse
+	33, // [33:58] is the sub-list for method output_type
+	8,  // [8:33] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_evie_service_v1_dictionary_proto_init() }
@@ -3089,7 +3516,7 @@ func file_evie_service_v1_dictionary_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_evie_service_v1_dictionary_proto_rawDesc), len(file_evie_service_v1_dictionary_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   39,
+			NumMessages:   44,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

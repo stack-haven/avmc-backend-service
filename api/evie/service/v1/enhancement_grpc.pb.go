@@ -19,18 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	EnhancementService_ListPolicies_FullMethodName  = "/evie.service.v1.EnhancementService/ListPolicies"
-	EnhancementService_GetPolicy_FullMethodName     = "/evie.service.v1.EnhancementService/GetPolicy"
-	EnhancementService_CreatePolicy_FullMethodName  = "/evie.service.v1.EnhancementService/CreatePolicy"
-	EnhancementService_UpdatePolicy_FullMethodName  = "/evie.service.v1.EnhancementService/UpdatePolicy"
-	EnhancementService_DeletePolicy_FullMethodName  = "/evie.service.v1.EnhancementService/DeletePolicy"
-	EnhancementService_ListProfiles_FullMethodName  = "/evie.service.v1.EnhancementService/ListProfiles"
-	EnhancementService_GetProfile_FullMethodName    = "/evie.service.v1.EnhancementService/GetProfile"
-	EnhancementService_CreateProfile_FullMethodName = "/evie.service.v1.EnhancementService/CreateProfile"
-	EnhancementService_UpdateProfile_FullMethodName = "/evie.service.v1.EnhancementService/UpdateProfile"
-	EnhancementService_DeleteProfile_FullMethodName = "/evie.service.v1.EnhancementService/DeleteProfile"
-	EnhancementService_ListLogs_FullMethodName      = "/evie.service.v1.EnhancementService/ListLogs"
-	EnhancementService_GetLog_FullMethodName        = "/evie.service.v1.EnhancementService/GetLog"
+	EnhancementService_ListPolicies_FullMethodName   = "/evie.service.v1.EnhancementService/ListPolicies"
+	EnhancementService_GetPolicy_FullMethodName      = "/evie.service.v1.EnhancementService/GetPolicy"
+	EnhancementService_CreatePolicy_FullMethodName   = "/evie.service.v1.EnhancementService/CreatePolicy"
+	EnhancementService_UpdatePolicy_FullMethodName   = "/evie.service.v1.EnhancementService/UpdatePolicy"
+	EnhancementService_DeletePolicy_FullMethodName   = "/evie.service.v1.EnhancementService/DeletePolicy"
+	EnhancementService_ListProfiles_FullMethodName   = "/evie.service.v1.EnhancementService/ListProfiles"
+	EnhancementService_GetProfile_FullMethodName     = "/evie.service.v1.EnhancementService/GetProfile"
+	EnhancementService_CreateProfile_FullMethodName  = "/evie.service.v1.EnhancementService/CreateProfile"
+	EnhancementService_UpdateProfile_FullMethodName  = "/evie.service.v1.EnhancementService/UpdateProfile"
+	EnhancementService_DeleteProfile_FullMethodName  = "/evie.service.v1.EnhancementService/DeleteProfile"
+	EnhancementService_ListLogs_FullMethodName       = "/evie.service.v1.EnhancementService/ListLogs"
+	EnhancementService_GetLog_FullMethodName         = "/evie.service.v1.EnhancementService/GetLog"
+	EnhancementService_GeneratePinyin_FullMethodName = "/evie.service.v1.EnhancementService/GeneratePinyin"
 )
 
 // EnhancementServiceClient is the client API for EnhancementService service.
@@ -64,6 +65,9 @@ type EnhancementServiceClient interface {
 	ListLogs(ctx context.Context, in *ListEnhancementLogsRequest, opts ...grpc.CallOption) (*ListEnhancementLogsResponse, error)
 	// 查询增强记录详情
 	GetLog(ctx context.Context, in *GetEnhancementLogRequest, opts ...grpc.CallOption) (*EnhancementLog, error)
+	// 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
+	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
+	GeneratePinyin(ctx context.Context, in *GeneratePinyinRequest, opts ...grpc.CallOption) (*GeneratePinyinResponse, error)
 }
 
 type enhancementServiceClient struct {
@@ -194,6 +198,16 @@ func (c *enhancementServiceClient) GetLog(ctx context.Context, in *GetEnhancemen
 	return out, nil
 }
 
+func (c *enhancementServiceClient) GeneratePinyin(ctx context.Context, in *GeneratePinyinRequest, opts ...grpc.CallOption) (*GeneratePinyinResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GeneratePinyinResponse)
+	err := c.cc.Invoke(ctx, EnhancementService_GeneratePinyin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EnhancementServiceServer is the server API for EnhancementService service.
 // All implementations must embed UnimplementedEnhancementServiceServer
 // for forward compatibility.
@@ -225,6 +239,9 @@ type EnhancementServiceServer interface {
 	ListLogs(context.Context, *ListEnhancementLogsRequest) (*ListEnhancementLogsResponse, error)
 	// 查询增强记录详情
 	GetLog(context.Context, *GetEnhancementLogRequest) (*EnhancementLog, error)
+	// 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
+	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
+	GeneratePinyin(context.Context, *GeneratePinyinRequest) (*GeneratePinyinResponse, error)
 	mustEmbedUnimplementedEnhancementServiceServer()
 }
 
@@ -270,6 +287,9 @@ func (UnimplementedEnhancementServiceServer) ListLogs(context.Context, *ListEnha
 }
 func (UnimplementedEnhancementServiceServer) GetLog(context.Context, *GetEnhancementLogRequest) (*EnhancementLog, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLog not implemented")
+}
+func (UnimplementedEnhancementServiceServer) GeneratePinyin(context.Context, *GeneratePinyinRequest) (*GeneratePinyinResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GeneratePinyin not implemented")
 }
 func (UnimplementedEnhancementServiceServer) mustEmbedUnimplementedEnhancementServiceServer() {}
 func (UnimplementedEnhancementServiceServer) testEmbeddedByValue()                            {}
@@ -508,6 +528,24 @@ func _EnhancementService_GetLog_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EnhancementService_GeneratePinyin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GeneratePinyinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EnhancementServiceServer).GeneratePinyin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EnhancementService_GeneratePinyin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EnhancementServiceServer).GeneratePinyin(ctx, req.(*GeneratePinyinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EnhancementService_ServiceDesc is the grpc.ServiceDesc for EnhancementService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -562,6 +600,10 @@ var EnhancementService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLog",
 			Handler:    _EnhancementService_GetLog_Handler,
+		},
+		{
+			MethodName: "GeneratePinyin",
+			Handler:    _EnhancementService_GeneratePinyin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

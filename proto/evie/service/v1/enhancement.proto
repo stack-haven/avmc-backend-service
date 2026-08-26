@@ -130,6 +130,19 @@ service EnhancementService {
       tags: ["文本增强"]
     };
   }
+
+  // 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
+  // 本接口为无状态工具，不限租户——任何已登录用户可调用。
+  rpc GeneratePinyin(GeneratePinyinRequest) returns (GeneratePinyinResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/pinyin:generate"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "生成拼音"
+      tags: ["文本增强"]
+    };
+  }
 }
 
 // EnhancementPolicy 增强策略。
@@ -284,4 +297,19 @@ message ListEnhancementLogsResponse {
 
 message GetEnhancementLogRequest {
   uint32 id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+// ===== 词库中心交互优化 P0 接口（2026-08-25） =====
+
+// GeneratePinyinRequest 拼音生成请求。
+message GeneratePinyinRequest {
+  string text = 1 [(buf.validate.field).string = {min_len: 1, max_len: 256}];
+  bool include_initials = 2; // 是否同时返回拼音首字母（默认 true）
+}
+
+// GeneratePinyinResponse 拼音生成响应。
+message GeneratePinyinResponse {
+  string pinyin = 1;            // 全拼（空格分隔，如 "ke fu nin hao"）
+  string pinyin_initial = 2;    // 拼音首字母（如 "kfnh"）
+  string normalized_text = 3;   // 规范化后文本（去标点、空格归一）
 }

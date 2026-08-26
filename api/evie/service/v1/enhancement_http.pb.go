@@ -23,6 +23,7 @@ const OperationEnhancementServiceCreatePolicy = "/evie.service.v1.EnhancementSer
 const OperationEnhancementServiceCreateProfile = "/evie.service.v1.EnhancementService/CreateProfile"
 const OperationEnhancementServiceDeletePolicy = "/evie.service.v1.EnhancementService/DeletePolicy"
 const OperationEnhancementServiceDeleteProfile = "/evie.service.v1.EnhancementService/DeleteProfile"
+const OperationEnhancementServiceGeneratePinyin = "/evie.service.v1.EnhancementService/GeneratePinyin"
 const OperationEnhancementServiceGetLog = "/evie.service.v1.EnhancementService/GetLog"
 const OperationEnhancementServiceGetPolicy = "/evie.service.v1.EnhancementService/GetPolicy"
 const OperationEnhancementServiceGetProfile = "/evie.service.v1.EnhancementService/GetProfile"
@@ -41,6 +42,9 @@ type EnhancementServiceHTTPServer interface {
 	DeletePolicy(context.Context, *DeletePolicyRequest) (*DeletePolicyResponse, error)
 	// DeleteProfile 删除场景
 	DeleteProfile(context.Context, *DeleteProfileRequest) (*DeleteProfileResponse, error)
+	// GeneratePinyin 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
+	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
+	GeneratePinyin(context.Context, *GeneratePinyinRequest) (*GeneratePinyinResponse, error)
 	// GetLog 查询增强记录详情
 	GetLog(context.Context, *GetEnhancementLogRequest) (*EnhancementLog, error)
 	// GetPolicy 查询策略详情
@@ -73,6 +77,7 @@ func RegisterEnhancementServiceHTTPServer(s *http.Server, srv EnhancementService
 	r.DELETE("/evie/v1/enhancement-profiles/{id}", _EnhancementService_DeleteProfile0_HTTP_Handler(srv))
 	r.GET("/evie/v1/enhancement-logs", _EnhancementService_ListLogs0_HTTP_Handler(srv))
 	r.GET("/evie/v1/enhancement-logs/{id}", _EnhancementService_GetLog0_HTTP_Handler(srv))
+	r.POST("/evie/v1/pinyin:generate", _EnhancementService_GeneratePinyin0_HTTP_Handler(srv))
 }
 
 func _EnhancementService_ListPolicies0_HTTP_Handler(srv EnhancementServiceHTTPServer) func(ctx http.Context) error {
@@ -336,6 +341,28 @@ func _EnhancementService_GetLog0_HTTP_Handler(srv EnhancementServiceHTTPServer) 
 	}
 }
 
+func _EnhancementService_GeneratePinyin0_HTTP_Handler(srv EnhancementServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GeneratePinyinRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationEnhancementServiceGeneratePinyin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GeneratePinyin(ctx, req.(*GeneratePinyinRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GeneratePinyinResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type EnhancementServiceHTTPClient interface {
 	// CreatePolicy 创建策略
 	CreatePolicy(ctx context.Context, req *CreatePolicyRequest, opts ...http.CallOption) (rsp *EnhancementPolicy, err error)
@@ -345,6 +372,9 @@ type EnhancementServiceHTTPClient interface {
 	DeletePolicy(ctx context.Context, req *DeletePolicyRequest, opts ...http.CallOption) (rsp *DeletePolicyResponse, err error)
 	// DeleteProfile 删除场景
 	DeleteProfile(ctx context.Context, req *DeleteProfileRequest, opts ...http.CallOption) (rsp *DeleteProfileResponse, err error)
+	// GeneratePinyin 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
+	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
+	GeneratePinyin(ctx context.Context, req *GeneratePinyinRequest, opts ...http.CallOption) (rsp *GeneratePinyinResponse, err error)
 	// GetLog 查询增强记录详情
 	GetLog(ctx context.Context, req *GetEnhancementLogRequest, opts ...http.CallOption) (rsp *EnhancementLog, err error)
 	// GetPolicy 查询策略详情
@@ -421,6 +451,21 @@ func (c *EnhancementServiceHTTPClientImpl) DeleteProfile(ctx context.Context, in
 	opts = append(opts, http.Operation(OperationEnhancementServiceDeleteProfile))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GeneratePinyin 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
+// 本接口为无状态工具，不限租户——任何已登录用户可调用。
+func (c *EnhancementServiceHTTPClientImpl) GeneratePinyin(ctx context.Context, in *GeneratePinyinRequest, opts ...http.CallOption) (*GeneratePinyinResponse, error) {
+	var out GeneratePinyinResponse
+	pattern := "/evie/v1/pinyin:generate"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationEnhancementServiceGeneratePinyin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

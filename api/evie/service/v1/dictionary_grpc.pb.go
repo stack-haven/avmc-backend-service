@@ -19,29 +19,31 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DictionaryService_ListDictionaries_FullMethodName  = "/evie.service.v1.DictionaryService/ListDictionaries"
-	DictionaryService_GetDictionary_FullMethodName     = "/evie.service.v1.DictionaryService/GetDictionary"
-	DictionaryService_CreateDictionary_FullMethodName  = "/evie.service.v1.DictionaryService/CreateDictionary"
-	DictionaryService_UpdateDictionary_FullMethodName  = "/evie.service.v1.DictionaryService/UpdateDictionary"
-	DictionaryService_DeleteDictionary_FullMethodName  = "/evie.service.v1.DictionaryService/DeleteDictionary"
-	DictionaryService_ListEntries_FullMethodName       = "/evie.service.v1.DictionaryService/ListEntries"
-	DictionaryService_GetEntry_FullMethodName          = "/evie.service.v1.DictionaryService/GetEntry"
-	DictionaryService_CreateEntry_FullMethodName       = "/evie.service.v1.DictionaryService/CreateEntry"
-	DictionaryService_UpdateEntry_FullMethodName       = "/evie.service.v1.DictionaryService/UpdateEntry"
-	DictionaryService_DeleteEntry_FullMethodName       = "/evie.service.v1.DictionaryService/DeleteEntry"
-	DictionaryService_ListRelations_FullMethodName     = "/evie.service.v1.DictionaryService/ListRelations"
-	DictionaryService_GetRelation_FullMethodName       = "/evie.service.v1.DictionaryService/GetRelation"
-	DictionaryService_CreateRelation_FullMethodName    = "/evie.service.v1.DictionaryService/CreateRelation"
-	DictionaryService_UpdateRelation_FullMethodName    = "/evie.service.v1.DictionaryService/UpdateRelation"
-	DictionaryService_DeleteRelation_FullMethodName    = "/evie.service.v1.DictionaryService/DeleteRelation"
-	DictionaryService_ListCategories_FullMethodName    = "/evie.service.v1.DictionaryService/ListCategories"
-	DictionaryService_CreateCategory_FullMethodName    = "/evie.service.v1.DictionaryService/CreateCategory"
-	DictionaryService_UpdateCategory_FullMethodName    = "/evie.service.v1.DictionaryService/UpdateCategory"
-	DictionaryService_DeleteCategory_FullMethodName    = "/evie.service.v1.DictionaryService/DeleteCategory"
-	DictionaryService_ListVersions_FullMethodName      = "/evie.service.v1.DictionaryService/ListVersions"
-	DictionaryService_GetVersion_FullMethodName        = "/evie.service.v1.DictionaryService/GetVersion"
-	DictionaryService_PublishDictionary_FullMethodName = "/evie.service.v1.DictionaryService/PublishDictionary"
-	DictionaryService_ListConflicts_FullMethodName     = "/evie.service.v1.DictionaryService/ListConflicts"
+	DictionaryService_ListDictionaries_FullMethodName          = "/evie.service.v1.DictionaryService/ListDictionaries"
+	DictionaryService_GetDictionary_FullMethodName             = "/evie.service.v1.DictionaryService/GetDictionary"
+	DictionaryService_CreateDictionary_FullMethodName          = "/evie.service.v1.DictionaryService/CreateDictionary"
+	DictionaryService_UpdateDictionary_FullMethodName          = "/evie.service.v1.DictionaryService/UpdateDictionary"
+	DictionaryService_DeleteDictionary_FullMethodName          = "/evie.service.v1.DictionaryService/DeleteDictionary"
+	DictionaryService_ListEntries_FullMethodName               = "/evie.service.v1.DictionaryService/ListEntries"
+	DictionaryService_GetEntry_FullMethodName                  = "/evie.service.v1.DictionaryService/GetEntry"
+	DictionaryService_CreateEntry_FullMethodName               = "/evie.service.v1.DictionaryService/CreateEntry"
+	DictionaryService_UpdateEntry_FullMethodName               = "/evie.service.v1.DictionaryService/UpdateEntry"
+	DictionaryService_DeleteEntry_FullMethodName               = "/evie.service.v1.DictionaryService/DeleteEntry"
+	DictionaryService_ListRelations_FullMethodName             = "/evie.service.v1.DictionaryService/ListRelations"
+	DictionaryService_GetRelation_FullMethodName               = "/evie.service.v1.DictionaryService/GetRelation"
+	DictionaryService_CreateRelation_FullMethodName            = "/evie.service.v1.DictionaryService/CreateRelation"
+	DictionaryService_UpdateRelation_FullMethodName            = "/evie.service.v1.DictionaryService/UpdateRelation"
+	DictionaryService_DeleteRelation_FullMethodName            = "/evie.service.v1.DictionaryService/DeleteRelation"
+	DictionaryService_ListCategories_FullMethodName            = "/evie.service.v1.DictionaryService/ListCategories"
+	DictionaryService_CreateCategory_FullMethodName            = "/evie.service.v1.DictionaryService/CreateCategory"
+	DictionaryService_UpdateCategory_FullMethodName            = "/evie.service.v1.DictionaryService/UpdateCategory"
+	DictionaryService_DeleteCategory_FullMethodName            = "/evie.service.v1.DictionaryService/DeleteCategory"
+	DictionaryService_ListVersions_FullMethodName              = "/evie.service.v1.DictionaryService/ListVersions"
+	DictionaryService_GetVersion_FullMethodName                = "/evie.service.v1.DictionaryService/GetVersion"
+	DictionaryService_PublishDictionary_FullMethodName         = "/evie.service.v1.DictionaryService/PublishDictionary"
+	DictionaryService_ListConflicts_FullMethodName             = "/evie.service.v1.DictionaryService/ListConflicts"
+	DictionaryService_GetDictionaryStats_FullMethodName        = "/evie.service.v1.DictionaryService/GetDictionaryStats"
+	DictionaryService_ListRelationsByDictionary_FullMethodName = "/evie.service.v1.DictionaryService/ListRelationsByDictionary"
 )
 
 // DictionaryServiceClient is the client API for DictionaryService service.
@@ -98,6 +100,10 @@ type DictionaryServiceClient interface {
 	PublishDictionary(ctx context.Context, in *PublishDictionaryRequest, opts ...grpc.CallOption) (*DictionaryVersion, error)
 	// 查询词库冲突记录
 	ListConflicts(ctx context.Context, in *ListConflictsRequest, opts ...grpc.CallOption) (*ListConflictsResponse, error)
+	// 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
+	GetDictionaryStats(ctx context.Context, in *GetDictionaryStatsRequest, opts ...grpc.CallOption) (*GetDictionaryStatsResponse, error)
+	// 词库级别关系列表（不需先选 entryId，一次性返回词库下所有词条的关系）。
+	ListRelationsByDictionary(ctx context.Context, in *ListRelationsByDictionaryRequest, opts ...grpc.CallOption) (*ListRelationsByDictionaryResponse, error)
 }
 
 type dictionaryServiceClient struct {
@@ -338,6 +344,26 @@ func (c *dictionaryServiceClient) ListConflicts(ctx context.Context, in *ListCon
 	return out, nil
 }
 
+func (c *dictionaryServiceClient) GetDictionaryStats(ctx context.Context, in *GetDictionaryStatsRequest, opts ...grpc.CallOption) (*GetDictionaryStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDictionaryStatsResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_GetDictionaryStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) ListRelationsByDictionary(ctx context.Context, in *ListRelationsByDictionaryRequest, opts ...grpc.CallOption) (*ListRelationsByDictionaryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListRelationsByDictionaryResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_ListRelationsByDictionary_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DictionaryServiceServer is the server API for DictionaryService service.
 // All implementations must embed UnimplementedDictionaryServiceServer
 // for forward compatibility.
@@ -392,6 +418,10 @@ type DictionaryServiceServer interface {
 	PublishDictionary(context.Context, *PublishDictionaryRequest) (*DictionaryVersion, error)
 	// 查询词库冲突记录
 	ListConflicts(context.Context, *ListConflictsRequest) (*ListConflictsResponse, error)
+	// 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
+	GetDictionaryStats(context.Context, *GetDictionaryStatsRequest) (*GetDictionaryStatsResponse, error)
+	// 词库级别关系列表（不需先选 entryId，一次性返回词库下所有词条的关系）。
+	ListRelationsByDictionary(context.Context, *ListRelationsByDictionaryRequest) (*ListRelationsByDictionaryResponse, error)
 	mustEmbedUnimplementedDictionaryServiceServer()
 }
 
@@ -470,6 +500,12 @@ func (UnimplementedDictionaryServiceServer) PublishDictionary(context.Context, *
 }
 func (UnimplementedDictionaryServiceServer) ListConflicts(context.Context, *ListConflictsRequest) (*ListConflictsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListConflicts not implemented")
+}
+func (UnimplementedDictionaryServiceServer) GetDictionaryStats(context.Context, *GetDictionaryStatsRequest) (*GetDictionaryStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDictionaryStats not implemented")
+}
+func (UnimplementedDictionaryServiceServer) ListRelationsByDictionary(context.Context, *ListRelationsByDictionaryRequest) (*ListRelationsByDictionaryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListRelationsByDictionary not implemented")
 }
 func (UnimplementedDictionaryServiceServer) mustEmbedUnimplementedDictionaryServiceServer() {}
 func (UnimplementedDictionaryServiceServer) testEmbeddedByValue()                           {}
@@ -906,6 +942,42 @@ func _DictionaryService_ListConflicts_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DictionaryService_GetDictionaryStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDictionaryStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).GetDictionaryStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_GetDictionaryStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).GetDictionaryStats(ctx, req.(*GetDictionaryStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_ListRelationsByDictionary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRelationsByDictionaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).ListRelationsByDictionary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_ListRelationsByDictionary_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).ListRelationsByDictionary(ctx, req.(*ListRelationsByDictionaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DictionaryService_ServiceDesc is the grpc.ServiceDesc for DictionaryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1004,6 +1076,14 @@ var DictionaryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListConflicts",
 			Handler:    _DictionaryService_ListConflicts_Handler,
+		},
+		{
+			MethodName: "GetDictionaryStats",
+			Handler:    _DictionaryService_GetDictionaryStats_Handler,
+		},
+		{
+			MethodName: "ListRelationsByDictionary",
+			Handler:    _DictionaryService_ListRelationsByDictionary_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

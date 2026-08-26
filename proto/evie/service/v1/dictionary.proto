@@ -245,6 +245,24 @@ service DictionaryService {
       tags: ["词库中心"]
     };
   }
+
+  // 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
+  rpc GetDictionaryStats(GetDictionaryStatsRequest) returns (GetDictionaryStatsResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionaries/{dictionary_id}:stats"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词库统计指标"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 词库级别关系列表（不需先选 entryId，一次性返回词库下所有词条的关系）。
+  rpc ListRelationsByDictionary(ListRelationsByDictionaryRequest) returns (ListRelationsByDictionaryResponse) {
+    option (google.api.http) = {get: "/evie/v1/dictionaries/{dictionary_id}/relations"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "词库级别关系列表"
+      tags: ["词库中心"]
+    };
+  }
 }
 
 // Dictionary 词库。
@@ -380,6 +398,15 @@ message DictionaryRelation {
   int32 status = 8;          // 状态: 1=启用 2=禁用
   string created_at = 9;
   string updated_at = 10;
+
+  // —— 以下字段为词库中心交互优化补全（2026-08-25），用于关系表格自然语言化展示。
+  // —— biz 层在返回前已 JOIN dictionary_entries 与 dictionary 表。
+  // —— proto3 新增字段不影响 wire 兼容性，老客户端会安全忽略。
+  string entry_standard_text = 11;   // 所属词条的标准词/短语（用于展示「您 → ALIAS → 客服您好」）
+  string entry_category = 12;        // 所属词条的分类（PERSON/ORGANIZATION/PRODUCT/...）
+  string dictionary_name = 13;       // 所属词库名（跨词库聚合时显示，避免纯 ID）
+  string related_standard_text = 14; // 关联目标的标准词（同义词关系时填 target_entry 的 standard_text）
+  uint32 related_tenant_id = 15;     // 关联目标所在租户（跨租户场景，用于权限判断与 UI 徽章）
 }
 
 message ListRelationsRequest {
@@ -518,6 +545,51 @@ message ListConflictsRequest {
 
 message ListConflictsResponse {
   repeated DictionaryConflict conflicts = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+// ===== 词库中心交互优化 P0 接口（2026-08-25） =====
+
+// DictionaryStats 词库统计指标。
+message DictionaryStats {
+  uint32 dictionary_id = 1;
+
+  // 基础计数
+  int32 entry_count = 2;                 // 词条总数（含已禁用）
+  int32 enabled_entry_count = 3;         // 启用词条数
+  int32 relation_count = 4;              // 关系总数
+  int32 version_count = 5;               // 已发布版本数
+  int32 unresolved_conflict_count = 6;   // 未解决冲突数（status=PENDING）
+
+  // 健康度（基于近 7 天 EnhancementLog + AsrRecord 聚合）
+  double hit_rate = 7;                   // 词库命中率（命中词条 / 总请求）
+  double avg_recognition_confidence = 8; // 平均识别置信度（来自关联的 AsrRecord）
+
+  // 时间戳
+  string last_modified_at = 20;          // 最近一次词条/关系变更时间
+}
+
+message GetDictionaryStatsRequest {
+  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+}
+
+message GetDictionaryStatsResponse {
+  DictionaryStats stats = 1;
+}
+
+// ListRelationsByDictionaryRequest 词库级别关系列表请求。
+// 与 ListRelations 的区别：不需先选 entryId，一次性返回词库下所有词条的关系。
+message ListRelationsByDictionaryRequest {
+  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  int32 page_size = 2;
+  string page_token = 3;
+  string relation_type = 4; // 可选筛选
+  string keyword = 5;       // 可选筛选（匹配 entry.standard_text 或 relation.related_text）
+}
+
+message ListRelationsByDictionaryResponse {
+  repeated DictionaryRelation relations = 1; // DictionaryRelation 已补全 entry_standard_text 等字段
   int32 total = 2;
   string next_page_token = 3;
 }
