@@ -481,6 +481,53 @@ func (_u *EnhancementLogUpdate) ClearErrorMessage() *EnhancementLogUpdate {
 	return _u
 }
 
+// SetAsrRecordID sets the "asr_record_id" field.
+func (_u *EnhancementLogUpdate) SetAsrRecordID(v uint32) *EnhancementLogUpdate {
+	_u.mutation.ResetAsrRecordID()
+	_u.mutation.SetAsrRecordID(v)
+	return _u
+}
+
+// SetNillableAsrRecordID sets the "asr_record_id" field if the given value is not nil.
+func (_u *EnhancementLogUpdate) SetNillableAsrRecordID(v *uint32) *EnhancementLogUpdate {
+	if v != nil {
+		_u.SetAsrRecordID(*v)
+	}
+	return _u
+}
+
+// AddAsrRecordID adds value to the "asr_record_id" field.
+func (_u *EnhancementLogUpdate) AddAsrRecordID(v int32) *EnhancementLogUpdate {
+	_u.mutation.AddAsrRecordID(v)
+	return _u
+}
+
+// ClearAsrRecordID clears the value of the "asr_record_id" field.
+func (_u *EnhancementLogUpdate) ClearAsrRecordID() *EnhancementLogUpdate {
+	_u.mutation.ClearAsrRecordID()
+	return _u
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (_u *EnhancementLogUpdate) SetStepSnapshotsJSON(v string) *EnhancementLogUpdate {
+	_u.mutation.SetStepSnapshotsJSON(v)
+	return _u
+}
+
+// SetNillableStepSnapshotsJSON sets the "step_snapshots_json" field if the given value is not nil.
+func (_u *EnhancementLogUpdate) SetNillableStepSnapshotsJSON(v *string) *EnhancementLogUpdate {
+	if v != nil {
+		_u.SetStepSnapshotsJSON(*v)
+	}
+	return _u
+}
+
+// ClearStepSnapshotsJSON clears the value of the "step_snapshots_json" field.
+func (_u *EnhancementLogUpdate) ClearStepSnapshotsJSON() *EnhancementLogUpdate {
+	_u.mutation.ClearStepSnapshotsJSON()
+	return _u
+}
+
 // Mutation returns the EnhancementLogMutation object of the builder.
 func (_u *EnhancementLogUpdate) Mutation() *EnhancementLogMutation {
 	return _u.mutation
@@ -722,6 +769,21 @@ func (_u *EnhancementLogUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(enhancementlog.FieldErrorMessage, field.TypeString)
+	}
+	if value, ok := _u.mutation.AsrRecordID(); ok {
+		_spec.SetField(enhancementlog.FieldAsrRecordID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedAsrRecordID(); ok {
+		_spec.AddField(enhancementlog.FieldAsrRecordID, field.TypeUint32, value)
+	}
+	if _u.mutation.AsrRecordIDCleared() {
+		_spec.ClearField(enhancementlog.FieldAsrRecordID, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.StepSnapshotsJSON(); ok {
+		_spec.SetField(enhancementlog.FieldStepSnapshotsJSON, field.TypeString, value)
+	}
+	if _u.mutation.StepSnapshotsJSONCleared() {
+		_spec.ClearField(enhancementlog.FieldStepSnapshotsJSON, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -1197,6 +1259,53 @@ func (_u *EnhancementLogUpdateOne) ClearErrorMessage() *EnhancementLogUpdateOne 
 	return _u
 }
 
+// SetAsrRecordID sets the "asr_record_id" field.
+func (_u *EnhancementLogUpdateOne) SetAsrRecordID(v uint32) *EnhancementLogUpdateOne {
+	_u.mutation.ResetAsrRecordID()
+	_u.mutation.SetAsrRecordID(v)
+	return _u
+}
+
+// SetNillableAsrRecordID sets the "asr_record_id" field if the given value is not nil.
+func (_u *EnhancementLogUpdateOne) SetNillableAsrRecordID(v *uint32) *EnhancementLogUpdateOne {
+	if v != nil {
+		_u.SetAsrRecordID(*v)
+	}
+	return _u
+}
+
+// AddAsrRecordID adds value to the "asr_record_id" field.
+func (_u *EnhancementLogUpdateOne) AddAsrRecordID(v int32) *EnhancementLogUpdateOne {
+	_u.mutation.AddAsrRecordID(v)
+	return _u
+}
+
+// ClearAsrRecordID clears the value of the "asr_record_id" field.
+func (_u *EnhancementLogUpdateOne) ClearAsrRecordID() *EnhancementLogUpdateOne {
+	_u.mutation.ClearAsrRecordID()
+	return _u
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (_u *EnhancementLogUpdateOne) SetStepSnapshotsJSON(v string) *EnhancementLogUpdateOne {
+	_u.mutation.SetStepSnapshotsJSON(v)
+	return _u
+}
+
+// SetNillableStepSnapshotsJSON sets the "step_snapshots_json" field if the given value is not nil.
+func (_u *EnhancementLogUpdateOne) SetNillableStepSnapshotsJSON(v *string) *EnhancementLogUpdateOne {
+	if v != nil {
+		_u.SetStepSnapshotsJSON(*v)
+	}
+	return _u
+}
+
+// ClearStepSnapshotsJSON clears the value of the "step_snapshots_json" field.
+func (_u *EnhancementLogUpdateOne) ClearStepSnapshotsJSON() *EnhancementLogUpdateOne {
+	_u.mutation.ClearStepSnapshotsJSON()
+	return _u
+}
+
 // Mutation returns the EnhancementLogMutation object of the builder.
 func (_u *EnhancementLogUpdateOne) Mutation() *EnhancementLogMutation {
 	return _u.mutation
@@ -1468,6 +1577,21 @@ func (_u *EnhancementLogUpdateOne) sqlSave(ctx context.Context) (_node *Enhancem
 	}
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(enhancementlog.FieldErrorMessage, field.TypeString)
+	}
+	if value, ok := _u.mutation.AsrRecordID(); ok {
+		_spec.SetField(enhancementlog.FieldAsrRecordID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedAsrRecordID(); ok {
+		_spec.AddField(enhancementlog.FieldAsrRecordID, field.TypeUint32, value)
+	}
+	if _u.mutation.AsrRecordIDCleared() {
+		_spec.ClearField(enhancementlog.FieldAsrRecordID, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.StepSnapshotsJSON(); ok {
+		_spec.SetField(enhancementlog.FieldStepSnapshotsJSON, field.TypeString, value)
+	}
+	if _u.mutation.StepSnapshotsJSONCleared() {
+		_spec.ClearField(enhancementlog.FieldStepSnapshotsJSON, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &EnhancementLog{config: _u.config}

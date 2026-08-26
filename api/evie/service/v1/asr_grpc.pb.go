@@ -24,6 +24,7 @@ const (
 	ASRService_ListAsrRecords_FullMethodName      = "/evie.service.v1.ASRService/ListAsrRecords"
 	ASRService_GetAsrRecord_FullMethodName        = "/evie.service.v1.ASRService/GetAsrRecord"
 	ASRService_GetAsrRecordAudio_FullMethodName   = "/evie.service.v1.ASRService/GetAsrRecordAudio"
+	ASRService_GetAsrRecordDetail_FullMethodName  = "/evie.service.v1.ASRService/GetAsrRecordDetail"
 	ASRService_RecognizeAndCorrect_FullMethodName = "/evie.service.v1.ASRService/RecognizeAndCorrect"
 	ASRService_ReRecognize_FullMethodName         = "/evie.service.v1.ASRService/ReRecognize"
 )
@@ -45,6 +46,8 @@ type ASRServiceClient interface {
 	GetAsrRecord(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecord, error)
 	// 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(ctx context.Context, in *GetAsrRecordAudioRequest, opts ...grpc.CallOption) (*GetAsrRecordAudioResponse, error)
+	// 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
+	GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetail, error)
 	// 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
 	RecognizeAndCorrect(ctx context.Context, in *RecognizeRequest, opts ...grpc.CallOption) (*RecognizeAndCorrectResponse, error)
 	// 对已有记录重新识别（复用文件中心音频，不重复上传）
@@ -112,6 +115,16 @@ func (c *aSRServiceClient) GetAsrRecordAudio(ctx context.Context, in *GetAsrReco
 	return out, nil
 }
 
+func (c *aSRServiceClient) GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AsrRecordDetail)
+	err := c.cc.Invoke(ctx, ASRService_GetAsrRecordDetail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *aSRServiceClient) RecognizeAndCorrect(ctx context.Context, in *RecognizeRequest, opts ...grpc.CallOption) (*RecognizeAndCorrectResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RecognizeAndCorrectResponse)
@@ -149,6 +162,8 @@ type ASRServiceServer interface {
 	GetAsrRecord(context.Context, *GetAsrRecordRequest) (*AsrRecord, error)
 	// 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error)
+	// 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
+	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error)
 	// 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
 	RecognizeAndCorrect(context.Context, *RecognizeRequest) (*RecognizeAndCorrectResponse, error)
 	// 对已有记录重新识别（复用文件中心音频，不重复上传）
@@ -177,6 +192,9 @@ func (UnimplementedASRServiceServer) GetAsrRecord(context.Context, *GetAsrRecord
 }
 func (UnimplementedASRServiceServer) GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAsrRecordAudio not implemented")
+}
+func (UnimplementedASRServiceServer) GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAsrRecordDetail not implemented")
 }
 func (UnimplementedASRServiceServer) RecognizeAndCorrect(context.Context, *RecognizeRequest) (*RecognizeAndCorrectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RecognizeAndCorrect not implemented")
@@ -284,6 +302,24 @@ func _ASRService_GetAsrRecordAudio_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ASRService_GetAsrRecordDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAsrRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ASRServiceServer).GetAsrRecordDetail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ASRService_GetAsrRecordDetail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ASRServiceServer).GetAsrRecordDetail(ctx, req.(*GetAsrRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ASRService_RecognizeAndCorrect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RecognizeRequest)
 	if err := dec(in); err != nil {
@@ -342,6 +378,10 @@ var ASRService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAsrRecordAudio",
 			Handler:    _ASRService_GetAsrRecordAudio_Handler,
+		},
+		{
+			MethodName: "GetAsrRecordDetail",
+			Handler:    _ASRService_GetAsrRecordDetail_Handler,
 		},
 		{
 			MethodName: "RecognizeAndCorrect",

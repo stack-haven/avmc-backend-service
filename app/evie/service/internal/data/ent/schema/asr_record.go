@@ -4,6 +4,7 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/mixins"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
@@ -39,6 +40,7 @@ func (AsrRecord) Fields() []ent.Field {
 		field.String("audio_url").MaxLen(512).Optional().Comment("文件中心文件ID（供预览重识别）"),
 		field.String("audio_format").Default("pcm").MaxLen(16).Comment("pcm/wav/mp3/opus"),
 		field.String("engine").Default("funasr").MaxLen(32).Comment("funasr/whisper/sensevoice"),
+		field.String("enhanced_text").SchemaType(map[string]string{dialect.MySQL: "text"}).Optional().Comment("最终增强后文本"),
 	}
 }
 

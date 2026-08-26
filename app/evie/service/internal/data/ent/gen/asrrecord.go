@@ -43,7 +43,9 @@ type AsrRecord struct {
 	// pcm/wav/mp3/opus
 	AudioFormat string `json:"audio_format,omitempty"`
 	// funasr/whisper/sensevoice
-	Engine       string `json:"engine,omitempty"`
+	Engine string `json:"engine,omitempty"`
+	// 最终增强后文本
+	EnhancedText string `json:"enhanced_text,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -56,7 +58,7 @@ func (*AsrRecord) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case asrrecord.FieldID, asrrecord.FieldStatus, asrrecord.FieldTenantID, asrrecord.FieldUserID, asrrecord.FieldDurationMs, asrrecord.FieldAudioDurationMs:
 			values[i] = new(sql.NullInt64)
-		case asrrecord.FieldSessionID, asrrecord.FieldRawText, asrrecord.FieldAudioURL, asrrecord.FieldAudioFormat, asrrecord.FieldEngine:
+		case asrrecord.FieldSessionID, asrrecord.FieldRawText, asrrecord.FieldAudioURL, asrrecord.FieldAudioFormat, asrrecord.FieldEngine, asrrecord.FieldEnhancedText:
 			values[i] = new(sql.NullString)
 		case asrrecord.FieldCreatedAt, asrrecord.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -160,6 +162,12 @@ func (_m *AsrRecord) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Engine = value.String
 			}
+		case asrrecord.FieldEnhancedText:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field enhanced_text", values[i])
+			} else if value.Valid {
+				_m.EnhancedText = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -236,6 +244,9 @@ func (_m *AsrRecord) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("engine=")
 	builder.WriteString(_m.Engine)
+	builder.WriteString(", ")
+	builder.WriteString("enhanced_text=")
+	builder.WriteString(_m.EnhancedText)
 	builder.WriteByte(')')
 	return builder.String()
 }

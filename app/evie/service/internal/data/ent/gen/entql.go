@@ -72,6 +72,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			asrrecord.FieldAudioURL:        {Type: field.TypeString, Column: asrrecord.FieldAudioURL},
 			asrrecord.FieldAudioFormat:     {Type: field.TypeString, Column: asrrecord.FieldAudioFormat},
 			asrrecord.FieldEngine:          {Type: field.TypeString, Column: asrrecord.FieldEngine},
+			asrrecord.FieldEnhancedText:    {Type: field.TypeString, Column: asrrecord.FieldEnhancedText},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -272,6 +273,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enhancementlog.FieldUserCorrected:       {Type: field.TypeBool, Column: enhancementlog.FieldUserCorrected},
 			enhancementlog.FieldFeedbackText:        {Type: field.TypeString, Column: enhancementlog.FieldFeedbackText},
 			enhancementlog.FieldErrorMessage:        {Type: field.TypeString, Column: enhancementlog.FieldErrorMessage},
+			enhancementlog.FieldAsrRecordID:         {Type: field.TypeUint32, Column: enhancementlog.FieldAsrRecordID},
+			enhancementlog.FieldStepSnapshotsJSON:   {Type: field.TypeString, Column: enhancementlog.FieldStepSnapshotsJSON},
 		},
 	}
 	graph.Nodes[10] = &sqlgraph.Node{
@@ -614,6 +617,11 @@ func (f *AsrRecordFilter) WhereAudioFormat(p entql.StringP) {
 // WhereEngine applies the entql string predicate on the engine field.
 func (f *AsrRecordFilter) WhereEngine(p entql.StringP) {
 	f.Where(p.Field(asrrecord.FieldEngine))
+}
+
+// WhereEnhancedText applies the entql string predicate on the enhanced_text field.
+func (f *AsrRecordFilter) WhereEnhancedText(p entql.StringP) {
+	f.Where(p.Field(asrrecord.FieldEnhancedText))
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1498,6 +1506,16 @@ func (f *EnhancementLogFilter) WhereFeedbackText(p entql.StringP) {
 // WhereErrorMessage applies the entql string predicate on the error_message field.
 func (f *EnhancementLogFilter) WhereErrorMessage(p entql.StringP) {
 	f.Where(p.Field(enhancementlog.FieldErrorMessage))
+}
+
+// WhereAsrRecordID applies the entql uint32 predicate on the asr_record_id field.
+func (f *EnhancementLogFilter) WhereAsrRecordID(p entql.Uint32P) {
+	f.Where(p.Field(enhancementlog.FieldAsrRecordID))
+}
+
+// WhereStepSnapshotsJSON applies the entql string predicate on the step_snapshots_json field.
+func (f *EnhancementLogFilter) WhereStepSnapshotsJSON(p entql.StringP) {
+	f.Where(p.Field(enhancementlog.FieldStepSnapshotsJSON))
 }
 
 // addPredicate implements the predicateAdder interface.

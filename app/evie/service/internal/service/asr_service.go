@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -18,12 +19,13 @@ type ASRServiceService struct {
 	auc      *biz.ASRUsecase
 	enhancer *biz.EnhancementEngine
 	policyUc *biz.EnhancementPolicyUsecase
+	logUc    *biz.EnhancementLogUsecase
 	log      *log.Helper
 }
 
 // NewASRServiceService 创建 ASR 服务实例。
-func NewASRServiceService(auc *biz.ASRUsecase, enhancer *biz.EnhancementEngine, policyUc *biz.EnhancementPolicyUsecase, logger log.Logger) *ASRServiceService {
-	return &ASRServiceService{auc: auc, enhancer: enhancer, policyUc: policyUc, log: log.NewHelper(logger)}
+func NewASRServiceService(auc *biz.ASRUsecase, enhancer *biz.EnhancementEngine, policyUc *biz.EnhancementPolicyUsecase, logUc *biz.EnhancementLogUsecase, logger log.Logger) *ASRServiceService {
+	return &ASRServiceService{auc: auc, enhancer: enhancer, policyUc: policyUc, logUc: logUc, log: log.NewHelper(logger)}
 }
 
 // Recognize 同步识别。
@@ -106,7 +108,7 @@ func (s *ASRServiceService) RecognizeAndCorrect(ctx context.Context, req *pb.Rec
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId())
+	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId(), req.GetSessionId())
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +127,11 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.enhance(ctx, result.Text, 0)
+	record, err := s.auc.GetRecord(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	corrected, err := s.enhance(ctx, result.Text, 0, record.GetSessionId())
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +145,7 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 }
 
 // enhance 调用文本增强引擎，映射为 CorrectResponse。
-func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID uint32) (*pb.CorrectResponse, error) {
+func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID uint32, sessionID string) (*pb.CorrectResponse, error) {
 	tenantID := authn.GetAuthUserTenantID(ctx)
 	policy, err := resolveEnhancePolicy(ctx, s.policyUc, profileID)
 	if err != nil {
@@ -162,12 +168,83 @@ func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID 
 			needConfirm = true
 		}
 	}
+
+	// 保存增强日志（含步骤快照，供记录详情步骤图展示）
+	if s.logUc != nil && result.StepTimings != nil {
+		changesJSON, _ := json.Marshal(result.Changes)
+		snapshotsJSON, _ := json.Marshal(result.StepSnapshots)
+		s.logUc.Save(ctx, &biz.EnhancementLogData{
+			SessionID:           sessionID,
+			RawText:             result.RawText,
+			EnhancedText:        result.EnhancedText,
+			ChangesJSON:         string(changesJSON),
+			StepSnapshotsJSON:   string(snapshotsJSON),
+			ProcessingTimeMs:    result.TotalTime.Milliseconds(),
+			CleaningTimeMs:      stepMs(result.StepTimings, "cleaning"),
+			FillerTimeMs:        stepMs(result.StepTimings, "filler"),
+			VocabMatchTimeMs:    stepMs(result.StepTimings, "vocabulary_matching"),
+			AliasTimeMs:         stepMs(result.StepTimings, "alias_resolution"),
+			DeterministicTimeMs: stepMs(result.StepTimings, "deterministic_replacement"),
+			PinyinTimeMs:        stepMs(result.StepTimings, "pinyin_correction"),
+			FuzzyTimeMs:         stepMs(result.StepTimings, "fuzzy_matching"),
+			ContextTimeMs:       stepMs(result.StepTimings, "context_correction"),
+			Status:              1,
+		})
+	}
+
 	return &pb.CorrectResponse{
 		OriginalText:  result.RawText,
 		CorrectedText: result.EnhancedText,
 		Changes:       changes,
 		NeedConfirm:   needConfirm,
 	}, nil
+}
+
+// GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）。
+func (s *ASRServiceService) GetAsrRecordDetail(ctx context.Context, req *pb.GetAsrRecordRequest) (*pb.AsrRecordDetail, error) {
+	record, err := s.auc.GetRecord(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	detail := &pb.AsrRecordDetail{Record: record}
+	if s.logUc != nil {
+		logs, _, err := s.logUc.List(ctx, &pb.ListEnhancementLogsRequest{SessionId: record.GetSessionId(), PageSize: 1})
+		if err == nil && len(logs) > 0 {
+			log := logs[0]
+			detail.EnhancedText = log.GetEnhancedText()
+			detail.PolicyName = log.GetPolicyMode()
+			if log.GetStepSnapshotsJson() != "" {
+				var snapshots []*biz.StepSnapshot
+				if err := json.Unmarshal([]byte(log.GetStepSnapshotsJson()), &snapshots); err == nil {
+					for _, snap := range snapshots {
+						pbSnap := &pb.EnhancementStepSnapshot{
+							Step: snap.Step, Before: snap.Before, After: snap.After,
+							DurationMs: snap.DurationMs, Skipped: snap.Skipped,
+						}
+						for _, ch := range snap.Changes {
+							pbSnap.Changes = append(pbSnap.Changes, &pb.CorrectionChange{
+								From: ch.OriginalText, To: ch.ResultText,
+								Type: ch.Type, Confidence: float32(ch.Confidence),
+							})
+						}
+						detail.StepSnapshots = append(detail.StepSnapshots, pbSnap)
+					}
+				}
+			}
+			if log.GetChangesJson() != "" {
+				var changes []*biz.EnhancementChange
+				if err := json.Unmarshal([]byte(log.GetChangesJson()), &changes); err == nil {
+					for _, ch := range changes {
+						detail.Changes = append(detail.Changes, &pb.CorrectionChange{
+							From: ch.OriginalText, To: ch.ResultText,
+							Type: ch.Type, Confidence: float32(ch.Confidence),
+						})
+					}
+				}
+			}
+		}
+	}
+	return detail, nil
 }
 
 // ListAsrRecords 查询识别记录列表。

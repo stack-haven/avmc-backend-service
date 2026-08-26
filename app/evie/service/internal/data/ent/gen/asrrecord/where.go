@@ -119,6 +119,11 @@ func Engine(v string) predicate.AsrRecord {
 	return predicate.AsrRecord(sql.FieldEQ(FieldEngine, v))
 }
 
+// EnhancedText applies equality check predicate on the "enhanced_text" field. It's identical to EnhancedTextEQ.
+func EnhancedText(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldEQ(FieldEnhancedText, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.AsrRecord {
 	return predicate.AsrRecord(sql.FieldEQ(FieldCreatedAt, v))
@@ -782,6 +787,81 @@ func EngineEqualFold(v string) predicate.AsrRecord {
 // EngineContainsFold applies the ContainsFold predicate on the "engine" field.
 func EngineContainsFold(v string) predicate.AsrRecord {
 	return predicate.AsrRecord(sql.FieldContainsFold(FieldEngine, v))
+}
+
+// EnhancedTextEQ applies the EQ predicate on the "enhanced_text" field.
+func EnhancedTextEQ(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldEQ(FieldEnhancedText, v))
+}
+
+// EnhancedTextNEQ applies the NEQ predicate on the "enhanced_text" field.
+func EnhancedTextNEQ(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldNEQ(FieldEnhancedText, v))
+}
+
+// EnhancedTextIn applies the In predicate on the "enhanced_text" field.
+func EnhancedTextIn(vs ...string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldIn(FieldEnhancedText, vs...))
+}
+
+// EnhancedTextNotIn applies the NotIn predicate on the "enhanced_text" field.
+func EnhancedTextNotIn(vs ...string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldNotIn(FieldEnhancedText, vs...))
+}
+
+// EnhancedTextGT applies the GT predicate on the "enhanced_text" field.
+func EnhancedTextGT(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldGT(FieldEnhancedText, v))
+}
+
+// EnhancedTextGTE applies the GTE predicate on the "enhanced_text" field.
+func EnhancedTextGTE(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldGTE(FieldEnhancedText, v))
+}
+
+// EnhancedTextLT applies the LT predicate on the "enhanced_text" field.
+func EnhancedTextLT(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldLT(FieldEnhancedText, v))
+}
+
+// EnhancedTextLTE applies the LTE predicate on the "enhanced_text" field.
+func EnhancedTextLTE(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldLTE(FieldEnhancedText, v))
+}
+
+// EnhancedTextContains applies the Contains predicate on the "enhanced_text" field.
+func EnhancedTextContains(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldContains(FieldEnhancedText, v))
+}
+
+// EnhancedTextHasPrefix applies the HasPrefix predicate on the "enhanced_text" field.
+func EnhancedTextHasPrefix(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldHasPrefix(FieldEnhancedText, v))
+}
+
+// EnhancedTextHasSuffix applies the HasSuffix predicate on the "enhanced_text" field.
+func EnhancedTextHasSuffix(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldHasSuffix(FieldEnhancedText, v))
+}
+
+// EnhancedTextIsNil applies the IsNil predicate on the "enhanced_text" field.
+func EnhancedTextIsNil() predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldIsNull(FieldEnhancedText))
+}
+
+// EnhancedTextNotNil applies the NotNil predicate on the "enhanced_text" field.
+func EnhancedTextNotNil() predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldNotNull(FieldEnhancedText))
+}
+
+// EnhancedTextEqualFold applies the EqualFold predicate on the "enhanced_text" field.
+func EnhancedTextEqualFold(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldEqualFold(FieldEnhancedText, v))
+}
+
+// EnhancedTextContainsFold applies the ContainsFold predicate on the "enhanced_text" field.
+func EnhancedTextContainsFold(v string) predicate.AsrRecord {
+	return predicate.AsrRecord(sql.FieldContainsFold(FieldEnhancedText, v))
 }
 
 // And groups predicates with the AND operator between them.

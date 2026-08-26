@@ -174,6 +174,16 @@ func ErrorMessage(v string) predicate.EnhancementLog {
 	return predicate.EnhancementLog(sql.FieldEQ(FieldErrorMessage, v))
 }
 
+// AsrRecordID applies equality check predicate on the "asr_record_id" field. It's identical to AsrRecordIDEQ.
+func AsrRecordID(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldEQ(FieldAsrRecordID, v))
+}
+
+// StepSnapshotsJSON applies equality check predicate on the "step_snapshots_json" field. It's identical to StepSnapshotsJSONEQ.
+func StepSnapshotsJSON(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldEQ(FieldStepSnapshotsJSON, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.EnhancementLog {
 	return predicate.EnhancementLog(sql.FieldEQ(FieldCreatedAt, v))
@@ -1417,6 +1427,131 @@ func ErrorMessageEqualFold(v string) predicate.EnhancementLog {
 // ErrorMessageContainsFold applies the ContainsFold predicate on the "error_message" field.
 func ErrorMessageContainsFold(v string) predicate.EnhancementLog {
 	return predicate.EnhancementLog(sql.FieldContainsFold(FieldErrorMessage, v))
+}
+
+// AsrRecordIDEQ applies the EQ predicate on the "asr_record_id" field.
+func AsrRecordIDEQ(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldEQ(FieldAsrRecordID, v))
+}
+
+// AsrRecordIDNEQ applies the NEQ predicate on the "asr_record_id" field.
+func AsrRecordIDNEQ(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldNEQ(FieldAsrRecordID, v))
+}
+
+// AsrRecordIDIn applies the In predicate on the "asr_record_id" field.
+func AsrRecordIDIn(vs ...uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldIn(FieldAsrRecordID, vs...))
+}
+
+// AsrRecordIDNotIn applies the NotIn predicate on the "asr_record_id" field.
+func AsrRecordIDNotIn(vs ...uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldNotIn(FieldAsrRecordID, vs...))
+}
+
+// AsrRecordIDGT applies the GT predicate on the "asr_record_id" field.
+func AsrRecordIDGT(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldGT(FieldAsrRecordID, v))
+}
+
+// AsrRecordIDGTE applies the GTE predicate on the "asr_record_id" field.
+func AsrRecordIDGTE(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldGTE(FieldAsrRecordID, v))
+}
+
+// AsrRecordIDLT applies the LT predicate on the "asr_record_id" field.
+func AsrRecordIDLT(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldLT(FieldAsrRecordID, v))
+}
+
+// AsrRecordIDLTE applies the LTE predicate on the "asr_record_id" field.
+func AsrRecordIDLTE(v uint32) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldLTE(FieldAsrRecordID, v))
+}
+
+// AsrRecordIDIsNil applies the IsNil predicate on the "asr_record_id" field.
+func AsrRecordIDIsNil() predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldIsNull(FieldAsrRecordID))
+}
+
+// AsrRecordIDNotNil applies the NotNil predicate on the "asr_record_id" field.
+func AsrRecordIDNotNil() predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldNotNull(FieldAsrRecordID))
+}
+
+// StepSnapshotsJSONEQ applies the EQ predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONEQ(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldEQ(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONNEQ applies the NEQ predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONNEQ(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldNEQ(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONIn applies the In predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONIn(vs ...string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldIn(FieldStepSnapshotsJSON, vs...))
+}
+
+// StepSnapshotsJSONNotIn applies the NotIn predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONNotIn(vs ...string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldNotIn(FieldStepSnapshotsJSON, vs...))
+}
+
+// StepSnapshotsJSONGT applies the GT predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONGT(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldGT(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONGTE applies the GTE predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONGTE(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldGTE(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONLT applies the LT predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONLT(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldLT(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONLTE applies the LTE predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONLTE(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldLTE(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONContains applies the Contains predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONContains(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldContains(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONHasPrefix applies the HasPrefix predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONHasPrefix(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldHasPrefix(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONHasSuffix applies the HasSuffix predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONHasSuffix(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldHasSuffix(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONIsNil applies the IsNil predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONIsNil() predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldIsNull(FieldStepSnapshotsJSON))
+}
+
+// StepSnapshotsJSONNotNil applies the NotNil predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONNotNil() predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldNotNull(FieldStepSnapshotsJSON))
+}
+
+// StepSnapshotsJSONEqualFold applies the EqualFold predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONEqualFold(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldEqualFold(FieldStepSnapshotsJSON, v))
+}
+
+// StepSnapshotsJSONContainsFold applies the ContainsFold predicate on the "step_snapshots_json" field.
+func StepSnapshotsJSONContainsFold(v string) predicate.EnhancementLog {
+	return predicate.EnhancementLog(sql.FieldContainsFold(FieldStepSnapshotsJSON, v))
 }
 
 // And groups predicates with the AND operator between them.

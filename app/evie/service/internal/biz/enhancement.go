@@ -32,13 +32,24 @@ type EnhancementChange struct {
 	Locked       bool // 确定性结果锁定，后续算法不得覆盖（开发说明第二十五节）
 }
 
+// StepSnapshot 单步增强快照（用于步骤图/分词明细展示）。
+type StepSnapshot struct {
+	Step       string                // 步骤标识：text_cleaning / filler_removal / ...
+	Before     string                // 该步骤处理前文本
+	After      string                // 该步骤处理后文本
+	DurationMs int64                 // 该步骤耗时
+	Skipped    bool                  // 策略跳过该步骤时 true
+	Changes    []*EnhancementChange  // 该步骤产生的变更明细
+}
+
 // EnhancementResult 文本增强结果。
 type EnhancementResult struct {
-	RawText      string
-	EnhancedText string
-	Changes      []*EnhancementChange
-	StepTimings map[string]time.Duration
-	TotalTime time.Duration
+	RawText       string
+	EnhancedText  string
+	Changes       []*EnhancementChange
+	StepTimings   map[string]time.Duration
+	TotalTime     time.Duration
+	StepSnapshots []*StepSnapshot
 }
 
 // EnhancementContext 流水线上下文：贯穿各步骤，维护当前文本与变更。
@@ -121,21 +132,38 @@ func (e *EnhancementEngine) enhance(ctx context.Context, tenantID uint32, rawTex
 	}
 	c := &EnhancementContext{RawText: rawText, Text: rawText, Vocab: vc}
 	timings := make(map[string]time.Duration, len(e.steps))
+	snapshots := make([]*StepSnapshot, 0, len(e.steps))
 	for _, step := range e.steps {
 		if !stepEnabled(policy, step.Name()) {
+			snapshots = append(snapshots, &StepSnapshot{Step: step.Name(), Skipped: true})
 			continue
 		}
+		beforeText := c.Text
+		beforeChanges := len(c.Changes)
 		t0 := time.Now()
 		if err := step.Process(c); err != nil {
-			timings[step.Name()] = time.Since(t0)
+			elapsed := time.Since(t0)
+			timings[step.Name()] = elapsed
+			snapshots = append(snapshots, &StepSnapshot{
+				Step: step.Name(), Before: beforeText, After: c.Text,
+				DurationMs: elapsed.Milliseconds(),
+				Changes:    append([]*EnhancementChange(nil), c.Changes[beforeChanges:]...),
+			})
 			// 单阶段失败不阻断整个流水线（开发说明第四十八节：失败降级）
 			e.log.Warnf("enhancement step %s failed: %v", step.Name(), err)
 			continue
 		}
-		timings[step.Name()] = time.Since(t0)
+		elapsed := time.Since(t0)
+		timings[step.Name()] = elapsed
+		snapshots = append(snapshots, &StepSnapshot{
+			Step: step.Name(), Before: beforeText, After: c.Text,
+			DurationMs: elapsed.Milliseconds(),
+			Changes:    append([]*EnhancementChange(nil), c.Changes[beforeChanges:]...),
+		})
 	}
 	result := c.Result()
 	result.StepTimings = timings
+	result.StepSnapshots = snapshots
 	result.TotalTime = time.Since(totalStart)
 	return result, nil
 }

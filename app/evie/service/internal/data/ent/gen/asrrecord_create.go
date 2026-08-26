@@ -156,6 +156,20 @@ func (_c *AsrRecordCreate) SetNillableEngine(v *string) *AsrRecordCreate {
 	return _c
 }
 
+// SetEnhancedText sets the "enhanced_text" field.
+func (_c *AsrRecordCreate) SetEnhancedText(v string) *AsrRecordCreate {
+	_c.mutation.SetEnhancedText(v)
+	return _c
+}
+
+// SetNillableEnhancedText sets the "enhanced_text" field if the given value is not nil.
+func (_c *AsrRecordCreate) SetNillableEnhancedText(v *string) *AsrRecordCreate {
+	if v != nil {
+		_c.SetEnhancedText(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *AsrRecordCreate) SetID(v uint32) *AsrRecordCreate {
 	_c.mutation.SetID(v)
@@ -377,6 +391,10 @@ func (_c *AsrRecordCreate) createSpec() (*AsrRecord, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Engine(); ok {
 		_spec.SetField(asrrecord.FieldEngine, field.TypeString, value)
 		_node.Engine = value
+	}
+	if value, ok := _c.mutation.EnhancedText(); ok {
+		_spec.SetField(asrrecord.FieldEnhancedText, field.TypeString, value)
+		_node.EnhancedText = value
 	}
 	return _node, _spec
 }
@@ -619,6 +637,24 @@ func (u *AsrRecordUpsert) SetEngine(v string) *AsrRecordUpsert {
 // UpdateEngine sets the "engine" field to the value that was provided on create.
 func (u *AsrRecordUpsert) UpdateEngine() *AsrRecordUpsert {
 	u.SetExcluded(asrrecord.FieldEngine)
+	return u
+}
+
+// SetEnhancedText sets the "enhanced_text" field.
+func (u *AsrRecordUpsert) SetEnhancedText(v string) *AsrRecordUpsert {
+	u.Set(asrrecord.FieldEnhancedText, v)
+	return u
+}
+
+// UpdateEnhancedText sets the "enhanced_text" field to the value that was provided on create.
+func (u *AsrRecordUpsert) UpdateEnhancedText() *AsrRecordUpsert {
+	u.SetExcluded(asrrecord.FieldEnhancedText)
+	return u
+}
+
+// ClearEnhancedText clears the value of the "enhanced_text" field.
+func (u *AsrRecordUpsert) ClearEnhancedText() *AsrRecordUpsert {
+	u.SetNull(asrrecord.FieldEnhancedText)
 	return u
 }
 
@@ -894,6 +930,27 @@ func (u *AsrRecordUpsertOne) SetEngine(v string) *AsrRecordUpsertOne {
 func (u *AsrRecordUpsertOne) UpdateEngine() *AsrRecordUpsertOne {
 	return u.Update(func(s *AsrRecordUpsert) {
 		s.UpdateEngine()
+	})
+}
+
+// SetEnhancedText sets the "enhanced_text" field.
+func (u *AsrRecordUpsertOne) SetEnhancedText(v string) *AsrRecordUpsertOne {
+	return u.Update(func(s *AsrRecordUpsert) {
+		s.SetEnhancedText(v)
+	})
+}
+
+// UpdateEnhancedText sets the "enhanced_text" field to the value that was provided on create.
+func (u *AsrRecordUpsertOne) UpdateEnhancedText() *AsrRecordUpsertOne {
+	return u.Update(func(s *AsrRecordUpsert) {
+		s.UpdateEnhancedText()
+	})
+}
+
+// ClearEnhancedText clears the value of the "enhanced_text" field.
+func (u *AsrRecordUpsertOne) ClearEnhancedText() *AsrRecordUpsertOne {
+	return u.Update(func(s *AsrRecordUpsert) {
+		s.ClearEnhancedText()
 	})
 }
 
@@ -1335,6 +1392,27 @@ func (u *AsrRecordUpsertBulk) SetEngine(v string) *AsrRecordUpsertBulk {
 func (u *AsrRecordUpsertBulk) UpdateEngine() *AsrRecordUpsertBulk {
 	return u.Update(func(s *AsrRecordUpsert) {
 		s.UpdateEngine()
+	})
+}
+
+// SetEnhancedText sets the "enhanced_text" field.
+func (u *AsrRecordUpsertBulk) SetEnhancedText(v string) *AsrRecordUpsertBulk {
+	return u.Update(func(s *AsrRecordUpsert) {
+		s.SetEnhancedText(v)
+	})
+}
+
+// UpdateEnhancedText sets the "enhanced_text" field to the value that was provided on create.
+func (u *AsrRecordUpsertBulk) UpdateEnhancedText() *AsrRecordUpsertBulk {
+	return u.Update(func(s *AsrRecordUpsert) {
+		s.UpdateEnhancedText()
+	})
+}
+
+// ClearEnhancedText clears the value of the "enhanced_text" field.
+func (u *AsrRecordUpsertBulk) ClearEnhancedText() *AsrRecordUpsertBulk {
+	return u.Update(func(s *AsrRecordUpsert) {
+		s.ClearEnhancedText()
 	})
 }
 

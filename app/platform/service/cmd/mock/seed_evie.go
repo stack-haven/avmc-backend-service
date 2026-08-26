@@ -17,6 +17,7 @@ import (
 // 一级目录 sort=70，位于平台“通知中心(60)”之后、“系统管理(999)”之前。
 var evieMenus = []menuSeed{
 	{Parent: "", Name: "EviePlatform", Title: "语音智能引擎", Path: "/evie", Component: "BasicLayout", Icon: "mdi:microphone-message-outline", Type: 1, Sort: 70},
+	{Parent: "EviePlatform", Name: "EvieDashboard", Title: "工作台", Path: "/evie/dashboard", Component: "/evie/dashboard/index", Icon: "mdi:view-dashboard-outline", Type: 2, Sort: 5},
 
 	{Parent: "EviePlatform", Name: "EvieDictionary", Title: "词库中心", Path: "/evie/dictionary", Component: "", Icon: "mdi:book-cog-outline", Type: 1, Sort: 10},
 	{Parent: "EvieDictionary", Name: "EvieDictionaryList", Title: "词库管理", Path: "/evie/dictionary/dictionaries", Component: "/evie/dictionary/dictionaries/list", Icon: "mdi:bookshelf", Type: 2, Sort: 10},
@@ -79,6 +80,7 @@ var evieButtons = []buttonSpec{
 	{Parent: "EvieASR", Name: "EvieASRRecognizeAndCorrect", Title: "识别+纠错", Operation: eviev1.OperationASRServiceRecognizeAndCorrect, Sort: 15},
 	{Parent: "EvieASR", Name: "EvieASRRecordQuery", Title: "记录查询", Operation: eviev1.OperationASRServiceListAsrRecords, Sort: 20},
 	{Parent: "EvieASR", Name: "EvieASRRecordGet", Title: "记录详情", Operation: eviev1.OperationASRServiceGetAsrRecord, Sort: 30},
+	{Parent: "EvieASR", Name: "EvieASRRecordDetail", Title: "记录详情(增强轨迹)", Operation: eviev1.OperationASRServiceGetAsrRecordDetail, Sort: 35},
 	{Parent: "EvieASR", Name: "EvieASRRecordAudio", Title: "音频预览", Operation: eviev1.OperationASRServiceGetAsrRecordAudio, Sort: 40},
 	{Parent: "EvieASR", Name: "EvieASRReRecognize", Title: "重新识别", Operation: eviev1.OperationASRServiceReRecognize, Sort: 50},
 

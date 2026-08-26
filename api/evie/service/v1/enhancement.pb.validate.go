@@ -1923,6 +1923,8 @@ func (m *EnhancementLog) validate(all bool) error {
 
 	// no validation rules for CreatedAt
 
+	// no validation rules for StepSnapshotsJson
+
 	if len(errors) > 0 {
 		return EnhancementLogMultiError(errors)
 	}

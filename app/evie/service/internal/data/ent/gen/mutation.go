@@ -940,6 +940,7 @@ type AsrRecordMutation struct {
 	audio_url            *string
 	audio_format         *string
 	engine               *string
+	enhanced_text        *string
 	clearedFields        map[string]struct{}
 	done                 bool
 	oldValue             func(context.Context) (*AsrRecord, error)
@@ -1665,6 +1666,55 @@ func (m *AsrRecordMutation) ResetEngine() {
 	m.engine = nil
 }
 
+// SetEnhancedText sets the "enhanced_text" field.
+func (m *AsrRecordMutation) SetEnhancedText(s string) {
+	m.enhanced_text = &s
+}
+
+// EnhancedText returns the value of the "enhanced_text" field in the mutation.
+func (m *AsrRecordMutation) EnhancedText() (r string, exists bool) {
+	v := m.enhanced_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnhancedText returns the old "enhanced_text" field's value of the AsrRecord entity.
+// If the AsrRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AsrRecordMutation) OldEnhancedText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnhancedText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnhancedText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnhancedText: %w", err)
+	}
+	return oldValue.EnhancedText, nil
+}
+
+// ClearEnhancedText clears the value of the "enhanced_text" field.
+func (m *AsrRecordMutation) ClearEnhancedText() {
+	m.enhanced_text = nil
+	m.clearedFields[asrrecord.FieldEnhancedText] = struct{}{}
+}
+
+// EnhancedTextCleared returns if the "enhanced_text" field was cleared in this mutation.
+func (m *AsrRecordMutation) EnhancedTextCleared() bool {
+	_, ok := m.clearedFields[asrrecord.FieldEnhancedText]
+	return ok
+}
+
+// ResetEnhancedText resets all changes to the "enhanced_text" field.
+func (m *AsrRecordMutation) ResetEnhancedText() {
+	m.enhanced_text = nil
+	delete(m.clearedFields, asrrecord.FieldEnhancedText)
+}
+
 // Where appends a list predicates to the AsrRecordMutation builder.
 func (m *AsrRecordMutation) Where(ps ...predicate.AsrRecord) {
 	m.predicates = append(m.predicates, ps...)
@@ -1699,7 +1749,7 @@ func (m *AsrRecordMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AsrRecordMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.created_at != nil {
 		fields = append(fields, asrrecord.FieldCreatedAt)
 	}
@@ -1739,6 +1789,9 @@ func (m *AsrRecordMutation) Fields() []string {
 	if m.engine != nil {
 		fields = append(fields, asrrecord.FieldEngine)
 	}
+	if m.enhanced_text != nil {
+		fields = append(fields, asrrecord.FieldEnhancedText)
+	}
 	return fields
 }
 
@@ -1773,6 +1826,8 @@ func (m *AsrRecordMutation) Field(name string) (ent.Value, bool) {
 		return m.AudioFormat()
 	case asrrecord.FieldEngine:
 		return m.Engine()
+	case asrrecord.FieldEnhancedText:
+		return m.EnhancedText()
 	}
 	return nil, false
 }
@@ -1808,6 +1863,8 @@ func (m *AsrRecordMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldAudioFormat(ctx)
 	case asrrecord.FieldEngine:
 		return m.OldEngine(ctx)
+	case asrrecord.FieldEnhancedText:
+		return m.OldEnhancedText(ctx)
 	}
 	return nil, fmt.Errorf("unknown AsrRecord field %s", name)
 }
@@ -1907,6 +1964,13 @@ func (m *AsrRecordMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEngine(v)
+		return nil
+	case asrrecord.FieldEnhancedText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnhancedText(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AsrRecord field %s", name)
@@ -2019,6 +2083,9 @@ func (m *AsrRecordMutation) ClearedFields() []string {
 	if m.FieldCleared(asrrecord.FieldAudioURL) {
 		fields = append(fields, asrrecord.FieldAudioURL)
 	}
+	if m.FieldCleared(asrrecord.FieldEnhancedText) {
+		fields = append(fields, asrrecord.FieldEnhancedText)
+	}
 	return fields
 }
 
@@ -2038,6 +2105,9 @@ func (m *AsrRecordMutation) ClearField(name string) error {
 		return nil
 	case asrrecord.FieldAudioURL:
 		m.ClearAudioURL()
+		return nil
+	case asrrecord.FieldEnhancedText:
+		m.ClearEnhancedText()
 		return nil
 	}
 	return fmt.Errorf("unknown AsrRecord nullable field %s", name)
@@ -2085,6 +2155,9 @@ func (m *AsrRecordMutation) ResetField(name string) error {
 		return nil
 	case asrrecord.FieldEngine:
 		m.ResetEngine()
+		return nil
+	case asrrecord.FieldEnhancedText:
+		m.ResetEnhancedText()
 		return nil
 	}
 	return fmt.Errorf("unknown AsrRecord field %s", name)
@@ -9494,6 +9567,9 @@ type EnhancementLogMutation struct {
 	user_corrected           *bool
 	feedback_text            *string
 	error_message            *string
+	asr_record_id            *uint32
+	addasr_record_id         *int32
+	step_snapshots_json      *string
 	clearedFields            map[string]struct{}
 	done                     bool
 	oldValue                 func(context.Context) (*EnhancementLog, error)
@@ -10826,6 +10902,125 @@ func (m *EnhancementLogMutation) ResetErrorMessage() {
 	delete(m.clearedFields, enhancementlog.FieldErrorMessage)
 }
 
+// SetAsrRecordID sets the "asr_record_id" field.
+func (m *EnhancementLogMutation) SetAsrRecordID(u uint32) {
+	m.asr_record_id = &u
+	m.addasr_record_id = nil
+}
+
+// AsrRecordID returns the value of the "asr_record_id" field in the mutation.
+func (m *EnhancementLogMutation) AsrRecordID() (r uint32, exists bool) {
+	v := m.asr_record_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAsrRecordID returns the old "asr_record_id" field's value of the EnhancementLog entity.
+// If the EnhancementLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnhancementLogMutation) OldAsrRecordID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAsrRecordID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAsrRecordID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAsrRecordID: %w", err)
+	}
+	return oldValue.AsrRecordID, nil
+}
+
+// AddAsrRecordID adds u to the "asr_record_id" field.
+func (m *EnhancementLogMutation) AddAsrRecordID(u int32) {
+	if m.addasr_record_id != nil {
+		*m.addasr_record_id += u
+	} else {
+		m.addasr_record_id = &u
+	}
+}
+
+// AddedAsrRecordID returns the value that was added to the "asr_record_id" field in this mutation.
+func (m *EnhancementLogMutation) AddedAsrRecordID() (r int32, exists bool) {
+	v := m.addasr_record_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAsrRecordID clears the value of the "asr_record_id" field.
+func (m *EnhancementLogMutation) ClearAsrRecordID() {
+	m.asr_record_id = nil
+	m.addasr_record_id = nil
+	m.clearedFields[enhancementlog.FieldAsrRecordID] = struct{}{}
+}
+
+// AsrRecordIDCleared returns if the "asr_record_id" field was cleared in this mutation.
+func (m *EnhancementLogMutation) AsrRecordIDCleared() bool {
+	_, ok := m.clearedFields[enhancementlog.FieldAsrRecordID]
+	return ok
+}
+
+// ResetAsrRecordID resets all changes to the "asr_record_id" field.
+func (m *EnhancementLogMutation) ResetAsrRecordID() {
+	m.asr_record_id = nil
+	m.addasr_record_id = nil
+	delete(m.clearedFields, enhancementlog.FieldAsrRecordID)
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (m *EnhancementLogMutation) SetStepSnapshotsJSON(s string) {
+	m.step_snapshots_json = &s
+}
+
+// StepSnapshotsJSON returns the value of the "step_snapshots_json" field in the mutation.
+func (m *EnhancementLogMutation) StepSnapshotsJSON() (r string, exists bool) {
+	v := m.step_snapshots_json
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStepSnapshotsJSON returns the old "step_snapshots_json" field's value of the EnhancementLog entity.
+// If the EnhancementLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnhancementLogMutation) OldStepSnapshotsJSON(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStepSnapshotsJSON is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStepSnapshotsJSON requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStepSnapshotsJSON: %w", err)
+	}
+	return oldValue.StepSnapshotsJSON, nil
+}
+
+// ClearStepSnapshotsJSON clears the value of the "step_snapshots_json" field.
+func (m *EnhancementLogMutation) ClearStepSnapshotsJSON() {
+	m.step_snapshots_json = nil
+	m.clearedFields[enhancementlog.FieldStepSnapshotsJSON] = struct{}{}
+}
+
+// StepSnapshotsJSONCleared returns if the "step_snapshots_json" field was cleared in this mutation.
+func (m *EnhancementLogMutation) StepSnapshotsJSONCleared() bool {
+	_, ok := m.clearedFields[enhancementlog.FieldStepSnapshotsJSON]
+	return ok
+}
+
+// ResetStepSnapshotsJSON resets all changes to the "step_snapshots_json" field.
+func (m *EnhancementLogMutation) ResetStepSnapshotsJSON() {
+	m.step_snapshots_json = nil
+	delete(m.clearedFields, enhancementlog.FieldStepSnapshotsJSON)
+}
+
 // Where appends a list predicates to the EnhancementLogMutation builder.
 func (m *EnhancementLogMutation) Where(ps ...predicate.EnhancementLog) {
 	m.predicates = append(m.predicates, ps...)
@@ -10860,7 +11055,7 @@ func (m *EnhancementLogMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EnhancementLogMutation) Fields() []string {
-	fields := make([]string, 0, 24)
+	fields := make([]string, 0, 26)
 	if m.created_at != nil {
 		fields = append(fields, enhancementlog.FieldCreatedAt)
 	}
@@ -10933,6 +11128,12 @@ func (m *EnhancementLogMutation) Fields() []string {
 	if m.error_message != nil {
 		fields = append(fields, enhancementlog.FieldErrorMessage)
 	}
+	if m.asr_record_id != nil {
+		fields = append(fields, enhancementlog.FieldAsrRecordID)
+	}
+	if m.step_snapshots_json != nil {
+		fields = append(fields, enhancementlog.FieldStepSnapshotsJSON)
+	}
 	return fields
 }
 
@@ -10989,6 +11190,10 @@ func (m *EnhancementLogMutation) Field(name string) (ent.Value, bool) {
 		return m.FeedbackText()
 	case enhancementlog.FieldErrorMessage:
 		return m.ErrorMessage()
+	case enhancementlog.FieldAsrRecordID:
+		return m.AsrRecordID()
+	case enhancementlog.FieldStepSnapshotsJSON:
+		return m.StepSnapshotsJSON()
 	}
 	return nil, false
 }
@@ -11046,6 +11251,10 @@ func (m *EnhancementLogMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldFeedbackText(ctx)
 	case enhancementlog.FieldErrorMessage:
 		return m.OldErrorMessage(ctx)
+	case enhancementlog.FieldAsrRecordID:
+		return m.OldAsrRecordID(ctx)
+	case enhancementlog.FieldStepSnapshotsJSON:
+		return m.OldStepSnapshotsJSON(ctx)
 	}
 	return nil, fmt.Errorf("unknown EnhancementLog field %s", name)
 }
@@ -11223,6 +11432,20 @@ func (m *EnhancementLogMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetErrorMessage(v)
 		return nil
+	case enhancementlog.FieldAsrRecordID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAsrRecordID(v)
+		return nil
+	case enhancementlog.FieldStepSnapshotsJSON:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStepSnapshotsJSON(v)
+		return nil
 	}
 	return fmt.Errorf("unknown EnhancementLog field %s", name)
 }
@@ -11267,6 +11490,9 @@ func (m *EnhancementLogMutation) AddedFields() []string {
 	if m.addcontext_time_ms != nil {
 		fields = append(fields, enhancementlog.FieldContextTimeMs)
 	}
+	if m.addasr_record_id != nil {
+		fields = append(fields, enhancementlog.FieldAsrRecordID)
+	}
 	return fields
 }
 
@@ -11299,6 +11525,8 @@ func (m *EnhancementLogMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedFuzzyTimeMs()
 	case enhancementlog.FieldContextTimeMs:
 		return m.AddedContextTimeMs()
+	case enhancementlog.FieldAsrRecordID:
+		return m.AddedAsrRecordID()
 	}
 	return nil, false
 }
@@ -11392,6 +11620,13 @@ func (m *EnhancementLogMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddContextTimeMs(v)
 		return nil
+	case enhancementlog.FieldAsrRecordID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAsrRecordID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown EnhancementLog numeric field %s", name)
 }
@@ -11426,6 +11661,12 @@ func (m *EnhancementLogMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(enhancementlog.FieldErrorMessage) {
 		fields = append(fields, enhancementlog.FieldErrorMessage)
+	}
+	if m.FieldCleared(enhancementlog.FieldAsrRecordID) {
+		fields = append(fields, enhancementlog.FieldAsrRecordID)
+	}
+	if m.FieldCleared(enhancementlog.FieldStepSnapshotsJSON) {
+		fields = append(fields, enhancementlog.FieldStepSnapshotsJSON)
 	}
 	return fields
 }
@@ -11467,6 +11708,12 @@ func (m *EnhancementLogMutation) ClearField(name string) error {
 		return nil
 	case enhancementlog.FieldErrorMessage:
 		m.ClearErrorMessage()
+		return nil
+	case enhancementlog.FieldAsrRecordID:
+		m.ClearAsrRecordID()
+		return nil
+	case enhancementlog.FieldStepSnapshotsJSON:
+		m.ClearStepSnapshotsJSON()
 		return nil
 	}
 	return fmt.Errorf("unknown EnhancementLog nullable field %s", name)
@@ -11547,6 +11794,12 @@ func (m *EnhancementLogMutation) ResetField(name string) error {
 		return nil
 	case enhancementlog.FieldErrorMessage:
 		m.ResetErrorMessage()
+		return nil
+	case enhancementlog.FieldAsrRecordID:
+		m.ResetAsrRecordID()
+		return nil
+	case enhancementlog.FieldStepSnapshotsJSON:
+		m.ResetStepSnapshotsJSON()
 		return nil
 	}
 	return fmt.Errorf("unknown EnhancementLog field %s", name)

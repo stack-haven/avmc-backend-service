@@ -342,6 +342,34 @@ func (_c *EnhancementLogCreate) SetNillableErrorMessage(v *string) *EnhancementL
 	return _c
 }
 
+// SetAsrRecordID sets the "asr_record_id" field.
+func (_c *EnhancementLogCreate) SetAsrRecordID(v uint32) *EnhancementLogCreate {
+	_c.mutation.SetAsrRecordID(v)
+	return _c
+}
+
+// SetNillableAsrRecordID sets the "asr_record_id" field if the given value is not nil.
+func (_c *EnhancementLogCreate) SetNillableAsrRecordID(v *uint32) *EnhancementLogCreate {
+	if v != nil {
+		_c.SetAsrRecordID(*v)
+	}
+	return _c
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (_c *EnhancementLogCreate) SetStepSnapshotsJSON(v string) *EnhancementLogCreate {
+	_c.mutation.SetStepSnapshotsJSON(v)
+	return _c
+}
+
+// SetNillableStepSnapshotsJSON sets the "step_snapshots_json" field if the given value is not nil.
+func (_c *EnhancementLogCreate) SetNillableStepSnapshotsJSON(v *string) *EnhancementLogCreate {
+	if v != nil {
+		_c.SetStepSnapshotsJSON(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *EnhancementLogCreate) SetID(v uint32) *EnhancementLogCreate {
 	_c.mutation.SetID(v)
@@ -666,6 +694,14 @@ func (_c *EnhancementLogCreate) createSpec() (*EnhancementLog, *sqlgraph.CreateS
 	if value, ok := _c.mutation.ErrorMessage(); ok {
 		_spec.SetField(enhancementlog.FieldErrorMessage, field.TypeString, value)
 		_node.ErrorMessage = value
+	}
+	if value, ok := _c.mutation.AsrRecordID(); ok {
+		_spec.SetField(enhancementlog.FieldAsrRecordID, field.TypeUint32, value)
+		_node.AsrRecordID = value
+	}
+	if value, ok := _c.mutation.StepSnapshotsJSON(); ok {
+		_spec.SetField(enhancementlog.FieldStepSnapshotsJSON, field.TypeString, value)
+		_node.StepSnapshotsJSON = value
 	}
 	return _node, _spec
 }
@@ -1118,6 +1154,48 @@ func (u *EnhancementLogUpsert) UpdateErrorMessage() *EnhancementLogUpsert {
 // ClearErrorMessage clears the value of the "error_message" field.
 func (u *EnhancementLogUpsert) ClearErrorMessage() *EnhancementLogUpsert {
 	u.SetNull(enhancementlog.FieldErrorMessage)
+	return u
+}
+
+// SetAsrRecordID sets the "asr_record_id" field.
+func (u *EnhancementLogUpsert) SetAsrRecordID(v uint32) *EnhancementLogUpsert {
+	u.Set(enhancementlog.FieldAsrRecordID, v)
+	return u
+}
+
+// UpdateAsrRecordID sets the "asr_record_id" field to the value that was provided on create.
+func (u *EnhancementLogUpsert) UpdateAsrRecordID() *EnhancementLogUpsert {
+	u.SetExcluded(enhancementlog.FieldAsrRecordID)
+	return u
+}
+
+// AddAsrRecordID adds v to the "asr_record_id" field.
+func (u *EnhancementLogUpsert) AddAsrRecordID(v uint32) *EnhancementLogUpsert {
+	u.Add(enhancementlog.FieldAsrRecordID, v)
+	return u
+}
+
+// ClearAsrRecordID clears the value of the "asr_record_id" field.
+func (u *EnhancementLogUpsert) ClearAsrRecordID() *EnhancementLogUpsert {
+	u.SetNull(enhancementlog.FieldAsrRecordID)
+	return u
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (u *EnhancementLogUpsert) SetStepSnapshotsJSON(v string) *EnhancementLogUpsert {
+	u.Set(enhancementlog.FieldStepSnapshotsJSON, v)
+	return u
+}
+
+// UpdateStepSnapshotsJSON sets the "step_snapshots_json" field to the value that was provided on create.
+func (u *EnhancementLogUpsert) UpdateStepSnapshotsJSON() *EnhancementLogUpsert {
+	u.SetExcluded(enhancementlog.FieldStepSnapshotsJSON)
+	return u
+}
+
+// ClearStepSnapshotsJSON clears the value of the "step_snapshots_json" field.
+func (u *EnhancementLogUpsert) ClearStepSnapshotsJSON() *EnhancementLogUpsert {
+	u.SetNull(enhancementlog.FieldStepSnapshotsJSON)
 	return u
 }
 
@@ -1638,6 +1716,55 @@ func (u *EnhancementLogUpsertOne) UpdateErrorMessage() *EnhancementLogUpsertOne 
 func (u *EnhancementLogUpsertOne) ClearErrorMessage() *EnhancementLogUpsertOne {
 	return u.Update(func(s *EnhancementLogUpsert) {
 		s.ClearErrorMessage()
+	})
+}
+
+// SetAsrRecordID sets the "asr_record_id" field.
+func (u *EnhancementLogUpsertOne) SetAsrRecordID(v uint32) *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.SetAsrRecordID(v)
+	})
+}
+
+// AddAsrRecordID adds v to the "asr_record_id" field.
+func (u *EnhancementLogUpsertOne) AddAsrRecordID(v uint32) *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.AddAsrRecordID(v)
+	})
+}
+
+// UpdateAsrRecordID sets the "asr_record_id" field to the value that was provided on create.
+func (u *EnhancementLogUpsertOne) UpdateAsrRecordID() *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.UpdateAsrRecordID()
+	})
+}
+
+// ClearAsrRecordID clears the value of the "asr_record_id" field.
+func (u *EnhancementLogUpsertOne) ClearAsrRecordID() *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.ClearAsrRecordID()
+	})
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (u *EnhancementLogUpsertOne) SetStepSnapshotsJSON(v string) *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.SetStepSnapshotsJSON(v)
+	})
+}
+
+// UpdateStepSnapshotsJSON sets the "step_snapshots_json" field to the value that was provided on create.
+func (u *EnhancementLogUpsertOne) UpdateStepSnapshotsJSON() *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.UpdateStepSnapshotsJSON()
+	})
+}
+
+// ClearStepSnapshotsJSON clears the value of the "step_snapshots_json" field.
+func (u *EnhancementLogUpsertOne) ClearStepSnapshotsJSON() *EnhancementLogUpsertOne {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.ClearStepSnapshotsJSON()
 	})
 }
 
@@ -2324,6 +2451,55 @@ func (u *EnhancementLogUpsertBulk) UpdateErrorMessage() *EnhancementLogUpsertBul
 func (u *EnhancementLogUpsertBulk) ClearErrorMessage() *EnhancementLogUpsertBulk {
 	return u.Update(func(s *EnhancementLogUpsert) {
 		s.ClearErrorMessage()
+	})
+}
+
+// SetAsrRecordID sets the "asr_record_id" field.
+func (u *EnhancementLogUpsertBulk) SetAsrRecordID(v uint32) *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.SetAsrRecordID(v)
+	})
+}
+
+// AddAsrRecordID adds v to the "asr_record_id" field.
+func (u *EnhancementLogUpsertBulk) AddAsrRecordID(v uint32) *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.AddAsrRecordID(v)
+	})
+}
+
+// UpdateAsrRecordID sets the "asr_record_id" field to the value that was provided on create.
+func (u *EnhancementLogUpsertBulk) UpdateAsrRecordID() *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.UpdateAsrRecordID()
+	})
+}
+
+// ClearAsrRecordID clears the value of the "asr_record_id" field.
+func (u *EnhancementLogUpsertBulk) ClearAsrRecordID() *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.ClearAsrRecordID()
+	})
+}
+
+// SetStepSnapshotsJSON sets the "step_snapshots_json" field.
+func (u *EnhancementLogUpsertBulk) SetStepSnapshotsJSON(v string) *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.SetStepSnapshotsJSON(v)
+	})
+}
+
+// UpdateStepSnapshotsJSON sets the "step_snapshots_json" field to the value that was provided on create.
+func (u *EnhancementLogUpsertBulk) UpdateStepSnapshotsJSON() *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.UpdateStepSnapshotsJSON()
+	})
+}
+
+// ClearStepSnapshotsJSON clears the value of the "step_snapshots_json" field.
+func (u *EnhancementLogUpsertBulk) ClearStepSnapshotsJSON() *EnhancementLogUpsertBulk {
+	return u.Update(func(s *EnhancementLogUpsert) {
+		s.ClearStepSnapshotsJSON()
 	})
 }
 

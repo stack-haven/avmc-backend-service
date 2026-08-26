@@ -1132,6 +1132,7 @@ type EnhancementLog struct {
 	UserCorrected       bool                   `protobuf:"varint,21,opt,name=user_corrected,json=userCorrected,proto3" json:"user_corrected,omitempty"`
 	FeedbackText        string                 `protobuf:"bytes,22,opt,name=feedback_text,json=feedbackText,proto3" json:"feedback_text,omitempty"`
 	CreatedAt           string                 `protobuf:"bytes,23,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	StepSnapshotsJson   string                 `protobuf:"bytes,24,opt,name=step_snapshots_json,json=stepSnapshotsJson,proto3" json:"step_snapshots_json,omitempty"` // 步骤快照 JSON（步骤图/分词明细展示）
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1323,6 +1324,13 @@ func (x *EnhancementLog) GetFeedbackText() string {
 func (x *EnhancementLog) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *EnhancementLog) GetStepSnapshotsJson() string {
+	if x != nil {
+		return x.StepSnapshotsJson
 	}
 	return ""
 }
@@ -1699,7 +1707,7 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x04R\vdescription\"/\n" +
 	"\x14DeleteProfileRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x17\n" +
-	"\x15DeleteProfileResponse\"\xc7\x06\n" +
+	"\x15DeleteProfileResponse\"\xf7\x06\n" +
 	"\x0eEnhancementLog\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x1d\n" +
 	"\n" +
@@ -1728,7 +1736,8 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\x0euser_corrected\x18\x15 \x01(\bR\ruserCorrected\x12#\n" +
 	"\rfeedback_text\x18\x16 \x01(\tR\ffeedbackText\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x17 \x01(\tR\tcreatedAt\"w\n" +
+	"created_at\x18\x17 \x01(\tR\tcreatedAt\x12.\n" +
+	"\x13step_snapshots_json\x18\x18 \x01(\tR\x11stepSnapshotsJson\"w\n" +
 	"\x1aListEnhancementLogsRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +

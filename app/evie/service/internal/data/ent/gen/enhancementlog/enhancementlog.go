@@ -62,6 +62,10 @@ const (
 	FieldFeedbackText = "feedback_text"
 	// FieldErrorMessage holds the string denoting the error_message field in the database.
 	FieldErrorMessage = "error_message"
+	// FieldAsrRecordID holds the string denoting the asr_record_id field in the database.
+	FieldAsrRecordID = "asr_record_id"
+	// FieldStepSnapshotsJSON holds the string denoting the step_snapshots_json field in the database.
+	FieldStepSnapshotsJSON = "step_snapshots_json"
 	// Table holds the table name of the enhancementlog in the database.
 	Table = "evie_enhancement_logs"
 )
@@ -93,6 +97,8 @@ var Columns = []string{
 	FieldUserCorrected,
 	FieldFeedbackText,
 	FieldErrorMessage,
+	FieldAsrRecordID,
+	FieldStepSnapshotsJSON,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -287,4 +293,14 @@ func ByFeedbackText(opts ...sql.OrderTermOption) OrderOption {
 // ByErrorMessage orders the results by the error_message field.
 func ByErrorMessage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldErrorMessage, opts...).ToFunc()
+}
+
+// ByAsrRecordID orders the results by the asr_record_id field.
+func ByAsrRecordID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAsrRecordID, opts...).ToFunc()
+}
+
+// ByStepSnapshotsJSON orders the results by the step_snapshots_json field.
+func ByStepSnapshotsJSON(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStepSnapshotsJSON, opts...).ToFunc()
 }

@@ -281,6 +281,7 @@ message EnhancementLog {
   bool user_corrected = 21;
   string feedback_text = 22;
   string created_at = 23;
+  string step_snapshots_json = 24; // 步骤快照 JSON（步骤图/分词明细展示）
 }
 
 message ListEnhancementLogsRequest {

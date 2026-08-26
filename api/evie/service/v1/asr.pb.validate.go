@@ -1428,6 +1428,355 @@ var _ interface {
 	ErrorName() string
 } = GetAsrRecordAudioResponseValidationError{}
 
+// Validate checks the field values on EnhancementStepSnapshot with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *EnhancementStepSnapshot) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on EnhancementStepSnapshot with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// EnhancementStepSnapshotMultiError, or nil if none found.
+func (m *EnhancementStepSnapshot) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *EnhancementStepSnapshot) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Step
+
+	// no validation rules for Before
+
+	// no validation rules for After
+
+	// no validation rules for DurationMs
+
+	// no validation rules for Skipped
+
+	for idx, item := range m.GetChanges() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, EnhancementStepSnapshotValidationError{
+						field:  fmt.Sprintf("Changes[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, EnhancementStepSnapshotValidationError{
+						field:  fmt.Sprintf("Changes[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EnhancementStepSnapshotValidationError{
+					field:  fmt.Sprintf("Changes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return EnhancementStepSnapshotMultiError(errors)
+	}
+
+	return nil
+}
+
+// EnhancementStepSnapshotMultiError is an error wrapping multiple validation
+// errors returned by EnhancementStepSnapshot.ValidateAll() if the designated
+// constraints aren't met.
+type EnhancementStepSnapshotMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m EnhancementStepSnapshotMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m EnhancementStepSnapshotMultiError) AllErrors() []error { return m }
+
+// EnhancementStepSnapshotValidationError is the validation error returned by
+// EnhancementStepSnapshot.Validate if the designated constraints aren't met.
+type EnhancementStepSnapshotValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e EnhancementStepSnapshotValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e EnhancementStepSnapshotValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e EnhancementStepSnapshotValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e EnhancementStepSnapshotValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e EnhancementStepSnapshotValidationError) ErrorName() string {
+	return "EnhancementStepSnapshotValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e EnhancementStepSnapshotValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEnhancementStepSnapshot.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = EnhancementStepSnapshotValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = EnhancementStepSnapshotValidationError{}
+
+// Validate checks the field values on AsrRecordDetail with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *AsrRecordDetail) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AsrRecordDetail with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AsrRecordDetailMultiError, or nil if none found.
+func (m *AsrRecordDetail) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AsrRecordDetail) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetRecord()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AsrRecordDetailValidationError{
+					field:  "Record",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AsrRecordDetailValidationError{
+					field:  "Record",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRecord()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AsrRecordDetailValidationError{
+				field:  "Record",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for EnhancedText
+
+	// no validation rules for PolicyName
+
+	// no validation rules for ProfileName
+
+	for idx, item := range m.GetStepSnapshots() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, AsrRecordDetailValidationError{
+						field:  fmt.Sprintf("StepSnapshots[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, AsrRecordDetailValidationError{
+						field:  fmt.Sprintf("StepSnapshots[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AsrRecordDetailValidationError{
+					field:  fmt.Sprintf("StepSnapshots[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetChanges() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, AsrRecordDetailValidationError{
+						field:  fmt.Sprintf("Changes[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, AsrRecordDetailValidationError{
+						field:  fmt.Sprintf("Changes[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AsrRecordDetailValidationError{
+					field:  fmt.Sprintf("Changes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return AsrRecordDetailMultiError(errors)
+	}
+
+	return nil
+}
+
+// AsrRecordDetailMultiError is an error wrapping multiple validation errors
+// returned by AsrRecordDetail.ValidateAll() if the designated constraints
+// aren't met.
+type AsrRecordDetailMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AsrRecordDetailMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AsrRecordDetailMultiError) AllErrors() []error { return m }
+
+// AsrRecordDetailValidationError is the validation error returned by
+// AsrRecordDetail.Validate if the designated constraints aren't met.
+type AsrRecordDetailValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AsrRecordDetailValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AsrRecordDetailValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AsrRecordDetailValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AsrRecordDetailValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AsrRecordDetailValidationError) ErrorName() string { return "AsrRecordDetailValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AsrRecordDetailValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAsrRecordDetail.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AsrRecordDetailValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AsrRecordDetailValidationError{}
+
 // Validate checks the field values on RecognizeAndCorrectResponse with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

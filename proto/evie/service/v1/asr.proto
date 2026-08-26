@@ -59,6 +59,15 @@ service ASRService {
     };
   }
 
+  // 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
+  rpc GetAsrRecordDetail(GetAsrRecordRequest) returns (AsrRecordDetail) {
+    option (google.api.http) = {get: "/evie/v1/asr/records/{id}/detail"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询识别记录完整详情"
+      tags: ["ASR识别"]
+    };
+  }
+
   // 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
   rpc RecognizeAndCorrect(RecognizeRequest) returns (RecognizeAndCorrectResponse) {
     option (google.api.http) = {
@@ -177,6 +186,26 @@ message GetAsrRecordAudioRequest {
 message GetAsrRecordAudioResponse {
   bytes audio_data = 1;   // 音频内容（base64，文件中心代理下载）
   string content_type = 2; // 如 audio/webm
+}
+
+// EnhancementStepSnapshot 单步增强快照（用于步骤图/分词明细展示）。
+message EnhancementStepSnapshot {
+  string step = 1;
+  string before = 2;
+  string after = 3;
+  int64 duration_ms = 4;
+  bool skipped = 5;
+  repeated CorrectionChange changes = 6;
+}
+
+// AsrRecordDetail 识别记录完整详情。
+message AsrRecordDetail {
+  AsrRecord record = 1;
+  string enhanced_text = 2;    // 最终增强后文本
+  string policy_name = 3;      // 使用的增强策略名称
+  string profile_name = 4;     // 使用的增强场景名称（默认方案时为空）
+  repeated EnhancementStepSnapshot step_snapshots = 5;
+  repeated CorrectionChange changes = 6;
 }
 
 // RecognizeAndCorrectResponse 语音识别 + 纠错的组合结果。

@@ -14,7 +14,7 @@ import (
 var platformMenus = []menuSeed{
 	// ── 仪表盘 ──────────────────────────────────────────
 	{Parent: "", Name: "Dashboard", Title: "仪表盘", Path: "/dashboard", Component: "BasicLayout", Icon: "ion:grid-outline", Type: 1, Sort: 10},
-	{Parent: "Dashboard", Name: "DashboardWorkbench", Title: "工作台", Path: "/dashboard/workbench", Component: "/dashboard/index", Icon: "mdi:monitor-dashboard", Type: 2, Sort: 10},
+	{Parent: "Dashboard", Name: "DashboardWorkbench", Title: "工作台", Path: "/dashboard/workbench", Component: "/dashboard/workspace/index", Icon: "mdi:monitor-dashboard", Type: 2, Sort: 10},
 
 	// ── 租户管理 ────────────────────────────────────────
 	{Parent: "", Name: "TenantManagement", Title: "租户管理", Path: "/tenant", Component: "BasicLayout", Icon: "mdi:office-building-cog-outline", Type: 1, Sort: 20},

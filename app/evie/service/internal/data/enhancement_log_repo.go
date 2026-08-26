@@ -47,6 +47,7 @@ func enhancementLogProto(row *gen.EnhancementLog) *pb.EnhancementLog {
 		ContextTimeMs:       row.ContextTimeMs,
 		Status:              status,
 		ErrorMessage:        row.ErrorMessage,
+		StepSnapshotsJson:   row.StepSnapshotsJSON,
 		CreatedAt:           row.CreatedAt.Format(time.DateTime),
 	}
 }
@@ -97,6 +98,7 @@ func (r *enhancementLogRepo) Save(ctx context.Context, data *biz.EnhancementLogD
 		SetRawText(data.RawText).
 		SetNillableEnhancedText(nilIfEmpty(data.EnhancedText)).
 		SetNillableChangesJSON(nilIfEmpty(data.ChangesJSON)).
+		SetNillableStepSnapshotsJSON(nilIfEmpty(data.StepSnapshotsJSON)).
 		SetProcessingTimeMs(data.ProcessingTimeMs).
 		SetCleaningTimeMs(data.CleaningTimeMs).
 		SetFillerTimeMs(data.FillerTimeMs).

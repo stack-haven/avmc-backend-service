@@ -40,6 +40,8 @@ const (
 	FieldAudioFormat = "audio_format"
 	// FieldEngine holds the string denoting the engine field in the database.
 	FieldEngine = "engine"
+	// FieldEnhancedText holds the string denoting the enhanced_text field in the database.
+	FieldEnhancedText = "enhanced_text"
 	// Table holds the table name of the asrrecord in the database.
 	Table = "evie_asr_records"
 )
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldAudioURL,
 	FieldAudioFormat,
 	FieldEngine,
+	FieldEnhancedText,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -177,4 +180,9 @@ func ByAudioFormat(opts ...sql.OrderTermOption) OrderOption {
 // ByEngine orders the results by the engine field.
 func ByEngine(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEngine, opts...).ToFunc()
+}
+
+// ByEnhancedText orders the results by the enhanced_text field.
+func ByEnhancedText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnhancedText, opts...).ToFunc()
 }

@@ -66,7 +66,11 @@ type EnhancementLog struct {
 	FeedbackText string `json:"feedback_text,omitempty"`
 	// 错误信息
 	ErrorMessage string `json:"error_message,omitempty"`
-	selectValues sql.SelectValues
+	// 关联 ASR 记录 ID（0=手动增强）
+	AsrRecordID uint32 `json:"asr_record_id,omitempty"`
+	// 步骤快照 JSON（步骤图/分词明细展示）
+	StepSnapshotsJSON string `json:"step_snapshots_json,omitempty"`
+	selectValues      sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -76,9 +80,9 @@ func (*EnhancementLog) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case enhancementlog.FieldUserCorrected:
 			values[i] = new(sql.NullBool)
-		case enhancementlog.FieldID, enhancementlog.FieldStatus, enhancementlog.FieldTenantID, enhancementlog.FieldPolicyID, enhancementlog.FieldProcessingTimeMs, enhancementlog.FieldCleaningTimeMs, enhancementlog.FieldFillerTimeMs, enhancementlog.FieldVocabMatchTimeMs, enhancementlog.FieldAliasTimeMs, enhancementlog.FieldDeterministicTimeMs, enhancementlog.FieldPinyinTimeMs, enhancementlog.FieldFuzzyTimeMs, enhancementlog.FieldContextTimeMs:
+		case enhancementlog.FieldID, enhancementlog.FieldStatus, enhancementlog.FieldTenantID, enhancementlog.FieldPolicyID, enhancementlog.FieldProcessingTimeMs, enhancementlog.FieldCleaningTimeMs, enhancementlog.FieldFillerTimeMs, enhancementlog.FieldVocabMatchTimeMs, enhancementlog.FieldAliasTimeMs, enhancementlog.FieldDeterministicTimeMs, enhancementlog.FieldPinyinTimeMs, enhancementlog.FieldFuzzyTimeMs, enhancementlog.FieldContextTimeMs, enhancementlog.FieldAsrRecordID:
 			values[i] = new(sql.NullInt64)
-		case enhancementlog.FieldRequestID, enhancementlog.FieldSessionID, enhancementlog.FieldPolicyMode, enhancementlog.FieldContextVersion, enhancementlog.FieldRawText, enhancementlog.FieldEnhancedText, enhancementlog.FieldChangesJSON, enhancementlog.FieldFeedbackText, enhancementlog.FieldErrorMessage:
+		case enhancementlog.FieldRequestID, enhancementlog.FieldSessionID, enhancementlog.FieldPolicyMode, enhancementlog.FieldContextVersion, enhancementlog.FieldRawText, enhancementlog.FieldEnhancedText, enhancementlog.FieldChangesJSON, enhancementlog.FieldFeedbackText, enhancementlog.FieldErrorMessage, enhancementlog.FieldStepSnapshotsJSON:
 			values[i] = new(sql.NullString)
 		case enhancementlog.FieldCreatedAt, enhancementlog.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -248,6 +252,18 @@ func (_m *EnhancementLog) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ErrorMessage = value.String
 			}
+		case enhancementlog.FieldAsrRecordID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field asr_record_id", values[i])
+			} else if value.Valid {
+				_m.AsrRecordID = uint32(value.Int64)
+			}
+		case enhancementlog.FieldStepSnapshotsJSON:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field step_snapshots_json", values[i])
+			} else if value.Valid {
+				_m.StepSnapshotsJSON = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -357,6 +373,12 @@ func (_m *EnhancementLog) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("error_message=")
 	builder.WriteString(_m.ErrorMessage)
+	builder.WriteString(", ")
+	builder.WriteString("asr_record_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AsrRecordID))
+	builder.WriteString(", ")
+	builder.WriteString("step_snapshots_json=")
+	builder.WriteString(_m.StepSnapshotsJSON)
 	builder.WriteByte(')')
 	return builder.String()
 }

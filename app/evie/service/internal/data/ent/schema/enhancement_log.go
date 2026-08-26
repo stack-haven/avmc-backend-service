@@ -49,7 +49,9 @@ func (EnhancementLog) Fields() []ent.Field {
 		field.Int64("context_time_ms").Default(0).Comment("上下文纠错耗时"),
 		field.Bool("user_corrected").Default(false).Comment("用户是否纠正"),
 		field.String("feedback_text").MaxLen(1024).Optional().Comment("反馈文本"),
-			field.String("error_message").MaxLen(512).Optional().Comment("错误信息"),
+		field.String("error_message").MaxLen(512).Optional().Comment("错误信息"),
+		field.Uint32("asr_record_id").Optional().Comment("关联 ASR 记录 ID（0=手动增强）"),
+		field.String("step_snapshots_json").SchemaType(map[string]string{dialect.MySQL: "text"}).Optional().Comment("步骤快照 JSON（步骤图/分词明细展示）"),
 	}
 }
 

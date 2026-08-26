@@ -25,6 +25,7 @@ type EnhancementLogData struct {
 	RawText             string
 	EnhancedText        string
 	ChangesJSON         string
+	StepSnapshotsJSON   string
 	ProcessingTimeMs    int64
 	CleaningTimeMs      int64
 	FillerTimeMs        int64

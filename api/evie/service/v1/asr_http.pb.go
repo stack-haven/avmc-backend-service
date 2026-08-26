@@ -21,6 +21,7 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationASRServiceGetAsrRecord = "/evie.service.v1.ASRService/GetAsrRecord"
 const OperationASRServiceGetAsrRecordAudio = "/evie.service.v1.ASRService/GetAsrRecordAudio"
+const OperationASRServiceGetAsrRecordDetail = "/evie.service.v1.ASRService/GetAsrRecordDetail"
 const OperationASRServiceListAsrRecords = "/evie.service.v1.ASRService/ListAsrRecords"
 const OperationASRServiceReRecognize = "/evie.service.v1.ASRService/ReRecognize"
 const OperationASRServiceRecognize = "/evie.service.v1.ASRService/Recognize"
@@ -31,6 +32,8 @@ type ASRServiceHTTPServer interface {
 	GetAsrRecord(context.Context, *GetAsrRecordRequest) (*AsrRecord, error)
 	// GetAsrRecordAudio 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error)
+	// GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
+	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error)
 	// ListAsrRecords 查询识别记录列表
 	ListAsrRecords(context.Context, *ListAsrRecordsRequest) (*ListAsrRecordsResponse, error)
 	// ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
@@ -47,6 +50,7 @@ func RegisterASRServiceHTTPServer(s *http.Server, srv ASRServiceHTTPServer) {
 	r.GET("/evie/v1/asr/records", _ASRService_ListAsrRecords0_HTTP_Handler(srv))
 	r.GET("/evie/v1/asr/records/{id}", _ASRService_GetAsrRecord0_HTTP_Handler(srv))
 	r.GET("/evie/v1/asr/records/{id}/audio", _ASRService_GetAsrRecordAudio0_HTTP_Handler(srv))
+	r.GET("/evie/v1/asr/records/{id}/detail", _ASRService_GetAsrRecordDetail0_HTTP_Handler(srv))
 	r.POST("/evie/v1/asr:recognize-and-correct", _ASRService_RecognizeAndCorrect0_HTTP_Handler(srv))
 	r.POST("/evie/v1/asr/records/{id}:re-recognize", _ASRService_ReRecognize0_HTTP_Handler(srv))
 }
@@ -136,6 +140,28 @@ func _ASRService_GetAsrRecordAudio0_HTTP_Handler(srv ASRServiceHTTPServer) func(
 	}
 }
 
+func _ASRService_GetAsrRecordDetail0_HTTP_Handler(srv ASRServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetAsrRecordRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationASRServiceGetAsrRecordDetail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetAsrRecordDetail(ctx, req.(*GetAsrRecordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AsrRecordDetail)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _ASRService_RecognizeAndCorrect0_HTTP_Handler(srv ASRServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in RecognizeRequest
@@ -188,6 +214,8 @@ type ASRServiceHTTPClient interface {
 	GetAsrRecord(ctx context.Context, req *GetAsrRecordRequest, opts ...http.CallOption) (rsp *AsrRecord, err error)
 	// GetAsrRecordAudio 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(ctx context.Context, req *GetAsrRecordAudioRequest, opts ...http.CallOption) (rsp *GetAsrRecordAudioResponse, err error)
+	// GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
+	GetAsrRecordDetail(ctx context.Context, req *GetAsrRecordRequest, opts ...http.CallOption) (rsp *AsrRecordDetail, err error)
 	// ListAsrRecords 查询识别记录列表
 	ListAsrRecords(ctx context.Context, req *ListAsrRecordsRequest, opts ...http.CallOption) (rsp *ListAsrRecordsResponse, err error)
 	// ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
@@ -226,6 +254,20 @@ func (c *ASRServiceHTTPClientImpl) GetAsrRecordAudio(ctx context.Context, in *Ge
 	pattern := "/evie/v1/asr/records/{id}/audio"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationASRServiceGetAsrRecordAudio))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
+func (c *ASRServiceHTTPClientImpl) GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...http.CallOption) (*AsrRecordDetail, error) {
+	var out AsrRecordDetail
+	pattern := "/evie/v1/asr/records/{id}/detail"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationASRServiceGetAsrRecordDetail))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

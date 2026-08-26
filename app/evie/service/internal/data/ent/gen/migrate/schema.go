@@ -57,6 +57,7 @@ var (
 		{Name: "audio_url", Type: field.TypeString, Nullable: true, Size: 512, Comment: "文件中心文件ID（供预览重识别）"},
 		{Name: "audio_format", Type: field.TypeString, Size: 16, Comment: "pcm/wav/mp3/opus", Default: "pcm"},
 		{Name: "engine", Type: field.TypeString, Size: 32, Comment: "funasr/whisper/sensevoice", Default: "funasr"},
+		{Name: "enhanced_text", Type: field.TypeString, Nullable: true, Comment: "最终增强后文本", SchemaType: map[string]string{"mysql": "text"}},
 	}
 	// EvieAsrRecordsTable holds the schema information for the "evie_asr_records" table.
 	EvieAsrRecordsTable = &schema.Table{
@@ -401,6 +402,8 @@ var (
 		{Name: "user_corrected", Type: field.TypeBool, Comment: "用户是否纠正", Default: false},
 		{Name: "feedback_text", Type: field.TypeString, Nullable: true, Size: 1024, Comment: "反馈文本"},
 		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 512, Comment: "错误信息"},
+		{Name: "asr_record_id", Type: field.TypeUint32, Nullable: true, Comment: "关联 ASR 记录 ID（0=手动增强）"},
+		{Name: "step_snapshots_json", Type: field.TypeString, Nullable: true, Comment: "步骤快照 JSON（步骤图/分词明细展示）", SchemaType: map[string]string{"mysql": "text"}},
 	}
 	// EvieEnhancementLogsTable holds the schema information for the "evie_enhancement_logs" table.
 	EvieEnhancementLogsTable = &schema.Table{

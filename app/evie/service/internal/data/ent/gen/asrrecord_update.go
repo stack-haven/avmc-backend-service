@@ -243,6 +243,26 @@ func (_u *AsrRecordUpdate) SetNillableEngine(v *string) *AsrRecordUpdate {
 	return _u
 }
 
+// SetEnhancedText sets the "enhanced_text" field.
+func (_u *AsrRecordUpdate) SetEnhancedText(v string) *AsrRecordUpdate {
+	_u.mutation.SetEnhancedText(v)
+	return _u
+}
+
+// SetNillableEnhancedText sets the "enhanced_text" field if the given value is not nil.
+func (_u *AsrRecordUpdate) SetNillableEnhancedText(v *string) *AsrRecordUpdate {
+	if v != nil {
+		_u.SetEnhancedText(*v)
+	}
+	return _u
+}
+
+// ClearEnhancedText clears the value of the "enhanced_text" field.
+func (_u *AsrRecordUpdate) ClearEnhancedText() *AsrRecordUpdate {
+	_u.mutation.ClearEnhancedText()
+	return _u
+}
+
 // Mutation returns the AsrRecordMutation object of the builder.
 func (_u *AsrRecordUpdate) Mutation() *AsrRecordMutation {
 	return _u.mutation
@@ -397,6 +417,12 @@ func (_u *AsrRecordUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Engine(); ok {
 		_spec.SetField(asrrecord.FieldEngine, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EnhancedText(); ok {
+		_spec.SetField(asrrecord.FieldEnhancedText, field.TypeString, value)
+	}
+	if _u.mutation.EnhancedTextCleared() {
+		_spec.ClearField(asrrecord.FieldEnhancedText, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -634,6 +660,26 @@ func (_u *AsrRecordUpdateOne) SetNillableEngine(v *string) *AsrRecordUpdateOne {
 	return _u
 }
 
+// SetEnhancedText sets the "enhanced_text" field.
+func (_u *AsrRecordUpdateOne) SetEnhancedText(v string) *AsrRecordUpdateOne {
+	_u.mutation.SetEnhancedText(v)
+	return _u
+}
+
+// SetNillableEnhancedText sets the "enhanced_text" field if the given value is not nil.
+func (_u *AsrRecordUpdateOne) SetNillableEnhancedText(v *string) *AsrRecordUpdateOne {
+	if v != nil {
+		_u.SetEnhancedText(*v)
+	}
+	return _u
+}
+
+// ClearEnhancedText clears the value of the "enhanced_text" field.
+func (_u *AsrRecordUpdateOne) ClearEnhancedText() *AsrRecordUpdateOne {
+	_u.mutation.ClearEnhancedText()
+	return _u
+}
+
 // Mutation returns the AsrRecordMutation object of the builder.
 func (_u *AsrRecordUpdateOne) Mutation() *AsrRecordMutation {
 	return _u.mutation
@@ -818,6 +864,12 @@ func (_u *AsrRecordUpdateOne) sqlSave(ctx context.Context) (_node *AsrRecord, er
 	}
 	if value, ok := _u.mutation.Engine(); ok {
 		_spec.SetField(asrrecord.FieldEngine, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EnhancedText(); ok {
+		_spec.SetField(asrrecord.FieldEnhancedText, field.TypeString, value)
+	}
+	if _u.mutation.EnhancedTextCleared() {
+		_spec.ClearField(asrrecord.FieldEnhancedText, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &AsrRecord{config: _u.config}
