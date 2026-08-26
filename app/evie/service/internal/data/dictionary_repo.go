@@ -470,7 +470,7 @@ func (r *dictionaryRepo) ListRelations(ctx context.Context, req *pb.ListRelation
 	}
 	size := listing.NormalizePageSize(req.GetPageSize())
 	offset := listing.PageOffset(req.GetPageToken())
-	rows, err := query.Order(gen.Asc(dictionaryrelation.FieldID)).Offset(offset).Limit(size).All(ctx)
+	rows, err := query.Order(gen.Desc(dictionaryrelation.FieldID)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -541,7 +541,7 @@ func (r *dictionaryRepo) ListRelationsByDictionary(ctx context.Context, req *pb.
 	// 3. 分页 + 排序
 	size := listing.NormalizePageSize(req.GetPageSize())
 	offset := listing.PageOffset(req.GetPageToken())
-	rows, err := baseQuery.Order(gen.Asc(dictionaryrelation.FieldID)).Offset(offset).Limit(size).All(ctx)
+	rows, err := baseQuery.Order(gen.Desc(dictionaryrelation.FieldID)).Offset(offset).Limit(size).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
