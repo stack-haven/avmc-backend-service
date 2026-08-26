@@ -211,10 +211,29 @@ func (TextCleaningStep) Process(c *EnhancementContext) error {
 		return string([]rune(s)[0])
 	})
 	if text != c.Text {
-		c.Changes = append(c.Changes, &EnhancementChange{
-			OriginalText: c.Text, ResultText: text, Action: ActionReplace,
-			Type: "CLEAN", Source: "SYSTEM", Confidence: 1.0, Locked: true,
-		})
+		// 逐个记录实际清洗片段（重复标点/连续空格/控制字符），避免把整段文本塞入变更导致前端 Tag 撑大
+		for _, s := range ctrlChars.FindAllString(c.Text, -1) {
+			c.Changes = append(c.Changes, &EnhancementChange{
+				OriginalText: s, ResultText: "", Action: ActionDelete,
+				Type: "CLEAN", Source: "SYSTEM", Confidence: 1.0, Locked: true,
+			})
+		}
+		for _, s := range multiSpace.FindAllString(c.Text, -1) {
+			if s != " " {
+				c.Changes = append(c.Changes, &EnhancementChange{
+					OriginalText: s, ResultText: " ", Action: ActionReplace,
+					Type: "CLEAN", Source: "SYSTEM", Confidence: 1.0, Locked: true,
+				})
+			}
+		}
+		for _, s := range multiPunct.FindAllString(c.Text, -1) {
+			if len([]rune(s)) > 1 {
+				c.Changes = append(c.Changes, &EnhancementChange{
+					OriginalText: s, ResultText: string([]rune(s)[0]), Action: ActionReplace,
+					Type: "CLEAN", Source: "SYSTEM", Confidence: 1.0, Locked: true,
+				})
+			}
+		}
 		c.Text = text
 	}
 	return nil
@@ -231,11 +250,13 @@ var strongFillers = map[string]bool{"呃": true, "额": true, "啊": true, "哦"
 func (FillerStep) Process(c *EnhancementContext) error {
 	runes := []rune(c.Text)
 	var out []rune
+	var removed []string
 	changed := false
 	for i, r := range runes {
 		if strongFillers[string(r)] {
 			// 仅删除句首或标点/空白后的口水词
 			if i == 0 || isPunctOrSpace(runes[i-1]) {
+				removed = append(removed, string(r))
 				changed = true
 				continue
 			}
@@ -243,10 +264,13 @@ func (FillerStep) Process(c *EnhancementContext) error {
 		out = append(out, r)
 	}
 	if changed {
-		c.Changes = append(c.Changes, &EnhancementChange{
-			OriginalText: c.Text, ResultText: string(out), Action: ActionDelete,
-			Type: "FILLER", Source: "SYSTEM", Confidence: 1.0, Locked: true,
-		})
+		// 逐个记录被删除的口水词，避免把整段文本塞入变更
+		for _, f := range removed {
+			c.Changes = append(c.Changes, &EnhancementChange{
+				OriginalText: f, ResultText: "", Action: ActionDelete,
+				Type: "FILLER", Source: "SYSTEM", Confidence: 1.0, Locked: true,
+			})
+		}
 		c.Text = string(out)
 	}
 	return nil

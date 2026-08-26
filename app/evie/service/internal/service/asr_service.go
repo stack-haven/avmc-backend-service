@@ -131,7 +131,8 @@ func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognize
 	if err != nil {
 		return nil, err
 	}
-	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId(), record.GetSessionId())
+	// ReRecognize 会生成新记录（session_id 为 旧session-re），增强日志需挂到新记录 session 下
+	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId(), record.GetSessionId()+"-re")
 	if err != nil {
 		return nil, err
 	}
