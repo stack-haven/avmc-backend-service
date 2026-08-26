@@ -18,6 +18,7 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
 	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
+	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/aip/listing"
 )
 
@@ -166,8 +167,10 @@ func (r *dictionaryRepo) DeleteDictionary(ctx context.Context, id uint32) error 
 
 // ListEntries 分页查询词条。
 func (r *dictionaryRepo) ListEntries(ctx context.Context, req *pb.ListEntriesRequest) ([]*pb.DictionaryEntry, int32, error) {
-	query := r.Data.DB(ctx).DictionaryEntry.Query().
-		Where(dictionaryentry.DeletedAtIsNil(), dictionaryentry.DictionaryIDEQ(req.GetDictionaryId()))
+	query := r.Data.DB(ctx).DictionaryEntry.Query().Where(dictionaryentry.DeletedAtIsNil())
+	if req.GetDictionaryId() != 0 {
+		query.Where(dictionaryentry.DictionaryIDEQ(req.GetDictionaryId()))
+	}
 	if req.GetCategory() != "" {
 		query.Where(dictionaryentry.CategoryEQ(req.GetCategory()))
 	}
@@ -412,8 +415,10 @@ func (r *dictionaryRepo) loadDictionariesByIDs(ctx context.Context, ids []uint32
 
 // ListRelations 分页查询词条关系（响应含 JOIN 字段）。
 func (r *dictionaryRepo) ListRelations(ctx context.Context, req *pb.ListRelationsRequest) ([]*pb.DictionaryRelation, int32, error) {
-	query := r.Data.DB(ctx).DictionaryRelation.Query().
-		Where(dictionaryrelation.DeletedAtIsNil(), dictionaryrelation.EntryIDEQ(req.GetEntryId()))
+	query := r.Data.DB(ctx).DictionaryRelation.Query().Where(dictionaryrelation.DeletedAtIsNil())
+	if req.GetEntryId() != 0 {
+		query.Where(dictionaryrelation.EntryIDEQ(req.GetEntryId()))
+	}
 	if req.GetRelationType() != "" {
 		query.Where(dictionaryrelation.RelationTypeEQ(req.GetRelationType()))
 	}
@@ -745,8 +750,10 @@ func dictionaryVersionProto(row *gen.DictionaryVersion) *pb.DictionaryVersion {
 
 // ListVersions 分页查询词库版本。
 func (r *dictionaryRepo) ListVersions(ctx context.Context, req *pb.ListVersionsRequest) ([]*pb.DictionaryVersion, int32, error) {
-	query := r.Data.DB(ctx).DictionaryVersion.Query().
-		Where(dictionaryversion.DictionaryIDEQ(req.GetDictionaryId()))
+	query := r.Data.DB(ctx).DictionaryVersion.Query()
+	if req.GetDictionaryId() != 0 {
+		query.Where(dictionaryversion.DictionaryIDEQ(req.GetDictionaryId()))
+	}
 	total, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -1005,13 +1012,12 @@ func (r *dictionaryRepo) maxDictionaryModifiedAt(ctx context.Context, dictionary
 
 // ===== Backend-1 词库中心交互优化工作台接口实现（2026-08-25） =====
 
-// tenantIDFromContext 从 ctx 安全提取当前租户；与 viewer ctx 区分，跨租户查询需用 entviewer.NewSystemContext。
+// tenantIDFromContext 从 ctx 安全提取当前租户。
+// 修复说明：原先用 ctx.Value("tenant_id").(uint32) 错误，因为 kratos authn 把 tenant_id
+// 存在 SecurityUser 里，需要走 authn.GetAuthUserTenantID(ctx)。原断言失败时返回 0，
+// 导致多租户过滤失效，dashboard 数据为空。
 func (r *dictionaryRepo) tenantIDFromContext(ctx context.Context) uint32 {
-	tenantID, ok := ctx.Value("tenant_id").(uint32)
-	if !ok {
-		return 0
-	}
-	return tenantID
+	return authn.GetAuthUserTenantID(ctx)
 }
 
 // dashboardMyDictCard 从 Dictionary ent 生成我的词库卡片。

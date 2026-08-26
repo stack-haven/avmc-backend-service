@@ -353,7 +353,7 @@ message DeleteDictionaryRequest {
 message DeleteDictionaryResponse {}
 
 message ListEntriesRequest {
-  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  uint32 dictionary_id = 1; // 0=全部词库
   int32 page_size = 2;
   string page_token = 3;
   string category = 4;   // 按分类筛选
@@ -428,7 +428,7 @@ message DictionaryRelation {
 }
 
 message ListRelationsRequest {
-  uint32 entry_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  uint32 entry_id = 1; // 0=全部词条
   int32 page_size = 2;
   string page_token = 3;
   string relation_type = 4; // 按关系类型筛选
@@ -524,7 +524,7 @@ message DeleteCategoryRequest {
 message DeleteCategoryResponse {}
 
 message ListVersionsRequest {
-  uint32 dictionary_id = 1 [(buf.validate.field).uint32 = {gt: 0}];
+  uint32 dictionary_id = 1; // 0=全部词库
   int32 page_size = 2;
   string page_token = 3;
 }

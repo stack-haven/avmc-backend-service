@@ -680,7 +680,7 @@ func (*DeleteDictionaryResponse) Descriptor() ([]byte, []int) {
 
 type ListEntriesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"` // 0=全部词库
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	Category      string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"` // 按分类筛选
@@ -1348,7 +1348,7 @@ func (x *DictionaryRelation) GetRelatedTenantId() uint32 {
 
 type ListRelationsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EntryId       uint32                 `protobuf:"varint,1,opt,name=entry_id,json=entryId,proto3" json:"entry_id,omitempty"`
+	EntryId       uint32                 `protobuf:"varint,1,opt,name=entry_id,json=entryId,proto3" json:"entry_id,omitempty"` // 0=全部词条
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	RelationType  string                 `protobuf:"bytes,4,opt,name=relation_type,json=relationType,proto3" json:"relation_type,omitempty"` // 按关系类型筛选
@@ -2298,7 +2298,7 @@ func (*DeleteCategoryResponse) Descriptor() ([]byte, []int) {
 
 type ListVersionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	DictionaryId  uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"` // 0=全部词库
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -3876,9 +3876,9 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\"2\n" +
 	"\x17DeleteDictionaryRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x1a\n" +
-	"\x18DeleteDictionaryResponse\"\xcc\x01\n" +
-	"\x12ListEntriesRequest\x12,\n" +
-	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12\x1b\n" +
+	"\x18DeleteDictionaryResponse\"\xc3\x01\n" +
+	"\x12ListEntriesRequest\x12#\n" +
+	"\rdictionary_id\x18\x01 \x01(\rR\fdictionaryId\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tR\tpageToken\x12\x1a\n" +
@@ -3940,9 +3940,9 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\x0eentry_category\x18\f \x01(\tR\rentryCategory\x12'\n" +
 	"\x0fdictionary_name\x18\r \x01(\tR\x0edictionaryName\x122\n" +
 	"\x15related_standard_text\x18\x0e \x01(\tR\x13relatedStandardText\x12*\n" +
-	"\x11related_tenant_id\x18\x0f \x01(\rR\x0frelatedTenantId\"\x9b\x01\n" +
-	"\x14ListRelationsRequest\x12\"\n" +
-	"\bentry_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\aentryId\x12\x1b\n" +
+	"\x11related_tenant_id\x18\x0f \x01(\rR\x0frelatedTenantId\"\x92\x01\n" +
+	"\x14ListRelationsRequest\x12\x19\n" +
+	"\bentry_id\x18\x01 \x01(\rR\aentryId\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tR\tpageToken\x12#\n" +
@@ -4017,9 +4017,9 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\"0\n" +
 	"\x15DeleteCategoryRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\"\x18\n" +
-	"\x16DeleteCategoryResponse\"\x7f\n" +
-	"\x13ListVersionsRequest\x12,\n" +
-	"\rdictionary_id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\fdictionaryId\x12\x1b\n" +
+	"\x16DeleteCategoryResponse\"v\n" +
+	"\x13ListVersionsRequest\x12#\n" +
+	"\rdictionary_id\x18\x01 \x01(\rR\fdictionaryId\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tR\tpageToken\"\x94\x01\n" +
