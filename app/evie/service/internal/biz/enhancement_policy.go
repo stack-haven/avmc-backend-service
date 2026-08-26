@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"unicode/utf8"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -44,7 +45,8 @@ func (uc *EnhancementPolicyUsecase) GeneratePinyin(ctx context.Context, text str
 	if text == "" {
 		return nil, errors.BadRequest("TEXT_REQUIRED", "文本不能为空")
 	}
-	if len(text) > 256 {
+	// 使用 rune 计数而非 byte 计数，避免中文字符 3 字节歧义。
+	if utf8.RuneCountInString(text) > 256 {
 		return nil, errors.BadRequest("TEXT_TOO_LONG", "文本长度不能超过 256 字符")
 	}
 	return uc.repo.GeneratePinyin(ctx, text, includeInitials)

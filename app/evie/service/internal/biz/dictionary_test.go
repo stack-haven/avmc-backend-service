@@ -11,13 +11,15 @@ import (
 
 // dictionaryRepoStub is a minimal DictionaryRepo stub for usecase tests.
 type dictionaryRepoStub struct {
-	words        []string
-	createdDict  *pb.Dictionary
-	createdEntry *pb.DictionaryEntry
-	updatedDict  *pb.Dictionary
-	updatedEntry *pb.DictionaryEntry
-	deletedDict  uint32
-	deletedEntry uint32
+	words                   []string
+	createdDict             *pb.Dictionary
+	createdEntry            *pb.DictionaryEntry
+	updatedDict             *pb.Dictionary
+	updatedEntry            *pb.DictionaryEntry
+	deletedDict             uint32
+	deletedEntry            uint32
+	relationsByDictionaryFn func(*pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error)
+	statsFn                 func(uint32) (*pb.DictionaryStats, error)
 }
 
 func (s *dictionaryRepoStub) ListDictionaries(context.Context, *pb.ListDictionariesRequest) ([]*pb.Dictionary, int32, error) {
@@ -64,6 +66,12 @@ func (s *dictionaryRepoStub) ListActiveEntryTexts(context.Context) ([]string, er
 func (s *dictionaryRepoStub) ListRelations(context.Context, *pb.ListRelationsRequest) ([]*pb.DictionaryRelation, int32, error) {
 	return nil, 0, nil
 }
+func (s *dictionaryRepoStub) ListRelationsByDictionary(_ context.Context, req *pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error) {
+	if s.relationsByDictionaryFn != nil {
+		return s.relationsByDictionaryFn(req)
+	}
+	return nil, 0, nil
+}
 func (s *dictionaryRepoStub) GetRelation(context.Context, uint32) (*pb.DictionaryRelation, error) {
 	return nil, nil
 }
@@ -74,6 +82,13 @@ func (s *dictionaryRepoStub) UpdateRelation(context.Context, *pb.DictionaryRelat
 	return nil, nil
 }
 func (s *dictionaryRepoStub) DeleteRelation(context.Context, uint32) error { return nil }
+
+func (s *dictionaryRepoStub) GetStats(_ context.Context, dictionaryID uint32) (*pb.DictionaryStats, error) {
+	if s.statsFn != nil {
+		return s.statsFn(dictionaryID)
+	}
+	return &pb.DictionaryStats{DictionaryId: dictionaryID}, nil
+}
 
 func (s *dictionaryRepoStub) ListCategories(context.Context, *pb.ListCategoriesRequest) ([]*pb.DictionaryCategory, int32, error) {
 	return nil, 0, nil
