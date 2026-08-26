@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "backend-service/api/evie/service/v1"
@@ -25,10 +26,13 @@ type DictionaryRepo interface {
 	ListActiveEntryTexts(ctx context.Context) ([]string, error)
 
 	ListRelations(ctx context.Context, req *pb.ListRelationsRequest) ([]*pb.DictionaryRelation, int32, error)
+	ListRelationsByDictionary(ctx context.Context, req *pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error)
 	GetRelation(ctx context.Context, id uint32) (*pb.DictionaryRelation, error)
 	CreateRelation(ctx context.Context, relation *pb.DictionaryRelation) (*pb.DictionaryRelation, error)
 	UpdateRelation(ctx context.Context, relation *pb.DictionaryRelation) (*pb.DictionaryRelation, error)
 	DeleteRelation(ctx context.Context, id uint32) error
+
+	GetStats(ctx context.Context, dictionaryID uint32) (*pb.DictionaryStats, error)
 
 	ListCategories(ctx context.Context, req *pb.ListCategoriesRequest) ([]*pb.DictionaryCategory, int32, error)
 	CreateCategory(ctx context.Context, category *pb.DictionaryCategory) (*pb.DictionaryCategory, error)
@@ -143,6 +147,24 @@ func (uc *DictionaryUsecase) DeleteEntry(ctx context.Context, id uint32) error {
 // ListRelations 分页查询词条关系。
 func (uc *DictionaryUsecase) ListRelations(ctx context.Context, req *pb.ListRelationsRequest) ([]*pb.DictionaryRelation, int32, error) {
 	return uc.repo.ListRelations(ctx, req)
+}
+
+// ListRelationsByDictionary 词库级别关系列表（不需先选 entryId）。
+// biz 层仅为透传；多租户隐私 + 词库存在性校验在 repo 内完成。
+func (uc *DictionaryUsecase) ListRelationsByDictionary(ctx context.Context, req *pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error) {
+	if req.GetDictionaryId() == 0 {
+		return nil, 0, errors.BadRequest("DICTIONARY_ID_REQUIRED", "词库ID不能为空")
+	}
+	return uc.repo.ListRelationsByDictionary(ctx, req)
+}
+
+// GetStats 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
+// biz 层仅为透传；按词库 scope 可见性校验在 repo 内完成。
+func (uc *DictionaryUsecase) GetStats(ctx context.Context, dictionaryID uint32) (*pb.DictionaryStats, error) {
+	if dictionaryID == 0 {
+		return nil, errors.BadRequest("DICTIONARY_ID_REQUIRED", "词库ID不能为空")
+	}
+	return uc.repo.GetStats(ctx, dictionaryID)
 }
 
 // GetRelation 查询词条关系详情。

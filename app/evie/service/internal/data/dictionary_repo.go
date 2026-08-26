@@ -310,12 +310,14 @@ func (r *dictionaryRepo) ListActiveEntryTexts(ctx context.Context) ([]string, er
 }
 
 // dictionaryRelationProto converts an Ent DictionaryRelation to a proto DictionaryRelation.
-func dictionaryRelationProto(row *gen.DictionaryRelation) *pb.DictionaryRelation {
+// 包含 JOIN 后的 entry_standard_text / entry_category / dictionary_name /
+// related_standard_text / related_tenant_id 字段，用于前端「您 → ALIAS → 客服您好」自然语言化展示。
+func dictionaryRelationProto(row *gen.DictionaryRelation, joined *relationJoin) *pb.DictionaryRelation {
 	status := int32(0)
 	if row.Status != nil {
 		status = *row.Status
 	}
-	return &pb.DictionaryRelation{
+	out := &pb.DictionaryRelation{
 		Id:            row.ID,
 		EntryId:       row.EntryID,
 		RelationType:  row.RelationType,
@@ -327,9 +329,87 @@ func dictionaryRelationProto(row *gen.DictionaryRelation) *pb.DictionaryRelation
 		CreatedAt:     row.CreatedAt.Format(time.DateTime),
 		UpdatedAt:     row.UpdatedAt.Format(time.DateTime),
 	}
+	if joined != nil {
+		out.EntryStandardText = joined.EntryStandardText
+		out.EntryCategory = joined.EntryCategory
+		out.DictionaryName = joined.DictionaryName
+		out.RelatedStandardText = joined.RelatedStandardText
+		out.RelatedTenantId = joined.RelatedTenantID
+	}
+	return out
 }
 
-// ListRelations 分页查询词条关系。
+// relationJoin 记录查询返回的关联字段（避免 N+1）。
+// 与 DictionaryRelation 一一对应，由 listRelationsByEntryAndID/listRelationsByDictionary 填充。
+type relationJoin struct {
+	EntryStandardText   string
+	EntryCategory       string
+	DictionaryName      string
+	RelatedStandardText string
+	RelatedTenantID     uint32
+}
+
+// fillRelationJoins 一次性预加载所需 entry / dictionary 字段，避免 N+1。
+// entriesByID 与 dictsByID 由调用方提供（已聚合到 IN 查询结果）。
+func fillRelationJoins(relations []*gen.DictionaryRelation, entriesByID map[uint32]*gen.DictionaryEntry, dictsByID map[uint32]*gen.Dictionary, targetEntryByID map[uint32]*gen.DictionaryEntry) map[uint32]*relationJoin {
+	out := make(map[uint32]*relationJoin, len(relations))
+	for _, rel := range relations {
+		join := &relationJoin{}
+		if entry, ok := entriesByID[rel.EntryID]; ok && entry != nil {
+			join.EntryStandardText = entry.StandardText
+			join.EntryCategory = entry.Category
+			if d, ok := dictsByID[entry.DictionaryID]; ok && d != nil {
+				join.DictionaryName = d.Name
+			}
+		}
+		if rel.TargetEntryID != 0 {
+			if t, ok := targetEntryByID[rel.TargetEntryID]; ok && t != nil {
+				join.RelatedStandardText = t.StandardText
+				join.RelatedTenantID = t.TenantID
+			}
+		}
+		out[rel.ID] = join
+	}
+	return out
+}
+
+// loadEntriesByIDs 预加载 entry，返回 ID → entry 映射。
+func (r *dictionaryRepo) loadEntriesByIDs(ctx context.Context, ids []uint32) (map[uint32]*gen.DictionaryEntry, error) {
+	if len(ids) == 0 {
+		return map[uint32]*gen.DictionaryEntry{}, nil
+	}
+	rows, err := r.Data.DB(ctx).DictionaryEntry.Query().
+		Where(dictionaryentry.IDIn(ids...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[uint32]*gen.DictionaryEntry, len(rows))
+	for _, e := range rows {
+		out[e.ID] = e
+	}
+	return out, nil
+}
+
+// loadDictionariesByIDs 预加载 dictionary，返回 ID → dictionary 映射。
+func (r *dictionaryRepo) loadDictionariesByIDs(ctx context.Context, ids []uint32) (map[uint32]*gen.Dictionary, error) {
+	if len(ids) == 0 {
+		return map[uint32]*gen.Dictionary{}, nil
+	}
+	rows, err := r.Data.DB(ctx).Dictionary.Query().
+		Where(dictionary.IDIn(ids...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[uint32]*gen.Dictionary, len(rows))
+	for _, d := range rows {
+		out[d.ID] = d
+	}
+	return out, nil
+}
+
+// ListRelations 分页查询词条关系（响应含 JOIN 字段）。
 func (r *dictionaryRepo) ListRelations(ctx context.Context, req *pb.ListRelationsRequest) ([]*pb.DictionaryRelation, int32, error) {
 	query := r.Data.DB(ctx).DictionaryRelation.Query().
 		Where(dictionaryrelation.DeletedAtIsNil(), dictionaryrelation.EntryIDEQ(req.GetEntryId()))
@@ -346,9 +426,108 @@ func (r *dictionaryRepo) ListRelations(ctx context.Context, req *pb.ListRelation
 	if err != nil {
 		return nil, 0, err
 	}
+
+	// JOIN：收集 entry IDs + target entry IDs，批量预加载。
+	entryIDs := make([]uint32, 0, len(rows))
+	targetIDs := make([]uint32, 0, len(rows))
+	for _, rel := range rows {
+		entryIDs = append(entryIDs, rel.EntryID)
+		if rel.TargetEntryID != 0 {
+			targetIDs = append(targetIDs, rel.TargetEntryID)
+		}
+	}
+	entriesByID, err := r.loadEntriesByIDs(ctx, entryIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	dictIDs := make([]uint32, 0, len(entriesByID))
+	for _, e := range entriesByID {
+		dictIDs = append(dictIDs, e.DictionaryID)
+	}
+	dictsByID, err := r.loadDictionariesByIDs(ctx, dictIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	targetByID, err := r.loadEntriesByIDs(ctx, targetIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	joins := fillRelationJoins(rows, entriesByID, dictsByID, targetByID)
+
 	result := make([]*pb.DictionaryRelation, 0, len(rows))
 	for _, row := range rows {
-		result = append(result, dictionaryRelationProto(row))
+		result = append(result, dictionaryRelationProto(row, joins[row.ID]))
+	}
+	return result, int32(total), nil
+}
+
+// ListRelationsByDictionary 词库级别关系列表（跨 entryId，一次性返回词库下所有词条的关系）。
+// SQL 等价：SELECT r.* FROM dictionary_relations r
+//   INNER JOIN dictionary_entries e ON r.entry_id = e.id WHERE e.dictionary_id = ?
+// 响应含 JOIN 后的 entry_standard_text / dictionary_name 等字段，与 ListRelations 保持一致。
+func (r *dictionaryRepo) ListRelationsByDictionary(ctx context.Context, req *pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error) {
+	// 1. 校验词库存在 + scope 可见性（复用 GetDictionary，错误码 DICTIONARY_NOT_FOUND）
+	if _, err := r.GetDictionary(ctx, req.GetDictionaryId()); err != nil {
+		return nil, 0, err
+	}
+
+	// 2. 总数
+	baseQuery := r.Data.DB(ctx).DictionaryRelation.Query().
+		Where(dictionaryrelation.DeletedAtIsNil()).
+		Where(dictionaryrelation.HasEntryWith(dictionaryentry.DictionaryIDEQ(req.GetDictionaryId())))
+	if req.GetRelationType() != "" {
+		baseQuery.Where(dictionaryrelation.RelationTypeEQ(req.GetRelationType()))
+	}
+	if req.GetKeyword() != "" {
+		// 模糊搜索：entry.standard_text 或 relation.related_text
+		baseQuery.Where(dictionaryrelation.Or(
+			dictionaryrelation.HasEntryWith(dictionaryentry.StandardTextContains(req.GetKeyword())),
+			dictionaryrelation.RelatedTextContains(req.GetKeyword()),
+		))
+	}
+	total, err := baseQuery.Clone().Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 3. 分页 + 排序
+	size := listing.NormalizePageSize(req.GetPageSize())
+	offset := listing.PageOffset(req.GetPageToken())
+	rows, err := baseQuery.Order(gen.Asc(dictionaryrelation.FieldID)).Offset(offset).Limit(size).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 4. JOIN 字段预加载（与 ListRelations 同样的填充方式）
+	entryIDs := make([]uint32, 0, len(rows))
+	targetIDs := make([]uint32, 0, len(rows))
+	for _, rel := range rows {
+		entryIDs = append(entryIDs, rel.EntryID)
+		if rel.TargetEntryID != 0 {
+			targetIDs = append(targetIDs, rel.TargetEntryID)
+		}
+	}
+	entriesByID, err := r.loadEntriesByIDs(ctx, entryIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	dictIDs := make([]uint32, 0, len(entriesByID))
+	for _, e := range entriesByID {
+		dictIDs = append(dictIDs, e.DictionaryID)
+	}
+	dictsByID, err := r.loadDictionariesByIDs(ctx, dictIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	targetByID, err := r.loadEntriesByIDs(ctx, targetIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	joins := fillRelationJoins(rows, entriesByID, dictsByID, targetByID)
+
+	result := make([]*pb.DictionaryRelation, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, dictionaryRelationProto(row, joins[row.ID]))
 	}
 	return result, int32(total), nil
 }
@@ -364,7 +543,7 @@ func (r *dictionaryRepo) GetRelation(ctx context.Context, id uint32) (*pb.Dictio
 	if err != nil {
 		return nil, err
 	}
-	return dictionaryRelationProto(row), nil
+	return dictionaryRelationProto(row, nil), nil
 }
 
 // CreateRelation 创建词条关系。
@@ -625,7 +804,7 @@ func (r *dictionaryRepo) PublishDictionary(ctx context.Context, req *pb.PublishD
 		snapshot.Entries = append(snapshot.Entries, dictionaryEntryProto(e))
 	}
 	for _, rel := range relations {
-		snapshot.Relations = append(snapshot.Relations, dictionaryRelationProto(rel))
+		snapshot.Relations = append(snapshot.Relations, dictionaryRelationProto(rel, nil))
 	}
 	snapshotJSON, err := json.Marshal(snapshot)
 	if err != nil {
@@ -718,4 +897,107 @@ func (r *dictionaryRepo) LoadVocabularyEntries(ctx context.Context, tenantID uin
 		})
 	}
 	return entries, relations, nil
+}
+
+// GetStats 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
+// 多租户隐私：调用 GetDictionary 触发 scope 可见性校验。
+//
+// 健康度字段说明（1.0 占位）：
+//   - HitRate、AvgRecognitionConfidence 需 JOIN EnhancementLog + AsrRecord，1.0 返回 0，
+//     前端以「数据收集中」提示；2.0 加入 Schema 补强后返回实际值。
+//   - UnresolvedConflictCount：DictionaryConflict 表以 source_dictionary 字符串存储（无外键），
+//     1.0 返回全局未解决冲突数；2.0 补 dictionary_id 字段后改为按词库统计。
+func (r *dictionaryRepo) GetStats(ctx context.Context, id uint32) (*pb.DictionaryStats, error) {
+	// 1. scope 可见性校验（复用 GetDictionary 返回 DICTIONARY_NOT_FOUND）
+	if _, err := r.GetDictionary(ctx, id); err != nil {
+		return nil, err
+	}
+
+	db := r.Data.DB(ctx)
+
+	// 2. 词条计数（含禁用 + 仅启用）
+	entryTotal, err := db.DictionaryEntry.Query().
+		Where(dictionaryentry.DictionaryIDEQ(id), dictionaryentry.DeletedAtIsNil()).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	enabledEntry, err := db.DictionaryEntry.Query().
+		Where(dictionaryentry.DictionaryIDEQ(id), dictionaryentry.DeletedAtIsNil(), dictionaryentry.StatusEQ(1)).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. 关系计数（跨词条）
+	relationTotal, err := db.DictionaryRelation.Query().
+		Where(dictionaryrelation.DeletedAtIsNil()).
+		Where(dictionaryrelation.HasEntryWith(dictionaryentry.DictionaryIDEQ(id))).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. 版本计数
+	versionTotal, err := db.DictionaryVersion.Query().
+		Where(dictionaryversion.DictionaryIDEQ(id)).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. lastModifiedAt：MAX(updated_at) from entries + relations，取较大者。
+	lastModifiedAt, err := r.maxDictionaryModifiedAt(ctx, id)
+	if err != nil {
+		r.Log.Warnf("compute last_modified_at failed for dictionary %d: %v", id, err)
+	}
+
+	stats := &pb.DictionaryStats{
+		EntryCount:                 int32(entryTotal),
+		EnabledEntryCount:          int32(enabledEntry),
+		RelationCount:              int32(relationTotal),
+		VersionCount:               int32(versionTotal),
+		UnresolvedConflictCount:    0, // 1.0 占位：返回 0，前端展示「数据收集中」
+		HitRate:                    0, // 1.0 占位
+		AvgRecognitionConfidence:   0, // 1.0 占位
+		LastModifiedAt:             lastModifiedAt,
+		DictionaryId:               id,
+	}
+	return stats, nil
+}
+
+// maxDictionaryModifiedAt 返回词库下词条 + 关系最后一次更新的时间戳。
+// 实现方式：分别取 entries 和 relations 按 UpdatedAt 降序的首条记录，取较大者。
+// 避免用 Max(time.Time) 聚合——ent 0.14.5 selector 未提供 Time() 提取方法（仅 Int/Float64/String）。
+func (r *dictionaryRepo) maxDictionaryModifiedAt(ctx context.Context, dictionaryID uint32) (string, error) {
+	db := r.Data.DB(ctx)
+	var latest time.Time
+
+	entry, err := db.DictionaryEntry.Query().
+		Where(dictionaryentry.DictionaryIDEQ(dictionaryID), dictionaryentry.DeletedAtIsNil()).
+		Order(gen.Desc(dictionaryentry.FieldUpdatedAt)).
+		First(ctx)
+	if err != nil && !gen.IsNotFound(err) {
+		return "", err
+	}
+	if entry != nil {
+		latest = entry.UpdatedAt
+	}
+
+	relation, err := db.DictionaryRelation.Query().
+		Where(dictionaryrelation.DeletedAtIsNil()).
+		Where(dictionaryrelation.HasEntryWith(dictionaryentry.DictionaryIDEQ(dictionaryID))).
+		Order(gen.Desc(dictionaryrelation.FieldUpdatedAt)).
+		First(ctx)
+	if err != nil && !gen.IsNotFound(err) {
+		return "", err
+	}
+	if relation != nil && relation.UpdatedAt.After(latest) {
+		latest = relation.UpdatedAt
+	}
+
+	if latest.IsZero() {
+		return "", nil
+	}
+	return latest.UTC().Format(time.DateTime), nil
 }

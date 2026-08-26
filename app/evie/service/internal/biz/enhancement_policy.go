@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "backend-service/api/evie/service/v1"
@@ -21,6 +22,9 @@ type EnhancementPolicyRepo interface {
 	CreateProfile(ctx context.Context, profile *pb.EnhancementProfile) (*pb.EnhancementProfile, error)
 	UpdateProfile(ctx context.Context, profile *pb.EnhancementProfile) (*pb.EnhancementProfile, error)
 	DeleteProfile(ctx context.Context, id uint32) error
+
+	// GeneratePinyin 生成拼音（无状态工具接口，不依赖数据）。
+	GeneratePinyin(ctx context.Context, text string, includeInitials bool) (*pb.GeneratePinyinResponse, error)
 }
 
 // EnhancementPolicyUsecase 增强策略与场景业务逻辑。
@@ -32,6 +36,18 @@ type EnhancementPolicyUsecase struct {
 // NewEnhancementPolicyUsecase 创建增强策略 usecase。
 func NewEnhancementPolicyUsecase(repo EnhancementPolicyRepo, logger log.Logger) *EnhancementPolicyUsecase {
 	return &EnhancementPolicyUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+// GeneratePinyin 生成拼音（后端兑底，前端 pinyin-pro 失败时调用）。
+// 本接口为无状态工具，不限租户——任何已登录用户可调用（用于前端表单辅助）。
+func (uc *EnhancementPolicyUsecase) GeneratePinyin(ctx context.Context, text string, includeInitials bool) (*pb.GeneratePinyinResponse, error) {
+	if text == "" {
+		return nil, errors.BadRequest("TEXT_REQUIRED", "文本不能为空")
+	}
+	if len(text) > 256 {
+		return nil, errors.BadRequest("TEXT_TOO_LONG", "文本长度不能超过 256 字符")
+	}
+	return uc.repo.GeneratePinyin(ctx, text, includeInitials)
 }
 
 // ListPolicies 分页查询策略。

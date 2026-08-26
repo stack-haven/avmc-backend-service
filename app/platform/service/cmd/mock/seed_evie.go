@@ -41,6 +41,8 @@ var evieButtons = []buttonSpec{
 	{Parent: "EvieDictionaryList", Name: "EvieDictCreate", Title: "新增", Operation: eviev1.OperationDictionaryServiceCreateDictionary, Sort: 30},
 	{Parent: "EvieDictionaryList", Name: "EvieDictEdit", Title: "编辑", Operation: eviev1.OperationDictionaryServiceUpdateDictionary, Sort: 40},
 	{Parent: "EvieDictionaryList", Name: "EvieDictDelete", Title: "删除", Operation: eviev1.OperationDictionaryServiceDeleteDictionary, Sort: 50},
+	{Parent: "EvieDictionaryList", Name: "EvieDictStats", Title: "查看统计", Operation: eviev1.OperationDictionaryServiceGetDictionaryStats, Sort: 60},
+	{Parent: "EvieDictionaryList", Name: "EvieDictRelationsAll", Title: "查询词库下所有关系", Operation: eviev1.OperationDictionaryServiceListRelationsByDictionary, Sort: 70},
 
 	// 词条管理
 	{Parent: "EvieEntryList", Name: "EvieEntryQuery", Title: "查询", Operation: eviev1.OperationDictionaryServiceListEntries, Sort: 10},
@@ -100,6 +102,7 @@ var evieButtons = []buttonSpec{
 	// 增强记录
 	{Parent: "EvieLogList", Name: "EvieLogQuery", Title: "查询", Operation: eviev1.OperationEnhancementServiceListLogs, Sort: 10},
 	{Parent: "EvieLogList", Name: "EvieLogGet", Title: "详情", Operation: eviev1.OperationEnhancementServiceGetLog, Sort: 20},
+	{Parent: "EvieEntryList", Name: "EviePinyinGenerate", Title: "拼音生成", Operation: eviev1.OperationEnhancementServiceGeneratePinyin, Sort: 60},
 
 	// 纠错（兼容保留，Correct 走增强引擎）
 	{Parent: "EvieEnhancement", Name: "EvieCorrectionCorrect", Title: "文本增强", Operation: eviev1.OperationCorrectionServiceCorrect, Sort: 30},

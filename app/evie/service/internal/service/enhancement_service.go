@@ -125,3 +125,13 @@ func (s *EnhancementServiceService) ListLogs(ctx context.Context, req *pb.ListEn
 func (s *EnhancementServiceService) GetLog(ctx context.Context, req *pb.GetEnhancementLogRequest) (*pb.EnhancementLog, error) {
 	return s.logUc.Get(ctx, req.GetId())
 }
+
+// GeneratePinyin 生成拼音（后端兑底，前端 pinyin-pro 失败时调用）。
+// 本接口为无状态工具，不限租户——任何已登录用户可调用。
+func (s *EnhancementServiceService) GeneratePinyin(ctx context.Context, req *pb.GeneratePinyinRequest) (*pb.GeneratePinyinResponse, error) {
+	resp, err := s.policyUc.GeneratePinyin(ctx, req.GetText(), req.GetIncludeInitials())
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}

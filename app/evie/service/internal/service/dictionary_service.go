@@ -154,6 +154,24 @@ func (s *DictionaryServiceService) ListRelations(ctx context.Context, req *pb.Li
 	return &pb.ListRelationsResponse{Relations: relations, Total: total}, nil
 }
 
+// ListRelationsByDictionary 词库级别关系列表（不需先选 entryId，响应含 entry_standard_text 等 JOIN 字段）。
+func (s *DictionaryServiceService) ListRelationsByDictionary(ctx context.Context, req *pb.ListRelationsByDictionaryRequest) (*pb.ListRelationsByDictionaryResponse, error) {
+	relations, total, err := s.uc.ListRelationsByDictionary(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.ListRelationsByDictionaryResponse{Relations: relations, Total: total}, nil
+}
+
+// GetDictionaryStats 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
+func (s *DictionaryServiceService) GetDictionaryStats(ctx context.Context, req *pb.GetDictionaryStatsRequest) (*pb.GetDictionaryStatsResponse, error) {
+	stats, err := s.uc.GetStats(ctx, req.GetDictionaryId())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetDictionaryStatsResponse{Stats: stats}, nil
+}
+
 // GetRelation 查询词条关系详情。
 func (s *DictionaryServiceService) GetRelation(ctx context.Context, req *pb.GetRelationRequest) (*pb.DictionaryRelation, error) {
 	return s.uc.GetRelation(ctx, req.GetId())

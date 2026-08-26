@@ -12,6 +12,7 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
+	pinyinpkg "backend-service/pkg/pinyin"
 	"backend-service/pkg/aip/listing"
 )
 
@@ -230,4 +231,19 @@ func (r *enhancementPolicyRepo) DeleteProfile(ctx context.Context, id uint32) er
 		return err
 	}
 	return nil
+}
+
+// GeneratePinyin 生成拼音。委托 pkg/pinyin 公共包，本接口为无状态工具，
+// 不限租户（任何已登录用户可调用，用于前端表单辅助）。
+func (r *enhancementPolicyRepo) GeneratePinyin(ctx context.Context, text string, includeInitials bool) (*pb.GeneratePinyinResponse, error) {
+	_ = ctx // 未使用：拼音生成是函数式操作，不依赖上下文状态
+	result, err := pinyinpkg.Convert(text, includeInitials)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GeneratePinyinResponse{
+		Pinyin:         result.Pinyin,
+		PinyinInitial:  result.PinyinInitial,
+		NormalizedText: result.NormalizedText,
+	}, nil
 }
