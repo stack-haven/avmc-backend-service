@@ -451,7 +451,13 @@ func (r *dictionaryRepo) activeDictionaryIDs(ctx context.Context) ([]uint32, err
 
 // ListRelations 分页查询词条关系（响应含 JOIN 字段）。
 func (r *dictionaryRepo) ListRelations(ctx context.Context, req *pb.ListRelationsRequest) ([]*pb.DictionaryRelation, int32, error) {
-	query := r.Data.DB(ctx).DictionaryRelation.Query().Where(dictionaryrelation.DeletedAtIsNil())
+	// 只展示「未删除词条」且「未删除词库」下的关系（词条/词库已删除则关系不再展示）
+	query := r.Data.DB(ctx).DictionaryRelation.Query().
+		Where(dictionaryrelation.DeletedAtIsNil()).
+		Where(dictionaryrelation.HasEntryWith(
+			dictionaryentry.DeletedAtIsNil(),
+			dictionaryentry.HasDictionaryWith(dictionary.DeletedAtIsNil()),
+		))
 	if req.GetEntryId() != 0 {
 		query.Where(dictionaryrelation.EntryIDEQ(req.GetEntryId()))
 	}
