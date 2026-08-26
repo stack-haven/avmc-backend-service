@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -170,6 +171,30 @@ func (s *DictionaryServiceService) GetDictionaryStats(ctx context.Context, req *
 		return nil, err
 	}
 	return &pb.GetDictionaryStatsResponse{Stats: stats}, nil
+}
+
+// GetDashboardOverview 查询词库中心工作台总览（Backend-1）。
+func (s *DictionaryServiceService) GetDashboardOverview(ctx context.Context, req *pb.GetDashboardOverviewRequest) (*pb.GetDashboardOverviewResponse, error) {
+	limit := int32(5)
+	if raw := req.GetActivitiesLimit(); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil && n > 0 {
+			limit = int32(n)
+		}
+	}
+	overview, err := s.uc.GetDashboardOverview(ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetDashboardOverviewResponse{Overview: overview}, nil
+}
+
+// GetVocabularyHealth 查询词库健康度详细指标（Backend-1）。
+func (s *DictionaryServiceService) GetVocabularyHealth(ctx context.Context, req *pb.GetVocabularyHealthRequest) (*pb.GetVocabularyHealthResponse, error) {
+	details, err := s.uc.GetVocabularyHealth(ctx, req.GetDictionaryScope(), req.GetRecentDays())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetVocabularyHealthResponse{Details: details}, nil
 }
 
 // GetRelation 查询词条关系详情。

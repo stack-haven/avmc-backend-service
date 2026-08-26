@@ -263,6 +263,24 @@ service DictionaryService {
       tags: ["词库中心"]
     };
   }
+
+  // 查询词库中心工作台总览（我的词库 + 系统词库 + 全局事件 + 健康度聚合）。
+  rpc GetDashboardOverview(GetDashboardOverviewRequest) returns (GetDashboardOverviewResponse) {
+    option (google.api.http) = {get: "/evie/v1/dashboard"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词库中心工作台总览"
+      tags: ["词库中心"]
+    };
+  }
+
+  // 查询词库健康度指标（基于增强记录 + ASR 记录的识别命中聚合）。
+  rpc GetVocabularyHealth(GetVocabularyHealthRequest) returns (GetVocabularyHealthResponse) {
+    option (google.api.http) = {get: "/evie/v1/vocabulary-health"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词库健康度指标"
+      tags: ["词库中心"]
+    };
+  }
 }
 
 // Dictionary 词库。
@@ -592,4 +610,90 @@ message ListRelationsByDictionaryResponse {
   repeated DictionaryRelation relations = 1; // DictionaryRelation 已补全 entry_standard_text 等字段
   int32 total = 2;
   string next_page_token = 3;
+}
+
+// ===== 词库中心交互优化 Backend-1 接口（2026-08-25） =====
+
+// DashboardMyDictionary 工作台「我的词库」轻量卡片（仅展示必要字段）。
+message DashboardMyDictionary {
+  uint32 id = 1;
+  string name = 2;
+  string scope = 3;            // TENANT
+  int32 entry_count = 4;       // 词库下词条总数
+  int32 relation_count = 5;     // 词库下关系总数
+  int32 unresolved_conflict_count = 6; // 未解决冲突数
+  string last_modified_at = 7;
+}
+
+// DashboardSystemDictionary 工作台「系统词库」轻量卡片（PLATFORM/SYSTEM scope）。
+message DashboardSystemDictionary {
+  uint32 id = 1;
+  string name = 2;
+  string scope = 3;            // PLATFORM / SYSTEM
+  int32 entry_count = 4;
+  string last_modified_at = 7;
+}
+
+// DashboardActivity 工作台全局事件项（聚合 DictionaryChangeLog + 增强记录 + 冲突）。
+message DashboardActivity {
+  uint64 id = 1;
+  string type = 2;             // dictionary.published / dictionary.entry.created / conflict.detected / enhancement.recorded
+  string title = 3;             // 人友可读事件标题，如「发布了词库『客服话术』v1.3」
+  string summary = 4;          // 事件详细描述（词条文本/错误原因等）
+  uint32 actor_id = 5;          // 触发者 ID
+  string actor_name = 6;       // 触发者名称（如有）
+  string target_type = 7;       // dictionary / entry / relation / conflict
+  uint32 target_id = 8;        // 目标资源 ID
+  string target_label = 9;     // 目标名称（如词库名）
+  string scope = 10;           // PLATFORM / SYSTEM / TENANT（用于决定是否跨租户可见）
+  string created_at = 11;
+}
+
+// DashboardHealthSummary 工作台健康度聚合（覆盖当前租户 + PLATFORM scope 词库）。
+message DashboardHealthSummary {
+  int32 total_dictionaries = 1;
+  int32 total_entries = 2;
+  int32 enabled_entries = 3;
+  int32 total_relations = 4;
+  int32 unresolved_conflicts = 5;
+  double hit_rate = 6;                  // 近 7 天识别命中词条比例（0~1）
+  double avg_recognition_confidence = 7;// 近 7 天识别置信度均值（0~1）
+  int32 coverage_dictionary_count = 8;  // 覆盖识别的词库数（hit_rate > 0）
+  int32 total_dictionary_count = 9;    // 总词库数
+}
+
+// DashboardOverview 工作台总览响应。
+message DashboardOverview {
+  repeated DashboardMyDictionary my_dictionaries = 1;       // scope=TENANT 的可见词库
+  repeated DashboardSystemDictionary system_dictionaries = 2; // scope=PLATFORM/SYSTEM 可见词库
+  DashboardHealthSummary health = 3;
+  repeated DashboardActivity recent_activities = 4;          // 近 5 条全局事件
+}
+
+message GetDashboardOverviewRequest {
+  string activities_limit = 1; // 可选："5"/"10"/"20"，默认 5
+}
+
+message GetDashboardOverviewResponse {
+  DashboardOverview overview = 1;
+}
+
+// VocabularyHealthDetail 词库健康度详细指标。
+message VocabularyHealthDetail {
+  uint32 dictionary_id = 1;
+  string dictionary_name = 2;
+  int32 entry_count = 3;
+  int32 relation_count = 4;
+  double hit_rate = 5;
+  double avg_recognition_confidence = 6;
+  int32 sample_count = 7; // 计算所用的增强记录样本数
+}
+
+message GetVocabularyHealthRequest {
+  string dictionary_scope = 1; // 可选："ALL"/"PLATFORM"/"TENANT"，默认 ALL
+  int32 recent_days = 2;       // 近 N 天的增强记录，默认 7
+}
+
+message GetVocabularyHealthResponse {
+  repeated VocabularyHealthDetail details = 1;
 }

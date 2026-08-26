@@ -3063,6 +3063,756 @@ func (x *ListRelationsByDictionaryResponse) GetNextPageToken() string {
 	return ""
 }
 
+// DashboardMyDictionary 工作台「我的词库」轻量卡片（仅展示必要字段）。
+type DashboardMyDictionary struct {
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	Id                      uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                    string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Scope                   string                 `protobuf:"bytes,3,opt,name=scope,proto3" json:"scope,omitempty"`                                                                       // TENANT
+	EntryCount              int32                  `protobuf:"varint,4,opt,name=entry_count,json=entryCount,proto3" json:"entry_count,omitempty"`                                          // 词库下词条总数
+	RelationCount           int32                  `protobuf:"varint,5,opt,name=relation_count,json=relationCount,proto3" json:"relation_count,omitempty"`                                 // 词库下关系总数
+	UnresolvedConflictCount int32                  `protobuf:"varint,6,opt,name=unresolved_conflict_count,json=unresolvedConflictCount,proto3" json:"unresolved_conflict_count,omitempty"` // 未解决冲突数
+	LastModifiedAt          string                 `protobuf:"bytes,7,opt,name=last_modified_at,json=lastModifiedAt,proto3" json:"last_modified_at,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *DashboardMyDictionary) Reset() {
+	*x = DashboardMyDictionary{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DashboardMyDictionary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DashboardMyDictionary) ProtoMessage() {}
+
+func (x *DashboardMyDictionary) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DashboardMyDictionary.ProtoReflect.Descriptor instead.
+func (*DashboardMyDictionary) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *DashboardMyDictionary) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DashboardMyDictionary) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DashboardMyDictionary) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+func (x *DashboardMyDictionary) GetEntryCount() int32 {
+	if x != nil {
+		return x.EntryCount
+	}
+	return 0
+}
+
+func (x *DashboardMyDictionary) GetRelationCount() int32 {
+	if x != nil {
+		return x.RelationCount
+	}
+	return 0
+}
+
+func (x *DashboardMyDictionary) GetUnresolvedConflictCount() int32 {
+	if x != nil {
+		return x.UnresolvedConflictCount
+	}
+	return 0
+}
+
+func (x *DashboardMyDictionary) GetLastModifiedAt() string {
+	if x != nil {
+		return x.LastModifiedAt
+	}
+	return ""
+}
+
+// DashboardSystemDictionary 工作台「系统词库」轻量卡片（PLATFORM/SYSTEM scope）。
+type DashboardSystemDictionary struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Scope          string                 `protobuf:"bytes,3,opt,name=scope,proto3" json:"scope,omitempty"` // PLATFORM / SYSTEM
+	EntryCount     int32                  `protobuf:"varint,4,opt,name=entry_count,json=entryCount,proto3" json:"entry_count,omitempty"`
+	LastModifiedAt string                 `protobuf:"bytes,7,opt,name=last_modified_at,json=lastModifiedAt,proto3" json:"last_modified_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DashboardSystemDictionary) Reset() {
+	*x = DashboardSystemDictionary{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DashboardSystemDictionary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DashboardSystemDictionary) ProtoMessage() {}
+
+func (x *DashboardSystemDictionary) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DashboardSystemDictionary.ProtoReflect.Descriptor instead.
+func (*DashboardSystemDictionary) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *DashboardSystemDictionary) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DashboardSystemDictionary) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DashboardSystemDictionary) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+func (x *DashboardSystemDictionary) GetEntryCount() int32 {
+	if x != nil {
+		return x.EntryCount
+	}
+	return 0
+}
+
+func (x *DashboardSystemDictionary) GetLastModifiedAt() string {
+	if x != nil {
+		return x.LastModifiedAt
+	}
+	return ""
+}
+
+// DashboardActivity 工作台全局事件项（聚合 DictionaryChangeLog + 增强记录 + 冲突）。
+type DashboardActivity struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`                                  // dictionary.published / dictionary.entry.created / conflict.detected / enhancement.recorded
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                                // 人友可读事件标题，如「发布了词库『客服话术』v1.3」
+	Summary       string                 `protobuf:"bytes,4,opt,name=summary,proto3" json:"summary,omitempty"`                            // 事件详细描述（词条文本/错误原因等）
+	ActorId       uint32                 `protobuf:"varint,5,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`            // 触发者 ID
+	ActorName     string                 `protobuf:"bytes,6,opt,name=actor_name,json=actorName,proto3" json:"actor_name,omitempty"`       // 触发者名称（如有）
+	TargetType    string                 `protobuf:"bytes,7,opt,name=target_type,json=targetType,proto3" json:"target_type,omitempty"`    // dictionary / entry / relation / conflict
+	TargetId      uint32                 `protobuf:"varint,8,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`         // 目标资源 ID
+	TargetLabel   string                 `protobuf:"bytes,9,opt,name=target_label,json=targetLabel,proto3" json:"target_label,omitempty"` // 目标名称（如词库名）
+	Scope         string                 `protobuf:"bytes,10,opt,name=scope,proto3" json:"scope,omitempty"`                               // PLATFORM / SYSTEM / TENANT（用于决定是否跨租户可见）
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DashboardActivity) Reset() {
+	*x = DashboardActivity{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DashboardActivity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DashboardActivity) ProtoMessage() {}
+
+func (x *DashboardActivity) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DashboardActivity.ProtoReflect.Descriptor instead.
+func (*DashboardActivity) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *DashboardActivity) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DashboardActivity) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetSummary() string {
+	if x != nil {
+		return x.Summary
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetActorId() uint32 {
+	if x != nil {
+		return x.ActorId
+	}
+	return 0
+}
+
+func (x *DashboardActivity) GetActorName() string {
+	if x != nil {
+		return x.ActorName
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetTargetType() string {
+	if x != nil {
+		return x.TargetType
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetTargetId() uint32 {
+	if x != nil {
+		return x.TargetId
+	}
+	return 0
+}
+
+func (x *DashboardActivity) GetTargetLabel() string {
+	if x != nil {
+		return x.TargetLabel
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+func (x *DashboardActivity) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+// DashboardHealthSummary 工作台健康度聚合（覆盖当前租户 + PLATFORM scope 词库）。
+type DashboardHealthSummary struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	TotalDictionaries        int32                  `protobuf:"varint,1,opt,name=total_dictionaries,json=totalDictionaries,proto3" json:"total_dictionaries,omitempty"`
+	TotalEntries             int32                  `protobuf:"varint,2,opt,name=total_entries,json=totalEntries,proto3" json:"total_entries,omitempty"`
+	EnabledEntries           int32                  `protobuf:"varint,3,opt,name=enabled_entries,json=enabledEntries,proto3" json:"enabled_entries,omitempty"`
+	TotalRelations           int32                  `protobuf:"varint,4,opt,name=total_relations,json=totalRelations,proto3" json:"total_relations,omitempty"`
+	UnresolvedConflicts      int32                  `protobuf:"varint,5,opt,name=unresolved_conflicts,json=unresolvedConflicts,proto3" json:"unresolved_conflicts,omitempty"`
+	HitRate                  float64                `protobuf:"fixed64,6,opt,name=hit_rate,json=hitRate,proto3" json:"hit_rate,omitempty"`                                                      // 近 7 天识别命中词条比例（0~1）
+	AvgRecognitionConfidence float64                `protobuf:"fixed64,7,opt,name=avg_recognition_confidence,json=avgRecognitionConfidence,proto3" json:"avg_recognition_confidence,omitempty"` // 近 7 天识别置信度均值（0~1）
+	CoverageDictionaryCount  int32                  `protobuf:"varint,8,opt,name=coverage_dictionary_count,json=coverageDictionaryCount,proto3" json:"coverage_dictionary_count,omitempty"`     // 覆盖识别的词库数（hit_rate > 0）
+	TotalDictionaryCount     int32                  `protobuf:"varint,9,opt,name=total_dictionary_count,json=totalDictionaryCount,proto3" json:"total_dictionary_count,omitempty"`              // 总词库数
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *DashboardHealthSummary) Reset() {
+	*x = DashboardHealthSummary{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DashboardHealthSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DashboardHealthSummary) ProtoMessage() {}
+
+func (x *DashboardHealthSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DashboardHealthSummary.ProtoReflect.Descriptor instead.
+func (*DashboardHealthSummary) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *DashboardHealthSummary) GetTotalDictionaries() int32 {
+	if x != nil {
+		return x.TotalDictionaries
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetTotalEntries() int32 {
+	if x != nil {
+		return x.TotalEntries
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetEnabledEntries() int32 {
+	if x != nil {
+		return x.EnabledEntries
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetTotalRelations() int32 {
+	if x != nil {
+		return x.TotalRelations
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetUnresolvedConflicts() int32 {
+	if x != nil {
+		return x.UnresolvedConflicts
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetHitRate() float64 {
+	if x != nil {
+		return x.HitRate
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetAvgRecognitionConfidence() float64 {
+	if x != nil {
+		return x.AvgRecognitionConfidence
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetCoverageDictionaryCount() int32 {
+	if x != nil {
+		return x.CoverageDictionaryCount
+	}
+	return 0
+}
+
+func (x *DashboardHealthSummary) GetTotalDictionaryCount() int32 {
+	if x != nil {
+		return x.TotalDictionaryCount
+	}
+	return 0
+}
+
+// DashboardOverview 工作台总览响应。
+type DashboardOverview struct {
+	state              protoimpl.MessageState       `protogen:"open.v1"`
+	MyDictionaries     []*DashboardMyDictionary     `protobuf:"bytes,1,rep,name=my_dictionaries,json=myDictionaries,proto3" json:"my_dictionaries,omitempty"`             // scope=TENANT 的可见词库
+	SystemDictionaries []*DashboardSystemDictionary `protobuf:"bytes,2,rep,name=system_dictionaries,json=systemDictionaries,proto3" json:"system_dictionaries,omitempty"` // scope=PLATFORM/SYSTEM 可见词库
+	Health             *DashboardHealthSummary      `protobuf:"bytes,3,opt,name=health,proto3" json:"health,omitempty"`
+	RecentActivities   []*DashboardActivity         `protobuf:"bytes,4,rep,name=recent_activities,json=recentActivities,proto3" json:"recent_activities,omitempty"` // 近 5 条全局事件
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *DashboardOverview) Reset() {
+	*x = DashboardOverview{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DashboardOverview) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DashboardOverview) ProtoMessage() {}
+
+func (x *DashboardOverview) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DashboardOverview.ProtoReflect.Descriptor instead.
+func (*DashboardOverview) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *DashboardOverview) GetMyDictionaries() []*DashboardMyDictionary {
+	if x != nil {
+		return x.MyDictionaries
+	}
+	return nil
+}
+
+func (x *DashboardOverview) GetSystemDictionaries() []*DashboardSystemDictionary {
+	if x != nil {
+		return x.SystemDictionaries
+	}
+	return nil
+}
+
+func (x *DashboardOverview) GetHealth() *DashboardHealthSummary {
+	if x != nil {
+		return x.Health
+	}
+	return nil
+}
+
+func (x *DashboardOverview) GetRecentActivities() []*DashboardActivity {
+	if x != nil {
+		return x.RecentActivities
+	}
+	return nil
+}
+
+type GetDashboardOverviewRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ActivitiesLimit string                 `protobuf:"bytes,1,opt,name=activities_limit,json=activitiesLimit,proto3" json:"activities_limit,omitempty"` // 可选："5"/"10"/"20"，默认 5
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetDashboardOverviewRequest) Reset() {
+	*x = GetDashboardOverviewRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDashboardOverviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDashboardOverviewRequest) ProtoMessage() {}
+
+func (x *GetDashboardOverviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDashboardOverviewRequest.ProtoReflect.Descriptor instead.
+func (*GetDashboardOverviewRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *GetDashboardOverviewRequest) GetActivitiesLimit() string {
+	if x != nil {
+		return x.ActivitiesLimit
+	}
+	return ""
+}
+
+type GetDashboardOverviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Overview      *DashboardOverview     `protobuf:"bytes,1,opt,name=overview,proto3" json:"overview,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDashboardOverviewResponse) Reset() {
+	*x = GetDashboardOverviewResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDashboardOverviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDashboardOverviewResponse) ProtoMessage() {}
+
+func (x *GetDashboardOverviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDashboardOverviewResponse.ProtoReflect.Descriptor instead.
+func (*GetDashboardOverviewResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *GetDashboardOverviewResponse) GetOverview() *DashboardOverview {
+	if x != nil {
+		return x.Overview
+	}
+	return nil
+}
+
+// VocabularyHealthDetail 词库健康度详细指标。
+type VocabularyHealthDetail struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryId             uint32                 `protobuf:"varint,1,opt,name=dictionary_id,json=dictionaryId,proto3" json:"dictionary_id,omitempty"`
+	DictionaryName           string                 `protobuf:"bytes,2,opt,name=dictionary_name,json=dictionaryName,proto3" json:"dictionary_name,omitempty"`
+	EntryCount               int32                  `protobuf:"varint,3,opt,name=entry_count,json=entryCount,proto3" json:"entry_count,omitempty"`
+	RelationCount            int32                  `protobuf:"varint,4,opt,name=relation_count,json=relationCount,proto3" json:"relation_count,omitempty"`
+	HitRate                  float64                `protobuf:"fixed64,5,opt,name=hit_rate,json=hitRate,proto3" json:"hit_rate,omitempty"`
+	AvgRecognitionConfidence float64                `protobuf:"fixed64,6,opt,name=avg_recognition_confidence,json=avgRecognitionConfidence,proto3" json:"avg_recognition_confidence,omitempty"`
+	SampleCount              int32                  `protobuf:"varint,7,opt,name=sample_count,json=sampleCount,proto3" json:"sample_count,omitempty"` // 计算所用的增强记录样本数
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *VocabularyHealthDetail) Reset() {
+	*x = VocabularyHealthDetail{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VocabularyHealthDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VocabularyHealthDetail) ProtoMessage() {}
+
+func (x *VocabularyHealthDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VocabularyHealthDetail.ProtoReflect.Descriptor instead.
+func (*VocabularyHealthDetail) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *VocabularyHealthDetail) GetDictionaryId() uint32 {
+	if x != nil {
+		return x.DictionaryId
+	}
+	return 0
+}
+
+func (x *VocabularyHealthDetail) GetDictionaryName() string {
+	if x != nil {
+		return x.DictionaryName
+	}
+	return ""
+}
+
+func (x *VocabularyHealthDetail) GetEntryCount() int32 {
+	if x != nil {
+		return x.EntryCount
+	}
+	return 0
+}
+
+func (x *VocabularyHealthDetail) GetRelationCount() int32 {
+	if x != nil {
+		return x.RelationCount
+	}
+	return 0
+}
+
+func (x *VocabularyHealthDetail) GetHitRate() float64 {
+	if x != nil {
+		return x.HitRate
+	}
+	return 0
+}
+
+func (x *VocabularyHealthDetail) GetAvgRecognitionConfidence() float64 {
+	if x != nil {
+		return x.AvgRecognitionConfidence
+	}
+	return 0
+}
+
+func (x *VocabularyHealthDetail) GetSampleCount() int32 {
+	if x != nil {
+		return x.SampleCount
+	}
+	return 0
+}
+
+type GetVocabularyHealthRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	DictionaryScope string                 `protobuf:"bytes,1,opt,name=dictionary_scope,json=dictionaryScope,proto3" json:"dictionary_scope,omitempty"` // 可选："ALL"/"PLATFORM"/"TENANT"，默认 ALL
+	RecentDays      int32                  `protobuf:"varint,2,opt,name=recent_days,json=recentDays,proto3" json:"recent_days,omitempty"`               // 近 N 天的增强记录，默认 7
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetVocabularyHealthRequest) Reset() {
+	*x = GetVocabularyHealthRequest{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetVocabularyHealthRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetVocabularyHealthRequest) ProtoMessage() {}
+
+func (x *GetVocabularyHealthRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetVocabularyHealthRequest.ProtoReflect.Descriptor instead.
+func (*GetVocabularyHealthRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *GetVocabularyHealthRequest) GetDictionaryScope() string {
+	if x != nil {
+		return x.DictionaryScope
+	}
+	return ""
+}
+
+func (x *GetVocabularyHealthRequest) GetRecentDays() int32 {
+	if x != nil {
+		return x.RecentDays
+	}
+	return 0
+}
+
+type GetVocabularyHealthResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Details       []*VocabularyHealthDetail `protobuf:"bytes,1,rep,name=details,proto3" json:"details,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetVocabularyHealthResponse) Reset() {
+	*x = GetVocabularyHealthResponse{}
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetVocabularyHealthResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetVocabularyHealthResponse) ProtoMessage() {}
+
+func (x *GetVocabularyHealthResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_dictionary_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetVocabularyHealthResponse.ProtoReflect.Descriptor instead.
+func (*GetVocabularyHealthResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_dictionary_proto_rawDescGZIP(), []int{53}
+}
+
+func (x *GetVocabularyHealthResponse) GetDetails() []*VocabularyHealthDetail {
+	if x != nil {
+		return x.Details
+	}
+	return nil
+}
+
 var File_evie_service_v1_dictionary_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_dictionary_proto_rawDesc = "" +
@@ -3325,7 +4075,73 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"!ListRelationsByDictionaryResponse\x12A\n" +
 	"\trelations\x18\x01 \x03(\v2#.evie.service.v1.DictionaryRelationR\trelations\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12&\n" +
-	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken2\xf2\"\n" +
+	"\x0fnext_page_token\x18\x03 \x01(\tR\rnextPageToken\"\xff\x01\n" +
+	"\x15DashboardMyDictionary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\x12\x1f\n" +
+	"\ventry_count\x18\x04 \x01(\x05R\n" +
+	"entryCount\x12%\n" +
+	"\x0erelation_count\x18\x05 \x01(\x05R\rrelationCount\x12:\n" +
+	"\x19unresolved_conflict_count\x18\x06 \x01(\x05R\x17unresolvedConflictCount\x12(\n" +
+	"\x10last_modified_at\x18\a \x01(\tR\x0elastModifiedAt\"\xa0\x01\n" +
+	"\x19DashboardSystemDictionary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
+	"\x05scope\x18\x03 \x01(\tR\x05scope\x12\x1f\n" +
+	"\ventry_count\x18\x04 \x01(\x05R\n" +
+	"entryCount\x12(\n" +
+	"\x10last_modified_at\x18\a \x01(\tR\x0elastModifiedAt\"\xb7\x02\n" +
+	"\x11DashboardActivity\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x18\n" +
+	"\asummary\x18\x04 \x01(\tR\asummary\x12\x19\n" +
+	"\bactor_id\x18\x05 \x01(\rR\aactorId\x12\x1d\n" +
+	"\n" +
+	"actor_name\x18\x06 \x01(\tR\tactorName\x12\x1f\n" +
+	"\vtarget_type\x18\a \x01(\tR\n" +
+	"targetType\x12\x1b\n" +
+	"\ttarget_id\x18\b \x01(\rR\btargetId\x12!\n" +
+	"\ftarget_label\x18\t \x01(\tR\vtargetLabel\x12\x14\n" +
+	"\x05scope\x18\n" +
+	" \x01(\tR\x05scope\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\"\xbc\x03\n" +
+	"\x16DashboardHealthSummary\x12-\n" +
+	"\x12total_dictionaries\x18\x01 \x01(\x05R\x11totalDictionaries\x12#\n" +
+	"\rtotal_entries\x18\x02 \x01(\x05R\ftotalEntries\x12'\n" +
+	"\x0fenabled_entries\x18\x03 \x01(\x05R\x0eenabledEntries\x12'\n" +
+	"\x0ftotal_relations\x18\x04 \x01(\x05R\x0etotalRelations\x121\n" +
+	"\x14unresolved_conflicts\x18\x05 \x01(\x05R\x13unresolvedConflicts\x12\x19\n" +
+	"\bhit_rate\x18\x06 \x01(\x01R\ahitRate\x12<\n" +
+	"\x1aavg_recognition_confidence\x18\a \x01(\x01R\x18avgRecognitionConfidence\x12:\n" +
+	"\x19coverage_dictionary_count\x18\b \x01(\x05R\x17coverageDictionaryCount\x124\n" +
+	"\x16total_dictionary_count\x18\t \x01(\x05R\x14totalDictionaryCount\"\xd3\x02\n" +
+	"\x11DashboardOverview\x12O\n" +
+	"\x0fmy_dictionaries\x18\x01 \x03(\v2&.evie.service.v1.DashboardMyDictionaryR\x0emyDictionaries\x12[\n" +
+	"\x13system_dictionaries\x18\x02 \x03(\v2*.evie.service.v1.DashboardSystemDictionaryR\x12systemDictionaries\x12?\n" +
+	"\x06health\x18\x03 \x01(\v2'.evie.service.v1.DashboardHealthSummaryR\x06health\x12O\n" +
+	"\x11recent_activities\x18\x04 \x03(\v2\".evie.service.v1.DashboardActivityR\x10recentActivities\"H\n" +
+	"\x1bGetDashboardOverviewRequest\x12)\n" +
+	"\x10activities_limit\x18\x01 \x01(\tR\x0factivitiesLimit\"^\n" +
+	"\x1cGetDashboardOverviewResponse\x12>\n" +
+	"\boverview\x18\x01 \x01(\v2\".evie.service.v1.DashboardOverviewR\boverview\"\xaa\x02\n" +
+	"\x16VocabularyHealthDetail\x12#\n" +
+	"\rdictionary_id\x18\x01 \x01(\rR\fdictionaryId\x12'\n" +
+	"\x0fdictionary_name\x18\x02 \x01(\tR\x0edictionaryName\x12\x1f\n" +
+	"\ventry_count\x18\x03 \x01(\x05R\n" +
+	"entryCount\x12%\n" +
+	"\x0erelation_count\x18\x04 \x01(\x05R\rrelationCount\x12\x19\n" +
+	"\bhit_rate\x18\x05 \x01(\x01R\ahitRate\x12<\n" +
+	"\x1aavg_recognition_confidence\x18\x06 \x01(\x01R\x18avgRecognitionConfidence\x12!\n" +
+	"\fsample_count\x18\a \x01(\x05R\vsampleCount\"h\n" +
+	"\x1aGetVocabularyHealthRequest\x12)\n" +
+	"\x10dictionary_scope\x18\x01 \x01(\tR\x0fdictionaryScope\x12\x1f\n" +
+	"\vrecent_days\x18\x02 \x01(\x05R\n" +
+	"recentDays\"`\n" +
+	"\x1bGetVocabularyHealthResponse\x12A\n" +
+	"\adetails\x18\x01 \x03(\v2'.evie.service.v1.VocabularyHealthDetailR\adetails2\xfd%\n" +
 	"\x11DictionaryService\x12\xb1\x01\n" +
 	"\x10ListDictionaries\x12(.evie.service.v1.ListDictionariesRequest\x1a).evie.service.v1.ListDictionariesResponse\"H\xbaG(\n" +
 	"\f词库中心\x12\x18分页查询词库列表\x82\xd3\xe4\x93\x02\x17\x12\x15/evie/v1/dictionaries\x12\x9c\x01\n" +
@@ -3377,7 +4193,11 @@ const file_evie_service_v1_dictionary_proto_rawDesc = "" +
 	"\x12GetDictionaryStats\x12*.evie.service.v1.GetDictionaryStatsRequest\x1a+.evie.service.v1.GetDictionaryStatsResponse\"^\xbaG(\n" +
 	"\f词库中心\x12\x18查询词库统计指标\x82\xd3\xe4\x93\x02-\x12+/evie/v1/dictionaries/{dictionary_id}:stats\x12\xe6\x01\n" +
 	"\x19ListRelationsByDictionary\x121.evie.service.v1.ListRelationsByDictionaryRequest\x1a2.evie.service.v1.ListRelationsByDictionaryResponse\"b\xbaG(\n" +
-	"\f词库中心\x12\x18词库级别关系列表\x82\xd3\xe4\x93\x021\x12//evie/v1/dictionaries/{dictionary_id}/relationsB\xac\x01\n" +
+	"\f词库中心\x12\x18词库级别关系列表\x82\xd3\xe4\x93\x021\x12//evie/v1/dictionaries/{dictionary_id}/relations\x12\xc3\x01\n" +
+	"\x14GetDashboardOverview\x12,.evie.service.v1.GetDashboardOverviewRequest\x1a-.evie.service.v1.GetDashboardOverviewResponse\"N\xbaG1\n" +
+	"\f词库中心\x12!查询词库中心工作台总览\x82\xd3\xe4\x93\x02\x14\x12\x12/evie/v1/dashboard\x12\xc2\x01\n" +
+	"\x13GetVocabularyHealth\x12+.evie.service.v1.GetVocabularyHealthRequest\x1a,.evie.service.v1.GetVocabularyHealthResponse\"P\xbaG+\n" +
+	"\f词库中心\x12\x1b查询词库健康度指标\x82\xd3\xe4\x93\x02\x1c\x12\x1a/evie/v1/vocabulary-healthB\xac\x01\n" +
 	"\x13com.evie.service.v1B\x0fDictionaryProtoP\x01Z&backend-service/api/evie/service/v1;v1\xa2\x02\x03ESX\xaa\x02\x0fEvie.Service.V1\xca\x02\x0fEvie\\Service\\V1\xe2\x02\x1bEvie\\Service\\V1\\GPBMetadata\xea\x02\x11Evie::Service::V1b\x06proto3"
 
 var (
@@ -3392,7 +4212,7 @@ func file_evie_service_v1_dictionary_proto_rawDescGZIP() []byte {
 	return file_evie_service_v1_dictionary_proto_rawDescData
 }
 
-var file_evie_service_v1_dictionary_proto_msgTypes = make([]protoimpl.MessageInfo, 44)
+var file_evie_service_v1_dictionary_proto_msgTypes = make([]protoimpl.MessageInfo, 54)
 var file_evie_service_v1_dictionary_proto_goTypes = []any{
 	(*Dictionary)(nil),                        // 0: evie.service.v1.Dictionary
 	(*DictionaryEntry)(nil),                   // 1: evie.service.v1.DictionaryEntry
@@ -3438,6 +4258,16 @@ var file_evie_service_v1_dictionary_proto_goTypes = []any{
 	(*GetDictionaryStatsResponse)(nil),        // 41: evie.service.v1.GetDictionaryStatsResponse
 	(*ListRelationsByDictionaryRequest)(nil),  // 42: evie.service.v1.ListRelationsByDictionaryRequest
 	(*ListRelationsByDictionaryResponse)(nil), // 43: evie.service.v1.ListRelationsByDictionaryResponse
+	(*DashboardMyDictionary)(nil),             // 44: evie.service.v1.DashboardMyDictionary
+	(*DashboardSystemDictionary)(nil),         // 45: evie.service.v1.DashboardSystemDictionary
+	(*DashboardActivity)(nil),                 // 46: evie.service.v1.DashboardActivity
+	(*DashboardHealthSummary)(nil),            // 47: evie.service.v1.DashboardHealthSummary
+	(*DashboardOverview)(nil),                 // 48: evie.service.v1.DashboardOverview
+	(*GetDashboardOverviewRequest)(nil),       // 49: evie.service.v1.GetDashboardOverviewRequest
+	(*GetDashboardOverviewResponse)(nil),      // 50: evie.service.v1.GetDashboardOverviewResponse
+	(*VocabularyHealthDetail)(nil),            // 51: evie.service.v1.VocabularyHealthDetail
+	(*GetVocabularyHealthRequest)(nil),        // 52: evie.service.v1.GetVocabularyHealthRequest
+	(*GetVocabularyHealthResponse)(nil),       // 53: evie.service.v1.GetVocabularyHealthResponse
 }
 var file_evie_service_v1_dictionary_proto_depIdxs = []int32{
 	0,  // 0: evie.service.v1.ListDictionariesResponse.dictionaries:type_name -> evie.service.v1.Dictionary
@@ -3448,61 +4278,71 @@ var file_evie_service_v1_dictionary_proto_depIdxs = []int32{
 	36, // 5: evie.service.v1.ListConflictsResponse.conflicts:type_name -> evie.service.v1.DictionaryConflict
 	39, // 6: evie.service.v1.GetDictionaryStatsResponse.stats:type_name -> evie.service.v1.DictionaryStats
 	16, // 7: evie.service.v1.ListRelationsByDictionaryResponse.relations:type_name -> evie.service.v1.DictionaryRelation
-	2,  // 8: evie.service.v1.DictionaryService.ListDictionaries:input_type -> evie.service.v1.ListDictionariesRequest
-	4,  // 9: evie.service.v1.DictionaryService.GetDictionary:input_type -> evie.service.v1.GetDictionaryRequest
-	5,  // 10: evie.service.v1.DictionaryService.CreateDictionary:input_type -> evie.service.v1.CreateDictionaryRequest
-	6,  // 11: evie.service.v1.DictionaryService.UpdateDictionary:input_type -> evie.service.v1.UpdateDictionaryRequest
-	7,  // 12: evie.service.v1.DictionaryService.DeleteDictionary:input_type -> evie.service.v1.DeleteDictionaryRequest
-	9,  // 13: evie.service.v1.DictionaryService.ListEntries:input_type -> evie.service.v1.ListEntriesRequest
-	11, // 14: evie.service.v1.DictionaryService.GetEntry:input_type -> evie.service.v1.GetEntryRequest
-	12, // 15: evie.service.v1.DictionaryService.CreateEntry:input_type -> evie.service.v1.CreateEntryRequest
-	13, // 16: evie.service.v1.DictionaryService.UpdateEntry:input_type -> evie.service.v1.UpdateEntryRequest
-	14, // 17: evie.service.v1.DictionaryService.DeleteEntry:input_type -> evie.service.v1.DeleteEntryRequest
-	17, // 18: evie.service.v1.DictionaryService.ListRelations:input_type -> evie.service.v1.ListRelationsRequest
-	19, // 19: evie.service.v1.DictionaryService.GetRelation:input_type -> evie.service.v1.GetRelationRequest
-	20, // 20: evie.service.v1.DictionaryService.CreateRelation:input_type -> evie.service.v1.CreateRelationRequest
-	21, // 21: evie.service.v1.DictionaryService.UpdateRelation:input_type -> evie.service.v1.UpdateRelationRequest
-	22, // 22: evie.service.v1.DictionaryService.DeleteRelation:input_type -> evie.service.v1.DeleteRelationRequest
-	26, // 23: evie.service.v1.DictionaryService.ListCategories:input_type -> evie.service.v1.ListCategoriesRequest
-	28, // 24: evie.service.v1.DictionaryService.CreateCategory:input_type -> evie.service.v1.CreateCategoryRequest
-	29, // 25: evie.service.v1.DictionaryService.UpdateCategory:input_type -> evie.service.v1.UpdateCategoryRequest
-	30, // 26: evie.service.v1.DictionaryService.DeleteCategory:input_type -> evie.service.v1.DeleteCategoryRequest
-	32, // 27: evie.service.v1.DictionaryService.ListVersions:input_type -> evie.service.v1.ListVersionsRequest
-	34, // 28: evie.service.v1.DictionaryService.GetVersion:input_type -> evie.service.v1.GetVersionRequest
-	35, // 29: evie.service.v1.DictionaryService.PublishDictionary:input_type -> evie.service.v1.PublishDictionaryRequest
-	37, // 30: evie.service.v1.DictionaryService.ListConflicts:input_type -> evie.service.v1.ListConflictsRequest
-	40, // 31: evie.service.v1.DictionaryService.GetDictionaryStats:input_type -> evie.service.v1.GetDictionaryStatsRequest
-	42, // 32: evie.service.v1.DictionaryService.ListRelationsByDictionary:input_type -> evie.service.v1.ListRelationsByDictionaryRequest
-	3,  // 33: evie.service.v1.DictionaryService.ListDictionaries:output_type -> evie.service.v1.ListDictionariesResponse
-	0,  // 34: evie.service.v1.DictionaryService.GetDictionary:output_type -> evie.service.v1.Dictionary
-	0,  // 35: evie.service.v1.DictionaryService.CreateDictionary:output_type -> evie.service.v1.Dictionary
-	0,  // 36: evie.service.v1.DictionaryService.UpdateDictionary:output_type -> evie.service.v1.Dictionary
-	8,  // 37: evie.service.v1.DictionaryService.DeleteDictionary:output_type -> evie.service.v1.DeleteDictionaryResponse
-	10, // 38: evie.service.v1.DictionaryService.ListEntries:output_type -> evie.service.v1.ListEntriesResponse
-	1,  // 39: evie.service.v1.DictionaryService.GetEntry:output_type -> evie.service.v1.DictionaryEntry
-	1,  // 40: evie.service.v1.DictionaryService.CreateEntry:output_type -> evie.service.v1.DictionaryEntry
-	1,  // 41: evie.service.v1.DictionaryService.UpdateEntry:output_type -> evie.service.v1.DictionaryEntry
-	15, // 42: evie.service.v1.DictionaryService.DeleteEntry:output_type -> evie.service.v1.DeleteEntryResponse
-	18, // 43: evie.service.v1.DictionaryService.ListRelations:output_type -> evie.service.v1.ListRelationsResponse
-	16, // 44: evie.service.v1.DictionaryService.GetRelation:output_type -> evie.service.v1.DictionaryRelation
-	16, // 45: evie.service.v1.DictionaryService.CreateRelation:output_type -> evie.service.v1.DictionaryRelation
-	16, // 46: evie.service.v1.DictionaryService.UpdateRelation:output_type -> evie.service.v1.DictionaryRelation
-	23, // 47: evie.service.v1.DictionaryService.DeleteRelation:output_type -> evie.service.v1.DeleteRelationResponse
-	27, // 48: evie.service.v1.DictionaryService.ListCategories:output_type -> evie.service.v1.ListCategoriesResponse
-	24, // 49: evie.service.v1.DictionaryService.CreateCategory:output_type -> evie.service.v1.DictionaryCategory
-	24, // 50: evie.service.v1.DictionaryService.UpdateCategory:output_type -> evie.service.v1.DictionaryCategory
-	31, // 51: evie.service.v1.DictionaryService.DeleteCategory:output_type -> evie.service.v1.DeleteCategoryResponse
-	33, // 52: evie.service.v1.DictionaryService.ListVersions:output_type -> evie.service.v1.ListVersionsResponse
-	25, // 53: evie.service.v1.DictionaryService.GetVersion:output_type -> evie.service.v1.DictionaryVersion
-	25, // 54: evie.service.v1.DictionaryService.PublishDictionary:output_type -> evie.service.v1.DictionaryVersion
-	38, // 55: evie.service.v1.DictionaryService.ListConflicts:output_type -> evie.service.v1.ListConflictsResponse
-	41, // 56: evie.service.v1.DictionaryService.GetDictionaryStats:output_type -> evie.service.v1.GetDictionaryStatsResponse
-	43, // 57: evie.service.v1.DictionaryService.ListRelationsByDictionary:output_type -> evie.service.v1.ListRelationsByDictionaryResponse
-	33, // [33:58] is the sub-list for method output_type
-	8,  // [8:33] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	44, // 8: evie.service.v1.DashboardOverview.my_dictionaries:type_name -> evie.service.v1.DashboardMyDictionary
+	45, // 9: evie.service.v1.DashboardOverview.system_dictionaries:type_name -> evie.service.v1.DashboardSystemDictionary
+	47, // 10: evie.service.v1.DashboardOverview.health:type_name -> evie.service.v1.DashboardHealthSummary
+	46, // 11: evie.service.v1.DashboardOverview.recent_activities:type_name -> evie.service.v1.DashboardActivity
+	48, // 12: evie.service.v1.GetDashboardOverviewResponse.overview:type_name -> evie.service.v1.DashboardOverview
+	51, // 13: evie.service.v1.GetVocabularyHealthResponse.details:type_name -> evie.service.v1.VocabularyHealthDetail
+	2,  // 14: evie.service.v1.DictionaryService.ListDictionaries:input_type -> evie.service.v1.ListDictionariesRequest
+	4,  // 15: evie.service.v1.DictionaryService.GetDictionary:input_type -> evie.service.v1.GetDictionaryRequest
+	5,  // 16: evie.service.v1.DictionaryService.CreateDictionary:input_type -> evie.service.v1.CreateDictionaryRequest
+	6,  // 17: evie.service.v1.DictionaryService.UpdateDictionary:input_type -> evie.service.v1.UpdateDictionaryRequest
+	7,  // 18: evie.service.v1.DictionaryService.DeleteDictionary:input_type -> evie.service.v1.DeleteDictionaryRequest
+	9,  // 19: evie.service.v1.DictionaryService.ListEntries:input_type -> evie.service.v1.ListEntriesRequest
+	11, // 20: evie.service.v1.DictionaryService.GetEntry:input_type -> evie.service.v1.GetEntryRequest
+	12, // 21: evie.service.v1.DictionaryService.CreateEntry:input_type -> evie.service.v1.CreateEntryRequest
+	13, // 22: evie.service.v1.DictionaryService.UpdateEntry:input_type -> evie.service.v1.UpdateEntryRequest
+	14, // 23: evie.service.v1.DictionaryService.DeleteEntry:input_type -> evie.service.v1.DeleteEntryRequest
+	17, // 24: evie.service.v1.DictionaryService.ListRelations:input_type -> evie.service.v1.ListRelationsRequest
+	19, // 25: evie.service.v1.DictionaryService.GetRelation:input_type -> evie.service.v1.GetRelationRequest
+	20, // 26: evie.service.v1.DictionaryService.CreateRelation:input_type -> evie.service.v1.CreateRelationRequest
+	21, // 27: evie.service.v1.DictionaryService.UpdateRelation:input_type -> evie.service.v1.UpdateRelationRequest
+	22, // 28: evie.service.v1.DictionaryService.DeleteRelation:input_type -> evie.service.v1.DeleteRelationRequest
+	26, // 29: evie.service.v1.DictionaryService.ListCategories:input_type -> evie.service.v1.ListCategoriesRequest
+	28, // 30: evie.service.v1.DictionaryService.CreateCategory:input_type -> evie.service.v1.CreateCategoryRequest
+	29, // 31: evie.service.v1.DictionaryService.UpdateCategory:input_type -> evie.service.v1.UpdateCategoryRequest
+	30, // 32: evie.service.v1.DictionaryService.DeleteCategory:input_type -> evie.service.v1.DeleteCategoryRequest
+	32, // 33: evie.service.v1.DictionaryService.ListVersions:input_type -> evie.service.v1.ListVersionsRequest
+	34, // 34: evie.service.v1.DictionaryService.GetVersion:input_type -> evie.service.v1.GetVersionRequest
+	35, // 35: evie.service.v1.DictionaryService.PublishDictionary:input_type -> evie.service.v1.PublishDictionaryRequest
+	37, // 36: evie.service.v1.DictionaryService.ListConflicts:input_type -> evie.service.v1.ListConflictsRequest
+	40, // 37: evie.service.v1.DictionaryService.GetDictionaryStats:input_type -> evie.service.v1.GetDictionaryStatsRequest
+	42, // 38: evie.service.v1.DictionaryService.ListRelationsByDictionary:input_type -> evie.service.v1.ListRelationsByDictionaryRequest
+	49, // 39: evie.service.v1.DictionaryService.GetDashboardOverview:input_type -> evie.service.v1.GetDashboardOverviewRequest
+	52, // 40: evie.service.v1.DictionaryService.GetVocabularyHealth:input_type -> evie.service.v1.GetVocabularyHealthRequest
+	3,  // 41: evie.service.v1.DictionaryService.ListDictionaries:output_type -> evie.service.v1.ListDictionariesResponse
+	0,  // 42: evie.service.v1.DictionaryService.GetDictionary:output_type -> evie.service.v1.Dictionary
+	0,  // 43: evie.service.v1.DictionaryService.CreateDictionary:output_type -> evie.service.v1.Dictionary
+	0,  // 44: evie.service.v1.DictionaryService.UpdateDictionary:output_type -> evie.service.v1.Dictionary
+	8,  // 45: evie.service.v1.DictionaryService.DeleteDictionary:output_type -> evie.service.v1.DeleteDictionaryResponse
+	10, // 46: evie.service.v1.DictionaryService.ListEntries:output_type -> evie.service.v1.ListEntriesResponse
+	1,  // 47: evie.service.v1.DictionaryService.GetEntry:output_type -> evie.service.v1.DictionaryEntry
+	1,  // 48: evie.service.v1.DictionaryService.CreateEntry:output_type -> evie.service.v1.DictionaryEntry
+	1,  // 49: evie.service.v1.DictionaryService.UpdateEntry:output_type -> evie.service.v1.DictionaryEntry
+	15, // 50: evie.service.v1.DictionaryService.DeleteEntry:output_type -> evie.service.v1.DeleteEntryResponse
+	18, // 51: evie.service.v1.DictionaryService.ListRelations:output_type -> evie.service.v1.ListRelationsResponse
+	16, // 52: evie.service.v1.DictionaryService.GetRelation:output_type -> evie.service.v1.DictionaryRelation
+	16, // 53: evie.service.v1.DictionaryService.CreateRelation:output_type -> evie.service.v1.DictionaryRelation
+	16, // 54: evie.service.v1.DictionaryService.UpdateRelation:output_type -> evie.service.v1.DictionaryRelation
+	23, // 55: evie.service.v1.DictionaryService.DeleteRelation:output_type -> evie.service.v1.DeleteRelationResponse
+	27, // 56: evie.service.v1.DictionaryService.ListCategories:output_type -> evie.service.v1.ListCategoriesResponse
+	24, // 57: evie.service.v1.DictionaryService.CreateCategory:output_type -> evie.service.v1.DictionaryCategory
+	24, // 58: evie.service.v1.DictionaryService.UpdateCategory:output_type -> evie.service.v1.DictionaryCategory
+	31, // 59: evie.service.v1.DictionaryService.DeleteCategory:output_type -> evie.service.v1.DeleteCategoryResponse
+	33, // 60: evie.service.v1.DictionaryService.ListVersions:output_type -> evie.service.v1.ListVersionsResponse
+	25, // 61: evie.service.v1.DictionaryService.GetVersion:output_type -> evie.service.v1.DictionaryVersion
+	25, // 62: evie.service.v1.DictionaryService.PublishDictionary:output_type -> evie.service.v1.DictionaryVersion
+	38, // 63: evie.service.v1.DictionaryService.ListConflicts:output_type -> evie.service.v1.ListConflictsResponse
+	41, // 64: evie.service.v1.DictionaryService.GetDictionaryStats:output_type -> evie.service.v1.GetDictionaryStatsResponse
+	43, // 65: evie.service.v1.DictionaryService.ListRelationsByDictionary:output_type -> evie.service.v1.ListRelationsByDictionaryResponse
+	50, // 66: evie.service.v1.DictionaryService.GetDashboardOverview:output_type -> evie.service.v1.GetDashboardOverviewResponse
+	53, // 67: evie.service.v1.DictionaryService.GetVocabularyHealth:output_type -> evie.service.v1.GetVocabularyHealthResponse
+	41, // [41:68] is the sub-list for method output_type
+	14, // [14:41] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_evie_service_v1_dictionary_proto_init() }
@@ -3516,7 +4356,7 @@ func file_evie_service_v1_dictionary_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_evie_service_v1_dictionary_proto_rawDesc), len(file_evie_service_v1_dictionary_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   44,
+			NumMessages:   54,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

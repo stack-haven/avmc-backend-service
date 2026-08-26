@@ -5130,3 +5130,1304 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ListRelationsByDictionaryResponseValidationError{}
+
+// Validate checks the field values on DashboardMyDictionary with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DashboardMyDictionary) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DashboardMyDictionary with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DashboardMyDictionaryMultiError, or nil if none found.
+func (m *DashboardMyDictionary) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DashboardMyDictionary) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Scope
+
+	// no validation rules for EntryCount
+
+	// no validation rules for RelationCount
+
+	// no validation rules for UnresolvedConflictCount
+
+	// no validation rules for LastModifiedAt
+
+	if len(errors) > 0 {
+		return DashboardMyDictionaryMultiError(errors)
+	}
+
+	return nil
+}
+
+// DashboardMyDictionaryMultiError is an error wrapping multiple validation
+// errors returned by DashboardMyDictionary.ValidateAll() if the designated
+// constraints aren't met.
+type DashboardMyDictionaryMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DashboardMyDictionaryMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DashboardMyDictionaryMultiError) AllErrors() []error { return m }
+
+// DashboardMyDictionaryValidationError is the validation error returned by
+// DashboardMyDictionary.Validate if the designated constraints aren't met.
+type DashboardMyDictionaryValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DashboardMyDictionaryValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DashboardMyDictionaryValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DashboardMyDictionaryValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DashboardMyDictionaryValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DashboardMyDictionaryValidationError) ErrorName() string {
+	return "DashboardMyDictionaryValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DashboardMyDictionaryValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDashboardMyDictionary.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DashboardMyDictionaryValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DashboardMyDictionaryValidationError{}
+
+// Validate checks the field values on DashboardSystemDictionary with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DashboardSystemDictionary) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DashboardSystemDictionary with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DashboardSystemDictionaryMultiError, or nil if none found.
+func (m *DashboardSystemDictionary) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DashboardSystemDictionary) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Scope
+
+	// no validation rules for EntryCount
+
+	// no validation rules for LastModifiedAt
+
+	if len(errors) > 0 {
+		return DashboardSystemDictionaryMultiError(errors)
+	}
+
+	return nil
+}
+
+// DashboardSystemDictionaryMultiError is an error wrapping multiple validation
+// errors returned by DashboardSystemDictionary.ValidateAll() if the
+// designated constraints aren't met.
+type DashboardSystemDictionaryMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DashboardSystemDictionaryMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DashboardSystemDictionaryMultiError) AllErrors() []error { return m }
+
+// DashboardSystemDictionaryValidationError is the validation error returned by
+// DashboardSystemDictionary.Validate if the designated constraints aren't met.
+type DashboardSystemDictionaryValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DashboardSystemDictionaryValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DashboardSystemDictionaryValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DashboardSystemDictionaryValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DashboardSystemDictionaryValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DashboardSystemDictionaryValidationError) ErrorName() string {
+	return "DashboardSystemDictionaryValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DashboardSystemDictionaryValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDashboardSystemDictionary.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DashboardSystemDictionaryValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DashboardSystemDictionaryValidationError{}
+
+// Validate checks the field values on DashboardActivity with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DashboardActivity) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DashboardActivity with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DashboardActivityMultiError, or nil if none found.
+func (m *DashboardActivity) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DashboardActivity) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Type
+
+	// no validation rules for Title
+
+	// no validation rules for Summary
+
+	// no validation rules for ActorId
+
+	// no validation rules for ActorName
+
+	// no validation rules for TargetType
+
+	// no validation rules for TargetId
+
+	// no validation rules for TargetLabel
+
+	// no validation rules for Scope
+
+	// no validation rules for CreatedAt
+
+	if len(errors) > 0 {
+		return DashboardActivityMultiError(errors)
+	}
+
+	return nil
+}
+
+// DashboardActivityMultiError is an error wrapping multiple validation errors
+// returned by DashboardActivity.ValidateAll() if the designated constraints
+// aren't met.
+type DashboardActivityMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DashboardActivityMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DashboardActivityMultiError) AllErrors() []error { return m }
+
+// DashboardActivityValidationError is the validation error returned by
+// DashboardActivity.Validate if the designated constraints aren't met.
+type DashboardActivityValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DashboardActivityValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DashboardActivityValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DashboardActivityValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DashboardActivityValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DashboardActivityValidationError) ErrorName() string {
+	return "DashboardActivityValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DashboardActivityValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDashboardActivity.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DashboardActivityValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DashboardActivityValidationError{}
+
+// Validate checks the field values on DashboardHealthSummary with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DashboardHealthSummary) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DashboardHealthSummary with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DashboardHealthSummaryMultiError, or nil if none found.
+func (m *DashboardHealthSummary) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DashboardHealthSummary) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TotalDictionaries
+
+	// no validation rules for TotalEntries
+
+	// no validation rules for EnabledEntries
+
+	// no validation rules for TotalRelations
+
+	// no validation rules for UnresolvedConflicts
+
+	// no validation rules for HitRate
+
+	// no validation rules for AvgRecognitionConfidence
+
+	// no validation rules for CoverageDictionaryCount
+
+	// no validation rules for TotalDictionaryCount
+
+	if len(errors) > 0 {
+		return DashboardHealthSummaryMultiError(errors)
+	}
+
+	return nil
+}
+
+// DashboardHealthSummaryMultiError is an error wrapping multiple validation
+// errors returned by DashboardHealthSummary.ValidateAll() if the designated
+// constraints aren't met.
+type DashboardHealthSummaryMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DashboardHealthSummaryMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DashboardHealthSummaryMultiError) AllErrors() []error { return m }
+
+// DashboardHealthSummaryValidationError is the validation error returned by
+// DashboardHealthSummary.Validate if the designated constraints aren't met.
+type DashboardHealthSummaryValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DashboardHealthSummaryValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DashboardHealthSummaryValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DashboardHealthSummaryValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DashboardHealthSummaryValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DashboardHealthSummaryValidationError) ErrorName() string {
+	return "DashboardHealthSummaryValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DashboardHealthSummaryValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDashboardHealthSummary.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DashboardHealthSummaryValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DashboardHealthSummaryValidationError{}
+
+// Validate checks the field values on DashboardOverview with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DashboardOverview) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DashboardOverview with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DashboardOverviewMultiError, or nil if none found.
+func (m *DashboardOverview) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DashboardOverview) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetMyDictionaries() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, DashboardOverviewValidationError{
+						field:  fmt.Sprintf("MyDictionaries[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, DashboardOverviewValidationError{
+						field:  fmt.Sprintf("MyDictionaries[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return DashboardOverviewValidationError{
+					field:  fmt.Sprintf("MyDictionaries[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetSystemDictionaries() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, DashboardOverviewValidationError{
+						field:  fmt.Sprintf("SystemDictionaries[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, DashboardOverviewValidationError{
+						field:  fmt.Sprintf("SystemDictionaries[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return DashboardOverviewValidationError{
+					field:  fmt.Sprintf("SystemDictionaries[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if all {
+		switch v := interface{}(m.GetHealth()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DashboardOverviewValidationError{
+					field:  "Health",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DashboardOverviewValidationError{
+					field:  "Health",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetHealth()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DashboardOverviewValidationError{
+				field:  "Health",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	for idx, item := range m.GetRecentActivities() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, DashboardOverviewValidationError{
+						field:  fmt.Sprintf("RecentActivities[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, DashboardOverviewValidationError{
+						field:  fmt.Sprintf("RecentActivities[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return DashboardOverviewValidationError{
+					field:  fmt.Sprintf("RecentActivities[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return DashboardOverviewMultiError(errors)
+	}
+
+	return nil
+}
+
+// DashboardOverviewMultiError is an error wrapping multiple validation errors
+// returned by DashboardOverview.ValidateAll() if the designated constraints
+// aren't met.
+type DashboardOverviewMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DashboardOverviewMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DashboardOverviewMultiError) AllErrors() []error { return m }
+
+// DashboardOverviewValidationError is the validation error returned by
+// DashboardOverview.Validate if the designated constraints aren't met.
+type DashboardOverviewValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DashboardOverviewValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DashboardOverviewValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DashboardOverviewValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DashboardOverviewValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DashboardOverviewValidationError) ErrorName() string {
+	return "DashboardOverviewValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DashboardOverviewValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDashboardOverview.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DashboardOverviewValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DashboardOverviewValidationError{}
+
+// Validate checks the field values on GetDashboardOverviewRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetDashboardOverviewRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetDashboardOverviewRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetDashboardOverviewRequestMultiError, or nil if none found.
+func (m *GetDashboardOverviewRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetDashboardOverviewRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ActivitiesLimit
+
+	if len(errors) > 0 {
+		return GetDashboardOverviewRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetDashboardOverviewRequestMultiError is an error wrapping multiple
+// validation errors returned by GetDashboardOverviewRequest.ValidateAll() if
+// the designated constraints aren't met.
+type GetDashboardOverviewRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetDashboardOverviewRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetDashboardOverviewRequestMultiError) AllErrors() []error { return m }
+
+// GetDashboardOverviewRequestValidationError is the validation error returned
+// by GetDashboardOverviewRequest.Validate if the designated constraints
+// aren't met.
+type GetDashboardOverviewRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetDashboardOverviewRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetDashboardOverviewRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetDashboardOverviewRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetDashboardOverviewRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetDashboardOverviewRequestValidationError) ErrorName() string {
+	return "GetDashboardOverviewRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetDashboardOverviewRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetDashboardOverviewRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetDashboardOverviewRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetDashboardOverviewRequestValidationError{}
+
+// Validate checks the field values on GetDashboardOverviewResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetDashboardOverviewResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetDashboardOverviewResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetDashboardOverviewResponseMultiError, or nil if none found.
+func (m *GetDashboardOverviewResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetDashboardOverviewResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetOverview()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetDashboardOverviewResponseValidationError{
+					field:  "Overview",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetDashboardOverviewResponseValidationError{
+					field:  "Overview",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetOverview()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetDashboardOverviewResponseValidationError{
+				field:  "Overview",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return GetDashboardOverviewResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetDashboardOverviewResponseMultiError is an error wrapping multiple
+// validation errors returned by GetDashboardOverviewResponse.ValidateAll() if
+// the designated constraints aren't met.
+type GetDashboardOverviewResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetDashboardOverviewResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetDashboardOverviewResponseMultiError) AllErrors() []error { return m }
+
+// GetDashboardOverviewResponseValidationError is the validation error returned
+// by GetDashboardOverviewResponse.Validate if the designated constraints
+// aren't met.
+type GetDashboardOverviewResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetDashboardOverviewResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetDashboardOverviewResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetDashboardOverviewResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetDashboardOverviewResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetDashboardOverviewResponseValidationError) ErrorName() string {
+	return "GetDashboardOverviewResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetDashboardOverviewResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetDashboardOverviewResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetDashboardOverviewResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetDashboardOverviewResponseValidationError{}
+
+// Validate checks the field values on VocabularyHealthDetail with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *VocabularyHealthDetail) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on VocabularyHealthDetail with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// VocabularyHealthDetailMultiError, or nil if none found.
+func (m *VocabularyHealthDetail) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *VocabularyHealthDetail) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for DictionaryId
+
+	// no validation rules for DictionaryName
+
+	// no validation rules for EntryCount
+
+	// no validation rules for RelationCount
+
+	// no validation rules for HitRate
+
+	// no validation rules for AvgRecognitionConfidence
+
+	// no validation rules for SampleCount
+
+	if len(errors) > 0 {
+		return VocabularyHealthDetailMultiError(errors)
+	}
+
+	return nil
+}
+
+// VocabularyHealthDetailMultiError is an error wrapping multiple validation
+// errors returned by VocabularyHealthDetail.ValidateAll() if the designated
+// constraints aren't met.
+type VocabularyHealthDetailMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m VocabularyHealthDetailMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m VocabularyHealthDetailMultiError) AllErrors() []error { return m }
+
+// VocabularyHealthDetailValidationError is the validation error returned by
+// VocabularyHealthDetail.Validate if the designated constraints aren't met.
+type VocabularyHealthDetailValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VocabularyHealthDetailValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VocabularyHealthDetailValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VocabularyHealthDetailValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VocabularyHealthDetailValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VocabularyHealthDetailValidationError) ErrorName() string {
+	return "VocabularyHealthDetailValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e VocabularyHealthDetailValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVocabularyHealthDetail.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VocabularyHealthDetailValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VocabularyHealthDetailValidationError{}
+
+// Validate checks the field values on GetVocabularyHealthRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetVocabularyHealthRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetVocabularyHealthRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetVocabularyHealthRequestMultiError, or nil if none found.
+func (m *GetVocabularyHealthRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetVocabularyHealthRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for DictionaryScope
+
+	// no validation rules for RecentDays
+
+	if len(errors) > 0 {
+		return GetVocabularyHealthRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetVocabularyHealthRequestMultiError is an error wrapping multiple
+// validation errors returned by GetVocabularyHealthRequest.ValidateAll() if
+// the designated constraints aren't met.
+type GetVocabularyHealthRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetVocabularyHealthRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetVocabularyHealthRequestMultiError) AllErrors() []error { return m }
+
+// GetVocabularyHealthRequestValidationError is the validation error returned
+// by GetVocabularyHealthRequest.Validate if the designated constraints aren't met.
+type GetVocabularyHealthRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetVocabularyHealthRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetVocabularyHealthRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetVocabularyHealthRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetVocabularyHealthRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetVocabularyHealthRequestValidationError) ErrorName() string {
+	return "GetVocabularyHealthRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetVocabularyHealthRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetVocabularyHealthRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetVocabularyHealthRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetVocabularyHealthRequestValidationError{}
+
+// Validate checks the field values on GetVocabularyHealthResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetVocabularyHealthResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetVocabularyHealthResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetVocabularyHealthResponseMultiError, or nil if none found.
+func (m *GetVocabularyHealthResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetVocabularyHealthResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetDetails() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetVocabularyHealthResponseValidationError{
+						field:  fmt.Sprintf("Details[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetVocabularyHealthResponseValidationError{
+						field:  fmt.Sprintf("Details[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetVocabularyHealthResponseValidationError{
+					field:  fmt.Sprintf("Details[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetVocabularyHealthResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetVocabularyHealthResponseMultiError is an error wrapping multiple
+// validation errors returned by GetVocabularyHealthResponse.ValidateAll() if
+// the designated constraints aren't met.
+type GetVocabularyHealthResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetVocabularyHealthResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetVocabularyHealthResponseMultiError) AllErrors() []error { return m }
+
+// GetVocabularyHealthResponseValidationError is the validation error returned
+// by GetVocabularyHealthResponse.Validate if the designated constraints
+// aren't met.
+type GetVocabularyHealthResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetVocabularyHealthResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetVocabularyHealthResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetVocabularyHealthResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetVocabularyHealthResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetVocabularyHealthResponseValidationError) ErrorName() string {
+	return "GetVocabularyHealthResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetVocabularyHealthResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetVocabularyHealthResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetVocabularyHealthResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetVocabularyHealthResponseValidationError{}

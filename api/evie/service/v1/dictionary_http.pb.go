@@ -27,11 +27,13 @@ const OperationDictionaryServiceDeleteCategory = "/evie.service.v1.DictionarySer
 const OperationDictionaryServiceDeleteDictionary = "/evie.service.v1.DictionaryService/DeleteDictionary"
 const OperationDictionaryServiceDeleteEntry = "/evie.service.v1.DictionaryService/DeleteEntry"
 const OperationDictionaryServiceDeleteRelation = "/evie.service.v1.DictionaryService/DeleteRelation"
+const OperationDictionaryServiceGetDashboardOverview = "/evie.service.v1.DictionaryService/GetDashboardOverview"
 const OperationDictionaryServiceGetDictionary = "/evie.service.v1.DictionaryService/GetDictionary"
 const OperationDictionaryServiceGetDictionaryStats = "/evie.service.v1.DictionaryService/GetDictionaryStats"
 const OperationDictionaryServiceGetEntry = "/evie.service.v1.DictionaryService/GetEntry"
 const OperationDictionaryServiceGetRelation = "/evie.service.v1.DictionaryService/GetRelation"
 const OperationDictionaryServiceGetVersion = "/evie.service.v1.DictionaryService/GetVersion"
+const OperationDictionaryServiceGetVocabularyHealth = "/evie.service.v1.DictionaryService/GetVocabularyHealth"
 const OperationDictionaryServiceListCategories = "/evie.service.v1.DictionaryService/ListCategories"
 const OperationDictionaryServiceListConflicts = "/evie.service.v1.DictionaryService/ListConflicts"
 const OperationDictionaryServiceListDictionaries = "/evie.service.v1.DictionaryService/ListDictionaries"
@@ -62,6 +64,8 @@ type DictionaryServiceHTTPServer interface {
 	DeleteEntry(context.Context, *DeleteEntryRequest) (*DeleteEntryResponse, error)
 	// DeleteRelation 删除词条关系
 	DeleteRelation(context.Context, *DeleteRelationRequest) (*DeleteRelationResponse, error)
+	// GetDashboardOverview 查询词库中心工作台总览（我的词库 + 系统词库 + 全局事件 + 健康度聚合）。
+	GetDashboardOverview(context.Context, *GetDashboardOverviewRequest) (*GetDashboardOverviewResponse, error)
 	// GetDictionary 查询词库详情
 	GetDictionary(context.Context, *GetDictionaryRequest) (*Dictionary, error)
 	// GetDictionaryStats 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
@@ -72,6 +76,8 @@ type DictionaryServiceHTTPServer interface {
 	GetRelation(context.Context, *GetRelationRequest) (*DictionaryRelation, error)
 	// GetVersion 查询词库版本详情
 	GetVersion(context.Context, *GetVersionRequest) (*DictionaryVersion, error)
+	// GetVocabularyHealth 查询词库健康度指标（基于增强记录 + ASR 记录的识别命中聚合）。
+	GetVocabularyHealth(context.Context, *GetVocabularyHealthRequest) (*GetVocabularyHealthResponse, error)
 	// ListCategories 分页查询词条分类列表
 	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
 	// ListConflicts 查询词库冲突记录
@@ -125,6 +131,8 @@ func RegisterDictionaryServiceHTTPServer(s *http.Server, srv DictionaryServiceHT
 	r.GET("/evie/v1/dictionary-conflicts", _DictionaryService_ListConflicts0_HTTP_Handler(srv))
 	r.GET("/evie/v1/dictionaries/{dictionary_id}:stats", _DictionaryService_GetDictionaryStats0_HTTP_Handler(srv))
 	r.GET("/evie/v1/dictionaries/{dictionary_id}/relations", _DictionaryService_ListRelationsByDictionary0_HTTP_Handler(srv))
+	r.GET("/evie/v1/dashboard", _DictionaryService_GetDashboardOverview0_HTTP_Handler(srv))
+	r.GET("/evie/v1/vocabulary-health", _DictionaryService_GetVocabularyHealth0_HTTP_Handler(srv))
 }
 
 func _DictionaryService_ListDictionaries0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
@@ -689,6 +697,44 @@ func _DictionaryService_ListRelationsByDictionary0_HTTP_Handler(srv DictionarySe
 	}
 }
 
+func _DictionaryService_GetDashboardOverview0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetDashboardOverviewRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceGetDashboardOverview)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetDashboardOverview(ctx, req.(*GetDashboardOverviewRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetDashboardOverviewResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _DictionaryService_GetVocabularyHealth0_HTTP_Handler(srv DictionaryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetVocabularyHealthRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDictionaryServiceGetVocabularyHealth)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetVocabularyHealth(ctx, req.(*GetVocabularyHealthRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetVocabularyHealthResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type DictionaryServiceHTTPClient interface {
 	// CreateCategory 创建词条分类（仅自定义）
 	CreateCategory(ctx context.Context, req *CreateCategoryRequest, opts ...http.CallOption) (rsp *DictionaryCategory, err error)
@@ -706,6 +752,8 @@ type DictionaryServiceHTTPClient interface {
 	DeleteEntry(ctx context.Context, req *DeleteEntryRequest, opts ...http.CallOption) (rsp *DeleteEntryResponse, err error)
 	// DeleteRelation 删除词条关系
 	DeleteRelation(ctx context.Context, req *DeleteRelationRequest, opts ...http.CallOption) (rsp *DeleteRelationResponse, err error)
+	// GetDashboardOverview 查询词库中心工作台总览（我的词库 + 系统词库 + 全局事件 + 健康度聚合）。
+	GetDashboardOverview(ctx context.Context, req *GetDashboardOverviewRequest, opts ...http.CallOption) (rsp *GetDashboardOverviewResponse, err error)
 	// GetDictionary 查询词库详情
 	GetDictionary(ctx context.Context, req *GetDictionaryRequest, opts ...http.CallOption) (rsp *Dictionary, err error)
 	// GetDictionaryStats 查询词库统计指标（词库详情页顶部 + 工作台健康度聚合）。
@@ -716,6 +764,8 @@ type DictionaryServiceHTTPClient interface {
 	GetRelation(ctx context.Context, req *GetRelationRequest, opts ...http.CallOption) (rsp *DictionaryRelation, err error)
 	// GetVersion 查询词库版本详情
 	GetVersion(ctx context.Context, req *GetVersionRequest, opts ...http.CallOption) (rsp *DictionaryVersion, err error)
+	// GetVocabularyHealth 查询词库健康度指标（基于增强记录 + ASR 记录的识别命中聚合）。
+	GetVocabularyHealth(ctx context.Context, req *GetVocabularyHealthRequest, opts ...http.CallOption) (rsp *GetVocabularyHealthResponse, err error)
 	// ListCategories 分页查询词条分类列表
 	ListCategories(ctx context.Context, req *ListCategoriesRequest, opts ...http.CallOption) (rsp *ListCategoriesResponse, err error)
 	// ListConflicts 查询词库冲突记录
@@ -862,6 +912,20 @@ func (c *DictionaryServiceHTTPClientImpl) DeleteRelation(ctx context.Context, in
 	return &out, nil
 }
 
+// GetDashboardOverview 查询词库中心工作台总览（我的词库 + 系统词库 + 全局事件 + 健康度聚合）。
+func (c *DictionaryServiceHTTPClientImpl) GetDashboardOverview(ctx context.Context, in *GetDashboardOverviewRequest, opts ...http.CallOption) (*GetDashboardOverviewResponse, error) {
+	var out GetDashboardOverviewResponse
+	pattern := "/evie/v1/dashboard"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceGetDashboardOverview))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // GetDictionary 查询词库详情
 func (c *DictionaryServiceHTTPClientImpl) GetDictionary(ctx context.Context, in *GetDictionaryRequest, opts ...http.CallOption) (*Dictionary, error) {
 	var out Dictionary
@@ -924,6 +988,20 @@ func (c *DictionaryServiceHTTPClientImpl) GetVersion(ctx context.Context, in *Ge
 	pattern := "/evie/v1/dictionary-versions/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationDictionaryServiceGetVersion))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetVocabularyHealth 查询词库健康度指标（基于增强记录 + ASR 记录的识别命中聚合）。
+func (c *DictionaryServiceHTTPClientImpl) GetVocabularyHealth(ctx context.Context, in *GetVocabularyHealthRequest, opts ...http.CallOption) (*GetVocabularyHealthResponse, error) {
+	var out GetVocabularyHealthResponse
+	pattern := "/evie/v1/vocabulary-health"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDictionaryServiceGetVocabularyHealth))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

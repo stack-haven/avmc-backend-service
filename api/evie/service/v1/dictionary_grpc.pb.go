@@ -44,6 +44,8 @@ const (
 	DictionaryService_ListConflicts_FullMethodName             = "/evie.service.v1.DictionaryService/ListConflicts"
 	DictionaryService_GetDictionaryStats_FullMethodName        = "/evie.service.v1.DictionaryService/GetDictionaryStats"
 	DictionaryService_ListRelationsByDictionary_FullMethodName = "/evie.service.v1.DictionaryService/ListRelationsByDictionary"
+	DictionaryService_GetDashboardOverview_FullMethodName      = "/evie.service.v1.DictionaryService/GetDashboardOverview"
+	DictionaryService_GetVocabularyHealth_FullMethodName       = "/evie.service.v1.DictionaryService/GetVocabularyHealth"
 )
 
 // DictionaryServiceClient is the client API for DictionaryService service.
@@ -104,6 +106,10 @@ type DictionaryServiceClient interface {
 	GetDictionaryStats(ctx context.Context, in *GetDictionaryStatsRequest, opts ...grpc.CallOption) (*GetDictionaryStatsResponse, error)
 	// 词库级别关系列表（不需先选 entryId，一次性返回词库下所有词条的关系）。
 	ListRelationsByDictionary(ctx context.Context, in *ListRelationsByDictionaryRequest, opts ...grpc.CallOption) (*ListRelationsByDictionaryResponse, error)
+	// 查询词库中心工作台总览（我的词库 + 系统词库 + 全局事件 + 健康度聚合）。
+	GetDashboardOverview(ctx context.Context, in *GetDashboardOverviewRequest, opts ...grpc.CallOption) (*GetDashboardOverviewResponse, error)
+	// 查询词库健康度指标（基于增强记录 + ASR 记录的识别命中聚合）。
+	GetVocabularyHealth(ctx context.Context, in *GetVocabularyHealthRequest, opts ...grpc.CallOption) (*GetVocabularyHealthResponse, error)
 }
 
 type dictionaryServiceClient struct {
@@ -364,6 +370,26 @@ func (c *dictionaryServiceClient) ListRelationsByDictionary(ctx context.Context,
 	return out, nil
 }
 
+func (c *dictionaryServiceClient) GetDashboardOverview(ctx context.Context, in *GetDashboardOverviewRequest, opts ...grpc.CallOption) (*GetDashboardOverviewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDashboardOverviewResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_GetDashboardOverview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dictionaryServiceClient) GetVocabularyHealth(ctx context.Context, in *GetVocabularyHealthRequest, opts ...grpc.CallOption) (*GetVocabularyHealthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetVocabularyHealthResponse)
+	err := c.cc.Invoke(ctx, DictionaryService_GetVocabularyHealth_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DictionaryServiceServer is the server API for DictionaryService service.
 // All implementations must embed UnimplementedDictionaryServiceServer
 // for forward compatibility.
@@ -422,6 +448,10 @@ type DictionaryServiceServer interface {
 	GetDictionaryStats(context.Context, *GetDictionaryStatsRequest) (*GetDictionaryStatsResponse, error)
 	// 词库级别关系列表（不需先选 entryId，一次性返回词库下所有词条的关系）。
 	ListRelationsByDictionary(context.Context, *ListRelationsByDictionaryRequest) (*ListRelationsByDictionaryResponse, error)
+	// 查询词库中心工作台总览（我的词库 + 系统词库 + 全局事件 + 健康度聚合）。
+	GetDashboardOverview(context.Context, *GetDashboardOverviewRequest) (*GetDashboardOverviewResponse, error)
+	// 查询词库健康度指标（基于增强记录 + ASR 记录的识别命中聚合）。
+	GetVocabularyHealth(context.Context, *GetVocabularyHealthRequest) (*GetVocabularyHealthResponse, error)
 	mustEmbedUnimplementedDictionaryServiceServer()
 }
 
@@ -506,6 +536,12 @@ func (UnimplementedDictionaryServiceServer) GetDictionaryStats(context.Context, 
 }
 func (UnimplementedDictionaryServiceServer) ListRelationsByDictionary(context.Context, *ListRelationsByDictionaryRequest) (*ListRelationsByDictionaryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListRelationsByDictionary not implemented")
+}
+func (UnimplementedDictionaryServiceServer) GetDashboardOverview(context.Context, *GetDashboardOverviewRequest) (*GetDashboardOverviewResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDashboardOverview not implemented")
+}
+func (UnimplementedDictionaryServiceServer) GetVocabularyHealth(context.Context, *GetVocabularyHealthRequest) (*GetVocabularyHealthResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetVocabularyHealth not implemented")
 }
 func (UnimplementedDictionaryServiceServer) mustEmbedUnimplementedDictionaryServiceServer() {}
 func (UnimplementedDictionaryServiceServer) testEmbeddedByValue()                           {}
@@ -978,6 +1014,42 @@ func _DictionaryService_ListRelationsByDictionary_Handler(srv interface{}, ctx c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DictionaryService_GetDashboardOverview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDashboardOverviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).GetDashboardOverview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_GetDashboardOverview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).GetDashboardOverview(ctx, req.(*GetDashboardOverviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DictionaryService_GetVocabularyHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVocabularyHealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DictionaryServiceServer).GetVocabularyHealth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DictionaryService_GetVocabularyHealth_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DictionaryServiceServer).GetVocabularyHealth(ctx, req.(*GetVocabularyHealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DictionaryService_ServiceDesc is the grpc.ServiceDesc for DictionaryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1084,6 +1156,14 @@ var DictionaryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListRelationsByDictionary",
 			Handler:    _DictionaryService_ListRelationsByDictionary_Handler,
+		},
+		{
+			MethodName: "GetDashboardOverview",
+			Handler:    _DictionaryService_GetDashboardOverview_Handler,
+		},
+		{
+			MethodName: "GetVocabularyHealth",
+			Handler:    _DictionaryService_GetVocabularyHealth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -13,6 +13,7 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionary"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
+	"backend-service/app/evie/service/internal/data/ent/gen/dictionarychangelog"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
@@ -1000,4 +1001,313 @@ func (r *dictionaryRepo) maxDictionaryModifiedAt(ctx context.Context, dictionary
 		return "", nil
 	}
 	return latest.UTC().Format(time.DateTime), nil
+}
+
+// ===== Backend-1 词库中心交互优化工作台接口实现（2026-08-25） =====
+
+// tenantIDFromContext 从 ctx 安全提取当前租户；与 viewer ctx 区分，跨租户查询需用 entviewer.NewSystemContext。
+func (r *dictionaryRepo) tenantIDFromContext(ctx context.Context) uint32 {
+	tenantID, ok := ctx.Value("tenant_id").(uint32)
+	if !ok {
+		return 0
+	}
+	return tenantID
+}
+
+// dashboardMyDictCard 从 Dictionary ent 生成我的词库卡片。
+func dashboardMyDictCard(d *gen.Dictionary, entryCount int32, relationCount int32, conflictCount int32) *pb.DashboardMyDictionary {
+	lastModified := ""
+	if !d.UpdatedAt.IsZero() {
+		lastModified = d.UpdatedAt.Format(time.DateTime)
+	}
+	return &pb.DashboardMyDictionary{
+		Id:                     d.ID,
+		Name:                   d.Name,
+		Scope:                  d.Scope,
+		EntryCount:             entryCount,
+		RelationCount:          relationCount,
+		UnresolvedConflictCount: conflictCount,
+		LastModifiedAt:         lastModified,
+	}
+}
+
+// dashboardSystemDictCard 从 Dictionary ent 生成系统词库卡片（PLATFORM/SYSTEM scope）。
+func dashboardSystemDictCard(d *gen.Dictionary, entryCount int32) *pb.DashboardSystemDictionary {
+	lastModified := ""
+	if !d.UpdatedAt.IsZero() {
+		lastModified = d.UpdatedAt.Format(time.DateTime)
+	}
+	return &pb.DashboardSystemDictionary{
+		Id:             d.ID,
+		Name:           d.Name,
+		Scope:          d.Scope,
+		EntryCount:     entryCount,
+		LastModifiedAt: lastModified,
+	}
+}
+
+// GetDashboardOverview 查询词库中心工作台总览。
+// 多租户隐私：
+//   - 我的词库：ctx 租户的 scope=TENANT 词库
+//   - 系统词库：PLATFORM/SYSTEM 词库（全租户可见）
+//   - 最近活动：ctx 租户 + PLATFORM scope 词库的事件（跨租户可见）
+func (r *dictionaryRepo) GetDashboardOverview(ctx context.Context, activitiesLimit int32) (*pb.DashboardOverview, error) {
+	if activitiesLimit <= 0 {
+		activitiesLimit = 5
+	}
+	if activitiesLimit > 50 {
+		activitiesLimit = 50
+	}
+
+	db := r.Data.DB(ctx)
+	tenantID := r.tenantIDFromContext(ctx)
+
+	// 1. 我的词库（scope=TENANT, tenant_id=ctx）
+	myDicts, err := db.Dictionary.Query().
+		Where(dictionary.DeletedAtIsNil(), dictionary.ScopeEQ("TENANT"), dictionary.TenantIDEQ(tenantID)).
+		Order(gen.Desc(dictionary.FieldUpdatedAt)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	myCards := make([]*pb.DashboardMyDictionary, 0, len(myDicts))
+	totalMyEntries := int32(0)
+	totalMyRelations := int32(0)
+	totalMyConflicts := int32(0)
+	for _, d := range myDicts {
+		entryCnt, err := db.DictionaryEntry.Query().
+			Where(dictionaryentry.DictionaryIDEQ(d.ID), dictionaryentry.DeletedAtIsNil()).
+			Count(ctx)
+		if err != nil {
+			return nil, err
+		}
+		relCnt, err := db.DictionaryRelation.Query().
+			Where(dictionaryrelation.DeletedAtIsNil()).
+			Where(dictionaryrelation.HasEntryWith(dictionaryentry.DictionaryIDEQ(d.ID))).
+			Count(ctx)
+		if err != nil {
+			return nil, err
+		}
+		// 冲突数：1.0 占位返回 0（DictionaryConflict.source_dictionary 为字符串，无法按 dictionary_id 过滤）
+		myCards = append(myCards, dashboardMyDictCard(d, int32(entryCnt), int32(relCnt), 0))
+		totalMyEntries += int32(entryCnt)
+		totalMyRelations += int32(relCnt)
+	}
+
+	// 2. 系统词库（scope in PLATFORM, SYSTEM）—— 使用 sys ctx 跳过 tenant filter
+	sysCtx := entviewer.NewSystemContext(ctx)
+	sysDicts, err := r.Data.DB(sysCtx).Dictionary.Query().
+		Where(dictionary.DeletedAtIsNil(), dictionary.ScopeIn("PLATFORM", "SYSTEM")).
+		Order(gen.Desc(dictionary.FieldUpdatedAt)).
+		Limit(50).
+		All(sysCtx)
+	if err != nil {
+		return nil, err
+	}
+	sysCards := make([]*pb.DashboardSystemDictionary, 0, len(sysDicts))
+	totalSysEntries := int32(0)
+	for _, d := range sysDicts {
+		entryCnt, err := r.Data.DB(sysCtx).DictionaryEntry.Query().
+			Where(dictionaryentry.DictionaryIDEQ(d.ID), dictionaryentry.DeletedAtIsNil()).
+			Count(sysCtx)
+		if err != nil {
+			return nil, err
+		}
+		sysCards = append(sysCards, dashboardSystemDictCard(d, int32(entryCnt)))
+		totalSysEntries += int32(entryCnt)
+	}
+
+	// 3. 健康度汇总
+	totalEntries := totalMyEntries + totalSysEntries
+	enabledEntries := totalEntries // 1.0 不区分启用（需后续 scheme 加 status 全局聚合）
+	totalRelations := totalMyRelations
+	totalDicts := int32(len(myDicts) + len(sysDicts))
+	health := &pb.DashboardHealthSummary{
+		TotalDictionaries:       totalDicts,
+		TotalEntries:            totalEntries,
+		EnabledEntries:          enabledEntries,
+		TotalRelations:          totalRelations,
+		UnresolvedConflicts:     totalMyConflicts,
+		HitRate:                 0, // 1.0 占位（需 JOIN EnhancementLog，2.0 补 schema）
+		AvgRecognitionConfidence: 0,
+		CoverageDictionaryCount: int32(len(myDicts)),
+		TotalDictionaryCount:    totalDicts,
+	}
+
+	// 4. 最近活动（从 DictionaryChangeLog 拉取前 N 条，限制为 ctx 租户 + PLATFORM 可见）
+	activities, err := r.loadRecentActivities(ctx, sysCtx, int(activitiesLimit))
+	if err != nil {
+		// 活动加载失败不影响主响应返回，降级为空
+		r.Log.Warnf("load recent activities failed: %v", err)
+		activities = nil
+	}
+
+	return &pb.DashboardOverview{
+		MyDictionaries:     myCards,
+		SystemDictionaries: sysCards,
+		Health:             health,
+		RecentActivities:   activities,
+	}, nil
+}
+
+// loadRecentActivities 加载最近 N 条全局事件。
+// 多租户隐私：ctx 租户的事件 + PLATFORM scope 词库的事件（跨租户可见）。
+// 1.0 实现：从 DictionaryChangeLog 拉取最近 N 条，包含 entity_type/action/operator_id。
+// title/summary 用 entity_type.action 模板生成；后续可在 change_log 加 actor_name、entity_name 字段优化。
+func (r *dictionaryRepo) loadRecentActivities(ctx context.Context, sysCtx context.Context, limit int) ([]*pb.DashboardActivity, error) {
+	if limit <= 0 {
+		limit = 5
+	}
+	tenantID := r.tenantIDFromContext(ctx)
+
+	// 使用 sys ctx 获取全平台变更记录，依赖 entviewer + tenant filter 双机制
+	rows, err := r.Data.DB(sysCtx).DictionaryChangeLog.Query().
+		Order(gen.Desc(dictionarychangelog.FieldCreatedAt)).
+		Limit(limit * 2). // 预取 2 倍，FIL 过滤后取 N 条
+		All(sysCtx)
+	if err != nil {
+		return nil, err
+	}
+	activities := make([]*pb.DashboardActivity, 0, limit)
+	for _, row := range rows {
+		// 多租户过滤：ctx 租户的事件 + PLATFORM scope 词库事件可见
+		visible := row.TenantID == tenantID
+		if !visible && row.TenantID != 0 { // tenantID=0 是 PLATFORM scope
+			continue
+		}
+		scope := "TENANT"
+		if row.TenantID == 0 {
+			scope = "PLATFORM"
+		}
+		activities = append(activities, &pb.DashboardActivity{
+			Id:         uint64(row.ID),
+			Type:       row.EntityType + "." + row.Action,
+			Title:      formatActivityTitle(row.EntityType, row.Action),
+			Summary:    extractActivitySummary(row.AfterSnapshot),
+			ActorId:    row.OperatorID,
+			TargetType: row.EntityType,
+			TargetId:   row.EntityID,
+			Scope:      scope,
+			CreatedAt:  row.CreatedAt.Format(time.DateTime),
+		})
+		if len(activities) >= limit {
+			break
+		}
+	}
+	return activities, nil
+}
+
+// formatActivityTitle 生成活动标题（如「创建了词条」）。
+func formatActivityTitle(entityType, action string) string {
+	switch entityType {
+	case "dictionary":
+		switch action {
+		case "create":
+			return "创建了词库"
+		case "update":
+			return "更新了词库"
+		case "publish":
+			return "发布了词库版本"
+		default:
+			return "词库变更"
+		}
+	case "entry":
+		switch action {
+		case "create":
+			return "添加了词条"
+		case "update":
+			return "更新了词条"
+		case "disable":
+			return "停用了词条"
+		default:
+			return "词条变更"
+		}
+	case "relation":
+		return "维护了词条关系"
+	default:
+		return action + " " + entityType
+	}
+}
+
+// extractActivitySummary 从变更后快照 JSON 中提取名称（最多 80 字符）。
+func extractActivitySummary(snapshot string) string {
+	if snapshot == "" {
+		return ""
+	}
+	var m map[string]any
+	if err := json.Unmarshal([]byte(snapshot), &m); err != nil {
+		return ""
+	}
+	for _, key := range []string{"name", "standard_text", "related_text"} {
+		if v, ok := m[key].(string); ok && v != "" {
+			if len(v) > 80 {
+				return v[:80] + "..."
+			}
+			return v
+		}
+	}
+	if len(snapshot) > 80 {
+		return snapshot[:80] + "..."
+	}
+	return snapshot
+}
+
+// GetVocabularyHealth 查询词库健康度详细指标。
+// 1.0 占位实现：hit_rate / avg_recognition_confidence 返回 0。
+// 后续 2.0 需要：
+//   - EnhancementLog 增加 dictionary_id 外键（当前只有 session_id）
+//   - 通过 ASRRecord → session_id 间接 JOIN 词库
+// 多租户隐私：ctx 租户的 scope=TENANT + PLATFORM/SYSTEM 词库。
+func (r *dictionaryRepo) GetVocabularyHealth(ctx context.Context, scope string, recentDays int32) ([]*pb.VocabularyHealthDetail, error) {
+	if recentDays <= 0 {
+		recentDays = 7
+	}
+	if recentDays > 90 {
+		recentDays = 90
+	}
+	tenantID := r.tenantIDFromContext(ctx)
+	db := r.Data.DB(ctx)
+
+	// 1. 查询可见词库
+	query := db.Dictionary.Query().Where(dictionary.DeletedAtIsNil())
+	switch scope {
+	case "PLATFORM":
+		query.Where(dictionary.ScopeEQ("PLATFORM"))
+	case "TENANT":
+		query.Where(dictionary.ScopeEQ("TENANT"), dictionary.TenantIDEQ(tenantID))
+	case "ALL", "":
+		// 全部可见词库：ctx 租户 + PLATFORM/SYSTEM
+		query.Where(dictionary.Or(
+			dictionary.ScopeEQ("PLATFORM"),
+			dictionary.ScopeEQ("SYSTEM"),
+			dictionary.And(dictionary.ScopeEQ("TENANT"), dictionary.TenantIDEQ(tenantID)),
+		))
+	default:
+		return nil, errors.BadRequest("SCOPE_INVALID", "scope 参数必须是 PL/ATFORM/TENANT/ALL 之一")
+	}
+
+	dicts, err := query.Order(gen.Desc(dictionary.FieldUpdatedAt)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	details := make([]*pb.VocabularyHealthDetail, 0, len(dicts))
+	for _, d := range dicts {
+		entryCnt, _ := db.DictionaryEntry.Query().
+			Where(dictionaryentry.DictionaryIDEQ(d.ID), dictionaryentry.DeletedAtIsNil()).
+			Count(ctx)
+		relCnt, _ := db.DictionaryRelation.Query().
+			Where(dictionaryrelation.DeletedAtIsNil()).
+			Where(dictionaryrelation.HasEntryWith(dictionaryentry.DictionaryIDEQ(d.ID))).
+			Count(ctx)
+		details = append(details, &pb.VocabularyHealthDetail{
+			DictionaryId:             d.ID,
+			DictionaryName:           d.Name,
+			EntryCount:               int32(entryCnt),
+			RelationCount:            int32(relCnt),
+			HitRate:                  0, // 1.0 占位
+			AvgRecognitionConfidence: 0, // 1.0 占位
+			SampleCount:              0,
+		})
+	}
+	return details, nil
 }

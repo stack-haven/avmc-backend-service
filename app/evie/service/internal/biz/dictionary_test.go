@@ -20,6 +20,8 @@ type dictionaryRepoStub struct {
 	deletedEntry            uint32
 	relationsByDictionaryFn func(*pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error)
 	statsFn                 func(uint32) (*pb.DictionaryStats, error)
+	dashboardFn             func(int32) (*pb.DashboardOverview, error)
+	healthFn                func(string, int32) ([]*pb.VocabularyHealthDetail, error)
 }
 
 func (s *dictionaryRepoStub) ListDictionaries(context.Context, *pb.ListDictionariesRequest) ([]*pb.Dictionary, int32, error) {
@@ -88,6 +90,20 @@ func (s *dictionaryRepoStub) GetStats(_ context.Context, dictionaryID uint32) (*
 		return s.statsFn(dictionaryID)
 	}
 	return &pb.DictionaryStats{DictionaryId: dictionaryID}, nil
+}
+
+func (s *dictionaryRepoStub) GetDashboardOverview(_ context.Context, limit int32) (*pb.DashboardOverview, error) {
+	if s.dashboardFn != nil {
+		return s.dashboardFn(limit)
+	}
+	return &pb.DashboardOverview{}, nil
+}
+
+func (s *dictionaryRepoStub) GetVocabularyHealth(_ context.Context, scope string, recentDays int32) ([]*pb.VocabularyHealthDetail, error) {
+	if s.healthFn != nil {
+		return s.healthFn(scope, recentDays)
+	}
+	return nil, nil
 }
 
 func (s *dictionaryRepoStub) ListCategories(context.Context, *pb.ListCategoriesRequest) ([]*pb.DictionaryCategory, int32, error) {

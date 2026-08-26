@@ -34,6 +34,9 @@ type DictionaryRepo interface {
 
 	GetStats(ctx context.Context, dictionaryID uint32) (*pb.DictionaryStats, error)
 
+	GetDashboardOverview(ctx context.Context, activitiesLimit int32) (*pb.DashboardOverview, error)
+	GetVocabularyHealth(ctx context.Context, scope string, recentDays int32) ([]*pb.VocabularyHealthDetail, error)
+
 	ListCategories(ctx context.Context, req *pb.ListCategoriesRequest) ([]*pb.DictionaryCategory, int32, error)
 	CreateCategory(ctx context.Context, category *pb.DictionaryCategory) (*pb.DictionaryCategory, error)
 	UpdateCategory(ctx context.Context, category *pb.DictionaryCategory) (*pb.DictionaryCategory, error)
@@ -165,6 +168,31 @@ func (uc *DictionaryUsecase) GetStats(ctx context.Context, dictionaryID uint32) 
 		return nil, errors.BadRequest("DICTIONARY_ID_REQUIRED", "词库ID不能为空")
 	}
 	return uc.repo.GetStats(ctx, dictionaryID)
+}
+
+// GetDashboardOverview 查询词库中心工作台总览。
+// 聚合 我的词库（scope=TENANT）+ 系统词库（scope=PLATFORM/SYSTEM）+ 健康度 + 最近活动。
+// 多租户隐私：PLATFORM/SYSTEM 词库跨租户可见，activities 仅包含 ctx 租户 + PLATFORM 词库事件。
+func (uc *DictionaryUsecase) GetDashboardOverview(ctx context.Context, activitiesLimit int32) (*pb.DashboardOverview, error) {
+	if activitiesLimit <= 0 {
+		activitiesLimit = 5
+	}
+	if activitiesLimit > 50 {
+		activitiesLimit = 50
+	}
+	return uc.repo.GetDashboardOverview(ctx, activitiesLimit)
+}
+
+// GetVocabularyHealth 查询词库健康度详细指标。
+// 多租户隐私：ctx 租户的可见词库 + PLATFORM 词库都计算在内。
+func (uc *DictionaryUsecase) GetVocabularyHealth(ctx context.Context, scope string, recentDays int32) ([]*pb.VocabularyHealthDetail, error) {
+	if recentDays <= 0 {
+		recentDays = 7
+	}
+	if recentDays > 90 {
+		recentDays = 90
+	}
+	return uc.repo.GetVocabularyHealth(ctx, scope, recentDays)
 }
 
 // GetRelation 查询词条关系详情。

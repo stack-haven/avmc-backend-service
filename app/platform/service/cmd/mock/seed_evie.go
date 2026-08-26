@@ -43,6 +43,8 @@ var evieButtons = []buttonSpec{
 	{Parent: "EvieDictionaryList", Name: "EvieDictDelete", Title: "删除", Operation: eviev1.OperationDictionaryServiceDeleteDictionary, Sort: 50},
 	{Parent: "EvieDictionaryList", Name: "EvieDictStats", Title: "查看统计", Operation: eviev1.OperationDictionaryServiceGetDictionaryStats, Sort: 60},
 	{Parent: "EvieDictionaryList", Name: "EvieDictRelationsAll", Title: "查询词库下所有关系", Operation: eviev1.OperationDictionaryServiceListRelationsByDictionary, Sort: 70},
+	{Parent: "EvieDictionaryList", Name: "EvieDictDashboard", Title: "工作台总览", Operation: eviev1.OperationDictionaryServiceGetDashboardOverview, Sort: 80},
+	{Parent: "EvieDictionaryList", Name: "EvieDictHealth", Title: "健康度详情", Operation: eviev1.OperationDictionaryServiceGetVocabularyHealth, Sort: 90},
 
 	// 词条管理
 	{Parent: "EvieEntryList", Name: "EvieEntryQuery", Title: "查询", Operation: eviev1.OperationDictionaryServiceListEntries, Sort: 10},
