@@ -26,6 +26,8 @@ type AsrProviderConfig struct {
 	Status *int32 `json:"status,omitempty"`
 	// 租户ID（0=平台级全局共享，>0=租户隔离）
 	TenantID uint32 `json:"tenant_id,omitempty"`
+	// 删除时间
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// funasr/whisper/xunfei/aliyun
 	ProviderName string `json:"provider_name,omitempty"`
 	// 是否启用
@@ -50,7 +52,7 @@ func (*AsrProviderConfig) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case asrproviderconfig.FieldProviderName, asrproviderconfig.FieldConfigJSON, asrproviderconfig.FieldLanguage:
 			values[i] = new(sql.NullString)
-		case asrproviderconfig.FieldCreatedAt, asrproviderconfig.FieldUpdatedAt:
+		case asrproviderconfig.FieldCreatedAt, asrproviderconfig.FieldUpdatedAt, asrproviderconfig.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -97,6 +99,13 @@ func (_m *AsrProviderConfig) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
 				_m.TenantID = uint32(value.Int64)
+			}
+		case asrproviderconfig.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case asrproviderconfig.FieldProviderName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -177,6 +186,11 @@ func (_m *AsrProviderConfig) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("provider_name=")
 	builder.WriteString(_m.ProviderName)

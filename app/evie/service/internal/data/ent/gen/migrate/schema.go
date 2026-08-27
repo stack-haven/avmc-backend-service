@@ -16,6 +16,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID（0=平台级全局共享，>0=租户隔离）", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "provider_name", Type: field.TypeString, Size: 32, Comment: "funasr/whisper/xunfei/aliyun"},
 		{Name: "is_active", Type: field.TypeBool, Comment: "是否启用", Default: false},
 		{Name: "config_json", Type: field.TypeString, Size: 2147483647, Comment: "Provider 连接配置 JSON"},
@@ -37,7 +38,7 @@ var (
 			{
 				Name:    "asrproviderconfig_tenant_id_provider_name",
 				Unique:  true,
-				Columns: []*schema.Column{EvieAsrProviderConfigsColumns[4], EvieAsrProviderConfigsColumns[5]},
+				Columns: []*schema.Column{EvieAsrProviderConfigsColumns[4], EvieAsrProviderConfigsColumns[6]},
 			},
 		},
 	}
@@ -127,6 +128,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID（0=平台级全局共享，>0=租户隔离）", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "code", Type: field.TypeString, Size: 64, Comment: "分类编码: PERSON/ORGANIZATION/PRODUCT/LOCATION/PERSON_TITLE/BUSINESS_TERM/TECH_TERM/OTHER"},
 		{Name: "name", Type: field.TypeString, Size: 128, Comment: "分类名称"},
 		{Name: "builtin", Type: field.TypeBool, Comment: "是否内置分类（内置只读）", Default: false},
@@ -147,7 +149,7 @@ var (
 			{
 				Name:    "dictionarycategory_tenant_id_code",
 				Unique:  true,
-				Columns: []*schema.Column{EvieDictionaryCategoriesColumns[4], EvieDictionaryCategoriesColumns[5]},
+				Columns: []*schema.Column{EvieDictionaryCategoriesColumns[4], EvieDictionaryCategoriesColumns[6]},
 			},
 		},
 	}
@@ -196,6 +198,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID（0=平台级全局共享，>0=租户隔离）", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "input", Type: field.TypeString, Size: 255, Comment: "输入表达"},
 		{Name: "candidate", Type: field.TypeString, Size: 255, Comment: "候选结果"},
 		{Name: "source_scope", Type: field.TypeString, Size: 32, Comment: "来源作用域: PLATFORM/SYSTEM/TENANT"},
@@ -218,7 +221,7 @@ var (
 			{
 				Name:    "dictionaryconflict_tenant_id_input_source_scope_source_dictionary",
 				Unique:  true,
-				Columns: []*schema.Column{EvieDictionaryConflictsColumns[4], EvieDictionaryConflictsColumns[5], EvieDictionaryConflictsColumns[7], EvieDictionaryConflictsColumns[8]},
+				Columns: []*schema.Column{EvieDictionaryConflictsColumns[4], EvieDictionaryConflictsColumns[6], EvieDictionaryConflictsColumns[8], EvieDictionaryConflictsColumns[9]},
 			},
 		},
 	}
@@ -343,6 +346,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID（0=平台级全局共享，>0=租户隔离）", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "version_no", Type: field.TypeInt32, Comment: "版本号，递增", Default: 1},
 		{Name: "snapshot", Type: field.TypeString, Nullable: true, Comment: "词条/关系时点快照（JSON）", SchemaType: map[string]string{"mysql": "mediumtext"}},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 512, Comment: "版本说明"},
@@ -357,7 +361,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "evie_dictionary_versions_evie_dictionaries_versions",
-				Columns:    []*schema.Column{EvieDictionaryVersionsColumns[8]},
+				Columns:    []*schema.Column{EvieDictionaryVersionsColumns[9]},
 				RefColumns: []*schema.Column{EvieDictionariesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -371,7 +375,7 @@ var (
 			{
 				Name:    "dictionaryversion_tenant_id_dictionary_id_version_no",
 				Unique:  true,
-				Columns: []*schema.Column{EvieDictionaryVersionsColumns[4], EvieDictionaryVersionsColumns[8], EvieDictionaryVersionsColumns[5]},
+				Columns: []*schema.Column{EvieDictionaryVersionsColumns[4], EvieDictionaryVersionsColumns[9], EvieDictionaryVersionsColumns[6]},
 			},
 		},
 	}
@@ -436,6 +440,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID（0=平台级全局共享，>0=租户隔离）", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Size: 128, Comment: "策略名称"},
 		{Name: "mode", Type: field.TypeString, Size: 32, Comment: "模式: HIGH_PERFORMANCE/STANDARD/HIGH_ACCURACY", Default: "STANDARD"},
 		{Name: "text_cleaning", Type: field.TypeBool, Comment: "文本清洗开关", Default: true},
@@ -462,7 +467,7 @@ var (
 			{
 				Name:    "enhancementpolicy_tenant_id_name",
 				Unique:  true,
-				Columns: []*schema.Column{EvieEnhancementPoliciesColumns[4], EvieEnhancementPoliciesColumns[5]},
+				Columns: []*schema.Column{EvieEnhancementPoliciesColumns[4], EvieEnhancementPoliciesColumns[6]},
 			},
 		},
 	}
@@ -473,6 +478,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
 		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID（0=平台级全局共享，>0=租户隔离）", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Size: 128, Comment: "场景名称"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 512, Comment: "描述"},
 		{Name: "policy_id", Type: field.TypeUint32, Comment: "绑定策略 ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "serial"}},
@@ -486,7 +492,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "evie_enhancement_profiles_evie_enhancement_policies_profiles",
-				Columns:    []*schema.Column{EvieEnhancementProfilesColumns[7]},
+				Columns:    []*schema.Column{EvieEnhancementProfilesColumns[8]},
 				RefColumns: []*schema.Column{EvieEnhancementPoliciesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -500,7 +506,7 @@ var (
 			{
 				Name:    "enhancementprofile_tenant_id_name",
 				Unique:  true,
-				Columns: []*schema.Column{EvieEnhancementProfilesColumns[4], EvieEnhancementProfilesColumns[5]},
+				Columns: []*schema.Column{EvieEnhancementProfilesColumns[4], EvieEnhancementProfilesColumns[6]},
 			},
 		},
 	}

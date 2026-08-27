@@ -78,6 +78,26 @@ func (_u *DictionaryVersionUpdate) AddTenantID(v int32) *DictionaryVersionUpdate
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DictionaryVersionUpdate) SetDeletedAt(v time.Time) *DictionaryVersionUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DictionaryVersionUpdate) SetNillableDeletedAt(v *time.Time) *DictionaryVersionUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DictionaryVersionUpdate) ClearDeletedAt() *DictionaryVersionUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetDictionaryID sets the "dictionary_id" field.
 func (_u *DictionaryVersionUpdate) SetDictionaryID(v uint32) *DictionaryVersionUpdate {
 	_u.mutation.SetDictionaryID(v)
@@ -267,6 +287,12 @@ func (_u *DictionaryVersionUpdate) sqlSave(ctx context.Context) (_node int, err 
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(dictionaryversion.FieldTenantID, field.TypeUint32, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionaryversion.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dictionaryversion.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.VersionNo(); ok {
 		_spec.SetField(dictionaryversion.FieldVersionNo, field.TypeInt32, value)
 	}
@@ -381,6 +407,26 @@ func (_u *DictionaryVersionUpdateOne) SetNillableTenantID(v *uint32) *Dictionary
 // AddTenantID adds value to the "tenant_id" field.
 func (_u *DictionaryVersionUpdateOne) AddTenantID(v int32) *DictionaryVersionUpdateOne {
 	_u.mutation.AddTenantID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DictionaryVersionUpdateOne) SetDeletedAt(v time.Time) *DictionaryVersionUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DictionaryVersionUpdateOne) SetNillableDeletedAt(v *time.Time) *DictionaryVersionUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DictionaryVersionUpdateOne) ClearDeletedAt() *DictionaryVersionUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -602,6 +648,12 @@ func (_u *DictionaryVersionUpdateOne) sqlSave(ctx context.Context) (_node *Dicti
 	}
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(dictionaryversion.FieldTenantID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionaryversion.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dictionaryversion.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.VersionNo(); ok {
 		_spec.SetField(dictionaryversion.FieldVersionNo, field.TypeInt32, value)

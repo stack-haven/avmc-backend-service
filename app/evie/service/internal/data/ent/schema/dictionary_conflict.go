@@ -43,6 +43,7 @@ func (DictionaryConflict) Fields() []ent.Field {
 func (DictionaryConflict) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

@@ -61,6 +61,7 @@ type AsrProviderConfigMutation struct {
 	addstatus      *int32
 	tenant_id      *uint32
 	addtenant_id   *int32
+	deleted_at     *time.Time
 	provider_name  *string
 	is_active      *bool
 	config_json    *string
@@ -361,6 +362,55 @@ func (m *AsrProviderConfigMutation) ResetTenantID() {
 	m.addtenant_id = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *AsrProviderConfigMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *AsrProviderConfigMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the AsrProviderConfig entity.
+// If the AsrProviderConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AsrProviderConfigMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *AsrProviderConfigMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[asrproviderconfig.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *AsrProviderConfigMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[asrproviderconfig.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *AsrProviderConfigMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, asrproviderconfig.FieldDeletedAt)
+}
+
 // SetProviderName sets the "provider_name" field.
 func (m *AsrProviderConfigMutation) SetProviderName(s string) {
 	m.provider_name = &s
@@ -595,7 +645,7 @@ func (m *AsrProviderConfigMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AsrProviderConfigMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, asrproviderconfig.FieldCreatedAt)
 	}
@@ -607,6 +657,9 @@ func (m *AsrProviderConfigMutation) Fields() []string {
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, asrproviderconfig.FieldTenantID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, asrproviderconfig.FieldDeletedAt)
 	}
 	if m.provider_name != nil {
 		fields = append(fields, asrproviderconfig.FieldProviderName)
@@ -639,6 +692,8 @@ func (m *AsrProviderConfigMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case asrproviderconfig.FieldTenantID:
 		return m.TenantID()
+	case asrproviderconfig.FieldDeletedAt:
+		return m.DeletedAt()
 	case asrproviderconfig.FieldProviderName:
 		return m.ProviderName()
 	case asrproviderconfig.FieldIsActive:
@@ -666,6 +721,8 @@ func (m *AsrProviderConfigMutation) OldField(ctx context.Context, name string) (
 		return m.OldStatus(ctx)
 	case asrproviderconfig.FieldTenantID:
 		return m.OldTenantID(ctx)
+	case asrproviderconfig.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case asrproviderconfig.FieldProviderName:
 		return m.OldProviderName(ctx)
 	case asrproviderconfig.FieldIsActive:
@@ -712,6 +769,13 @@ func (m *AsrProviderConfigMutation) SetField(name string, value ent.Value) error
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTenantID(v)
+		return nil
+	case asrproviderconfig.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case asrproviderconfig.FieldProviderName:
 		v, ok := value.(string)
@@ -816,7 +880,11 @@ func (m *AsrProviderConfigMutation) AddField(name string, value ent.Value) error
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AsrProviderConfigMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(asrproviderconfig.FieldDeletedAt) {
+		fields = append(fields, asrproviderconfig.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -829,6 +897,11 @@ func (m *AsrProviderConfigMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AsrProviderConfigMutation) ClearField(name string) error {
+	switch name {
+	case asrproviderconfig.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown AsrProviderConfig nullable field %s", name)
 }
 
@@ -847,6 +920,9 @@ func (m *AsrProviderConfigMutation) ResetField(name string) error {
 		return nil
 	case asrproviderconfig.FieldTenantID:
 		m.ResetTenantID()
+		return nil
+	case asrproviderconfig.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case asrproviderconfig.FieldProviderName:
 		m.ResetProviderName()
@@ -3273,6 +3349,7 @@ type DictionaryCategoryMutation struct {
 	addstatus     *int32
 	tenant_id     *uint32
 	addtenant_id  *int32
+	deleted_at    *time.Time
 	code          *string
 	name          *string
 	builtin       *bool
@@ -3572,6 +3649,55 @@ func (m *DictionaryCategoryMutation) ResetTenantID() {
 	m.addtenant_id = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DictionaryCategoryMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DictionaryCategoryMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the DictionaryCategory entity.
+// If the DictionaryCategory object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DictionaryCategoryMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *DictionaryCategoryMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[dictionarycategory.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *DictionaryCategoryMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[dictionarycategory.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DictionaryCategoryMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, dictionarycategory.FieldDeletedAt)
+}
+
 // SetCode sets the "code" field.
 func (m *DictionaryCategoryMutation) SetCode(s string) {
 	m.code = &s
@@ -3770,7 +3896,7 @@ func (m *DictionaryCategoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DictionaryCategoryMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, dictionarycategory.FieldCreatedAt)
 	}
@@ -3782,6 +3908,9 @@ func (m *DictionaryCategoryMutation) Fields() []string {
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, dictionarycategory.FieldTenantID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, dictionarycategory.FieldDeletedAt)
 	}
 	if m.code != nil {
 		fields = append(fields, dictionarycategory.FieldCode)
@@ -3811,6 +3940,8 @@ func (m *DictionaryCategoryMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case dictionarycategory.FieldTenantID:
 		return m.TenantID()
+	case dictionarycategory.FieldDeletedAt:
+		return m.DeletedAt()
 	case dictionarycategory.FieldCode:
 		return m.Code()
 	case dictionarycategory.FieldName:
@@ -3836,6 +3967,8 @@ func (m *DictionaryCategoryMutation) OldField(ctx context.Context, name string) 
 		return m.OldStatus(ctx)
 	case dictionarycategory.FieldTenantID:
 		return m.OldTenantID(ctx)
+	case dictionarycategory.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case dictionarycategory.FieldCode:
 		return m.OldCode(ctx)
 	case dictionarycategory.FieldName:
@@ -3880,6 +4013,13 @@ func (m *DictionaryCategoryMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTenantID(v)
+		return nil
+	case dictionarycategory.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case dictionarycategory.FieldCode:
 		v, ok := value.(string)
@@ -3977,7 +4117,11 @@ func (m *DictionaryCategoryMutation) AddField(name string, value ent.Value) erro
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DictionaryCategoryMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(dictionarycategory.FieldDeletedAt) {
+		fields = append(fields, dictionarycategory.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3990,6 +4134,11 @@ func (m *DictionaryCategoryMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DictionaryCategoryMutation) ClearField(name string) error {
+	switch name {
+	case dictionarycategory.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown DictionaryCategory nullable field %s", name)
 }
 
@@ -4008,6 +4157,9 @@ func (m *DictionaryCategoryMutation) ResetField(name string) error {
 		return nil
 	case dictionarycategory.FieldTenantID:
 		m.ResetTenantID()
+		return nil
+	case dictionarycategory.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case dictionarycategory.FieldCode:
 		m.ResetCode()
@@ -5099,6 +5251,7 @@ type DictionaryConflictMutation struct {
 	addstatus          *int32
 	tenant_id          *uint32
 	addtenant_id       *int32
+	deleted_at         *time.Time
 	input              *string
 	candidate          *string
 	source_scope       *string
@@ -5400,6 +5553,55 @@ func (m *DictionaryConflictMutation) ResetTenantID() {
 	m.addtenant_id = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DictionaryConflictMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DictionaryConflictMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the DictionaryConflict entity.
+// If the DictionaryConflict object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DictionaryConflictMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *DictionaryConflictMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[dictionaryconflict.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *DictionaryConflictMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[dictionaryconflict.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DictionaryConflictMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, dictionaryconflict.FieldDeletedAt)
+}
+
 // SetInput sets the "input" field.
 func (m *DictionaryConflictMutation) SetInput(s string) {
 	m.input = &s
@@ -5683,7 +5885,7 @@ func (m *DictionaryConflictMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DictionaryConflictMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, dictionaryconflict.FieldCreatedAt)
 	}
@@ -5695,6 +5897,9 @@ func (m *DictionaryConflictMutation) Fields() []string {
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, dictionaryconflict.FieldTenantID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, dictionaryconflict.FieldDeletedAt)
 	}
 	if m.input != nil {
 		fields = append(fields, dictionaryconflict.FieldInput)
@@ -5730,6 +5935,8 @@ func (m *DictionaryConflictMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case dictionaryconflict.FieldTenantID:
 		return m.TenantID()
+	case dictionaryconflict.FieldDeletedAt:
+		return m.DeletedAt()
 	case dictionaryconflict.FieldInput:
 		return m.Input()
 	case dictionaryconflict.FieldCandidate:
@@ -5759,6 +5966,8 @@ func (m *DictionaryConflictMutation) OldField(ctx context.Context, name string) 
 		return m.OldStatus(ctx)
 	case dictionaryconflict.FieldTenantID:
 		return m.OldTenantID(ctx)
+	case dictionaryconflict.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case dictionaryconflict.FieldInput:
 		return m.OldInput(ctx)
 	case dictionaryconflict.FieldCandidate:
@@ -5807,6 +6016,13 @@ func (m *DictionaryConflictMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTenantID(v)
+		return nil
+	case dictionaryconflict.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case dictionaryconflict.FieldInput:
 		v, ok := value.(string)
@@ -5919,6 +6135,9 @@ func (m *DictionaryConflictMutation) AddField(name string, value ent.Value) erro
 // mutation.
 func (m *DictionaryConflictMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(dictionaryconflict.FieldDeletedAt) {
+		fields = append(fields, dictionaryconflict.FieldDeletedAt)
+	}
 	if m.FieldCleared(dictionaryconflict.FieldResolvedCandidate) {
 		fields = append(fields, dictionaryconflict.FieldResolvedCandidate)
 	}
@@ -5936,6 +6155,9 @@ func (m *DictionaryConflictMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *DictionaryConflictMutation) ClearField(name string) error {
 	switch name {
+	case dictionaryconflict.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case dictionaryconflict.FieldResolvedCandidate:
 		m.ClearResolvedCandidate()
 		return nil
@@ -5958,6 +6180,9 @@ func (m *DictionaryConflictMutation) ResetField(name string) error {
 		return nil
 	case dictionaryconflict.FieldTenantID:
 		m.ResetTenantID()
+		return nil
+	case dictionaryconflict.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case dictionaryconflict.FieldInput:
 		m.ResetInput()
@@ -8630,6 +8855,7 @@ type DictionaryVersionMutation struct {
 	addstatus         *int32
 	tenant_id         *uint32
 	addtenant_id      *int32
+	deleted_at        *time.Time
 	version_no        *int32
 	addversion_no     *int32
 	snapshot          *string
@@ -8930,6 +9156,55 @@ func (m *DictionaryVersionMutation) ResetTenantID() {
 	m.addtenant_id = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DictionaryVersionMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DictionaryVersionMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the DictionaryVersion entity.
+// If the DictionaryVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DictionaryVersionMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *DictionaryVersionMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[dictionaryversion.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *DictionaryVersionMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[dictionaryversion.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DictionaryVersionMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, dictionaryversion.FieldDeletedAt)
+}
+
 // SetDictionaryID sets the "dictionary_id" field.
 func (m *DictionaryVersionMutation) SetDictionaryID(u uint32) {
 	m.dictionary = &u
@@ -9181,7 +9456,7 @@ func (m *DictionaryVersionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DictionaryVersionMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, dictionaryversion.FieldCreatedAt)
 	}
@@ -9193,6 +9468,9 @@ func (m *DictionaryVersionMutation) Fields() []string {
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, dictionaryversion.FieldTenantID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, dictionaryversion.FieldDeletedAt)
 	}
 	if m.dictionary != nil {
 		fields = append(fields, dictionaryversion.FieldDictionaryID)
@@ -9222,6 +9500,8 @@ func (m *DictionaryVersionMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case dictionaryversion.FieldTenantID:
 		return m.TenantID()
+	case dictionaryversion.FieldDeletedAt:
+		return m.DeletedAt()
 	case dictionaryversion.FieldDictionaryID:
 		return m.DictionaryID()
 	case dictionaryversion.FieldVersionNo:
@@ -9247,6 +9527,8 @@ func (m *DictionaryVersionMutation) OldField(ctx context.Context, name string) (
 		return m.OldStatus(ctx)
 	case dictionaryversion.FieldTenantID:
 		return m.OldTenantID(ctx)
+	case dictionaryversion.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case dictionaryversion.FieldDictionaryID:
 		return m.OldDictionaryID(ctx)
 	case dictionaryversion.FieldVersionNo:
@@ -9291,6 +9573,13 @@ func (m *DictionaryVersionMutation) SetField(name string, value ent.Value) error
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTenantID(v)
+		return nil
+	case dictionaryversion.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case dictionaryversion.FieldDictionaryID:
 		v, ok := value.(uint32)
@@ -9389,6 +9678,9 @@ func (m *DictionaryVersionMutation) AddField(name string, value ent.Value) error
 // mutation.
 func (m *DictionaryVersionMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(dictionaryversion.FieldDeletedAt) {
+		fields = append(fields, dictionaryversion.FieldDeletedAt)
+	}
 	if m.FieldCleared(dictionaryversion.FieldSnapshot) {
 		fields = append(fields, dictionaryversion.FieldSnapshot)
 	}
@@ -9409,6 +9701,9 @@ func (m *DictionaryVersionMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *DictionaryVersionMutation) ClearField(name string) error {
 	switch name {
+	case dictionaryversion.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case dictionaryversion.FieldSnapshot:
 		m.ClearSnapshot()
 		return nil
@@ -9434,6 +9729,9 @@ func (m *DictionaryVersionMutation) ResetField(name string) error {
 		return nil
 	case dictionaryversion.FieldTenantID:
 		m.ResetTenantID()
+		return nil
+	case dictionaryversion.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case dictionaryversion.FieldDictionaryID:
 		m.ResetDictionaryID()
@@ -11865,6 +12163,7 @@ type EnhancementPolicyMutation struct {
 	addstatus                 *int32
 	tenant_id                 *uint32
 	addtenant_id              *int32
+	deleted_at                *time.Time
 	name                      *string
 	mode                      *string
 	text_cleaning             *bool
@@ -12170,6 +12469,55 @@ func (m *EnhancementPolicyMutation) AddedTenantID() (r int32, exists bool) {
 func (m *EnhancementPolicyMutation) ResetTenantID() {
 	m.tenant_id = nil
 	m.addtenant_id = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *EnhancementPolicyMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *EnhancementPolicyMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the EnhancementPolicy entity.
+// If the EnhancementPolicy object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnhancementPolicyMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *EnhancementPolicyMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[enhancementpolicy.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *EnhancementPolicyMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[enhancementpolicy.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *EnhancementPolicyMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, enhancementpolicy.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -12633,7 +12981,7 @@ func (m *EnhancementPolicyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EnhancementPolicyMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, enhancementpolicy.FieldCreatedAt)
 	}
@@ -12645,6 +12993,9 @@ func (m *EnhancementPolicyMutation) Fields() []string {
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, enhancementpolicy.FieldTenantID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, enhancementpolicy.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, enhancementpolicy.FieldName)
@@ -12692,6 +13043,8 @@ func (m *EnhancementPolicyMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case enhancementpolicy.FieldTenantID:
 		return m.TenantID()
+	case enhancementpolicy.FieldDeletedAt:
+		return m.DeletedAt()
 	case enhancementpolicy.FieldName:
 		return m.Name()
 	case enhancementpolicy.FieldMode:
@@ -12729,6 +13082,8 @@ func (m *EnhancementPolicyMutation) OldField(ctx context.Context, name string) (
 		return m.OldStatus(ctx)
 	case enhancementpolicy.FieldTenantID:
 		return m.OldTenantID(ctx)
+	case enhancementpolicy.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case enhancementpolicy.FieldName:
 		return m.OldName(ctx)
 	case enhancementpolicy.FieldMode:
@@ -12785,6 +13140,13 @@ func (m *EnhancementPolicyMutation) SetField(name string, value ent.Value) error
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTenantID(v)
+		return nil
+	case enhancementpolicy.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case enhancementpolicy.FieldName:
 		v, ok := value.(string)
@@ -12913,6 +13275,9 @@ func (m *EnhancementPolicyMutation) AddField(name string, value ent.Value) error
 // mutation.
 func (m *EnhancementPolicyMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(enhancementpolicy.FieldDeletedAt) {
+		fields = append(fields, enhancementpolicy.FieldDeletedAt)
+	}
 	if m.FieldCleared(enhancementpolicy.FieldDescription) {
 		fields = append(fields, enhancementpolicy.FieldDescription)
 	}
@@ -12930,6 +13295,9 @@ func (m *EnhancementPolicyMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *EnhancementPolicyMutation) ClearField(name string) error {
 	switch name {
+	case enhancementpolicy.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case enhancementpolicy.FieldDescription:
 		m.ClearDescription()
 		return nil
@@ -12952,6 +13320,9 @@ func (m *EnhancementPolicyMutation) ResetField(name string) error {
 		return nil
 	case enhancementpolicy.FieldTenantID:
 		m.ResetTenantID()
+		return nil
+	case enhancementpolicy.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case enhancementpolicy.FieldName:
 		m.ResetName()
@@ -13083,6 +13454,7 @@ type EnhancementProfileMutation struct {
 	addstatus     *int32
 	tenant_id     *uint32
 	addtenant_id  *int32
+	deleted_at    *time.Time
 	name          *string
 	description   *string
 	clearedFields map[string]struct{}
@@ -13381,6 +13753,55 @@ func (m *EnhancementProfileMutation) ResetTenantID() {
 	m.addtenant_id = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *EnhancementProfileMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *EnhancementProfileMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the EnhancementProfile entity.
+// If the EnhancementProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnhancementProfileMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *EnhancementProfileMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[enhancementprofile.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *EnhancementProfileMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[enhancementprofile.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *EnhancementProfileMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, enhancementprofile.FieldDeletedAt)
+}
+
 // SetPolicyID sets the "policy_id" field.
 func (m *EnhancementProfileMutation) SetPolicyID(u uint32) {
 	m.policy = &u
@@ -13563,7 +13984,7 @@ func (m *EnhancementProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EnhancementProfileMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, enhancementprofile.FieldCreatedAt)
 	}
@@ -13575,6 +13996,9 @@ func (m *EnhancementProfileMutation) Fields() []string {
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, enhancementprofile.FieldTenantID)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, enhancementprofile.FieldDeletedAt)
 	}
 	if m.policy != nil {
 		fields = append(fields, enhancementprofile.FieldPolicyID)
@@ -13601,6 +14025,8 @@ func (m *EnhancementProfileMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case enhancementprofile.FieldTenantID:
 		return m.TenantID()
+	case enhancementprofile.FieldDeletedAt:
+		return m.DeletedAt()
 	case enhancementprofile.FieldPolicyID:
 		return m.PolicyID()
 	case enhancementprofile.FieldName:
@@ -13624,6 +14050,8 @@ func (m *EnhancementProfileMutation) OldField(ctx context.Context, name string) 
 		return m.OldStatus(ctx)
 	case enhancementprofile.FieldTenantID:
 		return m.OldTenantID(ctx)
+	case enhancementprofile.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case enhancementprofile.FieldPolicyID:
 		return m.OldPolicyID(ctx)
 	case enhancementprofile.FieldName:
@@ -13666,6 +14094,13 @@ func (m *EnhancementProfileMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTenantID(v)
+		return nil
+	case enhancementprofile.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case enhancementprofile.FieldPolicyID:
 		v, ok := value.(uint32)
@@ -13745,6 +14180,9 @@ func (m *EnhancementProfileMutation) AddField(name string, value ent.Value) erro
 // mutation.
 func (m *EnhancementProfileMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(enhancementprofile.FieldDeletedAt) {
+		fields = append(fields, enhancementprofile.FieldDeletedAt)
+	}
 	if m.FieldCleared(enhancementprofile.FieldDescription) {
 		fields = append(fields, enhancementprofile.FieldDescription)
 	}
@@ -13762,6 +14200,9 @@ func (m *EnhancementProfileMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *EnhancementProfileMutation) ClearField(name string) error {
 	switch name {
+	case enhancementprofile.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case enhancementprofile.FieldDescription:
 		m.ClearDescription()
 		return nil
@@ -13784,6 +14225,9 @@ func (m *EnhancementProfileMutation) ResetField(name string) error {
 		return nil
 	case enhancementprofile.FieldTenantID:
 		m.ResetTenantID()
+		return nil
+	case enhancementprofile.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case enhancementprofile.FieldPolicyID:
 		m.ResetPolicyID()

@@ -26,6 +26,8 @@ type DictionaryCategory struct {
 	Status *int32 `json:"status,omitempty"`
 	// 租户ID（0=平台级全局共享，>0=租户隔离）
 	TenantID uint32 `json:"tenant_id,omitempty"`
+	// 删除时间
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 分类编码: PERSON/ORGANIZATION/PRODUCT/LOCATION/PERSON_TITLE/BUSINESS_TERM/TECH_TERM/OTHER
 	Code string `json:"code,omitempty"`
 	// 分类名称
@@ -48,7 +50,7 @@ func (*DictionaryCategory) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case dictionarycategory.FieldCode, dictionarycategory.FieldName:
 			values[i] = new(sql.NullString)
-		case dictionarycategory.FieldCreatedAt, dictionarycategory.FieldUpdatedAt:
+		case dictionarycategory.FieldCreatedAt, dictionarycategory.FieldUpdatedAt, dictionarycategory.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -95,6 +97,13 @@ func (_m *DictionaryCategory) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
 				_m.TenantID = uint32(value.Int64)
+			}
+		case dictionarycategory.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case dictionarycategory.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -169,6 +178,11 @@ func (_m *DictionaryCategory) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(_m.Code)

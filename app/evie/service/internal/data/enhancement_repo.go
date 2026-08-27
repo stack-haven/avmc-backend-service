@@ -142,9 +142,10 @@ func (r *enhancementPolicyRepo) UpdatePolicy(ctx context.Context, p *pb.Enhancem
 	return r.GetPolicy(ctx, p.GetId())
 }
 
-// DeletePolicy 删除策略。
+// DeletePolicy 软删除策略。
 func (r *enhancementPolicyRepo) DeletePolicy(ctx context.Context, id uint32) error {
-	if err := r.Data.DB(ctx).EnhancementPolicy.DeleteOneID(id).Exec(ctx); gen.IsNotFound(err) {
+	now := time.Now()
+	if err := r.Data.DB(ctx).EnhancementPolicy.UpdateOneID(id).SetDeletedAt(now).Exec(ctx); gen.IsNotFound(err) {
 		return errors.NotFound("ENHANCEMENT_POLICY_NOT_FOUND", "增强策略不存在")
 	} else if err != nil {
 		return err
@@ -223,9 +224,10 @@ func (r *enhancementPolicyRepo) UpdateProfile(ctx context.Context, p *pb.Enhance
 	return r.GetProfile(ctx, p.GetId())
 }
 
-// DeleteProfile 删除场景。
+// DeleteProfile 软删除场景。
 func (r *enhancementPolicyRepo) DeleteProfile(ctx context.Context, id uint32) error {
-	if err := r.Data.DB(ctx).EnhancementProfile.DeleteOneID(id).Exec(ctx); gen.IsNotFound(err) {
+	now := time.Now()
+	if err := r.Data.DB(ctx).EnhancementProfile.UpdateOneID(id).SetDeletedAt(now).Exec(ctx); gen.IsNotFound(err) {
 		return errors.NotFound("ENHANCEMENT_PROFILE_NOT_FOUND", "增强场景不存在")
 	} else if err != nil {
 		return err

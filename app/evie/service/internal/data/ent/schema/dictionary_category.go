@@ -41,6 +41,7 @@ func (DictionaryCategory) Fields() []ent.Field {
 func (DictionaryCategory) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

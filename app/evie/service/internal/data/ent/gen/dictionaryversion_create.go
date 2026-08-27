@@ -71,6 +71,20 @@ func (_c *DictionaryVersionCreate) SetTenantID(v uint32) *DictionaryVersionCreat
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *DictionaryVersionCreate) SetDeletedAt(v time.Time) *DictionaryVersionCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *DictionaryVersionCreate) SetNillableDeletedAt(v *time.Time) *DictionaryVersionCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetDictionaryID sets the "dictionary_id" field.
 func (_c *DictionaryVersionCreate) SetDictionaryID(v uint32) *DictionaryVersionCreate {
 	_c.mutation.SetDictionaryID(v)
@@ -284,6 +298,10 @@ func (_c *DictionaryVersionCreate) createSpec() (*DictionaryVersion, *sqlgraph.C
 		_spec.SetField(dictionaryversion.FieldTenantID, field.TypeUint32, value)
 		_node.TenantID = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionaryversion.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.VersionNo(); ok {
 		_spec.SetField(dictionaryversion.FieldVersionNo, field.TypeInt32, value)
 		_node.VersionNo = value
@@ -410,6 +428,24 @@ func (u *DictionaryVersionUpsert) UpdateTenantID() *DictionaryVersionUpsert {
 // AddTenantID adds v to the "tenant_id" field.
 func (u *DictionaryVersionUpsert) AddTenantID(v uint32) *DictionaryVersionUpsert {
 	u.Add(dictionaryversion.FieldTenantID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryVersionUpsert) SetDeletedAt(v time.Time) *DictionaryVersionUpsert {
+	u.Set(dictionaryversion.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryVersionUpsert) UpdateDeletedAt() *DictionaryVersionUpsert {
+	u.SetExcluded(dictionaryversion.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryVersionUpsert) ClearDeletedAt() *DictionaryVersionUpsert {
+	u.SetNull(dictionaryversion.FieldDeletedAt)
 	return u
 }
 
@@ -583,6 +619,27 @@ func (u *DictionaryVersionUpsertOne) AddTenantID(v uint32) *DictionaryVersionUps
 func (u *DictionaryVersionUpsertOne) UpdateTenantID() *DictionaryVersionUpsertOne {
 	return u.Update(func(s *DictionaryVersionUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryVersionUpsertOne) SetDeletedAt(v time.Time) *DictionaryVersionUpsertOne {
+	return u.Update(func(s *DictionaryVersionUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryVersionUpsertOne) UpdateDeletedAt() *DictionaryVersionUpsertOne {
+	return u.Update(func(s *DictionaryVersionUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryVersionUpsertOne) ClearDeletedAt() *DictionaryVersionUpsertOne {
+	return u.Update(func(s *DictionaryVersionUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -933,6 +990,27 @@ func (u *DictionaryVersionUpsertBulk) AddTenantID(v uint32) *DictionaryVersionUp
 func (u *DictionaryVersionUpsertBulk) UpdateTenantID() *DictionaryVersionUpsertBulk {
 	return u.Update(func(s *DictionaryVersionUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryVersionUpsertBulk) SetDeletedAt(v time.Time) *DictionaryVersionUpsertBulk {
+	return u.Update(func(s *DictionaryVersionUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryVersionUpsertBulk) UpdateDeletedAt() *DictionaryVersionUpsertBulk {
+	return u.Update(func(s *DictionaryVersionUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryVersionUpsertBulk) ClearDeletedAt() *DictionaryVersionUpsertBulk {
+	return u.Update(func(s *DictionaryVersionUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

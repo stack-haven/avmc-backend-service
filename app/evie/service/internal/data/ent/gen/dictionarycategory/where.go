@@ -74,6 +74,11 @@ func TenantID(v uint32) predicate.DictionaryCategory {
 	return predicate.DictionaryCategory(sql.FieldEQ(FieldTenantID, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
 func Code(v string) predicate.DictionaryCategory {
 	return predicate.DictionaryCategory(sql.FieldEQ(FieldCode, v))
@@ -252,6 +257,56 @@ func TenantIDLT(v uint32) predicate.DictionaryCategory {
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
 func TenantIDLTE(v uint32) predicate.DictionaryCategory {
 	return predicate.DictionaryCategory(sql.FieldLTE(FieldTenantID, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.DictionaryCategory {
+	return predicate.DictionaryCategory(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // CodeEQ applies the EQ predicate on the "code" field.

@@ -418,7 +418,8 @@ func (c *AsrProviderConfigClient) Hooks() []Hook {
 
 // Interceptors returns the client interceptors.
 func (c *AsrProviderConfigClient) Interceptors() []Interceptor {
-	return c.inters.AsrProviderConfig
+	inters := c.inters.AsrProviderConfig
+	return append(inters[:len(inters):len(inters)], asrproviderconfig.Interceptors[:]...)
 }
 
 func (c *AsrProviderConfigClient) mutate(ctx context.Context, m *AsrProviderConfigMutation) (Value, error) {
@@ -853,7 +854,8 @@ func (c *DictionaryCategoryClient) Hooks() []Hook {
 
 // Interceptors returns the client interceptors.
 func (c *DictionaryCategoryClient) Interceptors() []Interceptor {
-	return c.inters.DictionaryCategory
+	inters := c.inters.DictionaryCategory
+	return append(inters[:len(inters):len(inters)], dictionarycategory.Interceptors[:]...)
 }
 
 func (c *DictionaryCategoryClient) mutate(ctx context.Context, m *DictionaryCategoryMutation) (Value, error) {
@@ -1121,7 +1123,8 @@ func (c *DictionaryConflictClient) Hooks() []Hook {
 
 // Interceptors returns the client interceptors.
 func (c *DictionaryConflictClient) Interceptors() []Interceptor {
-	return c.inters.DictionaryConflict
+	inters := c.inters.DictionaryConflict
+	return append(inters[:len(inters):len(inters)], dictionaryconflict.Interceptors[:]...)
 }
 
 func (c *DictionaryConflictClient) mutate(ctx context.Context, m *DictionaryConflictMutation) (Value, error) {
@@ -1589,7 +1592,8 @@ func (c *DictionaryVersionClient) Hooks() []Hook {
 
 // Interceptors returns the client interceptors.
 func (c *DictionaryVersionClient) Interceptors() []Interceptor {
-	return c.inters.DictionaryVersion
+	inters := c.inters.DictionaryVersion
+	return append(inters[:len(inters):len(inters)], dictionaryversion.Interceptors[:]...)
 }
 
 func (c *DictionaryVersionClient) mutate(ctx context.Context, m *DictionaryVersionMutation) (Value, error) {
@@ -1873,7 +1877,8 @@ func (c *EnhancementPolicyClient) Hooks() []Hook {
 
 // Interceptors returns the client interceptors.
 func (c *EnhancementPolicyClient) Interceptors() []Interceptor {
-	return c.inters.EnhancementPolicy
+	inters := c.inters.EnhancementPolicy
+	return append(inters[:len(inters):len(inters)], enhancementpolicy.Interceptors[:]...)
 }
 
 func (c *EnhancementPolicyClient) mutate(ctx context.Context, m *EnhancementPolicyMutation) (Value, error) {
@@ -2023,7 +2028,8 @@ func (c *EnhancementProfileClient) Hooks() []Hook {
 
 // Interceptors returns the client interceptors.
 func (c *EnhancementProfileClient) Interceptors() []Interceptor {
-	return c.inters.EnhancementProfile
+	inters := c.inters.EnhancementProfile
+	return append(inters[:len(inters):len(inters)], enhancementprofile.Interceptors[:]...)
 }
 
 func (c *EnhancementProfileClient) mutate(ctx context.Context, m *EnhancementProfileMutation) (Value, error) {

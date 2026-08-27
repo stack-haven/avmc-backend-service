@@ -27,6 +27,8 @@ type EnhancementProfile struct {
 	Status *int32 `json:"status,omitempty"`
 	// 租户ID（0=平台级全局共享，>0=租户隔离）
 	TenantID uint32 `json:"tenant_id,omitempty"`
+	// 删除时间
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 绑定策略 ID
 	PolicyID uint32 `json:"policy_id,omitempty"`
 	// 场景名称
@@ -68,7 +70,7 @@ func (*EnhancementProfile) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case enhancementprofile.FieldName, enhancementprofile.FieldDescription:
 			values[i] = new(sql.NullString)
-		case enhancementprofile.FieldCreatedAt, enhancementprofile.FieldUpdatedAt:
+		case enhancementprofile.FieldCreatedAt, enhancementprofile.FieldUpdatedAt, enhancementprofile.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -115,6 +117,13 @@ func (_m *EnhancementProfile) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
 				_m.TenantID = uint32(value.Int64)
+			}
+		case enhancementprofile.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case enhancementprofile.FieldPolicyID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -188,6 +197,11 @@ func (_m *EnhancementProfile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("policy_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PolicyID))

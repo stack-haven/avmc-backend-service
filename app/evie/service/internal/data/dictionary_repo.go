@@ -747,7 +747,7 @@ func (r *dictionaryRepo) UpdateCategory(ctx context.Context, cat *pb.DictionaryC
 	return r.categoryByID(ctx, cat.GetId())
 }
 
-// DeleteCategory 删除分类（仅自定义，内置只读）。
+// DeleteCategory 软删除分类（仅自定义，内置只读）。
 func (r *dictionaryRepo) DeleteCategory(ctx context.Context, id uint32) error {
 	row, err := r.Data.DB(ctx).DictionaryCategory.Query().
 		Where(dictionarycategory.IDEQ(id)).
@@ -761,7 +761,8 @@ func (r *dictionaryRepo) DeleteCategory(ctx context.Context, id uint32) error {
 	if row.Builtin {
 		return errors.Forbidden("DICTIONARY_CATEGORY_BUILTIN", "内置分类不可删除")
 	}
-	return r.Data.DB(ctx).DictionaryCategory.DeleteOneID(id).Exec(ctx)
+	now := time.Now()
+	return r.Data.DB(ctx).DictionaryCategory.UpdateOneID(id).SetDeletedAt(now).Exec(ctx)
 }
 
 func (r *dictionaryRepo) categoryByID(ctx context.Context, id uint32) (*pb.DictionaryCategory, error) {

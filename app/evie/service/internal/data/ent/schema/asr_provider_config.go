@@ -40,7 +40,7 @@ func (AsrProviderConfig) Fields() []ent.Field {
 
 // Mixin of the AsrProviderConfig.
 func (AsrProviderConfig) Mixin() []ent.Mixin {
-	return []ent.Mixin{mixins.BaseMixin{}} // 无软删除
+	return []ent.Mixin{mixins.BaseMixin{}, mixins.SoftDeleteMixin{}}
 }
 
 // Indexes of the AsrProviderConfig.

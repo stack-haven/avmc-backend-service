@@ -51,6 +51,7 @@ func (DictionaryVersion) Edges() []ent.Edge {
 func (DictionaryVersion) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

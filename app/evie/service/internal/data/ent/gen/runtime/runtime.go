@@ -37,6 +37,11 @@ func init() {
 			return next.Mutate(ctx, m)
 		})
 	}
+	asrproviderconfigMixinHooks1 := asrproviderconfigMixin[1].Hooks()
+
+	asrproviderconfig.Hooks[1] = asrproviderconfigMixinHooks1[0]
+	asrproviderconfigMixinInters1 := asrproviderconfigMixin[1].Interceptors()
+	asrproviderconfig.Interceptors[0] = asrproviderconfigMixinInters1[0]
 	asrproviderconfigMixinFields0 := asrproviderconfigMixin[0].Fields()
 	_ = asrproviderconfigMixinFields0
 	asrproviderconfigFields := schema.AsrProviderConfig{}.Fields()
@@ -272,6 +277,11 @@ func init() {
 			return next.Mutate(ctx, m)
 		})
 	}
+	dictionarycategoryMixinHooks1 := dictionarycategoryMixin[1].Hooks()
+
+	dictionarycategory.Hooks[1] = dictionarycategoryMixinHooks1[0]
+	dictionarycategoryMixinInters1 := dictionarycategoryMixin[1].Interceptors()
+	dictionarycategory.Interceptors[0] = dictionarycategoryMixinInters1[0]
 	dictionarycategoryMixinFields0 := dictionarycategoryMixin[0].Fields()
 	_ = dictionarycategoryMixinFields0
 	dictionarycategoryFields := schema.DictionaryCategory{}.Fields()
@@ -456,6 +466,11 @@ func init() {
 			return next.Mutate(ctx, m)
 		})
 	}
+	dictionaryconflictMixinHooks1 := dictionaryconflictMixin[1].Hooks()
+
+	dictionaryconflict.Hooks[1] = dictionaryconflictMixinHooks1[0]
+	dictionaryconflictMixinInters1 := dictionaryconflictMixin[1].Interceptors()
+	dictionaryconflict.Interceptors[0] = dictionaryconflictMixinInters1[0]
 	dictionaryconflictMixinFields0 := dictionaryconflictMixin[0].Fields()
 	_ = dictionaryconflictMixinFields0
 	dictionaryconflictFields := schema.DictionaryConflict{}.Fields()
@@ -776,6 +791,11 @@ func init() {
 			return next.Mutate(ctx, m)
 		})
 	}
+	dictionaryversionMixinHooks1 := dictionaryversionMixin[1].Hooks()
+
+	dictionaryversion.Hooks[1] = dictionaryversionMixinHooks1[0]
+	dictionaryversionMixinInters1 := dictionaryversionMixin[1].Interceptors()
+	dictionaryversion.Interceptors[0] = dictionaryversionMixinInters1[0]
 	dictionaryversionMixinFields0 := dictionaryversionMixin[0].Fields()
 	_ = dictionaryversionMixinFields0
 	dictionaryversionFields := schema.DictionaryVersion{}.Fields()
@@ -952,6 +972,11 @@ func init() {
 			return next.Mutate(ctx, m)
 		})
 	}
+	enhancementpolicyMixinHooks1 := enhancementpolicyMixin[1].Hooks()
+
+	enhancementpolicy.Hooks[1] = enhancementpolicyMixinHooks1[0]
+	enhancementpolicyMixinInters1 := enhancementpolicyMixin[1].Interceptors()
+	enhancementpolicy.Interceptors[0] = enhancementpolicyMixinInters1[0]
 	enhancementpolicyMixinFields0 := enhancementpolicyMixin[0].Fields()
 	_ = enhancementpolicyMixinFields0
 	enhancementpolicyFields := schema.EnhancementPolicy{}.Fields()
@@ -1056,6 +1081,11 @@ func init() {
 			return next.Mutate(ctx, m)
 		})
 	}
+	enhancementprofileMixinHooks1 := enhancementprofileMixin[1].Hooks()
+
+	enhancementprofile.Hooks[1] = enhancementprofileMixinHooks1[0]
+	enhancementprofileMixinInters1 := enhancementprofileMixin[1].Interceptors()
+	enhancementprofile.Interceptors[0] = enhancementprofileMixinInters1[0]
 	enhancementprofileMixinFields0 := enhancementprofileMixin[0].Fields()
 	_ = enhancementprofileMixinFields0
 	enhancementprofileFields := schema.EnhancementProfile{}.Fields()

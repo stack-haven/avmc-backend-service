@@ -47,6 +47,7 @@ func (EnhancementPolicy) Fields() []ent.Field {
 func (EnhancementPolicy) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

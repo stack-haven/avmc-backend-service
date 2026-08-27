@@ -71,6 +71,20 @@ func (_c *EnhancementPolicyCreate) SetTenantID(v uint32) *EnhancementPolicyCreat
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *EnhancementPolicyCreate) SetDeletedAt(v time.Time) *EnhancementPolicyCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *EnhancementPolicyCreate) SetNillableDeletedAt(v *time.Time) *EnhancementPolicyCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *EnhancementPolicyCreate) SetName(v string) *EnhancementPolicyCreate {
 	_c.mutation.SetName(v)
@@ -429,6 +443,10 @@ func (_c *EnhancementPolicyCreate) createSpec() (*EnhancementPolicy, *sqlgraph.C
 		_spec.SetField(enhancementpolicy.FieldTenantID, field.TypeUint32, value)
 		_node.TenantID = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(enhancementpolicy.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(enhancementpolicy.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -582,6 +600,24 @@ func (u *EnhancementPolicyUpsert) UpdateTenantID() *EnhancementPolicyUpsert {
 // AddTenantID adds v to the "tenant_id" field.
 func (u *EnhancementPolicyUpsert) AddTenantID(v uint32) *EnhancementPolicyUpsert {
 	u.Add(enhancementpolicy.FieldTenantID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *EnhancementPolicyUpsert) SetDeletedAt(v time.Time) *EnhancementPolicyUpsert {
+	u.Set(enhancementpolicy.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *EnhancementPolicyUpsert) UpdateDeletedAt() *EnhancementPolicyUpsert {
+	u.SetExcluded(enhancementpolicy.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *EnhancementPolicyUpsert) ClearDeletedAt() *EnhancementPolicyUpsert {
+	u.SetNull(enhancementpolicy.FieldDeletedAt)
 	return u
 }
 
@@ -815,6 +851,27 @@ func (u *EnhancementPolicyUpsertOne) AddTenantID(v uint32) *EnhancementPolicyUps
 func (u *EnhancementPolicyUpsertOne) UpdateTenantID() *EnhancementPolicyUpsertOne {
 	return u.Update(func(s *EnhancementPolicyUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *EnhancementPolicyUpsertOne) SetDeletedAt(v time.Time) *EnhancementPolicyUpsertOne {
+	return u.Update(func(s *EnhancementPolicyUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *EnhancementPolicyUpsertOne) UpdateDeletedAt() *EnhancementPolicyUpsertOne {
+	return u.Update(func(s *EnhancementPolicyUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *EnhancementPolicyUpsertOne) ClearDeletedAt() *EnhancementPolicyUpsertOne {
+	return u.Update(func(s *EnhancementPolicyUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -1235,6 +1292,27 @@ func (u *EnhancementPolicyUpsertBulk) AddTenantID(v uint32) *EnhancementPolicyUp
 func (u *EnhancementPolicyUpsertBulk) UpdateTenantID() *EnhancementPolicyUpsertBulk {
 	return u.Update(func(s *EnhancementPolicyUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *EnhancementPolicyUpsertBulk) SetDeletedAt(v time.Time) *EnhancementPolicyUpsertBulk {
+	return u.Update(func(s *EnhancementPolicyUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *EnhancementPolicyUpsertBulk) UpdateDeletedAt() *EnhancementPolicyUpsertBulk {
+	return u.Update(func(s *EnhancementPolicyUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *EnhancementPolicyUpsertBulk) ClearDeletedAt() *EnhancementPolicyUpsertBulk {
+	return u.Update(func(s *EnhancementPolicyUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

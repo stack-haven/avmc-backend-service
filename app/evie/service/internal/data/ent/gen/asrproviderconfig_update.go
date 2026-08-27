@@ -77,6 +77,26 @@ func (_u *AsrProviderConfigUpdate) AddTenantID(v int32) *AsrProviderConfigUpdate
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *AsrProviderConfigUpdate) SetDeletedAt(v time.Time) *AsrProviderConfigUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *AsrProviderConfigUpdate) SetNillableDeletedAt(v *time.Time) *AsrProviderConfigUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *AsrProviderConfigUpdate) ClearDeletedAt() *AsrProviderConfigUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetProviderName sets the "provider_name" field.
 func (_u *AsrProviderConfigUpdate) SetProviderName(v string) *AsrProviderConfigUpdate {
 	_u.mutation.SetProviderName(v)
@@ -254,6 +274,12 @@ func (_u *AsrProviderConfigUpdate) sqlSave(ctx context.Context) (_node int, err 
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(asrproviderconfig.FieldTenantID, field.TypeUint32, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(asrproviderconfig.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(asrproviderconfig.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.ProviderName(); ok {
 		_spec.SetField(asrproviderconfig.FieldProviderName, field.TypeString, value)
 	}
@@ -339,6 +365,26 @@ func (_u *AsrProviderConfigUpdateOne) SetNillableTenantID(v *uint32) *AsrProvide
 // AddTenantID adds value to the "tenant_id" field.
 func (_u *AsrProviderConfigUpdateOne) AddTenantID(v int32) *AsrProviderConfigUpdateOne {
 	_u.mutation.AddTenantID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *AsrProviderConfigUpdateOne) SetDeletedAt(v time.Time) *AsrProviderConfigUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *AsrProviderConfigUpdateOne) SetNillableDeletedAt(v *time.Time) *AsrProviderConfigUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *AsrProviderConfigUpdateOne) ClearDeletedAt() *AsrProviderConfigUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -548,6 +594,12 @@ func (_u *AsrProviderConfigUpdateOne) sqlSave(ctx context.Context) (_node *AsrPr
 	}
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(asrproviderconfig.FieldTenantID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(asrproviderconfig.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(asrproviderconfig.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.ProviderName(); ok {
 		_spec.SetField(asrproviderconfig.FieldProviderName, field.TypeString, value)

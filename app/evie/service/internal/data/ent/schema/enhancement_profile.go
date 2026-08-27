@@ -45,6 +45,7 @@ func (EnhancementProfile) Edges() []ent.Edge {
 func (EnhancementProfile) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.BaseMixin{},
+		mixins.SoftDeleteMixin{},
 	}
 }
 

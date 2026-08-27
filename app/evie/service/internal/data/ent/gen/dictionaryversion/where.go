@@ -75,6 +75,11 @@ func TenantID(v uint32) predicate.DictionaryVersion {
 	return predicate.DictionaryVersion(sql.FieldEQ(FieldTenantID, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // DictionaryID applies equality check predicate on the "dictionary_id" field. It's identical to DictionaryIDEQ.
 func DictionaryID(v uint32) predicate.DictionaryVersion {
 	return predicate.DictionaryVersion(sql.FieldEQ(FieldDictionaryID, v))
@@ -253,6 +258,56 @@ func TenantIDLT(v uint32) predicate.DictionaryVersion {
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
 func TenantIDLTE(v uint32) predicate.DictionaryVersion {
 	return predicate.DictionaryVersion(sql.FieldLTE(FieldTenantID, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.DictionaryVersion {
+	return predicate.DictionaryVersion(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // DictionaryIDEQ applies the EQ predicate on the "dictionary_id" field.

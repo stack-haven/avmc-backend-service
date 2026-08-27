@@ -70,6 +70,20 @@ func (_c *DictionaryCategoryCreate) SetTenantID(v uint32) *DictionaryCategoryCre
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *DictionaryCategoryCreate) SetDeletedAt(v time.Time) *DictionaryCategoryCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *DictionaryCategoryCreate) SetNillableDeletedAt(v *time.Time) *DictionaryCategoryCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetCode sets the "code" field.
 func (_c *DictionaryCategoryCreate) SetCode(v string) *DictionaryCategoryCreate {
 	_c.mutation.SetCode(v)
@@ -277,6 +291,10 @@ func (_c *DictionaryCategoryCreate) createSpec() (*DictionaryCategory, *sqlgraph
 		_spec.SetField(dictionarycategory.FieldTenantID, field.TypeUint32, value)
 		_node.TenantID = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionarycategory.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(dictionarycategory.FieldCode, field.TypeString, value)
 		_node.Code = value
@@ -390,6 +408,24 @@ func (u *DictionaryCategoryUpsert) UpdateTenantID() *DictionaryCategoryUpsert {
 // AddTenantID adds v to the "tenant_id" field.
 func (u *DictionaryCategoryUpsert) AddTenantID(v uint32) *DictionaryCategoryUpsert {
 	u.Add(dictionarycategory.FieldTenantID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryCategoryUpsert) SetDeletedAt(v time.Time) *DictionaryCategoryUpsert {
+	u.Set(dictionarycategory.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryCategoryUpsert) UpdateDeletedAt() *DictionaryCategoryUpsert {
+	u.SetExcluded(dictionarycategory.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryCategoryUpsert) ClearDeletedAt() *DictionaryCategoryUpsert {
+	u.SetNull(dictionarycategory.FieldDeletedAt)
 	return u
 }
 
@@ -551,6 +587,27 @@ func (u *DictionaryCategoryUpsertOne) AddTenantID(v uint32) *DictionaryCategoryU
 func (u *DictionaryCategoryUpsertOne) UpdateTenantID() *DictionaryCategoryUpsertOne {
 	return u.Update(func(s *DictionaryCategoryUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryCategoryUpsertOne) SetDeletedAt(v time.Time) *DictionaryCategoryUpsertOne {
+	return u.Update(func(s *DictionaryCategoryUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryCategoryUpsertOne) UpdateDeletedAt() *DictionaryCategoryUpsertOne {
+	return u.Update(func(s *DictionaryCategoryUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryCategoryUpsertOne) ClearDeletedAt() *DictionaryCategoryUpsertOne {
+	return u.Update(func(s *DictionaryCategoryUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -887,6 +944,27 @@ func (u *DictionaryCategoryUpsertBulk) AddTenantID(v uint32) *DictionaryCategory
 func (u *DictionaryCategoryUpsertBulk) UpdateTenantID() *DictionaryCategoryUpsertBulk {
 	return u.Update(func(s *DictionaryCategoryUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryCategoryUpsertBulk) SetDeletedAt(v time.Time) *DictionaryCategoryUpsertBulk {
+	return u.Update(func(s *DictionaryCategoryUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryCategoryUpsertBulk) UpdateDeletedAt() *DictionaryCategoryUpsertBulk {
+	return u.Update(func(s *DictionaryCategoryUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryCategoryUpsertBulk) ClearDeletedAt() *DictionaryCategoryUpsertBulk {
+	return u.Update(func(s *DictionaryCategoryUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

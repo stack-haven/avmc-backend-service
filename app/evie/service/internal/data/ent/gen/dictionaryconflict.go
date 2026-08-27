@@ -26,6 +26,8 @@ type DictionaryConflict struct {
 	Status *int32 `json:"status,omitempty"`
 	// 租户ID（0=平台级全局共享，>0=租户隔离）
 	TenantID uint32 `json:"tenant_id,omitempty"`
+	// 删除时间
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 输入表达
 	Input string `json:"input,omitempty"`
 	// 候选结果
@@ -50,7 +52,7 @@ func (*DictionaryConflict) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case dictionaryconflict.FieldInput, dictionaryconflict.FieldCandidate, dictionaryconflict.FieldSourceScope, dictionaryconflict.FieldSourceDictionary, dictionaryconflict.FieldResolvedCandidate:
 			values[i] = new(sql.NullString)
-		case dictionaryconflict.FieldCreatedAt, dictionaryconflict.FieldUpdatedAt:
+		case dictionaryconflict.FieldCreatedAt, dictionaryconflict.FieldUpdatedAt, dictionaryconflict.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -97,6 +99,13 @@ func (_m *DictionaryConflict) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
 				_m.TenantID = uint32(value.Int64)
+			}
+		case dictionaryconflict.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case dictionaryconflict.FieldInput:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -183,6 +192,11 @@ func (_m *DictionaryConflict) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("input=")
 	builder.WriteString(_m.Input)

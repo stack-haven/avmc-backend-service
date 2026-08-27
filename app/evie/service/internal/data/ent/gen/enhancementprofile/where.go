@@ -75,6 +75,11 @@ func TenantID(v uint32) predicate.EnhancementProfile {
 	return predicate.EnhancementProfile(sql.FieldEQ(FieldTenantID, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // PolicyID applies equality check predicate on the "policy_id" field. It's identical to PolicyIDEQ.
 func PolicyID(v uint32) predicate.EnhancementProfile {
 	return predicate.EnhancementProfile(sql.FieldEQ(FieldPolicyID, v))
@@ -248,6 +253,56 @@ func TenantIDLT(v uint32) predicate.EnhancementProfile {
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
 func TenantIDLTE(v uint32) predicate.EnhancementProfile {
 	return predicate.EnhancementProfile(sql.FieldLTE(FieldTenantID, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.EnhancementProfile {
+	return predicate.EnhancementProfile(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // PolicyIDEQ applies the EQ predicate on the "policy_id" field.

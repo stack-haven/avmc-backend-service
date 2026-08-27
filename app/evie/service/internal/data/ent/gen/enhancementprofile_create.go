@@ -71,6 +71,20 @@ func (_c *EnhancementProfileCreate) SetTenantID(v uint32) *EnhancementProfileCre
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *EnhancementProfileCreate) SetDeletedAt(v time.Time) *EnhancementProfileCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *EnhancementProfileCreate) SetNillableDeletedAt(v *time.Time) *EnhancementProfileCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetPolicyID sets the "policy_id" field.
 func (_c *EnhancementProfileCreate) SetPolicyID(v uint32) *EnhancementProfileCreate {
 	_c.mutation.SetPolicyID(v)
@@ -263,6 +277,10 @@ func (_c *EnhancementProfileCreate) createSpec() (*EnhancementProfile, *sqlgraph
 		_spec.SetField(enhancementprofile.FieldTenantID, field.TypeUint32, value)
 		_node.TenantID = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(enhancementprofile.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(enhancementprofile.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -385,6 +403,24 @@ func (u *EnhancementProfileUpsert) UpdateTenantID() *EnhancementProfileUpsert {
 // AddTenantID adds v to the "tenant_id" field.
 func (u *EnhancementProfileUpsert) AddTenantID(v uint32) *EnhancementProfileUpsert {
 	u.Add(enhancementprofile.FieldTenantID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *EnhancementProfileUpsert) SetDeletedAt(v time.Time) *EnhancementProfileUpsert {
+	u.Set(enhancementprofile.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *EnhancementProfileUpsert) UpdateDeletedAt() *EnhancementProfileUpsert {
+	u.SetExcluded(enhancementprofile.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *EnhancementProfileUpsert) ClearDeletedAt() *EnhancementProfileUpsert {
+	u.SetNull(enhancementprofile.FieldDeletedAt)
 	return u
 }
 
@@ -534,6 +570,27 @@ func (u *EnhancementProfileUpsertOne) AddTenantID(v uint32) *EnhancementProfileU
 func (u *EnhancementProfileUpsertOne) UpdateTenantID() *EnhancementProfileUpsertOne {
 	return u.Update(func(s *EnhancementProfileUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *EnhancementProfileUpsertOne) SetDeletedAt(v time.Time) *EnhancementProfileUpsertOne {
+	return u.Update(func(s *EnhancementProfileUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *EnhancementProfileUpsertOne) UpdateDeletedAt() *EnhancementProfileUpsertOne {
+	return u.Update(func(s *EnhancementProfileUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *EnhancementProfileUpsertOne) ClearDeletedAt() *EnhancementProfileUpsertOne {
+	return u.Update(func(s *EnhancementProfileUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -856,6 +913,27 @@ func (u *EnhancementProfileUpsertBulk) AddTenantID(v uint32) *EnhancementProfile
 func (u *EnhancementProfileUpsertBulk) UpdateTenantID() *EnhancementProfileUpsertBulk {
 	return u.Update(func(s *EnhancementProfileUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *EnhancementProfileUpsertBulk) SetDeletedAt(v time.Time) *EnhancementProfileUpsertBulk {
+	return u.Update(func(s *EnhancementProfileUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *EnhancementProfileUpsertBulk) UpdateDeletedAt() *EnhancementProfileUpsertBulk {
+	return u.Update(func(s *EnhancementProfileUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *EnhancementProfileUpsertBulk) ClearDeletedAt() *EnhancementProfileUpsertBulk {
+	return u.Update(func(s *EnhancementProfileUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

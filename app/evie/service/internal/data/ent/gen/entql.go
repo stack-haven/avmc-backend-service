@@ -41,6 +41,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			asrproviderconfig.FieldUpdatedAt:    {Type: field.TypeTime, Column: asrproviderconfig.FieldUpdatedAt},
 			asrproviderconfig.FieldStatus:       {Type: field.TypeInt32, Column: asrproviderconfig.FieldStatus},
 			asrproviderconfig.FieldTenantID:     {Type: field.TypeUint32, Column: asrproviderconfig.FieldTenantID},
+			asrproviderconfig.FieldDeletedAt:    {Type: field.TypeTime, Column: asrproviderconfig.FieldDeletedAt},
 			asrproviderconfig.FieldProviderName: {Type: field.TypeString, Column: asrproviderconfig.FieldProviderName},
 			asrproviderconfig.FieldIsActive:     {Type: field.TypeBool, Column: asrproviderconfig.FieldIsActive},
 			asrproviderconfig.FieldConfigJSON:   {Type: field.TypeString, Column: asrproviderconfig.FieldConfigJSON},
@@ -112,6 +113,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			dictionarycategory.FieldUpdatedAt: {Type: field.TypeTime, Column: dictionarycategory.FieldUpdatedAt},
 			dictionarycategory.FieldStatus:    {Type: field.TypeInt32, Column: dictionarycategory.FieldStatus},
 			dictionarycategory.FieldTenantID:  {Type: field.TypeUint32, Column: dictionarycategory.FieldTenantID},
+			dictionarycategory.FieldDeletedAt: {Type: field.TypeTime, Column: dictionarycategory.FieldDeletedAt},
 			dictionarycategory.FieldCode:      {Type: field.TypeString, Column: dictionarycategory.FieldCode},
 			dictionarycategory.FieldName:      {Type: field.TypeString, Column: dictionarycategory.FieldName},
 			dictionarycategory.FieldBuiltin:   {Type: field.TypeBool, Column: dictionarycategory.FieldBuiltin},
@@ -156,6 +158,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			dictionaryconflict.FieldUpdatedAt:         {Type: field.TypeTime, Column: dictionaryconflict.FieldUpdatedAt},
 			dictionaryconflict.FieldStatus:            {Type: field.TypeInt32, Column: dictionaryconflict.FieldStatus},
 			dictionaryconflict.FieldTenantID:          {Type: field.TypeUint32, Column: dictionaryconflict.FieldTenantID},
+			dictionaryconflict.FieldDeletedAt:         {Type: field.TypeTime, Column: dictionaryconflict.FieldDeletedAt},
 			dictionaryconflict.FieldInput:             {Type: field.TypeString, Column: dictionaryconflict.FieldInput},
 			dictionaryconflict.FieldCandidate:         {Type: field.TypeString, Column: dictionaryconflict.FieldCandidate},
 			dictionaryconflict.FieldSourceScope:       {Type: field.TypeString, Column: dictionaryconflict.FieldSourceScope},
@@ -232,6 +235,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			dictionaryversion.FieldUpdatedAt:    {Type: field.TypeTime, Column: dictionaryversion.FieldUpdatedAt},
 			dictionaryversion.FieldStatus:       {Type: field.TypeInt32, Column: dictionaryversion.FieldStatus},
 			dictionaryversion.FieldTenantID:     {Type: field.TypeUint32, Column: dictionaryversion.FieldTenantID},
+			dictionaryversion.FieldDeletedAt:    {Type: field.TypeTime, Column: dictionaryversion.FieldDeletedAt},
 			dictionaryversion.FieldDictionaryID: {Type: field.TypeUint32, Column: dictionaryversion.FieldDictionaryID},
 			dictionaryversion.FieldVersionNo:    {Type: field.TypeInt32, Column: dictionaryversion.FieldVersionNo},
 			dictionaryversion.FieldSnapshot:     {Type: field.TypeString, Column: dictionaryversion.FieldSnapshot},
@@ -292,6 +296,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enhancementpolicy.FieldUpdatedAt:                {Type: field.TypeTime, Column: enhancementpolicy.FieldUpdatedAt},
 			enhancementpolicy.FieldStatus:                   {Type: field.TypeInt32, Column: enhancementpolicy.FieldStatus},
 			enhancementpolicy.FieldTenantID:                 {Type: field.TypeUint32, Column: enhancementpolicy.FieldTenantID},
+			enhancementpolicy.FieldDeletedAt:                {Type: field.TypeTime, Column: enhancementpolicy.FieldDeletedAt},
 			enhancementpolicy.FieldName:                     {Type: field.TypeString, Column: enhancementpolicy.FieldName},
 			enhancementpolicy.FieldMode:                     {Type: field.TypeString, Column: enhancementpolicy.FieldMode},
 			enhancementpolicy.FieldTextCleaning:             {Type: field.TypeBool, Column: enhancementpolicy.FieldTextCleaning},
@@ -319,6 +324,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			enhancementprofile.FieldUpdatedAt:   {Type: field.TypeTime, Column: enhancementprofile.FieldUpdatedAt},
 			enhancementprofile.FieldStatus:      {Type: field.TypeInt32, Column: enhancementprofile.FieldStatus},
 			enhancementprofile.FieldTenantID:    {Type: field.TypeUint32, Column: enhancementprofile.FieldTenantID},
+			enhancementprofile.FieldDeletedAt:   {Type: field.TypeTime, Column: enhancementprofile.FieldDeletedAt},
 			enhancementprofile.FieldPolicyID:    {Type: field.TypeUint32, Column: enhancementprofile.FieldPolicyID},
 			enhancementprofile.FieldName:        {Type: field.TypeString, Column: enhancementprofile.FieldName},
 			enhancementprofile.FieldDescription: {Type: field.TypeString, Column: enhancementprofile.FieldDescription},
@@ -487,6 +493,11 @@ func (f *AsrProviderConfigFilter) WhereStatus(p entql.Int32P) {
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
 func (f *AsrProviderConfigFilter) WhereTenantID(p entql.Uint32P) {
 	f.Where(p.Field(asrproviderconfig.FieldTenantID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *AsrProviderConfigFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(asrproviderconfig.FieldDeletedAt))
 }
 
 // WhereProviderName applies the entql string predicate on the provider_name field.
@@ -797,6 +808,11 @@ func (f *DictionaryCategoryFilter) WhereTenantID(p entql.Uint32P) {
 	f.Where(p.Field(dictionarycategory.FieldTenantID))
 }
 
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *DictionaryCategoryFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionarycategory.FieldDeletedAt))
+}
+
 // WhereCode applies the entql string predicate on the code field.
 func (f *DictionaryCategoryFilter) WhereCode(p entql.StringP) {
 	f.Where(p.Field(dictionarycategory.FieldCode))
@@ -965,6 +981,11 @@ func (f *DictionaryConflictFilter) WhereStatus(p entql.Int32P) {
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
 func (f *DictionaryConflictFilter) WhereTenantID(p entql.Uint32P) {
 	f.Where(p.Field(dictionaryconflict.FieldTenantID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *DictionaryConflictFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryconflict.FieldDeletedAt))
 }
 
 // WhereInput applies the entql string predicate on the input field.
@@ -1314,6 +1335,11 @@ func (f *DictionaryVersionFilter) WhereTenantID(p entql.Uint32P) {
 	f.Where(p.Field(dictionaryversion.FieldTenantID))
 }
 
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *DictionaryVersionFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(dictionaryversion.FieldDeletedAt))
+}
+
 // WhereDictionaryID applies the entql uint32 predicate on the dictionary_id field.
 func (f *DictionaryVersionFilter) WhereDictionaryID(p entql.Uint32P) {
 	f.Where(p.Field(dictionaryversion.FieldDictionaryID))
@@ -1578,6 +1604,11 @@ func (f *EnhancementPolicyFilter) WhereTenantID(p entql.Uint32P) {
 	f.Where(p.Field(enhancementpolicy.FieldTenantID))
 }
 
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *EnhancementPolicyFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementpolicy.FieldDeletedAt))
+}
+
 // WhereName applies the entql string predicate on the name field.
 func (f *EnhancementPolicyFilter) WhereName(p entql.StringP) {
 	f.Where(p.Field(enhancementpolicy.FieldName))
@@ -1700,6 +1731,11 @@ func (f *EnhancementProfileFilter) WhereStatus(p entql.Int32P) {
 // WhereTenantID applies the entql uint32 predicate on the tenant_id field.
 func (f *EnhancementProfileFilter) WhereTenantID(p entql.Uint32P) {
 	f.Where(p.Field(enhancementprofile.FieldTenantID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *EnhancementProfileFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(enhancementprofile.FieldDeletedAt))
 }
 
 // WherePolicyID applies the entql uint32 predicate on the policy_id field.

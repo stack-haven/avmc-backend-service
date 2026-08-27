@@ -327,6 +327,9 @@ func seedLogs(ctx context.Context, client *gen.Client) error {
 			SetTenantID(1).
 			SetRequestID(fmt.Sprintf("req-%d", i)).
 			SetSessionID(fmt.Sprintf("session-%d", i)).
+			SetPolicyID(uint32(1 + i%3)).  // 轮询分配到 1/2/3 号策略 (mock seed 已创建 3 条)
+			SetPolicyMode([]string{"HIGH_PERFORMANCE", "STANDARD", "HIGH_ACCURACY"}[i%3]).
+			SetContextVersion(fmt.Sprintf("v%d", 1+(i/30))).
 			SetRawText(raw).
 			SetEnhancedText(enhanced).
 			SetStatus(status).

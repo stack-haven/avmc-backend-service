@@ -78,6 +78,26 @@ func (_u *EnhancementPolicyUpdate) AddTenantID(v int32) *EnhancementPolicyUpdate
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *EnhancementPolicyUpdate) SetDeletedAt(v time.Time) *EnhancementPolicyUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *EnhancementPolicyUpdate) SetNillableDeletedAt(v *time.Time) *EnhancementPolicyUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *EnhancementPolicyUpdate) ClearDeletedAt() *EnhancementPolicyUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *EnhancementPolicyUpdate) SetName(v string) *EnhancementPolicyUpdate {
 	_u.mutation.SetName(v)
@@ -365,6 +385,12 @@ func (_u *EnhancementPolicyUpdate) sqlSave(ctx context.Context) (_node int, err 
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(enhancementpolicy.FieldTenantID, field.TypeUint32, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(enhancementpolicy.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(enhancementpolicy.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(enhancementpolicy.FieldName, field.TypeString, value)
 	}
@@ -510,6 +536,26 @@ func (_u *EnhancementPolicyUpdateOne) SetNillableTenantID(v *uint32) *Enhancemen
 // AddTenantID adds value to the "tenant_id" field.
 func (_u *EnhancementPolicyUpdateOne) AddTenantID(v int32) *EnhancementPolicyUpdateOne {
 	_u.mutation.AddTenantID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *EnhancementPolicyUpdateOne) SetDeletedAt(v time.Time) *EnhancementPolicyUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *EnhancementPolicyUpdateOne) SetNillableDeletedAt(v *time.Time) *EnhancementPolicyUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *EnhancementPolicyUpdateOne) ClearDeletedAt() *EnhancementPolicyUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -829,6 +875,12 @@ func (_u *EnhancementPolicyUpdateOne) sqlSave(ctx context.Context) (_node *Enhan
 	}
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(enhancementpolicy.FieldTenantID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(enhancementpolicy.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(enhancementpolicy.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(enhancementpolicy.FieldName, field.TypeString, value)

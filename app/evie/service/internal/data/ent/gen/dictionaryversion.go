@@ -27,6 +27,8 @@ type DictionaryVersion struct {
 	Status *int32 `json:"status,omitempty"`
 	// 租户ID（0=平台级全局共享，>0=租户隔离）
 	TenantID uint32 `json:"tenant_id,omitempty"`
+	// 删除时间
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 所属词库 ID
 	DictionaryID uint32 `json:"dictionary_id,omitempty"`
 	// 版本号，递增
@@ -70,7 +72,7 @@ func (*DictionaryVersion) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case dictionaryversion.FieldSnapshot, dictionaryversion.FieldDescription:
 			values[i] = new(sql.NullString)
-		case dictionaryversion.FieldCreatedAt, dictionaryversion.FieldUpdatedAt:
+		case dictionaryversion.FieldCreatedAt, dictionaryversion.FieldUpdatedAt, dictionaryversion.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -117,6 +119,13 @@ func (_m *DictionaryVersion) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
 				_m.TenantID = uint32(value.Int64)
+			}
+		case dictionaryversion.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case dictionaryversion.FieldDictionaryID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -196,6 +205,11 @@ func (_m *DictionaryVersion) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TenantID))
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("dictionary_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DictionaryID))

@@ -70,6 +70,20 @@ func (_c *AsrProviderConfigCreate) SetTenantID(v uint32) *AsrProviderConfigCreat
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *AsrProviderConfigCreate) SetDeletedAt(v time.Time) *AsrProviderConfigCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *AsrProviderConfigCreate) SetNillableDeletedAt(v *time.Time) *AsrProviderConfigCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetProviderName sets the "provider_name" field.
 func (_c *AsrProviderConfigCreate) SetProviderName(v string) *AsrProviderConfigCreate {
 	_c.mutation.SetProviderName(v)
@@ -298,6 +312,10 @@ func (_c *AsrProviderConfigCreate) createSpec() (*AsrProviderConfig, *sqlgraph.C
 		_spec.SetField(asrproviderconfig.FieldTenantID, field.TypeUint32, value)
 		_node.TenantID = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(asrproviderconfig.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.ProviderName(); ok {
 		_spec.SetField(asrproviderconfig.FieldProviderName, field.TypeString, value)
 		_node.ProviderName = value
@@ -415,6 +433,24 @@ func (u *AsrProviderConfigUpsert) UpdateTenantID() *AsrProviderConfigUpsert {
 // AddTenantID adds v to the "tenant_id" field.
 func (u *AsrProviderConfigUpsert) AddTenantID(v uint32) *AsrProviderConfigUpsert {
 	u.Add(asrproviderconfig.FieldTenantID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *AsrProviderConfigUpsert) SetDeletedAt(v time.Time) *AsrProviderConfigUpsert {
+	u.Set(asrproviderconfig.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *AsrProviderConfigUpsert) UpdateDeletedAt() *AsrProviderConfigUpsert {
+	u.SetExcluded(asrproviderconfig.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *AsrProviderConfigUpsert) ClearDeletedAt() *AsrProviderConfigUpsert {
+	u.SetNull(asrproviderconfig.FieldDeletedAt)
 	return u
 }
 
@@ -588,6 +624,27 @@ func (u *AsrProviderConfigUpsertOne) AddTenantID(v uint32) *AsrProviderConfigUps
 func (u *AsrProviderConfigUpsertOne) UpdateTenantID() *AsrProviderConfigUpsertOne {
 	return u.Update(func(s *AsrProviderConfigUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *AsrProviderConfigUpsertOne) SetDeletedAt(v time.Time) *AsrProviderConfigUpsertOne {
+	return u.Update(func(s *AsrProviderConfigUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *AsrProviderConfigUpsertOne) UpdateDeletedAt() *AsrProviderConfigUpsertOne {
+	return u.Update(func(s *AsrProviderConfigUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *AsrProviderConfigUpsertOne) ClearDeletedAt() *AsrProviderConfigUpsertOne {
+	return u.Update(func(s *AsrProviderConfigUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -938,6 +995,27 @@ func (u *AsrProviderConfigUpsertBulk) AddTenantID(v uint32) *AsrProviderConfigUp
 func (u *AsrProviderConfigUpsertBulk) UpdateTenantID() *AsrProviderConfigUpsertBulk {
 	return u.Update(func(s *AsrProviderConfigUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *AsrProviderConfigUpsertBulk) SetDeletedAt(v time.Time) *AsrProviderConfigUpsertBulk {
+	return u.Update(func(s *AsrProviderConfigUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *AsrProviderConfigUpsertBulk) UpdateDeletedAt() *AsrProviderConfigUpsertBulk {
+	return u.Update(func(s *AsrProviderConfigUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *AsrProviderConfigUpsertBulk) ClearDeletedAt() *AsrProviderConfigUpsertBulk {
+	return u.Update(func(s *AsrProviderConfigUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

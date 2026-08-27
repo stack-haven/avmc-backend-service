@@ -70,6 +70,20 @@ func (_c *DictionaryConflictCreate) SetTenantID(v uint32) *DictionaryConflictCre
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *DictionaryConflictCreate) SetDeletedAt(v time.Time) *DictionaryConflictCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *DictionaryConflictCreate) SetNillableDeletedAt(v *time.Time) *DictionaryConflictCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetInput sets the "input" field.
 func (_c *DictionaryConflictCreate) SetInput(v string) *DictionaryConflictCreate {
 	_c.mutation.SetInput(v)
@@ -303,6 +317,10 @@ func (_c *DictionaryConflictCreate) createSpec() (*DictionaryConflict, *sqlgraph
 		_spec.SetField(dictionaryconflict.FieldTenantID, field.TypeUint32, value)
 		_node.TenantID = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionaryconflict.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Input(); ok {
 		_spec.SetField(dictionaryconflict.FieldInput, field.TypeString, value)
 		_node.Input = value
@@ -424,6 +442,24 @@ func (u *DictionaryConflictUpsert) UpdateTenantID() *DictionaryConflictUpsert {
 // AddTenantID adds v to the "tenant_id" field.
 func (u *DictionaryConflictUpsert) AddTenantID(v uint32) *DictionaryConflictUpsert {
 	u.Add(dictionaryconflict.FieldTenantID, v)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryConflictUpsert) SetDeletedAt(v time.Time) *DictionaryConflictUpsert {
+	u.Set(dictionaryconflict.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryConflictUpsert) UpdateDeletedAt() *DictionaryConflictUpsert {
+	u.SetExcluded(dictionaryconflict.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryConflictUpsert) ClearDeletedAt() *DictionaryConflictUpsert {
+	u.SetNull(dictionaryconflict.FieldDeletedAt)
 	return u
 }
 
@@ -615,6 +651,27 @@ func (u *DictionaryConflictUpsertOne) AddTenantID(v uint32) *DictionaryConflictU
 func (u *DictionaryConflictUpsertOne) UpdateTenantID() *DictionaryConflictUpsertOne {
 	return u.Update(func(s *DictionaryConflictUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryConflictUpsertOne) SetDeletedAt(v time.Time) *DictionaryConflictUpsertOne {
+	return u.Update(func(s *DictionaryConflictUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryConflictUpsertOne) UpdateDeletedAt() *DictionaryConflictUpsertOne {
+	return u.Update(func(s *DictionaryConflictUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryConflictUpsertOne) ClearDeletedAt() *DictionaryConflictUpsertOne {
+	return u.Update(func(s *DictionaryConflictUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -986,6 +1043,27 @@ func (u *DictionaryConflictUpsertBulk) AddTenantID(v uint32) *DictionaryConflict
 func (u *DictionaryConflictUpsertBulk) UpdateTenantID() *DictionaryConflictUpsertBulk {
 	return u.Update(func(s *DictionaryConflictUpsert) {
 		s.UpdateTenantID()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *DictionaryConflictUpsertBulk) SetDeletedAt(v time.Time) *DictionaryConflictUpsertBulk {
+	return u.Update(func(s *DictionaryConflictUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *DictionaryConflictUpsertBulk) UpdateDeletedAt() *DictionaryConflictUpsertBulk {
+	return u.Update(func(s *DictionaryConflictUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *DictionaryConflictUpsertBulk) ClearDeletedAt() *DictionaryConflictUpsertBulk {
+	return u.Update(func(s *DictionaryConflictUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

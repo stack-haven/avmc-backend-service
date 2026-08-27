@@ -77,6 +77,26 @@ func (_u *DictionaryCategoryUpdate) AddTenantID(v int32) *DictionaryCategoryUpda
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DictionaryCategoryUpdate) SetDeletedAt(v time.Time) *DictionaryCategoryUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DictionaryCategoryUpdate) SetNillableDeletedAt(v *time.Time) *DictionaryCategoryUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DictionaryCategoryUpdate) ClearDeletedAt() *DictionaryCategoryUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetCode sets the "code" field.
 func (_u *DictionaryCategoryUpdate) SetCode(v string) *DictionaryCategoryUpdate {
 	_u.mutation.SetCode(v)
@@ -240,6 +260,12 @@ func (_u *DictionaryCategoryUpdate) sqlSave(ctx context.Context) (_node int, err
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(dictionarycategory.FieldTenantID, field.TypeUint32, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionarycategory.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dictionarycategory.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(dictionarycategory.FieldCode, field.TypeString, value)
 	}
@@ -322,6 +348,26 @@ func (_u *DictionaryCategoryUpdateOne) SetNillableTenantID(v *uint32) *Dictionar
 // AddTenantID adds value to the "tenant_id" field.
 func (_u *DictionaryCategoryUpdateOne) AddTenantID(v int32) *DictionaryCategoryUpdateOne {
 	_u.mutation.AddTenantID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DictionaryCategoryUpdateOne) SetDeletedAt(v time.Time) *DictionaryCategoryUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DictionaryCategoryUpdateOne) SetNillableDeletedAt(v *time.Time) *DictionaryCategoryUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DictionaryCategoryUpdateOne) ClearDeletedAt() *DictionaryCategoryUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -517,6 +563,12 @@ func (_u *DictionaryCategoryUpdateOne) sqlSave(ctx context.Context) (_node *Dict
 	}
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(dictionarycategory.FieldTenantID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionarycategory.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dictionarycategory.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(dictionarycategory.FieldCode, field.TypeString, value)

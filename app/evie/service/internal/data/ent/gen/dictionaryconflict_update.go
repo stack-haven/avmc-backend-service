@@ -77,6 +77,26 @@ func (_u *DictionaryConflictUpdate) AddTenantID(v int32) *DictionaryConflictUpda
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DictionaryConflictUpdate) SetDeletedAt(v time.Time) *DictionaryConflictUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DictionaryConflictUpdate) SetNillableDeletedAt(v *time.Time) *DictionaryConflictUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DictionaryConflictUpdate) ClearDeletedAt() *DictionaryConflictUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetInput sets the "input" field.
 func (_u *DictionaryConflictUpdate) SetInput(v string) *DictionaryConflictUpdate {
 	_u.mutation.SetInput(v)
@@ -289,6 +309,12 @@ func (_u *DictionaryConflictUpdate) sqlSave(ctx context.Context) (_node int, err
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(dictionaryconflict.FieldTenantID, field.TypeUint32, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionaryconflict.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dictionaryconflict.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Input(); ok {
 		_spec.SetField(dictionaryconflict.FieldInput, field.TypeString, value)
 	}
@@ -380,6 +406,26 @@ func (_u *DictionaryConflictUpdateOne) SetNillableTenantID(v *uint32) *Dictionar
 // AddTenantID adds value to the "tenant_id" field.
 func (_u *DictionaryConflictUpdateOne) AddTenantID(v int32) *DictionaryConflictUpdateOne {
 	_u.mutation.AddTenantID(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DictionaryConflictUpdateOne) SetDeletedAt(v time.Time) *DictionaryConflictUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DictionaryConflictUpdateOne) SetNillableDeletedAt(v *time.Time) *DictionaryConflictUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DictionaryConflictUpdateOne) ClearDeletedAt() *DictionaryConflictUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -624,6 +670,12 @@ func (_u *DictionaryConflictUpdateOne) sqlSave(ctx context.Context) (_node *Dict
 	}
 	if value, ok := _u.mutation.AddedTenantID(); ok {
 		_spec.AddField(dictionaryconflict.FieldTenantID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(dictionaryconflict.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(dictionaryconflict.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Input(); ok {
 		_spec.SetField(dictionaryconflict.FieldInput, field.TypeString, value)
