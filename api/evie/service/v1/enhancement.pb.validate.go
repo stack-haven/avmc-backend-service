@@ -35,6 +35,114 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on EnhanceChange with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *EnhanceChange) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on EnhanceChange with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in EnhanceChangeMultiError, or
+// nil if none found.
+func (m *EnhanceChange) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *EnhanceChange) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for From
+
+	// no validation rules for To
+
+	// no validation rules for Type
+
+	// no validation rules for Confidence
+
+	if len(errors) > 0 {
+		return EnhanceChangeMultiError(errors)
+	}
+
+	return nil
+}
+
+// EnhanceChangeMultiError is an error wrapping multiple validation errors
+// returned by EnhanceChange.ValidateAll() if the designated constraints
+// aren't met.
+type EnhanceChangeMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m EnhanceChangeMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m EnhanceChangeMultiError) AllErrors() []error { return m }
+
+// EnhanceChangeValidationError is the validation error returned by
+// EnhanceChange.Validate if the designated constraints aren't met.
+type EnhanceChangeValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e EnhanceChangeValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e EnhanceChangeValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e EnhanceChangeValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e EnhanceChangeValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e EnhanceChangeValidationError) ErrorName() string { return "EnhanceChangeValidationError" }
+
+// Error satisfies the builtin error interface
+func (e EnhanceChangeValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEnhanceChange.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = EnhanceChangeValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = EnhanceChangeValidationError{}
+
 // Validate checks the field values on EnhancementPolicy with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -2569,3 +2677,273 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GeneratePinyinResponseValidationError{}
+
+// Validate checks the field values on EnhanceTextRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *EnhanceTextRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on EnhanceTextRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// EnhanceTextRequestMultiError, or nil if none found.
+func (m *EnhanceTextRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *EnhanceTextRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Text
+
+	// no validation rules for ProfileId
+
+	// no validation rules for SessionId
+
+	if len(errors) > 0 {
+		return EnhanceTextRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// EnhanceTextRequestMultiError is an error wrapping multiple validation errors
+// returned by EnhanceTextRequest.ValidateAll() if the designated constraints
+// aren't met.
+type EnhanceTextRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m EnhanceTextRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m EnhanceTextRequestMultiError) AllErrors() []error { return m }
+
+// EnhanceTextRequestValidationError is the validation error returned by
+// EnhanceTextRequest.Validate if the designated constraints aren't met.
+type EnhanceTextRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e EnhanceTextRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e EnhanceTextRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e EnhanceTextRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e EnhanceTextRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e EnhanceTextRequestValidationError) ErrorName() string {
+	return "EnhanceTextRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e EnhanceTextRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEnhanceTextRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = EnhanceTextRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = EnhanceTextRequestValidationError{}
+
+// Validate checks the field values on EnhanceTextResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *EnhanceTextResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on EnhanceTextResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// EnhanceTextResponseMultiError, or nil if none found.
+func (m *EnhanceTextResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *EnhanceTextResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for OriginalText
+
+	// no validation rules for EnhancedText
+
+	for idx, item := range m.GetChanges() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, EnhanceTextResponseValidationError{
+						field:  fmt.Sprintf("Changes[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, EnhanceTextResponseValidationError{
+						field:  fmt.Sprintf("Changes[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EnhanceTextResponseValidationError{
+					field:  fmt.Sprintf("Changes[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Status
+
+	// no validation rules for ProcessingTimeMs
+
+	// no validation rules for CleaningTimeMs
+
+	// no validation rules for FillerTimeMs
+
+	// no validation rules for VocabMatchTimeMs
+
+	// no validation rules for AliasTimeMs
+
+	// no validation rules for DeterministicTimeMs
+
+	// no validation rules for PinyinTimeMs
+
+	// no validation rules for FuzzyTimeMs
+
+	// no validation rules for ContextTimeMs
+
+	// no validation rules for ErrorMessage
+
+	if len(errors) > 0 {
+		return EnhanceTextResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// EnhanceTextResponseMultiError is an error wrapping multiple validation
+// errors returned by EnhanceTextResponse.ValidateAll() if the designated
+// constraints aren't met.
+type EnhanceTextResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m EnhanceTextResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m EnhanceTextResponseMultiError) AllErrors() []error { return m }
+
+// EnhanceTextResponseValidationError is the validation error returned by
+// EnhanceTextResponse.Validate if the designated constraints aren't met.
+type EnhanceTextResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e EnhanceTextResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e EnhanceTextResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e EnhanceTextResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e EnhanceTextResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e EnhanceTextResponseValidationError) ErrorName() string {
+	return "EnhanceTextResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e EnhanceTextResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEnhanceTextResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = EnhanceTextResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = EnhanceTextResponseValidationError{}

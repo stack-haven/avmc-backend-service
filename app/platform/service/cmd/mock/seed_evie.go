@@ -32,6 +32,7 @@ var evieMenus = []menuSeed{
 	{Parent: "EvieEnhancement", Name: "EviePolicyList", Title: "增强策略", Path: "/evie/enhancement/policies", Component: "/evie/enhancement/policies/list", Icon: "mdi:tune-variant", Type: 2, Sort: 10},
 	{Parent: "EvieEnhancement", Name: "EvieProfileList", Title: "增强场景", Path: "/evie/enhancement/profiles", Component: "/evie/enhancement/profiles/list", Icon: "mdi:view-list-outline", Type: 2, Sort: 20},
 	{Parent: "EvieEnhancement", Name: "EvieLogList", Title: "增强记录", Path: "/evie/enhancement/logs", Component: "/evie/enhancement/logs/list", Icon: "mdi:clipboard-text-clock-outline", Type: 2, Sort: 30},
+	{Parent: "EvieEnhancement", Name: "EviePureText", Title: "纯文本增强", Path: "/evie/enhancement/pure-text", Component: "/evie/enhancement/pure-text/index", Icon: "mdi:text-box-edit-outline", Type: 2, Sort: 35},
 }
 
 // evieButtons Evie 产品服务权限按钮（引用 evie 生成的 Operation 常量）。
@@ -76,8 +77,7 @@ var evieButtons = []buttonSpec{
 	{Parent: "EvieConflictList", Name: "EvieConflictQuery", Title: "查询", Operation: eviev1.OperationDictionaryServiceListConflicts, Sort: 10},
 
 	// 语音识别
-	{Parent: "EvieASR", Name: "EvieASRRecognize", Title: "识别", Operation: eviev1.OperationASRServiceRecognize, Sort: 10},
-	{Parent: "EvieASR", Name: "EvieASRRecognizeAndCorrect", Title: "识别+纠错", Operation: eviev1.OperationASRServiceRecognizeAndCorrect, Sort: 15},
+	{Parent: "EvieASR", Name: "EvieASRRecognize", Title: "识别+增强", Operation: eviev1.OperationASRServiceRecognize, Sort: 10},
 	{Parent: "EvieASR", Name: "EvieASRRecordQuery", Title: "记录查询", Operation: eviev1.OperationASRServiceListAsrRecords, Sort: 20},
 	{Parent: "EvieASR", Name: "EvieASRRecordGet", Title: "记录详情", Operation: eviev1.OperationASRServiceGetAsrRecord, Sort: 30},
 	{Parent: "EvieASR", Name: "EvieASRRecordDetail", Title: "记录详情(增强轨迹)", Operation: eviev1.OperationASRServiceGetAsrRecordDetail, Sort: 35},
@@ -108,8 +108,8 @@ var evieButtons = []buttonSpec{
 	{Parent: "EvieLogList", Name: "EvieLogGet", Title: "详情", Operation: eviev1.OperationEnhancementServiceGetLog, Sort: 20},
 	{Parent: "EvieEntryList", Name: "EviePinyinGenerate", Title: "拼音生成", Operation: eviev1.OperationEnhancementServiceGeneratePinyin, Sort: 60},
 
-	// 纠错（兼容保留，Correct 走增强引擎）
-	{Parent: "EvieEnhancement", Name: "EvieCorrectionCorrect", Title: "文本增强", Operation: eviev1.OperationCorrectionServiceCorrect, Sort: 30},
+	// 纯文本增强按钮（独立 RPC；页面按钮直接调用）
+	{Parent: "EviePureText", Name: "EviePureTextRun", Title: "执行增强", Operation: eviev1.OperationEnhancementServiceEnhanceText, Sort: 10},
 }
 
 // seedEvie 幂等维护 Evie 产品服务的菜单树与按钮，返回 evie 菜单 name→ID 映射。

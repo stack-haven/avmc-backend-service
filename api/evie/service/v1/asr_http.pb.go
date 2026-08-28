@@ -25,7 +25,6 @@ const OperationASRServiceGetAsrRecordDetail = "/evie.service.v1.ASRService/GetAs
 const OperationASRServiceListAsrRecords = "/evie.service.v1.ASRService/ListAsrRecords"
 const OperationASRServiceReRecognize = "/evie.service.v1.ASRService/ReRecognize"
 const OperationASRServiceRecognize = "/evie.service.v1.ASRService/Recognize"
-const OperationASRServiceRecognizeAndCorrect = "/evie.service.v1.ASRService/RecognizeAndCorrect"
 
 type ASRServiceHTTPServer interface {
 	// GetAsrRecord 查询识别记录详情
@@ -37,11 +36,10 @@ type ASRServiceHTTPServer interface {
 	// ListAsrRecords 查询识别记录列表
 	ListAsrRecords(context.Context, *ListAsrRecordsRequest) (*ListAsrRecordsResponse, error)
 	// ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
-	ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeAndCorrectResponse, error)
-	// Recognize 同步识别（短音频 ≤60s）
+	ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeResponse, error)
+	// Recognize 同步语音识别：纯识别，返回 ASR 原始文本（不增强）。
+	// 如需识别 + 文本增强，请调用 RecognizeAndCorrect。
 	Recognize(context.Context, *RecognizeRequest) (*RecognizeResponse, error)
-	// RecognizeAndCorrect 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
-	RecognizeAndCorrect(context.Context, *RecognizeRequest) (*RecognizeAndCorrectResponse, error)
 }
 
 func RegisterASRServiceHTTPServer(s *http.Server, srv ASRServiceHTTPServer) {
@@ -51,7 +49,6 @@ func RegisterASRServiceHTTPServer(s *http.Server, srv ASRServiceHTTPServer) {
 	r.GET("/evie/v1/asr/records/{id}", _ASRService_GetAsrRecord0_HTTP_Handler(srv))
 	r.GET("/evie/v1/asr/records/{id}/audio", _ASRService_GetAsrRecordAudio0_HTTP_Handler(srv))
 	r.GET("/evie/v1/asr/records/{id}/detail", _ASRService_GetAsrRecordDetail0_HTTP_Handler(srv))
-	r.POST("/evie/v1/asr:recognize-and-correct", _ASRService_RecognizeAndCorrect0_HTTP_Handler(srv))
 	r.POST("/evie/v1/asr/records/{id}:re-recognize", _ASRService_ReRecognize0_HTTP_Handler(srv))
 }
 
@@ -162,28 +159,6 @@ func _ASRService_GetAsrRecordDetail0_HTTP_Handler(srv ASRServiceHTTPServer) func
 	}
 }
 
-func _ASRService_RecognizeAndCorrect0_HTTP_Handler(srv ASRServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RecognizeRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationASRServiceRecognizeAndCorrect)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RecognizeAndCorrect(ctx, req.(*RecognizeRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*RecognizeAndCorrectResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
 func _ASRService_ReRecognize0_HTTP_Handler(srv ASRServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ReRecognizeRequest
@@ -204,7 +179,7 @@ func _ASRService_ReRecognize0_HTTP_Handler(srv ASRServiceHTTPServer) func(ctx ht
 		if err != nil {
 			return err
 		}
-		reply := out.(*RecognizeAndCorrectResponse)
+		reply := out.(*RecognizeResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -219,11 +194,10 @@ type ASRServiceHTTPClient interface {
 	// ListAsrRecords 查询识别记录列表
 	ListAsrRecords(ctx context.Context, req *ListAsrRecordsRequest, opts ...http.CallOption) (rsp *ListAsrRecordsResponse, err error)
 	// ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
-	ReRecognize(ctx context.Context, req *ReRecognizeRequest, opts ...http.CallOption) (rsp *RecognizeAndCorrectResponse, err error)
-	// Recognize 同步识别（短音频 ≤60s）
+	ReRecognize(ctx context.Context, req *ReRecognizeRequest, opts ...http.CallOption) (rsp *RecognizeResponse, err error)
+	// Recognize 同步语音识别：纯识别，返回 ASR 原始文本（不增强）。
+	// 如需识别 + 文本增强，请调用 RecognizeAndCorrect。
 	Recognize(ctx context.Context, req *RecognizeRequest, opts ...http.CallOption) (rsp *RecognizeResponse, err error)
-	// RecognizeAndCorrect 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
-	RecognizeAndCorrect(ctx context.Context, req *RecognizeRequest, opts ...http.CallOption) (rsp *RecognizeAndCorrectResponse, err error)
 }
 
 type ASRServiceHTTPClientImpl struct {
@@ -291,8 +265,8 @@ func (c *ASRServiceHTTPClientImpl) ListAsrRecords(ctx context.Context, in *ListA
 }
 
 // ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
-func (c *ASRServiceHTTPClientImpl) ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...http.CallOption) (*RecognizeAndCorrectResponse, error) {
-	var out RecognizeAndCorrectResponse
+func (c *ASRServiceHTTPClientImpl) ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...http.CallOption) (*RecognizeResponse, error) {
+	var out RecognizeResponse
 	pattern := "/evie/v1/asr/records/{id}:re-recognize"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationASRServiceReRecognize))
@@ -304,26 +278,13 @@ func (c *ASRServiceHTTPClientImpl) ReRecognize(ctx context.Context, in *ReRecogn
 	return &out, nil
 }
 
-// Recognize 同步识别（短音频 ≤60s）
+// Recognize 同步语音识别：纯识别，返回 ASR 原始文本（不增强）。
+// 如需识别 + 文本增强，请调用 RecognizeAndCorrect。
 func (c *ASRServiceHTTPClientImpl) Recognize(ctx context.Context, in *RecognizeRequest, opts ...http.CallOption) (*RecognizeResponse, error) {
 	var out RecognizeResponse
 	pattern := "/evie/v1/asr:recognize"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationASRServiceRecognize))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// RecognizeAndCorrect 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
-func (c *ASRServiceHTTPClientImpl) RecognizeAndCorrect(ctx context.Context, in *RecognizeRequest, opts ...http.CallOption) (*RecognizeAndCorrectResponse, error) {
-	var out RecognizeAndCorrectResponse
-	pattern := "/evie/v1/asr:recognize-and-correct"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationASRServiceRecognizeAndCorrect))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

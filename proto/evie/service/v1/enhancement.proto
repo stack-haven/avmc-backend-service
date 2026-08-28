@@ -143,6 +143,28 @@ service EnhancementService {
       tags: ["文本增强"]
     };
   }
+
+  // 纯文本增强：对输入文本直接走 8 层流水线，返回增强结果。
+  // 增强策略由 profile_id 关联的场景决定；不传 profile_id 走租户默认。
+  rpc EnhanceText(EnhanceTextRequest) returns (EnhanceTextResponse) {
+    option (google.api.http) = {
+      post: "/evie/v1/enhancement:text"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "纯文本增强"
+      tags: ["文本增强"]
+    };
+  }
+}
+
+// EnhanceChange 单条增强变更（从原 CorrectionChange 迁移并重命名）。
+// 命名升级：剥离"纠错"语义，表达"增强做了什么"。
+message EnhanceChange {
+  string from = 1;          // 变更前片段
+  string to = 2;            // 变更后片段
+  string type = 3;          // 增强类型：ALIAS/CLEAN/FILLER/REPLACE/PHONETIC/FUZZY/CONTEXT
+  float confidence = 4;     // 置信度
 }
 
 // EnhancementPolicy 增强策略。
@@ -313,4 +335,31 @@ message GeneratePinyinResponse {
   string pinyin = 1;            // 全拼（空格分隔，如 "ke fu nin hao"）
   string pinyin_initial = 2;    // 拼音首字母（如 "kfnh"）
   string normalized_text = 3;   // 规范化后文本（去标点、空格归一）
+}
+
+// ===== 纯文本增强（2026-08-27） =====
+
+// EnhanceTextRequest 纯文本增强请求。
+message EnhanceTextRequest {
+  string text = 1 [(buf.validate.field).string = {min_len: 1, max_len: 4096}];
+  uint32 profile_id = 2;  // 0=按租户默认；非 0=按场景关联策略
+  string session_id = 3;   // 可选，便于日志关联
+}
+
+// EnhanceTextResponse 纯文本增强响应。
+message EnhanceTextResponse {
+  string original_text = 1;
+  string enhanced_text = 2;
+  repeated EnhanceChange changes = 3;
+  int32 status = 4;                // 1=SUCCESS 2=DEGRADED 3=FAILED
+  int64 processing_time_ms = 5;
+  int64 cleaning_time_ms = 6;
+  int64 filler_time_ms = 7;
+  int64 vocab_match_time_ms = 8;
+  int64 alias_time_ms = 9;
+  int64 deterministic_time_ms = 10;
+  int64 pinyin_time_ms = 11;
+  int64 fuzzy_time_ms = 12;
+  int64 context_time_ms = 13;
+  string error_message = 14;
 }

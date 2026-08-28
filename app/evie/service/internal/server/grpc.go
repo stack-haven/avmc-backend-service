@@ -29,7 +29,7 @@ func NewGRPCServer(
 	dictionaryService *service.DictionaryServiceService,
 	asrService *service.ASRServiceService,
 	providerService *service.ProviderServiceService,
-	correctionService *service.CorrectionServiceService,
+	
 	enhancementService *service.EnhancementServiceService,
 	authenticator *session.Manager,
 	authorizer authzEngine.Enforcer,
@@ -50,7 +50,7 @@ func NewGRPCServer(
 	v1.RegisterDictionaryServiceServer(srv, dictionaryService)
 	v1.RegisterASRServiceServer(srv, asrService)
 	v1.RegisterProviderServiceServer(srv, providerService)
-	v1.RegisterCorrectionServiceServer(srv, correctionService)
+	
 	v1.RegisterEnhancementServiceServer(srv, enhancementService)
 	return srv, nil
 }

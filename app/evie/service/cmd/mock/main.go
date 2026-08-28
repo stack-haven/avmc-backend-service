@@ -14,6 +14,7 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
 	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
 	"backend-service/app/evie/service/internal/runtimeconfig"
@@ -253,57 +254,105 @@ func seedConflicts(ctx context.Context, client *gen.Client) error {
 }
 
 // seedPoliciesAndProfiles 创建增强策略 + 场景。
+// 2026-08-27 重构为 A/B 场景双策略，供前端对比增强差异。
+//   - 场景 A: 客服对话场景 → 客服对话策略 (text_cleaning + alias_resolution)
+//   - 场景 B: 专业访谈场景 → 专业访谈策略 (pinyin_correction + context_correction)
+// 幂等：按 (tenant_id, name) 查存在则跳过；旧 random profile/policy 保留。
 func seedPoliciesAndProfiles(ctx context.Context, client *gen.Client) error {
-	modes := []string{"HIGH_PERFORMANCE", "STANDARD", "HIGH_ACCURACY"}
-	for tid, count := range map[uint32]int{1: policyCount1, 2: policyCount2} {
-		existing, err := client.EnhancementPolicy.Query().
-			Where(enhancementpolicy.TenantIDEQ(tid)).
-			Count(ctx)
-		if err != nil {
-			return err
-		}
-		createdPol := 0
-		for i := existing + 1; i <= count; i++ {
-			mode := modes[i%len(modes)]
-			pol, err := client.EnhancementPolicy.Create().
-				SetTenantID(tid).
-				SetName(fmt.Sprintf("租户%d策略-%02d", tid, i)).
-				SetMode(mode).
-				SetTextCleaning(true).
-				SetFillerRemoval(i%2 == 0).
-				SetAliasResolution(true).
-				SetDeterministicReplacement(true).
-				SetPinyinCorrection(i%3 == 0).
-				SetFuzzyMatching(i%2 != 0).
-				SetContextCorrection(i%2 == 0).
-				SetDescription("bulk mock policy").
-				Save(ctx)
-			if err != nil {
-				return fmt.Errorf("create policy: %w", err)
+	scenarioA := []struct {
+		profileName string
+		policyName  string
+		mode        string
+		setPolicy   func(*gen.EnhancementPolicyCreate)
+	}{
+		{
+			profileName: "客服对话场景",
+			policyName:  "客服对话策略",
+			mode:        "STANDARD",
+			setPolicy: func(c *gen.EnhancementPolicyCreate) {
+				c.SetTextCleaning(true).
+					SetFillerRemoval(true).
+					SetAliasResolution(true).
+					SetDeterministicReplacement(false).
+					SetPinyinCorrection(false).
+					SetFuzzyMatching(false).
+					SetContextCorrection(false)
+			},
+		},
+	}
+	scenarioB := []struct {
+		profileName string
+		policyName  string
+		mode        string
+		setPolicy   func(*gen.EnhancementPolicyCreate)
+	}{
+		{
+			profileName: "专业访谈场景",
+			policyName:  "专业访谈策略",
+			mode:        "HIGH_ACCURACY",
+			setPolicy: func(c *gen.EnhancementPolicyCreate) {
+				c.SetTextCleaning(false).
+					SetFillerRemoval(false).
+					SetAliasResolution(false).
+					SetDeterministicReplacement(false).
+					SetPinyinCorrection(true).
+					SetFuzzyMatching(true).
+					SetContextCorrection(true)
+			},
+		},
+	}
+	allScenarios := append(scenarioA, scenarioB...)
+	for tid := uint32(1); tid <= 2; tid++ {
+		created := 0
+		for _, sc := range allScenarios {
+			policyName := fmt.Sprintf("租户%d-%s", tid, sc.policyName)
+			exists, err := client.EnhancementPolicy.Query().
+				Where(enhancementpolicy.TenantIDEQ(tid), enhancementpolicy.NameEQ(policyName)).
+				First(ctx)
+			if err != nil && !gen.IsNotFound(err) {
+				return err
 			}
-			profiles := profilePerPol1
-			if tid == 2 {
-				profiles = profilePerPol2
+			var pol *gen.EnhancementPolicy
+			if exists != nil {
+				pol = exists
+			} else {
+				pc := client.EnhancementPolicy.Create().
+					SetTenantID(tid).
+					SetName(policyName).
+					SetMode(sc.mode).
+					SetDescription(fmt.Sprintf("%s：仅启用 %s 相关步骤，演示 A/B 场景增强差异", sc.policyName, sc.profileName))
+				sc.setPolicy(pc)
+				pol, err = pc.Save(ctx)
+				if err != nil {
+					return fmt.Errorf("create policy %s: %w", policyName, err)
+				}
+				created++
 			}
-			for p := 1; p <= profiles; p++ {
+			profileName := fmt.Sprintf("租户%d-%s", tid, sc.profileName)
+			profileExists, err := client.EnhancementProfile.Query().
+				Where(enhancementprofile.TenantIDEQ(tid), enhancementprofile.NameEQ(profileName)).
+				First(ctx)
+			if err != nil && !gen.IsNotFound(err) {
+				return err
+			}
+			if profileExists == nil {
 				if _, err := client.EnhancementProfile.Create().
 					SetTenantID(tid).
 					SetPolicyID(pol.ID).
-					SetName(fmt.Sprintf("租户%d场景-%02d-%d", tid, i, p)).
-					SetDescription("bulk mock profile").
+					SetName(profileName).
+					SetDescription(fmt.Sprintf("场景关联策略：%s", sc.policyName)).
 					Save(ctx); err != nil {
-					return fmt.Errorf("create profile: %w", err)
+					return fmt.Errorf("create profile %s: %w", profileName, err)
 				}
+				created++
 			}
-			createdPol++
 		}
-		if createdPol > 0 {
-			fmt.Printf("  created %d policies for tenant %d\n", createdPol, tid)
+		if created > 0 {
+			fmt.Printf("  tenant %d: created %d A/B-scenario items\n", tid, created)
 		}
 	}
 	return nil
 }
-
 // seedLogs 生成增强日志（历史记录）。
 func seedLogs(ctx context.Context, client *gen.Client) error {
 	cnt, err := client.EnhancementLog.Query().

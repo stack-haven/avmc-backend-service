@@ -8,6 +8,5 @@ var ProviderSet = wire.NewSet(
 	NewASRServiceService,
 	NewASRStreamService,
 	NewProviderServiceService,
-	NewCorrectionServiceService,
 	NewEnhancementServiceService,
 )

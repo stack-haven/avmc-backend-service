@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 
@@ -28,21 +29,15 @@ func NewASRServiceService(auc *biz.ASRUsecase, enhancer *biz.EnhancementEngine, 
 	return &ASRServiceService{auc: auc, enhancer: enhancer, policyUc: policyUc, logUc: logUc, log: log.NewHelper(logger)}
 }
 
-// Recognize 同步识别。
+// Recognize 语音识别 + 文本增强（profile_id 决定策略）。
+// 增强策略统一通过场景 Profile 关联：profile_id>0 时按场景关联策略；=0 时按租户默认。
 func (s *ASRServiceService) Recognize(ctx context.Context, req *pb.RecognizeRequest) (*pb.RecognizeResponse, error) {
 	result, err := s.auc.Recognize(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.RecognizeResponse{
-		RequestId:    result.RequestID,
-		Text:         result.Text,
-		Segments:     toPbSegments(result.Segments),
-		Confidence:   float32(result.Confidence),
-		DurationMs:   result.DurationMs,
-		IsFinal:      true,
-		ProviderName: result.ProviderName,
-	}, nil
+
+	return s.buildEnhancedResponse(ctx, result, req.GetProfileId(), req.GetSessionId())
 }
 
 // StreamRecognize 流式识别（双向流）：接收音频分片，回传增量文本。
@@ -102,51 +97,48 @@ func (s *ASRServiceService) StreamRecognize(stream pb.ASRService_StreamRecognize
 	return nil
 }
 
-// RecognizeAndCorrect 语音识别 + 文本增强：一步输出标准企业语言。
-func (s *ASRServiceService) RecognizeAndCorrect(ctx context.Context, req *pb.RecognizeRequest) (*pb.RecognizeAndCorrectResponse, error) {
-	result, err := s.auc.Recognize(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId(), req.GetSessionId())
-	if err != nil {
-		return nil, err
-	}
-	return &pb.RecognizeAndCorrectResponse{
-		OriginalText:  result.Text,
-		CorrectedText: corrected.GetCorrectedText(),
-		Changes:       corrected.GetChanges(),
-		Confidence:    corrected.GetConfidence(),
-		ProviderName:  result.ProviderName,
-	}, nil
-}
-
-// ReRecognize 对已有记录重新识别 + 文本增强。
-func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognizeRequest) (*pb.RecognizeAndCorrectResponse, error) {
+// ReRecognize 对已有记录重新识别（纯 ASR，不增强）。
+// 如需增强请调用 Recognize。
+func (s *ASRServiceService) ReRecognize(ctx context.Context, req *pb.ReRecognizeRequest) (*pb.RecognizeResponse, error) {
 	result, err := s.auc.ReRecognize(ctx, req.GetId())
 	if err != nil {
 		return nil, err
 	}
-	record, err := s.auc.GetRecord(ctx, req.GetId())
+
+	return s.buildEnhancedResponse(ctx, result, req.GetProfileId(), result.RequestID)
+
+}
+
+// buildEnhancedResponse 构造 RecognizeResponse 并落增强日志。
+// profileID=0 时按租户默认策略；无策略返回 corrected==original（changes=空）。
+func (s *ASRServiceService) buildEnhancedResponse(ctx context.Context, result *asr.ASRResult, profileID uint32, sessionID string) (*pb.RecognizeResponse, error) {
+	corrected, err := s.enhance(ctx, result.Text, profileID, sessionID)
 	if err != nil {
 		return nil, err
 	}
-	// ReRecognize 会生成新记录（session_id 为 旧session-re），增强日志需挂到新记录 session 下
-	corrected, err := s.enhance(ctx, result.Text, req.GetProfileId(), record.GetSessionId()+"-re")
-	if err != nil {
-		return nil, err
+	if corrected == nil {
+		return &pb.RecognizeResponse{
+			RawText:      result.Text,
+			Changes:      nil,
+			Confidence:   float32(result.Confidence),
+			ProviderName: result.ProviderName,
+		}, nil
 	}
-	return &pb.RecognizeAndCorrectResponse{
-		OriginalText:  result.Text,
-		CorrectedText: corrected.GetCorrectedText(),
-		Changes:       corrected.GetChanges(),
-		Confidence:    corrected.GetConfidence(),
-		ProviderName:  result.ProviderName,
+	return &pb.RecognizeResponse{
+		RawText:      result.Text,
+		EnhancedText: corrected.EnhancedText,
+		Changes:      corrected.GetChanges(),
+		Confidence:   float32(0),
+		ProviderName: result.ProviderName,
 	}, nil
 }
 
 // enhance 调用文本增强引擎，映射为 CorrectResponse。
-func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID uint32, sessionID string) (*pb.CorrectResponse, error) {
+// policyID > 0 时按指定策略增强；profileID > 0 时按场景增强（场景关联策略）。
+// enhance 调用文本增强引擎，映射为 CorrectResponse。
+// 增强策略统一通过 profile 路径：profileID>0 时按场景关联策略；profileID=0 时按租户默认。
+// 找不到任何策略时返回 nil，由 buildRecognizeResponse 退化为只返回原文。
+func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID uint32, sessionID string) (*pb.EnhanceTextResponse, error) {
 	tenantID := authn.GetAuthUserTenantID(ctx)
 	policy, err := resolveEnhancePolicy(ctx, s.policyUc, profileID)
 	if err != nil {
@@ -156,25 +148,21 @@ func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID 
 	if err != nil {
 		return nil, err
 	}
-	changes := make([]*pb.CorrectionChange, 0, len(result.Changes))
-	needConfirm := false
+	changes := make([]*pb.EnhanceChange, 0, len(result.Changes))
 	for _, ch := range result.Changes {
-		changes = append(changes, &pb.CorrectionChange{
+		changes = append(changes, &pb.EnhanceChange{
 			From:       ch.OriginalText,
 			To:         ch.ResultText,
 			Type:       ch.Type,
 			Confidence: float32(ch.Confidence),
 		})
-		if ch.Action == biz.ActionSuggest {
-			needConfirm = true
-		}
 	}
 
 	// 保存增强日志（含步骤快照，供记录详情步骤图展示）
 	if s.logUc != nil && result.StepTimings != nil {
 		changesJSON, _ := json.Marshal(result.Changes)
 		snapshotsJSON, _ := json.Marshal(result.StepSnapshots)
-		s.logUc.Save(ctx, &biz.EnhancementLogData{
+		err = s.logUc.Save(ctx, &biz.EnhancementLogData{
 			SessionID:           sessionID,
 			RawText:             result.RawText,
 			EnhancedText:        result.EnhancedText,
@@ -191,13 +179,16 @@ func (s *ASRServiceService) enhance(ctx context.Context, text string, profileID 
 			ContextTimeMs:       stepMs(result.StepTimings, "context_correction"),
 			Status:              1,
 		})
+		if err != nil {
+			s.log.Errorf("failed to save enhancement log: %v", err)
+		}
 	}
 
-	return &pb.CorrectResponse{
-		OriginalText:  result.RawText,
-		CorrectedText: result.EnhancedText,
-		Changes:       changes,
-		NeedConfirm:   needConfirm,
+	return &pb.EnhanceTextResponse{
+		OriginalText: result.RawText,
+		EnhancedText: result.EnhancedText,
+		Changes:      changes,
+		Status:       1,
 	}, nil
 }
 
@@ -223,7 +214,7 @@ func (s *ASRServiceService) GetAsrRecordDetail(ctx context.Context, req *pb.GetA
 							DurationMs: snap.DurationMs, Skipped: snap.Skipped,
 						}
 						for _, ch := range snap.Changes {
-							pbSnap.Changes = append(pbSnap.Changes, &pb.CorrectionChange{
+							pbSnap.Changes = append(pbSnap.Changes, &pb.EnhanceChange{
 								From: ch.OriginalText, To: ch.ResultText,
 								Type: ch.Type, Confidence: float32(ch.Confidence),
 							})
@@ -236,7 +227,7 @@ func (s *ASRServiceService) GetAsrRecordDetail(ctx context.Context, req *pb.GetA
 				var changes []*biz.EnhancementChange
 				if err := json.Unmarshal([]byte(log.GetChangesJson()), &changes); err == nil {
 					for _, ch := range changes {
-						detail.Changes = append(detail.Changes, &pb.CorrectionChange{
+						detail.Changes = append(detail.Changes, &pb.EnhanceChange{
 							From: ch.OriginalText, To: ch.ResultText,
 							Type: ch.Type, Confidence: float32(ch.Confidence),
 						})
@@ -271,15 +262,12 @@ func (s *ASRServiceService) GetAsrRecordAudio(ctx context.Context, req *pb.GetAs
 	return &pb.GetAsrRecordAudioResponse{AudioData: audio, ContentType: contentType}, nil
 }
 
-func toPbSegments(segments []asr.Segment) []*pb.Segment {
-	result := make([]*pb.Segment, 0, len(segments))
-	for _, seg := range segments {
-		result = append(result, &pb.Segment{
-			StartMs:    seg.StartMs,
-			EndMs:      seg.EndMs,
-			Text:       seg.Text,
-			Confidence: float32(seg.Confidence),
-		})
+// stepMs 从 stepTimings map 中取步骤耗时，找不到返回 0。
+func stepMs(m map[string]time.Duration, key string) int64 {
+	if d, ok := m[key]; ok {
+		return d.Milliseconds()
 	}
-	return result
+	return 0
 }
+
+// toPbSegments 死代码已删除（Segment 类型已从 proto 中移除；如需按时间片展示识别片段可临时在调用处构造）

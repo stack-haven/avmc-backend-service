@@ -4,6 +4,50 @@ import (
 	"strings"
 )
 
+// levenshteinDistance 计算两个字符串的编辑距离（Levenshtein，基于 rune）。
+// 内联自原 correction_editdistance.go（该文件已废弃并删除）。
+func levenshteinDistance(a, b string) int {
+	ar := []rune(a)
+	br := []rune(b)
+	la, lb := len(ar), len(br)
+	if la == 0 {
+		return lb
+	}
+	if lb == 0 {
+		return la
+	}
+	prev := make([]int, lb+1)
+	cur := make([]int, lb+1)
+	for j := 0; j <= lb; j++ {
+		prev[j] = j
+	}
+	for i := 1; i <= la; i++ {
+		cur[0] = i
+		for j := 1; j <= lb; j++ {
+			cost := 1
+			if ar[i-1] == br[j-1] {
+				cost = 0
+			}
+			cur[j] = min3(cur[j-1]+1, prev[j]+1, prev[j-1]+cost)
+		}
+		prev, cur = cur, prev
+	}
+	return prev[lb]
+}
+
+func min3(a, b, c int) int {
+	if a < b {
+		if a < c {
+			return a
+		}
+		return c
+	}
+	if b < c {
+		return b
+	}
+	return c
+}
+
 // 推断置信度阈值（开发说明第三十五节：第一期系统内置，不开放业务配置）。
 const (
 	autoThreshold    = 0.8 // >= 0.8 自动替换 REPLACE

@@ -24,6 +24,76 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// EnhanceChange 单条增强变更（从原 CorrectionChange 迁移并重命名）。
+// 命名升级：剥离"纠错"语义，表达"增强做了什么"。
+type EnhanceChange struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	From          string                 `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`               // 变更前片段
+	To            string                 `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`                   // 变更后片段
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`               // 增强类型：ALIAS/CLEAN/FILLER/REPLACE/PHONETIC/FUZZY/CONTEXT
+	Confidence    float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"` // 置信度
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnhanceChange) Reset() {
+	*x = EnhanceChange{}
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnhanceChange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnhanceChange) ProtoMessage() {}
+
+func (x *EnhanceChange) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnhanceChange.ProtoReflect.Descriptor instead.
+func (*EnhanceChange) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *EnhanceChange) GetFrom() string {
+	if x != nil {
+		return x.From
+	}
+	return ""
+}
+
+func (x *EnhanceChange) GetTo() string {
+	if x != nil {
+		return x.To
+	}
+	return ""
+}
+
+func (x *EnhanceChange) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *EnhanceChange) GetConfidence() float32 {
+	if x != nil {
+		return x.Confidence
+	}
+	return 0
+}
+
 // EnhancementPolicy 增强策略。
 type EnhancementPolicy struct {
 	state                    protoimpl.MessageState `protogen:"open.v1"`
@@ -46,7 +116,7 @@ type EnhancementPolicy struct {
 
 func (x *EnhancementPolicy) Reset() {
 	*x = EnhancementPolicy{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[0]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -58,7 +128,7 @@ func (x *EnhancementPolicy) String() string {
 func (*EnhancementPolicy) ProtoMessage() {}
 
 func (x *EnhancementPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[0]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -71,7 +141,7 @@ func (x *EnhancementPolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnhancementPolicy.ProtoReflect.Descriptor instead.
 func (*EnhancementPolicy) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{0}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *EnhancementPolicy) GetId() uint32 {
@@ -180,7 +250,7 @@ type EnhancementProfile struct {
 
 func (x *EnhancementProfile) Reset() {
 	*x = EnhancementProfile{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[1]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -192,7 +262,7 @@ func (x *EnhancementProfile) String() string {
 func (*EnhancementProfile) ProtoMessage() {}
 
 func (x *EnhancementProfile) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[1]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -205,7 +275,7 @@ func (x *EnhancementProfile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnhancementProfile.ProtoReflect.Descriptor instead.
 func (*EnhancementProfile) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{1}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *EnhancementProfile) GetId() uint32 {
@@ -261,7 +331,7 @@ type ListPoliciesRequest struct {
 
 func (x *ListPoliciesRequest) Reset() {
 	*x = ListPoliciesRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[2]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -273,7 +343,7 @@ func (x *ListPoliciesRequest) String() string {
 func (*ListPoliciesRequest) ProtoMessage() {}
 
 func (x *ListPoliciesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[2]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -286,7 +356,7 @@ func (x *ListPoliciesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPoliciesRequest.ProtoReflect.Descriptor instead.
 func (*ListPoliciesRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{2}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListPoliciesRequest) GetPageSize() int32 {
@@ -321,7 +391,7 @@ type ListPoliciesResponse struct {
 
 func (x *ListPoliciesResponse) Reset() {
 	*x = ListPoliciesResponse{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[3]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -333,7 +403,7 @@ func (x *ListPoliciesResponse) String() string {
 func (*ListPoliciesResponse) ProtoMessage() {}
 
 func (x *ListPoliciesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[3]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -346,7 +416,7 @@ func (x *ListPoliciesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPoliciesResponse.ProtoReflect.Descriptor instead.
 func (*ListPoliciesResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{3}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListPoliciesResponse) GetPolicies() []*EnhancementPolicy {
@@ -379,7 +449,7 @@ type GetPolicyRequest struct {
 
 func (x *GetPolicyRequest) Reset() {
 	*x = GetPolicyRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[4]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -391,7 +461,7 @@ func (x *GetPolicyRequest) String() string {
 func (*GetPolicyRequest) ProtoMessage() {}
 
 func (x *GetPolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[4]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -404,7 +474,7 @@ func (x *GetPolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPolicyRequest.ProtoReflect.Descriptor instead.
 func (*GetPolicyRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{4}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetPolicyRequest) GetId() uint32 {
@@ -432,7 +502,7 @@ type CreatePolicyRequest struct {
 
 func (x *CreatePolicyRequest) Reset() {
 	*x = CreatePolicyRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[5]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -444,7 +514,7 @@ func (x *CreatePolicyRequest) String() string {
 func (*CreatePolicyRequest) ProtoMessage() {}
 
 func (x *CreatePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[5]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -457,7 +527,7 @@ func (x *CreatePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePolicyRequest.ProtoReflect.Descriptor instead.
 func (*CreatePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{5}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CreatePolicyRequest) GetName() string {
@@ -549,7 +619,7 @@ type UpdatePolicyRequest struct {
 
 func (x *UpdatePolicyRequest) Reset() {
 	*x = UpdatePolicyRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[6]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -561,7 +631,7 @@ func (x *UpdatePolicyRequest) String() string {
 func (*UpdatePolicyRequest) ProtoMessage() {}
 
 func (x *UpdatePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[6]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -574,7 +644,7 @@ func (x *UpdatePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePolicyRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{6}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdatePolicyRequest) GetId() uint32 {
@@ -663,7 +733,7 @@ type DeletePolicyRequest struct {
 
 func (x *DeletePolicyRequest) Reset() {
 	*x = DeletePolicyRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[7]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -675,7 +745,7 @@ func (x *DeletePolicyRequest) String() string {
 func (*DeletePolicyRequest) ProtoMessage() {}
 
 func (x *DeletePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[7]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -688,7 +758,7 @@ func (x *DeletePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePolicyRequest.ProtoReflect.Descriptor instead.
 func (*DeletePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{7}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeletePolicyRequest) GetId() uint32 {
@@ -706,7 +776,7 @@ type DeletePolicyResponse struct {
 
 func (x *DeletePolicyResponse) Reset() {
 	*x = DeletePolicyResponse{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[8]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -718,7 +788,7 @@ func (x *DeletePolicyResponse) String() string {
 func (*DeletePolicyResponse) ProtoMessage() {}
 
 func (x *DeletePolicyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[8]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -731,7 +801,7 @@ func (x *DeletePolicyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePolicyResponse.ProtoReflect.Descriptor instead.
 func (*DeletePolicyResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{8}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{9}
 }
 
 type ListProfilesRequest struct {
@@ -745,7 +815,7 @@ type ListProfilesRequest struct {
 
 func (x *ListProfilesRequest) Reset() {
 	*x = ListProfilesRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[9]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -757,7 +827,7 @@ func (x *ListProfilesRequest) String() string {
 func (*ListProfilesRequest) ProtoMessage() {}
 
 func (x *ListProfilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[9]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -770,7 +840,7 @@ func (x *ListProfilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListProfilesRequest.ProtoReflect.Descriptor instead.
 func (*ListProfilesRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{9}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ListProfilesRequest) GetPageSize() int32 {
@@ -805,7 +875,7 @@ type ListProfilesResponse struct {
 
 func (x *ListProfilesResponse) Reset() {
 	*x = ListProfilesResponse{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[10]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -817,7 +887,7 @@ func (x *ListProfilesResponse) String() string {
 func (*ListProfilesResponse) ProtoMessage() {}
 
 func (x *ListProfilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[10]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -830,7 +900,7 @@ func (x *ListProfilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListProfilesResponse.ProtoReflect.Descriptor instead.
 func (*ListProfilesResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{10}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListProfilesResponse) GetProfiles() []*EnhancementProfile {
@@ -863,7 +933,7 @@ type GetProfileRequest struct {
 
 func (x *GetProfileRequest) Reset() {
 	*x = GetProfileRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[11]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -875,7 +945,7 @@ func (x *GetProfileRequest) String() string {
 func (*GetProfileRequest) ProtoMessage() {}
 
 func (x *GetProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[11]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -888,7 +958,7 @@ func (x *GetProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetProfileRequest.ProtoReflect.Descriptor instead.
 func (*GetProfileRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{11}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetProfileRequest) GetId() uint32 {
@@ -909,7 +979,7 @@ type CreateProfileRequest struct {
 
 func (x *CreateProfileRequest) Reset() {
 	*x = CreateProfileRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[12]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -921,7 +991,7 @@ func (x *CreateProfileRequest) String() string {
 func (*CreateProfileRequest) ProtoMessage() {}
 
 func (x *CreateProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[12]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -934,7 +1004,7 @@ func (x *CreateProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateProfileRequest.ProtoReflect.Descriptor instead.
 func (*CreateProfileRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{12}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *CreateProfileRequest) GetPolicyId() uint32 {
@@ -970,7 +1040,7 @@ type UpdateProfileRequest struct {
 
 func (x *UpdateProfileRequest) Reset() {
 	*x = UpdateProfileRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[13]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -982,7 +1052,7 @@ func (x *UpdateProfileRequest) String() string {
 func (*UpdateProfileRequest) ProtoMessage() {}
 
 func (x *UpdateProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[13]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -995,7 +1065,7 @@ func (x *UpdateProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProfileRequest.ProtoReflect.Descriptor instead.
 func (*UpdateProfileRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{13}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateProfileRequest) GetId() uint32 {
@@ -1035,7 +1105,7 @@ type DeleteProfileRequest struct {
 
 func (x *DeleteProfileRequest) Reset() {
 	*x = DeleteProfileRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[14]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1047,7 +1117,7 @@ func (x *DeleteProfileRequest) String() string {
 func (*DeleteProfileRequest) ProtoMessage() {}
 
 func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[14]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1060,7 +1130,7 @@ func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileRequest.ProtoReflect.Descriptor instead.
 func (*DeleteProfileRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{14}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *DeleteProfileRequest) GetId() uint32 {
@@ -1078,7 +1148,7 @@ type DeleteProfileResponse struct {
 
 func (x *DeleteProfileResponse) Reset() {
 	*x = DeleteProfileResponse{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[15]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1090,7 +1160,7 @@ func (x *DeleteProfileResponse) String() string {
 func (*DeleteProfileResponse) ProtoMessage() {}
 
 func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[15]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1103,7 +1173,7 @@ func (x *DeleteProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProfileResponse.ProtoReflect.Descriptor instead.
 func (*DeleteProfileResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{15}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{16}
 }
 
 // EnhancementLog 文本增强记录（含分阶段耗时 + 反馈预留）。
@@ -1139,7 +1209,7 @@ type EnhancementLog struct {
 
 func (x *EnhancementLog) Reset() {
 	*x = EnhancementLog{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[16]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1151,7 +1221,7 @@ func (x *EnhancementLog) String() string {
 func (*EnhancementLog) ProtoMessage() {}
 
 func (x *EnhancementLog) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[16]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1164,7 +1234,7 @@ func (x *EnhancementLog) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnhancementLog.ProtoReflect.Descriptor instead.
 func (*EnhancementLog) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{16}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *EnhancementLog) GetId() uint32 {
@@ -1346,7 +1416,7 @@ type ListEnhancementLogsRequest struct {
 
 func (x *ListEnhancementLogsRequest) Reset() {
 	*x = ListEnhancementLogsRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[17]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1358,7 +1428,7 @@ func (x *ListEnhancementLogsRequest) String() string {
 func (*ListEnhancementLogsRequest) ProtoMessage() {}
 
 func (x *ListEnhancementLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[17]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1371,7 +1441,7 @@ func (x *ListEnhancementLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListEnhancementLogsRequest.ProtoReflect.Descriptor instead.
 func (*ListEnhancementLogsRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{17}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ListEnhancementLogsRequest) GetPageSize() int32 {
@@ -1406,7 +1476,7 @@ type ListEnhancementLogsResponse struct {
 
 func (x *ListEnhancementLogsResponse) Reset() {
 	*x = ListEnhancementLogsResponse{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[18]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1418,7 +1488,7 @@ func (x *ListEnhancementLogsResponse) String() string {
 func (*ListEnhancementLogsResponse) ProtoMessage() {}
 
 func (x *ListEnhancementLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[18]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1431,7 +1501,7 @@ func (x *ListEnhancementLogsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListEnhancementLogsResponse.ProtoReflect.Descriptor instead.
 func (*ListEnhancementLogsResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{18}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListEnhancementLogsResponse) GetLogs() []*EnhancementLog {
@@ -1464,7 +1534,7 @@ type GetEnhancementLogRequest struct {
 
 func (x *GetEnhancementLogRequest) Reset() {
 	*x = GetEnhancementLogRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[19]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1476,7 +1546,7 @@ func (x *GetEnhancementLogRequest) String() string {
 func (*GetEnhancementLogRequest) ProtoMessage() {}
 
 func (x *GetEnhancementLogRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[19]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1489,7 +1559,7 @@ func (x *GetEnhancementLogRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetEnhancementLogRequest.ProtoReflect.Descriptor instead.
 func (*GetEnhancementLogRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{19}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetEnhancementLogRequest) GetId() uint32 {
@@ -1510,7 +1580,7 @@ type GeneratePinyinRequest struct {
 
 func (x *GeneratePinyinRequest) Reset() {
 	*x = GeneratePinyinRequest{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[20]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1522,7 +1592,7 @@ func (x *GeneratePinyinRequest) String() string {
 func (*GeneratePinyinRequest) ProtoMessage() {}
 
 func (x *GeneratePinyinRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[20]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1535,7 +1605,7 @@ func (x *GeneratePinyinRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GeneratePinyinRequest.ProtoReflect.Descriptor instead.
 func (*GeneratePinyinRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{20}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GeneratePinyinRequest) GetText() string {
@@ -1564,7 +1634,7 @@ type GeneratePinyinResponse struct {
 
 func (x *GeneratePinyinResponse) Reset() {
 	*x = GeneratePinyinResponse{}
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[21]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1576,7 +1646,7 @@ func (x *GeneratePinyinResponse) String() string {
 func (*GeneratePinyinResponse) ProtoMessage() {}
 
 func (x *GeneratePinyinResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_enhancement_proto_msgTypes[21]
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1589,7 +1659,7 @@ func (x *GeneratePinyinResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GeneratePinyinResponse.ProtoReflect.Descriptor instead.
 func (*GeneratePinyinResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{21}
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GeneratePinyinResponse) GetPinyin() string {
@@ -1613,11 +1683,228 @@ func (x *GeneratePinyinResponse) GetNormalizedText() string {
 	return ""
 }
 
+// EnhanceTextRequest 纯文本增强请求。
+type EnhanceTextRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	ProfileId     uint32                 `protobuf:"varint,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 0=按租户默认；非 0=按场景关联策略
+	SessionId     string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`  // 可选，便于日志关联
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnhanceTextRequest) Reset() {
+	*x = EnhanceTextRequest{}
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnhanceTextRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnhanceTextRequest) ProtoMessage() {}
+
+func (x *EnhanceTextRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnhanceTextRequest.ProtoReflect.Descriptor instead.
+func (*EnhanceTextRequest) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *EnhanceTextRequest) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *EnhanceTextRequest) GetProfileId() uint32 {
+	if x != nil {
+		return x.ProfileId
+	}
+	return 0
+}
+
+func (x *EnhanceTextRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+// EnhanceTextResponse 纯文本增强响应。
+type EnhanceTextResponse struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	OriginalText        string                 `protobuf:"bytes,1,opt,name=original_text,json=originalText,proto3" json:"original_text,omitempty"`
+	EnhancedText        string                 `protobuf:"bytes,2,opt,name=enhanced_text,json=enhancedText,proto3" json:"enhanced_text,omitempty"`
+	Changes             []*EnhanceChange       `protobuf:"bytes,3,rep,name=changes,proto3" json:"changes,omitempty"`
+	Status              int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"` // 1=SUCCESS 2=DEGRADED 3=FAILED
+	ProcessingTimeMs    int64                  `protobuf:"varint,5,opt,name=processing_time_ms,json=processingTimeMs,proto3" json:"processing_time_ms,omitempty"`
+	CleaningTimeMs      int64                  `protobuf:"varint,6,opt,name=cleaning_time_ms,json=cleaningTimeMs,proto3" json:"cleaning_time_ms,omitempty"`
+	FillerTimeMs        int64                  `protobuf:"varint,7,opt,name=filler_time_ms,json=fillerTimeMs,proto3" json:"filler_time_ms,omitempty"`
+	VocabMatchTimeMs    int64                  `protobuf:"varint,8,opt,name=vocab_match_time_ms,json=vocabMatchTimeMs,proto3" json:"vocab_match_time_ms,omitempty"`
+	AliasTimeMs         int64                  `protobuf:"varint,9,opt,name=alias_time_ms,json=aliasTimeMs,proto3" json:"alias_time_ms,omitempty"`
+	DeterministicTimeMs int64                  `protobuf:"varint,10,opt,name=deterministic_time_ms,json=deterministicTimeMs,proto3" json:"deterministic_time_ms,omitempty"`
+	PinyinTimeMs        int64                  `protobuf:"varint,11,opt,name=pinyin_time_ms,json=pinyinTimeMs,proto3" json:"pinyin_time_ms,omitempty"`
+	FuzzyTimeMs         int64                  `protobuf:"varint,12,opt,name=fuzzy_time_ms,json=fuzzyTimeMs,proto3" json:"fuzzy_time_ms,omitempty"`
+	ContextTimeMs       int64                  `protobuf:"varint,13,opt,name=context_time_ms,json=contextTimeMs,proto3" json:"context_time_ms,omitempty"`
+	ErrorMessage        string                 `protobuf:"bytes,14,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *EnhanceTextResponse) Reset() {
+	*x = EnhanceTextResponse{}
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnhanceTextResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnhanceTextResponse) ProtoMessage() {}
+
+func (x *EnhanceTextResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_enhancement_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnhanceTextResponse.ProtoReflect.Descriptor instead.
+func (*EnhanceTextResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_enhancement_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *EnhanceTextResponse) GetOriginalText() string {
+	if x != nil {
+		return x.OriginalText
+	}
+	return ""
+}
+
+func (x *EnhanceTextResponse) GetEnhancedText() string {
+	if x != nil {
+		return x.EnhancedText
+	}
+	return ""
+}
+
+func (x *EnhanceTextResponse) GetChanges() []*EnhanceChange {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
+}
+
+func (x *EnhanceTextResponse) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetProcessingTimeMs() int64 {
+	if x != nil {
+		return x.ProcessingTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetCleaningTimeMs() int64 {
+	if x != nil {
+		return x.CleaningTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetFillerTimeMs() int64 {
+	if x != nil {
+		return x.FillerTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetVocabMatchTimeMs() int64 {
+	if x != nil {
+		return x.VocabMatchTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetAliasTimeMs() int64 {
+	if x != nil {
+		return x.AliasTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetDeterministicTimeMs() int64 {
+	if x != nil {
+		return x.DeterministicTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetPinyinTimeMs() int64 {
+	if x != nil {
+		return x.PinyinTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetFuzzyTimeMs() int64 {
+	if x != nil {
+		return x.FuzzyTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetContextTimeMs() int64 {
+	if x != nil {
+		return x.ContextTimeMs
+	}
+	return 0
+}
+
+func (x *EnhanceTextResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
 var File_evie_service_v1_enhancement_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\n" +
-	"!evie/service/v1/enhancement.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"\xe2\x03\n" +
+	"!evie/service/v1/enhancement.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"g\n" +
+	"\rEnhanceChange\x12\x12\n" +
+	"\x04from\x18\x01 \x01(\tR\x04from\x12\x0e\n" +
+	"\x02to\x18\x02 \x01(\tR\x02to\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12\x1e\n" +
+	"\n" +
+	"confidence\x18\x04 \x01(\x02R\n" +
+	"confidence\"\xe2\x03\n" +
 	"\x11EnhancementPolicy\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -1757,7 +2044,30 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\x16GeneratePinyinResponse\x12\x16\n" +
 	"\x06pinyin\x18\x01 \x01(\tR\x06pinyin\x12%\n" +
 	"\x0epinyin_initial\x18\x02 \x01(\tR\rpinyinInitial\x12'\n" +
-	"\x0fnormalized_text\x18\x03 \x01(\tR\x0enormalizedText2\x82\x12\n" +
+	"\x0fnormalized_text\x18\x03 \x01(\tR\x0enormalizedText\"r\n" +
+	"\x12EnhanceTextRequest\x12\x1e\n" +
+	"\x04text\x18\x01 \x01(\tB\n" +
+	"\xbaH\ar\x05\x10\x01\x18\x80 R\x04text\x12\x1d\n" +
+	"\n" +
+	"profile_id\x18\x02 \x01(\rR\tprofileId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x03 \x01(\tR\tsessionId\"\xcd\x04\n" +
+	"\x13EnhanceTextResponse\x12#\n" +
+	"\roriginal_text\x18\x01 \x01(\tR\foriginalText\x12#\n" +
+	"\renhanced_text\x18\x02 \x01(\tR\fenhancedText\x128\n" +
+	"\achanges\x18\x03 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\x12,\n" +
+	"\x12processing_time_ms\x18\x05 \x01(\x03R\x10processingTimeMs\x12(\n" +
+	"\x10cleaning_time_ms\x18\x06 \x01(\x03R\x0ecleaningTimeMs\x12$\n" +
+	"\x0efiller_time_ms\x18\a \x01(\x03R\ffillerTimeMs\x12-\n" +
+	"\x13vocab_match_time_ms\x18\b \x01(\x03R\x10vocabMatchTimeMs\x12\"\n" +
+	"\ralias_time_ms\x18\t \x01(\x03R\valiasTimeMs\x122\n" +
+	"\x15deterministic_time_ms\x18\n" +
+	" \x01(\x03R\x13deterministicTimeMs\x12$\n" +
+	"\x0epinyin_time_ms\x18\v \x01(\x03R\fpinyinTimeMs\x12\"\n" +
+	"\rfuzzy_time_ms\x18\f \x01(\x03R\vfuzzyTimeMs\x12&\n" +
+	"\x0fcontext_time_ms\x18\r \x01(\x03R\rcontextTimeMs\x12#\n" +
+	"\rerror_message\x18\x0e \x01(\tR\ferrorMessage2\xa5\x13\n" +
 	"\x12EnhancementService\x12\xb3\x01\n" +
 	"\fListPolicies\x12$.evie.service.v1.ListPoliciesRequest\x1a%.evie.service.v1.ListPoliciesResponse\"V\xbaG.\n" +
 	"\f文本增强\x12\x1e分页查询增强策略列表\x82\xd3\xe4\x93\x02\x1f\x12\x1d/evie/v1/enhancement-policies\x12\xa9\x01\n" +
@@ -1785,7 +2095,9 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\x06GetLog\x12).evie.service.v1.GetEnhancementLogRequest\x1a\x1f.evie.service.v1.EnhancementLog\"Q\xbaG(\n" +
 	"\f文本增强\x12\x18查询增强记录详情\x82\xd3\xe4\x93\x02 \x12\x1e/evie/v1/enhancement-logs/{id}\x12\xa5\x01\n" +
 	"\x0eGeneratePinyin\x12&.evie.service.v1.GeneratePinyinRequest\x1a'.evie.service.v1.GeneratePinyinResponse\"B\xbaG\x1c\n" +
-	"\f文本增强\x12\f生成拼音\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/evie/v1/pinyin:generateB\xad\x01\n" +
+	"\f文本增强\x12\f生成拼音\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/evie/v1/pinyin:generate\x12\xa0\x01\n" +
+	"\vEnhanceText\x12#.evie.service.v1.EnhanceTextRequest\x1a$.evie.service.v1.EnhanceTextResponse\"F\xbaG\x1f\n" +
+	"\f文本增强\x12\x0f纯文本增强\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/evie/v1/enhancement:textB\xad\x01\n" +
 	"\x13com.evie.service.v1B\x10EnhancementProtoP\x01Z&backend-service/api/evie/service/v1;v1\xa2\x02\x03ESX\xaa\x02\x0fEvie.Service.V1\xca\x02\x0fEvie\\Service\\V1\xe2\x02\x1bEvie\\Service\\V1\\GPBMetadata\xea\x02\x11Evie::Service::V1b\x06proto3"
 
 var (
@@ -1800,66 +2112,72 @@ func file_evie_service_v1_enhancement_proto_rawDescGZIP() []byte {
 	return file_evie_service_v1_enhancement_proto_rawDescData
 }
 
-var file_evie_service_v1_enhancement_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_evie_service_v1_enhancement_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_evie_service_v1_enhancement_proto_goTypes = []any{
-	(*EnhancementPolicy)(nil),           // 0: evie.service.v1.EnhancementPolicy
-	(*EnhancementProfile)(nil),          // 1: evie.service.v1.EnhancementProfile
-	(*ListPoliciesRequest)(nil),         // 2: evie.service.v1.ListPoliciesRequest
-	(*ListPoliciesResponse)(nil),        // 3: evie.service.v1.ListPoliciesResponse
-	(*GetPolicyRequest)(nil),            // 4: evie.service.v1.GetPolicyRequest
-	(*CreatePolicyRequest)(nil),         // 5: evie.service.v1.CreatePolicyRequest
-	(*UpdatePolicyRequest)(nil),         // 6: evie.service.v1.UpdatePolicyRequest
-	(*DeletePolicyRequest)(nil),         // 7: evie.service.v1.DeletePolicyRequest
-	(*DeletePolicyResponse)(nil),        // 8: evie.service.v1.DeletePolicyResponse
-	(*ListProfilesRequest)(nil),         // 9: evie.service.v1.ListProfilesRequest
-	(*ListProfilesResponse)(nil),        // 10: evie.service.v1.ListProfilesResponse
-	(*GetProfileRequest)(nil),           // 11: evie.service.v1.GetProfileRequest
-	(*CreateProfileRequest)(nil),        // 12: evie.service.v1.CreateProfileRequest
-	(*UpdateProfileRequest)(nil),        // 13: evie.service.v1.UpdateProfileRequest
-	(*DeleteProfileRequest)(nil),        // 14: evie.service.v1.DeleteProfileRequest
-	(*DeleteProfileResponse)(nil),       // 15: evie.service.v1.DeleteProfileResponse
-	(*EnhancementLog)(nil),              // 16: evie.service.v1.EnhancementLog
-	(*ListEnhancementLogsRequest)(nil),  // 17: evie.service.v1.ListEnhancementLogsRequest
-	(*ListEnhancementLogsResponse)(nil), // 18: evie.service.v1.ListEnhancementLogsResponse
-	(*GetEnhancementLogRequest)(nil),    // 19: evie.service.v1.GetEnhancementLogRequest
-	(*GeneratePinyinRequest)(nil),       // 20: evie.service.v1.GeneratePinyinRequest
-	(*GeneratePinyinResponse)(nil),      // 21: evie.service.v1.GeneratePinyinResponse
+	(*EnhanceChange)(nil),               // 0: evie.service.v1.EnhanceChange
+	(*EnhancementPolicy)(nil),           // 1: evie.service.v1.EnhancementPolicy
+	(*EnhancementProfile)(nil),          // 2: evie.service.v1.EnhancementProfile
+	(*ListPoliciesRequest)(nil),         // 3: evie.service.v1.ListPoliciesRequest
+	(*ListPoliciesResponse)(nil),        // 4: evie.service.v1.ListPoliciesResponse
+	(*GetPolicyRequest)(nil),            // 5: evie.service.v1.GetPolicyRequest
+	(*CreatePolicyRequest)(nil),         // 6: evie.service.v1.CreatePolicyRequest
+	(*UpdatePolicyRequest)(nil),         // 7: evie.service.v1.UpdatePolicyRequest
+	(*DeletePolicyRequest)(nil),         // 8: evie.service.v1.DeletePolicyRequest
+	(*DeletePolicyResponse)(nil),        // 9: evie.service.v1.DeletePolicyResponse
+	(*ListProfilesRequest)(nil),         // 10: evie.service.v1.ListProfilesRequest
+	(*ListProfilesResponse)(nil),        // 11: evie.service.v1.ListProfilesResponse
+	(*GetProfileRequest)(nil),           // 12: evie.service.v1.GetProfileRequest
+	(*CreateProfileRequest)(nil),        // 13: evie.service.v1.CreateProfileRequest
+	(*UpdateProfileRequest)(nil),        // 14: evie.service.v1.UpdateProfileRequest
+	(*DeleteProfileRequest)(nil),        // 15: evie.service.v1.DeleteProfileRequest
+	(*DeleteProfileResponse)(nil),       // 16: evie.service.v1.DeleteProfileResponse
+	(*EnhancementLog)(nil),              // 17: evie.service.v1.EnhancementLog
+	(*ListEnhancementLogsRequest)(nil),  // 18: evie.service.v1.ListEnhancementLogsRequest
+	(*ListEnhancementLogsResponse)(nil), // 19: evie.service.v1.ListEnhancementLogsResponse
+	(*GetEnhancementLogRequest)(nil),    // 20: evie.service.v1.GetEnhancementLogRequest
+	(*GeneratePinyinRequest)(nil),       // 21: evie.service.v1.GeneratePinyinRequest
+	(*GeneratePinyinResponse)(nil),      // 22: evie.service.v1.GeneratePinyinResponse
+	(*EnhanceTextRequest)(nil),          // 23: evie.service.v1.EnhanceTextRequest
+	(*EnhanceTextResponse)(nil),         // 24: evie.service.v1.EnhanceTextResponse
 }
 var file_evie_service_v1_enhancement_proto_depIdxs = []int32{
-	0,  // 0: evie.service.v1.ListPoliciesResponse.policies:type_name -> evie.service.v1.EnhancementPolicy
-	1,  // 1: evie.service.v1.ListProfilesResponse.profiles:type_name -> evie.service.v1.EnhancementProfile
-	16, // 2: evie.service.v1.ListEnhancementLogsResponse.logs:type_name -> evie.service.v1.EnhancementLog
-	2,  // 3: evie.service.v1.EnhancementService.ListPolicies:input_type -> evie.service.v1.ListPoliciesRequest
-	4,  // 4: evie.service.v1.EnhancementService.GetPolicy:input_type -> evie.service.v1.GetPolicyRequest
-	5,  // 5: evie.service.v1.EnhancementService.CreatePolicy:input_type -> evie.service.v1.CreatePolicyRequest
-	6,  // 6: evie.service.v1.EnhancementService.UpdatePolicy:input_type -> evie.service.v1.UpdatePolicyRequest
-	7,  // 7: evie.service.v1.EnhancementService.DeletePolicy:input_type -> evie.service.v1.DeletePolicyRequest
-	9,  // 8: evie.service.v1.EnhancementService.ListProfiles:input_type -> evie.service.v1.ListProfilesRequest
-	11, // 9: evie.service.v1.EnhancementService.GetProfile:input_type -> evie.service.v1.GetProfileRequest
-	12, // 10: evie.service.v1.EnhancementService.CreateProfile:input_type -> evie.service.v1.CreateProfileRequest
-	13, // 11: evie.service.v1.EnhancementService.UpdateProfile:input_type -> evie.service.v1.UpdateProfileRequest
-	14, // 12: evie.service.v1.EnhancementService.DeleteProfile:input_type -> evie.service.v1.DeleteProfileRequest
-	17, // 13: evie.service.v1.EnhancementService.ListLogs:input_type -> evie.service.v1.ListEnhancementLogsRequest
-	19, // 14: evie.service.v1.EnhancementService.GetLog:input_type -> evie.service.v1.GetEnhancementLogRequest
-	20, // 15: evie.service.v1.EnhancementService.GeneratePinyin:input_type -> evie.service.v1.GeneratePinyinRequest
-	3,  // 16: evie.service.v1.EnhancementService.ListPolicies:output_type -> evie.service.v1.ListPoliciesResponse
-	0,  // 17: evie.service.v1.EnhancementService.GetPolicy:output_type -> evie.service.v1.EnhancementPolicy
-	0,  // 18: evie.service.v1.EnhancementService.CreatePolicy:output_type -> evie.service.v1.EnhancementPolicy
-	0,  // 19: evie.service.v1.EnhancementService.UpdatePolicy:output_type -> evie.service.v1.EnhancementPolicy
-	8,  // 20: evie.service.v1.EnhancementService.DeletePolicy:output_type -> evie.service.v1.DeletePolicyResponse
-	10, // 21: evie.service.v1.EnhancementService.ListProfiles:output_type -> evie.service.v1.ListProfilesResponse
-	1,  // 22: evie.service.v1.EnhancementService.GetProfile:output_type -> evie.service.v1.EnhancementProfile
-	1,  // 23: evie.service.v1.EnhancementService.CreateProfile:output_type -> evie.service.v1.EnhancementProfile
-	1,  // 24: evie.service.v1.EnhancementService.UpdateProfile:output_type -> evie.service.v1.EnhancementProfile
-	15, // 25: evie.service.v1.EnhancementService.DeleteProfile:output_type -> evie.service.v1.DeleteProfileResponse
-	18, // 26: evie.service.v1.EnhancementService.ListLogs:output_type -> evie.service.v1.ListEnhancementLogsResponse
-	16, // 27: evie.service.v1.EnhancementService.GetLog:output_type -> evie.service.v1.EnhancementLog
-	21, // 28: evie.service.v1.EnhancementService.GeneratePinyin:output_type -> evie.service.v1.GeneratePinyinResponse
-	16, // [16:29] is the sub-list for method output_type
-	3,  // [3:16] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	1,  // 0: evie.service.v1.ListPoliciesResponse.policies:type_name -> evie.service.v1.EnhancementPolicy
+	2,  // 1: evie.service.v1.ListProfilesResponse.profiles:type_name -> evie.service.v1.EnhancementProfile
+	17, // 2: evie.service.v1.ListEnhancementLogsResponse.logs:type_name -> evie.service.v1.EnhancementLog
+	0,  // 3: evie.service.v1.EnhanceTextResponse.changes:type_name -> evie.service.v1.EnhanceChange
+	3,  // 4: evie.service.v1.EnhancementService.ListPolicies:input_type -> evie.service.v1.ListPoliciesRequest
+	5,  // 5: evie.service.v1.EnhancementService.GetPolicy:input_type -> evie.service.v1.GetPolicyRequest
+	6,  // 6: evie.service.v1.EnhancementService.CreatePolicy:input_type -> evie.service.v1.CreatePolicyRequest
+	7,  // 7: evie.service.v1.EnhancementService.UpdatePolicy:input_type -> evie.service.v1.UpdatePolicyRequest
+	8,  // 8: evie.service.v1.EnhancementService.DeletePolicy:input_type -> evie.service.v1.DeletePolicyRequest
+	10, // 9: evie.service.v1.EnhancementService.ListProfiles:input_type -> evie.service.v1.ListProfilesRequest
+	12, // 10: evie.service.v1.EnhancementService.GetProfile:input_type -> evie.service.v1.GetProfileRequest
+	13, // 11: evie.service.v1.EnhancementService.CreateProfile:input_type -> evie.service.v1.CreateProfileRequest
+	14, // 12: evie.service.v1.EnhancementService.UpdateProfile:input_type -> evie.service.v1.UpdateProfileRequest
+	15, // 13: evie.service.v1.EnhancementService.DeleteProfile:input_type -> evie.service.v1.DeleteProfileRequest
+	18, // 14: evie.service.v1.EnhancementService.ListLogs:input_type -> evie.service.v1.ListEnhancementLogsRequest
+	20, // 15: evie.service.v1.EnhancementService.GetLog:input_type -> evie.service.v1.GetEnhancementLogRequest
+	21, // 16: evie.service.v1.EnhancementService.GeneratePinyin:input_type -> evie.service.v1.GeneratePinyinRequest
+	23, // 17: evie.service.v1.EnhancementService.EnhanceText:input_type -> evie.service.v1.EnhanceTextRequest
+	4,  // 18: evie.service.v1.EnhancementService.ListPolicies:output_type -> evie.service.v1.ListPoliciesResponse
+	1,  // 19: evie.service.v1.EnhancementService.GetPolicy:output_type -> evie.service.v1.EnhancementPolicy
+	1,  // 20: evie.service.v1.EnhancementService.CreatePolicy:output_type -> evie.service.v1.EnhancementPolicy
+	1,  // 21: evie.service.v1.EnhancementService.UpdatePolicy:output_type -> evie.service.v1.EnhancementPolicy
+	9,  // 22: evie.service.v1.EnhancementService.DeletePolicy:output_type -> evie.service.v1.DeletePolicyResponse
+	11, // 23: evie.service.v1.EnhancementService.ListProfiles:output_type -> evie.service.v1.ListProfilesResponse
+	2,  // 24: evie.service.v1.EnhancementService.GetProfile:output_type -> evie.service.v1.EnhancementProfile
+	2,  // 25: evie.service.v1.EnhancementService.CreateProfile:output_type -> evie.service.v1.EnhancementProfile
+	2,  // 26: evie.service.v1.EnhancementService.UpdateProfile:output_type -> evie.service.v1.EnhancementProfile
+	16, // 27: evie.service.v1.EnhancementService.DeleteProfile:output_type -> evie.service.v1.DeleteProfileResponse
+	19, // 28: evie.service.v1.EnhancementService.ListLogs:output_type -> evie.service.v1.ListEnhancementLogsResponse
+	17, // 29: evie.service.v1.EnhancementService.GetLog:output_type -> evie.service.v1.EnhancementLog
+	22, // 30: evie.service.v1.EnhancementService.GeneratePinyin:output_type -> evie.service.v1.GeneratePinyinResponse
+	24, // 31: evie.service.v1.EnhancementService.EnhanceText:output_type -> evie.service.v1.EnhanceTextResponse
+	18, // [18:32] is the sub-list for method output_type
+	4,  // [4:18] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_evie_service_v1_enhancement_proto_init() }
@@ -1873,7 +2191,7 @@ func file_evie_service_v1_enhancement_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_evie_service_v1_enhancement_proto_rawDesc), len(file_evie_service_v1_enhancement_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   22,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

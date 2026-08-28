@@ -277,260 +277,6 @@ var _ interface {
 	ErrorName() string
 } = RecognizeRequestValidationError{}
 
-// Validate checks the field values on RecognizeResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *RecognizeResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on RecognizeResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// RecognizeResponseMultiError, or nil if none found.
-func (m *RecognizeResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *RecognizeResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for RequestId
-
-	// no validation rules for Text
-
-	for idx, item := range m.GetSegments() {
-		_, _ = idx, item
-
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, RecognizeResponseValidationError{
-						field:  fmt.Sprintf("Segments[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, RecognizeResponseValidationError{
-						field:  fmt.Sprintf("Segments[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return RecognizeResponseValidationError{
-					field:  fmt.Sprintf("Segments[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	// no validation rules for Confidence
-
-	// no validation rules for DurationMs
-
-	// no validation rules for IsFinal
-
-	// no validation rules for ProviderName
-
-	if len(errors) > 0 {
-		return RecognizeResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// RecognizeResponseMultiError is an error wrapping multiple validation errors
-// returned by RecognizeResponse.ValidateAll() if the designated constraints
-// aren't met.
-type RecognizeResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m RecognizeResponseMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m RecognizeResponseMultiError) AllErrors() []error { return m }
-
-// RecognizeResponseValidationError is the validation error returned by
-// RecognizeResponse.Validate if the designated constraints aren't met.
-type RecognizeResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e RecognizeResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e RecognizeResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e RecognizeResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e RecognizeResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e RecognizeResponseValidationError) ErrorName() string {
-	return "RecognizeResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e RecognizeResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sRecognizeResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = RecognizeResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = RecognizeResponseValidationError{}
-
-// Validate checks the field values on Segment with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Segment) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Segment with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in SegmentMultiError, or nil if none found.
-func (m *Segment) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Segment) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for StartMs
-
-	// no validation rules for EndMs
-
-	// no validation rules for Text
-
-	// no validation rules for Confidence
-
-	if len(errors) > 0 {
-		return SegmentMultiError(errors)
-	}
-
-	return nil
-}
-
-// SegmentMultiError is an error wrapping multiple validation errors returned
-// by Segment.ValidateAll() if the designated constraints aren't met.
-type SegmentMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m SegmentMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m SegmentMultiError) AllErrors() []error { return m }
-
-// SegmentValidationError is the validation error returned by Segment.Validate
-// if the designated constraints aren't met.
-type SegmentValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e SegmentValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e SegmentValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e SegmentValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e SegmentValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e SegmentValidationError) ErrorName() string { return "SegmentValidationError" }
-
-// Error satisfies the builtin error interface
-func (e SegmentValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sSegment.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = SegmentValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = SegmentValidationError{}
-
 // Validate checks the field values on AudioChunk with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -1777,31 +1523,41 @@ var _ interface {
 	ErrorName() string
 } = AsrRecordDetailValidationError{}
 
-// Validate checks the field values on RecognizeAndCorrectResponse with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *RecognizeAndCorrectResponse) Validate() error {
+// Validate checks the field values on RecognizeResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RecognizeResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RecognizeAndCorrectResponse with the
-// rules defined in the proto definition for this message. If any rules are
+// ValidateAll checks the field values on RecognizeResponse with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// RecognizeAndCorrectResponseMultiError, or nil if none found.
-func (m *RecognizeAndCorrectResponse) ValidateAll() error {
+// RecognizeResponseMultiError, or nil if none found.
+func (m *RecognizeResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RecognizeAndCorrectResponse) validate(all bool) error {
+func (m *RecognizeResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for OriginalText
+	// no validation rules for RequestId
 
-	// no validation rules for CorrectedText
+	// no validation rules for RawText
+
+	// no validation rules for EnhancedText
+
+	// no validation rules for Confidence
+
+	// no validation rules for DurationMs
+
+	// no validation rules for IsFinal
+
+	// no validation rules for ProviderName
 
 	for idx, item := range m.GetChanges() {
 		_, _ = idx, item
@@ -1810,7 +1566,7 @@ func (m *RecognizeAndCorrectResponse) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, RecognizeAndCorrectResponseValidationError{
+					errors = append(errors, RecognizeResponseValidationError{
 						field:  fmt.Sprintf("Changes[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1818,7 +1574,7 @@ func (m *RecognizeAndCorrectResponse) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, RecognizeAndCorrectResponseValidationError{
+					errors = append(errors, RecognizeResponseValidationError{
 						field:  fmt.Sprintf("Changes[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1827,7 +1583,7 @@ func (m *RecognizeAndCorrectResponse) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return RecognizeAndCorrectResponseValidationError{
+				return RecognizeResponseValidationError{
 					field:  fmt.Sprintf("Changes[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1837,24 +1593,42 @@ func (m *RecognizeAndCorrectResponse) validate(all bool) error {
 
 	}
 
-	// no validation rules for Confidence
+	// no validation rules for Status
 
-	// no validation rules for ProviderName
+	// no validation rules for ProcessingTimeMs
+
+	// no validation rules for CleaningTimeMs
+
+	// no validation rules for FillerTimeMs
+
+	// no validation rules for VocabMatchTimeMs
+
+	// no validation rules for AliasTimeMs
+
+	// no validation rules for DeterministicTimeMs
+
+	// no validation rules for PinyinTimeMs
+
+	// no validation rules for FuzzyTimeMs
+
+	// no validation rules for ContextTimeMs
+
+	// no validation rules for ErrorMessage
 
 	if len(errors) > 0 {
-		return RecognizeAndCorrectResponseMultiError(errors)
+		return RecognizeResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// RecognizeAndCorrectResponseMultiError is an error wrapping multiple
-// validation errors returned by RecognizeAndCorrectResponse.ValidateAll() if
-// the designated constraints aren't met.
-type RecognizeAndCorrectResponseMultiError []error
+// RecognizeResponseMultiError is an error wrapping multiple validation errors
+// returned by RecognizeResponse.ValidateAll() if the designated constraints
+// aren't met.
+type RecognizeResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RecognizeAndCorrectResponseMultiError) Error() string {
+func (m RecognizeResponseMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1863,12 +1637,11 @@ func (m RecognizeAndCorrectResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RecognizeAndCorrectResponseMultiError) AllErrors() []error { return m }
+func (m RecognizeResponseMultiError) AllErrors() []error { return m }
 
-// RecognizeAndCorrectResponseValidationError is the validation error returned
-// by RecognizeAndCorrectResponse.Validate if the designated constraints
-// aren't met.
-type RecognizeAndCorrectResponseValidationError struct {
+// RecognizeResponseValidationError is the validation error returned by
+// RecognizeResponse.Validate if the designated constraints aren't met.
+type RecognizeResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1876,24 +1649,24 @@ type RecognizeAndCorrectResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e RecognizeAndCorrectResponseValidationError) Field() string { return e.field }
+func (e RecognizeResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RecognizeAndCorrectResponseValidationError) Reason() string { return e.reason }
+func (e RecognizeResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RecognizeAndCorrectResponseValidationError) Cause() error { return e.cause }
+func (e RecognizeResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RecognizeAndCorrectResponseValidationError) Key() bool { return e.key }
+func (e RecognizeResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RecognizeAndCorrectResponseValidationError) ErrorName() string {
-	return "RecognizeAndCorrectResponseValidationError"
+func (e RecognizeResponseValidationError) ErrorName() string {
+	return "RecognizeResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e RecognizeAndCorrectResponseValidationError) Error() string {
+func (e RecognizeResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1905,14 +1678,14 @@ func (e RecognizeAndCorrectResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRecognizeAndCorrectResponse.%s: %s%s",
+		"invalid %sRecognizeResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RecognizeAndCorrectResponseValidationError{}
+var _ error = RecognizeResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -1920,7 +1693,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RecognizeAndCorrectResponseValidationError{}
+} = RecognizeResponseValidationError{}
 
 // Validate checks the field values on ReRecognizeRequest with the rules
 // defined in the proto definition for this message. If any rules are

@@ -32,6 +32,7 @@ const (
 	EnhancementService_ListLogs_FullMethodName       = "/evie.service.v1.EnhancementService/ListLogs"
 	EnhancementService_GetLog_FullMethodName         = "/evie.service.v1.EnhancementService/GetLog"
 	EnhancementService_GeneratePinyin_FullMethodName = "/evie.service.v1.EnhancementService/GeneratePinyin"
+	EnhancementService_EnhanceText_FullMethodName    = "/evie.service.v1.EnhancementService/EnhanceText"
 )
 
 // EnhancementServiceClient is the client API for EnhancementService service.
@@ -68,6 +69,9 @@ type EnhancementServiceClient interface {
 	// 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
 	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
 	GeneratePinyin(ctx context.Context, in *GeneratePinyinRequest, opts ...grpc.CallOption) (*GeneratePinyinResponse, error)
+	// 纯文本增强：对输入文本直接走 8 层流水线，返回增强结果。
+	// 增强策略由 profile_id 关联的场景决定；不传 profile_id 走租户默认。
+	EnhanceText(ctx context.Context, in *EnhanceTextRequest, opts ...grpc.CallOption) (*EnhanceTextResponse, error)
 }
 
 type enhancementServiceClient struct {
@@ -208,6 +212,16 @@ func (c *enhancementServiceClient) GeneratePinyin(ctx context.Context, in *Gener
 	return out, nil
 }
 
+func (c *enhancementServiceClient) EnhanceText(ctx context.Context, in *EnhanceTextRequest, opts ...grpc.CallOption) (*EnhanceTextResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EnhanceTextResponse)
+	err := c.cc.Invoke(ctx, EnhancementService_EnhanceText_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EnhancementServiceServer is the server API for EnhancementService service.
 // All implementations must embed UnimplementedEnhancementServiceServer
 // for forward compatibility.
@@ -242,6 +256,9 @@ type EnhancementServiceServer interface {
 	// 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
 	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
 	GeneratePinyin(context.Context, *GeneratePinyinRequest) (*GeneratePinyinResponse, error)
+	// 纯文本增强：对输入文本直接走 8 层流水线，返回增强结果。
+	// 增强策略由 profile_id 关联的场景决定；不传 profile_id 走租户默认。
+	EnhanceText(context.Context, *EnhanceTextRequest) (*EnhanceTextResponse, error)
 	mustEmbedUnimplementedEnhancementServiceServer()
 }
 
@@ -290,6 +307,9 @@ func (UnimplementedEnhancementServiceServer) GetLog(context.Context, *GetEnhance
 }
 func (UnimplementedEnhancementServiceServer) GeneratePinyin(context.Context, *GeneratePinyinRequest) (*GeneratePinyinResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GeneratePinyin not implemented")
+}
+func (UnimplementedEnhancementServiceServer) EnhanceText(context.Context, *EnhanceTextRequest) (*EnhanceTextResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EnhanceText not implemented")
 }
 func (UnimplementedEnhancementServiceServer) mustEmbedUnimplementedEnhancementServiceServer() {}
 func (UnimplementedEnhancementServiceServer) testEmbeddedByValue()                            {}
@@ -546,6 +566,24 @@ func _EnhancementService_GeneratePinyin_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EnhancementService_EnhanceText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnhanceTextRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EnhancementServiceServer).EnhanceText(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EnhancementService_EnhanceText_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EnhancementServiceServer).EnhanceText(ctx, req.(*EnhanceTextRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EnhancementService_ServiceDesc is the grpc.ServiceDesc for EnhancementService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -604,6 +642,10 @@ var EnhancementService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GeneratePinyin",
 			Handler:    _EnhancementService_GeneratePinyin_Handler,
+		},
+		{
+			MethodName: "EnhanceText",
+			Handler:    _EnhancementService_EnhanceText_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -154,7 +154,7 @@ type RecognizeRequest struct {
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Format        *AudioFormat           `protobuf:"bytes,2,opt,name=format,proto3" json:"format,omitempty"`
 	AudioData     []byte                 `protobuf:"bytes,3,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`  // max 10MB
-	ProfileId     uint32                 `protobuf:"varint,4,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=默认增强方案）
+	ProfileId     uint32                 `protobuf:"varint,4,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=不增强或租户默认；非 0=按场景关联策略增强）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -217,166 +217,6 @@ func (x *RecognizeRequest) GetProfileId() uint32 {
 	return 0
 }
 
-type RecognizeResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
-	Segments      []*Segment             `protobuf:"bytes,3,rep,name=segments,proto3" json:"segments,omitempty"`
-	Confidence    float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`
-	DurationMs    int64                  `protobuf:"varint,5,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
-	IsFinal       bool                   `protobuf:"varint,6,opt,name=is_final,json=isFinal,proto3" json:"is_final,omitempty"`
-	ProviderName  string                 `protobuf:"bytes,7,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"` // 使用的 ASR 引擎
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RecognizeResponse) Reset() {
-	*x = RecognizeResponse{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RecognizeResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RecognizeResponse) ProtoMessage() {}
-
-func (x *RecognizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RecognizeResponse.ProtoReflect.Descriptor instead.
-func (*RecognizeResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *RecognizeResponse) GetRequestId() string {
-	if x != nil {
-		return x.RequestId
-	}
-	return ""
-}
-
-func (x *RecognizeResponse) GetText() string {
-	if x != nil {
-		return x.Text
-	}
-	return ""
-}
-
-func (x *RecognizeResponse) GetSegments() []*Segment {
-	if x != nil {
-		return x.Segments
-	}
-	return nil
-}
-
-func (x *RecognizeResponse) GetConfidence() float32 {
-	if x != nil {
-		return x.Confidence
-	}
-	return 0
-}
-
-func (x *RecognizeResponse) GetDurationMs() int64 {
-	if x != nil {
-		return x.DurationMs
-	}
-	return 0
-}
-
-func (x *RecognizeResponse) GetIsFinal() bool {
-	if x != nil {
-		return x.IsFinal
-	}
-	return false
-}
-
-func (x *RecognizeResponse) GetProviderName() string {
-	if x != nil {
-		return x.ProviderName
-	}
-	return ""
-}
-
-type Segment struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StartMs       int64                  `protobuf:"varint,1,opt,name=start_ms,json=startMs,proto3" json:"start_ms,omitempty"`
-	EndMs         int64                  `protobuf:"varint,2,opt,name=end_ms,json=endMs,proto3" json:"end_ms,omitempty"`
-	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
-	Confidence    float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Segment) Reset() {
-	*x = Segment{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Segment) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Segment) ProtoMessage() {}
-
-func (x *Segment) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Segment.ProtoReflect.Descriptor instead.
-func (*Segment) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *Segment) GetStartMs() int64 {
-	if x != nil {
-		return x.StartMs
-	}
-	return 0
-}
-
-func (x *Segment) GetEndMs() int64 {
-	if x != nil {
-		return x.EndMs
-	}
-	return 0
-}
-
-func (x *Segment) GetText() string {
-	if x != nil {
-		return x.Text
-	}
-	return ""
-}
-
-func (x *Segment) GetConfidence() float32 {
-	if x != nil {
-		return x.Confidence
-	}
-	return 0
-}
-
 type AudioChunk struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
@@ -388,7 +228,7 @@ type AudioChunk struct {
 
 func (x *AudioChunk) Reset() {
 	*x = AudioChunk{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[4]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -400,7 +240,7 @@ func (x *AudioChunk) String() string {
 func (*AudioChunk) ProtoMessage() {}
 
 func (x *AudioChunk) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[4]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -413,7 +253,7 @@ func (x *AudioChunk) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AudioChunk.ProtoReflect.Descriptor instead.
 func (*AudioChunk) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{4}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *AudioChunk) GetSessionId() string {
@@ -450,7 +290,7 @@ type StreamResult struct {
 
 func (x *StreamResult) Reset() {
 	*x = StreamResult{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[5]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -462,7 +302,7 @@ func (x *StreamResult) String() string {
 func (*StreamResult) ProtoMessage() {}
 
 func (x *StreamResult) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[5]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -475,7 +315,7 @@ func (x *StreamResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamResult.ProtoReflect.Descriptor instead.
 func (*StreamResult) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{5}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *StreamResult) GetRequestId() string {
@@ -533,7 +373,7 @@ type AsrRecord struct {
 
 func (x *AsrRecord) Reset() {
 	*x = AsrRecord{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[6]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -545,7 +385,7 @@ func (x *AsrRecord) String() string {
 func (*AsrRecord) ProtoMessage() {}
 
 func (x *AsrRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[6]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -558,7 +398,7 @@ func (x *AsrRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AsrRecord.ProtoReflect.Descriptor instead.
 func (*AsrRecord) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{6}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *AsrRecord) GetId() uint32 {
@@ -649,7 +489,7 @@ type ListAsrRecordsRequest struct {
 
 func (x *ListAsrRecordsRequest) Reset() {
 	*x = ListAsrRecordsRequest{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[7]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -661,7 +501,7 @@ func (x *ListAsrRecordsRequest) String() string {
 func (*ListAsrRecordsRequest) ProtoMessage() {}
 
 func (x *ListAsrRecordsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[7]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -674,7 +514,7 @@ func (x *ListAsrRecordsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAsrRecordsRequest.ProtoReflect.Descriptor instead.
 func (*ListAsrRecordsRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{7}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListAsrRecordsRequest) GetPageSize() int32 {
@@ -709,7 +549,7 @@ type ListAsrRecordsResponse struct {
 
 func (x *ListAsrRecordsResponse) Reset() {
 	*x = ListAsrRecordsResponse{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[8]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -721,7 +561,7 @@ func (x *ListAsrRecordsResponse) String() string {
 func (*ListAsrRecordsResponse) ProtoMessage() {}
 
 func (x *ListAsrRecordsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[8]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -734,7 +574,7 @@ func (x *ListAsrRecordsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAsrRecordsResponse.ProtoReflect.Descriptor instead.
 func (*ListAsrRecordsResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{8}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListAsrRecordsResponse) GetRecords() []*AsrRecord {
@@ -767,7 +607,7 @@ type GetAsrRecordRequest struct {
 
 func (x *GetAsrRecordRequest) Reset() {
 	*x = GetAsrRecordRequest{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[9]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -779,7 +619,7 @@ func (x *GetAsrRecordRequest) String() string {
 func (*GetAsrRecordRequest) ProtoMessage() {}
 
 func (x *GetAsrRecordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[9]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -792,7 +632,7 @@ func (x *GetAsrRecordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAsrRecordRequest.ProtoReflect.Descriptor instead.
 func (*GetAsrRecordRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{9}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetAsrRecordRequest) GetId() uint32 {
@@ -811,7 +651,7 @@ type GetAsrRecordAudioRequest struct {
 
 func (x *GetAsrRecordAudioRequest) Reset() {
 	*x = GetAsrRecordAudioRequest{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[10]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -823,7 +663,7 @@ func (x *GetAsrRecordAudioRequest) String() string {
 func (*GetAsrRecordAudioRequest) ProtoMessage() {}
 
 func (x *GetAsrRecordAudioRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[10]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -836,7 +676,7 @@ func (x *GetAsrRecordAudioRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAsrRecordAudioRequest.ProtoReflect.Descriptor instead.
 func (*GetAsrRecordAudioRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{10}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetAsrRecordAudioRequest) GetId() uint32 {
@@ -856,7 +696,7 @@ type GetAsrRecordAudioResponse struct {
 
 func (x *GetAsrRecordAudioResponse) Reset() {
 	*x = GetAsrRecordAudioResponse{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[11]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -868,7 +708,7 @@ func (x *GetAsrRecordAudioResponse) String() string {
 func (*GetAsrRecordAudioResponse) ProtoMessage() {}
 
 func (x *GetAsrRecordAudioResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[11]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -881,7 +721,7 @@ func (x *GetAsrRecordAudioResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAsrRecordAudioResponse.ProtoReflect.Descriptor instead.
 func (*GetAsrRecordAudioResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{11}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetAsrRecordAudioResponse) GetAudioData() []byte {
@@ -906,14 +746,14 @@ type EnhancementStepSnapshot struct {
 	After         string                 `protobuf:"bytes,3,opt,name=after,proto3" json:"after,omitempty"`
 	DurationMs    int64                  `protobuf:"varint,4,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	Skipped       bool                   `protobuf:"varint,5,opt,name=skipped,proto3" json:"skipped,omitempty"`
-	Changes       []*CorrectionChange    `protobuf:"bytes,6,rep,name=changes,proto3" json:"changes,omitempty"`
+	Changes       []*EnhanceChange       `protobuf:"bytes,6,rep,name=changes,proto3" json:"changes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EnhancementStepSnapshot) Reset() {
 	*x = EnhancementStepSnapshot{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[12]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -925,7 +765,7 @@ func (x *EnhancementStepSnapshot) String() string {
 func (*EnhancementStepSnapshot) ProtoMessage() {}
 
 func (x *EnhancementStepSnapshot) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[12]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -938,7 +778,7 @@ func (x *EnhancementStepSnapshot) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnhancementStepSnapshot.ProtoReflect.Descriptor instead.
 func (*EnhancementStepSnapshot) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{12}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *EnhancementStepSnapshot) GetStep() string {
@@ -976,7 +816,7 @@ func (x *EnhancementStepSnapshot) GetSkipped() bool {
 	return false
 }
 
-func (x *EnhancementStepSnapshot) GetChanges() []*CorrectionChange {
+func (x *EnhancementStepSnapshot) GetChanges() []*EnhanceChange {
 	if x != nil {
 		return x.Changes
 	}
@@ -991,14 +831,14 @@ type AsrRecordDetail struct {
 	PolicyName    string                     `protobuf:"bytes,3,opt,name=policy_name,json=policyName,proto3" json:"policy_name,omitempty"`       // 使用的增强策略名称
 	ProfileName   string                     `protobuf:"bytes,4,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`    // 使用的增强场景名称（默认方案时为空）
 	StepSnapshots []*EnhancementStepSnapshot `protobuf:"bytes,5,rep,name=step_snapshots,json=stepSnapshots,proto3" json:"step_snapshots,omitempty"`
-	Changes       []*CorrectionChange        `protobuf:"bytes,6,rep,name=changes,proto3" json:"changes,omitempty"`
+	Changes       []*EnhanceChange           `protobuf:"bytes,6,rep,name=changes,proto3" json:"changes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AsrRecordDetail) Reset() {
 	*x = AsrRecordDetail{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[13]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1010,7 +850,7 @@ func (x *AsrRecordDetail) String() string {
 func (*AsrRecordDetail) ProtoMessage() {}
 
 func (x *AsrRecordDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[13]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1023,7 +863,7 @@ func (x *AsrRecordDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AsrRecordDetail.ProtoReflect.Descriptor instead.
 func (*AsrRecordDetail) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{13}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *AsrRecordDetail) GetRecord() *AsrRecord {
@@ -1061,40 +901,55 @@ func (x *AsrRecordDetail) GetStepSnapshots() []*EnhancementStepSnapshot {
 	return nil
 }
 
-func (x *AsrRecordDetail) GetChanges() []*CorrectionChange {
+func (x *AsrRecordDetail) GetChanges() []*EnhanceChange {
 	if x != nil {
 		return x.Changes
 	}
 	return nil
 }
 
-// RecognizeAndCorrectResponse 语音识别 + 纠错的组合结果。
-type RecognizeAndCorrectResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	OriginalText  string                 `protobuf:"bytes,1,opt,name=original_text,json=originalText,proto3" json:"original_text,omitempty"`    // ASR 原始文本
-	CorrectedText string                 `protobuf:"bytes,2,opt,name=corrected_text,json=correctedText,proto3" json:"corrected_text,omitempty"` // 纠错后标准企业语言
-	Changes       []*CorrectionChange    `protobuf:"bytes,3,rep,name=changes,proto3" json:"changes,omitempty"`
-	Confidence    float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`
-	ProviderName  string                 `protobuf:"bytes,5,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"` // 使用的 ASR 引擎
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+// RecognizeResponse 同步语音识别结果
+type RecognizeResponse struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	RequestId    string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	RawText      string                 `protobuf:"bytes,2,opt,name=raw_text,json=rawText,proto3" json:"raw_text,omitempty"`                // ASR 原始文本
+	EnhancedText string                 `protobuf:"bytes,3,opt,name=enhanced_text,json=enhancedText,proto3" json:"enhanced_text,omitempty"` // 文本增强后标准企业语言
+	Confidence   float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`
+	DurationMs   int64                  `protobuf:"varint,5,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	IsFinal      bool                   `protobuf:"varint,6,opt,name=is_final,json=isFinal,proto3" json:"is_final,omitempty"`
+	ProviderName string                 `protobuf:"bytes,7,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"` // 使用的 ASR 引擎
+	// ===== 增强结果（2026-08-27 统一为增强后输出） =====
+	Changes             []*EnhanceChange `protobuf:"bytes,8,rep,name=changes,proto3" json:"changes,omitempty"`                                               // 增强变更项列表
+	Status              int32            `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`                                                // 1=SUCCESS 2=DEGRADED 3=FAILED
+	ProcessingTimeMs    int64            `protobuf:"varint,10,opt,name=processing_time_ms,json=processingTimeMs,proto3" json:"processing_time_ms,omitempty"` // 8 层流水线总耗时
+	CleaningTimeMs      int64            `protobuf:"varint,11,opt,name=cleaning_time_ms,json=cleaningTimeMs,proto3" json:"cleaning_time_ms,omitempty"`
+	FillerTimeMs        int64            `protobuf:"varint,12,opt,name=filler_time_ms,json=fillerTimeMs,proto3" json:"filler_time_ms,omitempty"`
+	VocabMatchTimeMs    int64            `protobuf:"varint,13,opt,name=vocab_match_time_ms,json=vocabMatchTimeMs,proto3" json:"vocab_match_time_ms,omitempty"`
+	AliasTimeMs         int64            `protobuf:"varint,14,opt,name=alias_time_ms,json=aliasTimeMs,proto3" json:"alias_time_ms,omitempty"`
+	DeterministicTimeMs int64            `protobuf:"varint,15,opt,name=deterministic_time_ms,json=deterministicTimeMs,proto3" json:"deterministic_time_ms,omitempty"`
+	PinyinTimeMs        int64            `protobuf:"varint,16,opt,name=pinyin_time_ms,json=pinyinTimeMs,proto3" json:"pinyin_time_ms,omitempty"`
+	FuzzyTimeMs         int64            `protobuf:"varint,17,opt,name=fuzzy_time_ms,json=fuzzyTimeMs,proto3" json:"fuzzy_time_ms,omitempty"`
+	ContextTimeMs       int64            `protobuf:"varint,18,opt,name=context_time_ms,json=contextTimeMs,proto3" json:"context_time_ms,omitempty"`
+	ErrorMessage        string           `protobuf:"bytes,19,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
-func (x *RecognizeAndCorrectResponse) Reset() {
-	*x = RecognizeAndCorrectResponse{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[14]
+func (x *RecognizeResponse) Reset() {
+	*x = RecognizeResponse{}
+	mi := &file_evie_service_v1_asr_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RecognizeAndCorrectResponse) String() string {
+func (x *RecognizeResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RecognizeAndCorrectResponse) ProtoMessage() {}
+func (*RecognizeResponse) ProtoMessage() {}
 
-func (x *RecognizeAndCorrectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[14]
+func (x *RecognizeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_evie_service_v1_asr_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1105,42 +960,140 @@ func (x *RecognizeAndCorrectResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RecognizeAndCorrectResponse.ProtoReflect.Descriptor instead.
-func (*RecognizeAndCorrectResponse) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{14}
+// Deprecated: Use RecognizeResponse.ProtoReflect.Descriptor instead.
+func (*RecognizeResponse) Descriptor() ([]byte, []int) {
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *RecognizeAndCorrectResponse) GetOriginalText() string {
+func (x *RecognizeResponse) GetRequestId() string {
 	if x != nil {
-		return x.OriginalText
+		return x.RequestId
 	}
 	return ""
 }
 
-func (x *RecognizeAndCorrectResponse) GetCorrectedText() string {
+func (x *RecognizeResponse) GetRawText() string {
 	if x != nil {
-		return x.CorrectedText
+		return x.RawText
 	}
 	return ""
 }
 
-func (x *RecognizeAndCorrectResponse) GetChanges() []*CorrectionChange {
+func (x *RecognizeResponse) GetEnhancedText() string {
 	if x != nil {
-		return x.Changes
+		return x.EnhancedText
 	}
-	return nil
+	return ""
 }
 
-func (x *RecognizeAndCorrectResponse) GetConfidence() float32 {
+func (x *RecognizeResponse) GetConfidence() float32 {
 	if x != nil {
 		return x.Confidence
 	}
 	return 0
 }
 
-func (x *RecognizeAndCorrectResponse) GetProviderName() string {
+func (x *RecognizeResponse) GetDurationMs() int64 {
+	if x != nil {
+		return x.DurationMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetIsFinal() bool {
+	if x != nil {
+		return x.IsFinal
+	}
+	return false
+}
+
+func (x *RecognizeResponse) GetProviderName() string {
 	if x != nil {
 		return x.ProviderName
+	}
+	return ""
+}
+
+func (x *RecognizeResponse) GetChanges() []*EnhanceChange {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
+}
+
+func (x *RecognizeResponse) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetProcessingTimeMs() int64 {
+	if x != nil {
+		return x.ProcessingTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetCleaningTimeMs() int64 {
+	if x != nil {
+		return x.CleaningTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetFillerTimeMs() int64 {
+	if x != nil {
+		return x.FillerTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetVocabMatchTimeMs() int64 {
+	if x != nil {
+		return x.VocabMatchTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetAliasTimeMs() int64 {
+	if x != nil {
+		return x.AliasTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetDeterministicTimeMs() int64 {
+	if x != nil {
+		return x.DeterministicTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetPinyinTimeMs() int64 {
+	if x != nil {
+		return x.PinyinTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetFuzzyTimeMs() int64 {
+	if x != nil {
+		return x.FuzzyTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetContextTimeMs() int64 {
+	if x != nil {
+		return x.ContextTimeMs
+	}
+	return 0
+}
+
+func (x *RecognizeResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
 	}
 	return ""
 }
@@ -1148,14 +1101,14 @@ func (x *RecognizeAndCorrectResponse) GetProviderName() string {
 type ReRecognizeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProfileId     uint32                 `protobuf:"varint,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=默认增强方案）
+	ProfileId     uint32                 `protobuf:"varint,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=不增强；非 0=按场景关联策略增强）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ReRecognizeRequest) Reset() {
 	*x = ReRecognizeRequest{}
-	mi := &file_evie_service_v1_asr_proto_msgTypes[15]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1167,7 +1120,7 @@ func (x *ReRecognizeRequest) String() string {
 func (*ReRecognizeRequest) ProtoMessage() {}
 
 func (x *ReRecognizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_evie_service_v1_asr_proto_msgTypes[15]
+	mi := &file_evie_service_v1_asr_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1180,7 +1133,7 @@ func (x *ReRecognizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReRecognizeRequest.ProtoReflect.Descriptor instead.
 func (*ReRecognizeRequest) Descriptor() ([]byte, []int) {
-	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{15}
+	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ReRecognizeRequest) GetId() uint32 {
@@ -1201,7 +1154,7 @@ var File_evie_service_v1_asr_proto protoreflect.FileDescriptor
 
 const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\n" +
-	"\x19evie/service/v1/asr.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a evie/service/v1/correction.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"\xa3\x01\n" +
+	"\x19evie/service/v1/asr.proto\x12\x0fevie.service.v1\x1a\x1bbuf/validate/validate.proto\x1a!evie/service/v1/enhancement.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\"\xa3\x01\n" +
 	"\vAudioFormat\x12:\n" +
 	"\bencoding\x18\x01 \x01(\x0e2\x1e.evie.service.v1.AudioEncodingR\bencoding\x12\x1f\n" +
 	"\vsample_rate\x18\x02 \x01(\x05R\n" +
@@ -1216,26 +1169,7 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"audio_data\x18\x03 \x01(\fB\n" +
 	"\xbaH\az\x05\x18\x80\x80\x80\x05R\taudioData\x12\x1d\n" +
 	"\n" +
-	"profile_id\x18\x04 \x01(\rR\tprofileId\"\xfd\x01\n" +
-	"\x11RecognizeResponse\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x12\x12\n" +
-	"\x04text\x18\x02 \x01(\tR\x04text\x124\n" +
-	"\bsegments\x18\x03 \x03(\v2\x18.evie.service.v1.SegmentR\bsegments\x12\x1e\n" +
-	"\n" +
-	"confidence\x18\x04 \x01(\x02R\n" +
-	"confidence\x12\x1f\n" +
-	"\vduration_ms\x18\x05 \x01(\x03R\n" +
-	"durationMs\x12\x19\n" +
-	"\bis_final\x18\x06 \x01(\bR\aisFinal\x12#\n" +
-	"\rprovider_name\x18\a \x01(\tR\fproviderName\"o\n" +
-	"\aSegment\x12\x19\n" +
-	"\bstart_ms\x18\x01 \x01(\x03R\astartMs\x12\x15\n" +
-	"\x06end_ms\x18\x02 \x01(\x03R\x05endMs\x12\x12\n" +
-	"\x04text\x18\x03 \x01(\tR\x04text\x12\x1e\n" +
-	"\n" +
-	"confidence\x18\x04 \x01(\x02R\n" +
-	"confidence\"b\n" +
+	"profile_id\x18\x04 \x01(\rR\tprofileId\"b\n" +
 	"\n" +
 	"AudioChunk\x12\x1d\n" +
 	"\n" +
@@ -1286,31 +1220,48 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\x19GetAsrRecordAudioResponse\x12\x1d\n" +
 	"\n" +
 	"audio_data\x18\x01 \x01(\fR\taudioData\x12!\n" +
-	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\"\xd3\x01\n" +
+	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\"\xd0\x01\n" +
 	"\x17EnhancementStepSnapshot\x12\x12\n" +
 	"\x04step\x18\x01 \x01(\tR\x04step\x12\x16\n" +
 	"\x06before\x18\x02 \x01(\tR\x06before\x12\x14\n" +
 	"\x05after\x18\x03 \x01(\tR\x05after\x12\x1f\n" +
 	"\vduration_ms\x18\x04 \x01(\x03R\n" +
 	"durationMs\x12\x18\n" +
-	"\askipped\x18\x05 \x01(\bR\askipped\x12;\n" +
-	"\achanges\x18\x06 \x03(\v2!.evie.service.v1.CorrectionChangeR\achanges\"\xbc\x02\n" +
+	"\askipped\x18\x05 \x01(\bR\askipped\x128\n" +
+	"\achanges\x18\x06 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\"\xb9\x02\n" +
 	"\x0fAsrRecordDetail\x122\n" +
 	"\x06record\x18\x01 \x01(\v2\x1a.evie.service.v1.AsrRecordR\x06record\x12#\n" +
 	"\renhanced_text\x18\x02 \x01(\tR\fenhancedText\x12\x1f\n" +
 	"\vpolicy_name\x18\x03 \x01(\tR\n" +
 	"policyName\x12!\n" +
 	"\fprofile_name\x18\x04 \x01(\tR\vprofileName\x12O\n" +
-	"\x0estep_snapshots\x18\x05 \x03(\v2(.evie.service.v1.EnhancementStepSnapshotR\rstepSnapshots\x12;\n" +
-	"\achanges\x18\x06 \x03(\v2!.evie.service.v1.CorrectionChangeR\achanges\"\xeb\x01\n" +
-	"\x1bRecognizeAndCorrectResponse\x12#\n" +
-	"\roriginal_text\x18\x01 \x01(\tR\foriginalText\x12%\n" +
-	"\x0ecorrected_text\x18\x02 \x01(\tR\rcorrectedText\x12;\n" +
-	"\achanges\x18\x03 \x03(\v2!.evie.service.v1.CorrectionChangeR\achanges\x12\x1e\n" +
+	"\x0estep_snapshots\x18\x05 \x03(\v2(.evie.service.v1.EnhancementStepSnapshotR\rstepSnapshots\x128\n" +
+	"\achanges\x18\x06 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\"\xe1\x05\n" +
+	"\x11RecognizeResponse\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x19\n" +
+	"\braw_text\x18\x02 \x01(\tR\arawText\x12#\n" +
+	"\renhanced_text\x18\x03 \x01(\tR\fenhancedText\x12\x1e\n" +
 	"\n" +
 	"confidence\x18\x04 \x01(\x02R\n" +
-	"confidence\x12#\n" +
-	"\rprovider_name\x18\x05 \x01(\tR\fproviderName\"L\n" +
+	"confidence\x12\x1f\n" +
+	"\vduration_ms\x18\x05 \x01(\x03R\n" +
+	"durationMs\x12\x19\n" +
+	"\bis_final\x18\x06 \x01(\bR\aisFinal\x12#\n" +
+	"\rprovider_name\x18\a \x01(\tR\fproviderName\x128\n" +
+	"\achanges\x18\b \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\x12\x16\n" +
+	"\x06status\x18\t \x01(\x05R\x06status\x12,\n" +
+	"\x12processing_time_ms\x18\n" +
+	" \x01(\x03R\x10processingTimeMs\x12(\n" +
+	"\x10cleaning_time_ms\x18\v \x01(\x03R\x0ecleaningTimeMs\x12$\n" +
+	"\x0efiller_time_ms\x18\f \x01(\x03R\ffillerTimeMs\x12-\n" +
+	"\x13vocab_match_time_ms\x18\r \x01(\x03R\x10vocabMatchTimeMs\x12\"\n" +
+	"\ralias_time_ms\x18\x0e \x01(\x03R\valiasTimeMs\x122\n" +
+	"\x15deterministic_time_ms\x18\x0f \x01(\x03R\x13deterministicTimeMs\x12$\n" +
+	"\x0epinyin_time_ms\x18\x10 \x01(\x03R\fpinyinTimeMs\x12\"\n" +
+	"\rfuzzy_time_ms\x18\x11 \x01(\x03R\vfuzzyTimeMs\x12&\n" +
+	"\x0fcontext_time_ms\x18\x12 \x01(\x03R\rcontextTimeMs\x12#\n" +
+	"\rerror_message\x18\x13 \x01(\tR\ferrorMessage\"L\n" +
 	"\x12ReRecognizeRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12\x1d\n" +
 	"\n" +
@@ -1320,8 +1271,7 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\x12AUDIO_ENCODING_PCM\x10\x01\x12\x16\n" +
 	"\x12AUDIO_ENCODING_WAV\x10\x02\x12\x16\n" +
 	"\x12AUDIO_ENCODING_MP3\x10\x03\x12\x17\n" +
-	"\x13AUDIO_ENCODING_OPUS\x10\x042\xcf\n" +
-	"\n" +
+	"\x13AUDIO_ENCODING_OPUS\x10\x042\x88\t\n" +
 	"\n" +
 	"ASRService\x12\x97\x01\n" +
 	"\tRecognize\x12!.evie.service.v1.RecognizeRequest\x1a\".evie.service.v1.RecognizeResponse\"C\xbaG\x1f\n" +
@@ -1335,10 +1285,8 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\x11GetAsrRecordAudio\x12).evie.service.v1.GetAsrRecordAudioRequest\x1a*.evie.service.v1.GetAsrRecordAudioResponse\"U\xbaG+\n" +
 	"\tASR识别\x12\x1e查询识别记录原始音频\x82\xd3\xe4\x93\x02!\x12\x1f/evie/v1/asr/records/{id}/audio\x12\xb4\x01\n" +
 	"\x12GetAsrRecordDetail\x12$.evie.service.v1.GetAsrRecordRequest\x1a .evie.service.v1.AsrRecordDetail\"V\xbaG+\n" +
-	"\tASR识别\x12\x1e查询识别记录完整详情\x82\xd3\xe4\x93\x02\"\x12 /evie/v1/asr/records/{id}/detail\x12\xba\x01\n" +
-	"\x13RecognizeAndCorrect\x12!.evie.service.v1.RecognizeRequest\x1a,.evie.service.v1.RecognizeAndCorrectResponse\"R\xbaG\"\n" +
-	"\tASR识别\x12\x15语音识别并纠错\x82\xd3\xe4\x93\x02':\x01*\"\"/evie/v1/asr:recognize-and-correct\x12\xaf\x01\n" +
-	"\vReRecognize\x12#.evie.service.v1.ReRecognizeRequest\x1a,.evie.service.v1.RecognizeAndCorrectResponse\"M\xbaG\x19\n" +
+	"\tASR识别\x12\x1e查询识别记录完整详情\x82\xd3\xe4\x93\x02\"\x12 /evie/v1/asr/records/{id}/detail\x12\xa5\x01\n" +
+	"\vReRecognize\x12#.evie.service.v1.ReRecognizeRequest\x1a\".evie.service.v1.RecognizeResponse\"M\xbaG\x19\n" +
 	"\tASR识别\x12\f重新识别\x82\xd3\xe4\x93\x02+:\x01*\"&/evie/v1/asr/records/{id}:re-recognizeB\xa5\x01\n" +
 	"\x13com.evie.service.v1B\bAsrProtoP\x01Z&backend-service/api/evie/service/v1;v1\xa2\x02\x03ESX\xaa\x02\x0fEvie.Service.V1\xca\x02\x0fEvie\\Service\\V1\xe2\x02\x1bEvie\\Service\\V1\\GPBMetadata\xea\x02\x11Evie::Service::V1b\x06proto3"
 
@@ -1355,58 +1303,53 @@ func file_evie_service_v1_asr_proto_rawDescGZIP() []byte {
 }
 
 var file_evie_service_v1_asr_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_evie_service_v1_asr_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_evie_service_v1_asr_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_evie_service_v1_asr_proto_goTypes = []any{
-	(AudioEncoding)(0),                  // 0: evie.service.v1.AudioEncoding
-	(*AudioFormat)(nil),                 // 1: evie.service.v1.AudioFormat
-	(*RecognizeRequest)(nil),            // 2: evie.service.v1.RecognizeRequest
-	(*RecognizeResponse)(nil),           // 3: evie.service.v1.RecognizeResponse
-	(*Segment)(nil),                     // 4: evie.service.v1.Segment
-	(*AudioChunk)(nil),                  // 5: evie.service.v1.AudioChunk
-	(*StreamResult)(nil),                // 6: evie.service.v1.StreamResult
-	(*AsrRecord)(nil),                   // 7: evie.service.v1.AsrRecord
-	(*ListAsrRecordsRequest)(nil),       // 8: evie.service.v1.ListAsrRecordsRequest
-	(*ListAsrRecordsResponse)(nil),      // 9: evie.service.v1.ListAsrRecordsResponse
-	(*GetAsrRecordRequest)(nil),         // 10: evie.service.v1.GetAsrRecordRequest
-	(*GetAsrRecordAudioRequest)(nil),    // 11: evie.service.v1.GetAsrRecordAudioRequest
-	(*GetAsrRecordAudioResponse)(nil),   // 12: evie.service.v1.GetAsrRecordAudioResponse
-	(*EnhancementStepSnapshot)(nil),     // 13: evie.service.v1.EnhancementStepSnapshot
-	(*AsrRecordDetail)(nil),             // 14: evie.service.v1.AsrRecordDetail
-	(*RecognizeAndCorrectResponse)(nil), // 15: evie.service.v1.RecognizeAndCorrectResponse
-	(*ReRecognizeRequest)(nil),          // 16: evie.service.v1.ReRecognizeRequest
-	(*CorrectionChange)(nil),            // 17: evie.service.v1.CorrectionChange
+	(AudioEncoding)(0),                // 0: evie.service.v1.AudioEncoding
+	(*AudioFormat)(nil),               // 1: evie.service.v1.AudioFormat
+	(*RecognizeRequest)(nil),          // 2: evie.service.v1.RecognizeRequest
+	(*AudioChunk)(nil),                // 3: evie.service.v1.AudioChunk
+	(*StreamResult)(nil),              // 4: evie.service.v1.StreamResult
+	(*AsrRecord)(nil),                 // 5: evie.service.v1.AsrRecord
+	(*ListAsrRecordsRequest)(nil),     // 6: evie.service.v1.ListAsrRecordsRequest
+	(*ListAsrRecordsResponse)(nil),    // 7: evie.service.v1.ListAsrRecordsResponse
+	(*GetAsrRecordRequest)(nil),       // 8: evie.service.v1.GetAsrRecordRequest
+	(*GetAsrRecordAudioRequest)(nil),  // 9: evie.service.v1.GetAsrRecordAudioRequest
+	(*GetAsrRecordAudioResponse)(nil), // 10: evie.service.v1.GetAsrRecordAudioResponse
+	(*EnhancementStepSnapshot)(nil),   // 11: evie.service.v1.EnhancementStepSnapshot
+	(*AsrRecordDetail)(nil),           // 12: evie.service.v1.AsrRecordDetail
+	(*RecognizeResponse)(nil),         // 13: evie.service.v1.RecognizeResponse
+	(*ReRecognizeRequest)(nil),        // 14: evie.service.v1.ReRecognizeRequest
+	(*EnhanceChange)(nil),             // 15: evie.service.v1.EnhanceChange
 }
 var file_evie_service_v1_asr_proto_depIdxs = []int32{
 	0,  // 0: evie.service.v1.AudioFormat.encoding:type_name -> evie.service.v1.AudioEncoding
 	1,  // 1: evie.service.v1.RecognizeRequest.format:type_name -> evie.service.v1.AudioFormat
-	4,  // 2: evie.service.v1.RecognizeResponse.segments:type_name -> evie.service.v1.Segment
-	7,  // 3: evie.service.v1.ListAsrRecordsResponse.records:type_name -> evie.service.v1.AsrRecord
-	17, // 4: evie.service.v1.EnhancementStepSnapshot.changes:type_name -> evie.service.v1.CorrectionChange
-	7,  // 5: evie.service.v1.AsrRecordDetail.record:type_name -> evie.service.v1.AsrRecord
-	13, // 6: evie.service.v1.AsrRecordDetail.step_snapshots:type_name -> evie.service.v1.EnhancementStepSnapshot
-	17, // 7: evie.service.v1.AsrRecordDetail.changes:type_name -> evie.service.v1.CorrectionChange
-	17, // 8: evie.service.v1.RecognizeAndCorrectResponse.changes:type_name -> evie.service.v1.CorrectionChange
-	2,  // 9: evie.service.v1.ASRService.Recognize:input_type -> evie.service.v1.RecognizeRequest
-	5,  // 10: evie.service.v1.ASRService.StreamRecognize:input_type -> evie.service.v1.AudioChunk
-	8,  // 11: evie.service.v1.ASRService.ListAsrRecords:input_type -> evie.service.v1.ListAsrRecordsRequest
-	10, // 12: evie.service.v1.ASRService.GetAsrRecord:input_type -> evie.service.v1.GetAsrRecordRequest
-	11, // 13: evie.service.v1.ASRService.GetAsrRecordAudio:input_type -> evie.service.v1.GetAsrRecordAudioRequest
-	10, // 14: evie.service.v1.ASRService.GetAsrRecordDetail:input_type -> evie.service.v1.GetAsrRecordRequest
-	2,  // 15: evie.service.v1.ASRService.RecognizeAndCorrect:input_type -> evie.service.v1.RecognizeRequest
-	16, // 16: evie.service.v1.ASRService.ReRecognize:input_type -> evie.service.v1.ReRecognizeRequest
-	3,  // 17: evie.service.v1.ASRService.Recognize:output_type -> evie.service.v1.RecognizeResponse
-	6,  // 18: evie.service.v1.ASRService.StreamRecognize:output_type -> evie.service.v1.StreamResult
-	9,  // 19: evie.service.v1.ASRService.ListAsrRecords:output_type -> evie.service.v1.ListAsrRecordsResponse
-	7,  // 20: evie.service.v1.ASRService.GetAsrRecord:output_type -> evie.service.v1.AsrRecord
-	12, // 21: evie.service.v1.ASRService.GetAsrRecordAudio:output_type -> evie.service.v1.GetAsrRecordAudioResponse
-	14, // 22: evie.service.v1.ASRService.GetAsrRecordDetail:output_type -> evie.service.v1.AsrRecordDetail
-	15, // 23: evie.service.v1.ASRService.RecognizeAndCorrect:output_type -> evie.service.v1.RecognizeAndCorrectResponse
-	15, // 24: evie.service.v1.ASRService.ReRecognize:output_type -> evie.service.v1.RecognizeAndCorrectResponse
-	17, // [17:25] is the sub-list for method output_type
-	9,  // [9:17] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	5,  // 2: evie.service.v1.ListAsrRecordsResponse.records:type_name -> evie.service.v1.AsrRecord
+	15, // 3: evie.service.v1.EnhancementStepSnapshot.changes:type_name -> evie.service.v1.EnhanceChange
+	5,  // 4: evie.service.v1.AsrRecordDetail.record:type_name -> evie.service.v1.AsrRecord
+	11, // 5: evie.service.v1.AsrRecordDetail.step_snapshots:type_name -> evie.service.v1.EnhancementStepSnapshot
+	15, // 6: evie.service.v1.AsrRecordDetail.changes:type_name -> evie.service.v1.EnhanceChange
+	15, // 7: evie.service.v1.RecognizeResponse.changes:type_name -> evie.service.v1.EnhanceChange
+	2,  // 8: evie.service.v1.ASRService.Recognize:input_type -> evie.service.v1.RecognizeRequest
+	3,  // 9: evie.service.v1.ASRService.StreamRecognize:input_type -> evie.service.v1.AudioChunk
+	6,  // 10: evie.service.v1.ASRService.ListAsrRecords:input_type -> evie.service.v1.ListAsrRecordsRequest
+	8,  // 11: evie.service.v1.ASRService.GetAsrRecord:input_type -> evie.service.v1.GetAsrRecordRequest
+	9,  // 12: evie.service.v1.ASRService.GetAsrRecordAudio:input_type -> evie.service.v1.GetAsrRecordAudioRequest
+	8,  // 13: evie.service.v1.ASRService.GetAsrRecordDetail:input_type -> evie.service.v1.GetAsrRecordRequest
+	14, // 14: evie.service.v1.ASRService.ReRecognize:input_type -> evie.service.v1.ReRecognizeRequest
+	13, // 15: evie.service.v1.ASRService.Recognize:output_type -> evie.service.v1.RecognizeResponse
+	4,  // 16: evie.service.v1.ASRService.StreamRecognize:output_type -> evie.service.v1.StreamResult
+	7,  // 17: evie.service.v1.ASRService.ListAsrRecords:output_type -> evie.service.v1.ListAsrRecordsResponse
+	5,  // 18: evie.service.v1.ASRService.GetAsrRecord:output_type -> evie.service.v1.AsrRecord
+	10, // 19: evie.service.v1.ASRService.GetAsrRecordAudio:output_type -> evie.service.v1.GetAsrRecordAudioResponse
+	12, // 20: evie.service.v1.ASRService.GetAsrRecordDetail:output_type -> evie.service.v1.AsrRecordDetail
+	13, // 21: evie.service.v1.ASRService.ReRecognize:output_type -> evie.service.v1.RecognizeResponse
+	15, // [15:22] is the sub-list for method output_type
+	8,  // [8:15] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_evie_service_v1_asr_proto_init() }
@@ -1414,14 +1357,14 @@ func file_evie_service_v1_asr_proto_init() {
 	if File_evie_service_v1_asr_proto != nil {
 		return
 	}
-	file_evie_service_v1_correction_proto_init()
+	file_evie_service_v1_enhancement_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_evie_service_v1_asr_proto_rawDesc), len(file_evie_service_v1_asr_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   16,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

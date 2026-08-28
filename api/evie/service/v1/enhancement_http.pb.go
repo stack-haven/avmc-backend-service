@@ -23,6 +23,7 @@ const OperationEnhancementServiceCreatePolicy = "/evie.service.v1.EnhancementSer
 const OperationEnhancementServiceCreateProfile = "/evie.service.v1.EnhancementService/CreateProfile"
 const OperationEnhancementServiceDeletePolicy = "/evie.service.v1.EnhancementService/DeletePolicy"
 const OperationEnhancementServiceDeleteProfile = "/evie.service.v1.EnhancementService/DeleteProfile"
+const OperationEnhancementServiceEnhanceText = "/evie.service.v1.EnhancementService/EnhanceText"
 const OperationEnhancementServiceGeneratePinyin = "/evie.service.v1.EnhancementService/GeneratePinyin"
 const OperationEnhancementServiceGetLog = "/evie.service.v1.EnhancementService/GetLog"
 const OperationEnhancementServiceGetPolicy = "/evie.service.v1.EnhancementService/GetPolicy"
@@ -42,6 +43,9 @@ type EnhancementServiceHTTPServer interface {
 	DeletePolicy(context.Context, *DeletePolicyRequest) (*DeletePolicyResponse, error)
 	// DeleteProfile 删除场景
 	DeleteProfile(context.Context, *DeleteProfileRequest) (*DeleteProfileResponse, error)
+	// EnhanceText 纯文本增强：对输入文本直接走 8 层流水线，返回增强结果。
+	// 增强策略由 profile_id 关联的场景决定；不传 profile_id 走租户默认。
+	EnhanceText(context.Context, *EnhanceTextRequest) (*EnhanceTextResponse, error)
 	// GeneratePinyin 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
 	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
 	GeneratePinyin(context.Context, *GeneratePinyinRequest) (*GeneratePinyinResponse, error)
@@ -78,6 +82,7 @@ func RegisterEnhancementServiceHTTPServer(s *http.Server, srv EnhancementService
 	r.GET("/evie/v1/enhancement-logs", _EnhancementService_ListLogs0_HTTP_Handler(srv))
 	r.GET("/evie/v1/enhancement-logs/{id}", _EnhancementService_GetLog0_HTTP_Handler(srv))
 	r.POST("/evie/v1/pinyin:generate", _EnhancementService_GeneratePinyin0_HTTP_Handler(srv))
+	r.POST("/evie/v1/enhancement:text", _EnhancementService_EnhanceText0_HTTP_Handler(srv))
 }
 
 func _EnhancementService_ListPolicies0_HTTP_Handler(srv EnhancementServiceHTTPServer) func(ctx http.Context) error {
@@ -363,6 +368,28 @@ func _EnhancementService_GeneratePinyin0_HTTP_Handler(srv EnhancementServiceHTTP
 	}
 }
 
+func _EnhancementService_EnhanceText0_HTTP_Handler(srv EnhancementServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in EnhanceTextRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationEnhancementServiceEnhanceText)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.EnhanceText(ctx, req.(*EnhanceTextRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*EnhanceTextResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type EnhancementServiceHTTPClient interface {
 	// CreatePolicy 创建策略
 	CreatePolicy(ctx context.Context, req *CreatePolicyRequest, opts ...http.CallOption) (rsp *EnhancementPolicy, err error)
@@ -372,6 +399,9 @@ type EnhancementServiceHTTPClient interface {
 	DeletePolicy(ctx context.Context, req *DeletePolicyRequest, opts ...http.CallOption) (rsp *DeletePolicyResponse, err error)
 	// DeleteProfile 删除场景
 	DeleteProfile(ctx context.Context, req *DeleteProfileRequest, opts ...http.CallOption) (rsp *DeleteProfileResponse, err error)
+	// EnhanceText 纯文本增强：对输入文本直接走 8 层流水线，返回增强结果。
+	// 增强策略由 profile_id 关联的场景决定；不传 profile_id 走租户默认。
+	EnhanceText(ctx context.Context, req *EnhanceTextRequest, opts ...http.CallOption) (rsp *EnhanceTextResponse, err error)
 	// GeneratePinyin 生成拼音（后端兜底，前端 pinyin-pro 失败时调用）。
 	// 本接口为无状态工具，不限租户——任何已登录用户可调用。
 	GeneratePinyin(ctx context.Context, req *GeneratePinyinRequest, opts ...http.CallOption) (rsp *GeneratePinyinResponse, err error)
@@ -451,6 +481,21 @@ func (c *EnhancementServiceHTTPClientImpl) DeleteProfile(ctx context.Context, in
 	opts = append(opts, http.Operation(OperationEnhancementServiceDeleteProfile))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// EnhanceText 纯文本增强：对输入文本直接走 8 层流水线，返回增强结果。
+// 增强策略由 profile_id 关联的场景决定；不传 profile_id 走租户默认。
+func (c *EnhancementServiceHTTPClientImpl) EnhanceText(ctx context.Context, in *EnhanceTextRequest, opts ...http.CallOption) (*EnhanceTextResponse, error) {
+	var out EnhanceTextResponse
+	pattern := "/evie/v1/enhancement:text"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationEnhancementServiceEnhanceText))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

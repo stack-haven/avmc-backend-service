@@ -84,10 +84,11 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 		audioFormat = up.audioFormat
 	}
 
+	result.RequestID = req.GetSessionId()
 	if result != nil && uc.recordRepo != nil {
 		if _, err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
-			SessionID:   req.GetSessionId(),
+			SessionID:   result.RequestID,
 			RawText:     result.Text,
 			Confidence:  result.Confidence,
 			DurationMs:  result.DurationMs,
@@ -340,12 +341,12 @@ func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResul
 	if err != nil {
 		return nil, err
 	}
-
+	result.RequestID = fmt.Sprintf("%s-re", record.GetSessionId())
 	// 保存新记录（复用原音频文件，避免重复上传）
 	if result != nil && uc.recordRepo != nil {
 		if _, err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
-			SessionID:   fmt.Sprintf("%s-re", record.GetSessionId()),
+			SessionID:   result.RequestID,
 			RawText:     result.Text,
 			Confidence:  result.Confidence,
 			DurationMs:  result.DurationMs,
@@ -377,4 +378,3 @@ func (uc *ASRUsecase) GetRecordAudio(ctx context.Context, id uint32) ([]byte, st
 	}
 	return uc.fileCenter.DownloadContent(ctx, uint32(fileID))
 }
-

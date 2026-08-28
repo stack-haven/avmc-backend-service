@@ -133,7 +133,7 @@ def main():
         # 5. Correct 文本增强（多组输入）
         for i, text in enumerate(CORRECT_CASES):
             status, data, dt = correct(token, text)
-            round_results[f"correct_{i}"] = (status, data.get("correctedText", ""), data.get("changes", []), dt)
+            round_results[f"correct_{i}"] = (status, data.get("enhancedText", ""), data.get("changes", []), dt)
 
         # 5.1 大分页：词条翻 5 页（每页 20）
         if dict_ids:
@@ -162,7 +162,7 @@ def main():
             status, data, dt = get_list(token2, "/evie/v1/dictionaries", {"pageSize": 5})
             round_results["tenant2_dict"] = (status, len(data.get("dictionaries", [])), data.get("total", 0), dt)
             status, data, dt = correct(token2, "给小田申请奖励")
-            round_results["tenant2_correct"] = (status, data.get("correctedText", ""), dt)
+            round_results["tenant2_correct"] = (status, data.get("enhancedText", ""), dt)
 
         # 汇总
         failed = [k for k, v in round_results.items() if v[0] != 200]

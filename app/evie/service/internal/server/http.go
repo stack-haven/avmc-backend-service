@@ -37,7 +37,6 @@ func NewHTTPServer(
 	asrService *service.ASRServiceService,
 	asrStreamService *service.ASRStreamService,
 	providerService *service.ProviderServiceService,
-	correctionService *service.CorrectionServiceService,
 	enhancementService *service.EnhancementServiceService,
 	auditClient audit.Client,
 ) (*http.Server, error) {
@@ -68,7 +67,6 @@ func NewHTTPServer(
 	v1.RegisterDictionaryServiceHTTPServer(srv, dictionaryService)
 	v1.RegisterASRServiceHTTPServer(srv, asrService)
 	v1.RegisterProviderServiceHTTPServer(srv, providerService)
-	v1.RegisterCorrectionServiceHTTPServer(srv, correctionService)
 	v1.RegisterEnhancementServiceHTTPServer(srv, enhancementService)
 	return srv, nil
 }

@@ -19,14 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ASRService_Recognize_FullMethodName           = "/evie.service.v1.ASRService/Recognize"
-	ASRService_StreamRecognize_FullMethodName     = "/evie.service.v1.ASRService/StreamRecognize"
-	ASRService_ListAsrRecords_FullMethodName      = "/evie.service.v1.ASRService/ListAsrRecords"
-	ASRService_GetAsrRecord_FullMethodName        = "/evie.service.v1.ASRService/GetAsrRecord"
-	ASRService_GetAsrRecordAudio_FullMethodName   = "/evie.service.v1.ASRService/GetAsrRecordAudio"
-	ASRService_GetAsrRecordDetail_FullMethodName  = "/evie.service.v1.ASRService/GetAsrRecordDetail"
-	ASRService_RecognizeAndCorrect_FullMethodName = "/evie.service.v1.ASRService/RecognizeAndCorrect"
-	ASRService_ReRecognize_FullMethodName         = "/evie.service.v1.ASRService/ReRecognize"
+	ASRService_Recognize_FullMethodName          = "/evie.service.v1.ASRService/Recognize"
+	ASRService_StreamRecognize_FullMethodName    = "/evie.service.v1.ASRService/StreamRecognize"
+	ASRService_ListAsrRecords_FullMethodName     = "/evie.service.v1.ASRService/ListAsrRecords"
+	ASRService_GetAsrRecord_FullMethodName       = "/evie.service.v1.ASRService/GetAsrRecord"
+	ASRService_GetAsrRecordAudio_FullMethodName  = "/evie.service.v1.ASRService/GetAsrRecordAudio"
+	ASRService_GetAsrRecordDetail_FullMethodName = "/evie.service.v1.ASRService/GetAsrRecordDetail"
+	ASRService_ReRecognize_FullMethodName        = "/evie.service.v1.ASRService/ReRecognize"
 )
 
 // ASRServiceClient is the client API for ASRService service.
@@ -36,7 +35,8 @@ const (
 // ASR 语音识别服务。
 // 将音频转为文本；Provider（FunASR/Whisper/讯飞/阿里云）可替换、租户可自选。
 type ASRServiceClient interface {
-	// 同步识别（短音频 ≤60s）
+	// 同步语音识别：纯识别，返回 ASR 原始文本（不增强）。
+	// 如需识别 + 文本增强，请调用 RecognizeAndCorrect。
 	Recognize(ctx context.Context, in *RecognizeRequest, opts ...grpc.CallOption) (*RecognizeResponse, error)
 	// 流式识别（长音频 / 实时），双向流
 	StreamRecognize(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[AudioChunk, StreamResult], error)
@@ -48,10 +48,8 @@ type ASRServiceClient interface {
 	GetAsrRecordAudio(ctx context.Context, in *GetAsrRecordAudioRequest, opts ...grpc.CallOption) (*GetAsrRecordAudioResponse, error)
 	// 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
 	GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetail, error)
-	// 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
-	RecognizeAndCorrect(ctx context.Context, in *RecognizeRequest, opts ...grpc.CallOption) (*RecognizeAndCorrectResponse, error)
 	// 对已有记录重新识别（复用文件中心音频，不重复上传）
-	ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...grpc.CallOption) (*RecognizeAndCorrectResponse, error)
+	ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...grpc.CallOption) (*RecognizeResponse, error)
 }
 
 type aSRServiceClient struct {
@@ -125,19 +123,9 @@ func (c *aSRServiceClient) GetAsrRecordDetail(ctx context.Context, in *GetAsrRec
 	return out, nil
 }
 
-func (c *aSRServiceClient) RecognizeAndCorrect(ctx context.Context, in *RecognizeRequest, opts ...grpc.CallOption) (*RecognizeAndCorrectResponse, error) {
+func (c *aSRServiceClient) ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...grpc.CallOption) (*RecognizeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecognizeAndCorrectResponse)
-	err := c.cc.Invoke(ctx, ASRService_RecognizeAndCorrect_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *aSRServiceClient) ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...grpc.CallOption) (*RecognizeAndCorrectResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecognizeAndCorrectResponse)
+	out := new(RecognizeResponse)
 	err := c.cc.Invoke(ctx, ASRService_ReRecognize_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -152,7 +140,8 @@ func (c *aSRServiceClient) ReRecognize(ctx context.Context, in *ReRecognizeReque
 // ASR 语音识别服务。
 // 将音频转为文本；Provider（FunASR/Whisper/讯飞/阿里云）可替换、租户可自选。
 type ASRServiceServer interface {
-	// 同步识别（短音频 ≤60s）
+	// 同步语音识别：纯识别，返回 ASR 原始文本（不增强）。
+	// 如需识别 + 文本增强，请调用 RecognizeAndCorrect。
 	Recognize(context.Context, *RecognizeRequest) (*RecognizeResponse, error)
 	// 流式识别（长音频 / 实时），双向流
 	StreamRecognize(grpc.BidiStreamingServer[AudioChunk, StreamResult]) error
@@ -164,10 +153,8 @@ type ASRServiceServer interface {
 	GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error)
 	// 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
 	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error)
-	// 语音识别 + 纠错（一步到位输出标准企业语言，便于 LLM 消费）
-	RecognizeAndCorrect(context.Context, *RecognizeRequest) (*RecognizeAndCorrectResponse, error)
 	// 对已有记录重新识别（复用文件中心音频，不重复上传）
-	ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeAndCorrectResponse, error)
+	ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeResponse, error)
 	mustEmbedUnimplementedASRServiceServer()
 }
 
@@ -196,10 +183,7 @@ func (UnimplementedASRServiceServer) GetAsrRecordAudio(context.Context, *GetAsrR
 func (UnimplementedASRServiceServer) GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAsrRecordDetail not implemented")
 }
-func (UnimplementedASRServiceServer) RecognizeAndCorrect(context.Context, *RecognizeRequest) (*RecognizeAndCorrectResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RecognizeAndCorrect not implemented")
-}
-func (UnimplementedASRServiceServer) ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeAndCorrectResponse, error) {
+func (UnimplementedASRServiceServer) ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReRecognize not implemented")
 }
 func (UnimplementedASRServiceServer) mustEmbedUnimplementedASRServiceServer() {}
@@ -320,24 +304,6 @@ func _ASRService_GetAsrRecordDetail_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ASRService_RecognizeAndCorrect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RecognizeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ASRServiceServer).RecognizeAndCorrect(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ASRService_RecognizeAndCorrect_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ASRServiceServer).RecognizeAndCorrect(ctx, req.(*RecognizeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ASRService_ReRecognize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReRecognizeRequest)
 	if err := dec(in); err != nil {
@@ -382,10 +348,6 @@ var ASRService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAsrRecordDetail",
 			Handler:    _ASRService_GetAsrRecordDetail_Handler,
-		},
-		{
-			MethodName: "RecognizeAndCorrect",
-			Handler:    _ASRService_RecognizeAndCorrect_Handler,
 		},
 		{
 			MethodName: "ReRecognize",
