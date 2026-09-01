@@ -32,7 +32,7 @@ type ASRServiceHTTPServer interface {
 	// GetAsrRecordAudio 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error)
 	// GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
-	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error)
+	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetailResponse, error)
 	// ListAsrRecords 查询识别记录列表
 	ListAsrRecords(context.Context, *ListAsrRecordsRequest) (*ListAsrRecordsResponse, error)
 	// ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
@@ -154,7 +154,7 @@ func _ASRService_GetAsrRecordDetail0_HTTP_Handler(srv ASRServiceHTTPServer) func
 		if err != nil {
 			return err
 		}
-		reply := out.(*AsrRecordDetail)
+		reply := out.(*AsrRecordDetailResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -190,7 +190,7 @@ type ASRServiceHTTPClient interface {
 	// GetAsrRecordAudio 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(ctx context.Context, req *GetAsrRecordAudioRequest, opts ...http.CallOption) (rsp *GetAsrRecordAudioResponse, err error)
 	// GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
-	GetAsrRecordDetail(ctx context.Context, req *GetAsrRecordRequest, opts ...http.CallOption) (rsp *AsrRecordDetail, err error)
+	GetAsrRecordDetail(ctx context.Context, req *GetAsrRecordRequest, opts ...http.CallOption) (rsp *AsrRecordDetailResponse, err error)
 	// ListAsrRecords 查询识别记录列表
 	ListAsrRecords(ctx context.Context, req *ListAsrRecordsRequest, opts ...http.CallOption) (rsp *ListAsrRecordsResponse, err error)
 	// ReRecognize 对已有记录重新识别（复用文件中心音频，不重复上传）
@@ -237,8 +237,8 @@ func (c *ASRServiceHTTPClientImpl) GetAsrRecordAudio(ctx context.Context, in *Ge
 }
 
 // GetAsrRecordDetail 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
-func (c *ASRServiceHTTPClientImpl) GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...http.CallOption) (*AsrRecordDetail, error) {
-	var out AsrRecordDetail
+func (c *ASRServiceHTTPClientImpl) GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...http.CallOption) (*AsrRecordDetailResponse, error) {
+	var out AsrRecordDetailResponse
 	pattern := "/evie/v1/asr/records/{id}/detail"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationASRServiceGetAsrRecordDetail))

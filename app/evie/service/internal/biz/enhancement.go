@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"strings"
 	"time"
@@ -9,7 +10,194 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	pb "backend-service/api/evie/service/v1"
+	"backend-service/pkg/utils/id"
+
+	"backend-service/pkg/auth/authn"
 )
+
+// EnhanceUsecase 纯文本增强编排（独立于 ASRUsecase）。
+// session_id 在入口处由 backend 统一生成（id.NewSessionID），前端不再传。
+type EnhancementUsecase struct {
+	enhancer *EnhancementEngine
+	epuc     *EnhancementPolicyUsecase
+	eluc     *EnhancementLogUsecase
+	log      *log.Helper
+}
+
+// NewEnhanceUsecase 创建增强 usecase。
+func NewEnhancementUsecase(enhancer *EnhancementEngine, epuc *EnhancementPolicyUsecase, eluc *EnhancementLogUsecase, logger log.Logger) *EnhancementUsecase {
+	return &EnhancementUsecase{enhancer: enhancer, epuc: epuc, eluc: eluc, log: log.NewHelper(logger)}
+}
+
+// EnhanceResult 文本增强业务结果。
+type EnhanceResult struct {
+	OriginalText        string
+	EnhancedText        string
+	Changes             []*EnhancementChange
+	StepTimings         map[string]time.Duration
+	TotalTime           time.Duration
+	StepSnapshots       []*StepSnapshot
+	Status              int32
+	ProcessingTimeMs    int64
+	CleaningTimeMs      int64
+	FillerTimeMs        int64
+	VocabMatchTimeMs    int64
+	AliasTimeMs         int64
+	DeterministicTimeMs int64
+	PinyinTimeMs        int64
+	FuzzyTimeMs         int64
+	ContextTimeMs       int64
+	ErrorMessage        string
+	SessionID           string
+}
+
+// EnhanceText 纯文本增强入口（对应 proto EnhanceText RPC）。
+// session_id 后端统一生成（UUID v4 + 业务前缀）。
+// profile_id 决定策略：0=租户默认；非 0=按场景关联策略。
+func (uc *EnhancementUsecase) EnhanceText(ctx context.Context, req *pb.EnhanceTextRequest) (*EnhanceResult, error) {
+	sessionID := id.NewSessionID(id.SessionIDPrefixEnhanceText)
+	return uc.EnhanceTextWithSessionID(ctx, req, sessionID)
+}
+
+// EnhanceTextWithSessionID 纯文本增强入口（对应 proto EnhanceText RPC）。
+func (uc *EnhancementUsecase) EnhanceTextWithSessionID(ctx context.Context, req *pb.EnhanceTextRequest, sessionID string) (*EnhanceResult, error) {
+	policy, err := uc.ResolveEnhancePolicy(ctx, uc.epuc, req.GetProfileId())
+	if err != nil {
+		return nil, err
+	}
+	result, err := uc.enhancer.EnhanceWithPolicy(ctx, req.GetText(), policy)
+	if err != nil {
+		return nil, err
+	}
+
+	// 写增强日志（包含 8 步耗时 + step snapshots + 变更列表）
+	changesJSON, _ := json.Marshal(result.Changes)
+	snapshotsJSON, _ := json.Marshal(result.StepSnapshots)
+	logData := &EnhancementLogData{
+		SessionID:           sessionID,
+		RawText:             result.RawText,
+		EnhancedText:        result.EnhancedText,
+		ChangesJSON:         string(changesJSON),
+		StepSnapshotsJSON:   string(snapshotsJSON),
+		ProcessingTimeMs:    result.TotalTime.Milliseconds(),
+		CleaningTimeMs:      StepMs(result.StepTimings, "cleaning"),
+		FillerTimeMs:        StepMs(result.StepTimings, "filler"),
+		VocabMatchTimeMs:    StepMs(result.StepTimings, "vocabulary_matching"),
+		AliasTimeMs:         StepMs(result.StepTimings, "alias_resolution"),
+		DeterministicTimeMs: StepMs(result.StepTimings, "deterministic_replacement"),
+		PinyinTimeMs:        StepMs(result.StepTimings, "pinyin_correction"),
+		FuzzyTimeMs:         StepMs(result.StepTimings, "fuzzy_matching"),
+		ContextTimeMs:       StepMs(result.StepTimings, "context_correction"),
+		Status:              1,
+	}
+	// policy 可能为 nil（默认场景下未匹配策略），安全获取 Id/Mode/Name
+	if policy != nil {
+		logData.PolicyID = policy.Id
+		logData.PolicyMode = policy.Mode
+		logData.PolicyName = policy.Name
+	}
+	uc.eluc.Save(ctx, logData)
+
+	return &EnhanceResult{
+		OriginalText:        result.RawText,
+		EnhancedText:        result.EnhancedText,
+		Changes:             result.Changes,
+		StepTimings:         result.StepTimings,
+		TotalTime:           result.TotalTime,
+		StepSnapshots:       result.StepSnapshots,
+		Status:              1,
+		ProcessingTimeMs:    result.TotalTime.Milliseconds(),
+		CleaningTimeMs:      StepMs(result.StepTimings, "cleaning"),
+		FillerTimeMs:        StepMs(result.StepTimings, "filler"),
+		VocabMatchTimeMs:    StepMs(result.StepTimings, "vocabulary_matching"),
+		AliasTimeMs:         StepMs(result.StepTimings, "alias_resolution"),
+		DeterministicTimeMs: StepMs(result.StepTimings, "deterministic_replacement"),
+		PinyinTimeMs:        StepMs(result.StepTimings, "pinyin_correction"),
+		FuzzyTimeMs:         StepMs(result.StepTimings, "fuzzy_matching"),
+		ContextTimeMs:       StepMs(result.StepTimings, "context_correction"),
+		SessionID:           sessionID,
+	}, nil
+}
+
+// ToProto 业务结果转 proto。
+func (r *EnhanceResult) ToProto() *pb.EnhanceTextResponse {
+	if r == nil {
+		return nil
+	}
+	resp := &pb.EnhanceTextResponse{
+		OriginalText:        r.OriginalText,
+		EnhancedText:        r.EnhancedText,
+		Changes:             make([]*pb.EnhanceChange, 0, len(r.Changes)),
+		Status:              r.Status,
+		ProcessingTimeMs:    r.ProcessingTimeMs,
+		CleaningTimeMs:      r.CleaningTimeMs,
+		FillerTimeMs:        r.FillerTimeMs,
+		VocabMatchTimeMs:    r.VocabMatchTimeMs,
+		AliasTimeMs:         r.AliasTimeMs,
+		DeterministicTimeMs: r.DeterministicTimeMs,
+		PinyinTimeMs:        r.PinyinTimeMs,
+		FuzzyTimeMs:         r.FuzzyTimeMs,
+		ContextTimeMs:       r.ContextTimeMs,
+		ErrorMessage:        r.ErrorMessage,
+		SessionId:           r.SessionID,
+	}
+	for _, ch := range r.Changes {
+		resp.Changes = append(resp.Changes, &pb.EnhanceChange{
+			From:       ch.OriginalText,
+			To:         ch.ResultText,
+			Type:       ch.Type,
+			Confidence: float32(ch.Confidence),
+		})
+	}
+	return resp
+}
+
+// StepMs 从 stepTimings map 中取步骤耗时，找不到返回 0。
+func StepMs(m map[string]time.Duration, key string) int64 {
+	if d, ok := m[key]; ok {
+		return d.Milliseconds()
+	}
+	return 0
+}
+
+// ResolveEnhancePolicy 解析文本增强方案：
+//   - profileID > 0：按增强场景（Profile）绑定的策略执行
+//
+// 设计原则：增强策略只能通过场景 Profile 关联，不接受 policy_id 直传。
+// 这与系统「场景关联策略」的设计一致——避免策略在多个场景间游离。
+func (uc *EnhancementUsecase) ResolveEnhancePolicy(ctx context.Context, epuc *EnhancementPolicyUsecase, profileID uint32) (*pb.EnhancementPolicy, error) {
+	if uc == nil {
+		return nil, nil
+	}
+	// 1) profileID：按场景绑定的策略取
+	if profileID != 0 {
+		profile, err := uc.epuc.GetProfile(ctx, profileID)
+		if err != nil {
+			return nil, err
+		}
+		if profile == nil || profile.GetPolicyId() == 0 {
+			return nil, nil
+		}
+		return uc.epuc.GetPolicy(ctx, profile.GetPolicyId())
+	}
+	// 默认增强方案：优先选择「高性能模式且启用口水词+别名+确定性替换」的策略；
+	// 其次选启用核心步骤（口水词+别名+确定性替换）的策略；没有则 nil（执行全部步骤）。
+	policies, _, err := uc.epuc.ListPolicies(ctx, &pb.ListPoliciesRequest{PageSize: 100})
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range policies {
+		if p.GetMode() == "HIGH_PERFORMANCE" && p.GetFillerRemoval() && p.GetAliasResolution() && p.GetDeterministicReplacement() {
+			return p, nil
+		}
+	}
+	for _, p := range policies {
+		if p.GetFillerRemoval() && p.GetAliasResolution() && p.GetDeterministicReplacement() {
+			return p, nil
+		}
+	}
+	return nil, nil
+}
 
 // EnhancementAction 增强动作类型（开发说明第三十六节）。
 const (
@@ -21,25 +209,28 @@ const (
 )
 
 // EnhancementChange 单条文本增强变更（开发说明第三十七节）。
+// JSON tag 与 proto EnhanceChange 字段名保持一致，便于直接序列化到 enhancement_logs.changes_json
+// 并由 GetRecordDetail 反序列化回 pb.EnhanceChange。
 type EnhancementChange struct {
-	OriginalText string  // 原片段
-	ResultText   string  // 结果片段（DELETE 时为空）
-	Action       string  // KEEP/REPLACE/DELETE/SUGGEST/RESOLVE
-	Type         string  // CLEAN/FILLER/ALIAS/CORRECTION/EXACT/...
-	Source       string  // PLATFORM/SYSTEM/TENANT 词库 或 SYSTEM
-	Confidence   float64 // 确定性=1.0；推断性=score
-	Reason       string
-	Locked       bool // 确定性结果锁定，后续算法不得覆盖（开发说明第二十五节）
+	OriginalText string  `json:"from,omitempty"`
+	ResultText   string  `json:"to,omitempty"`
+	Action       string  `json:"action,omitempty"`
+	Type         string  `json:"type,omitempty"`
+	Source       string  `json:"source,omitempty"`
+	Confidence   float64 `json:"confidence,omitempty"`
+	Reason       string  `json:"reason,omitempty"`
+	Locked       bool    `json:"locked,omitempty"`
 }
 
 // StepSnapshot 单步增强快照（用于步骤图/分词明细展示）。
+// JSON tag 与 proto EnhancementStepSnapshot 字段名保持一致。
 type StepSnapshot struct {
-	Step       string                // 步骤标识：text_cleaning / filler_removal / ...
-	Before     string                // 该步骤处理前文本
-	After      string                // 该步骤处理后文本
-	DurationMs int64                 // 该步骤耗时
-	Skipped    bool                  // 策略跳过该步骤时 true
-	Changes    []*EnhancementChange  // 该步骤产生的变更明细
+	Step       string               `json:"step,omitempty"`
+	Before     string               `json:"before,omitempty"`
+	After      string               `json:"after,omitempty"`
+	DurationMs int64                `json:"duration_ms,omitempty"`
+	Skipped    bool                 `json:"skipped,omitempty"`
+	Changes    []*EnhancementChange `json:"changes,omitempty"`
 }
 
 // EnhancementResult 文本增强结果。
@@ -102,31 +293,31 @@ func NewEnhancementEngine(vocab *VocabularyBuilder, logger log.Logger) *Enhancem
 	e := &EnhancementEngine{vocab: vocab, log: log.NewHelper(logger)}
 	e.steps = []EnhancementStep{
 		&TextCleaningStep{},             // ① 清洗
-		&FillerStep{},                    // ② 口水词
-		&VocabularyMatchingStep{},        // ③ 词库匹配
-		&AliasResolutionStep{},           // ④ 别名解析
-		&DeterministicReplacementStep{},  // ⑤ 确定性替换
-		&PhraseStandardizationStep{},     // 短语标准化（确定性规则）
-		&PinyinCorrectionStep{},          // ⑥ 拼音纠错（推断）
-		&FuzzyMatchingStep{},             // ⑦ 模糊匹配（推断）
-		&ContextCorrectionStep{},         // ⑧ 上下文纠错（推断）
+		&FillerStep{},                   // ② 口水词
+		&VocabularyMatchingStep{},       // ③ 词库匹配
+		&AliasResolutionStep{},          // ④ 别名解析
+		&DeterministicReplacementStep{}, // ⑤ 确定性替换
+		&PhraseStandardizationStep{},    // 短语标准化（确定性规则）
+		&PinyinCorrectionStep{},         // ⑥ 拼音纠错（推断）
+		&FuzzyMatchingStep{},            // ⑦ 模糊匹配（推断）
+		&ContextCorrectionStep{},        // ⑧ 上下文纠错（推断）
 	}
 	return e
 }
 
 // Enhance 执行完整文本增强流水线（默认 STANDARD 策略：全部确定性 + 推断）。
-func (e *EnhancementEngine) Enhance(ctx context.Context, tenantID uint32, rawText string) (*EnhancementResult, error) {
-	return e.enhance(ctx, tenantID, rawText, nil)
+func (e *EnhancementEngine) Enhance(ctx context.Context, rawText string) (*EnhancementResult, error) {
+	return e.enhance(ctx, rawText, nil)
 }
 
 // EnhanceWithPolicy 按策略执行流水线（仅启用策略开启的步骤）。
-func (e *EnhancementEngine) EnhanceWithPolicy(ctx context.Context, tenantID uint32, rawText string, policy *pb.EnhancementPolicy) (*EnhancementResult, error) {
-	return e.enhance(ctx, tenantID, rawText, policy)
+func (e *EnhancementEngine) EnhanceWithPolicy(ctx context.Context, rawText string, policy *pb.EnhancementPolicy) (*EnhancementResult, error) {
+	return e.enhance(ctx, rawText, policy)
 }
 
-func (e *EnhancementEngine) enhance(ctx context.Context, tenantID uint32, rawText string, policy *pb.EnhancementPolicy) (*EnhancementResult, error) {
+func (e *EnhancementEngine) enhance(ctx context.Context, rawText string, policy *pb.EnhancementPolicy) (*EnhancementResult, error) {
 	totalStart := time.Now()
-	vc, err := e.vocab.Build(ctx, tenantID)
+	vc, err := e.vocab.Build(ctx, authn.GetAuthUserTenantID(ctx))
 	if err != nil {
 		return nil, err
 	}

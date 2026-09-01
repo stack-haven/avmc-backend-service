@@ -35,7 +35,6 @@ func NewHTTPServer(
 	checker pkgHealth.Checker,
 	dictionaryService *service.DictionaryServiceService,
 	asrService *service.ASRServiceService,
-	asrStreamService *service.ASRStreamService,
 	providerService *service.ProviderServiceService,
 	enhancementService *service.EnhancementServiceService,
 	auditClient audit.Client,
@@ -63,7 +62,7 @@ func NewHTTPServer(
 	srv := http.NewServer(opts...)
 	pkgHealth.RegisterHTTP(srv, checker, 2*time.Second)
 	// WebSocket 流式识别入口（绕过 auth 中间件，service 层内部自行鉴权）
-	srv.HandleFunc("/evie/v1/asr/stream", asrStreamService.ServeHTTP)
+	srv.HandleFunc("/evie/v1/asr/stream", asrService.ServeHTTP)
 	v1.RegisterDictionaryServiceHTTPServer(srv, dictionaryService)
 	v1.RegisterASRServiceHTTPServer(srv, asrService)
 	v1.RegisterProviderServiceHTTPServer(srv, providerService)

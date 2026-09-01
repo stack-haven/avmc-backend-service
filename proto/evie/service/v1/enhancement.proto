@@ -343,7 +343,7 @@ message GeneratePinyinResponse {
 message EnhanceTextRequest {
   string text = 1 [(buf.validate.field).string = {min_len: 1, max_len: 4096}];
   uint32 profile_id = 2;  // 0=按租户默认；非 0=按场景关联策略
-  string session_id = 3;   // 可选，便于日志关联
+  string session_id = 3; // 可选：前端传入 session_id，后端统一生成 UUID session_id
 }
 
 // EnhanceTextResponse 纯文本增强响应。
@@ -362,4 +362,5 @@ message EnhanceTextResponse {
   int64 fuzzy_time_ms = 12;
   int64 context_time_ms = 13;
   string error_message = 14;
+  string session_id = 15;          // 后端统一生成的 UUID session_id
 }

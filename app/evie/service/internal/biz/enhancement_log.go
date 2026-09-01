@@ -13,6 +13,7 @@ type EnhancementLogRepo interface {
 	List(ctx context.Context, req *pb.ListEnhancementLogsRequest) ([]*pb.EnhancementLog, int32, error)
 	Get(ctx context.Context, id uint32) (*pb.EnhancementLog, error)
 	Save(ctx context.Context, log *EnhancementLogData) error
+	GetBySessionID(ctx context.Context, sessionID string) (*pb.EnhancementLog, error)
 }
 
 // EnhancementLogData 增强记录写入数据（业务模型）。
@@ -20,6 +21,7 @@ type EnhancementLogData struct {
 	RequestID           string
 	SessionID           string
 	PolicyID            uint32
+	PolicyName          string
 	PolicyMode          string
 	ContextVersion      string
 	RawText             string
@@ -58,6 +60,11 @@ func (uc *EnhancementLogUsecase) List(ctx context.Context, req *pb.ListEnhanceme
 // Get 查询增强记录详情。
 func (uc *EnhancementLogUsecase) Get(ctx context.Context, id uint32) (*pb.EnhancementLog, error) {
 	return uc.repo.Get(ctx, id)
+}
+
+// Get 查询增强记录详情。
+func (uc *EnhancementLogUsecase) GetBySessionID(ctx context.Context, sessionID string) (*pb.EnhancementLog, error) {
+	return uc.repo.GetBySessionID(ctx, sessionID)
 }
 
 // Save 保存增强记录（错误降级：保存失败不阻断文本增强主流程）。

@@ -1688,7 +1688,7 @@ type EnhanceTextRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	ProfileId     uint32                 `protobuf:"varint,2,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 0=按租户默认；非 0=按场景关联策略
-	SessionId     string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`  // 可选，便于日志关联
+	SessionId     string                 `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`  // 可选：前端传入 session_id，后端统一生成 UUID session_id
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1761,6 +1761,7 @@ type EnhanceTextResponse struct {
 	FuzzyTimeMs         int64                  `protobuf:"varint,12,opt,name=fuzzy_time_ms,json=fuzzyTimeMs,proto3" json:"fuzzy_time_ms,omitempty"`
 	ContextTimeMs       int64                  `protobuf:"varint,13,opt,name=context_time_ms,json=contextTimeMs,proto3" json:"context_time_ms,omitempty"`
 	ErrorMessage        string                 `protobuf:"bytes,14,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	SessionId           string                 `protobuf:"bytes,15,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"` // 后端统一生成的 UUID session_id
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1889,6 +1890,13 @@ func (x *EnhanceTextResponse) GetContextTimeMs() int64 {
 func (x *EnhanceTextResponse) GetErrorMessage() string {
 	if x != nil {
 		return x.ErrorMessage
+	}
+	return ""
+}
+
+func (x *EnhanceTextResponse) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
 	}
 	return ""
 }
@@ -2051,7 +2059,7 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\n" +
 	"profile_id\x18\x02 \x01(\rR\tprofileId\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x03 \x01(\tR\tsessionId\"\xcd\x04\n" +
+	"session_id\x18\x03 \x01(\tR\tsessionId\"\xec\x04\n" +
 	"\x13EnhanceTextResponse\x12#\n" +
 	"\roriginal_text\x18\x01 \x01(\tR\foriginalText\x12#\n" +
 	"\renhanced_text\x18\x02 \x01(\tR\fenhancedText\x128\n" +
@@ -2067,7 +2075,9 @@ const file_evie_service_v1_enhancement_proto_rawDesc = "" +
 	"\x0epinyin_time_ms\x18\v \x01(\x03R\fpinyinTimeMs\x12\"\n" +
 	"\rfuzzy_time_ms\x18\f \x01(\x03R\vfuzzyTimeMs\x12&\n" +
 	"\x0fcontext_time_ms\x18\r \x01(\x03R\rcontextTimeMs\x12#\n" +
-	"\rerror_message\x18\x0e \x01(\tR\ferrorMessage2\xa5\x13\n" +
+	"\rerror_message\x18\x0e \x01(\tR\ferrorMessage\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x0f \x01(\tR\tsessionId2\xa5\x13\n" +
 	"\x12EnhancementService\x12\xb3\x01\n" +
 	"\fListPolicies\x12$.evie.service.v1.ListPoliciesRequest\x1a%.evie.service.v1.ListPoliciesResponse\"V\xbaG.\n" +
 	"\f文本增强\x12\x1e分页查询增强策略列表\x82\xd3\xe4\x93\x02\x1f\x12\x1d/evie/v1/enhancement-policies\x12\xa9\x01\n" +

@@ -1,7 +1,9 @@
 package biz
 
 import (
+	pid "backend-service/pkg/utils/id"
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -43,16 +45,17 @@ type ASRUsecase struct {
 	providerRepo ProviderRepo
 	recordRepo   ASRRecordRepo
 	fileCenter   *platformclient.FileCenterClient
+	euc          *EnhancementUsecase
 	log          *log.Helper
 }
 
 // NewASRUsecase 创建 ASR usecase。
-func NewASRUsecase(providerRepo ProviderRepo, recordRepo ASRRecordRepo, fileCenter *platformclient.FileCenterClient, logger log.Logger) *ASRUsecase {
-	return &ASRUsecase{providerRepo: providerRepo, recordRepo: recordRepo, fileCenter: fileCenter, log: log.NewHelper(logger)}
+func NewASRUsecase(providerRepo ProviderRepo, recordRepo ASRRecordRepo, fileCenter *platformclient.FileCenterClient, euc *EnhancementUsecase, logger log.Logger) *ASRUsecase {
+	return &ASRUsecase{providerRepo: providerRepo, recordRepo: recordRepo, fileCenter: fileCenter, euc: euc, log: log.NewHelper(logger)}
 }
 
 // Recognize 同步识别。
-func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (*asr.ASRResult, error) {
+func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (*pb.RecognizeResponse, error) {
 	provider, opts, err := uc.route(ctx, false)
 	if err != nil {
 		return nil, err
@@ -84,11 +87,11 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 		audioFormat = up.audioFormat
 	}
 
-	result.RequestID = req.GetSessionId()
+	sessionID := pid.NewSessionID(pid.SessionIDPrefixASR)
 	if result != nil && uc.recordRepo != nil {
 		if _, err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
-			SessionID:   result.RequestID,
+			SessionID:   sessionID,
 			RawText:     result.Text,
 			Confidence:  result.Confidence,
 			DurationMs:  result.DurationMs,
@@ -99,7 +102,16 @@ func (uc *ASRUsecase) Recognize(ctx context.Context, req *pb.RecognizeRequest) (
 			uc.log.Errorf("save asr record: %v", err)
 		}
 	}
-	return result, nil
+
+	// 文本增强：ASR 主流程沿用 asr-session_id，增强日志与 ASR 记录可关联。
+	enhResult, err := uc.euc.EnhanceTextWithSessionID(ctx, &pb.EnhanceTextRequest{
+		Text:      result.Text,
+		ProfileId: req.GetProfileId(),
+	}, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	return buildRecognizeResponse(result, enhResult), nil
 }
 
 // uploadAudio 将音频上传到文件中心，返回文件 ID 与实际存储格式。
@@ -109,11 +121,11 @@ func (uc *ASRUsecase) uploadAudio(ctx context.Context, req *pb.RecognizeRequest)
 	}
 	audio, ext, contentType := normalizeAudio(req)
 	file, err := uc.fileCenter.Upload(ctx, &platformpb.CreateFileUploadSessionRequest{
-		FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.%s", req.GetSessionId(), ext)),
+		FileName:     convert.ToPointer(fmt.Sprintf("asr-%s.%s", pid.NewSessionID(pid.SessionIDPrefixASR), ext)),
 		ContentType:  convert.ToPointer(contentType),
 		Size:         convert.ToPointer(int64(len(audio))),
 		BusinessType: convert.ToPointer("asr"),
-		BusinessId:   convert.ToPointer(req.GetSessionId()),
+		BusinessId:   convert.ToPointer(pid.NewSessionID(pid.SessionIDPrefixASR)),
 		Visibility:   convert.ToPointer("private"),
 	}, audio)
 	if err != nil {
@@ -217,7 +229,7 @@ func newProvider(name, configJSON string) (asr.ASRProvider, error) {
 
 // StreamRecognize 流式识别：路由到 Provider，收集完整音频，识别结束后上传文件中心并保存记录。
 // 通过 resultCh 增量回传纯 ASR 文本（不含业务字段）；返回保存后的记录 ID 与音频文件 ID。
-func (uc *ASRUsecase) StreamRecognize(ctx context.Context, sessionID string, audioCh <-chan asr.PCMChunk, resultCh chan<- asr.ASRStreamResult) (uint32, string, error) {
+func (uc *ASRUsecase) StreamRecognize(ctx context.Context, audioCh <-chan asr.PCMChunk, resultCh chan<- asr.ASRStreamResult) (uint32, string, error) {
 	provider, opts, err := uc.route(ctx, true)
 	if err != nil {
 		return 0, "", err
@@ -256,15 +268,16 @@ func (uc *ASRUsecase) StreamRecognize(ctx context.Context, sessionID string, aud
 	var recordID uint32
 	var audioURL string
 	if finalText != "" && len(audioBuf) > 0 {
-		recordID, audioURL = uc.saveStreamRecord(ctx, sessionID, finalText, audioBuf, provider.Name())
+		recordID, audioURL = uc.saveStreamRecord(ctx, finalText, audioBuf, provider.Name())
 	}
 
 	return recordID, audioURL, err
 }
 
 // saveStreamRecord 将完整 PCM 音频转 WAV 上传文件中心，并保存识别记录。
-func (uc *ASRUsecase) saveStreamRecord(ctx context.Context, sessionID, finalText string, audioPCM []byte, engine string) (uint32, string) {
+func (uc *ASRUsecase) saveStreamRecord(ctx context.Context, finalText string, audioPCM []byte, engine string) (uint32, string) {
 	audioURL := ""
+	sessionID := pid.NewSessionID(pid.SessionIDPrefixASR)
 	if uc.fileCenter != nil && len(audioPCM) > 0 {
 		wav := asraudio.PCMToWAV(audioPCM, 16000, 1, 16)
 		file, err := uc.fileCenter.UploadAuto(ctx, &platformpb.CreateFileUploadSessionRequest{
@@ -311,8 +324,38 @@ func (uc *ASRUsecase) GetRecord(ctx context.Context, id uint32) (*pb.AsrRecord, 
 	return uc.recordRepo.Get(ctx, id)
 }
 
+// GetRecordDetail 查询识别记录完整详情（含增强轨迹 + 步骤快照），从 enhancement_logs 取最近 log 拼接。
+func (uc *ASRUsecase) GetRecordDetail(ctx context.Context, id uint32) (*pb.AsrRecordDetailResponse, error) {
+	rec, err := uc.GetRecord(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	detail := &pb.AsrRecordDetailResponse{Record: rec}
+	if uc.euc == nil || uc.euc.eluc == nil {
+		return detail, nil
+	}
+	if rec.GetSessionId() == "" {
+		return detail, nil
+	}
+	log, lerr := uc.euc.eluc.GetBySessionID(ctx, rec.GetSessionId())
+	if lerr != nil || log == nil {
+		return detail, nil
+	}
+	detail.EnhancedText = log.GetEnhancedText()
+	detail.PolicyName = log.GetPolicyMode()
+	// 反序列化步骤快照（含每步变更 from/to/action/source/locked 等）
+	if log.StepSnapshotsJson != "" {
+		json.Unmarshal([]byte(log.StepSnapshotsJson), &detail.StepSnapshots)
+	}
+	// 反序列化变更汇总
+	if log.ChangesJson != "" {
+		json.Unmarshal([]byte(log.ChangesJson), &detail.Changes)
+	}
+	return detail, nil
+}
+
 // ReRecognize 对已有记录重新识别：复用文件中心音频，不重复上传。
-func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResult, error) {
+func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*pb.RecognizeResponse, error) {
 	record, err := uc.recordRepo.Get(ctx, id)
 	if err != nil {
 		return nil, err
@@ -341,12 +384,13 @@ func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResul
 	if err != nil {
 		return nil, err
 	}
-	result.RequestID = fmt.Sprintf("%s-re", record.GetSessionId())
+
+	sessionID := pid.NewSessionID(pid.SessionIDPrefixASR)
 	// 保存新记录（复用原音频文件，避免重复上传）
 	if result != nil && uc.recordRepo != nil {
 		if _, err := uc.recordRepo.Save(ctx, &ASRRecord{
 			UserID:      authn.GetAuthUserID(ctx),
-			SessionID:   result.RequestID,
+			SessionID:   sessionID,
 			RawText:     result.Text,
 			Confidence:  result.Confidence,
 			DurationMs:  result.DurationMs,
@@ -357,7 +401,16 @@ func (uc *ASRUsecase) ReRecognize(ctx context.Context, id uint32) (*asr.ASRResul
 			uc.log.Errorf("save re-recognize record: %v", err)
 		}
 	}
-	return result, nil
+
+	// 文本增强：沿用重新识别生成的 session_id（原 asr-session_id + "-re"）。
+	enhResult, err := uc.euc.EnhanceTextWithSessionID(ctx, &pb.EnhanceTextRequest{
+		Text:      result.Text,
+		ProfileId: 0,
+	}, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	return buildRecognizeResponse(result, enhResult), nil
 }
 
 // GetRecordAudio 获取识别记录音频内容（通过文件中心代理下载）。
@@ -377,4 +430,44 @@ func (uc *ASRUsecase) GetRecordAudio(ctx context.Context, id uint32) ([]byte, st
 		return nil, "", fmt.Errorf("parse audio file id: %w", err)
 	}
 	return uc.fileCenter.DownloadContent(ctx, uint32(fileID))
+}
+
+// buildRecognizeResponse 合并 ASR 原始结果与增强结果，生成 transport 层响应。
+// 由 biz 层统一构造，service 只做透传。
+func buildRecognizeResponse(r *asr.ASRResult, e *EnhanceResult) *pb.RecognizeResponse {
+	if r == nil {
+		return nil
+	}
+	resp := &pb.RecognizeResponse{
+		RequestId:    r.RequestID,
+		SessionId:    r.RequestID,
+		RawText:      r.Text,
+		Confidence:   float32(r.Confidence),
+		DurationMs:   r.DurationMs,
+		IsFinal:      true,
+		ProviderName: r.ProviderName,
+	}
+	if e != nil {
+		resp.EnhancedText = e.EnhancedText
+		resp.Status = e.Status
+		resp.ProcessingTimeMs = e.ProcessingTimeMs
+		resp.CleaningTimeMs = e.CleaningTimeMs
+		resp.FillerTimeMs = e.FillerTimeMs
+		resp.VocabMatchTimeMs = e.VocabMatchTimeMs
+		resp.AliasTimeMs = e.AliasTimeMs
+		resp.DeterministicTimeMs = e.DeterministicTimeMs
+		resp.PinyinTimeMs = e.PinyinTimeMs
+		resp.FuzzyTimeMs = e.FuzzyTimeMs
+		resp.ContextTimeMs = e.ContextTimeMs
+		resp.ErrorMessage = e.ErrorMessage
+		for _, ch := range e.Changes {
+			resp.Changes = append(resp.Changes, &pb.EnhanceChange{
+				From:       ch.OriginalText,
+				To:         ch.ResultText,
+				Type:       ch.Type,
+				Confidence: float32(ch.Confidence),
+			})
+		}
+	}
+	return resp
 }

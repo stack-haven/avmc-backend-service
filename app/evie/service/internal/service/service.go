@@ -6,7 +6,6 @@ import "github.com/google/wire"
 var ProviderSet = wire.NewSet(
 	NewDictionaryServiceService,
 	NewASRServiceService,
-	NewASRStreamService,
 	NewProviderServiceService,
 	NewEnhancementServiceService,
 )

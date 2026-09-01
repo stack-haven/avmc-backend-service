@@ -61,7 +61,7 @@ service ASRService {
   }
 
   // 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
-  rpc GetAsrRecordDetail(GetAsrRecordRequest) returns (AsrRecordDetail) {
+  rpc GetAsrRecordDetail(GetAsrRecordRequest) returns (AsrRecordDetailResponse) {
     option (google.api.http) = {get: "/evie/v1/asr/records/{id}/detail"};
     option (gnostic.openapi.v3.operation) = {
       summary: "查询识别记录完整详情"
@@ -100,21 +100,19 @@ message AudioFormat {
 }
 
 message RecognizeRequest {
-  string session_id = 1;
-  AudioFormat format = 2;
-  bytes audio_data = 3 [(buf.validate.field).bytes = {max_len: 10485760}]; // max 10MB
-  uint32 profile_id = 4; // 增强场景 ID（0=不增强或租户默认；非 0=按场景关联策略增强）
+  AudioFormat format = 1;
+  bytes audio_data = 2 [(buf.validate.field).bytes = {max_len: 10485760}]; // max 10MB
+  uint32 profile_id = 3; // 增强场景 ID（0=不增强或租户默认；非 0=按场景关联策略增强）
 }
 
 message AudioChunk {
-  string session_id = 1;
-  bytes data = 2;
-  int64 timestamp_ms = 3;
+  bytes data = 1;
+  int64 timestamp_ms = 2;
 }
 
 message StreamResult {
   string request_id = 1;
-  string text = 2;      // 增量文本
+  string text = 2; // 增量文本
   float confidence = 3;
   bool is_final = 4;
   int64 timestamp_ms = 5;
@@ -136,7 +134,7 @@ message AsrRecord {
 }
 
 message ListAsrRecordsRequest {
-  int32 page_size = 1;   // 每页行数
+  int32 page_size = 1; // 每页行数
   string page_token = 2; // 页码 token（偏移量）
   string session_id = 3; // 按会话ID筛选
 }
@@ -156,7 +154,7 @@ message GetAsrRecordAudioRequest {
 }
 
 message GetAsrRecordAudioResponse {
-  bytes audio_data = 1;   // 音频内容（base64，文件中心代理下载）
+  bytes audio_data = 1; // 音频内容（base64，文件中心代理下载）
   string content_type = 2; // 如 audio/webm
 }
 
@@ -170,12 +168,12 @@ message EnhancementStepSnapshot {
   repeated EnhanceChange changes = 6;
 }
 
-// AsrRecordDetail 识别记录完整详情。
-message AsrRecordDetail {
+// AsrRecordDetailResponse 识别记录完整详情。
+message AsrRecordDetailResponse {
   AsrRecord record = 1;
-  string enhanced_text = 2;    // 最终增强后文本
-  string policy_name = 3;      // 使用的增强策略名称
-  string profile_name = 4;     // 使用的增强场景名称（默认方案时为空）
+  string enhanced_text = 2; // 最终增强后文本
+  string policy_name = 3; // 使用的增强策略名称
+  string profile_name = 4; // 使用的增强场景名称（默认方案时为空）
   repeated EnhancementStepSnapshot step_snapshots = 5;
   repeated EnhanceChange changes = 6;
 }
@@ -183,16 +181,15 @@ message AsrRecordDetail {
 // RecognizeResponse 同步语音识别结果
 message RecognizeResponse {
   string request_id = 1;
-  string raw_text = 2;                    // ASR 原始文本
-  string enhanced_text = 3;               // 文本增强后标准企业语言
+  string raw_text = 2; // ASR 原始文本
+  string enhanced_text = 3; // 文本增强后标准企业语言
   float confidence = 4;
   int64 duration_ms = 5;
   bool is_final = 6;
-  string provider_name = 7;              // 使用的 ASR 引擎
-  // ===== 增强结果（2026-08-27 统一为增强后输出） =====
-  repeated EnhanceChange changes = 8;     // 增强变更项列表
-  int32 status = 9;                       // 1=SUCCESS 2=DEGRADED 3=FAILED
-  int64 processing_time_ms = 10;          // 8 层流水线总耗时
+  string provider_name = 7; // 使用的 ASR 引擎
+  repeated EnhanceChange changes = 8; // 增强变更项列表
+  int32 status = 9; // 1=SUCCESS 2=DEGRADED 3=FAILED
+  int64 processing_time_ms = 10; // 8 层流水线总耗时
   int64 cleaning_time_ms = 11;
   int64 filler_time_ms = 12;
   int64 vocab_match_time_ms = 13;
@@ -202,6 +199,7 @@ message RecognizeResponse {
   int64 fuzzy_time_ms = 17;
   int64 context_time_ms = 18;
   string error_message = 19;
+  string session_id = 20; // 后端统一生成的 UUID session_id
 }
 
 message ReRecognizeRequest {

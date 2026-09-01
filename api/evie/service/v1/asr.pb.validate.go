@@ -164,8 +164,6 @@ func (m *RecognizeRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for SessionId
-
 	if all {
 		switch v := interface{}(m.GetFormat()).(type) {
 		case interface{ ValidateAll() error }:
@@ -298,8 +296,6 @@ func (m *AudioChunk) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for SessionId
 
 	// no validation rules for Data
 
@@ -1320,22 +1316,22 @@ var _ interface {
 	ErrorName() string
 } = EnhancementStepSnapshotValidationError{}
 
-// Validate checks the field values on AsrRecordDetail with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *AsrRecordDetail) Validate() error {
+// Validate checks the field values on AsrRecordDetailResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AsrRecordDetailResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on AsrRecordDetail with the rules
-// defined in the proto definition for this message. If any rules are
+// ValidateAll checks the field values on AsrRecordDetailResponse with the
+// rules defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// AsrRecordDetailMultiError, or nil if none found.
-func (m *AsrRecordDetail) ValidateAll() error {
+// AsrRecordDetailResponseMultiError, or nil if none found.
+func (m *AsrRecordDetailResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *AsrRecordDetail) validate(all bool) error {
+func (m *AsrRecordDetailResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1346,7 +1342,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 		switch v := interface{}(m.GetRecord()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, AsrRecordDetailValidationError{
+				errors = append(errors, AsrRecordDetailResponseValidationError{
 					field:  "Record",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1354,7 +1350,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, AsrRecordDetailValidationError{
+				errors = append(errors, AsrRecordDetailResponseValidationError{
 					field:  "Record",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1363,7 +1359,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetRecord()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return AsrRecordDetailValidationError{
+			return AsrRecordDetailResponseValidationError{
 				field:  "Record",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -1384,7 +1380,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, AsrRecordDetailValidationError{
+					errors = append(errors, AsrRecordDetailResponseValidationError{
 						field:  fmt.Sprintf("StepSnapshots[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1392,7 +1388,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, AsrRecordDetailValidationError{
+					errors = append(errors, AsrRecordDetailResponseValidationError{
 						field:  fmt.Sprintf("StepSnapshots[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1401,7 +1397,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return AsrRecordDetailValidationError{
+				return AsrRecordDetailResponseValidationError{
 					field:  fmt.Sprintf("StepSnapshots[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1418,7 +1414,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, AsrRecordDetailValidationError{
+					errors = append(errors, AsrRecordDetailResponseValidationError{
 						field:  fmt.Sprintf("Changes[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1426,7 +1422,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, AsrRecordDetailValidationError{
+					errors = append(errors, AsrRecordDetailResponseValidationError{
 						field:  fmt.Sprintf("Changes[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -1435,7 +1431,7 @@ func (m *AsrRecordDetail) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return AsrRecordDetailValidationError{
+				return AsrRecordDetailResponseValidationError{
 					field:  fmt.Sprintf("Changes[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -1446,19 +1442,19 @@ func (m *AsrRecordDetail) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return AsrRecordDetailMultiError(errors)
+		return AsrRecordDetailResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// AsrRecordDetailMultiError is an error wrapping multiple validation errors
-// returned by AsrRecordDetail.ValidateAll() if the designated constraints
-// aren't met.
-type AsrRecordDetailMultiError []error
+// AsrRecordDetailResponseMultiError is an error wrapping multiple validation
+// errors returned by AsrRecordDetailResponse.ValidateAll() if the designated
+// constraints aren't met.
+type AsrRecordDetailResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m AsrRecordDetailMultiError) Error() string {
+func (m AsrRecordDetailResponseMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1467,11 +1463,11 @@ func (m AsrRecordDetailMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m AsrRecordDetailMultiError) AllErrors() []error { return m }
+func (m AsrRecordDetailResponseMultiError) AllErrors() []error { return m }
 
-// AsrRecordDetailValidationError is the validation error returned by
-// AsrRecordDetail.Validate if the designated constraints aren't met.
-type AsrRecordDetailValidationError struct {
+// AsrRecordDetailResponseValidationError is the validation error returned by
+// AsrRecordDetailResponse.Validate if the designated constraints aren't met.
+type AsrRecordDetailResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1479,22 +1475,24 @@ type AsrRecordDetailValidationError struct {
 }
 
 // Field function returns field value.
-func (e AsrRecordDetailValidationError) Field() string { return e.field }
+func (e AsrRecordDetailResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AsrRecordDetailValidationError) Reason() string { return e.reason }
+func (e AsrRecordDetailResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AsrRecordDetailValidationError) Cause() error { return e.cause }
+func (e AsrRecordDetailResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AsrRecordDetailValidationError) Key() bool { return e.key }
+func (e AsrRecordDetailResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AsrRecordDetailValidationError) ErrorName() string { return "AsrRecordDetailValidationError" }
+func (e AsrRecordDetailResponseValidationError) ErrorName() string {
+	return "AsrRecordDetailResponseValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e AsrRecordDetailValidationError) Error() string {
+func (e AsrRecordDetailResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1506,14 +1504,14 @@ func (e AsrRecordDetailValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAsrRecordDetail.%s: %s%s",
+		"invalid %sAsrRecordDetailResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AsrRecordDetailValidationError{}
+var _ error = AsrRecordDetailResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -1521,7 +1519,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AsrRecordDetailValidationError{}
+} = AsrRecordDetailResponseValidationError{}
 
 // Validate checks the field values on RecognizeResponse with the rules defined
 // in the proto definition for this message. If any rules are violated, the
@@ -1614,6 +1612,8 @@ func (m *RecognizeResponse) validate(all bool) error {
 	// no validation rules for ContextTimeMs
 
 	// no validation rules for ErrorMessage
+
+	// no validation rules for SessionId
 
 	if len(errors) > 0 {
 		return RecognizeResponseMultiError(errors)

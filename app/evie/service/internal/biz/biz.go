@@ -15,6 +15,7 @@ var ProviderSet = wire.NewSet(
 	NewEnhancementEngine,
 	NewEnhancementPolicyUsecase,
 	NewEnhancementLogUsecase,
+	NewEnhancementUsecase,
 )
 
 type Transaction interface {

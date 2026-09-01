@@ -2868,6 +2868,8 @@ func (m *EnhanceTextResponse) validate(all bool) error {
 
 	// no validation rules for ErrorMessage
 
+	// no validation rules for SessionId
+
 	if len(errors) > 0 {
 		return EnhanceTextResponseMultiError(errors)
 	}

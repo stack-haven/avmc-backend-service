@@ -85,6 +85,17 @@ func (r *enhancementLogRepo) Get(ctx context.Context, id uint32) (*pb.Enhancemen
 	return enhancementLogProto(row), nil
 }
 
+func (r *enhancementLogRepo) GetBySessionID(ctx context.Context, sessionID string) (*pb.EnhancementLog, error) {
+	row, err := r.Data.DB(ctx).EnhancementLog.Query().Where(enhancementlog.SessionIDEQ(sessionID)).Only(ctx)
+	if gen.IsNotFound(err) {
+		return nil, errors.NotFound("ENHANCEMENT_LOG_NOT_FOUND", "增强记录不存在")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return enhancementLogProto(row), nil
+}
+
 func (r *enhancementLogRepo) Save(ctx context.Context, data *biz.EnhancementLogData) error {
 	if data == nil || data.RawText == "" {
 		return nil
@@ -115,11 +126,15 @@ func (r *enhancementLogRepo) Save(ctx context.Context, data *biz.EnhancementLogD
 }
 
 func nilIfEmpty(s string) *string {
-	if s == "" { return nil }
+	if s == "" {
+		return nil
+	}
 	return &s
 }
 
 func nilIfZero(v uint32) *uint32 {
-	if v == 0 { return nil }
+	if v == 0 {
+		return nil
+	}
 	return &v
 }

@@ -151,10 +151,9 @@ func (x *AudioFormat) GetChannels() int32 {
 
 type RecognizeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Format        *AudioFormat           `protobuf:"bytes,2,opt,name=format,proto3" json:"format,omitempty"`
-	AudioData     []byte                 `protobuf:"bytes,3,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`  // max 10MB
-	ProfileId     uint32                 `protobuf:"varint,4,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=不增强或租户默认；非 0=按场景关联策略增强）
+	Format        *AudioFormat           `protobuf:"bytes,1,opt,name=format,proto3" json:"format,omitempty"`
+	AudioData     []byte                 `protobuf:"bytes,2,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`  // max 10MB
+	ProfileId     uint32                 `protobuf:"varint,3,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"` // 增强场景 ID（0=不增强或租户默认；非 0=按场景关联策略增强）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,13 +188,6 @@ func (*RecognizeRequest) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RecognizeRequest) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
 func (x *RecognizeRequest) GetFormat() *AudioFormat {
 	if x != nil {
 		return x.Format
@@ -219,9 +211,8 @@ func (x *RecognizeRequest) GetProfileId() uint32 {
 
 type AudioChunk struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
-	TimestampMs   int64                  `protobuf:"varint,3,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	TimestampMs   int64                  `protobuf:"varint,2,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -254,13 +245,6 @@ func (x *AudioChunk) ProtoReflect() protoreflect.Message {
 // Deprecated: Use AudioChunk.ProtoReflect.Descriptor instead.
 func (*AudioChunk) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *AudioChunk) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
 }
 
 func (x *AudioChunk) GetData() []byte {
@@ -823,8 +807,8 @@ func (x *EnhancementStepSnapshot) GetChanges() []*EnhanceChange {
 	return nil
 }
 
-// AsrRecordDetail 识别记录完整详情。
-type AsrRecordDetail struct {
+// AsrRecordDetailResponse 识别记录完整详情。
+type AsrRecordDetailResponse struct {
 	state         protoimpl.MessageState     `protogen:"open.v1"`
 	Record        *AsrRecord                 `protobuf:"bytes,1,opt,name=record,proto3" json:"record,omitempty"`
 	EnhancedText  string                     `protobuf:"bytes,2,opt,name=enhanced_text,json=enhancedText,proto3" json:"enhanced_text,omitempty"` // 最终增强后文本
@@ -836,20 +820,20 @@ type AsrRecordDetail struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *AsrRecordDetail) Reset() {
-	*x = AsrRecordDetail{}
+func (x *AsrRecordDetailResponse) Reset() {
+	*x = AsrRecordDetailResponse{}
 	mi := &file_evie_service_v1_asr_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AsrRecordDetail) String() string {
+func (x *AsrRecordDetailResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AsrRecordDetail) ProtoMessage() {}
+func (*AsrRecordDetailResponse) ProtoMessage() {}
 
-func (x *AsrRecordDetail) ProtoReflect() protoreflect.Message {
+func (x *AsrRecordDetailResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_evie_service_v1_asr_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -861,47 +845,47 @@ func (x *AsrRecordDetail) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AsrRecordDetail.ProtoReflect.Descriptor instead.
-func (*AsrRecordDetail) Descriptor() ([]byte, []int) {
+// Deprecated: Use AsrRecordDetailResponse.ProtoReflect.Descriptor instead.
+func (*AsrRecordDetailResponse) Descriptor() ([]byte, []int) {
 	return file_evie_service_v1_asr_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *AsrRecordDetail) GetRecord() *AsrRecord {
+func (x *AsrRecordDetailResponse) GetRecord() *AsrRecord {
 	if x != nil {
 		return x.Record
 	}
 	return nil
 }
 
-func (x *AsrRecordDetail) GetEnhancedText() string {
+func (x *AsrRecordDetailResponse) GetEnhancedText() string {
 	if x != nil {
 		return x.EnhancedText
 	}
 	return ""
 }
 
-func (x *AsrRecordDetail) GetPolicyName() string {
+func (x *AsrRecordDetailResponse) GetPolicyName() string {
 	if x != nil {
 		return x.PolicyName
 	}
 	return ""
 }
 
-func (x *AsrRecordDetail) GetProfileName() string {
+func (x *AsrRecordDetailResponse) GetProfileName() string {
 	if x != nil {
 		return x.ProfileName
 	}
 	return ""
 }
 
-func (x *AsrRecordDetail) GetStepSnapshots() []*EnhancementStepSnapshot {
+func (x *AsrRecordDetailResponse) GetStepSnapshots() []*EnhancementStepSnapshot {
 	if x != nil {
 		return x.StepSnapshots
 	}
 	return nil
 }
 
-func (x *AsrRecordDetail) GetChanges() []*EnhanceChange {
+func (x *AsrRecordDetailResponse) GetChanges() []*EnhanceChange {
 	if x != nil {
 		return x.Changes
 	}
@@ -910,27 +894,27 @@ func (x *AsrRecordDetail) GetChanges() []*EnhanceChange {
 
 // RecognizeResponse 同步语音识别结果
 type RecognizeResponse struct {
-	state        protoimpl.MessageState `protogen:"open.v1"`
-	RequestId    string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	RawText      string                 `protobuf:"bytes,2,opt,name=raw_text,json=rawText,proto3" json:"raw_text,omitempty"`                // ASR 原始文本
-	EnhancedText string                 `protobuf:"bytes,3,opt,name=enhanced_text,json=enhancedText,proto3" json:"enhanced_text,omitempty"` // 文本增强后标准企业语言
-	Confidence   float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`
-	DurationMs   int64                  `protobuf:"varint,5,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
-	IsFinal      bool                   `protobuf:"varint,6,opt,name=is_final,json=isFinal,proto3" json:"is_final,omitempty"`
-	ProviderName string                 `protobuf:"bytes,7,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"` // 使用的 ASR 引擎
-	// ===== 增强结果（2026-08-27 统一为增强后输出） =====
-	Changes             []*EnhanceChange `protobuf:"bytes,8,rep,name=changes,proto3" json:"changes,omitempty"`                                               // 增强变更项列表
-	Status              int32            `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`                                                // 1=SUCCESS 2=DEGRADED 3=FAILED
-	ProcessingTimeMs    int64            `protobuf:"varint,10,opt,name=processing_time_ms,json=processingTimeMs,proto3" json:"processing_time_ms,omitempty"` // 8 层流水线总耗时
-	CleaningTimeMs      int64            `protobuf:"varint,11,opt,name=cleaning_time_ms,json=cleaningTimeMs,proto3" json:"cleaning_time_ms,omitempty"`
-	FillerTimeMs        int64            `protobuf:"varint,12,opt,name=filler_time_ms,json=fillerTimeMs,proto3" json:"filler_time_ms,omitempty"`
-	VocabMatchTimeMs    int64            `protobuf:"varint,13,opt,name=vocab_match_time_ms,json=vocabMatchTimeMs,proto3" json:"vocab_match_time_ms,omitempty"`
-	AliasTimeMs         int64            `protobuf:"varint,14,opt,name=alias_time_ms,json=aliasTimeMs,proto3" json:"alias_time_ms,omitempty"`
-	DeterministicTimeMs int64            `protobuf:"varint,15,opt,name=deterministic_time_ms,json=deterministicTimeMs,proto3" json:"deterministic_time_ms,omitempty"`
-	PinyinTimeMs        int64            `protobuf:"varint,16,opt,name=pinyin_time_ms,json=pinyinTimeMs,proto3" json:"pinyin_time_ms,omitempty"`
-	FuzzyTimeMs         int64            `protobuf:"varint,17,opt,name=fuzzy_time_ms,json=fuzzyTimeMs,proto3" json:"fuzzy_time_ms,omitempty"`
-	ContextTimeMs       int64            `protobuf:"varint,18,opt,name=context_time_ms,json=contextTimeMs,proto3" json:"context_time_ms,omitempty"`
-	ErrorMessage        string           `protobuf:"bytes,19,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	RequestId           string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	RawText             string                 `protobuf:"bytes,2,opt,name=raw_text,json=rawText,proto3" json:"raw_text,omitempty"`                // ASR 原始文本
+	EnhancedText        string                 `protobuf:"bytes,3,opt,name=enhanced_text,json=enhancedText,proto3" json:"enhanced_text,omitempty"` // 文本增强后标准企业语言
+	Confidence          float32                `protobuf:"fixed32,4,opt,name=confidence,proto3" json:"confidence,omitempty"`
+	DurationMs          int64                  `protobuf:"varint,5,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	IsFinal             bool                   `protobuf:"varint,6,opt,name=is_final,json=isFinal,proto3" json:"is_final,omitempty"`
+	ProviderName        string                 `protobuf:"bytes,7,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"`                 // 使用的 ASR 引擎
+	Changes             []*EnhanceChange       `protobuf:"bytes,8,rep,name=changes,proto3" json:"changes,omitempty"`                                               // 增强变更项列表
+	Status              int32                  `protobuf:"varint,9,opt,name=status,proto3" json:"status,omitempty"`                                                // 1=SUCCESS 2=DEGRADED 3=FAILED
+	ProcessingTimeMs    int64                  `protobuf:"varint,10,opt,name=processing_time_ms,json=processingTimeMs,proto3" json:"processing_time_ms,omitempty"` // 8 层流水线总耗时
+	CleaningTimeMs      int64                  `protobuf:"varint,11,opt,name=cleaning_time_ms,json=cleaningTimeMs,proto3" json:"cleaning_time_ms,omitempty"`
+	FillerTimeMs        int64                  `protobuf:"varint,12,opt,name=filler_time_ms,json=fillerTimeMs,proto3" json:"filler_time_ms,omitempty"`
+	VocabMatchTimeMs    int64                  `protobuf:"varint,13,opt,name=vocab_match_time_ms,json=vocabMatchTimeMs,proto3" json:"vocab_match_time_ms,omitempty"`
+	AliasTimeMs         int64                  `protobuf:"varint,14,opt,name=alias_time_ms,json=aliasTimeMs,proto3" json:"alias_time_ms,omitempty"`
+	DeterministicTimeMs int64                  `protobuf:"varint,15,opt,name=deterministic_time_ms,json=deterministicTimeMs,proto3" json:"deterministic_time_ms,omitempty"`
+	PinyinTimeMs        int64                  `protobuf:"varint,16,opt,name=pinyin_time_ms,json=pinyinTimeMs,proto3" json:"pinyin_time_ms,omitempty"`
+	FuzzyTimeMs         int64                  `protobuf:"varint,17,opt,name=fuzzy_time_ms,json=fuzzyTimeMs,proto3" json:"fuzzy_time_ms,omitempty"`
+	ContextTimeMs       int64                  `protobuf:"varint,18,opt,name=context_time_ms,json=contextTimeMs,proto3" json:"context_time_ms,omitempty"`
+	ErrorMessage        string                 `protobuf:"bytes,19,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	SessionId           string                 `protobuf:"bytes,20,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"` // 后端统一生成的 UUID session_id
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1098,6 +1082,13 @@ func (x *RecognizeResponse) GetErrorMessage() string {
 	return ""
 }
 
+func (x *RecognizeResponse) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
 type ReRecognizeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1160,22 +1151,18 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\vsample_rate\x18\x02 \x01(\x05R\n" +
 	"sampleRate\x12\x1b\n" +
 	"\tbit_depth\x18\x03 \x01(\x05R\bbitDepth\x12\x1a\n" +
-	"\bchannels\x18\x04 \x01(\x05R\bchannels\"\xb1\x01\n" +
-	"\x10RecognizeRequest\x12\x1d\n" +
+	"\bchannels\x18\x04 \x01(\x05R\bchannels\"\x92\x01\n" +
+	"\x10RecognizeRequest\x124\n" +
+	"\x06format\x18\x01 \x01(\v2\x1c.evie.service.v1.AudioFormatR\x06format\x12)\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x124\n" +
-	"\x06format\x18\x02 \x01(\v2\x1c.evie.service.v1.AudioFormatR\x06format\x12)\n" +
-	"\n" +
-	"audio_data\x18\x03 \x01(\fB\n" +
+	"audio_data\x18\x02 \x01(\fB\n" +
 	"\xbaH\az\x05\x18\x80\x80\x80\x05R\taudioData\x12\x1d\n" +
 	"\n" +
-	"profile_id\x18\x04 \x01(\rR\tprofileId\"b\n" +
+	"profile_id\x18\x03 \x01(\rR\tprofileId\"C\n" +
 	"\n" +
-	"AudioChunk\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
-	"\x04data\x18\x02 \x01(\fR\x04data\x12!\n" +
-	"\ftimestamp_ms\x18\x03 \x01(\x03R\vtimestampMs\"\x9f\x01\n" +
+	"AudioChunk\x12\x12\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
+	"\ftimestamp_ms\x18\x02 \x01(\x03R\vtimestampMs\"\x9f\x01\n" +
 	"\fStreamResult\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x12\n" +
@@ -1228,15 +1215,15 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\vduration_ms\x18\x04 \x01(\x03R\n" +
 	"durationMs\x12\x18\n" +
 	"\askipped\x18\x05 \x01(\bR\askipped\x128\n" +
-	"\achanges\x18\x06 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\"\xb9\x02\n" +
-	"\x0fAsrRecordDetail\x122\n" +
+	"\achanges\x18\x06 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\"\xc1\x02\n" +
+	"\x17AsrRecordDetailResponse\x122\n" +
 	"\x06record\x18\x01 \x01(\v2\x1a.evie.service.v1.AsrRecordR\x06record\x12#\n" +
 	"\renhanced_text\x18\x02 \x01(\tR\fenhancedText\x12\x1f\n" +
 	"\vpolicy_name\x18\x03 \x01(\tR\n" +
 	"policyName\x12!\n" +
 	"\fprofile_name\x18\x04 \x01(\tR\vprofileName\x12O\n" +
 	"\x0estep_snapshots\x18\x05 \x03(\v2(.evie.service.v1.EnhancementStepSnapshotR\rstepSnapshots\x128\n" +
-	"\achanges\x18\x06 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\"\xe1\x05\n" +
+	"\achanges\x18\x06 \x03(\v2\x1e.evie.service.v1.EnhanceChangeR\achanges\"\x80\x06\n" +
 	"\x11RecognizeResponse\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x19\n" +
@@ -1261,7 +1248,9 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\x0epinyin_time_ms\x18\x10 \x01(\x03R\fpinyinTimeMs\x12\"\n" +
 	"\rfuzzy_time_ms\x18\x11 \x01(\x03R\vfuzzyTimeMs\x12&\n" +
 	"\x0fcontext_time_ms\x18\x12 \x01(\x03R\rcontextTimeMs\x12#\n" +
-	"\rerror_message\x18\x13 \x01(\tR\ferrorMessage\"L\n" +
+	"\rerror_message\x18\x13 \x01(\tR\ferrorMessage\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x14 \x01(\tR\tsessionId\"L\n" +
 	"\x12ReRecognizeRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\rB\a\xbaH\x04*\x02 \x00R\x02id\x12\x1d\n" +
 	"\n" +
@@ -1271,7 +1260,7 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\x12AUDIO_ENCODING_PCM\x10\x01\x12\x16\n" +
 	"\x12AUDIO_ENCODING_WAV\x10\x02\x12\x16\n" +
 	"\x12AUDIO_ENCODING_MP3\x10\x03\x12\x17\n" +
-	"\x13AUDIO_ENCODING_OPUS\x10\x042\x88\t\n" +
+	"\x13AUDIO_ENCODING_OPUS\x10\x042\x90\t\n" +
 	"\n" +
 	"ASRService\x12\x97\x01\n" +
 	"\tRecognize\x12!.evie.service.v1.RecognizeRequest\x1a\".evie.service.v1.RecognizeResponse\"C\xbaG\x1f\n" +
@@ -1283,8 +1272,8 @@ const file_evie_service_v1_asr_proto_rawDesc = "" +
 	"\fGetAsrRecord\x12$.evie.service.v1.GetAsrRecordRequest\x1a\x1a.evie.service.v1.AsrRecord\"I\xbaG%\n" +
 	"\tASR识别\x12\x18查询识别记录详情\x82\xd3\xe4\x93\x02\x1b\x12\x19/evie/v1/asr/records/{id}\x12\xc1\x01\n" +
 	"\x11GetAsrRecordAudio\x12).evie.service.v1.GetAsrRecordAudioRequest\x1a*.evie.service.v1.GetAsrRecordAudioResponse\"U\xbaG+\n" +
-	"\tASR识别\x12\x1e查询识别记录原始音频\x82\xd3\xe4\x93\x02!\x12\x1f/evie/v1/asr/records/{id}/audio\x12\xb4\x01\n" +
-	"\x12GetAsrRecordDetail\x12$.evie.service.v1.GetAsrRecordRequest\x1a .evie.service.v1.AsrRecordDetail\"V\xbaG+\n" +
+	"\tASR识别\x12\x1e查询识别记录原始音频\x82\xd3\xe4\x93\x02!\x12\x1f/evie/v1/asr/records/{id}/audio\x12\xbc\x01\n" +
+	"\x12GetAsrRecordDetail\x12$.evie.service.v1.GetAsrRecordRequest\x1a(.evie.service.v1.AsrRecordDetailResponse\"V\xbaG+\n" +
 	"\tASR识别\x12\x1e查询识别记录完整详情\x82\xd3\xe4\x93\x02\"\x12 /evie/v1/asr/records/{id}/detail\x12\xa5\x01\n" +
 	"\vReRecognize\x12#.evie.service.v1.ReRecognizeRequest\x1a\".evie.service.v1.RecognizeResponse\"M\xbaG\x19\n" +
 	"\tASR识别\x12\f重新识别\x82\xd3\xe4\x93\x02+:\x01*\"&/evie/v1/asr/records/{id}:re-recognizeB\xa5\x01\n" +
@@ -1317,7 +1306,7 @@ var file_evie_service_v1_asr_proto_goTypes = []any{
 	(*GetAsrRecordAudioRequest)(nil),  // 9: evie.service.v1.GetAsrRecordAudioRequest
 	(*GetAsrRecordAudioResponse)(nil), // 10: evie.service.v1.GetAsrRecordAudioResponse
 	(*EnhancementStepSnapshot)(nil),   // 11: evie.service.v1.EnhancementStepSnapshot
-	(*AsrRecordDetail)(nil),           // 12: evie.service.v1.AsrRecordDetail
+	(*AsrRecordDetailResponse)(nil),   // 12: evie.service.v1.AsrRecordDetailResponse
 	(*RecognizeResponse)(nil),         // 13: evie.service.v1.RecognizeResponse
 	(*ReRecognizeRequest)(nil),        // 14: evie.service.v1.ReRecognizeRequest
 	(*EnhanceChange)(nil),             // 15: evie.service.v1.EnhanceChange
@@ -1327,9 +1316,9 @@ var file_evie_service_v1_asr_proto_depIdxs = []int32{
 	1,  // 1: evie.service.v1.RecognizeRequest.format:type_name -> evie.service.v1.AudioFormat
 	5,  // 2: evie.service.v1.ListAsrRecordsResponse.records:type_name -> evie.service.v1.AsrRecord
 	15, // 3: evie.service.v1.EnhancementStepSnapshot.changes:type_name -> evie.service.v1.EnhanceChange
-	5,  // 4: evie.service.v1.AsrRecordDetail.record:type_name -> evie.service.v1.AsrRecord
-	11, // 5: evie.service.v1.AsrRecordDetail.step_snapshots:type_name -> evie.service.v1.EnhancementStepSnapshot
-	15, // 6: evie.service.v1.AsrRecordDetail.changes:type_name -> evie.service.v1.EnhanceChange
+	5,  // 4: evie.service.v1.AsrRecordDetailResponse.record:type_name -> evie.service.v1.AsrRecord
+	11, // 5: evie.service.v1.AsrRecordDetailResponse.step_snapshots:type_name -> evie.service.v1.EnhancementStepSnapshot
+	15, // 6: evie.service.v1.AsrRecordDetailResponse.changes:type_name -> evie.service.v1.EnhanceChange
 	15, // 7: evie.service.v1.RecognizeResponse.changes:type_name -> evie.service.v1.EnhanceChange
 	2,  // 8: evie.service.v1.ASRService.Recognize:input_type -> evie.service.v1.RecognizeRequest
 	3,  // 9: evie.service.v1.ASRService.StreamRecognize:input_type -> evie.service.v1.AudioChunk
@@ -1343,7 +1332,7 @@ var file_evie_service_v1_asr_proto_depIdxs = []int32{
 	7,  // 17: evie.service.v1.ASRService.ListAsrRecords:output_type -> evie.service.v1.ListAsrRecordsResponse
 	5,  // 18: evie.service.v1.ASRService.GetAsrRecord:output_type -> evie.service.v1.AsrRecord
 	10, // 19: evie.service.v1.ASRService.GetAsrRecordAudio:output_type -> evie.service.v1.GetAsrRecordAudioResponse
-	12, // 20: evie.service.v1.ASRService.GetAsrRecordDetail:output_type -> evie.service.v1.AsrRecordDetail
+	12, // 20: evie.service.v1.ASRService.GetAsrRecordDetail:output_type -> evie.service.v1.AsrRecordDetailResponse
 	13, // 21: evie.service.v1.ASRService.ReRecognize:output_type -> evie.service.v1.RecognizeResponse
 	15, // [15:22] is the sub-list for method output_type
 	8,  // [8:15] is the sub-list for method input_type

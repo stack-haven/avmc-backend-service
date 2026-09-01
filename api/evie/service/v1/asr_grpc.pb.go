@@ -47,7 +47,7 @@ type ASRServiceClient interface {
 	// 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(ctx context.Context, in *GetAsrRecordAudioRequest, opts ...grpc.CallOption) (*GetAsrRecordAudioResponse, error)
 	// 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
-	GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetail, error)
+	GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetailResponse, error)
 	// 对已有记录重新识别（复用文件中心音频，不重复上传）
 	ReRecognize(ctx context.Context, in *ReRecognizeRequest, opts ...grpc.CallOption) (*RecognizeResponse, error)
 }
@@ -113,9 +113,9 @@ func (c *aSRServiceClient) GetAsrRecordAudio(ctx context.Context, in *GetAsrReco
 	return out, nil
 }
 
-func (c *aSRServiceClient) GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetail, error) {
+func (c *aSRServiceClient) GetAsrRecordDetail(ctx context.Context, in *GetAsrRecordRequest, opts ...grpc.CallOption) (*AsrRecordDetailResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AsrRecordDetail)
+	out := new(AsrRecordDetailResponse)
 	err := c.cc.Invoke(ctx, ASRService_GetAsrRecordDetail_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ type ASRServiceServer interface {
 	// 查询识别记录原始音频（用于预览播放）
 	GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error)
 	// 查询识别记录完整详情（音频 + 原始/增强文本 + 增强步骤快照）
-	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error)
+	GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetailResponse, error)
 	// 对已有记录重新识别（复用文件中心音频，不重复上传）
 	ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeResponse, error)
 	mustEmbedUnimplementedASRServiceServer()
@@ -180,7 +180,7 @@ func (UnimplementedASRServiceServer) GetAsrRecord(context.Context, *GetAsrRecord
 func (UnimplementedASRServiceServer) GetAsrRecordAudio(context.Context, *GetAsrRecordAudioRequest) (*GetAsrRecordAudioResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAsrRecordAudio not implemented")
 }
-func (UnimplementedASRServiceServer) GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetail, error) {
+func (UnimplementedASRServiceServer) GetAsrRecordDetail(context.Context, *GetAsrRecordRequest) (*AsrRecordDetailResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAsrRecordDetail not implemented")
 }
 func (UnimplementedASRServiceServer) ReRecognize(context.Context, *ReRecognizeRequest) (*RecognizeResponse, error) {
