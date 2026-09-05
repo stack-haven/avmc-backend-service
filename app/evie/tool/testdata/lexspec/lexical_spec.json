@@ -1,0 +1,1159 @@
+{
+  "schema": "evie-tool/lexspec/v1",
+  "generated_at": "2026-09-05T13:42:38+08:00",
+  "tool": {
+    "service": "evie-tool",
+    "version": "0.1.0",
+    "endpoint": "/evie/tool/v1/asr:recognize",
+    "transport": "json/base64 (HTTP gateway)"
+  },
+  "mode": "production_real",
+  "audio": {
+    "path": "./testdata/晨会录音.mp3",
+    "size_bytes": 621816,
+    "format": "mp3",
+    "provider": "funasr",
+    "stream": false
+  },
+  "tenant": {
+    "id": "1889501240003497986",
+    "token_kind": "bearer:6dcd5e06...",
+    "user_id": "u-prod-1",
+    "dept_id": "1904450235179954177"
+  },
+  "dictionary": {
+    "system": {
+      "version": "2026-09-01",
+      "path": "./configs/dictionaries/system.json",
+      "entries": [
+        {
+          "id": "金种籽",
+          "standard_text": "金种籽",
+          "category": "PRODUCT",
+          "priority": 100,
+          "aliases": [
+            "金种子",
+            "金种仔"
+          ],
+          "homophones": [
+            "金中子",
+            "金种种"
+          ],
+          "source": "system"
+        },
+        {
+          "id": "指令官",
+          "standard_text": "指令官",
+          "category": "PRODUCT",
+          "priority": 90,
+          "homophones": [
+            "纸灵官",
+            "指令关"
+          ],
+          "source": "system"
+        },
+        {
+          "id": "技术研发部",
+          "standard_text": "技术研发部",
+          "category": "ORGANIZATION",
+          "priority": 80,
+          "aliases": [
+            "研发部",
+            "技术部"
+          ],
+          "source": "system"
+        }
+      ],
+      "phrase_rules": [
+        {
+          "from": "个种籽",
+          "to": "颗种籽"
+        },
+        {
+          "from": "个种子",
+          "to": "颗种籽"
+        }
+      ]
+    },
+    "qua": {
+      "endpoint_users": "/admin-api/qua/member-extended/page?selectAll=true",
+      "endpoint_depts": "/admin-api/system/dept/list",
+      "users_active_total": 9,
+      "users_filtered": 1,
+      "depts_active_total": 3,
+      "sync_log_message": "synced tenant 1889501240003497986: 73 entries, 65 relations",
+      "snapshot": [
+        {
+          "id": "10001",
+          "standard_text": "佘丽群",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138001"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10002",
+          "standard_text": "周丽群",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138002"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10003",
+          "standard_text": "测试1",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138003"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10004",
+          "standard_text": "王五",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138004"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10005",
+          "standard_text": "赵六",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138005"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10006",
+          "standard_text": "孙七",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138006"
+          ],
+          "source": "qua_user",
+          "status": "disabled"
+        },
+        {
+          "id": "10007",
+          "standard_text": "周八",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138007"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10008",
+          "standard_text": "吴九",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138008"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10009",
+          "standard_text": "郑十",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138009"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "10010",
+          "standard_text": "钱多多",
+          "category": "PERSON",
+          "priority": 50,
+          "aliases": [
+            "13800138010"
+          ],
+          "source": "qua_user",
+          "status": "active"
+        },
+        {
+          "id": "101",
+          "standard_text": "技术研发部",
+          "category": "ORGANIZATION",
+          "priority": 30,
+          "source": "qua_dept",
+          "status": "active"
+        },
+        {
+          "id": "102",
+          "standard_text": "产品运营部",
+          "category": "ORGANIZATION",
+          "priority": 30,
+          "source": "qua_dept",
+          "status": "active"
+        },
+        {
+          "id": "103",
+          "standard_text": "金种籽事业部",
+          "category": "ORGANIZATION",
+          "priority": 30,
+          "source": "qua_dept",
+          "status": "active"
+        }
+      ]
+    },
+    "totals": {
+      "qua_entries_total": 13,
+      "system_entries": 3,
+      "system_phrase_rules": 2
+    }
+  },
+  "pipeline": {
+    "order": [
+      "normalize",
+      "disfluency",
+      "alias",
+      "deterministic",
+      "pinyin",
+      "fuzzy_vocab",
+      "ctxproc"
+    ],
+    "engine": "pkg/lexnorm",
+    "workspace": "go.work (backend-service + pkg/lexnorm)"
+  },
+  "result": {
+    "raw_text": "对一下我天的情况。好呃，昨天的金种子情况呢，夏总给陈欣静加了三十个金种子做标书方案的设计方案，呃，给伍西辉加了二十个金种子整理导航软件信息输入，给伍西辉加五颗黑种子设计门市文化墙，未考虑呃展成问题。好，我们的熊经理给我们的田华加了五颗黑种子，量化客户使用中反馈配置无法生效，确信给杨新宇加了十颗金种子，按照要求完成播种未来的功能开发。给田青加了十五颗金种子验收测试播种未来功能，找出多处的一个错误，给田华加了十颗金种子，参加客户问题客户问题反馈会议快速解决方案啊，我们的田华给田青加了一颗黑种子黑种子的设计图，出现一副企议啊，给杨新宇加了十五颗金种子播种未来主题创建模块开发。给婷青加了十五克金种是总子任务提醒信息呃，交叉设计，给陈科航加了五颗金种子。早上打招呼，好，我们的袁总给田华加了给云，给田华和杨新宇加了二十克金种子，每人帮助搬运花盆，给李宇豪加了十颗k种子管理视频封面出作，给田华招了五颗黑种子。是啊，办公桌面前的植物未浇水，给林玉豪加了三十个斤种子。龚老师的几个账号视频按时完成好，李海燕给朱凤加了二十克金种子，协助查询发票信息，给天华加了二十个金种子，就是其他平台的v i p分享使用周丽群给陈科航加了二十个金种子，协助卸货，给陈新进加了四颗金种子，帮助同事转文件给武锡辉和卢川加了二十个黑种，是每人多次提醒未完成产值的一个表格整理啊，这是昨天的新融织情况。",
+    "enhanced_text": "对一下我天的情况。好,昨天的金种籽情况呢,夏总给陈欣静加了三十个金种籽做标书方案的设计方案,,给伍西辉加了二十个金种籽整理导航软件信息输入,给伍西辉加五颗黑种子设计门市文化墙,未考虑展成问题。好,我们的熊经理给我们的田华加了五颗黑种子,量化客户使用中反馈配置无法生效,确信给杨新宇加了十颗金种籽,按照要求完成播种未来的功能开发。给田青加了十五颗金种籽验收测试1种未来功能,找出多处的一个错误,给田华加了十颗金种籽,参加客户问题客户问题反馈会议快速解决方案,我们的田华给田青加了一颗黑种子黑种子的设计图,出现一副企议,给杨新宇加了十五颗金种籽播种未来主题创建模块开发。给婷青加了十五克金种是总子任务提醒信息,交叉设计,给陈科航加了五颗金种籽。早上打招呼,好,我们的袁总给田华加了给云,给田华和杨新宇加了二十克金种籽,每人帮助搬运花盆,给李宇豪加了十颗k种子管理视频封面出作,给田华招了五颗黑种子。是,办公桌面前的植物未浇水,给林玉豪加了三十个斤种子。龚老师的几个账号视频按时完成好,李海燕给朱凤加了二十克金种籽,协助查询发票信息,给天华加了二十个金种籽,就是其他平台的v i p分享使用佘丽群给陈科航加了二十个金种籽,协助卸货,给陈新进加了四颗金种籽,帮助同事转文件给武锡辉和卢川加了二十个黑种,是每人多次提醒未完成产值的一个表格整理,这是昨天的新融织情况。",
+    "raw_len": 586,
+    "enhanced_len": 578,
+    "provider": "",
+    "changes": [
+      {
+        "index": 0,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 1,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 2,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 3,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 4,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 5,
+        "from": " ",
+        "to": " ",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 6,
+        "from": " ",
+        "to": " ",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 7,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 8,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 9,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 10,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 11,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 12,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 13,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 14,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 15,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 16,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 17,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 18,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 19,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 20,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 21,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 22,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 23,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 24,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 25,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 26,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 27,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 28,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 29,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 30,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 31,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 32,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 33,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 34,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 35,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 36,
+        "from": "，",
+        "to": ",",
+        "action": "replace",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "reason": "whitespace and full-width normalization"
+      },
+      {
+        "index": 37,
+        "from": "啊",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 38,
+        "from": "啊",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 39,
+        "from": "呃",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 40,
+        "from": "啊",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 41,
+        "from": "啊",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 42,
+        "from": "呃",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 43,
+        "from": "呃",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 44,
+        "from": "呃",
+        "to": "",
+        "action": "remove",
+        "type": "FILLER",
+        "source": "disfluency",
+        "confidence": 1,
+        "reason": "filler word removal"
+      },
+      {
+        "index": 45,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 46,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 47,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 48,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 49,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 50,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 51,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 52,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 53,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 54,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 55,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 56,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 57,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "replace",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "reason": "alias → canonical: 金种子 → 金种籽"
+      },
+      {
+        "index": 58,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 59,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 60,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 61,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 62,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 63,
+        "from": "测试播",
+        "to": "测试1",
+        "action": "replace",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"测试播\" → \"测试1\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 64,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 65,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 66,
+        "from": "金种是",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种是\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 67,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 68,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 69,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 70,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 71,
+        "from": "周丽群",
+        "to": "佘丽群",
+        "action": "replace",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"周丽群\" → \"佘丽群\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 72,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      },
+      {
+        "index": 73,
+        "from": "金种子",
+        "to": "金种籽",
+        "action": "suggest",
+        "type": "FUZZY",
+        "source": "fuzzy_vocab",
+        "confidence": 0.6666667,
+        "reason": "fuzzy: \"金种子\" → \"金种籽\" (dist=1, conf=0.67)"
+      }
+    ]
+  },
+  "rules": {
+    "clean_normalize": true,
+    "disfluency_words": [
+      "啊",
+      "呃",
+      "哦",
+      "嗯",
+      "那个",
+      "这个"
+    ],
+    "fuzzy_auto_threshold": 0.8,
+    "fuzzy_suggest_threshold": 0.6,
+    "fuzzy_person_threshold": 0.65,
+    "pinyin_threshold": 0.85
+  },
+  "stats": {
+    "total_changes": 74,
+    "by_action": {
+      "remove": 8,
+      "replace": 52,
+      "suggest": 14
+    },
+    "by_type": {
+      "ALIAS": 13,
+      "CLEAN": 37,
+      "FILLER": 8,
+      "FUZZY": 16
+    },
+    "by_source": {
+      "alias": 13,
+      "disfluency": 8,
+      "fuzzy_vocab": 16,
+      "normalize": 37
+    },
+    "high_confidence_hits": [
+      {
+        "from": "，",
+        "to": ",",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "count_in_session": 35
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "type": "ALIAS",
+        "source": "alias",
+        "confidence": 1,
+        "count_in_session": 13
+      },
+      {
+        "from": " ",
+        "to": " ",
+        "type": "CLEAN",
+        "source": "normalize",
+        "confidence": 1,
+        "count_in_session": 2
+      }
+    ],
+    "alias_hits": [
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "count_in_session": 13
+      }
+    ],
+    "fuzzy_replace_hits": [
+      {
+        "from": "测试播",
+        "to": "测试1",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "周丽群",
+        "to": "佘丽群",
+        "confidence": 0.6666667
+      }
+    ],
+    "fuzzy_suggest_hits": [
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种是",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      },
+      {
+        "from": "金种子",
+        "to": "金种籽",
+        "confidence": 0.6666667
+      }
+    ]
+  },
+  "sanity": {
+    "raw_text_md5_across_5_runs": [
+      "e2d4e159",
+      "75bcc4fc",
+      "6c69edbb",
+      "46ceb06a",
+      "bc2926e3"
+    ],
+    "enhanced_text_md5_across_5_runs": [
+      "3e8534e8",
+      "90e1f1c8",
+      "4d059bca",
+      "1ddbc678",
+      "e35fec55"
+    ],
+    "note": "funasr 输出本身有微抖动（声学模型非完全确定性）；lexnorm pipeline 对相同 rawText 完全确定性。规范以 enhanced md5 中位数为基准。"
+  }
+}
