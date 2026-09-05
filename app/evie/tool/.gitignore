@@ -7,3 +7,7 @@ internal/conf/conf.pb.go
 internal/biz/upload/audio
 # 运行时数据
 configs/tenants.json
+# 上传的音频文件（运行时产生，不该进仓；含 cwd 错位产生的嵌套路径）
+upload/**
+# cwd 错位产生的重复路径（防止 binary 在错误 cwd 运行时把数据写到 app/evie/tool/app/...）
+app/

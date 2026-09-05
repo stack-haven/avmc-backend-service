@@ -34,6 +34,26 @@
 //   - SuggestThreshold ≤ confidence < AutoApplyThreshold → Suggest
 //   - confidence < SuggestThreshold → Skip
 //
+// # Variant.Confidence Default (Important)
+//
+// Variant.Confidence is a float64. Its zero value is 0.0, NOT 1.0.
+// A Variant{Approximate} with Confidence unset (left at Go's zero
+// value) will never reach Apply or Suggest — it falls into the Skip
+// branch because 0.0 < SuggestThreshold (default 0.65).
+//
+// This is silent: Fuzzy will simply produce zero Changes for that
+// Variant. To get Apply/Suggest behavior, callers MUST set
+// Variant.Confidence explicitly per Variant:
+//
+//	Variants: []lexicon.Variant{
+//	    {Text: "周莉群", Kind: lexicon.VariantApproximate, Confidence: 0.95},
+//	    {Text: "周里群", Kind: lexicon.VariantApproximate, Confidence: 0.85},
+//	}
+//
+// If you want a Variant to be treated as "high confidence by default",
+// set Confidence explicitly (e.g., 0.95). Fuzzy does NOT auto-promote
+// 0.0 to any default; the engine philosophy is "explicit beats implicit".
+//
 // # Difference From Alias
 //
 // Alias uses Variant{Alias} (synonyms, high certainty). Fuzzy uses

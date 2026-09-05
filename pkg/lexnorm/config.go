@@ -53,6 +53,12 @@ type Config struct {
 	// Decision becomes Suggest. Must satisfy 0 ≤ SuggestThreshold ≤
 	// AutoApplyThreshold.
 	//
+	// Special value 0: Setting SuggestThreshold to 0 means "any
+	// non-negative Confidence passes through to Suggest" (i.e., every
+	// match that did not reach AutoApplyThreshold becomes a Suggest).
+	// In other words, SuggestThreshold=0 disables the Suggest filter.
+	// This is a valid, intentional configuration, not a bug.
+	//
 	// Defaults to 0.65 via DefaultConfig.
 	SuggestThreshold float64
 

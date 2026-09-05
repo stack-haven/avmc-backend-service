@@ -150,7 +150,16 @@ type StepTiming struct {
 	// breakdown available via Result.Changes filtered by Processor.
 	Action Action
 
-	// ChangeCount is the number of Changes emitted by this Processor.
+	// ChangeCount is the TOTAL number of Changes emitted by this
+	// Processor, regardless of Action type. It does NOT distinguish
+	// between Replace / Remove / Suggest.
+	//
+	// Callers that need the per-Action breakdown (e.g., for metrics
+	// dashboards showing AppliedCount vs. SuggestedCount) MUST walk
+	// Result.Changes and filter by both Change.Processor and
+	// Change.Action. StepTiming intentionally stays as a lightweight
+	// timing record to avoid duplicating the per-Change information
+	// already available in Result.Changes.
 	ChangeCount int
 
 	// Duration is the wall-clock time spent in this Processor.

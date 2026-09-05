@@ -352,6 +352,17 @@ func (e *Engine) runProcessors(ctx context.Context, s *State, rt *Runtime) error
 		err := proc.Process(ctx, s)
 		stepDuration := time.Since(stepStart)
 
+		// B1 fix: back-fill Processor / ProcessorVersion on the Changes
+		// produced by this Processor. State.Replace/Suggest/Rewrite leave
+		// these empty by design (they cannot know which Processor owns
+		// the call); the Engine is the authoritative source. We do this
+		// BEFORE firing EventProcessorEnd so Hooks also see the populated
+		// Change.Processor.
+		for i := changesBefore; i < len(s.changes); i++ {
+			s.changes[i].Processor = proc.Name()
+			s.changes[i].ProcessorVersion = processorVersion
+		}
+
 		// Trigger EventProcessorEnd.
 		triggerHooks(e.hooks, Event{
 			Type:             EventProcessorEnd,
