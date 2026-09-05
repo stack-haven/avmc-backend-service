@@ -23,6 +23,11 @@ import (
 	"backend-service/app/evie/tool/internal/conf"
 )
 
+// 业务层调 Build 等待 lazy sync 完成的超时上限（防首请求坏 case）。
+//
+// 不走 conf：Build 是热路径，字段硬编码即可。
+const lazySyncWaitTimeout = 5 * time.Second
+
 // VocabularyBuilder 词库快照构建器。
 type VocabularyBuilder struct {
 	conf       *conf.SystemDict
@@ -177,28 +182,8 @@ func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *Vocabul
 		if snap != nil {
 			return snap
 		}
-		// cache miss：同步等待 lazy sync 完成（修复 P1 首请求 cache miss）。
-		// 之前用 go func() 异步触发，导致首请求拿 system fallback（只有 3 entries）
-		// → fuzzy_vocab/alias 全部不命中 → 用户看到"增强服务对晨人没用"。
-		// 现在用 done channel + ctx timeout：ctx 取消立即返回（不拖累请求）。
-		if b.lazySyncOnMiss != nil {
-			done := make(chan struct{})
-			go func(reqCtx context.Context, t string) {
-				defer close(done)
-				_ = b.lazySyncOnMiss(reqCtx, t)
-			}(ctx, tenantID)
-			// 最多等 5s 或 ctx 取消；超时不等也不会崩，下次 Build 仍能拿到
-			select {
-			case <-done:
-				b.tenantMu.RLock()
-				snap = b.tenantSnaps[tenantID]
-				b.tenantMu.RUnlock()
-				if snap != nil {
-					return snap
-				}
-			case <-ctx.Done():
-			case <-time.After(5 * time.Second):
-			}
+		if snap := b.waitForLazySync(ctx, tenantID); snap != nil {
+			return snap
 		}
 	}
 
@@ -217,6 +202,35 @@ func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *Vocabul
 
 	// 启动期 / 全失败
 	return EmptyVocabularySnapshot()
+}
+
+// waitForLazySync 在 tenant cache miss 时同步等待 lazy sync 完成后重读快照。
+//
+// 返回 snapshot 或 nil（超时 / ctx 取消 / sync 未注册）。
+//
+// 修复 P1 首请求 cache miss：之前用 go func() 异步触发，导致首请求拿 system fallback
+// （只有 3 entries）→ fuzzy_vocab/alias 全部不命中。现在用 done channel + ctx + timeout：
+// ctx 取消立即返回（不拕累请求）；超时不等也不会崩，下次 Build 仍能拿到。
+func (b *VocabularyBuilder) waitForLazySync(ctx context.Context, tenantID string) *VocabularySnapshot {
+	if b.lazySyncOnMiss == nil {
+		return nil
+	}
+	done := make(chan struct{})
+	go func(reqCtx context.Context, t string) {
+		defer close(done)
+		_ = b.lazySyncOnMiss(reqCtx, t)
+	}(ctx, tenantID)
+	select {
+	case <-done:
+		b.tenantMu.RLock()
+		snap := b.tenantSnaps[tenantID]
+		b.tenantMu.RUnlock()
+		return snap
+	case <-ctx.Done():
+		return nil
+	case <-time.After(lazySyncWaitTimeout):
+		return nil
+	}
 }
 
 // HasTenant 判断 tenant 是否已有非空 snapshot（用于 VocabSyncer.EnsureTenant 优化）。

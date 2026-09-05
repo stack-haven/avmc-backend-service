@@ -20,8 +20,6 @@ import (
 
 	"github.com/stack-haven/lexnorm"
 	"github.com/stack-haven/lexnorm/lexicon"
-
-	v1 "backend-service/api/evie/tool/v1"
 )
 
 // FuzzyVocabConfig 业务可配置的 fuzzy 阈值。
@@ -242,9 +240,6 @@ func byteOffsetOfRune(s string, runeIdx int) int {
 var _ lexnorm.Processor = (*FuzzyVocabProcessor)(nil)
 var _ lexnorm.Versioner = (*FuzzyVocabProcessor)(nil)
 var _ lexnorm.CertaintyReporter = (*FuzzyVocabProcessor)(nil)
-
-// dummy 引用防 lint 警告（v1.EnhanceChange 用于可能的 audit 字段预留）。
-var _ = v1.EnhanceChange{}
 
 // hasChangeAtSpan 检查 changes 中是否存在与给定 span 重叠的 Change。
 //

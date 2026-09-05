@@ -34,6 +34,14 @@ import (
 	pid "backend-service/pkg/utils/id"
 )
 
+// 流式 / 同步识别公共常量。
+const (
+	streamBufferSize     = 64
+	defaultSampleRate    = 16000
+	defaultBitDepth      = 16
+	defaultStreamChannel = 1
+)
+
 // ASRRecord 识别记录（内存版，不落库）。
 type ASRRecord struct {
 	ID           string    // = session_id
@@ -274,120 +282,26 @@ func (uc *ASRUsecase) StreamRecognize(
 		sessionID = pid.NewSessionID(pid.SessionIDPrefixASR)
 	}
 
-	providerIn := make(chan asrPkg.PCMChunk, 64)
-	providerOut := make(chan asrPkg.ASRStreamResult, 64)
+	providerIn := make(chan asrPkg.PCMChunk, streamBufferSize)
+	providerOut := make(chan asrPkg.ASRStreamResult, streamBufferSize)
 
-	// 收集完整音频（用于最终落盘 + 增强）
+	// 启动 collect + provider goroutines
 	var audioBuf []byte
 	collectDone := make(chan struct{})
-
-	// collect goroutine：消费 audioCh 累计字节 + 转发到 providerIn
-	go func() {
-		defer close(collectDone)
-		defer close(providerIn)
-		for chunk := range audioCh {
-			audioBuf = append(audioBuf, chunk...)
-			// provider 可能处理慢；阻塞到 provider 消费
-			select {
-			case providerIn <- asrPkg.PCMChunk{Data: chunk}:
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	// provider goroutine
+	go uc.collectStreamAudio(ctx, audioCh, providerIn, &audioBuf, collectDone)
 	providerDone := make(chan error, 1)
-	go func() {
-		opts := asrPkg.RecognizeOptions{
-			SampleRate: format.SampleRate,
-			Language:   format.Language,
-		}
-		providerDone <- uc.streamProvider.StreamRecognize(ctx, providerIn, providerOut, opts)
-	}()
+	go uc.runStreamProvider(providerDone, ctx, providerIn, providerOut, format)
 
-	// 主循环：消费 providerOut → 透传非最终帧 + 收集最终帧
-	var finalText string
-	var finalConfidence float64
-	for r := range providerOut {
-		if r.IsFinal {
-			// 最终帧：先暂存，等 audioCh 关闭后再跑增强 + 落盘
-			if r.Text != "" {
-				finalText = r.Text
-			}
-			if r.Confidence > 0 {
-				finalConfidence = r.Confidence
-			}
-			// 仍要透传（让客户端提前知道最终结果到达）
-			select {
-			case resultCh <- StreamResult{
-				RequestID:   uuid.NewString(),
-				SessionID:   sessionID,
-				Text:        r.Text,
-				IsFinal:     true,
-				Confidence:  r.Confidence,
-				TimestampMs: r.TimestampMs,
-			}:
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			}
-		} else {
-			if r.Text != "" {
-				finalText = r.Text // 增量累计
-			}
-			if r.Confidence > 0 {
-				finalConfidence = r.Confidence
-			}
-			select {
-			case resultCh <- StreamResult{
-				RequestID:   uuid.NewString(),
-				SessionID:   sessionID,
-				Text:        r.Text,
-				IsFinal:     false,
-				Confidence:  r.Confidence,
-				TimestampMs: r.TimestampMs,
-			}:
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			}
-		}
-	}
+	// 主循环：消费 providerOut → 透传所有帧 + 收集最终帧
+	finalText, finalConfidence := uc.forwardStreamFrames(ctx, resultCh, providerOut, sessionID)
 
 	// 等待 collect 完成 + provider 完成
 	<-collectDone
 	provErr := <-providerDone
 
-	// 最终结果：跑增强（一次）+ 落盘音频
-	var (
-		enhText   = finalText
-		errMsg    string
-		enhStatus int32 = 1
-	)
-	if enableEnhancement && uc.enhancer != nil && finalText != "" {
-		enh, enhErr := uc.enhancer.EnhanceText(ctx, finalText, tenantID)
-		if enhErr != nil {
-			uc.log.Warnf("stream enhance failed: %v", enhErr)
-			errMsg = enhErr.Error()
-			enhStatus = 2
-		} else {
-			enhText = enh.EnhancedText
-			enhStatus = enh.Status
-			errMsg = enh.ErrorMessage
-		}
-	}
-
-	// 落盘音频（流式默认 PCM → WAV）
-	sr := format.SampleRate
-	if sr <= 0 {
-		sr = 16000
-	}
-	bd := format.BitDepth
-	if bd <= 0 {
-		bd = 16
-	}
-	audioPath, _ := uc.saveAudio(tenantID, sessionID, "wav",
-		asrAudio.PCMToWAV(audioBuf, sr, 1, bd))
-
+	// 最终：跑一次增强 + 落盘音频
+	enhText, errMsg := uc.enhanceFinalText(ctx, finalText, tenantID, enableEnhancement)
+	audioPath := uc.saveStreamAudio(tenantID, sessionID, audioBuf, format)
 	rec := &ASRRecord{
 		ID:           sessionID,
 		UserID:       userID,
@@ -422,9 +336,114 @@ func (uc *ASRUsecase) StreamRecognize(
 	if provErr != nil && !errors.Is(provErr, context.Canceled) {
 		return rec, fmt.Errorf("biz.asr: stream provider: %w", provErr)
 	}
-	_ = errMsg
-	_ = enhStatus
+	_ = errMsg // errMsg 当前未注入 ASRRecord；保留扩展位
 	return rec, nil
+}
+
+// collectStreamAudio 收集所有分片 → providerIn，同时累计到 audioBuf。
+//
+// 在独立 goroutine 运行；audioCh 关闭后退出。
+func (uc *ASRUsecase) collectStreamAudio(
+	ctx context.Context,
+	audioCh <-chan []byte,
+	providerIn chan<- asrPkg.PCMChunk,
+	audioBuf *[]byte,
+	done chan<- struct{},
+) {
+	defer close(done)
+	defer close(providerIn)
+	for chunk := range audioCh {
+		*audioBuf = append(*audioBuf, chunk...)
+		// provider 可能处理慢；阻塞到 provider 消费
+		select {
+		case providerIn <- asrPkg.PCMChunk{Data: chunk}:
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+// runStreamProvider 跑流式 provider（独立 goroutine，错误放入 done chan）。
+func (uc *ASRUsecase) runStreamProvider(
+	done chan<- error,
+	ctx context.Context,
+	in <-chan asrPkg.PCMChunk,
+	out chan<- asrPkg.ASRStreamResult,
+	format AudioFormat,
+) {
+	opts := asrPkg.RecognizeOptions{
+		SampleRate: format.SampleRate,
+		Language:   format.Language,
+	}
+	done <- uc.streamProvider.StreamRecognize(ctx, in, out, opts)
+}
+
+// forwardStreamFrames 消费 providerOut 透传到 resultCh，同时累计 finalText / finalConfidence。
+//
+// 返回 (finalText, finalConfidence)；ctx 取消时 返回当前累计值。
+func (uc *ASRUsecase) forwardStreamFrames(
+	ctx context.Context,
+	resultCh chan<- StreamResult,
+	providerOut <-chan asrPkg.ASRStreamResult,
+	sessionID string,
+) (string, float64) {
+	var finalText string
+	var finalConfidence float64
+	for r := range providerOut {
+		if r.Text != "" {
+			finalText = r.Text
+		}
+		if r.Confidence > 0 {
+			finalConfidence = r.Confidence
+		}
+		select {
+		case resultCh <- StreamResult{
+			RequestID:   uuid.NewString(),
+			SessionID:   sessionID,
+			Text:        r.Text,
+			IsFinal:     r.IsFinal,
+			Confidence:  r.Confidence,
+			TimestampMs: r.TimestampMs,
+		}:
+		case <-ctx.Done():
+			return finalText, finalConfidence
+		}
+	}
+	return finalText, finalConfidence
+}
+
+// enhanceFinalText 对最终文本跑一次增强（可选）。
+//
+// 返回 (enhancedText, errMsg)；失败时返回原文本 + 错误消息。
+func (uc *ASRUsecase) enhanceFinalText(
+	ctx context.Context, rawText, tenantID string, enableEnhancement bool,
+) (string, string) {
+	if !enableEnhancement || uc.enhancer == nil || rawText == "" {
+		return rawText, ""
+	}
+	enh, err := uc.enhancer.EnhanceText(ctx, rawText, tenantID)
+	if err != nil {
+		uc.log.Warnf("stream enhance failed: %v", err)
+		return rawText, err.Error()
+	}
+	return enh.EnhancedText, enh.ErrorMessage
+}
+
+// saveStreamAudio 把流式累计的 PCM 转为 WAV 落盘。
+//
+// 返回 audioPath；落盘失败返回 ""（不阻断主流程）。
+func (uc *ASRUsecase) saveStreamAudio(tenantID, sessionID string, audioBuf []byte, format AudioFormat) string {
+	sr := format.SampleRate
+	if sr <= 0 {
+		sr = defaultSampleRate
+	}
+	bd := format.BitDepth
+	if bd <= 0 {
+		bd = defaultBitDepth
+	}
+	wavBytes := asrAudio.PCMToWAV(audioBuf, sr, defaultStreamChannel, bd)
+	path, _ := uc.saveAudio(tenantID, sessionID, "wav", wavBytes)
+	return path
 }
 
 // normalizeAudio 根据 encoding 统一为 WAV（落盘用），返回 audio bytes + ext。

@@ -13,6 +13,7 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/stack-haven/lexnorm"
@@ -158,16 +159,12 @@ func changeTypeFromProcessor(processor, ruleID string) string {
 }
 
 // formatLexnormErrors 把 error 切片拼成单个错误消息。
+//
+// 使用 errors.Join 保证每个错误完整保留（不丢 stack / context），
+// Error() 输出会在错误间加换行；与原代码 "; " 分隔行为类似但更标准。
 func formatLexnormErrors(errs []error) string {
 	if len(errs) == 0 {
 		return ""
 	}
-	msg := ""
-	for i, e := range errs {
-		if i > 0 {
-			msg += "; "
-		}
-		msg += e.Error()
-	}
-	return msg
+	return errors.Join(errs...).Error()
 }

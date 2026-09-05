@@ -217,6 +217,10 @@ func (c *quaClient) applyCommonHeaders(req *http.Request, info *AuthInfo) {
 }
 
 // do 统一处理：HTTP 状态码 → kratos error；body 读取 → JSON 反序列化。
+//
+// 优化（M10）：先用 base envelope 解出 code / msg 检查业务错误；
+// 若 out != nil 且业务错误以 code=0，再次 json.Unmarshal 转到 out。
+// 两次 unmarshal 是必要的：out 与 base 是不同结构，不能一次反序列化复用。
 func (c *quaClient) do(req *http.Request, out any) error {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -231,17 +235,27 @@ func (c *quaClient) do(req *http.Request, out any) error {
 
 	var base quaBaseResponse
 	if err := json.Unmarshal(body, &base); err != nil {
-		return v1.ErrorQuaInvalidResponse("decode qua base response: %v (body=%s)", err, string(body))
+		return v1.ErrorQuaInvalidResponse("decode qua base response: %v (body=%s)", err, bodyPreview(body))
 	}
 	if base.Code != 0 {
 		return mapQuaBusinessError(base.Code, base.Msg)
 	}
-	if out != nil {
-		if err := json.Unmarshal(body, out); err != nil {
-			return v1.ErrorQuaInvalidResponse("decode qua payload: %v (body=%s)", err, string(body))
-		}
+	if out == nil {
+		return nil
+	}
+	if err := json.Unmarshal(body, out); err != nil {
+		return v1.ErrorQuaInvalidResponse("decode qua payload: %v (body=%s)", err, bodyPreview(body))
 	}
 	return nil
+}
+
+// bodyPreview 返回 body 的前 200 字节用于错误日志（避免日志被大响应刷爆）。
+func bodyPreview(body []byte) string {
+	const max = 200
+	if len(body) <= max {
+		return string(body)
+	}
+	return string(body[:max]) + "..."
 }
 
 // mapQuaBusinessError 将 qua 业务码映射为本工具错误码。
@@ -306,6 +320,4 @@ type quaDeptsRawResponse struct {
 // 编译期断言
 var (
 	_ QuaFetcher = (*quaClient)(nil)
-	_           = fmt.Sprintf
-	_           = errors.Is
 )
