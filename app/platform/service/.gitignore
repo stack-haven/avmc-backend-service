@@ -45,8 +45,8 @@ deploy/sql/*.sql
 deploy/sql/*.sql.gz
 
 # 本地存储渠道运行时数据目录（local 渠道上传的文件）
-./upload/
-./uploads/
-./data/files/
+upload
+uploads
+data/files
 ./mock
 ./server
