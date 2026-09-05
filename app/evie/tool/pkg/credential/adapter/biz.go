@@ -11,9 +11,9 @@
 // # Example
 //
 //	import (
-//	    "backend-service/pkg/credential"
-//	    "backend-service/pkg/credential/middleware"
-//	    "backend-service/pkg/credential/adapter"
+//	    "backend-service/app/evie/tool/pkg/credential"
+//	    "backend-service/app/evie/tool/pkg/credential/middleware"
+//	    "backend-service/app/evie/tool/pkg/credential/adapter"
 //	)
 //
 //	mw := middleware.HTTPMiddleware(middleware.Config{Provider: p})
@@ -25,7 +25,7 @@ package adapter
 import (
 	"context"
 
-	"backend-service/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential"
 )
 
 // CallerIdentity is an alias for credential.CallerIdentity so existing

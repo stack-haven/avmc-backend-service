@@ -1,5 +1,5 @@
 // Package data · token_cache.go
-// TokenCache 薄包装：委托给 pkg/credential/redis.Provider，保留旧 API 兼容。
+// TokenCache 薄包装：委托给 evie/tool/internal/credential/redis.Provider，保留旧 API 兼容。
 //
 // qua token 在 Redis 中的 key 形态（Q2）：
 //   key:   oauth2_access_token:<token>
@@ -11,7 +11,7 @@
 //  2. TokenCache：薄包装，构造时初始化 credential.Provider，Get 委托
 //  3. ErrTokenNotFound / ErrTokenInvalid 错误类型（service 层引用）
 //
-// 新代码应直接用 pkg/credential + pkg/credential/redis。
+// 新代码应直接用 credential + evie/tool/internal/credential/redis。
 package data
 
 import (
@@ -21,8 +21,8 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"backend-service/app/evie/tool/internal/conf"
-	"backend-service/pkg/credential"
-	credredis "backend-service/pkg/credential/redis"
+	"backend-service/app/evie/tool/pkg/credential"
+	credredis "backend-service/app/evie/tool/pkg/credential/redis"
 )
 
 // ErrTokenNotFound 表示 token 在 Redis 中不存在（已过期或被踢下线）。
@@ -92,7 +92,7 @@ func (t *TokenCache) Key(token string) string {
 	return t.prefix + token
 }
 
-// Get 查询 AuthInfo（委托给 pkg/credential/redis.Provider 后转回本工具视图）。
+// Get 查询 AuthInfo（委托给 evie/tool/internal/credential/redis.Provider 后转回本工具视图）。
 //
 // 错误语义：
 //   credential.ErrTokenNotFound → ErrTokenNotFound

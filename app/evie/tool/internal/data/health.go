@@ -26,7 +26,7 @@ import (
 // HealthChecker 聚合多个 dependency 检查。
 type HealthChecker struct {
 	rdb    *redis.Client
-	qua    *quaClient
+	qua    *quaFetcher
 	asrReg *asrPkg.ProviderRegistry
 	mu     sync.RWMutex
 	lastSync  time.Time
@@ -40,11 +40,9 @@ var _ pkgHealth.Checker = (*HealthChecker)(nil)
 //
 // 返回 pkgHealth.Checker 接口以简化 Wire 装配（避免 wire.Bind）
 func NewHealthChecker(rdb *redis.Client, qua QuaFetcher, reg *asrPkg.ProviderRegistry) pkgHealth.Checker {
-	// qua 是 QuaFetcher interface（biz 用），但 health 需要访问 baseURL + Ping
-	// 当 qua 实现 *quaClient 时强转；否则 nil
-	var q *quaClient
+	var q *quaFetcher
 	if qua != nil {
-		if qc, ok := qua.(*quaClient); ok {
+		if qc, ok := qua.(*quaFetcher); ok {
 			q = qc
 		}
 	}

@@ -1,0 +1,12 @@
+{
+  "version": "v1",
+  "users": [
+    {"id": "u-alice", "name": "佘丽群", "mobile": "13800000001"},
+    {"id": "u-bob", "name": "测试一", "mobile": "13800000002"},
+    {"id": "u-carol", "name": "田华", "mobile": "13800000003"}
+  ],
+  "departments": [
+    {"id": "d-eng", "name": "工程部"},
+    {"id": "d-test", "name": "测试组"}
+  ]
+}

@@ -9,7 +9,7 @@
 //
 // # Example
 //
-//	import "backend-service/pkg/credential/redis"
+//	import "backend-service/app/evie/tool/pkg/credential/redis"
 //
 //	p, err := redis.New(redis.Config{
 //	    Client: rdb,
@@ -33,7 +33,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"backend-service/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential"
 )
 
 // FieldMapper is an alias for credential.FieldMapper so callers can

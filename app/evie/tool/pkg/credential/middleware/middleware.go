@@ -26,7 +26,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"backend-service/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential"
 )
 
 // ctxKey is unexported so callers cannot accidentally collide with it.

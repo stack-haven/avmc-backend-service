@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"backend-service/pkg/credential"
-	credjwt "backend-service/pkg/credential/jwt"
+	"backend-service/app/evie/tool/pkg/credential"
+	credjwt "backend-service/app/evie/tool/pkg/credential/jwt"
 )
 
 // helper: mint a HS256 JWT with custom claims.
@@ -44,6 +44,7 @@ func TestJWT_HS256_HappyPath(t *testing.T) {
 		Algorithm: "HS256",
 		Secret:    secret,
 		Issuer:    "test-issuer",
+		Audience:  "", // 测试里 token 不带 aud
 		Fields: credential.FieldMapper{
 			TenantID: "tenant_id", UserID: "sub", UserName: "name",
 		},

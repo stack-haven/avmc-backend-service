@@ -10,8 +10,8 @@ import (
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
 
-	"backend-service/pkg/credential"
-	credredis "backend-service/pkg/credential/redis"
+	"backend-service/app/evie/tool/pkg/credential"
+	credredis "backend-service/app/evie/tool/pkg/credential/redis"
 )
 
 // TestMapFromMapper 覆盖 FieldMapper 各种字段映射场景。

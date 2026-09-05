@@ -1,0 +1,118 @@
+# Evie Tool demo configuration (zero external dependencies).
+#
+# Run with:
+#   ./evie-tool -conf ./configs/config.demo.yaml
+#
+# What this demonstrates:
+#   - static credential provider (no Redis required)
+#   - file vocabulary source (no HTTP qua required)
+#   - full ASR + enhancement pipeline
+#
+# For production, switch to redis credential + http vocabulary source.
+
+server:
+  http:
+    addr: 0.0.0.0:8110
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9110
+    timeout: 30s
+
+# ============================================================
+# Credential (replaces Redis-backed Bearer validation)
+# ============================================================
+credential:
+  # Provider name: static | redis | jwt
+  provider: static
+  static:
+    default_tenant: demo
+    users:
+      - token: "demo-token"
+        tenant_id: "demo"
+        user_id: "demo-user"
+        user_name: "Demo User"
+        user_type: 2
+      - token: "admin-token"
+        tenant_id: "demo"
+        user_id: "admin"
+        user_name: "Demo Admin"
+        user_type: 1
+
+# ============================================================
+# Vocabulary source (replaces qua HTTP fetcher)
+# ============================================================
+vocabulary:
+  # Source name: file | http | qua
+  source: file
+  file:
+    path: "./configs/dictionaries/demo_vocab.json"
+    reload_on_fetch: false
+
+# ============================================================
+# ASR
+# ============================================================
+asr:
+  default_batch_provider: funasr
+  default_stream_provider: xunfei
+  upload:
+    audio_dir: "./upload/audio"
+    retention_days: 0
+  providers:
+    funasr:
+      enabled: true
+      addr: "http://127.0.0.1:18000"
+      sample_rate: 16000
+      language: zh
+    xunfei:
+      enabled: false
+
+# ============================================================
+# Enhancement
+# ============================================================
+enhancement:
+  pipeline:
+    - cleaning
+    - filler
+    - vocab_matching
+    - alias_resolution
+    - deterministic_replacement
+    - pinyin_correction
+    - fuzzy_matching
+    - context_correction
+  pinyin_threshold: 0.85
+  fuzzy_auto_threshold: 0.80
+  fuzzy_suggest_threshold: 0.60
+  llm_enabled: false
+
+tenant_vocab:
+  sync_interval: 300s
+  initial_warmup: false
+  concurrency: 4
+  include_departments: true
+  include_user_nickname: true
+  include_user_realname: true
+
+system_dict:
+  path: "./configs/dictionaries/system.json"
+  hot_reload: true
+
+# Normalizer 规则（demo 用最简单的字段映射）
+vocab_rules:
+  sources:
+    file:
+      entity_mappings:
+        - match:
+            entity_type: "user"
+          emit:
+            standard_text: "name"
+            category: "PERSON"
+            aliases: ["mobile"]
+            pinyin_hint: "name"
+            priority: "50"
+        - match:
+            entity_type: "department"
+          emit:
+            standard_text: "name"
+            category: "ORGANIZATION"
+            pinyin_hint: "name"
+            priority: "30"

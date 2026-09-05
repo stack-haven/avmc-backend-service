@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"backend-service/pkg/credential"
-	"backend-service/pkg/credential/static"
+	"backend-service/app/evie/tool/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential/static"
 )
 
 func TestStaticProvider_HappyPath(t *testing.T) {

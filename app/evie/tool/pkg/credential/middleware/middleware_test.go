@@ -9,9 +9,9 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"backend-service/pkg/credential"
-	"backend-service/pkg/credential/middleware"
-	"backend-service/pkg/credential/static"
+	"backend-service/app/evie/tool/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential/middleware"
+	"backend-service/app/evie/tool/pkg/credential/static"
 )
 
 func okHandler(checked *bool) http.Handler {

@@ -1,29 +1,26 @@
 // Package data · qua_client.go
-// quaClient：外部系统 HTTP fetcher，仅返回 opaque `[]map[string]any`。
+// QuaFetcher：薄包装 evie/tool/pkg/source/qua.Source。
 //
-// 设计原则（Q13 决定）：
-//   1. fetcher 不解释业务字段语义
-//   2. opaque payload 由 VocabularySource adapter（qua_source.go）包成 RawEntity
-//   3. 字段映射由 Normalizer + YAML 规则解释
-//   4. 加新 source = 新 fetcher + 新 adapter + 新规则 YAML；零核心代码变更
+// 本文件保留：
+//   1. QuaFetcher 接口（health check + QuaVocabularySource 调用方依赖）
+//   2. QuaClientOption / WithHTTPClient / WithTimeout（保持 wire 兼容）
+//   3. NewQuaClient：根据 conf.Qua 构造 QuaFetcher，内部委托 evie/tool/pkg/source/qua
+//   4. NewQuaClientOptions：返回空的 options 列表（wire provider）
 //
-// 协议约定（Q1/Q5/Q6 + 真实联调样本）：
-//   1. 调用方从 ctx 取 AuthInfo（data.AuthInfoFromContext）
-//   2. 透传 authorization: Bearer <token> 头
-//   3. 透传 tenant-id: <int> 头（qua 端要求数字）
-//   4. 静态透传 qua.extra_headers（如 zone）
-//   5. 部门： GET {baseURL}/admin-api/system/dept/list
-//   6. 用户： GET {baseURL}/admin-api/qua/member-extended/page?selectAll=true
+// QuaFetcher 实现的 HTTP 行为（必须与旧实现一致）：
+//   - Authorization: Bearer <ctx.AuthInfo.AccessToken>
+//   - tenant-id: <ctx.AuthInfo.TenantID as int>
+//   - selectAll=true 加到 user 接口的 query string
+//   - qua 业务错误码 (400/401/403/404/500) → v1 kratos errors
+//
+// 新代码应直接用 evie/tool/pkg/source/qua + evie/tool/pkg/source/adapter。
 package data
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -31,33 +28,144 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	v1 "backend-service/api/evie/tool/v1"
+
 	"backend-service/app/evie/tool/internal/conf"
+	httpsrc "backend-service/app/evie/tool/pkg/source/http"
+	quasrc "backend-service/app/evie/tool/pkg/source/qua"
 )
 
-// quaClient 实现 qua 系统的 opaque HTTP fetcher。
-type quaClient struct {
-	baseURL    string
+// QuaFetcher 是 qua 系统的 opaque fetcher 接口。
+type QuaFetcher interface {
+	FetchUsersRaw(ctx context.Context) ([]map[string]any, error)
+	FetchDeptsRaw(ctx context.Context) ([]map[string]any, error)
+	BaseURL() string
+	Ping(ctx context.Context) error
+}
+
+// quaFetcher 实现 QuaFetcher：内部委托 evie/tool/pkg/source/qua.Source。
+type quaFetcher struct {
+	src       *quasrc.Source
+	rawSource *httpsrc.Source // 直接访问底层 HTTP source（用于 ctx-aware tenant header）
+	baseURL   string
+}
+
+// QuaClientOption qua 配置函数（保留签名）。
+type QuaClientOption func(*quaOptions)
+
+type quaOptions struct {
 	httpClient *http.Client
-	endpoints  quaEndpoints
 	timeout    time.Duration
-	extraHdr   map[string]string
+}
+
+// WithHTTPClient 注入自定义 *http.Client。
+func WithHTTPClient(hc *http.Client) QuaClientOption {
+	return func(o *quaOptions) { o.httpClient = hc }
+}
+
+// WithTimeout 覆盖默认超时。
+func WithTimeout(d time.Duration) QuaClientOption {
+	return func(o *quaOptions) { o.timeout = d }
+}
+
+// NewQuaClient 根据 conf.Qua 构造 QuaFetcher（委托给 evie/tool/pkg/source/qua）。
+func NewQuaClient(c *conf.Qua, _ log.Logger, opts ...QuaClientOption) (QuaFetcher, error) {
+	if c == nil {
+		return nil, v1.ErrorInternalError("qua config is required")
+	}
+	if c.GetBaseUrl() == "" {
+		return nil, v1.ErrorInternalError("qua.base_url is required")
+	}
+
+	o := &quaOptions{}
+	for _, opt := range opts {
+		opt(o)
+	}
+
+	endpoints := c.GetEndpoints()
+	if endpoints.GetListUsers() == "" {
+		return nil, v1.ErrorInternalError("qua.endpoints.list_users is required")
+	}
+	if endpoints.GetListDepts() == "" {
+		return nil, v1.ErrorInternalError("qua.endpoints.list_depts is required")
+	}
+
+	headers := c.GetExtraHeaders()
+	tenantHeader := c.GetTenantHeader()
+	if tenantHeader == "" {
+		tenantHeader = "tenant-id" // qua 默认 header
+	}
+	timeout := o.timeout
+	if timeout == 0 {
+		if c.GetTimeout() != nil {
+			timeout = c.GetTimeout().AsDuration()
+		} else {
+			timeout = 5 * time.Second
+		}
+	}
+	httpClient := o.httpClient
+	if httpClient == nil {
+		httpClient = &http.Client{Timeout: timeout}
+	}
+
+	// 业务错误码 → v1.ErrorXxx 映射。
+	codeErrs := map[int]func(code int, msg string) error{
+		400: func(_ int, msg string) error { return v1.ErrorQuaBadRequest("%s", msg) },
+		401: func(_ int, msg string) error { return v1.ErrorQuaUnauthorized("%s", msg) },
+		403: func(_ int, msg string) error { return v1.ErrorQuaForbidden("%s", msg) },
+		404: func(_ int, msg string) error { return v1.ErrorQuaNotFound("%s", msg) },
+		500: func(_ int, msg string) error { return v1.ErrorQuaInternalError("%s", msg) },
+	}
+
+	rawSrc, err := httpsrc.New(httpsrc.Config{
+		BaseURL:        c.GetBaseUrl(),
+		UserPath:       endpoints.GetListUsers(),
+		DeptPath:       endpoints.GetListDepts(),
+		QueryParams:    map[string]string{"selectAll": "true"},
+		TokenProvider:  quaTokenProvider{}, // from ctx
+		Headers:        headers,
+		TenantHeader:   tenantHeader,
+		TenantIDProvider: quaTenantProvider{}, // from ctx,转 int
+		HTTPClient:     httpClient,
+		Timeout:        timeout,
+		Envelope: httpsrc.Envelope{
+			UsersPath: "data.list",
+			DeptsPath: "data",
+			CodePath:  "code",
+			CodeOK:    0,
+		},
+		CodeErrorMap: codeErrs,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("qua: build source: %w", err)
+	}
+	src, err := quasrc.New(quasrc.Config{
+		BaseURL:     c.GetBaseUrl(),
+		UserPath:    endpoints.GetListUsers(),
+		DeptPath:    endpoints.GetListDepts(),
+		Headers:     headers,
+		TenantHeader: tenantHeader,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("qua: build source: %w", err)
+	}
+	_ = src // quaVocabularySource 使用 rawSrc 路径
+	return &quaFetcher{src: src, rawSource: rawSrc, baseURL: c.GetBaseUrl()}, nil
 }
 
 // BaseURL 返回 baseURL（健康检查用）。
-func (c *quaClient) BaseURL() string { return c.baseURL }
+func (q *quaFetcher) BaseURL() string { return q.baseURL }
 
-// Ping 探测 qua 服务可达性（M9 健康检查用）。
-//
-// 实施：HEAD 请求 baseURL；qua 端 404 也算可达（说明路由生效）。
-func (c *quaClient) Ping(ctx context.Context) error {
-	if c == nil || c.baseURL == "" {
+// Ping 探测 qua 可达性（HEAD 请求 baseURL）。
+func (q *quaFetcher) Ping(ctx context.Context) error {
+	if q == nil || q.baseURL == "" {
 		return errors.New("qua: not configured")
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, c.baseURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, q.baseURL, nil)
 	if err != nil {
 		return err
 	}
-	resp, err := c.httpClient.Do(req)
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -68,256 +176,84 @@ func (c *quaClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-// quaEndpoints 镜像 conf.Qua.Endpoints。
-type quaEndpoints struct {
-	ListUsers string
-	ListDepts string
+// FetchUsersRaw 拉取用户 opaque 列表。
+func (q *quaFetcher) FetchUsersRaw(ctx context.Context) ([]map[string]any, error) {
+	return q.fetchByType(ctx, quasrc.UserEntityType)
 }
 
-// QuaClientOption quaClient 配置函数（便于测试时覆盖 baseURL / timeout）。
-type QuaClientOption func(*quaClient)
-
-// WithHTTPClient 注入自定义 *http.Client（测试 / tracing middleware 时用）。
-func WithHTTPClient(hc *http.Client) QuaClientOption {
-	return func(c *quaClient) { c.httpClient = hc }
+// FetchDeptsRaw 拉取部门 opaque 列表。
+func (q *quaFetcher) FetchDeptsRaw(ctx context.Context) ([]map[string]any, error) {
+	return q.fetchByType(ctx, quasrc.DepartmentEntityType)
 }
 
-// WithTimeout 覆盖默认超时。
-func WithTimeout(d time.Duration) QuaClientOption {
-	return func(c *quaClient) { c.timeout = d }
-}
-
-// NewQuaClient 构造 qua HTTP fetcher。
+// fetchByType 直接用底层 httpsrc 拉指定 entity_type。
 //
-//   c:      conf.Qua 配置
-//   logger: kratos logger（保留入参；M5+ 阶段用于错误日志）
-//   opts:   测试或定制选项
-func NewQuaClient(c *conf.Qua, _ log.Logger, opts ...QuaClientOption) (QuaFetcher, error) {
-	if c == nil {
-		return nil, v1.ErrorInternalError("qua config is required")
+// 错误包装：
+//   - 网络层错误 → v1.ErrorQuaUnreachable
+//   - JSON 解析错误 → v1.ErrorQuaInvalidResponse
+//   - 其他 → 透传
+func (q *quaFetcher) fetchByType(ctx context.Context, typ string) ([]map[string]any, error) {
+	var path string
+	switch typ {
+	case quasrc.UserEntityType:
+		path = q.rawSource.UserPath()
+	case quasrc.DepartmentEntityType:
+		path = q.rawSource.DeptPath()
+	default:
+		return nil, fmt.Errorf("qua: unknown entity_type %q", typ)
 	}
-	if c.GetBaseUrl() == "" {
-		return nil, v1.ErrorInternalError("qua.base_url is required")
+	entities, err := q.rawSource.FetchWithCtx(ctx, path)
+	if err != nil {
+		return nil, wrapHTTPError(err)
 	}
-	timeout := 5 * time.Second
-	if c.GetTimeout() != nil {
-		timeout = c.GetTimeout().AsDuration()
-	}
-	qc := &quaClient{
-		baseURL:    strings.TrimRight(c.GetBaseUrl(), "/"),
-		httpClient: &http.Client{Timeout: timeout},
-		timeout:    timeout,
-		extraHdr:   c.GetExtraHeaders(),
-		endpoints: quaEndpoints{
-			ListUsers: c.GetEndpoints().GetListUsers(),
-			ListDepts: c.GetEndpoints().GetListDepts(),
-		},
-	}
-	for _, opt := range opts {
-		opt(qc)
-	}
-	if qc.endpoints.ListUsers == "" {
-		return nil, v1.ErrorInternalError("qua.endpoints.list_users is required")
-	}
-	if qc.endpoints.ListDepts == "" {
-		return nil, v1.ErrorInternalError("qua.endpoints.list_depts is required")
-	}
-	return qc, nil
+	return entities, nil
 }
 
-// QuaFetcher opaque fetcher 接口（data 层契约）。
-//
-// 返回值为 opaque map，**不含任何业务类型**；语义解析由
-// adapter + Normalizer 处理。
-type QuaFetcher interface {
-	FetchUsersRaw(ctx context.Context) ([]map[string]any, error)
-	FetchDeptsRaw(ctx context.Context) ([]map[string]any, error)
-}
-
-// FetchUsersRaw GET {baseURL}/list_users?selectAll=true → opaque []map。
-func (c *quaClient) FetchUsersRaw(ctx context.Context) ([]map[string]any, error) {
-	auth, err := c.authInfo(ctx)
-	if err != nil {
-		return nil, err
-	}
-	endpoint := c.baseURL + c.endpoints.ListUsers
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, v1.ErrorInternalError("parse qua user endpoint: %v", err)
-	}
-	q := u.Query()
-	q.Set("selectAll", "true")
-	u.RawQuery = q.Encode()
-
-	// qua 用户接口是 GET（实测：POST 会返回 501 "yudao-module-bdk-qua - 已禁用"）
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
-	if err != nil {
-		return nil, v1.ErrorInternalError("build qua users request: %v", err)
-	}
-	c.applyCommonHeaders(req, auth)
-
-	var resp quaUsersRawResponse
-	if err := c.do(req, &resp); err != nil {
-		return nil, err
-	}
-	return resp.Data.List, nil
-}
-
-// FetchDeptsRaw GET {baseURL}/list_depts → opaque []map。
-func (c *quaClient) FetchDeptsRaw(ctx context.Context) ([]map[string]any, error) {
-	auth, err := c.authInfo(ctx)
-	if err != nil {
-		return nil, err
-	}
-	endpoint := c.baseURL + c.endpoints.ListDepts
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
-	if err != nil {
-		return nil, v1.ErrorInternalError("build qua depts request: %v", err)
-	}
-	c.applyCommonHeaders(req, auth)
-
-	var resp quaDeptsRawResponse
-	if err := c.do(req, &resp); err != nil {
-		return nil, err
-	}
-	return resp.Data, nil
-}
-
-// authInfo 从 ctx 取 AuthInfo 并校验必要字段。
-func (c *quaClient) authInfo(ctx context.Context) (*AuthInfo, error) {
-	info, ok := AuthInfoFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorTokenMissing("qua call requires auth context")
-	}
-	if info.AccessToken == "" {
-		return nil, v1.ErrorTokenPayloadInvalid("qua call requires accessToken in AuthInfo")
-	}
-	if info.TenantID == "" {
-		return nil, v1.ErrorTokenPayloadInvalid("qua call requires tenantId in AuthInfo")
-	}
-	return info, nil
-}
-
-// applyCommonHeaders 设置 qua 必需 header：authorization / tenant-id / extra_headers。
-func (c *quaClient) applyCommonHeaders(req *http.Request, info *AuthInfo) {
-	req.Header.Set("Authorization", "Bearer "+info.AccessToken)
-	// tenant-id 在 qua 端是数字（bigint → 字符串）
-	if tID, err := strconv.ParseInt(info.TenantID, 10, 64); err == nil {
-		req.Header.Set("tenant-id", strconv.FormatInt(tID, 10))
-	} else {
-		// 异常 tenantId 不阻断；qua 端如果强校验则返回 401/403，由 HTTP 错误层处理
-		req.Header.Set("tenant-id", info.TenantID)
-	}
-	for k, v := range c.extraHdr {
-		if k == "" {
-			continue
-		}
-		req.Header.Set(k, v)
-	}
-}
-
-// do 统一处理：HTTP 状态码 → kratos error；body 读取 → JSON 反序列化。
-//
-// 优化（M10）：先用 base envelope 解出 code / msg 检查业务错误；
-// 若 out != nil 且业务错误以 code=0，再次 json.Unmarshal 转到 out。
-// 两次 unmarshal 是必要的：out 与 base 是不同结构，不能一次反序列化复用。
-func (c *quaClient) do(req *http.Request, out any) error {
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return v1.ErrorQuaUnreachable("qua http call: %v", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return v1.ErrorQuaInvalidResponse("read qua response: %v", err)
-	}
-
-	var base quaBaseResponse
-	if err := json.Unmarshal(body, &base); err != nil {
-		return v1.ErrorQuaInvalidResponse("decode qua base response: %v (body=%s)", err, bodyPreview(body))
-	}
-	if base.Code != 0 {
-		return mapQuaBusinessError(base.Code, base.Msg)
-	}
-	if out == nil {
+// wrapHTTPError 把 evie/tool/evie/tool/pkg/source 的通用 error 映射到 qua 特定 v1 error。
+func wrapHTTPError(err error) error {
+	if err == nil {
 		return nil
 	}
-	if err := json.Unmarshal(body, out); err != nil {
-		return v1.ErrorQuaInvalidResponse("decode qua payload: %v (body=%s)", err, bodyPreview(body))
-	}
-	return nil
-}
-
-// bodyPreview 返回 body 的前 200 字节用于错误日志（避免日志被大响应刷爆）。
-func bodyPreview(body []byte) string {
-	const max = 200
-	if len(body) <= max {
-		return string(body)
-	}
-	return string(body[:max]) + "..."
-}
-
-// mapQuaBusinessError 将 qua 业务码映射为本工具错误码。
-// qua 业务码约定（基于常见 Spring Cloud 模板）：
-//   0    = ok
-//   400  = BAD_REQUEST
-//   401  = UNAUTHORIZED
-//   403  = FORBIDDEN
-//   404  = NOT_FOUND
-//   500  = INTERNAL
-//   其它  = INTERNAL_ERROR（qua 内部错误）
-func mapQuaBusinessError(code int32, msg string) error {
-	switch code {
-	case 400:
-		return v1.ErrorQuaBadRequest("%s", msg)
-	case 401:
-		return v1.ErrorQuaUnauthorized("%s", msg)
-	case 403:
-		return v1.ErrorQuaForbidden("%s", msg)
-	case 404:
-		return v1.ErrorQuaNotFound("%s", msg)
-	case 500:
-		return v1.ErrorQuaInternalError("%s", msg)
+	msg := err.Error()
+	switch {
+	case strings.Contains(msg, "http call:"):
+		return v1.ErrorQuaUnreachable("%s", msg)
+	case strings.Contains(msg, "decode root:") || strings.Contains(msg, "decode payload:"):
+		return v1.ErrorQuaInvalidResponse("%s", msg)
 	default:
-		return v1.ErrorQuaInternalError("qua code=%d msg=%s", code, msg)
+		return err
 	}
 }
 
-// ============================================================================
-// qua opaque 响应模型（私有）
-// ============================================================================
+// --- ctx-aware providers ---
 
-// quaBaseResponse qua 通用响应外壳。
-type quaBaseResponse struct {
-	Code int32  `json:"code"`
-	Msg  string `json:"msg"`
-	Data any    `json:"data"`
+// quaTokenProvider 从 ctx 取 access token（透传给 qua）。
+type quaTokenProvider struct{}
+
+func (quaTokenProvider) Token(ctx context.Context) (string, error) {
+	info, ok := AuthInfoFromContext(ctx)
+	if !ok {
+		return "", v1.ErrorTokenMissing("qua call requires auth context")
+	}
+	if info.AccessToken == "" {
+		return "", v1.ErrorTokenPayloadInvalid("qua call requires accessToken in AuthInfo")
+	}
+	return info.AccessToken, nil
 }
 
-// quaUsersRawResponse qua users 接口响应（opaque）。
-type quaUsersRawResponse struct {
-	Code int32           `json:"code"`
-	Msg  string          `json:"msg"`
-	Data quaUsersRawData `json:"data"`
-}
+// quaTenantProvider 从 ctx 取 tenant id 并转为数字字符串（qua 端要求）。
+type quaTenantProvider struct{}
 
-// quaUsersRawData 仅暴露 list 字段为 opaque map。
-type quaUsersRawData struct {
-	List     []map[string]any `json:"list"`
-	Total    int64           `json:"total"`
-	PageNo   int32           `json:"pageNo"`
-	PageSize int32           `json:"pageSize"`
+func (quaTenantProvider) TenantID(ctx context.Context) (string, error) {
+	info, ok := AuthInfoFromContext(ctx)
+	if !ok {
+		return "", v1.ErrorTokenMissing("qua call requires auth context")
+	}
+	if info.TenantID == "" {
+		return "", v1.ErrorTokenPayloadInvalid("qua call requires tenantId in AuthInfo")
+	}
+	if n, err := strconv.ParseInt(info.TenantID, 10, 64); err == nil {
+		return strconv.FormatInt(n, 10), nil
+	}
+	return info.TenantID, nil // 非数字透传
 }
-
-// quaDeptsRawResponse qua depts 接口响应（opaque）。
-type quaDeptsRawResponse struct {
-	Code int32            `json:"code"`
-	Msg  string           `json:"msg"`
-	Data []map[string]any `json:"data"`
-}
-
-// 编译期断言
-var (
-	_ QuaFetcher = (*quaClient)(nil)
-)

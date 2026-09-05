@@ -3,11 +3,13 @@
 //
 // # Use case
 //
-// For self-hosted / standalone deployments where no external identity
-// store is available, the operator can mint short-lived JWTs with
-// standard claims and let the tool verify them locally.
+// Self-hosted / standalone deployments where no external identity
+// store is available can mint short-lived JWTs and let this provider
+// verify them locally. The implementation is self-contained (no
+// external JWT library dependency) and covers HS256 / RS256 with
+// issuer/audience checks and configurable JSON-claim mapping.
 //
-// # Example (HMAC)
+// # Example
 //
 //	p, _ := jwt.New(jwt.Config{
 //	    Algorithm: "HS256",
@@ -36,7 +38,7 @@ import (
 	"strings"
 	"time"
 
-	"backend-service/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential"
 )
 
 // FieldMapper is an alias for credential.FieldMapper.
@@ -44,15 +46,14 @@ type FieldMapper = credential.FieldMapper
 
 // Config configures a JWT-based Provider.
 type Config struct {
-	// Algorithm is "HS256" or "RS256".
+	// Algorithm is "HS256" or "RS256". Defaults to HS256.
 	Algorithm string
 
-	// Secret is used for HS256 (HMAC-SHA256). Mutually exclusive with
-	// PublicKeyPEM.
+	// Secret is the HMAC secret for HS256. Mutually exclusive with
+	// PublicKeyPEM (RS256).
 	Secret []byte
 
-	// PublicKeyPEM is used for RS256 (RSA-SHA256). Mutually exclusive
-	// with Secret.
+	// PublicKeyPEM is a PEM-encoded RSA public key for RS256.
 	PublicKeyPEM []byte
 
 	// Issuer, when non-empty, requires the token's "iss" claim to match.
@@ -61,14 +62,16 @@ type Config struct {
 	// Audience, when non-empty, requires the token's "aud" claim to match.
 	Audience string
 
+	// Leeway is the clock skew tolerance applied to exp/nbf (default 0).
+	Leeway time.Duration
+
 	// Fields describes how to project JWT claims into CallerIdentity.
-	// Claims are accessed via top-level JSON keys (e.g. "tenant_id",
-	// "sub", "name"); nested paths use dot notation.
+	// Top-level JSON keys (e.g. "tenant_id", "sub", "name"); nested
+	// paths use dot notation.
 	Fields FieldMapper
 }
 
-// Provider validates JWTs locally and returns the corresponding
-// CallerIdentity.
+// Provider validates JWTs locally and returns the CallerIdentity.
 type Provider struct {
 	cfg Config
 	pub *rsa.PublicKey
@@ -76,12 +79,16 @@ type Provider struct {
 
 // New constructs a JWT Provider.
 func New(cfg Config) (*Provider, error) {
-	switch cfg.Algorithm {
-	case "HS256", "":
+	algo := cfg.Algorithm
+	if algo == "" {
+		algo = "HS256"
+	}
+	p := &Provider{cfg: cfg}
+	switch algo {
+	case "HS256":
 		if len(cfg.Secret) == 0 {
 			return nil, fmt.Errorf("%w: HS256 requires Secret", credential.ErrInvalidConfig)
 		}
-		cfg.Algorithm = "HS256"
 	case "RS256":
 		if len(cfg.PublicKeyPEM) == 0 {
 			return nil, fmt.Errorf("%w: RS256 requires PublicKeyPEM", credential.ErrInvalidConfig)
@@ -90,12 +97,11 @@ func New(cfg Config) (*Provider, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%w: parse RSA key: %v", credential.ErrInvalidConfig, err)
 		}
-		cfg.Algorithm = "RS256"
-		return &Provider{cfg: cfg, pub: pub}, nil
+		p.pub = pub
 	default:
-		return nil, fmt.Errorf("%w: unsupported algorithm %q", credential.ErrInvalidConfig, cfg.Algorithm)
+		return nil, fmt.Errorf("%w: unsupported algorithm %q", credential.ErrInvalidConfig, algo)
 	}
-	return &Provider{cfg: cfg}, nil
+	return p, nil
 }
 
 // Name implements credential.Provider.
@@ -103,8 +109,8 @@ func (p *Provider) Name() string { return "jwt" }
 
 // Authenticate verifies the token and returns the CallerIdentity.
 //
-// Implements the JWT verification path locally (no third-party library)
-// to keep the dependency surface small. Supports HS256 and RS256.
+// Implementation: self-contained JWT parsing + signature verification
+// (no third-party library). Supports HS256 and RS256.
 func (p *Provider) Authenticate(_ context.Context, token string) (*credential.CallerIdentity, error) {
 	if token == "" {
 		return nil, credential.ErrTokenNotFound
@@ -115,12 +121,10 @@ func (p *Provider) Authenticate(_ context.Context, token string) (*credential.Ca
 	}
 	header, payload, sig := parts[0], parts[1], parts[2]
 
-	// Verify signature.
 	if err := p.verifySignature(header, payload, sig); err != nil {
 		return nil, err
 	}
 
-	// Decode payload.
 	raw, err := base64.RawURLEncoding.DecodeString(payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: decode payload: %v", credential.ErrTokenInvalid, err)
@@ -130,12 +134,12 @@ func (p *Provider) Authenticate(_ context.Context, token string) (*credential.Ca
 		return nil, fmt.Errorf("%w: parse claims: %v", credential.ErrTokenInvalid, err)
 	}
 
-	// Validate exp / nbf.
-	if exp, ok := credential.ParseExpiresAt(claims["exp"]); ok && time.Now().After(exp) {
+	if exp, ok := credential.ParseExpiresAt(claims["exp"]); ok && time.Now().After(exp.Add(p.cfg.Leeway)) {
 		return nil, fmt.Errorf("%w: token expired", credential.ErrTokenInvalid)
 	}
-
-	// Validate iss / aud.
+	if nbf, ok := credential.ParseExpiresAt(claims["nbf"]); ok && time.Now().Before(nbf.Add(-p.cfg.Leeway)) {
+		return nil, fmt.Errorf("%w: token not yet valid", credential.ErrTokenInvalid)
+	}
 	if p.cfg.Issuer != "" {
 		if iss, _ := claims["iss"].(string); iss != p.cfg.Issuer {
 			return nil, fmt.Errorf("%w: bad issuer", credential.ErrTokenInvalid)
@@ -153,7 +157,6 @@ func (p *Provider) Authenticate(_ context.Context, token string) (*credential.Ca
 }
 
 func (p *Provider) verifySignature(header, payload, sig string) error {
-	// Decode header to confirm alg.
 	hBytes, err := base64.RawURLEncoding.DecodeString(header)
 	if err != nil {
 		return fmt.Errorf("%w: decode header: %v", credential.ErrTokenInvalid, err)
@@ -164,8 +167,12 @@ func (p *Provider) verifySignature(header, payload, sig string) error {
 	if err := json.Unmarshal(hBytes, &h); err != nil {
 		return fmt.Errorf("%w: parse header: %v", credential.ErrTokenInvalid, err)
 	}
-	if h.Alg != p.cfg.Algorithm {
-		return fmt.Errorf("%w: alg mismatch (got %q want %q)", credential.ErrTokenInvalid, h.Alg, p.cfg.Algorithm)
+	algo := p.cfg.Algorithm
+	if algo == "" {
+		algo = "HS256"
+	}
+	if h.Alg != algo {
+		return fmt.Errorf("%w: alg mismatch (got %q want %q)", credential.ErrTokenInvalid, h.Alg, algo)
 	}
 	sigBytes, err := base64.RawURLEncoding.DecodeString(sig)
 	if err != nil {
@@ -173,7 +180,7 @@ func (p *Provider) verifySignature(header, payload, sig string) error {
 	}
 	signing := header + "." + payload
 
-	switch p.cfg.Algorithm {
+	switch algo {
 	case "HS256":
 		mac := hmac.New(sha256.New, p.cfg.Secret)
 		mac.Write([]byte(signing))
@@ -187,6 +194,22 @@ func (p *Provider) verifySignature(header, payload, sig string) error {
 		}
 	}
 	return nil
+}
+
+// audienceMatches returns true if claim aud (string or []any) contains
+// the expected value.
+func audienceMatches(aud any, expected string) bool {
+	switch x := aud.(type) {
+	case string:
+		return x == expected
+	case []any:
+		for _, v := range x {
+			if s, ok := v.(string); ok && s == expected {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // parseRSAPublicKey parses a PEM-encoded RSA public key (PKIX or PKCS1).
@@ -206,20 +229,4 @@ func parseRSAPublicKey(pemBytes []byte) (*rsa.PublicKey, error) {
 		return pub, nil
 	}
 	return nil, errors.New("failed to parse RSA public key")
-}
-
-// audienceMatches returns true if claim aud (string or []any) contains
-// the expected value.
-func audienceMatches(aud any, expected string) bool {
-	switch x := aud.(type) {
-	case string:
-		return x == expected
-	case []any:
-		for _, v := range x {
-			if s, ok := v.(string); ok && s == expected {
-				return true
-			}
-		}
-	}
-	return false
 }

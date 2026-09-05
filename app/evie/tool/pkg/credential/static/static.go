@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"backend-service/pkg/credential"
+	"backend-service/app/evie/tool/pkg/credential"
 )
 
 // User is a single (token, identity) pair.
