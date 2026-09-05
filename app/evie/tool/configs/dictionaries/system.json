@@ -1,0 +1,33 @@
+{
+  "version": "2026-09-01",
+  "entries": [
+    {
+      "standard_text": "金种籽",
+      "category": "PRODUCT",
+      "priority": 100,
+      "aliases": ["金种子", "金种仔"],
+      "corrections": [],
+      "homophones": ["金中子", "金种种"]
+    },
+    {
+      "standard_text": "指令官",
+      "category": "PRODUCT",
+      "priority": 90,
+      "aliases": [""],
+      "corrections": [],
+      "homophones": ["纸灵官", "指令关"]
+    },
+    {
+      "standard_text": "技术研发部",
+      "category": "ORGANIZATION",
+      "priority": 80,
+      "aliases": ["研发部", "技术部"],
+      "corrections": [],
+      "homophones": []
+    }
+  ],
+  "phrase_rules": [
+    {"from": "个种籽", "to": "颗种籽"},
+    {"from": "个种子", "to": "颗种籽"}
+  ]
+}

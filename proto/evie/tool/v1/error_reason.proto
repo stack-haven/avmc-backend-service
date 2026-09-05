@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package evie.tool.v1;
+
+import "errors/errors.proto";
+
+option go_package = "backend-service/api/evie/tool/v1;v1";
+option java_multiple_files = true;
+option java_package = "evie.tool.v1";
+
+// 错误原因枚举（evie/tool 独立错误体系，不复用 evie.service.v1）。
+// 编号规则：
+//   0       UNSPECIFIED
+//   1~99    HTTP 标准错误
+//   100~199 认证 / Token 相关
+//   200~299 Qua 上游错误
+//   300~399 ASR Provider 错误
+//   400~499 文本增强 / 词库错误
+//   500+    通用 / 内部错误
+enum ErrorReason {
+  option (errors.default_code) = 500;
+
+  // ===== 标准 HTTP 错误 =====
+  RESERVED_DEFAULT    = 0  [(errors.code) = 500];
+  BAD_REQUEST         = 1  [(errors.code) = 400];
+  UNAUTHORIZED        = 2  [(errors.code) = 401];
+  ACCESS_FORBIDDEN    = 3  [(errors.code) = 403];
+  RESOURCE_NOT_FOUND  = 4  [(errors.code) = 404];
+  INTERNAL_ERROR      = 5  [(errors.code) = 500];
+  SERVICE_UNAVAILABLE = 6  [(errors.code) = 503];
+
+  // ===== Token / 认证 =====
+  TOKEN_MISSING         = 100 [(errors.code) = 401];
+  TOKEN_INVALID         = 101 [(errors.code) = 401]; // Redis 不存在 / JSON 非法
+  TOKEN_LOOKUP_FAILED   = 102 [(errors.code) = 500]; // Redis 故障
+  TOKEN_PAYLOAD_INVALID = 103 [(errors.code) = 401]; // 缺少 tenantId/userId
+
+  // ===== Qua 上游错误 =====
+  QUA_UNREACHABLE         = 200 [(errors.code) = 502];
+  QUA_BAD_REQUEST         = 201 [(errors.code) = 502];
+  QUA_UNAUTHORIZED        = 202 [(errors.code) = 502];
+  QUA_FORBIDDEN           = 203 [(errors.code) = 502];
+  QUA_NOT_FOUND           = 204 [(errors.code) = 502];
+  QUA_INTERNAL_ERROR      = 205 [(errors.code) = 502];
+  QUA_INVALID_RESPONSE    = 206 [(errors.code) = 502]; // JSON 解析失败
+
+  // ===== ASR Provider 错误 =====
+  ASR_PROVIDER_NOT_ENABLED     = 300 [(errors.code) = 503];
+  ASR_PROVIDER_RECOGNIZE_FAIL  = 301 [(errors.code) = 500];
+  ASR_PROVIDER_INVALID_AUDIO   = 302 [(errors.code) = 400];
+  ASR_AUDIO_TOO_LARGE          = 303 [(errors.code) = 413];
+  ASR_STREAM_BROKEN            = 304 [(errors.code) = 500];
+
+  // ===== 文本增强 / 词库 =====
+  ENHANCEMENT_VOCAB_NOT_READY  = 400 [(errors.code) = 503];
+  ENHANCEMENT_TEXT_INVALID     = 401 [(errors.code) = 400];
+  ENHANCEMENT_STEP_FAILED      = 402 [(errors.code) = 500]; // 单步失败不阻断，warn + 跳过
+}

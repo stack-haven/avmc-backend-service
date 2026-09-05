@@ -1,0 +1,176 @@
+syntax = "proto3";
+package kratos.api;
+
+option go_package = "backend-service/app/evie/tool/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+// Bootstrap 全量配置根（包含 server + data + qua + asr + enhancement + tenant_vocab + system_dict + tenant_registry + vocab_rules）。
+message Bootstrap {
+  Server server = 1;
+  Data data = 2;
+  Qua qua = 3;
+  Asr asr = 4;
+  Enhancement enhancement = 5;
+  TenantVocab tenant_vocab = 6;
+  SystemDict system_dict = 7;
+  TenantRegistry tenant_registry = 8;
+  VocabRules vocab_rules = 9;
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  message GRPC {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  HTTP http = 1;
+  GRPC grpc = 2;
+}
+
+message Data {
+  message Database {
+    string driver = 1;
+    string source = 2;
+  }
+  message Redis {
+    string network = 1;
+    string addr = 2;
+    string password = 3;
+    int32 db = 4;
+    google.protobuf.Duration read_timeout = 5;
+    google.protobuf.Duration write_timeout = 6;
+    // 访问令牌在 Redis 中的 key 前缀；qua 默认 oauth2_access_token:。
+    string token_key_prefix = 7;
+  }
+  Database database = 1;
+  Redis redis = 2;
+}
+
+// Qua 外部系统对接配置（Q1/Q5/Q6）。
+message Qua {
+  string base_url = 1;
+  google.protobuf.Duration timeout = 2;
+  bool forward_user_token = 3; // 调用 qua 时透传当前用户 Authorization
+  message Endpoints {
+    string list_users = 1;
+    string list_depts = 2;
+    // 预留：单租户用户 / 部门详情
+    string get_user = 3;
+    string get_dept = 4;
+  }
+  Endpoints endpoints = 4;
+  // 全量拉取时单页大小；qua 默认 10，需调大避免多次循环。
+  int32 page_size = 5;
+  // Qua 接口要求的 tenant 头字段名（如 "tenant-id"）；空 = 不传。
+  string tenant_header = 6;
+  // 额外静态 header（如 zone: Asia/Shanghai）；运行时不携带运行时参数。
+  map<string, string> extra_headers = 7;
+}
+
+// Asr ASR 配置（Q7）。
+message Asr {
+  string default_batch_provider = 1;   // 整段识别首选：funasr
+  string default_stream_provider = 2;  // 流式识别首选：xunfei
+
+  message Upload {
+    string audio_dir = 1; // 相对工作目录
+    int32 retention_days = 2; // 0=永久
+  }
+  Upload upload = 3;
+
+  message Provider {
+    bool enabled = 1;
+    // FunASR 字段
+    string addr = 10;
+    string stream_addr = 11;
+    int32 sample_rate = 12;
+    string language = 13;
+    // 讯飞字段
+    string host = 14;
+    string uri = 15;
+    string app_id = 20;
+    string api_key = 21;
+    string api_secret = 22;
+    // 通用预留字段
+    string region = 30;
+    string config_json = 31;
+  }
+
+  message Providers {
+    Provider funasr = 1;
+    Provider xunfei = 2;
+    Provider whisper = 3;
+    Provider aliyun = 4;
+  }
+  Providers providers = 4;
+}
+
+// Enhancement 8 层 Pipeline 配置。
+message Enhancement {
+  // pipeline 步骤顺序：cleaning/filler/vocabulary_matching/alias_resolution/deterministic_replacement/pinyin_correction/fuzzy_matching/context_correction/llm_reserved
+  repeated string pipeline = 1;
+  // 拼音自动替换阈值（默认 0.85；>= 阈值自动 REPLACE）。
+  double pinyin_threshold = 2;
+  // 模糊匹配自动替换阈值。
+  double fuzzy_auto_threshold = 3;
+  // 模糊匹配建议阈值（>= 阈值 SUGGEST；< 阈值 KEEP）。
+  double fuzzy_suggest_threshold = 4;
+  // LLM 步骤开关（保留位，默认 false）。
+  bool llm_enabled = 5;
+}
+
+// TenantVocab 租户词库同步配置（Q9）。
+message TenantVocab {
+  google.protobuf.Duration sync_interval = 1; // 默认 5m
+  bool initial_warmup = 2;                   // 启动时立即全量预热
+  int32 concurrency = 3;                     // 同步并发 worker 数
+  bool include_departments = 4;              // 是否把部门名作为标准词
+  bool include_user_nickname = 5;            // 是否收 qua userInfo.nickname（Q3）
+  bool include_user_realname = 6;            // 是否收 qua realname（Q3）
+  // qua 透传时的自定义别名字段（Q3：qua 不提供 alias 时留空）。
+  string custom_alias_field = 7;
+}
+
+// SystemDict 系统静态词条（Q8）。
+message SystemDict {
+  string path = 1;       // 相对工作目录
+  bool hot_reload = 2;   // fsnotify 监听变更
+}
+
+// TenantRegistry 租户注册表（Q9：tenants.json）。
+message TenantRegistry {
+  string path = 1; // 相对工作目录
+}
+
+// VocabRules 外部系统词条规则（Q13：解耦外部数据）。
+//
+// 例：qua 用户的 realName → standard_text / nickname → alias
+// 字段路径采用 dot-notation；include_when 使用简单语法（==/!=/真值）。
+message VocabRules {
+  message EntityMapping {
+    message Match {
+      string entity_type = 1;
+    }
+    message Emit {
+      string standard_text = 1;          // dot-path，必填
+      string category = 2;                // PERSON / ORGANIZATION ...
+      repeated string aliases = 3;        // dot-path 列表
+      string pinyin_hint = 4;             // dot-path（空表示不派生拼音）
+      string priority = 5;                // dot-path 或字面量
+      string include_when = 6;            // 简单条件表达式
+    }
+    Match match = 1;
+    Emit emit = 2;
+  }
+  message SourceRules {
+    string source = 1;
+    repeated EntityMapping entity_mappings = 2;
+  }
+  map<string, SourceRules> sources = 1;   // key = source name (qua / feishu / ...)
+}

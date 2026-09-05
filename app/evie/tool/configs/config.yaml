@@ -1,0 +1,130 @@
+server:
+  http:
+    addr: 0.0.0.0:8110
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9110
+    timeout: 30s
+
+data:
+  redis:
+    network: tcp
+    addr: 172.16.0.112:6379
+    password: "123456"
+    db: 14
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+    # Q2：qua token 在 Redis 的 key 形态
+    token_key_prefix: "oauth2_access_token:"
+
+# Q1/Q5/Q6：外部 qua 系统 HTTP 对接（确认的端点路径）
+qua:
+  base_url: "http://api.bdksim-pro.test.bedoke.com"
+  timeout: 10s
+  forward_user_token: true
+  endpoints:
+    # 部门列表（GET，无分页参数；一次性返回该租户全部部门）
+    list_depts: "/admin-api/system/dept/list"
+    # 租户用户列表（POST /admin-api/qua/member-extended/page，selectAll=true 一次性返回）
+    list_users: "/admin-api/qua/member-extended/page"
+    # 预留
+    get_user: ""
+    get_dept: ""
+  # 全量时直接传 selectAll=true（覆盖 qua 默认分页）
+  page_size: 0
+  # qua 必须透传的额外 header
+  extra_headers:
+    # tenant-id 在 qua 端是数字（不是字符串）；值从 AuthInfo.TenantID 转 int
+    tenant-id: ""        # 运行时由 ctx 中 AuthInfo.TenantID 填入
+    zone: "Asia/Shanghai"
+
+# Q7：ASR Provider 配置（按 enabled 开关）
+asr:
+  default_batch_provider: funasr
+  default_stream_provider: xunfei
+  upload:
+    audio_dir: "./app/evie/tool/upload/audio"
+    retention_days: 0           # 0=永久
+  providers:
+    funasr:
+      enabled: true
+      addr: "http://127.0.0.1:18000"
+      stream_addr: ""           # 空 = 不流式
+      sample_rate: 16000
+      language: zh
+    # 讯飞凭证（确认：iat-api.xfyun.cn / v2/iat）
+    xunfei:
+      enabled: true
+      host: "iat-api.xfyun.cn"
+      uri: "/v2/iat"
+      app_id: "2d8c3dd7"
+      api_key: "641cdc25afd21421685c6ec2ce24149c"
+      api_secret: "MWEyMzg2ODhiMThhY2E2MWJmZWQ4YjQ4"
+      sample_rate: 16000
+    whisper:
+      enabled: false
+    aliyun:
+      enabled: false
+
+# 文本增强 8 层 Pipeline（顺序 + 阈值）
+enhancement:
+  pipeline:
+    - cleaning
+    - filler
+    - vocab_matching
+    - alias_resolution
+    - deterministic_replacement
+    - pinyin_correction
+    - fuzzy_matching
+    - context_correction
+    # - llm_reserved  # 保留位，未启用
+  pinyin_threshold: 0.85
+  fuzzy_auto_threshold: 0.80
+  fuzzy_suggest_threshold: 0.60
+  llm_enabled: false
+
+# Q9：租户词库同步
+tenant_vocab:
+  sync_interval: 300s
+  initial_warmup: true
+  concurrency: 4
+  include_departments: true
+  include_user_nickname: true   # Q3
+  include_user_realname: true   # Q3
+  custom_alias_field: "alias"   # Q3：qua 透传别名字段（qua 暂无，留作预留）
+
+# Q8：系统静态词条
+system_dict:
+  path: "./app/evie/tool/configs/dictionaries/system.json"
+  hot_reload: true
+
+# Q9：租户注册表
+tenant_registry:
+  path: "./app/evie/tool/configs/tenants.json"
+
+# Q13：外部系统词条规则（YAML 配置，零代码接入新 source）
+# Normalizer 按这里的 mapping 把 RawEntity → NormalizedEntry。
+vocab_rules:
+  sources:
+    qua:
+      entity_mappings:
+        # 用户实体映射（qua 用户字段：id / name / mobile / deptName / orgId / status）
+        - match:
+            entity_type: "user"
+          emit:
+            standard_text: "name"             # qua 实际返回字段是 "name"（实测）
+            category: "PERSON"
+            aliases:
+              - "mobile"                       # 手机号作为辅助别名（人名 = 手机号 → 人名）
+            pinyin_hint: "name"
+            priority: "50"
+            include_when: "status==1"          # 只取启用用户（status=1）
+        # 部门实体映射
+        - match:
+            entity_type: "department"
+          emit:
+            standard_text: "name"
+            category: "ORGANIZATION"
+            pinyin_hint: "name"
+            priority: "30"
+            # 部门默认全取（不设 include_when）

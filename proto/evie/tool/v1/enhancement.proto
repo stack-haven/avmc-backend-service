@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package evie.tool.v1;
+
+import "google/api/annotations.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "buf/validate/validate.proto";
+import "evie/tool/v1/asr.proto";
+
+option go_package = "backend-service/api/evie/tool/v1;v1";
+option java_multiple_files = true;
+option java_package = "evie.tool.v1";
+
+// EnhancementService 纯文本增强（不调 ASR）。
+service EnhancementService {
+  rpc EnhanceText(EnhanceTextRequest) returns (EnhanceTextResponse) {
+    option (google.api.http) = {
+      post: "/evie/tool/v1/enhance"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "文本增强"
+      tags: ["文本增强"]
+    };
+  }
+}
+
+message EnhanceTextRequest {
+  string text = 1 [(buf.validate.field).string.min_len = 1];
+}
+message EnhanceTextResponse {
+  string original_text = 1;
+  string enhanced_text = 2;
+  repeated EnhanceChange changes = 3;
+  int32 status = 4; // 1=SUCCESS 2=DEGRADED
+  int64 processing_time_ms = 5;
+  int64 cleaning_time_ms = 6;
+  int64 filler_time_ms = 7;
+  int64 vocab_match_time_ms = 8;
+  int64 alias_time_ms = 9;
+  int64 deterministic_time_ms = 10;
+  int64 pinyin_time_ms = 11;
+  int64 fuzzy_time_ms = 12;
+  int64 context_time_ms = 13;
+  string error_message = 14;
+}
+
+// AdminService 运维接口（同步状态查询 + 手动触发）。
+service AdminService {
+  rpc GetVocabSyncStatus(GetVocabSyncStatusRequest) returns (GetVocabSyncStatusResponse) {
+    option (google.api.http) = {get: "/evie/tool/v1/admin/vocab/status"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询词库同步状态",
+      tags: ["运维"]
+    };
+  }
+  rpc TriggerVocabSync(TriggerVocabSyncRequest) returns (TriggerVocabSyncResponse) {
+    option (google.api.http) = {
+      post: "/evie/tool/v1/admin/vocab:sync"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "手动触发词库同步",
+      tags: ["运维"]
+    };
+  }
+}
+
+// TenantVocabStatus 单租户词库同步状态。
+message TenantVocabStatus {
+  string tenant_id = 1;
+  int64 last_sync_at_ms = 2;
+  int64 entry_count = 3;
+  int64 relation_count = 4;
+  // OK / SYNCING / FAILED / NEVER
+  string status = 5;
+  string last_error = 6;
+}
+
+message GetVocabSyncStatusRequest {}
+message GetVocabSyncStatusResponse {
+  repeated TenantVocabStatus tenants = 1;
+  int64 system_entry_count = 2;
+  int64 system_relation_count = 3;
+}
+
+message TriggerVocabSyncRequest {
+  // 空字符串 = 全部租户
+  string tenant_id = 1;
+}
+message TriggerVocabSyncResponse {
+  int32 triggered = 1;
+}

@@ -1,0 +1,38 @@
+# Evie Tool 系统静态词条格式说明
+
+## 文件位置
+- 默认：`backend-service/app/evie/tool/configs/dictionaries/system.json`
+- 可通过 `configs/config.yaml` 中 `system_dict.path` 修改
+
+## 格式（JSON，热加载）
+
+```json
+{
+  "version": "2026-09-01",
+  "entries": [
+    {
+      "standard_text": "金种籽",          // 标准词
+      "category": "PRODUCT",              // PERSON / ORGANIZATION / PRODUCT / LOCATION / TERM / OTHER
+      "priority": 100,                    // 越大越优先
+      "aliases":     ["金种子"],          // ALIAS 关系（确定性别名）
+      "corrections": ["金种仔"],          // CORRECTION 关系（确定性纠错）
+      "homophones":  ["金中子"]           // HOMOPHONE 关系（拼音纠错，confidence=0.85）
+    }
+  ],
+  "phrase_rules": [
+    {"from": "个种籽", "to": "颗种籽"}    // 短语标准化（确定性）
+  ]
+}
+```
+
+## 自动派生
+- 每个 `standard_text` 加载时会自动通过 `pkg/pinyin` 计算全拼 + 首字母
+- 拼音同音条目与 `homophones` 合并去重
+
+## 热加载
+- `system_dict.hot_reload=true` 时，`SystemDictLoader` 用 `fsnotify` 监听 `WRITE/RENAME` 事件
+- 文件变更后自动重新加载到 `VocabularyBuilder`，对调用方无感
+
+## 范围
+- 仅 `entries.standard_text` 落入 system 级 `VocabularyContext`，所有租户共享
+- 租户级词库（qua 同步来的用户/部门）单独存放，互不影响

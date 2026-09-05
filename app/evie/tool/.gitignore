@@ -1,0 +1,10 @@
+# evie/tool gitignore
+# 测试 / 调试
+*.log
+*.tmp
+# 生成代码（由 make config / make proto 产生）
+internal/conf/conf.pb.go
+internal/biz/upload/audio
+# 运行时数据
+configs/tenants.json
+upload/audio

@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package evie.tool.v1;
+
+import "google/api/annotations.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "buf/validate/validate.proto";
+
+option go_package = "backend-service/api/evie/tool/v1;v1";
+option java_multiple_files = true;
+option java_package = "evie.tool.v1";
+
+// ASRService 同步 + 流式语音识别（轻量独立版）。
+service ASRService {
+  // Recognize 同步识别整段音频（≤60s），返回 raw_text + enhanced_text。
+  rpc Recognize(RecognizeRequest) returns (RecognizeResponse) {
+    option (google.api.http) = {
+      post: "/evie/tool/v1/asr:recognize"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "同步语音识别"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // StreamRecognize 流式识别（双向流，gRPC/HTTP2），最终帧携带 enhanced_text。
+  rpc StreamRecognize(stream AudioChunk) returns (stream StreamResult) {
+    option (gnostic.openapi.v3.operation) = {
+      summary: "流式语音识别"
+      tags: ["ASR识别"]
+    };
+  }
+
+  // ListRecords 查询本租户近 N 条识别记录（仅日志/内存级）。
+  rpc ListRecords(ListAsrRecordsRequest) returns (ListAsrRecordsResponse) {
+    option (google.api.http) = {get: "/evie/tool/v1/asr/records"};
+    option (gnostic.openapi.v3.operation) = {summary: "查询识别记录", tags: ["ASR识别"]};
+  }
+
+  // GetRecord 查询单条识别记录。
+  rpc GetRecord(GetRecordRequest) returns (AsrRecord) {
+    option (google.api.http) = {get: "/evie/tool/v1/asr/records/{id}"};
+    option (gnostic.openapi.v3.operation) = {summary: "查询识别记录详情", tags: ["ASR识别"]};
+  }
+
+  // GetRecordAudio 取原始音频（直接读本地 upload/audio）。
+  rpc GetRecordAudio(GetRecordAudioRequest) returns (GetRecordAudioResponse) {
+    option (google.api.http) = {get: "/evie/tool/v1/asr/records/{id}/audio"};
+    option (gnostic.openapi.v3.operation) = {summary: "查询识别记录原始音频", tags: ["ASR识别"]};
+  }
+}
+
+// AudioFormat 音频格式描述。
+message AudioFormat {
+  // pcm/wav/mp3/opus
+  string encoding = 1;
+  int32 sample_rate = 2;
+  int32 bit_depth = 3; // 默认 16
+  int32 channels = 4;   // 默认 1
+}
+
+// RecognizeRequest 同步识别请求。
+message RecognizeRequest {
+  AudioFormat format = 1;
+  bytes audio_data = 2 [(buf.validate.field).bytes.max_len = 10485760]; // 10MB
+  // 可选客户端传入 session_id；空则服务端生成 UUIDv4。
+  string session_id = 3;
+  // 是否在识别后执行 8 层文本增强；默认 true。
+  bool enable_enhancement = 4;
+}
+
+// RecognizeResponse 同步识别响应。
+message RecognizeResponse {
+  string request_id = 1;
+  string session_id = 2;
+  string raw_text = 3;
+  string enhanced_text = 4;
+  float confidence = 5;
+  int64 duration_ms = 6;
+  bool is_final = 7;
+  string provider_name = 8;
+  // 相对工具工作目录的音频路径，如 upload/audio/<tenant>/<session>.wav
+  string audio_path = 9;
+  repeated EnhanceChange changes = 10;
+  int32 status = 11; // 1=SUCCESS 2=DEGRADED
+  int64 processing_time_ms = 12;
+  int64 cleaning_time_ms = 13;
+  int64 filler_time_ms = 14;
+  int64 vocab_match_time_ms = 15;
+  int64 alias_time_ms = 16;
+  int64 deterministic_time_ms = 17;
+  int64 pinyin_time_ms = 18;
+  int64 fuzzy_time_ms = 19;
+  int64 context_time_ms = 20;
+  string error_message = 21;
+}
+
+// AudioChunk 流式分片。
+message AudioChunk {
+  bytes data = 1;
+  int64 timestamp_ms = 2;
+}
+
+// StreamResult 流式结果。
+message StreamResult {
+  string request_id = 1;
+  string session_id = 2;
+  string text = 3; // 增量或累积（由实现约定）
+  bool is_final = 4;
+  float confidence = 5;
+  int64 timestamp_ms = 6;
+  // 仅 is_final=true 时填充
+  string audio_path = 7;
+  string enhanced_text = 8;
+}
+
+// AsrRecord 识别记录（不落库版本：从内存 ring buffer 读取）。
+message AsrRecord {
+  // session_id 直接作为记录 id
+  string id = 1;
+  string user_id = 2;
+  string tenant_id = 3;
+  string raw_text = 4;
+  string enhanced_text = 5;
+  string audio_path = 6;
+  string provider_name = 7;
+  string created_at = 8; // RFC3339
+}
+
+message ListAsrRecordsRequest {
+  int32 page_size = 1; // 默认 20
+  string page_token = 2;
+}
+message ListAsrRecordsResponse {
+  repeated AsrRecord records = 1;
+  int32 total = 2;
+  string next_page_token = 3;
+}
+
+message GetRecordRequest {
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+}
+message GetRecordAudioRequest {
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+}
+message GetRecordAudioResponse {
+  bytes audio_data = 1;
+  string content_type = 2;
+}
+
+// EnhanceChange 增强步骤变更项（被 enhancement.proto 复用）。
+message EnhanceChange {
+  string from = 1;
+  string to = 2;
+  // KEEP/REPLACE/DELETE/SUGGEST/RESOLVE
+  string action = 3;
+  // CLEAN/FILLER/ALIAS/CORRECTION/PINYIN/FUZZY/CONTEXT/PHRASE
+  string type = 4;
+  // SYSTEM/TENANT_DICTIONARY/QUA_TENANT_USER/QUA_TENANT_DEPT
+  string source = 5;
+  float confidence = 6;
+  bool locked = 7;
+  string reason = 8;
+}

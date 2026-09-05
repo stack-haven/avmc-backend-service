@@ -1,0 +1,19 @@
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Local build artifacts
+*.test
+*.out
+coverage.out
+coverage.html
+*.prof
+
+# Dependency caches
+vendor/
+
+# Local overrides
+.env
+.env.local
