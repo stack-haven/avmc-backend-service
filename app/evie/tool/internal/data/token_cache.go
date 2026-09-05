@@ -1,35 +1,35 @@
 // Package data · token_cache.go
-// TokenCache：Bearer Token → qua Redis 验证。
+// TokenCache 薄包装：委托给 pkg/credential/redis.Provider，保留旧 API 兼容。
 //
 // qua token 在 Redis 中的 key 形态（Q2）：
 //   key:   oauth2_access_token:<token>
 //   value: {"tenantId":"...","id":"...","accessToken":"...","userId":"...",
 //           "userType":2,"userInfo":{"nickname":"...","deptId":"..."},"expiresTime":1788491296083}
 //
-// 本文件定义：
-//   1. AuthInfo：从 qua JSON 反序列化得到的本工具视图（不依赖 quag 内部结构）
-//   2. TokenCache：Redis GET 抽象，区分 redis.Nil / JSON 错误 / 连接故障
+// 本文件保留：
+//  1. AuthInfo：本工具视图（service 层 proto 反序列化用）
+//  2. TokenCache：薄包装，构造时初始化 credential.Provider，Get 委托
+//  3. ErrTokenNotFound / ErrTokenInvalid 错误类型（service 层引用）
 //
-// 编译阶段处于 M0，本文件仅保留类型与构造函数骨架；
-// M2 阶段实现 Get 方法 + SecurityUser/ctxKey。
+// 新代码应直接用 pkg/credential + pkg/credential/redis。
 package data
 
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 
 	"github.com/redis/go-redis/v9"
 
 	"backend-service/app/evie/tool/internal/conf"
+	"backend-service/pkg/credential"
+	credredis "backend-service/pkg/credential/redis"
 )
 
 // ErrTokenNotFound 表示 token 在 Redis 中不存在（已过期或被踢下线）。
-var ErrTokenNotFound = errors.New("token not found in redis")
+var ErrTokenNotFound = credential.ErrTokenNotFound
 
 // ErrTokenInvalid 表示 token value 反序列化失败。
-var ErrTokenInvalid = errors.New("token value is invalid json")
+var ErrTokenInvalid = credential.ErrTokenInvalid
 
 // AuthInfo 本工具视图的 token 解析结果。
 //
@@ -49,18 +49,18 @@ type AuthInfo struct {
 		DeptID   string `json:"deptId"`
 	} `json:"userInfo"`
 
-	ClientID   string  `json:"clientId"`
-	Scopes     any     `json:"scopes"`     // 保留原样
-	ExpiresAt  int64   `json:"expiresTime"` // epoch ms
+	ClientID  string `json:"clientId"`
+	Scopes    any    `json:"scopes"`      // 保留原样
+	ExpiresAt int64  `json:"expiresTime"` // epoch ms
 }
 
-// TokenCache 提供 Bearer Token → AuthInfo 的查询能力。
+// TokenCache 提供 Bearer Token → AuthInfo 的查询能力（薄包装）。
 type TokenCache struct {
-	rdb    *redis.Client
-	prefix string // 默认 "oauth2_access_token:"
+	provider *credredis.Provider
+	prefix   string
 }
 
-// NewTokenCache 创建 TokenCache。
+// NewTokenCache 创建 TokenCache（薄包装 credential/redis.Provider）。
 //
 //   rdb:    已连接 Redis（与 qua 共享 db）
 //   prefix: Redis key 前缀，从 conf.Data.Redis.TokenKeyPrefix 注入
@@ -69,7 +69,22 @@ func NewTokenCache(rdb *redis.Client, redisConf *conf.Data_Redis) *TokenCache {
 	if prefix == "" {
 		prefix = "oauth2_access_token:"
 	}
-	return &TokenCache{rdb: rdb, prefix: prefix}
+	provider, _ := credredis.New(credredis.Config{
+		Client:    rdb,
+		KeyPrefix: prefix,
+		Fields: credredis.FieldMapper{
+			TenantID:     "tenantId",
+			UserID:       "userId",
+			UserName:     "userInfo.nickname",
+			DeptID:       "userInfo.deptId",
+			UserType:     "userType",
+			AccessToken:  "accessToken",
+			RefreshToken: "refreshToken",
+			Scopes:       "scopes",
+			ExpiresAt:    "expiresTime",
+		},
+	})
+	return &TokenCache{provider: provider, prefix: prefix}
 }
 
 // Key 拼接 Redis key（暴露给 test / 调试）。
@@ -77,23 +92,61 @@ func (t *TokenCache) Key(token string) string {
 	return t.prefix + token
 }
 
-// Get 查询 AuthInfo（M2 阶段实现完整逻辑）。
+// Get 查询 AuthInfo（委托给 pkg/credential/redis.Provider 后转回本工具视图）。
 //
 // 错误语义：
-//   redis.Nil           → ErrTokenNotFound
-//   json.Unmarshal 失败 → ErrTokenInvalid
-//   其它                → 包装原 error
+//   credential.ErrTokenNotFound → ErrTokenNotFound
+//   credential.ErrTokenInvalid  → ErrTokenInvalid
+//   其它 → 原 error
 func (c *TokenCache) Get(ctx context.Context, token string) (*AuthInfo, error) {
-	raw, err := c.rdb.Get(ctx, c.Key(token)).Result()
+	id, err := c.provider.Authenticate(ctx, token)
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			return nil, ErrTokenNotFound
+		return nil, err
+	}
+	return identityToAuthInfo(id), nil
+}
+
+// identityToAuthInfo 把 credential.CallerIdentity 转为 data.AuthInfo。
+//
+// 保留原 AuthInfo JSON 形态供 service 层反序列化用。
+func identityToAuthInfo(id *credential.CallerIdentity) *AuthInfo {
+	if id == nil {
+		return nil
+	}
+	info := &AuthInfo{
+		TenantID:     id.TenantID,
+		ID:           id.UserID,
+		AccessToken:  id.AccessToken,
+		RefreshToken: id.RefreshToken,
+		UserID:       id.UserID,
+		ExpiresAt:    id.ExpiresAt.UnixMilli(),
+		Scopes:       id.Scopes,
+	}
+	info.UserType = id.UserType
+	if m, ok := id.Raw.(map[string]any); ok {
+		if ui, ok := m["userInfo"].(map[string]any); ok {
+			info.UserInfo.Nickname = credLookupString(ui, "nickname")
+			info.UserInfo.DeptID = credLookupString(ui, "deptId")
 		}
-		return nil, fmt.Errorf("redis GET: %w", err)
+		info.ClientID = credLookupString(m, "clientId")
 	}
-	var info AuthInfo
-	if err := json.Unmarshal([]byte(raw), &info); err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrTokenInvalid, err)
+	if info.AccessToken == "" {
+		info.AccessToken = id.AccessToken
 	}
-	return &info, nil
+	return info
+}
+
+func credLookupString(m map[string]any, key string) string {
+	v, ok := m[key]
+	if !ok {
+		return ""
+	}
+	switch x := v.(type) {
+	case string:
+		return x
+	case float64:
+		bs, _ := json.Marshal(int64(x))
+		return string(bs)
+	}
+	return ""
 }
