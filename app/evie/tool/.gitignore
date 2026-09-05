@@ -7,4 +7,3 @@ internal/conf/conf.pb.go
 internal/biz/upload/audio
 # 运行时数据
 configs/tenants.json
-upload/audio
