@@ -16,6 +16,7 @@ inputs:
       - ./version/service/v1
       - ./ai/service/v1
       - ./evie/service/v1
+      - ./evie/tool/v1
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.11
     out: ../api

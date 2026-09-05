@@ -45,8 +45,7 @@ deploy/sql/*.sql
 deploy/sql/*.sql.gz
 
 # 本地存储渠道运行时数据目录（local 渠道上传的文件）
-app/platform/service/upload/
-app/platform/service/uploads/
-app/platform/service/data/files/
 ./mock
 ./server
+pkg/lexnorm/.agents/DESIGN.md
+e2e_production

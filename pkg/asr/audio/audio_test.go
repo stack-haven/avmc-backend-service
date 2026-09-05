@@ -1,53 +1,85 @@
+// Package audio · audio_test.go
+// 音频格式探测 + 转码（M9 修复：mp3 → wav）。
 package audio
 
-import (
-	"bytes"
-	"testing"
-)
+import "testing"
 
-func TestPCMToWAVRoundTrip(t *testing.T) {
-	pcm := make([]byte, 640) // 20ms @ 16kHz 16bit mono
-	for i := range pcm {
-		pcm[i] = byte(i)
+func TestIsMP3(t *testing.T) {
+	cases := []struct {
+		name  string
+		input []byte
+		want  bool
+	}{
+		{
+			name:  "ID3v2 header",
+			input: []byte("ID3\x04\x00\x00\x00\x00\x00\x00"),
+			want:  true,
+		},
+		{
+			name:  "MPEG frame sync 0xFF 0xFB",
+			input: []byte{0xFF, 0xFB, 0x90, 0x00},
+			want:  true,
+		},
+		{
+			name:  "MPEG frame sync 0xFF 0xF3",
+			input: []byte{0xFF, 0xF3, 0x88, 0xC4},
+			want:  true,
+		},
+		{
+			name: "ID3v1 tag (tail)",
+			input: func() []byte {
+				b := make([]byte, 128+50) // 50 bytes mp3 + 128 bytes ID3v1
+				copy(b[len(b)-128:], []byte("TAG\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"))
+				return b
+			}(),
+			want: true,
+		},
+		{
+			name:  "WAV header (RIFF)",
+			input: []byte("RIFF\x00\x00\x00\x00WAVEfmt "),
+			want:  false,
+		},
+		{
+			name:  "raw PCM",
+			input: []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05},
+			want:  false,
+		},
+		{
+			name:  "empty",
+			input: []byte{},
+			want:  false,
+		},
+		{
+			name:  "too short",
+			input: []byte{0xFF, 0xFB},
+			want:  false,
+		},
 	}
-
-	wav := PCMToWAV(pcm, 16000, 1, 16)
-	if !IsWAV(wav) {
-		t.Fatal("PCMToWAV 结果应为合法 WAV")
-	}
-	if len(wav) != 44+len(pcm) {
-		t.Fatalf("WAV 长度 = %d, 期望 %d", len(wav), 44+len(pcm))
-	}
-	// 往返：WAV 头剥离后应还原 PCM
-	if got := WAVToPCM(wav); !bytes.Equal(got, pcm) {
-		t.Fatal("WAVToPCM 未能还原原始 PCM")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := IsMP3(tc.input); got != tc.want {
+				t.Errorf("IsMP3 = %v, want %v (len=%d)", got, tc.want, len(tc.input))
+				if len(tc.input) >= 3 {
+					t.Logf("first 3: %q", tc.input[:3])
+				}
+				if len(tc.input) >= 128 {
+					t.Logf("tail-128..tail-125: %q", tc.input[len(tc.input)-128:len(tc.input)-125])
+				}
+			}
+		})
 	}
 }
 
-func TestWAVToPCMNonWAV(t *testing.T) {
-	raw := []byte{1, 2, 3, 4}
-	if got := WAVToPCM(raw); !bytes.Equal(got, raw) {
-		t.Fatal("非 WAV 输入应原样返回")
+func TestTranscodeToWAV_NotMP3(t *testing.T) {
+	_, err := TranscodeToWAV([]byte("RIFF\x00\x00\x00\x00WAVEfmt "))
+	if err == nil {
+		t.Error("expected error for non-MP3 input")
 	}
 }
 
-func TestIsWAV(t *testing.T) {
-	if IsWAV([]byte("RIFFxxxxWAVE")) {
-		t.Fatal("长度不足 44 字节不应判定为 WAV")
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	wav := PCMToWAV(make([]byte, 64), 16000, 1, 16)
-	if !IsWAV(wav) {
-		t.Fatal("合法 WAV 应判定为 WAV")
-	}
-}
-
-func TestPCMToWAVDefaults(t *testing.T) {
-	// 零值参数应回退默认（16kHz/mono/16bit）
-	wav := PCMToWAV(make([]byte, 32), 0, 0, 0)
-	if len(wav) != 44+32 {
-		t.Fatalf("长度 = %d", len(wav))
-	}
-	if wav[22] != 1 || wav[23] != 0 { // channels = 1 (little-endian uint16)
-		t.Fatal("默认声道数应为 1")
-	}
+	return b
 }

@@ -6,6 +6,7 @@ require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.5-20250307204501-0409229c3780.1
 	entgo.io/ent v0.14.5
 	github.com/BurntSushi/toml v1.6.0
+	github.com/alicebob/miniredis/v2 v2.39.0
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.10+incompatible
 	github.com/casbin/casbin/v2 v2.135.0
 	github.com/envoyproxy/protoc-gen-validate v1.2.1
@@ -17,6 +18,7 @@ require (
 	github.com/google/wire v0.7.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/qiniu/go-sdk/v7 v7.21.1
 	github.com/stretchr/testify v1.11.0
@@ -63,7 +65,6 @@ require (
 	github.com/microsoft/go-mssqldb v1.6.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mozillazg/go-httpheader v0.2.1 // indirect
-	github.com/mozillazg/go-pinyin v0.20.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.8.0 // indirect
@@ -73,6 +74,7 @@ require (
 	github.com/stoewer/go-strcase v1.3.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
+	github.com/yuin/gopher-lua v1.1.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect

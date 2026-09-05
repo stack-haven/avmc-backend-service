@@ -5,7 +5,67 @@
 // 供各供应商实现与上层业务复用，避免重复实现。
 package audio
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"errors"
+	"os/exec"
+	"strings"
+)
+
+// IsMP3 判断音频是否为 MP3 格式（检查 ID3 头或帧同步 0xFFE）。
+//
+//   - ID3v1 (末尾 128B "TAG")
+//   - ID3v2 (起始 "ID3")
+//   - Frame sync：首字节 0xFF 且第二字节 0xE0..0xFF (11-bit sync + 2 版本位)
+//
+// 仅检测，不作转码；转码依赖调用方调用 TranscodeToWAV()。
+func IsMP3(audio []byte) bool {
+	if len(audio) < 4 {
+		return false
+	}
+	// ID3v2 头
+	if string(audio[0:3]) == "ID3" {
+		return true
+	}
+	// MP3 帧同步：首字节 0xFF，后 3 位为 111（11-bit sync）
+	if audio[0] == 0xFF && (audio[1]&0xE0) == 0xE0 {
+		return true
+	}
+	// ID3v1 尾部标签
+	if len(audio) >= 128 && string(audio[len(audio)-128:len(audio)-125]) == "TAG" {
+		return true
+	}
+	return false
+}
+
+// TranscodeToWAV 调用外置 ffmpeg 将压缩音频转 16kHz / mono / 16-bit WAV。
+//
+// 返回 WAV 字节。funasr 后端依赖 ffmpeg 加载音频，不接受 mp3/opus 原始字节。
+func TranscodeToWAV(audio []byte) ([]byte, error) {
+	if !IsMP3(audio) {
+		// 仅 mp3 走此路径；opus/wav/m4a 等暂不支持
+		return nil, errors.New("audio: TranscodeToWAV currently supports MP3 only")
+	}
+	// 优先 ffmpeg；fallback avconv
+	bin := "ffmpeg"
+	if _, err := exec.LookPath(bin); err != nil {
+		bin = "avconv"
+		if _, err2 := exec.LookPath(bin); err2 != nil {
+			return nil, errors.New("audio: ffmpeg/avconv not found in PATH")
+		}
+	}
+	cmd := exec.Command(bin,
+		"-f", "mp3", "-i", "pipe:0",
+		"-ar", "16000", "-ac", "1",
+		"-acodec", "pcm_s16le", "-f", "wav", "pipe:1",
+	)
+	cmd.Stdin = strings.NewReader(string(audio))
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
 
 // DefaultSampleRate 是 ASR 常用采样率（16kHz）。
 const DefaultSampleRate = 16000

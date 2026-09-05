@@ -100,8 +100,17 @@ func (p *Provider) Recognize(ctx context.Context, audio []byte, opts asr.Recogni
 	if sampleRate == 0 {
 		sampleRate = p.cfg.SampleRate
 	}
-	// 后端 funasr 服务依赖 ffmpeg 探测音频格式，raw PCM 需封装为 WAV 才能识别。
-	if !asraudio.IsWAV(audio) {
+	// 音频格式适配（顺序重要）：
+	//   1. MP3 → ffmpeg 转 16kHz/mono/16bit WAV（funasr 拒绝 mp3 原始字节）
+	//   2. WAV → 原样发送（funasr 能直接 ffmpeg 加载）
+	//   3. 其它 → 按 raw PCM 封装为 WAV
+	if asraudio.IsMP3(audio) {
+		wav, err := asraudio.TranscodeToWAV(audio)
+		if err != nil {
+			return nil, fmt.Errorf("funasr mp3 transcode: %w", err)
+		}
+		audio = wav
+	} else if !asraudio.IsWAV(audio) {
 		audio = asraudio.PCMToWAV(audio, sampleRate, 1, 16)
 	}
 	url := strings.TrimRight(p.cfg.Addr, "/") + "/recognize"
