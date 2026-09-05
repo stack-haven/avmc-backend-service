@@ -1,14 +1,14 @@
-// Package processors · snapshot.go
-// VocabularySnapshot：不可变词汇快照（per-request 安全共享）。
+// Package biz · vocab_snapshot.go
+// 词库快照类型（business-level，从 pkg/textenhance/processors 迁移而来）。
 //
-// 设计要点：
-//   1. 构造后不可变；Process 只读，不写
-//   2. 由各服务的 VocabularyBuilder.Build(ctx, tenantID) 返回
-//   3. 跨租户不可共享（每个租户一份独立快照）
-//   4. 空快照合法（首次启动 / 外部源故障时使用）
-package processors
+// M9.6 重构：原 pkg/textenhance/processors.VocabularySnapshot 等价物。
+// 设计原因：
+//   - 词库快照是 evie/tool 业务数据模型（per-tenant），不是通用文本增强概念
+//   - 把它放在 biz 包，与 lexnorm 解耦（lexnorm 用自己的 Lexicon 类型）
+//   - lexnorm_bridge.go 在 biz 内部把 snapshot → lexnorm.Lexicon
+package biz
 
-// VocabularyEntry 词汇条目（语言概念）。
+// VocabularyEntry 词汇条目。
 type VocabularyEntry struct {
 	ID            uint32
 	StandardText  string
@@ -29,13 +29,13 @@ type VocabularyRelation struct {
 
 // VocabularySnapshot 不可变快照（per-request）。
 type VocabularySnapshot struct {
-	Version      string
-	Entries      map[string]*VocabularyEntry      // standard_text → entry
-	Relations    map[string][]*VocabularyRelation // related_text → relations
-	lookupEntry  map[string]*VocabularyEntry      // alias for O(1) query
+	Version     string
+	Entries     map[string]*VocabularyEntry      // standard_text → entry
+	Relations   map[string][]*VocabularyRelation // related_text → relations
+	lookupEntry map[string]*VocabularyEntry      // alias for O(1) query
 }
 
-// NewVocabularySnapshot 构造快照（自动建索引）。
+// NewVocabularySnapshot 构造快照。
 func NewVocabularySnapshot(entries []*VocabularyEntry, relations []*VocabularyRelation) *VocabularySnapshot {
 	es := make(map[string]*VocabularyEntry, len(entries))
 	for _, e := range entries {

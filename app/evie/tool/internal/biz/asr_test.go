@@ -10,12 +10,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
-	"backend-service/app/evie/tool/internal/conf"
-
-	"backend-service/pkg/textenhance"
-	"backend-service/pkg/textenhance/builtins"
+	v1conf "backend-service/app/evie/tool/internal/conf"
 
 	asrPkg "backend-service/pkg/asr"
 )
@@ -95,12 +91,12 @@ func (m *mockStreamProvider) Capabilities() asrPkg.ProviderCapabilities {
 	return asrPkg.ProviderCapabilities{Name: m.Name(), Streaming: true, SupportedFormat: []string{"pcm"}}
 }
 
-func makeConf(t *testing.T, audioDir string) *conf.Asr {
+func makeConf(t *testing.T, audioDir string) *v1conf.Asr {
 	t.Helper()
-	return &conf.Asr{
+	return &v1conf.Asr{
 		DefaultBatchProvider:  "mock-batch",
 		DefaultStreamProvider: "mock-stream",
-		Upload: &conf.Asr_Upload{
+		Upload: &v1conf.Asr_Upload{
 			AudioDir:      audioDir,
 			RetentionDays: 7,
 		},
@@ -117,20 +113,11 @@ func makeEnhancer(t *testing.T, dir string) *biz.EnhancementUsecase {
 	if err != nil {
 		t.Fatalf("vocab builder: %v", err)
 	}
-	enhConf := &v1conf.Enhancement{
-		Pipeline:              []string{"cleaning", "filler", "vocab_matching", "alias_resolution", "deterministic_replacement", "phrase_standardization", "pinyin_correction", "fuzzy_matching", "context_correction"},
-		PinyinThreshold:       0.85,
-		FuzzyAutoThreshold:    0.80,
-		FuzzySuggestThreshold: 0.60,
-		LlmEnabled:            false,
-	}
-	policy := biz.NewPolicyFromConf(enhConf)
-	reg := builtins.NewDefaultRegistry()
-	pipe, err := textenhance.BuildPipeline(reg, policy)
+	engine, err := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
 	if err != nil {
-		t.Fatalf("BuildPipeline: %v", err)
+		t.Fatalf("NewLexnormEngine: %v", err)
 	}
-	return biz.NewEnhancementUsecase(pipe, vb, policy)
+	return biz.NewEnhancementUsecase(engine)
 }
 
 // TestASRUsecase_Recognize 测试整段识别：返回 raw/enhanced + 落盘 + ring buffer。

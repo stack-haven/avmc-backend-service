@@ -13,8 +13,6 @@ import (
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 
 	v1 "backend-service/api/evie/tool/v1"
-	"backend-service/pkg/textenhance"
-	"backend-service/pkg/textenhance/builtins"
 
 	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
@@ -36,14 +34,10 @@ func TestEnhancementService_HTTPRouteRegistered(t *testing.T) {
 
 	// 业务逻辑测试见 TestEnhancementService_GRPCServiceDirect
 	dictPath := writeSystemDict(t)
-	conf := &v1conf.Enhancement{
-		Pipeline: []string{"vocab_matching", "alias_resolution"},
-	}
+	_ = &v1conf.Enhancement{}
 	vb, _ := biz.NewVocabularyBuilder(&v1conf.SystemDict{Path: dictPath})
-	policy := biz.NewPolicyFromConf(conf)
-	reg := builtins.NewDefaultRegistry()
-	pipeline, _ := textenhance.BuildPipeline(reg, policy)
-	uc := biz.NewEnhancementUsecase(pipeline, vb, policy)
+	engine, _ := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	uc := biz.NewEnhancementUsecase(engine)
 	svc := service.NewEnhancementService(uc, log.DefaultLogger)
 
 	// 启动 HTTP server 并 POST（不带 token → 401；这是正确的行为）
@@ -70,14 +64,10 @@ func TestEnhancementService_HTTPRouteRegistered(t *testing.T) {
 // gRPC 客户端连接需要更复杂的 setup；端到端通过 service.EnhanceText 验证。
 func TestEnhancementService_GRPCServiceDirect(t *testing.T) {
 	dictPath := writeSystemDict(t)
-	conf := &v1conf.Enhancement{
-		Pipeline: []string{"vocab_matching", "alias_resolution"},
-	}
+	_ = &v1conf.Enhancement{}
 	vb, _ := biz.NewVocabularyBuilder(&v1conf.SystemDict{Path: dictPath})
-	policy := biz.NewPolicyFromConf(conf)
-	reg := builtins.NewDefaultRegistry()
-	pipeline, _ := textenhance.BuildPipeline(reg, policy)
-	uc := biz.NewEnhancementUsecase(pipeline, vb, policy)
+	engine, _ := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	uc := biz.NewEnhancementUsecase(engine)
 	svc := service.NewEnhancementService(uc, log.DefaultLogger)
 
 	// 直接调 service（gRPC 客户端 → service.EnhanceText 链路简化）

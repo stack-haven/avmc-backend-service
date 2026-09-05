@@ -93,7 +93,6 @@ func setupASR_E2E(t *testing.T) *asrE2EEnv {
 	tc := data.NewTokenCache(rdb, conf.Data.Redis)
 
 	vb, _ := biz.NewVocabularyBuilder(conf.SystemDict)
-	policy := biz.NewPolicyFromConf(conf.Enhancement)
 
 	// 4. ASR providers
 	batch := &e2eMockASRProvider{name: "e2e-mock-batch", text: "你好世界", confidence: 0.95}
@@ -121,7 +120,6 @@ func setupASR_E2E(t *testing.T) *asrE2EEnv {
 	pkgHealth.RegisterHTTP(khttpSrv, checker, 2*time.Second)
 	env.httpSrv = httptest.NewServer(khttpSrv)
 	_ = vb
-	_ = policy
 	return env
 }
 

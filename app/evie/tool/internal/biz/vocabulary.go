@@ -19,7 +19,6 @@ import (
 	"sync"
 	"time"
 
-	"backend-service/pkg/textenhance/processors"
 
 	"backend-service/app/evie/tool/internal/conf"
 )
@@ -33,11 +32,11 @@ type VocabularyBuilder struct {
 
 	// 租户快照缓存（key = tenantID）
 	tenantMu    sync.RWMutex
-	tenantSnaps map[string]*processors.VocabularySnapshot
+	tenantSnaps map[string]*VocabularySnapshot
 
 	// 全局 fallback（最后一次任意租户成功构建的快照；HA 兜底）
 	fallbackMu sync.RWMutex
-	fallback   *processors.VocabularySnapshot
+	fallback   *VocabularySnapshot
 
 	// lazySyncOnMiss 可选回调：Build 在 tenant 缓存 miss 时触发。
 	// 用于“按需同步”：请求路径上首次访问某 tenant 时同步一次。
@@ -77,7 +76,7 @@ func NewVocabularyBuilder(c *conf.SystemDict) (*VocabularyBuilder, error) {
 	}
 	b := &VocabularyBuilder{
 		conf:        c,
-		tenantSnaps: make(map[string]*processors.VocabularySnapshot),
+		tenantSnaps: make(map[string]*VocabularySnapshot),
 	}
 	if err := b.loadSystemDict(); err != nil {
 		// 启动期加载失败：记录 warn + 用空快照（不阻断启动）
@@ -168,7 +167,7 @@ func (b *VocabularyBuilder) resolveSystemDictCandidates() []string {
 //   4. EmptyVocabularySnapshot（启动期 / 全失败）
 //
 // 返回值永不为 nil；调用方拿不到 error（HA 简化）。
-func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *processors.VocabularySnapshot {
+func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *VocabularySnapshot {
 	if tenantID != "" {
 		b.tenantMu.RLock()
 		snap := b.tenantSnaps[tenantID]
@@ -199,11 +198,11 @@ func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *process
 	}
 
 	// 启动期 / 全失败
-	return processors.EmptyVocabularySnapshot()
+	return EmptyVocabularySnapshot()
 }
 
 // HasTenant 判断 tenant 是否已有非空 snapshot（用于 VocabSyncer.EnsureTenant 优化）。
-func (b *VocabularyBuilder) HasTenant(tenantID string) (*processors.VocabularySnapshot, bool) {
+func (b *VocabularyBuilder) HasTenant(tenantID string) (*VocabularySnapshot, bool) {
 	if tenantID == "" {
 		return nil, false
 	}
@@ -217,13 +216,13 @@ func (b *VocabularyBuilder) HasTenant(tenantID string) (*processors.VocabularySn
 //
 // entries / relations 来自 qua API → Normalizer 转换后的通用词条。
 // HA 行为：写入失败不抛；原快照保留。
-func (b *VocabularyBuilder) UpdateTenant(tenantID string, entries []*processors.VocabularyEntry, relations []*processors.VocabularyRelation) {
+func (b *VocabularyBuilder) UpdateTenant(tenantID string, entries []*VocabularyEntry, relations []*VocabularyRelation) {
 	if tenantID == "" {
 		return
 	}
 	// 合并：system entries + tenant entries（tenant 优先）
 	mergedEntries, mergedRelations := b.mergeWithSystem(entries, relations)
-	snap := processors.NewVocabularySnapshot(mergedEntries, mergedRelations)
+	snap := NewVocabularySnapshot(mergedEntries, mergedRelations)
 
 	b.tenantMu.Lock()
 	b.tenantSnaps[tenantID] = snap
@@ -264,15 +263,15 @@ func (b *VocabularyBuilder) ListTenants() []string {
 // 避免 system 与 tenant ID 冲突（如 system "金种籽"=ID1 与 tenant "万康盛鼎集团"=ID1 同 ID，
 // 导致 resolveTarget 找错 entry）。
 func (b *VocabularyBuilder) mergeWithSystem(
-	tenantEntries []*processors.VocabularyEntry,
-	tenantRelations []*processors.VocabularyRelation,
-) ([]*processors.VocabularyEntry, []*processors.VocabularyRelation) {
+	tenantEntries []*VocabularyEntry,
+	tenantRelations []*VocabularyRelation,
+) ([]*VocabularyEntry, []*VocabularyRelation) {
 	// 1. system entries → base
 	sysSnap := b.buildSystemSnapshot()
 
 	// 2. tenant 优先，重新分配 ID
 	var nextID uint32 = 1
-	entries := make([]*processors.VocabularyEntry, 0, len(sysSnap.Entries)+len(tenantEntries))
+	entries := make([]*VocabularyEntry, 0, len(sysSnap.Entries)+len(tenantEntries))
 	seen := make(map[string]bool, len(tenantEntries))
 	oldIDToNew := make(map[uint32]uint32, len(tenantEntries))
 
@@ -301,7 +300,7 @@ func (b *VocabularyBuilder) mergeWithSystem(
 	}
 
 	// 3. relations 合并 + 修复 TargetEntryID
-	relations := make([]*processors.VocabularyRelation, 0, len(sysSnap.Relations)+len(tenantRelations))
+	relations := make([]*VocabularyRelation, 0, len(sysSnap.Relations)+len(tenantRelations))
 	// 3a. system relations 先
 	for _, rs := range sysSnap.Relations {
 		for _, r := range rs {
@@ -327,20 +326,20 @@ func (b *VocabularyBuilder) mergeWithSystem(
 }
 
 // buildSystemSnapshot 从 systemDictFile 构造 VocabularySnapshot。
-func (b *VocabularyBuilder) buildSystemSnapshot() *processors.VocabularySnapshot {
+func (b *VocabularyBuilder) buildSystemSnapshot() *VocabularySnapshot {
 	if b.systemDict == nil {
-		return processors.EmptyVocabularySnapshot()
+		return EmptyVocabularySnapshot()
 	}
 
-	entries := make([]*processors.VocabularyEntry, 0, len(b.systemDict.Entries))
-	relations := make([]*processors.VocabularyRelation, 0)
+	entries := make([]*VocabularyEntry, 0, len(b.systemDict.Entries))
+	relations := make([]*VocabularyRelation, 0)
 	var nextID uint32 = 1
 
 	for _, e := range b.systemDict.Entries {
 		if e.StandardText == "" {
 			continue
 		}
-		ent := &processors.VocabularyEntry{
+		ent := &VocabularyEntry{
 			ID:            nextID,
 			StandardText:  e.StandardText,
 			Category:      e.Category,
@@ -354,7 +353,7 @@ func (b *VocabularyBuilder) buildSystemSnapshot() *processors.VocabularySnapshot
 			if alias == "" {
 				continue
 			}
-			relations = append(relations, &processors.VocabularyRelation{
+			relations = append(relations, &VocabularyRelation{
 				EntryID:       ent.ID,
 				RelationType:  "ALIAS",
 				RelatedText:   alias,
@@ -365,7 +364,7 @@ func (b *VocabularyBuilder) buildSystemSnapshot() *processors.VocabularySnapshot
 			if corr == "" {
 				continue
 			}
-			relations = append(relations, &processors.VocabularyRelation{
+			relations = append(relations, &VocabularyRelation{
 				EntryID:       ent.ID,
 				RelationType:  "CORRECTION",
 				RelatedText:   corr,
@@ -376,7 +375,7 @@ func (b *VocabularyBuilder) buildSystemSnapshot() *processors.VocabularySnapshot
 			if homo == "" {
 				continue
 			}
-			relations = append(relations, &processors.VocabularyRelation{
+			relations = append(relations, &VocabularyRelation{
 				EntryID:       ent.ID,
 				RelationType:  "HOMOPHONE",
 				RelatedText:   homo,
@@ -385,7 +384,7 @@ func (b *VocabularyBuilder) buildSystemSnapshot() *processors.VocabularySnapshot
 		}
 	}
 
-	return processors.NewVocabularySnapshot(entries, relations)
+	return NewVocabularySnapshot(entries, relations)
 }
 
 // ReloadSystemDict 热重载 system.json。

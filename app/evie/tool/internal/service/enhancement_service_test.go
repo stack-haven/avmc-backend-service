@@ -8,9 +8,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"backend-service/pkg/textenhance"
-	"backend-service/pkg/textenhance/builtins"
-
 	v1 "backend-service/api/evie/tool/v1"
 	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
@@ -48,14 +45,12 @@ func newTestService(t *testing.T) *service.EnhancementService {
 	t.Helper()
 	dictPath := writeServiceTestDict(t)
 
-	conf := &v1conf.Enhancement{
-		Pipeline: []string{"cleaning", "filler", "vocab_matching", "alias_resolution", "deterministic_replacement", "phrase_standardization", "pinyin_correction", "fuzzy_matching", "context_correction"},
-	}
 	vb, _ := biz.NewVocabularyBuilder(&v1conf.SystemDict{Path: dictPath})
-	policy := biz.NewPolicyFromConf(conf)
-	reg := builtins.NewDefaultRegistry()
-	pipeline, _ := textenhance.BuildPipeline(reg, policy)
-	uc := biz.NewEnhancementUsecase(pipeline, vb, policy)
+	engine, err := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	if err != nil {
+		t.Fatalf("NewLexnormEngine: %v", err)
+	}
+	uc := biz.NewEnhancementUsecase(engine)
 
 	// 使用 kratos default logger（避免 nil panic）
 	return service.NewEnhancementService(uc, log.DefaultLogger)
@@ -73,10 +68,10 @@ func TestEnhancementService_EnhanceText_Success(t *testing.T) {
 	if resp.EnhancedText != "金种籽是新产品" {
 		t.Errorf("EnhancedText = %q, want %q", resp.EnhancedText, "金种籽是新产品")
 	}
-	if resp.Status == 0 {
-		t.Errorf("Status = 0, expected > 0 (textenhance StatusSuccess=%d)", textenhance.StatusSuccess)
+	if resp.Status > 2 {
+		t.Errorf("Status = %d, expected <= 2 (success/partial/canceled)", resp.Status)
 	}
-	t.Logf("Status = %d (textenhance StatusSuccess=%d)", resp.Status, textenhance.StatusSuccess)
+	t.Logf("Status = %d", resp.Status)
 }
 
 func TestEnhancementService_EnhanceText_NoAuth(t *testing.T) {

@@ -13,8 +13,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/durationpb"
 
-	"backend-service/pkg/textenhance/processors"
-
 	"backend-service/app/evie/tool/internal/biz"
 	"backend-service/app/evie/tool/internal/conf"
 )
@@ -59,11 +57,11 @@ func TestVocabBuilder_UpdateTenant(t *testing.T) {
 	}
 
 	// 2. 更新 tenant 158
-	tenantEntries := []*processors.VocabularyEntry{
+	tenantEntries := []*biz.VocabularyEntry{
 		{ID: 100, StandardText: "田华", Category: "PERSON", Priority: 90},
 		{ID: 101, StandardText: "技术研发部", Category: "ORGANIZATION", Priority: 80},
 	}
-	tenantRelations := []*processors.VocabularyRelation{
+	tenantRelations := []*biz.VocabularyRelation{
 		{EntryID: 100, RelationType: "ALIAS", RelatedText: "小田", TargetEntryID: 100},
 	}
 	vb.UpdateTenant("158", tenantEntries, tenantRelations)
@@ -91,10 +89,10 @@ func TestVocabBuilder_PerTenantIsolation(t *testing.T) {
 	dictPath := writeSyncTestDict(t)
 	vb, _ := biz.NewVocabularyBuilder(&conf.SystemDict{Path: dictPath})
 
-	vb.UpdateTenant("158", []*processors.VocabularyEntry{
+	vb.UpdateTenant("158", []*biz.VocabularyEntry{
 		{ID: 1, StandardText: "田华", Category: "PERSON"},
 	}, nil)
-	vb.UpdateTenant("159", []*processors.VocabularyEntry{
+	vb.UpdateTenant("159", []*biz.VocabularyEntry{
 		{ID: 2, StandardText: "张三", Category: "PERSON"},
 	}, nil)
 
@@ -123,7 +121,7 @@ func TestVocabBuilder_ConcurrentUpdate(t *testing.T) {
 		go func(idx int) {
 			defer wg.Done()
 			tenantID := "tenant-" + string(rune('A'+(idx%10)))
-			vb.UpdateTenant(tenantID, []*processors.VocabularyEntry{
+			vb.UpdateTenant(tenantID, []*biz.VocabularyEntry{
 				{ID: uint32(idx), StandardText: "name-" + string(rune('A'+(idx%10))), Category: "TEST"},
 			}, nil)
 		}(i)
@@ -214,11 +212,11 @@ func TestVocabularyBuilder_MergeNoIDConflict(t *testing.T) {
 	vb, _ := biz.NewVocabularyBuilder(&conf.SystemDict{Path: dictPath})
 
 	// 构造 tenant entries（ID 从 1 开始，与 system 冲突场景）
-	tenantEntries := []*processors.VocabularyEntry{
+	tenantEntries := []*biz.VocabularyEntry{
 		{ID: 1, StandardText: "万康盛鼎集团", Category: "ORGANIZATION", Priority: 50},
 		{ID: 2, StandardText: "技术部", Category: "ORGANIZATION", Priority: 80},
 	}
-	tenantRelations := []*processors.VocabularyRelation{
+	tenantRelations := []*biz.VocabularyRelation{
 		{EntryID: 2, RelationType: "ALIAS", RelatedText: "研发部", TargetEntryID: 2},
 	}
 

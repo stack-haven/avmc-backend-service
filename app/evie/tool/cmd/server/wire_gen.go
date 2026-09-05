@@ -49,16 +49,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	}
 	data_Redis := data.NewRedisConf(confData)
 	tokenCache := data.NewTokenCache(client, data_Redis)
-	pipeline, err := biz.NewEnhancementPipeline(enhancement, logger)
-	if err != nil {
-		return nil, nil, err
-	}
 	vocabularyBuilder, err := biz.NewVocabularyBuilder(systemDict)
 	if err != nil {
 		return nil, nil, err
 	}
-	policy := biz.NewPolicyFromConf(enhancement)
-	enhancementUsecase := biz.NewEnhancementUsecase(pipeline, vocabularyBuilder, policy)
+	engine, err := biz.NewLexnormEngine(enhancement, vocabularyBuilder, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	enhancementUsecase := biz.NewEnhancementUsecase(engine)
 	enhancementService := service.NewEnhancementService(enhancementUsecase, logger)
 	providerRegistry, err := data.NewASRRegistry(asr, logger)
 	if err != nil {

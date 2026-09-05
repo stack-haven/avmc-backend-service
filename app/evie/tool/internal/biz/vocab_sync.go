@@ -19,7 +19,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/app/evie/tool/internal/conf"
-	"backend-service/pkg/textenhance/processors"
 )
 
 // TenantRegistry 简化版：持久化的 tenant 列表。
@@ -295,19 +294,19 @@ func (s *VocabSyncer) EnsureTenant(ctx context.Context, tenantID string) error {
 	s.registry.Ensure(tenantID)
 	return s.SyncTenant(ctx, tenantID)
 }
-func (s *VocabSyncer) convertRawToVocab(raws []RawEntity) ([]*processors.VocabularyEntry, []*processors.VocabularyRelation, error) {
+func (s *VocabSyncer) convertRawToVocab(raws []RawEntity) ([]*VocabularyEntry, []*VocabularyRelation, error) {
 	normalized, err := s.normalizer.NormalizeBatch(raws)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	entries := make([]*processors.VocabularyEntry, 0, len(normalized))
-	relations := make([]*processors.VocabularyRelation, 0)
+	entries := make([]*VocabularyEntry, 0, len(normalized))
+	relations := make([]*VocabularyRelation, 0)
 	var nextID uint32 = 1
 	entryIDByText := make(map[string]uint32, len(normalized))
 
 	for _, n := range normalized {
-		e := &processors.VocabularyEntry{
+		e := &VocabularyEntry{
 			ID:            nextID,
 			StandardText:  n.StandardText,
 			Category:      n.Category,
@@ -321,7 +320,7 @@ func (s *VocabSyncer) convertRawToVocab(raws []RawEntity) ([]*processors.Vocabul
 
 		// ALIAS 关系
 		for _, a := range n.Aliases {
-			relations = append(relations, &processors.VocabularyRelation{
+			relations = append(relations, &VocabularyRelation{
 				EntryID:       e.ID,
 				RelationType:  "ALIAS",
 				RelatedText:   a,

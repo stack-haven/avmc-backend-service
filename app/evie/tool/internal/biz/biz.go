@@ -1,27 +1,18 @@
 // Package biz 聚合 evie/tool 的所有业务用例 Provider。
 //
-// M0~M6c 阶段 ProviderSet：
-//   - NewNormalizerFromConf：conf.VocabRules → Normalizer（M3c）
-//   - NewVocabularyBuilder：加载 system.json + Build 快照（M6c）
-//   - NewPolicyFromConf：conf.Enhancement → textenhance.Policy（M6c）
-//   - NewEnhancementPipeline：textenhance.Registry + Policy + Observers → Pipeline（M6c）
-//   - NewEnhancementUsecase：Pipeline + VocabularyBuilder + Policy（M6c）
+// M9.6 重构：从 pkg/textenhance 迁移到 pkg/lexnorm。
 //
-// 后续 M5 加：NewVocabSyncer
-// 后续 M7 加：NewASRUsecase
+// ProviderSet 变更：
+//   - 删除：NewPolicyFromConf / NewEnhancementPipeline
+//   - 新增：NewLexnormEngine / NewTenantProfileResolver
+//   - 保留：NewNormalizerFromConf / NewVocabularyBuilder / NewEnhancementUsecase /
+//     NewTenantRegistry / NewASRUsecase / NewVocabSyncerWithAuth
 package biz
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
-
-	"backend-service/pkg/textenhance"
-	"backend-service/pkg/textenhance/builtins"
-	"backend-service/pkg/textenhance/observers"
-	"backend-service/pkg/textenhance/processors"
+	"github.com/stack-haven/lexnorm"
 
 	v1conf "backend-service/app/evie/tool/internal/conf"
 )
@@ -34,10 +25,10 @@ import (
 var ProviderSet = wire.NewSet(
 	// M3c
 	NewNormalizerFromConf,
-	// M6c
+	// M6c / M9.6
 	NewVocabularyBuilder,
-	NewPolicyFromConf,
-	NewEnhancementPipeline,
+	NewTenantProfileResolver,
+	NewLexnormEngine,
 	NewEnhancementUsecase,
 	// M5
 	NewTenantRegistry,
@@ -51,45 +42,26 @@ func NewNormalizerFromConf(rules *v1conf.VocabRules, logger log.Logger) *Normali
 	return NewNormalizerWithLogger(rs, log.NewHelper(log.With(logger, "module", "vocab/normalizer")))
 }
 
-// NewEnhancementPipeline 从 conf + 默认 Registry 构造 textenhance.Pipeline。
+// NewLexnormEngine 构造 lexnorm.Engine（注入 ProfileResolver + 默认 Profile）。
 //
-// 默认带 LoggingObserver（写到 kratos log）+ CountingObserver（统计）。
-func NewEnhancementPipeline(
+// engine 是并发安全的；Engine.Normalize 是高频调用入口。
+// ProfileResolver 内部 lazy 调 VocabularyBuilder.Build(ctx, tenantID)，
+// 自动触发按需 qua sync。
+func NewLexnormEngine(
 	c *v1conf.Enhancement,
+	builder *VocabularyBuilder,
 	logger log.Logger,
-) (*textenhance.Pipeline, error) {
-	reg := builtins.NewDefaultRegistry()
-	policy := NewPolicyFromConf(c)
+) (*lexnorm.Engine, error) {
+	// 构造 per-tenant ProfileResolver
+	resolver := NewTenantProfileResolver(builder, lexnorm.DefaultConfig(), logger)
 
-	// 默认 observer 列表
-	obs := []processors.Observer{
-		observers.NewLoggingObserver(kratosToObserversLogger{log: logger}),
-		observers.NewCountingObserver(),
-	}
-	return textenhance.BuildPipeline(reg, policy,
-		textenhance.WithObservers(obs...),
+	engine, err := lexnorm.New(
+		lexnorm.WithProfileResolver(resolver),
+		lexnorm.WithDefaultProfile(lexnorm.ProfileID("default")),
+		// M9.6 hooks 留空：观测需求可后续加 lexnorm.Hook
 	)
-}
-
-// kratosToObserversLogger 适配 kratos log.Logger → observers.Logger。
-type kratosToObserversLogger struct {
-	log log.Logger
-}
-
-func (k kratosToObserversLogger) WithContext(ctx context.Context) observers.Logger { return k }
-
-func (k kratosToObserversLogger) Debugf(format string, args ...any) {
-	_ = k.log.Log(log.LevelDebug, "module", "textenhance", "msg", fmt.Sprintf(format, args...))
-}
-
-func (k kratosToObserversLogger) Infof(format string, args ...any) {
-	_ = k.log.Log(log.LevelInfo, "module", "textenhance", "msg", fmt.Sprintf(format, args...))
-}
-
-func (k kratosToObserversLogger) Warnf(format string, args ...any) {
-	_ = k.log.Log(log.LevelWarn, "module", "textenhance", "msg", fmt.Sprintf(format, args...))
-}
-
-func (k kratosToObserversLogger) Errorf(format string, args ...any) {
-	_ = k.log.Log(log.LevelError, "module", "textenhance", "msg", fmt.Sprintf(format, args...))
+	if err != nil {
+		return nil, err
+	}
+	return engine, nil
 }
