@@ -121,6 +121,17 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 			}
 			sub := string(runes[i : i+n])
 
+			// 修复 P6：跳过已被上游 processor 应用过的同区间位置。
+			// 注意：s.Replace 不会自动 Lock，所以不能用 IsLocked；
+			// 必须查 s.Changes() 看同 span 是不是已经有 Change。
+			span := lexnorm.Span{
+				Start: byteOffsetOfRune(original, i),
+				End:   byteOffsetOfRune(original, i+n),
+			}
+			if hasChangeAtSpan(s.Changes(), span) {
+				continue
+			}
+
 			// 查找最佳匹配：编辑距离 ≤ maxEdit 且 confidence ≥ suggest
 			bestEntry, bestConf, bestDist := findBestMatch(sub, bucket, maxEdit)
 			if bestEntry.ID == "" {
@@ -136,7 +147,6 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 				continue
 			}
 
-			span := lexnorm.Span{Start: byteOffsetOfRune(original, i), End: byteOffsetOfRune(original, i+n)}
 			meta := lexnorm.ChangeMeta{
 				Source:     p.Name(),
 				Confidence: bestConf,
@@ -235,3 +245,16 @@ var _ lexnorm.CertaintyReporter = (*FuzzyVocabProcessor)(nil)
 
 // dummy 引用防 lint 警告（v1.EnhanceChange 用于可能的 audit 字段预留）。
 var _ = v1.EnhanceChange{}
+
+// hasChangeAtSpan 检查 changes 中是否存在与给定 span 重叠的 Change。
+//
+// 修复 P6：上游 processor（alias / deterministic）应用 Replace 后没自动 Lock，
+// 后续 processor 应跳过同一区间。
+func hasChangeAtSpan(changes []lexnorm.Change, span lexnorm.Span) bool {
+	for _, c := range changes {
+		if c.Span.Start < span.End && c.Span.End > span.Start {
+			return true
+		}
+	}
+	return false
+}

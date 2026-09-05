@@ -160,11 +160,13 @@ func (b *VocabularyBuilder) resolveSystemDictCandidates() []string {
 
 // Build 为指定 tenant 构建 VocabularySnapshot。
 //
-// 查找顺序（cache-aside）：
-//   1. tenant 缓存（sync worker 最近一次成功构建）
-//   2. system 静态快照
-//   3. fallback（最后一次任意租户成功；HA 兜底）
-//   4. EmptyVocabularySnapshot（启动期 / 全失败）
+// 查找顺序（cache-aside + 同步等待）：
+//  1. tenant 缓存（sync worker 最近一次成功构建）
+//  2. cache miss 时同步阻塞等待 lazy sync 完成（最多 5s，ctx 取消立即退出）
+//     └─ 这避免了首请求拿 system fallback（缺 PERSON 类）导致的 fuzzy/alias 失效
+//  3. system 静态快照
+//  4. fallback（最后一次任意租户成功；HA 兜底）
+//  5. EmptyVocabularySnapshot（启动期 / 全失败）
 //
 // 返回值永不为 nil；调用方拿不到 error（HA 简化）。
 func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *VocabularySnapshot {
@@ -175,12 +177,28 @@ func (b *VocabularyBuilder) Build(ctx context.Context, tenantID string) *Vocabul
 		if snap != nil {
 			return snap
 		}
-		// cache miss：发起一次懒同步（不阻塞当前请求，下次 Build 会拿到）
-		// 把 reqCtx 传给 callback（带 AuthInfo），由 callback 内部复制 auth 到独立 ctx。
+		// cache miss：同步等待 lazy sync 完成（修复 P1 首请求 cache miss）。
+		// 之前用 go func() 异步触发，导致首请求拿 system fallback（只有 3 entries）
+		// → fuzzy_vocab/alias 全部不命中 → 用户看到"增强服务对晨人没用"。
+		// 现在用 done channel + ctx timeout：ctx 取消立即返回（不拖累请求）。
 		if b.lazySyncOnMiss != nil {
+			done := make(chan struct{})
 			go func(reqCtx context.Context, t string) {
+				defer close(done)
 				_ = b.lazySyncOnMiss(reqCtx, t)
 			}(ctx, tenantID)
+			// 最多等 5s 或 ctx 取消；超时不等也不会崩，下次 Build 仍能拿到
+			select {
+			case <-done:
+				b.tenantMu.RLock()
+				snap = b.tenantSnaps[tenantID]
+				b.tenantMu.RUnlock()
+				if snap != nil {
+					return snap
+				}
+			case <-ctx.Done():
+			case <-time.After(5 * time.Second):
+			}
 		}
 	}
 

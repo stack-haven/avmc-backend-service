@@ -311,6 +311,7 @@ func (s *VocabSyncer) convertRawToVocab(raws []RawEntity) ([]*VocabularyEntry, [
 			StandardText:  n.StandardText,
 			Category:      n.Category,
 			EntryType:     "WORD",
+			Priority:      int(n.Priority), // 修复 P5：Normalizer 输出的 Priority 必须传到 VocabularyEntry
 			Pinyin:        derivePinyin(n.StandardText),
 			PinyinInitial: derivePinyinInitial(n.StandardText),
 		}

@@ -10,6 +10,14 @@
       "homophones": ["金中子", "金种种"]
     },
     {
+      "standard_text": "黑种籽",
+      "category": "PRODUCT",
+      "priority": 100,
+      "aliases": ["黑种子", "黑种仔"],
+      "corrections": [],
+      "homophones": ["黑中子", "黑种种"]
+    },
+    {
       "standard_text": "指令官",
       "category": "PRODUCT",
       "priority": 90,
