@@ -80,6 +80,8 @@ func NewHTTPServer(
 	}
 	// Metrics 文本导出（Prometheus 兼容）
 	srv.Handle("/metrics", metrics.Default.Handler())
+	// pprof 调试端点（仅 EVIE_TOOL_PPROF=1）
+	MountPProf(srv)
 	return srv
 }
 
