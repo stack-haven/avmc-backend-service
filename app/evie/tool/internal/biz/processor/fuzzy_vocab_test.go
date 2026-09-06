@@ -236,31 +236,31 @@ func TestHasChangeAtSpan(t *testing.T) {
 		{
 			"empty changes returns false",
 			nil,
-			lexnorm.Span{0, 3},
+			lexnorm.Span{Start: 0, End: 3},
 			false,
 		},
 		{
 			"exact match returns true",
-			[]lexnorm.Change{{Span: lexnorm.Span{0, 3}}},
-			lexnorm.Span{0, 3},
+			[]lexnorm.Change{{Span: lexnorm.Span{Start: 0, End: 3}}},
+			lexnorm.Span{Start: 0, End: 3},
 			true,
 		},
 		{
 			"overlap returns true",
-			[]lexnorm.Change{{Span: lexnorm.Span{0, 5}}},
-			lexnorm.Span{3, 8},
+			[]lexnorm.Change{{Span: lexnorm.Span{Start: 0, End: 5}}},
+			lexnorm.Span{Start: 3, End: 8},
 			true,
 		},
 		{
 			"non-overlap returns false",
-			[]lexnorm.Change{{Span: lexnorm.Span{0, 3}}},
-			lexnorm.Span{5, 8},
+			[]lexnorm.Change{{Span: lexnorm.Span{Start: 0, End: 3}}},
+			lexnorm.Span{Start: 5, End: 8},
 			false,
 		},
 		{
 			"adjacent (touching) returns false",
-			[]lexnorm.Change{{Span: lexnorm.Span{0, 3}}},
-			lexnorm.Span{3, 5},
+			[]lexnorm.Change{{Span: lexnorm.Span{Start: 0, End: 3}}},
+			lexnorm.Span{Start: 3, End: 5},
 			false, // 区间 [3,5) 与 [0,3) 不重叠（半开区间）
 		},
 	}
@@ -301,7 +301,7 @@ func TestProcess_SkipsAlreadyAppliedSpan(t *testing.T) {
 
 	// 手动构造 lexnorm.State，注入一个已存在的 Change（模拟 alias 已命中）
 	s := newTestState("周丽群")
-	s.Replace(lexnorm.Span{0, 9}, "佘丽群", lexnorm.ChangeMeta{
+	s.Replace(lexnorm.Span{Start: 0, End: 9}, "佘丽群", lexnorm.ChangeMeta{
 		Source: "alias", Confidence: 1.0, RuleID: "alias", Reason: "pre",
 	})
 
