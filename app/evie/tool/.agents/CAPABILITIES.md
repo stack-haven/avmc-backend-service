@@ -105,7 +105,10 @@
 ## 7. 可观测性
 
 - **结构化日志**：Kratos `log`，含 `module / tenant / session_id` 字段
+  - `EVIE_TOOL_LOG_FORMAT=json|text`（默认 text）
+  - `EVIE_TOOL_LOG_REDACT=on|off`（默认 on）— 自动脱敏 `Authorization` / `X-API-Key` / `password` / `*_token` / `*_secret` / `*_api_key` 等敏感字段
 - **指标**：内置 `internal/metrics`（零依赖 Prometheus 文本）
+- **pprof 调试**：`EVIE_TOOL_PPROF=1` 启用 `/debug/pprof/*`；关闭时返回 404（覆盖 Kratos DefaultServeMux fallback）
 - **健康检查**：`/health/live` 永远 200；`/health/ready` 检查 Redis ping、qua HEAD、ASR provider capabilities、词库同步模式
 - **审计**：词库同步状态 `vocab_last_sync` / `vocab_last_error` 暴露在 `details`
 
@@ -145,7 +148,7 @@
   - `EnhancementUsecase.EnhanceText` ≈ 15 µs
   - `ASRUsecase.Recognize + ListRecords` ≈ 237 µs
   - `FuzzyVocabProcessor.Process`（1000 词库） ≈ 90 µs（Phase 7.1 优化后，原基线 ~9 ms；等长 Hamming 优化 + entry 预计算 rune 切片）
-- CI：`.github/workflows/ci.yaml`（gofmt / vet / test / race / bench）
+- CI：`.github/workflows/ci.yaml`（gofmt / vet / test / race / bench / govulncheck）
 - Makefile：`make config / wire / test / race / bench / lint / cover / demo`
 
 ---
