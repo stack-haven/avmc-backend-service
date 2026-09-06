@@ -41,29 +41,25 @@ jobs:
         run: go test -bench=. -run=^$ -benchtime=1x ./internal/biz/ ./internal/biz/processor/ || true
 
       - name: govulncheck
-        # 依赖漏洞扫描（reachable mode）。
+        # 依赖漏洞扫描（source mode = 仅 reachable vuln）。
         #
-        # 为什么 continue-on-error: true（临时）：
-        #   当前依赖中存在已知 reachable vuln（golang.org/x/net、google.golang.org/grpc
-        #   等），超出本次提交范围，需要单独的依赖升级 PR。开启本步以便：
-        #     1. CI 始终产出漏洞报告（PR 中可见）
-        #     2. 依赖升级完成后移除 continue-on-error，实现硬阻断
+        # 退出码：0=无漏洞，3=发现漏洞 → 本步会硬阻断 PR。
+        # 前置条件：
+        #   - setup-go 使用 Go 1.25 latest（>= 1.25.13）以获得 stdlib 补丁
+        #   - google.golang.org/grpc >= 1.82.1、golang.org/x/net >= 0.55.0（已升级）
         #
-        # 退出码：0=无漏洞，3=发现漏洞。本步将退出码 3 转换为成功，
-        # 同时把报告上传为 artifact 供审阅。
-        continue-on-error: true
+        # 本步不再使用 continue-on-error：发现任何 reachable vuln 都会让 PR 失败。
+        # 报告作为 artifact 上传（保留 30 天）供人工审查。
         run: |
-          set +e
-          go run golang.org/x/vuln/cmd/govulncheck@latest -mode=flagged -show=verbose ./... > govulncheck.txt 2>&1
+          go run golang.org/x/vuln/cmd/govulncheck@latest -mode=source -show=verbose ./... > govulncheck.txt 2>&1
           rc=$?
           echo "govulncheck exit code: $rc"
           if [ $rc -ne 0 ]; then
-            echo "::warning::govulncheck 发现漏洞，详见 govulncheck.txt（临时 continue-on-error，不阻断）"
-            tail -80 govulncheck.txt
-          else
-            echo "✓ 无 reachable 漏洞"
+            echo "::error::govulncheck 发现 reachable 漏洞，PR 被阻断"
+            tail -120 govulncheck.txt
+            exit $rc
           fi
-          exit 0
+          echo "✓ 无 reachable 漏洞"
 
       - name: upload govulncheck report
         if: always()
