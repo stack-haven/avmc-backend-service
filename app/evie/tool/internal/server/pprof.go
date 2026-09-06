@@ -3,13 +3,14 @@
 // pprof 调试端点挂载。仅当 EVIE_TOOL_PPROF=1 时启用。
 //
 // 端点（net/http/pprof 默认注册到 http.DefaultServeMux）：
-//   /debug/pprof/             - 索引页
-//   /debug/pprof/heap         - 堆 profile
-//   /debug/pprof/goroutine    - goroutine profile
-//   /debug/pprof/profile      - CPU profile（秒数由 ?seconds= 控制）
-//   /debug/pprof/trace        - 执行 trace
-//   /debug/pprof/symbol       - 符号解析
-//   /debug/pprof/cmdline      - 命令行
+//
+//	/debug/pprof/             - 索引页
+//	/debug/pprof/heap         - 堆 profile
+//	/debug/pprof/goroutine    - goroutine profile
+//	/debug/pprof/profile      - CPU profile（秒数由 ?seconds= 控制）
+//	/debug/pprof/trace        - 执行 trace
+//	/debug/pprof/symbol       - 符号解析
+//	/debug/pprof/cmdline      - 命令行
 //
 // # Kratos 路由细节
 //
@@ -20,7 +21,7 @@
 // 因此本函数的语义是：
 //   - env=1: 显式注册 /debug/pprof/ 等"锚点"，其余由 DefaultServeMux 提供
 //   - env!=1: 注册一个前缀处理器，对所有 /debug/pprof/* 返回 404，
-//            屏蔽 DefaultServeMux 的 fallback
+//     屏蔽 DefaultServeMux 的 fallback
 //
 // 安全：
 //   - 默认关闭（env 开关），避免在生产环境误暴露 runtime 状态

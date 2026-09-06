@@ -12,11 +12,12 @@
 //   - 后缀匹配（_*_token / _password / _secret / _key）以覆盖配置字段
 //
 // 例如：
-//   "Authorization: Bearer xyz"  →  value="***"
-//   "X-API-Key: abc"             →  value="***"
-//   "data.redis.password: p@ss"  →  value="***"
-//   "data.redis.token_key_prefix: oauth2_access_token:"  →  value="***"
-//     （后缀 _token 命中；该字段是配置模板不是真密钥，损失可接受）
+//
+//	"Authorization: Bearer xyz"  →  value="***"
+//	"X-API-Key: abc"             →  value="***"
+//	"data.redis.password: p@ss"  →  value="***"
+//	"data.redis.token_key_prefix: oauth2_access_token:"  →  value="***"
+//	  （后缀 _token 命中；该字段是配置模板不是真密钥，损失可接受）
 //
 // 已知限制：Kratos 内部日志通常不打印 header，因此 "header.Authorization"
 // 这类点分 key 不会被本脱敏命中。安全策略应在更上层（gateway / WAF）拦截。
@@ -37,20 +38,20 @@ const RedactValue = "***"
 
 // defaultSensitiveKeys 默认敏感 key 集合（小写精确匹配）。
 var defaultSensitiveKeys = map[string]bool{
-	"authorization":   true,
-	"x-api-key":       true,
-	"api-key":         true,
-	"apikey":          true,
-	"api_key":         true,
-	"password":         true,
-	"secret":           true,
-	"access-token":     true,
-	"refresh-token":    true,
-	"id-token":         true,
-	"cookie":           true,
-	"set-cookie":       true,
-	"x-auth-token":     true,
-	"x-csrf-token":     true,
+	"authorization": true,
+	"x-api-key":     true,
+	"api-key":       true,
+	"apikey":        true,
+	"api_key":       true,
+	"password":      true,
+	"secret":        true,
+	"access-token":  true,
+	"refresh-token": true,
+	"id-token":      true,
+	"cookie":        true,
+	"set-cookie":    true,
+	"x-auth-token":  true,
+	"x-csrf-token":  true,
 }
 
 // defaultSensitiveSuffixes 敏感 key 后缀（小写，HasSuffix 匹配）。
