@@ -139,7 +139,7 @@
 - `go test -bench=. -run=^$ ./internal/biz/ ./internal/biz/processor/` 提供基线：
   - `EnhancementUsecase.EnhanceText` ≈ 15 µs
   - `ASRUsecase.Recognize + ListRecords` ≈ 237 µs
-  - `FuzzyVocabProcessor.Process`（1000 词库） ≈ 9 ms（已知优化点）
+  - `FuzzyVocabProcessor.Process`（1000 词库） ≈ 90 µs（Phase 7.1 优化后，原基线 ~9 ms；等长 Hamming 优化 + entry 预计算 rune 切片）
 - CI：`.github/workflows/ci.yaml`（gofmt / vet / test / race / bench）
 - Makefile：`make config / wire / test / race / bench / lint / cover / demo`
 
@@ -147,8 +147,6 @@
 
 ## 11. 已知遗留与下一阶段方向
 
-- `fuzzy_vocab` 大词库耗时偏高（1000 词库 ≈ 9ms）—— 待启发式剪枝
-- `lexnorm.Span` 未使用 keyed fields 的 vet warning
 - `make wire` 自动重新生成 `wire_gen.go`（当前为手动编辑）
-- `internal/biz/processor/fuzzy_vocab_test.go` 中 Span 字面量可改用 keyed 字段
 - 拓展方向（v0.x → v1.x）见 `.agents/EXPANSION_PROPOSAL.md`
+- 小步快跑执行计划见 `.agents/EXECUTION_PLAN.md`

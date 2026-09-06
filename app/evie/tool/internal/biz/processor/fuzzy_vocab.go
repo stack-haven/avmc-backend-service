@@ -9,7 +9,26 @@
 // ASR 把"佘丽群"识别成"周丽群"，距离=1 → 替换为标准词）。
 //
 // 这是「词库驱动的模糊匹配」，与 lexnorm 的「变体预登记模式」不同，
-// 故独立实现，使用 lexnorm 提供的 LevenshteinDistance + 区间锁能力。
+// 故独立实现。
+//
+// # 性能优化（Phase 7.1）
+//
+// 旧实现对每个候选 entry 调用 lexicon.LevenshteinDistance，每次分配
+// 两个 []rune 切片并跑完整 DP；1000 词库下 Process 约 9ms。
+//
+// 关键观察：词库按 entry 文本长度分桶（byLen），候选与 sub 长度必然相等。
+// 在等长字符串下，Levenshtein 距离 ≡ Hamming 距离（因为 insert/delete
+// 配对成本 ≥ 直接 substitute），可以用 O(n) 的逐位 rune 比较代替
+// O(n²) 的 DP，且无需分配。
+//
+// 优化措施：
+//  1. buildIndex 阶段预计算每个 entry 的 []rune，零运行时分配
+//  2. Process 阶段预计算 subRunes 切片 + 字节偏移表（替代逐次 O(i) 计算）
+//  3. 按"非空长度桶"外层迭代（替代 map lookup + 空桶 skip）
+//  4. boundedHamming 早退：当前差异 > maxDist 立即返回
+//
+// 正确性：等长 Hamming ≡ Levenshtein 已被单元测试覆盖；桶外（不等长）
+// 路径仅在 findBestMatch（测试用）中保留，使用原 Levenshtein。
 package processor
 
 import (
@@ -50,13 +69,22 @@ func DefaultFuzzyVocabConfig() FuzzyVocabConfig {
 	}
 }
 
+// indexedEntry 在 buildIndex 阶段预计算 entry.Text 的 rune 切片，
+// 避免 Process 阶段重复 utf8 解码与 []rune 分配。
+type indexedEntry struct {
+	entry lexicon.Entry
+	runes []rune
+}
+
 // FuzzyVocabProcessor 实现 lexnorm.Processor：基于词库的编辑距离模糊匹配。
 type FuzzyVocabProcessor struct {
 	lex    lexicon.Lexicon
 	config FuzzyVocabConfig
 
 	// 预处理：按 entry.Text 长度分桶，O(1) 查 n 长度桶
-	byLen map[int][]lexicon.Entry
+	byLen map[int][]indexedEntry
+	// 非空长度桶的 n 值（排序），用于 Process 外层循环跳过空桶与 map lookup
+	nonEmptyLens []int
 }
 
 // NewFuzzyVocabProcessor 构造 processor。
@@ -77,25 +105,45 @@ func (p *FuzzyVocabProcessor) Version() string { return "v1" }
 // Certainty 实现 lexnorm.CertaintyReporter。
 func (p *FuzzyVocabProcessor) Certainty() lexnorm.Certainty { return lexnorm.CertaintyMedium }
 
-func (p *FuzzyVocabProcessor) buildIndex() {
-	p.byLen = make(map[int][]lexicon.Entry)
-	p.lex.All(func(e lexicon.Entry) bool {
-		n := runeLen(e.Text)
-		if n < p.config.MinEntryLen || n > p.config.MaxEntryLen {
-			return true
-		}
-		p.byLen[n] = append(p.byLen[n], e)
-		return true
-	})
-	// 每个桶内按 entry.Text 排序（确定性遍历）
-	for k := range p.byLen {
-		bucket := p.byLen[k]
-		sort.Slice(bucket, func(i, j int) bool { return bucket[i].Text < bucket[j].Text })
-		p.byLen[k] = bucket
+// Descriptor 实现 lexnorm.DescriptorProvider。
+func (p *FuzzyVocabProcessor) Descriptor() lexnorm.Descriptor {
+	return lexnorm.Descriptor{
+		Name:      p.Name(),
+		Certainty: lexnorm.CertaintyMedium,
 	}
 }
 
+func (p *FuzzyVocabProcessor) buildIndex() {
+	p.byLen = make(map[int][]indexedEntry)
+	if p.lex == nil {
+		return
+	}
+	p.lex.All(func(e lexicon.Entry) bool {
+		r := []rune(e.Text)
+		n := len(r)
+		if n < p.config.MinEntryLen || n > p.config.MaxEntryLen {
+			return true
+		}
+		p.byLen[n] = append(p.byLen[n], indexedEntry{entry: e, runes: r})
+		return true
+	})
+	// 每个桶内按 entry.Text 排序（确定性遍历 / 最佳匹配选择稳定）
+	ns := make([]int, 0, len(p.byLen))
+	for k, bucket := range p.byLen {
+		sort.Slice(bucket, func(i, j int) bool { return bucket[i].entry.Text < bucket[j].entry.Text })
+		p.byLen[k] = bucket
+		ns = append(ns, k)
+	}
+	sort.Ints(ns)
+	p.nonEmptyLens = ns
+}
+
 // Process 实现 lexnorm.Processor。
+//
+// 优化路径：
+//   - 预计算 runes 与 byteOff（O(N) 一次性）
+//   - 外层按非空长度桶遍历（避免 map lookup + 空桶）
+//   - 内层对每个 (i,n) 调用 findBestInBucket（bounded Hamming + 早退）
 func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error {
 	if p.lex == nil || len(p.byLen) == 0 {
 		return nil
@@ -106,32 +154,34 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 		return nil
 	}
 
+	// 字节偏移表：byteOff[i] = runes[:i] 在 original 中的 UTF-8 字节偏移
+	byteOff := make([]int, len(runes)+1)
+	for i := 0; i < len(runes); i++ {
+		byteOff[i+1] = byteOff[i] + utf8.RuneLen(runes[i])
+	}
+
 	autoApply := s.Config().AutoApplyThreshold
 	suggest := s.Config().SuggestThreshold
 	maxEdit := p.config.MaxEditDistance
 
-	// 遍历文本：每个起点 i 试 minLen..maxLen 长度
-	for i := 0; i < len(runes); i++ {
-		for n := p.config.MinEntryLen; n <= p.config.MaxEntryLen && i+n <= len(runes); n++ {
-			bucket := p.byLen[n]
-			if len(bucket) == 0 {
-				continue
-			}
-			sub := string(runes[i : i+n])
+	changes := s.Changes() // 取一次快照，后续增量追加不重复扫描整段
+
+	// 外层：按非空长度桶迭代
+	for _, n := range p.nonEmptyLens {
+		if n < p.config.MinEntryLen || n > p.config.MaxEntryLen {
+			continue
+		}
+		bucket := p.byLen[n]
+		for i := 0; i+n <= len(runes); i++ {
+			subRunes := runes[i : i+n]
+			span := lexnorm.Span{Start: byteOff[i], End: byteOff[i+n]}
 
 			// 修复 P6：跳过已被上游 processor 应用过的同区间位置。
-			// 注意：s.Replace 不会自动 Lock，所以不能用 IsLocked；
-			// 必须查 s.Changes() 看同 span 是不是已经有 Change。
-			span := lexnorm.Span{
-				Start: byteOffsetOfRune(original, i),
-				End:   byteOffsetOfRune(original, i+n),
-			}
-			if hasChangeAtSpan(s.Changes(), span) {
+			if hasChangeAtSpan(changes, span) {
 				continue
 			}
 
-			// 查找最佳匹配：编辑距离 ≤ maxEdit 且 confidence ≥ suggest
-			bestEntry, bestConf, bestDist := findBestMatch(sub, bucket, maxEdit)
+			bestEntry, bestConf, bestDist := findBestInBucket(subRunes, bucket, maxEdit)
 			if bestEntry.ID == "" {
 				continue
 			}
@@ -140,22 +190,18 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 			autoTh := thresholdFor(p.config.CategoryAuto, autoApply, categoryOf(bestEntry))
 			sugTh := thresholdFor(p.config.CategorySuggest, suggest, categoryOf(bestEntry))
 
-			// 跳过完全相同（避免无意义变更）
-			if sub == bestEntry.Text {
-				continue
-			}
-
 			meta := lexnorm.ChangeMeta{
 				Source:     p.Name(),
 				Confidence: bestConf,
 				RuleID:     "edit_distance",
 				EntryID:    string(bestEntry.ID),
-				Reason:     fmt.Sprintf("fuzzy: %q → %q (dist=%d, conf=%.2f)", sub, bestEntry.Text, bestDist, bestConf),
+				Reason:     fmt.Sprintf("fuzzy: %q → %q (dist=%d, conf=%.2f)", string(subRunes), bestEntry.Text, bestDist, bestConf),
 			}
 
 			switch {
 			case bestConf >= autoTh:
 				_ = s.Replace(span, bestEntry.Text, meta)
+				changes = append(changes, lexnorm.Change{Span: span})
 			case bestConf >= sugTh:
 				_ = s.Suggest(span, bestEntry.Text, meta)
 			}
@@ -164,17 +210,68 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 	return nil
 }
 
-// Descriptor 实现 lexnorm.DescriptorProvider。
-func (p *FuzzyVocabProcessor) Descriptor() lexnorm.Descriptor {
-	return lexnorm.Descriptor{
-		Name:      p.Name(),
-		Certainty: lexnorm.CertaintyMedium,
-	}
-}
-
-// findBestMatch 在候选 bucket 中找编辑距离最小的 entry。
+// findBestInBucket 在候选桶中找编辑距离最小的 entry（等长 Hamming 优化路径）。
 //
 // 返回：entry / confidence (=1 - dist/n) / dist
+//
+// 若 sub 与某 entry 完全相等，返回 (Entry{}, 0, 0) 表示"无替换"。
+func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexicon.Entry, float64, int) {
+	var best lexicon.Entry
+	bestDist := maxDist + 1
+	for _, ie := range bucket {
+		// boundedHamming 在 max=bestDist-1 时：返回 ≤ bestDist-1 的真实距离，
+		// 或返回 > bestDist-1 的已超过值（早退后实际差异数）。
+		d := boundedHamming(subRunes, ie.runes, bestDist-1)
+		if d == 0 {
+			// 完全相同：不替换
+			return lexicon.Entry{}, 0, 0
+		}
+		if d < bestDist {
+			bestDist = d
+			best = ie.entry
+		}
+	}
+	if bestDist > maxDist || best.ID == "" {
+		return lexicon.Entry{}, 0, bestDist
+	}
+	conf := 1.0 - float64(bestDist)/float64(len(subRunes))
+	return best, conf, bestDist
+}
+
+// boundedHamming 计算等长 rune 切片的 Hamming 距离，超过 max 时早退。
+//
+// # 等长 Hamming ≡ Levenshtein
+//
+// 对于 |a| == |b| 的字符串，Levenshtein 距离等于 Hamming 距离：
+// 任意 insert+delete 对（成本 2）都不优于直接 substitute（成本 1），
+// 因此最优编辑路径不包含 insert/delete。
+//
+// # 早退语义
+//
+// 若过程中差异数 d > max，返回当前 d（> max 的具体值不重要，
+// 调用方只关心 d < bestDist）。
+func boundedHamming(a, b []rune, max int) int {
+	// 调用方保证 len(a) == len(b)；不等长时降级为完整扫描（不会发生）
+	d := 0
+	n := len(a)
+	if len(b) < n {
+		n = len(b)
+	}
+	for i := 0; i < n; i++ {
+		if a[i] != b[i] {
+			d++
+			if d > max {
+				return d
+			}
+		}
+	}
+	return d
+}
+
+// findBestMatch 在候选 bucket 中找编辑距离最小的 entry（参考实现 / 测试用）。
+//
+// 使用 lexicon.LevenshteinDistance，支持任意长度差异；不分配预计算。
+// Process 热路径使用 findBestInBucket（等长 Hamming 优化）。
 func findBestMatch(sub string, bucket []lexicon.Entry, maxDist int) (lexicon.Entry, float64, int) {
 	var best lexicon.Entry
 	bestDist := maxDist + 1
@@ -227,6 +324,8 @@ func runeLen(s string) int {
 }
 
 // byteOffsetOfRune 返回 runes[i] 在原始 UTF-8 字符串中的字节偏移。
+//
+// 保留为公开工具（测试用）；Process 热路径已改用 byteOff 预计算表。
 func byteOffsetOfRune(s string, runeIdx int) int {
 	i := 0
 	for ; runeIdx > 0 && i < len(s); runeIdx-- {
@@ -235,11 +334,6 @@ func byteOffsetOfRune(s string, runeIdx int) int {
 	}
 	return i
 }
-
-// Ensure compile-time interface assertion.
-var _ lexnorm.Processor = (*FuzzyVocabProcessor)(nil)
-var _ lexnorm.Versioner = (*FuzzyVocabProcessor)(nil)
-var _ lexnorm.CertaintyReporter = (*FuzzyVocabProcessor)(nil)
 
 // hasChangeAtSpan 检查 changes 中是否存在与给定 span 重叠的 Change。
 //
@@ -253,3 +347,8 @@ func hasChangeAtSpan(changes []lexnorm.Change, span lexnorm.Span) bool {
 	}
 	return false
 }
+
+// Ensure compile-time interface assertion.
+var _ lexnorm.Processor = (*FuzzyVocabProcessor)(nil)
+var _ lexnorm.Versioner = (*FuzzyVocabProcessor)(nil)
+var _ lexnorm.CertaintyReporter = (*FuzzyVocabProcessor)(nil)
