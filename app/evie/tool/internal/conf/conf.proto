@@ -87,6 +87,16 @@ message Asr {
   }
   Upload upload = 3;
 
+  // 各阶段的超时配置（默认不限时）。
+  // 建议生产配置：
+  //   recognize = 30s（整段识别，依赖上传音频大小）
+  //   stream    = 60s（流式识别，单次会话上限）
+  message Timeouts {
+    google.protobuf.Duration recognize = 1; // 整段识别超时；0 = 不限
+    google.protobuf.Duration stream = 2;    // 流式识别会话超时；0 = 不限
+  }
+  Timeouts timeouts = 5;
+
   message Provider {
     bool enabled = 1;
     // FunASR 字段
@@ -126,6 +136,8 @@ message Enhancement {
   double fuzzy_suggest_threshold = 4;
   // LLM 步骤开关（保留位，默认 false）。
   bool llm_enabled = 5;
+  // 增强调用超时（默认不限时）；超过则返回 context.DeadlineExceeded。
+  google.protobuf.Duration timeout = 6;
 }
 
 // TenantVocab 租户词库同步配置（Q9）。

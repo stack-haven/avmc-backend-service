@@ -126,6 +126,11 @@
 - 配置文件：`configs/config.yaml`（生产/联调）/ `configs/config.example.yaml`（公开模板，无凭据）/ `configs/config.demo.yaml`（demo 模式）
 - 租户注册表：`configs/tenants.json`（`[{id, sync_token?}]`）
 - 启动期配置校验：`internal/conf/Validate` 聚合检查 server / redis / qua / asr / pipeline / system_dict / tenant_registry
+- **超时配置**（Phase 7.2）：
+  - `conf.Asr.Timeouts.Recognize`：整段识别超时（默认不限）
+  - `conf.Asr.Timeouts.Stream`：流式会话超时（默认不限）
+  - `conf.Enhancement.Timeout`：增强调用超时（默认不限）
+  - 0 或未配置 = 不限；配置后 ctx 自动 `WithTimeout`
 - 凭据注入：推荐使用环境变量（`${REDIS_PASSWORD}` / `${XUNFEI_API_KEY}` 等）
 
 ---

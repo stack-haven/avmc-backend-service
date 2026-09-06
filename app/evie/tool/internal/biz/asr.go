@@ -104,6 +104,41 @@ func NewASRUsecase(
 	}
 }
 
+// applyRecognizeTimeout 根据 conf.Asr.Timeouts.Recognize 为 ctx 设置超时。
+// 未配置或 <= 0 时返回原 ctx 与 no-op cancel，调用方可统一 defer cancel()。
+func (uc *ASRUsecase) applyRecognizeTimeout(ctx context.Context) (context.Context, context.CancelFunc) {
+	if uc.conf == nil || uc.conf.Timeouts == nil || uc.conf.Timeouts.Recognize == nil {
+		return ctx, func() {}
+	}
+	d := uc.conf.Timeouts.Recognize.AsDuration()
+	if d <= 0 {
+		return ctx, func() {}
+	}
+	return context.WithTimeout(ctx, d)
+}
+
+// ApplyRecognizeTimeoutForTest 导出供测试使用（同 applyRecognizeTimeout）。
+func (uc *ASRUsecase) ApplyRecognizeTimeoutForTest(ctx context.Context) (context.Context, context.CancelFunc) {
+	return uc.applyRecognizeTimeout(ctx)
+}
+
+// applyStreamTimeout 同上，针对 stream 会话超时。
+func (uc *ASRUsecase) applyStreamTimeout(ctx context.Context) (context.Context, context.CancelFunc) {
+	if uc.conf == nil || uc.conf.Timeouts == nil || uc.conf.Timeouts.Stream == nil {
+		return ctx, func() {}
+	}
+	d := uc.conf.Timeouts.Stream.AsDuration()
+	if d <= 0 {
+		return ctx, func() {}
+	}
+	return context.WithTimeout(ctx, d)
+}
+
+// ApplyStreamTimeoutForTest 导出供测试使用（同 applyStreamTimeout）。
+func (uc *ASRUsecase) ApplyStreamTimeoutForTest(ctx context.Context) (context.Context, context.CancelFunc) {
+	return uc.applyStreamTimeout(ctx)
+}
+
 // ASRProviders 整段 + 流式 provider 聚合（wire 友好的包装类型）。
 //
 // 定义在 biz 包；data 层构造它（data → biz 是已存在的合法方向，data 不依赖 ASRProviders 类型结构）。
@@ -187,6 +222,10 @@ func (uc *ASRUsecase) Recognize(
 	if sessionID == "" {
 		sessionID = pid.NewSessionID(pid.SessionIDPrefixASR)
 	}
+
+	// 应用超时（conf.Asr.Timeouts.Recognize；0 = 不限）
+	ctx, cancel := uc.applyRecognizeTimeout(ctx)
+	defer cancel()
 
 	// 1. 规范化音频（保留原始 ext 用于落盘）
 	audioBytes, ext := normalizeAudio(rawAudio, format)
@@ -311,6 +350,10 @@ func (uc *ASRUsecase) StreamRecognize(
 	if sessionID == "" {
 		sessionID = pid.NewSessionID(pid.SessionIDPrefixASR)
 	}
+
+	// 应用超时（conf.Asr.Timeouts.Stream；0 = 不限）
+	ctx, cancel := uc.applyStreamTimeout(ctx)
+	defer cancel()
 
 	// 保证 resultCh 在所有返回路径上都被关闭，避免 service sender 永久阻塞。
 	resultChClosed := false

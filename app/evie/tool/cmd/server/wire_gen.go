@@ -59,7 +59,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	if err != nil {
 		return nil, nil, err
 	}
-	enhancementUsecase := biz.NewEnhancementUsecase(engine)
+	enhancementUsecase := biz.NewEnhancementUsecaseWithConf(engine, enhancement)
 	enhancementService := service.NewEnhancementService(enhancementUsecase, logger)
 	providerRegistry, err := data.NewASRRegistry(asr, logger)
 	if err != nil {

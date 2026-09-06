@@ -15,10 +15,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/stack-haven/lexnorm"
 
 	v1 "backend-service/api/evie/tool/v1"
+	"backend-service/app/evie/tool/internal/conf"
 )
 
 // EnhanceTextResult 业务结果（service 层转 proto）。
@@ -41,15 +43,34 @@ type EnhanceTextResult struct {
 
 // EnhancementUsecase 文本增强用例（lexnorm 版本）。
 type EnhancementUsecase struct {
-	engine *lexnorm.Engine
+	engine  *lexnorm.Engine
+	timeout time.Duration // 0 = 不限
 }
 
-// NewEnhancementUsecase 构造（注入 lexnorm.Engine）。
+// NewEnhancementUsecase 构造（注入 lexnorm.Engine）；timeout 为 0（不限）。
 //
 // 注意：旧版 NewEnhancementUsecase(pipeline, builder, policy) 已废弃。
 // wire 直接注入 lexnorm.Engine。
 func NewEnhancementUsecase(engine *lexnorm.Engine) *EnhancementUsecase {
 	return &EnhancementUsecase{engine: engine}
+}
+
+// NewEnhancementUsecaseWithConf 同 NewEnhancementUsecase，但同时设置超时。
+//
+// 从 conf.Enhancement.Timeout 读取；nil / <=0 = 不限。
+// wire 路径使用本构造器以启用超时控制；demo / 单元测试可继续使用 NewEnhancementUsecase。
+func NewEnhancementUsecaseWithConf(engine *lexnorm.Engine, c *conf.Enhancement) *EnhancementUsecase {
+	uc := NewEnhancementUsecase(engine)
+	if c != nil && c.Timeout != nil {
+		uc.timeout = c.Timeout.AsDuration()
+	}
+	return uc
+}
+
+// WithTimeout 返回设置了超时的新实例（链式）；<=0 表示不限。
+func (uc *EnhancementUsecase) WithTimeout(d time.Duration) *EnhancementUsecase {
+	uc.timeout = d
+	return uc
 }
 
 // EnhanceText 增强一段文本（指定 tenantID）。
@@ -61,6 +82,13 @@ func (uc *EnhancementUsecase) EnhanceText(ctx context.Context, rawText, tenantID
 	}
 	if tenantID == "" {
 		return nil, fmt.Errorf("biz: tenantID is empty (auth missing?)")
+	}
+
+	// 应用超时（conf.Enhancement.Timeout；0 = 不限）
+	if uc.timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, uc.timeout)
+		defer cancel()
 	}
 
 	// 1. 跑 lexnorm 引擎
