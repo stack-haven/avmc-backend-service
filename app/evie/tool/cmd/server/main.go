@@ -26,6 +26,7 @@ import (
 
 	"backend-service/app/evie/tool/internal/biz"
 	"backend-service/app/evie/tool/internal/conf"
+	"backend-service/app/evie/tool/internal/logging"
 
 	_ "go.uber.org/automaxprocs"
 )
@@ -73,7 +74,7 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, syncer *biz.Voc
 
 func main() {
 	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
+	logger := logging.New(logging.DetectFormat(),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
 		"service.id", id,
