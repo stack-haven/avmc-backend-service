@@ -83,6 +83,10 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+	// 日志脱敏（默认启用）；EVIE_TOOL_LOG_REDACT=off 关闭（仅调试）
+	if logging.ShouldRedact() {
+		logger = logging.NewRedactingLogger(logger)
+	}
 
 	c := config.New(
 		config.WithSource(
