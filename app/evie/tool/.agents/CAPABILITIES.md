@@ -148,7 +148,7 @@
   - `EnhancementUsecase.EnhanceText` ≈ 15 µs
   - `ASRUsecase.Recognize + ListRecords` ≈ 237 µs
   - `FuzzyVocabProcessor.Process`（1000 词库） ≈ 90 µs（Phase 7.1 优化后，原基线 ~9 ms；等长 Hamming 优化 + entry 预计算 rune 切片）
-- CI：`.github/workflows/ci.yaml`（gofmt / vet / test / race / bench / govulncheck）
+- CI：`.github/workflows/ci.yaml`（gofmt / vet / test / race / bench / govulncheck 硬阻断）
 - Makefile：`make config / wire / test / race / bench / lint / cover / demo`
 
 ---
@@ -158,3 +158,10 @@
 - `make wire` 自动重新生成 `wire_gen.go`（当前为手动编辑）
 - 拓展方向（v0.x → v1.x）见 `.agents/EXPANSION_PROPOSAL.md`
 - 小步快跑执行计划见 `.agents/EXECUTION_PLAN.md`
+
+## 12. 依赖基线（最近升级）
+
+- `google.golang.org/grpc` v1.82.1（修复 GO-2026-6061）
+- `golang.org/x/net` v0.55.0（修复 GO-2026-5026 间接路径）
+- Go stdlib 依赖 CI 使用 Go 1.25 latest（>= 1.25.13，含所有 stdlib 补丁）
+- govulncheck 在 CI 中硬阻断 reachable vuln
