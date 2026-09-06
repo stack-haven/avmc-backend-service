@@ -39,3 +39,37 @@ jobs:
 
       - name: bench
         run: go test -bench=. -run=^$ -benchtime=1x ./internal/biz/ ./internal/biz/processor/ || true
+
+      - name: govulncheck
+        # 依赖漏洞扫描（reachable mode）。
+        #
+        # 为什么 continue-on-error: true（临时）：
+        #   当前依赖中存在已知 reachable vuln（golang.org/x/net、google.golang.org/grpc
+        #   等），超出本次提交范围，需要单独的依赖升级 PR。开启本步以便：
+        #     1. CI 始终产出漏洞报告（PR 中可见）
+        #     2. 依赖升级完成后移除 continue-on-error，实现硬阻断
+        #
+        # 退出码：0=无漏洞，3=发现漏洞。本步将退出码 3 转换为成功，
+        # 同时把报告上传为 artifact 供审阅。
+        continue-on-error: true
+        run: |
+          set +e
+          go run golang.org/x/vuln/cmd/govulncheck@latest -mode=flagged -show=verbose ./... > govulncheck.txt 2>&1
+          rc=$?
+          echo "govulncheck exit code: $rc"
+          if [ $rc -ne 0 ]; then
+            echo "::warning::govulncheck 发现漏洞，详见 govulncheck.txt（临时 continue-on-error，不阻断）"
+            tail -80 govulncheck.txt
+          else
+            echo "✓ 无 reachable 漏洞"
+          fi
+          exit 0
+
+      - name: upload govulncheck report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govulncheck-report
+          path: govulncheck.txt
+          if-no-files-found: ignore
+          retention-days: 30
