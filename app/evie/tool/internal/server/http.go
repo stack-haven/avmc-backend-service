@@ -7,18 +7,22 @@
 package server
 
 import (
+	"context"
 	"time"
 
 	pkgHealth "backend-service/pkg/health"
 
+	kvalidate "github.com/go-kratos/kratos/contrib/middleware/validate/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v2/transport"
+	kratoshttp "github.com/go-kratos/kratos/v2/transport/http"
 
 	v1 "backend-service/api/evie/tool/v1"
 	"backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/data"
+	"backend-service/app/evie/tool/internal/metrics"
 	"backend-service/app/evie/tool/internal/service"
 )
 
@@ -28,40 +32,40 @@ var skipPaths = []string{}
 
 // NewHTTPServer 创建 HTTP server。
 //
-//   c:              server config（addr / network / timeout）
-//   cache:          Token 缓存（M2 注入）
-//   enhService:     EnhancementService（M6c 注入）
-//   asrService:     ASRService（M7 注入）
-//   checker:        健康检查器（M9 注入）
-//   logger:         kratos logger
+//	c:              server config（addr / network / timeout）
+//	cache:          Token 缓存（M2 注入）
+//	enhService:     EnhancementService（M6c 注入）
+//	asrService:     ASRService（M7 注入）
+//	checker:        健康检查器（M9 注入）
+//	logger:         kratos logger
 func NewHTTPServer(
 	c *conf.Server,
-	cache *data.TokenCache,
+	cache data.TokenLookup,
 	enhService *service.EnhancementService,
 	asrService *service.ASRService,
 	checker pkgHealth.Checker,
 	logger log.Logger,
-) *http.Server {
-	mws := []middleware.Middleware{recovery.Recovery()}
+) *kratoshttp.Server {
+	mws := []middleware.Middleware{recovery.Recovery(), kvalidate.ProtoValidate(), metricsMiddleware()}
 	if cache != nil {
 		mws = append(mws, NewTokenAuthMiddleware(cache, skipPaths))
 	}
 	_ = logger
 
-	opts := []http.ServerOption{http.Middleware(mws...)}
+	opts := []kratoshttp.ServerOption{kratoshttp.Middleware(mws...)}
 	if c != nil && c.Http != nil {
 		if c.Http.Network != "" {
-			opts = append(opts, http.Network(c.Http.Network))
+			opts = append(opts, kratoshttp.Network(c.Http.Network))
 		}
 		if c.Http.Addr != "" {
-			opts = append(opts, http.Address(c.Http.Addr))
+			opts = append(opts, kratoshttp.Address(c.Http.Addr))
 		}
 		if c.Http.Timeout != nil {
-			opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
+			opts = append(opts, kratoshttp.Timeout(c.Http.Timeout.AsDuration()))
 		}
 	}
 
-	srv := http.NewServer(opts...)
+	srv := kratoshttp.NewServer(opts...)
 	// 注册 EnhancementService
 	if enhService != nil {
 		v1.RegisterEnhancementServiceHTTPServer(srv, enhService)
@@ -74,5 +78,32 @@ func NewHTTPServer(
 	if checker != nil {
 		pkgHealth.RegisterHTTP(srv, checker, 2*time.Second)
 	}
+	// Metrics 文本导出（Prometheus 兼容）
+	srv.Handle("/metrics", metrics.Default.Handler())
 	return srv
+}
+
+// metricsMiddleware 记录 HTTP 请求计数与延迟到 metrics.Default。
+//
+// 错误码：返回 err 时 status=500；其它场景使用 transport 推断。
+func metricsMiddleware() middleware.Middleware {
+	return func(handler middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+			start := time.Now()
+			reply, err = handler(ctx, req)
+			path := "unknown"
+			method := "unknown"
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				path = tr.Operation()
+				method = tr.Kind().String()
+			}
+			status := "200"
+			if err != nil {
+				status = "500"
+			}
+			metrics.HTTPRequestsTotal.Inc(method, path, status)
+			metrics.RequestDuration.Observe(time.Since(start).Seconds(), method, path)
+			return reply, err
+		}
+	}
 }

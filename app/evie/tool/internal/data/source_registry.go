@@ -2,9 +2,9 @@
 // VocabularySourceRegistry：多 source 聚合。
 //
 // 设计要点（Q13）：
-//   1. 未来加新 source（如飞书/LDAP）只调 Register，无需修改 Normalizer
-//   2. Registry 是并发安全的 map wrapper
-//   3. VocabSyncer（M5）通过 All() 拿到全部 source 同步
+//  1. 未来加新 source（如飞书/LDAP）只调 Register，无需修改 Normalizer
+//  2. Registry 是并发安全的 map wrapper
+//  3. VocabSyncer（M5）通过 All() 拿到全部 source 同步
 package data
 
 import (

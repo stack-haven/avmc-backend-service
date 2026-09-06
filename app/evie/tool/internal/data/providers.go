@@ -2,8 +2,10 @@
 // ASR Provider 装配：按 conf.Asr 配置按名启用 Provider 注册到 pkg/asr.ProviderRegistry。
 //
 // 路由约定（业务层使用）：
-//   batch  → conf.Asr.DefaultBatchProvider
-//   stream → conf.Asr.DefaultStreamProvider
+//
+//	batch  → conf.Asr.DefaultBatchProvider
+//	stream → conf.Asr.DefaultStreamProvider
+//
 // 若首选 Provider 未 enabled，自动降级到 Providers 中第一个 enabled。
 package data
 

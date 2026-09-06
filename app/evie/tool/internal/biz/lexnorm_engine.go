@@ -32,13 +32,13 @@ import (
 // TenantProfileResolver 实现 lexnorm.ProfileResolver：按 tenantID 懒加载词库。
 //
 // 关键链路：
-//   1. Resolve(ctx, "1889501240003497986") 由 Engine.Normalize 触发
-//   2. 调 VocabularyBuilder.Build(ctx, tenantID)：
-//      - 命中：直接返回 VocabularySnapshot
-//      - miss：触发 lazySyncOnMiss（VocabSyncer.EnsureTenant），并发走 fallback/system
-//   3. 把 VocabularySnapshot 转成 lexnorm.Lexicon（buildLexiconFromSnapshot）
-//   4. 构造 Pipeline（每个 tenant 独立 Pipeline 实例，因为 Lexicon 不同）
-//   5. 返回 lexnorm.Runtime
+//  1. Resolve(ctx, "1889501240003497986") 由 Engine.Normalize 触发
+//  2. 调 VocabularyBuilder.Build(ctx, tenantID)：
+//     - 命中：直接返回 VocabularySnapshot
+//     - miss：触发 lazySyncOnMiss（VocabSyncer.EnsureTenant），并发走 fallback/system
+//  3. 把 VocabularySnapshot 转成 lexnorm.Lexicon（buildLexiconFromSnapshot）
+//  4. 构造 Pipeline（每个 tenant 独立 Pipeline 实例，因为 Lexicon 不同）
+//  5. 返回 lexnorm.Runtime
 type TenantProfileResolver struct {
 	builder *VocabularyBuilder
 	cfg     lexnorm.Config

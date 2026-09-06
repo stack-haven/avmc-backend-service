@@ -17,17 +17,17 @@ import (
 // TestMapFromMapper 覆盖 FieldMapper 各种字段映射场景。
 func TestMapFromMapper(t *testing.T) {
 	tests := []struct {
-		name    string
-		root    map[string]any
-		mapper  credential.FieldMapper
-		check   func(t *testing.T, id credential.CallerIdentity)
+		name   string
+		root   map[string]any
+		mapper credential.FieldMapper
+		check  func(t *testing.T, id credential.CallerIdentity)
 	}{
 		{
 			name: "top-level fields",
 			root: map[string]any{
-				"tenantId":   "T1",
-				"userId":     "U1",
-				"userType":   float64(2),
+				"tenantId":    "T1",
+				"userId":      "U1",
+				"userType":    float64(2),
 				"expiresTime": float64(1898491296083),
 			},
 			mapper: credential.FieldMapper{
@@ -74,8 +74,8 @@ func TestMapFromMapper(t *testing.T) {
 			},
 		},
 		{
-			name: "empty mapper returns zero identity with raw preserved",
-			root: map[string]any{"foo": "bar"},
+			name:   "empty mapper returns zero identity with raw preserved",
+			root:   map[string]any{"foo": "bar"},
 			mapper: credential.FieldMapper{},
 			check: func(t *testing.T, id credential.CallerIdentity) {
 				if id.TenantID != "" || id.UserID != "" {
@@ -150,7 +150,7 @@ func TestExtractString(t *testing.T) {
 
 func TestLookupPath(t *testing.T) {
 	root := map[string]any{
-		"a": map[string]any{"b": map[string]any{"c": "deep"}},
+		"a":   map[string]any{"b": map[string]any{"c": "deep"}},
 		"top": "value",
 	}
 	tests := []struct {
@@ -194,10 +194,10 @@ func TestRedisProvider_EndToEnd(t *testing.T) {
 
 	payload := map[string]any{
 		"tenantId": "T1", "userId": "U1",
-		"userType":     float64(2),
-		"expiresTime":  float64(1898491296083),
-		"accessToken":  "echo-back",
-		"userInfo":     map[string]any{"nickname": "Alice"},
+		"userType":    float64(2),
+		"expiresTime": float64(1898491296083),
+		"accessToken": "echo-back",
+		"userInfo":    map[string]any{"nickname": "Alice"},
 	}
 	raw, _ := json.Marshal(payload)
 	mr.Set("test:good-token", string(raw))

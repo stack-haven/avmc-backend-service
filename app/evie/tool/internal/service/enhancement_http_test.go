@@ -14,8 +14,8 @@ import (
 
 	v1 "backend-service/api/evie/tool/v1"
 
-	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
+	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/data"
 	"backend-service/app/evie/tool/internal/service"
 )

@@ -30,6 +30,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 
@@ -110,6 +111,10 @@ func (p *Provider) Authenticate(ctx context.Context, token string) (*credential.
 	if id.AccessToken == "" {
 		// payload may carry its own accessToken echo; preserve it when set.
 		id.AccessToken = credential.ExtractString(credential.LookupPath(payload, p.fields.AccessToken))
+	}
+	// 过期检查：上游业务系统的 expiresTime 是事实来源，遵循之。
+	if !id.ExpiresAt.IsZero() && time.Now().After(id.ExpiresAt) {
+		return nil, credential.ErrTokenInvalid
 	}
 	return &id, nil
 }

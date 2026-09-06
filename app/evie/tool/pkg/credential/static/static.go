@@ -57,10 +57,10 @@ type Config struct {
 
 // Provider is an in-memory credential.Provider.
 type Provider struct {
-	mu             sync.RWMutex
-	byTokenLower   map[string]credential.CallerIdentity
-	defaultTenant  string
-	caseSensitive  bool
+	mu            sync.RWMutex
+	byTokenLower  map[string]credential.CallerIdentity
+	defaultTenant string
+	caseSensitive bool
 }
 
 // New constructs a StaticProvider from the given configuration.
@@ -114,6 +114,10 @@ func (p *Provider) Authenticate(_ context.Context, token string) (*credential.Ca
 	id, ok := p.byTokenLower[strings.ToLower(token)]
 	if !ok {
 		return nil, credential.ErrTokenNotFound
+	}
+	// 过期检查：与 Redis/JWT 保持一致语义。
+	if !id.ExpiresAt.IsZero() && time.Now().After(id.ExpiresAt) {
+		return nil, credential.ErrTokenInvalid
 	}
 	return &id, nil
 }

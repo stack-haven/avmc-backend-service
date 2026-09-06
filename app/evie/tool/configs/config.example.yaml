@@ -1,0 +1,124 @@
+# evie/tool 配置示例（生产部署前复制为 config.yaml 并填入真实值）
+#
+# 约定：
+# - 所有敏感字段（password、api_key、api_secret、app_id）通过环境变量或 secret 注入。
+# - 实际启动时可通过 Kratos env source 覆盖，参见 deploy 文档。
+# - 本文件可提交到版本库，不含任何真实凭据。
+
+server:
+  http:
+    addr: 0.0.0.0:8110
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9110
+    timeout: 30s
+
+data:
+  redis:
+    network: tcp
+    addr: 127.0.0.1:6379
+    # 通过 ${REDIS_PASSWORD} 注入，禁止提交明文
+    password: "${REDIS_PASSWORD}"
+    db: 14
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+    token_key_prefix: "oauth2_access_token:"
+
+# 外部 qua 系统 HTTP 对接
+qua:
+  base_url: "https://your-qua.example.com"
+  timeout: 10s
+  forward_user_token: true
+  endpoints:
+    list_depts: "/admin-api/system/dept/list"
+    list_users: "/admin-api/qua/member-extended/page"
+    get_user: ""
+    get_dept: ""
+  page_size: 0
+  extra_headers:
+    tenant-id: ""
+    zone: "Asia/Shanghai"
+
+# ASR Provider 配置
+asr:
+  default_batch_provider: funasr
+  default_stream_provider: xunfei
+  upload:
+    audio_dir: "./upload/audio"
+    retention_days: 7
+  providers:
+    funasr:
+      enabled: true
+      addr: "http://funasr:10095"
+      stream_addr: ""
+      sample_rate: 16000
+      language: zh
+    xunfei:
+      enabled: true
+      host: "iat-api.xfyun.cn"
+      uri: "/v2/iat"
+      app_id: "${XUNFEI_APP_ID}"
+      api_key: "${XUNFEI_API_KEY}"
+      api_secret: "${XUNFEI_API_SECRET}"
+      sample_rate: 16000
+    whisper:
+      enabled: false
+    aliyun:
+      enabled: false
+
+# 文本增强 8 层 Pipeline
+enhancement:
+  pipeline:
+    - cleaning
+    - filler
+    - vocab_matching
+    - alias_resolution
+    - deterministic_replacement
+    - pinyin_correction
+    - fuzzy_matching
+    - context_correction
+  pinyin_threshold: 0.85
+  fuzzy_auto_threshold: 0.80
+  fuzzy_suggest_threshold: 0.60
+  llm_enabled: false
+
+# 租户词库同步
+tenant_vocab:
+  sync_interval: 300s
+  initial_warmup: false
+  concurrency: 4
+  include_departments: true
+  include_user_nickname: true
+  include_user_realname: true
+  custom_alias_field: "alias"
+
+# 系统静态词条
+system_dict:
+  path: "./configs/dictionaries/system.json"
+  hot_reload: true
+
+# 租户注册表（决定预加载租户列表）
+tenant_registry:
+  path: "./configs/tenants.json"
+
+# 外部系统词条规则（YAML 零代码接入新 source）
+vocab_rules:
+  sources:
+    qua:
+      entity_mappings:
+        - match:
+            entity_type: "user"
+          emit:
+            standard_text: "realName"
+            category: "PERSON"
+            aliases: ["nickname"]
+            pinyin_hint: "realName"
+            priority: "50"
+            include_when: "status==1"
+        - match:
+            entity_type: "department"
+          emit:
+            standard_text: "name"
+            category: "ORGANIZATION"
+            pinyin_hint: "name"
+            priority: "30"

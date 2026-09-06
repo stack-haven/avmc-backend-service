@@ -15,6 +15,8 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+
+	pkgHealth "backend-service/pkg/health"
 )
 
 import (
@@ -74,11 +76,12 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	}
 	checker := data.NewHealthChecker(client, quaFetcher, providerRegistry)
 	httpServer := server.NewHTTPServer(confServer, tokenCache, enhancementService, asrService, checker, logger)
+	healthNotifier := provideHealthNotifier(checker)
 	bizTenantRegistry := biz.NewTenantRegistry(tenantRegistry)
 	normalizer := biz.NewNormalizerFromConf(vocabRules, logger)
 	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
 	v2 := provideCanQuaFetch()
-	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, tenantVocab, logger, v2)
+	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, tenantVocab, logger, v2, healthNotifier)
 	app := newApp(logger, grpcServer, httpServer, vocabSyncer)
 	return app, func() {
 	}, nil
@@ -99,4 +102,15 @@ func provideCanQuaFetch() func(ctx context.Context) bool {
 		_, ok := biz.AuthFrom(ctx)
 		return ok
 	}
+}
+
+// provideHealthNotifier 将 pkgHealth.Checker 适配为 biz.HealthNotifier。
+func provideHealthNotifier(checker pkgHealth.Checker) biz.HealthNotifier {
+	if checker == nil {
+		return nil
+	}
+	if n, ok := checker.(biz.HealthNotifier); ok {
+		return n
+	}
+	return nil
 }

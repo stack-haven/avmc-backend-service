@@ -33,11 +33,11 @@ func TestJWT_HS256_HappyPath(t *testing.T) {
 	secret := []byte("test-secret")
 	exp := time.Now().Add(1 * time.Hour).Unix()
 	tok := mintHS256(t, secret, map[string]any{
-		"sub":      "u-1",
-		"iss":      "test-issuer",
-		"exp":      exp,
+		"sub":       "u-1",
+		"iss":       "test-issuer",
+		"exp":       exp,
 		"tenant_id": "t-1",
-		"name":     "Alice",
+		"name":      "Alice",
 	})
 
 	p, err := credjwt.New(credjwt.Config{

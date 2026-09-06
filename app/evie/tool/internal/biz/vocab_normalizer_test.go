@@ -339,15 +339,15 @@ func TestEvalCondition(t *testing.T) {
 		expr string
 		want bool
 	}{
-		{"", true},                     // empty = 总是通过
-		{"status==1", true},            // 数字字符串比较
+		{"", true},          // empty = 总是通过
+		{"status==1", true}, // 数字字符串比较
 		{"status==2", false},
 		{"name=='田华'", true},
 		{"name=='其他'", false},
 		{"status!=2", true},
-		{"enabled", true},              // 真值单 token
-		{"status", true},               // "1" 是 truthy
-		{"missing_field", false},       // 字段缺失
+		{"enabled", true},        // 真值单 token
+		{"status", true},         // "1" 是 truthy
+		{"missing_field", false}, // 字段缺失
 	}
 
 	for _, tt := range tests {

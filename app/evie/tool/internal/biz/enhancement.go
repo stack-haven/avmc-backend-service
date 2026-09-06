@@ -4,11 +4,11 @@
 // M9.6 改造：从 pkg/textenhance 切换到 pkg/lexnorm。
 //
 // 责任：
-//   1. 拿 ctx 中的 AuthInfo（tenantID）
-//   2. 调 lexnorm.Engine.Normalize（内部 lazy 加载 tenant 词库）
-//   3. lexnorm.Change → v1.EnhanceChange 转换（保持 HTTP API 兼容）
-//   4. 读 result.Changes + Steps + Errors
-//   5. 返回 EnhanceTextResult
+//  1. 拿 ctx 中的 AuthInfo（tenantID）
+//  2. 调 lexnorm.Engine.Normalize（内部 lazy 加载 tenant 词库）
+//  3. lexnorm.Change → v1.EnhanceChange 转换（保持 HTTP API 兼容）
+//  4. 读 result.Changes + Steps + Errors
+//  5. 返回 EnhanceTextResult
 package biz
 
 import (

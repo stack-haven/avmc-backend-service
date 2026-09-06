@@ -14,8 +14,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	v1 "backend-service/api/evie/tool/v1"
-	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
+	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/data"
 	"backend-service/app/evie/tool/internal/service"
 
@@ -93,8 +93,8 @@ func TestASRService_Recognize(t *testing.T) {
 	ctx := makeCtxWithAuth("u1", "158")
 
 	resp, err := svc.Recognize(ctx, &v1.RecognizeRequest{
-		Format:             &v1.AudioFormat{Encoding: "wav", SampleRate: 16000, BitDepth: 16},
-		AudioData:          []byte("fake-wav-bytes"),
+		Format:            &v1.AudioFormat{Encoding: "wav", SampleRate: 16000, BitDepth: 16},
+		AudioData:         []byte("fake-wav-bytes"),
 		EnableEnhancement: false,
 	})
 	if err != nil {
@@ -261,7 +261,7 @@ func (f *fakeStreamServer) Send(r *v1.StreamResult) error {
 func (f *fakeStreamServer) sendRecv(c *v1.AudioChunk) {
 	f.recvCh <- c
 }
-func (f *fakeStreamServer) closeRecv() { close(f.recvCh) }
+func (f *fakeStreamServer) closeRecv()                   { close(f.recvCh) }
 func (f *fakeStreamServer) SetHeader(metadata.MD) error  { return nil }
 func (f *fakeStreamServer) SendHeader(metadata.MD) error { return nil }
 func (f *fakeStreamServer) SetTrailer(metadata.MD)       {}

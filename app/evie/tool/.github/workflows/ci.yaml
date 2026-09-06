@@ -1,0 +1,41 @@
+# GitHub Actions CI for evie/tool.
+#
+# Note: This file is placed under the subdirectory rather than the repo root.
+# Move it to backend-service/.github/workflows/ci.yaml when consolidating the
+# sub-repo's CI; the commands are identical.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-service/app/evie/tool
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: gofmt
+        run: |
+          out=$(gofmt -l internal pkg cmd)
+          if [ -n "$out" ]; then echo "gofmt diff: $out"; exit 1; fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: test
+        run: go test ./...
+
+      - name: test (race)
+        run: go test -race ./...
+
+      - name: bench
+        run: go test -bench=. -run=^$ -benchtime=1x ./internal/biz/ ./internal/biz/processor/ || true

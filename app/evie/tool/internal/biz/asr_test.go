@@ -18,12 +18,12 @@ import (
 
 // mockBatchProvider 整段识别 mock。
 type mockBatchProvider struct {
-	mu        sync.Mutex
-	calls     int
-	text      string
+	mu         sync.Mutex
+	calls      int
+	text       string
 	confidence float64
 	durationMs int64
-	err       error
+	err        error
 }
 
 func (m *mockBatchProvider) Name() string { return "mock-batch" }
@@ -50,11 +50,11 @@ func (m *mockBatchProvider) Capabilities() asrPkg.ProviderCapabilities {
 
 // mockStreamProvider 流式识别 mock。
 type mockStreamProvider struct {
-	mu       sync.Mutex
-	calls    int
-	chunks   int
+	mu        sync.Mutex
+	calls     int
+	chunks    int
 	finalText string
-	err      error
+	err       error
 }
 
 func (m *mockStreamProvider) Name() string { return "mock-stream" }
@@ -91,7 +91,7 @@ func (m *mockStreamProvider) Capabilities() asrPkg.ProviderCapabilities {
 	return asrPkg.ProviderCapabilities{Name: m.Name(), Streaming: true, SupportedFormat: []string{"pcm"}}
 }
 
-func makeConf(t *testing.T, audioDir string) *v1conf.Asr {
+func makeConf(t testing.TB, audioDir string) *v1conf.Asr {
 	t.Helper()
 	return &v1conf.Asr{
 		DefaultBatchProvider:  "mock-batch",
@@ -103,7 +103,7 @@ func makeConf(t *testing.T, audioDir string) *v1conf.Asr {
 	}
 }
 
-func makeEnhancer(t *testing.T, dir string) *biz.EnhancementUsecase {
+func makeEnhancer(t testing.TB, dir string) *biz.EnhancementUsecase {
 	t.Helper()
 	dictPath := filepath.Join(dir, "system.json")
 	if err := os.WriteFile(dictPath, []byte(`{"version":"t","entries":[]}`), 0644); err != nil {
@@ -162,7 +162,7 @@ func TestASRUsecase_Recognize(t *testing.T) {
 	}
 
 	// 验证 ring buffer
-	rec, ok := uc.GetRecord(context.Background(), res.SessionID)
+	rec, ok := uc.GetRecord(context.Background(), "158", res.SessionID)
 	if !ok {
 		t.Error("record not in ring buffer")
 	}
@@ -250,7 +250,7 @@ func TestASRUsecase_RingBufferEviction(t *testing.T) {
 			"", false)
 	}
 
-	page, total, _ := uc.ListRecords(context.Background(), 100, "")
+	page, total, _ := uc.ListRecords(context.Background(), "t", 100, "")
 	if total != 1000 {
 		t.Errorf("total = %d, want 1000 (after eviction)", total)
 	}
@@ -276,7 +276,7 @@ func TestASRUsecase_GetRecordAudio(t *testing.T) {
 		t.Fatalf("Recognize: %v", err)
 	}
 
-	audio, ct, err := uc.GetRecordAudio(context.Background(), res.SessionID)
+	audio, ct, err := uc.GetRecordAudio(context.Background(), "158", res.SessionID)
 	if err != nil {
 		t.Fatalf("GetRecordAudio: %v", err)
 	}
@@ -305,7 +305,7 @@ func TestASRUsecase_ListRecords_Pagination(t *testing.T) {
 	}
 
 	// 第一页
-	page1, total1, next1 := uc.ListRecords(context.Background(), 10, "")
+	page1, total1, next1 := uc.ListRecords(context.Background(), "t", 10, "")
 	if total1 != 25 {
 		t.Errorf("total1 = %d, want 25", total1)
 	}
@@ -317,7 +317,7 @@ func TestASRUsecase_ListRecords_Pagination(t *testing.T) {
 	}
 
 	// 第二页
-	page2, _, next2 := uc.ListRecords(context.Background(), 10, next1)
+	page2, _, next2 := uc.ListRecords(context.Background(), "t", 10, next1)
 	if len(page2) != 10 {
 		t.Errorf("page2 len = %d, want 10", len(page2))
 	}
@@ -326,12 +326,96 @@ func TestASRUsecase_ListRecords_Pagination(t *testing.T) {
 	}
 
 	// 第三页
-	page3, _, next3 := uc.ListRecords(context.Background(), 10, next2)
+	page3, _, next3 := uc.ListRecords(context.Background(), "t", 10, next2)
 	if len(page3) != 5 {
 		t.Errorf("page3 len = %d, want 5", len(page3))
 	}
 	if next3 != "" {
 		t.Errorf("next3 should be empty, got %q", next3)
+	}
+}
+
+// TestASRUsecase_TenantIsolation 验证多租户记录与音频隔离。
+func TestASRUsecase_TenantIsolation(t *testing.T) {
+	dir := t.TempDir()
+	mk := func(text string) *mockBatchProvider { return &mockBatchProvider{text: text} }
+	uc := biz.NewASRUsecase(
+		&biz.ASRProviders{Batch: mk("A"), Stream: &mockStreamProvider{}},
+		makeEnhancer(t, dir),
+		makeConf(t, "upload/audio"),
+		log.DefaultLogger,
+	)
+
+	// tenantA / tenantB 各造 2 条
+	for i := 0; i < 2; i++ {
+		if _, err := uc.Recognize(context.Background(), "u1", "tenantA", []byte{0x01},
+			biz.AudioFormat{Encoding: "pcm", SampleRate: 16000, BitDepth: 16},
+			"", false); err != nil {
+			t.Fatalf("tenantA Recognize: %v", err)
+		}
+	}
+	for i := 0; i < 2; i++ {
+		if _, err := uc.Recognize(context.Background(), "u2", "tenantB", []byte{0x02},
+			biz.AudioFormat{Encoding: "pcm", SampleRate: 16000, BitDepth: 16},
+			"", false); err != nil {
+			t.Fatalf("tenantB Recognize: %v", err)
+		}
+	}
+
+	// 各自 ListRecords 仅看到自己
+	pageA, totalA, _ := uc.ListRecords(context.Background(), "tenantA", 10, "")
+	if totalA != 2 || len(pageA) != 2 {
+		t.Errorf("tenantA total=%d len=%d, want 2", totalA, len(pageA))
+	}
+	pageB, totalB, _ := uc.ListRecords(context.Background(), "tenantB", 10, "")
+	if totalB != 2 || len(pageB) != 2 {
+		t.Errorf("tenantB total=%d len=%d, want 2", totalB, len(pageB))
+	}
+	// 跨租户为 0
+	pageX, totalX, _ := uc.ListRecords(context.Background(), "tenantX", 10, "")
+	if totalX != 0 || len(pageX) != 0 {
+		t.Errorf("tenantX should be empty, got total=%d len=%d", totalX, len(pageX))
+	}
+
+	// GetRecord 跨租户必须不存在
+	idA := pageA[0].ID
+	if _, ok := uc.GetRecord(context.Background(), "tenantA", idA); !ok {
+		t.Error("tenantA should see its own record")
+	}
+	if _, ok := uc.GetRecord(context.Background(), "tenantB", idA); ok {
+		t.Error("tenantB must NOT see tenantA's record")
+	}
+
+	// GetRecordAudio 跨租户必须返回错误
+	if _, _, err := uc.GetRecordAudio(context.Background(), "tenantB", idA); err == nil {
+		t.Error("tenantB GetRecordAudio of tenantA's record should error")
+	}
+	if _, _, err := uc.GetRecordAudio(context.Background(), "tenantA", idA); err != nil {
+		t.Errorf("tenantA GetRecordAudio of its own record should succeed: %v", err)
+	}
+
+	// TenantRecordCount 辅助
+	if c := uc.TenantRecordCount("tenantA"); c != 2 {
+		t.Errorf("TenantRecordCount(tenantA) = %d, want 2", c)
+	}
+	if c := uc.TenantRecordCount("tenantB"); c != 2 {
+		t.Errorf("TenantRecordCount(tenantB) = %d, want 2", c)
+	}
+}
+
+// TestASRUsecase_InvalidSessionID 拒绝非法 session_id。
+func TestASRUsecase_InvalidSessionID(t *testing.T) {
+	dir := t.TempDir()
+	uc := biz.NewASRUsecase(
+		&biz.ASRProviders{Batch: &mockBatchProvider{text: "x"}, Stream: &mockStreamProvider{}},
+		makeEnhancer(t, dir),
+		makeConf(t, "upload/audio"),
+		log.DefaultLogger,
+	)
+	if _, err := uc.Recognize(context.Background(), "u1", "158", []byte{0x01},
+		biz.AudioFormat{Encoding: "pcm", SampleRate: 16000, BitDepth: 16},
+		"../../evil", false); err == nil {
+		t.Error("expected error for invalid session_id, got nil")
 	}
 }
 

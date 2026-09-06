@@ -10,7 +10,8 @@ data:
   redis:
     network: tcp
     addr: 172.16.0.112:6379
-    password: "123456"
+    # 生产请从环境变量或 secret 注入：例如 ${REDIS_PASSWORD}
+    password: ""
     db: 14
     read_timeout: 0.2s
     write_timeout: 0.2s
@@ -53,13 +54,14 @@ asr:
       sample_rate: 16000
       language: zh
     # 讯飞凭证（确认：iat-api.xfyun.cn / v2/iat）
+    # 生产请通过环境变量注入：${XUNFEI_APP_ID} / ${XUNFEI_API_KEY} / ${XUNFEI_API_SECRET}
     xunfei:
       enabled: true
       host: "iat-api.xfyun.cn"
       uri: "/v2/iat"
-      app_id: "2d8c3dd7"
-      api_key: "641cdc25afd21421685c6ec2ce24149c"
-      api_secret: "MWEyMzg2ODhiMThhY2E2MWJmZWQ4YjQ4"
+      app_id: ""
+      api_key: ""
+      api_secret: ""
       sample_rate: 16000
     whisper:
       enabled: false

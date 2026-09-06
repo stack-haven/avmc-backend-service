@@ -1,7 +1,8 @@
 // Package server · middleware_integration_test.go
 // 端到端集成测试：
-//   miniredis（mock Redis）+ httptest qua + Kratos HTTP server + EnhancementService
-//   全链路：HTTP POST → Bearer middleware → AuthInfo → usecase → Pipeline → Response
+//
+//	miniredis（mock Redis）+ httptest qua + Kratos HTTP server + EnhancementService
+//	全链路：HTTP POST → Bearer middleware → AuthInfo → usecase → Pipeline → Response
 package server
 
 import (
@@ -23,14 +24,12 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 
-
-
 	v1 "backend-service/api/evie/tool/v1"
-	"github.com/redis/go-redis/v9"
-	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
+	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/data"
 	"backend-service/app/evie/tool/internal/service"
+	"github.com/redis/go-redis/v9"
 )
 
 // endToEndEnv 集成测试环境：mock redis + mock qua + Kratos HTTP server。
@@ -39,14 +38,22 @@ type endToEndEnv struct {
 	quaServer     *httptest.Server
 	systemDictDir string
 	httpSrv       *httptest.Server
-	token        string
+	token         string
 }
 
 func (e *endToEndEnv) Close() {
-	if e.miniRedis != nil { e.miniRedis.Close() }
-	if e.quaServer != nil { e.quaServer.Close() }
-	if e.httpSrv != nil { e.httpSrv.Close() }
-	if e.systemDictDir != "" { os.RemoveAll(e.systemDictDir) }
+	if e.miniRedis != nil {
+		e.miniRedis.Close()
+	}
+	if e.quaServer != nil {
+		e.quaServer.Close()
+	}
+	if e.httpSrv != nil {
+		e.httpSrv.Close()
+	}
+	if e.systemDictDir != "" {
+		os.RemoveAll(e.systemDictDir)
+	}
 }
 
 // setupEndToEnd 构造完整测试环境。
@@ -73,7 +80,7 @@ func setupEndToEnd(t *testing.T) *endToEndEnv {
 		"userInfo": {"nickname": "测试账号", "deptId": "1904450235179954177"},
 		"clientId": "default",
 		"scopes": null,
-		"expiresTime": 1788491296083
+		"expiresTime": 4102444800000
 	}`)
 
 	// 3. mock qua
@@ -115,9 +122,9 @@ func setupEndToEnd(t *testing.T) *endToEndEnv {
 
 	// 5. 构造 conf + 业务组件
 	conf := &v1conf.Bootstrap{
-		Server: &v1conf.Server{Http: &v1conf.Server_HTTP{Addr: ":0"}, Grpc: &v1conf.Server_GRPC{Addr: ":0"}},
-		Data:   &v1conf.Data{Redis: &v1conf.Data_Redis{Network: "tcp", Addr: mr.Addr(), TokenKeyPrefix: "oauth2_access_token:"}},
-		Qua:    &v1conf.Qua{BaseUrl: env.quaServer.URL, Endpoints: &v1conf.Qua_Endpoints{ListUsers: "/admin-api/qua/member-extended/page", ListDepts: "/admin-api/system/dept/list"}},
+		Server:      &v1conf.Server{Http: &v1conf.Server_HTTP{Addr: ":0"}, Grpc: &v1conf.Server_GRPC{Addr: ":0"}},
+		Data:        &v1conf.Data{Redis: &v1conf.Data_Redis{Network: "tcp", Addr: mr.Addr(), TokenKeyPrefix: "oauth2_access_token:"}},
+		Qua:         &v1conf.Qua{BaseUrl: env.quaServer.URL, Endpoints: &v1conf.Qua_Endpoints{ListUsers: "/admin-api/qua/member-extended/page", ListDepts: "/admin-api/system/dept/list"}},
 		Enhancement: &v1conf.Enhancement{Pipeline: []string{"vocab_matching", "alias_resolution", "deterministic_replacement"}},
 		SystemDict:  &v1conf.SystemDict{Path: systemDictPath, HotReload: false},
 		VocabRules:  &v1conf.VocabRules{},
@@ -267,7 +274,9 @@ func TestE2E_MultiRequest(t *testing.T) {
 			httpReq.Header.Set("Content-Type", "application/json")
 			httpReq.Header.Set("Authorization", "Bearer "+env.token)
 			resp, err := http.DefaultClient.Do(httpReq)
-			if err != nil { return }
+			if err != nil {
+				return
+			}
 			defer resp.Body.Close()
 			body, _ := io.ReadAll(resp.Body)
 			if !strings.Contains(string(body), "金种籽") {

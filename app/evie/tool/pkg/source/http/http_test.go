@@ -145,9 +145,9 @@ func TestHTTPSource_TenantIDProviderFromCtx(t *testing.T) {
 	defer srv.Close()
 
 	src, _ := httpsrc.New(httpsrc.Config{
-		BaseURL:        srv.URL,
-		UserPath:       "/users",
-		TenantHeader:   "tenant-id",
+		BaseURL:          srv.URL,
+		UserPath:         "/users",
+		TenantHeader:     "tenant-id",
 		TenantIDProvider: httpsrc.TenantIDFunc(func(_ context.Context) (string, error) { return "42", nil }),
 	})
 	_, _ = src.Fetch(context.Background())

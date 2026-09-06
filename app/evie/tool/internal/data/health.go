@@ -25,12 +25,13 @@ import (
 
 // HealthChecker 聚合多个 dependency 检查。
 type HealthChecker struct {
-	rdb    *redis.Client
-	qua    *quaFetcher
-	asrReg *asrPkg.ProviderRegistry
-	mu     sync.RWMutex
+	rdb       *redis.Client
+	qua       *quaFetcher
+	asrReg    *asrPkg.ProviderRegistry
+	mu        sync.RWMutex
 	lastSync  time.Time
 	lastError string
+	syncMode  string
 }
 
 // 编译期断言 HealthChecker 实现 pkgHealth.Checker。
@@ -55,6 +56,18 @@ func (c *HealthChecker) SetSyncState(last time.Time, errMsg string) {
 	defer c.mu.Unlock()
 	c.lastSync = last
 	c.lastError = errMsg
+}
+
+// SetSyncMode 上报后台词库同步模式（lazy_only / background）。
+//
+// 编译期保证：*HealthChecker 满足 biz.HealthNotifier。
+func (c *HealthChecker) SetSyncMode(mode string) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.syncMode = mode
 }
 
 // Ready 检查所有依赖（带 2s 总超时）。
@@ -104,9 +117,10 @@ func (c *HealthChecker) Details(_ context.Context) map[string]any {
 	defer c.mu.RUnlock()
 
 	details := map[string]any{
-		"redis": c.rdb != nil,
-		"qua":   c.qua != nil && c.qua.BaseURL() != "",
-		"asr":   c.asrReg != nil,
+		"redis":           c.rdb != nil,
+		"qua":             c.qua != nil && c.qua.BaseURL() != "",
+		"asr":             c.asrReg != nil,
+		"vocab_sync_mode": c.syncMode,
 	}
 	if c.asrReg != nil {
 		details["asr_providers"] = c.asrReg.Names()

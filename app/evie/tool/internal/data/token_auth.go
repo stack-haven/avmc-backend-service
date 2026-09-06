@@ -32,7 +32,7 @@ func (a *AuthInfo) GetTenantID() string    { return a.TenantID }
 //
 //	cache:    提供 Bearer token → AuthInfo 的查询能力
 //	skipPath: 跳过中间件的路径前缀（如 []string{"/healthz"}）
-func TokenAuthMiddleware(cache *TokenCache, skipPath []string) middleware.Middleware {
+func TokenAuthMiddleware(cache TokenLookup, skipPath []string) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			// 0. 跳过白名单

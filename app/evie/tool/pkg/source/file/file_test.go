@@ -138,9 +138,9 @@ func TestFileSource_CustomKeys(t *testing.T) {
 	custom := `{"members":[{"id":"m1","name":"Alice"}],"teams":[{"id":"t1","name":"Eng"}]}`
 	path := writeTemp(t, custom)
 	src, err := filesrc.New(filesrc.Config{
-		Path:      path,
-		UsersKey:  "members",
-		DeptsKey:  "teams",
+		Path:           path,
+		UsersKey:       "members",
+		DeptsKey:       "teams",
 		UserEntityType: "member",
 		DeptEntityType: "team",
 	})

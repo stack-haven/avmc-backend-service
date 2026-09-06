@@ -22,12 +22,12 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	pkgHealth "backend-service/pkg/health"
 	v1 "backend-service/api/evie/tool/v1"
-	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/biz"
+	v1conf "backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/data"
 	"backend-service/app/evie/tool/internal/service"
+	pkgHealth "backend-service/pkg/health"
 
 	asrPkg "backend-service/pkg/asr"
 )
@@ -85,8 +85,8 @@ func setupASR_E2E(t *testing.T) *asrE2EEnv {
 
 	// 3. 业务组件
 	conf := &v1conf.Bootstrap{
-		Data:       &v1conf.Data{Redis: &v1conf.Data_Redis{Network: "tcp", Addr: mr.Addr(), TokenKeyPrefix: "oauth2_access_token:"}},
-		SystemDict: &v1conf.SystemDict{Path: dictPath},
+		Data:        &v1conf.Data{Redis: &v1conf.Data_Redis{Network: "tcp", Addr: mr.Addr(), TokenKeyPrefix: "oauth2_access_token:"}},
+		SystemDict:  &v1conf.SystemDict{Path: dictPath},
 		Enhancement: &v1conf.Enhancement{Pipeline: []string{"vocab_matching"}},
 	}
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})

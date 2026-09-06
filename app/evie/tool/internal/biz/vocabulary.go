@@ -2,11 +2,11 @@
 // VocabularyBuilder：evie/tool 的词库快照构建器（per-tenant，HA）。
 //
 // 设计（M5）：
-//   1. 启动时加载 system.json（系统静态词条；PLATFORM / SYSTEM scope）
-//   2. 租户快照通过 UpdateTenant 由 VocabSyncer 异步刷新
-//   3. Build(ctx, tenantID) 走 cache-aside：返回最后一份好快照
-//   4. HA：sync 失败不影响主流程；空快照合法
-//   5. 线程安全：Build（高频读）+ UpdateTenant（低频写）通过 RWMutex 保护
+//  1. 启动时加载 system.json（系统静态词条；PLATFORM / SYSTEM scope）
+//  2. 租户快照通过 UpdateTenant 由 VocabSyncer 异步刷新
+//  3. Build(ctx, tenantID) 走 cache-aside：返回最后一份好快照
+//  4. HA：sync 失败不影响主流程；空快照合法
+//  5. 线程安全：Build（高频读）+ UpdateTenant（低频写）通过 RWMutex 保护
 package biz
 
 import (
@@ -18,7 +18,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 
 	"backend-service/app/evie/tool/internal/conf"
 )
@@ -372,11 +371,11 @@ func (b *VocabularyBuilder) buildSystemSnapshot() *VocabularySnapshot {
 			continue
 		}
 		ent := &VocabularyEntry{
-			ID:            nextID,
-			StandardText:  e.StandardText,
-			Category:      e.Category,
-			EntryType:     "WORD",
-			Priority:      e.Priority,
+			ID:           nextID,
+			StandardText: e.StandardText,
+			Category:     e.Category,
+			EntryType:    "WORD",
+			Priority:     e.Priority,
 		}
 		entries = append(entries, ent)
 		nextID++
@@ -426,10 +425,10 @@ func (b *VocabularyBuilder) ReloadSystemDict() error {
 
 // TenantSnapshotInfo 单 tenant 快照信息（运维）。
 type TenantSnapshotInfo struct {
-	TenantID     string
-	EntryCount   int
+	TenantID      string
+	EntryCount    int
 	RelationCount int
-	LastSyncAt   time.Time
+	LastSyncAt    time.Time
 }
 
 // GetTenantInfo 返回某 tenant 的快照信息。

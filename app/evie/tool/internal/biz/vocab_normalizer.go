@@ -3,23 +3,23 @@
 //
 // 规则结构（与 conf proto 对齐，参考 conf.Bootstrap.VocabRules）：
 //
-//   sources:
-//     qua:
-//       entity_mappings:
-//         - match: { entity_type: "user" }
-//           emit:
-//             standard_text: "realName"          # dot-path
-//             category: "PERSON"
-//             aliases: ["nickname", "alias"]
-//             pinyin_hint: "realName"
-//             include_when: "status==1"          # 简单表达式
+//	sources:
+//	  qua:
+//	    entity_mappings:
+//	      - match: { entity_type: "user" }
+//	        emit:
+//	          standard_text: "realName"          # dot-path
+//	          category: "PERSON"
+//	          aliases: ["nickname", "alias"]
+//	          pinyin_hint: "realName"
+//	          include_when: "status==1"          # 简单表达式
 //
 // 设计要点：
-//   1. Normalizer 是纯函数（输入 RawEntity → 输出 NormalizedEntry），无副作用
-//   2. 字段路径采用 dot-notation（realName → data["realName"]；支持任意嵌套）
-//   3. IncludeWhen 支持 == / != / 真值 三类简单条件
-//   4. 规则不存在 / 字段缺失 → 跳过该实体（warn 不阻断，C 决定）
-//   5. 同一 source 多个 entity_type 共存（user/department 各一条规则）
+//  1. Normalizer 是纯函数（输入 RawEntity → 输出 NormalizedEntry），无副作用
+//  2. 字段路径采用 dot-notation（realName → data["realName"]；支持任意嵌套）
+//  3. IncludeWhen 支持 == / != / 真值 三类简单条件
+//  4. 规则不存在 / 字段缺失 → 跳过该实体（warn 不阻断，C 决定）
+//  5. 同一 source 多个 entity_type 共存（user/department 各一条规则）
 package biz
 
 import (
@@ -234,9 +234,10 @@ func (n *Normalizer) NormalizeBatch(raws []RawEntity) ([]*NormalizedEntry, error
 // lookupPath 按 dot-path 在嵌套 map 中查找。
 //
 // 示例：
-//   "realName"             → data["realName"]
-//   "user.realName"        → data["user"]["realName"]
-//   "userInfo.nickname"    → data["userInfo"]["nickname"]
+//
+//	"realName"             → data["realName"]
+//	"user.realName"        → data["user"]["realName"]
+//	"userInfo.nickname"    → data["userInfo"]["nickname"]
 //
 // 返回值：找到的值（统一转 string）+ 是否存在。
 // 非 string 值（数字、bool、嵌套 map/数组）会被 fmt.Sprintf 处理。
@@ -270,11 +271,12 @@ func lookupPath(data map[string]any, path string) (string, bool) {
 // evalCondition 评估简单条件表达式。
 //
 // 支持的语法（v1，不支持完整 CEL）：
-//   "field.path==1"          数字相等（值已被 lookupPath 转 string）
-//   "field.path=='literal'" 字符串相等（自动去 ' / " 包裹）
-//   "field.path==true"       布尔相等（lookupPath 转为 "true" / "false"）
-//   "field.path!=value"      不等
-//   "field.path"             真值（非空 / 非 0 / 非 false）
+//
+//	"field.path==1"          数字相等（值已被 lookupPath 转 string）
+//	"field.path=='literal'" 字符串相等（自动去 ' / " 包裹）
+//	"field.path==true"       布尔相等（lookupPath 转为 "true" / "false"）
+//	"field.path!=value"      不等
+//	"field.path"             真值（非空 / 非 0 / 非 false）
 //
 // 设计取舍：保留简单语义，避免引入 CEL 库；M9 阶段评估是否升级。
 func evalCondition(expr string, data map[string]any) (bool, error) {

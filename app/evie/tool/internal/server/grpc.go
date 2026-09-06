@@ -3,6 +3,7 @@
 package server
 
 import (
+	kvalidate "github.com/go-kratos/kratos/contrib/middleware/validate/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -22,7 +23,7 @@ func NewGRPCServer(
 	asrService *service.ASRService,
 	logger log.Logger,
 ) *grpc.Server {
-	mws := []middleware.Middleware{recovery.Recovery()}
+	mws := []middleware.Middleware{recovery.Recovery(), kvalidate.ProtoValidate()}
 	if cache != nil {
 		mws = append(mws, NewTokenAuthMiddleware(cache, nil))
 	}

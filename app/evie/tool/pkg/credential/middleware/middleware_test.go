@@ -99,7 +99,7 @@ func TestHTTPMiddleware_SkipPaths(t *testing.T) {
 	prov, _ := static.New(static.Config{Users: []static.User{{Token: "tok"}}})
 	called := false
 	h := middleware.HTTPMiddleware(middleware.Config{
-		Provider: prov,
+		Provider:  prov,
 		SkipPaths: []string{"/healthz", "/api/public*"},
 	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		called = true
@@ -123,8 +123,8 @@ func TestHTTPMiddleware_SkipOnMissing(t *testing.T) {
 	prov, _ := static.New(static.Config{Users: []static.User{{Token: "tok"}}})
 	var anonymousReached bool
 	h := middleware.HTTPMiddleware(middleware.Config{
-		Provider:       prov,
-		SkipOnMissing:  true,
+		Provider:      prov,
+		SkipOnMissing: true,
 	})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		anonymousReached = true
 		if _, ok := middleware.FromContext(r.Context()); ok {

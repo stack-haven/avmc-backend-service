@@ -2,16 +2,17 @@
 // 通用「词汇来源」接口契约（与具体外部系统解耦）。
 //
 // 设计原则（用户反馈）：
-//   1. 工具不复用 qua-specific 类型（QuaUser/QuaDept），避免外部 API 变化冲击核心
-//   2. 任何外部系统（qua/飞书/LDAP/CSV...）通过实现 VocabularySource 接入
-//   3. Adapter 返回 opaque RawEntity；字段语义由 Normalizer + 配置规则解释
-//   4. VocabularyBuilder 只接收 NormalizedEntry，不知道来源
+//  1. 工具不复用 qua-specific 类型（QuaUser/QuaDept），避免外部 API 变化冲击核心
+//  2. 任何外部系统（qua/飞书/LDAP/CSV...）通过实现 VocabularySource 接入
+//  3. Adapter 返回 opaque RawEntity；字段语义由 Normalizer + 配置规则解释
+//  4. VocabularyBuilder 只接收 NormalizedEntry，不知道来源
 //
 // 数据流：
-//   HTTP fetcher（data 层，opaque map）
-//     → VocabularySource.Fetch(ctx) → []RawEntity
-//       → Normalizer.Normalize(raw) → *NormalizedEntry
-//         → VocabularyBuilder.Add(entry)
+//
+//	HTTP fetcher（data 层，opaque map）
+//	  → VocabularySource.Fetch(ctx) → []RawEntity
+//	    → Normalizer.Normalize(raw) → *NormalizedEntry
+//	      → VocabularyBuilder.Add(entry)
 package biz
 
 import "context"
@@ -54,5 +55,5 @@ var _ VocabularySource = (*nullSource)(nil)
 // nullSource 仅用于编译期断言，正常代码不实例化。
 type nullSource struct{}
 
-func (nullSource) Name() string                                       { return "" }
-func (nullSource) Fetch(context.Context) ([]RawEntity, error)          { return nil, nil }
+func (nullSource) Name() string                               { return "" }
+func (nullSource) Fetch(context.Context) ([]RawEntity, error) { return nil, nil }

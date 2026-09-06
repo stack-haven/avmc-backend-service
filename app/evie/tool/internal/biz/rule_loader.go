@@ -2,9 +2,9 @@
 // RuleSet 从 conf.VocabRules（proto 类型）加载，纯函数无副作用。
 //
 // 设计要点：
-//   1. conf.VocabRules（proto）→ biz.RuleSet（领域）单一转换函数
-//   2. 不做规则校验（warn 由 Normalizer 处理；C 决定）
-//   3. 不做缓存；调用方（data.NewRuleLoaderFromConf）按需加载
+//  1. conf.VocabRules（proto）→ biz.RuleSet（领域）单一转换函数
+//  2. 不做规则校验（warn 由 Normalizer 处理；C 决定）
+//  3. 不做缓存；调用方（data.NewRuleLoaderFromConf）按需加载
 package biz
 
 import (
@@ -14,9 +14,10 @@ import (
 // LoadRuleSet 从 conf.VocabRules 构造 RuleSet。
 //
 // 字段映射规则：
-//   conf.VocabRules.sources[<source>]      → RuleSet.Sources[<source>]
-//   conf.VocabRules.SourceRules.entity_mappings → SourceRules.EntityMappings
-//   conf.VocabRules.EntityMapping.emit.*    → EntityMapping.Emit.*
+//
+//	conf.VocabRules.sources[<source>]      → RuleSet.Sources[<source>]
+//	conf.VocabRules.SourceRules.entity_mappings → SourceRules.EntityMappings
+//	conf.VocabRules.EntityMapping.emit.*    → EntityMapping.Emit.*
 func LoadRuleSet(cfg *v1conf.VocabRules) *RuleSet {
 	rs := &RuleSet{Sources: make(map[string]*SourceRules)}
 	if cfg == nil {

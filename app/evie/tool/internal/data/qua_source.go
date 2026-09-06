@@ -4,10 +4,10 @@
 // 本文件是 biz.VocabularySource 的具体实现，薄包装 QuaFetcher。
 //
 // 设计要点（Q13）：
-//   1. Source.Name() = "qua"（与 conf.VocabRules.sources key 对齐）
-//   2. fetcher 返回的 opaque map 直接打包为 RawEntity；不解释字段语义
-//   3. EntityType 取常量 QuaEntityUser / QuaEntityDepartment
-//   4. 错误沿用 fetcher 的 kratos error；adapter 不重新包装
+//  1. Source.Name() = "qua"（与 conf.VocabRules.sources key 对齐）
+//  2. fetcher 返回的 opaque map 直接打包为 RawEntity；不解释字段语义
+//  3. EntityType 取常量 QuaEntityUser / QuaEntityDepartment
+//  4. 错误沿用 fetcher 的 kratos error；adapter 不重新包装
 package data
 
 import (

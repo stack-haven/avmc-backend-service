@@ -29,6 +29,7 @@
 // # Integration with HTTP/gRPC middleware
 //
 //	evie/tool/internal/credential/middleware provides a ready-to-use middleware that
+//
 // extracts the Bearer token, calls Provider.Authenticate, and stores the
 // resulting *CallerIdentity in the request context.
 package credential

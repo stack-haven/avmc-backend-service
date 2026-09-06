@@ -5,7 +5,7 @@ option go_package = "backend-service/app/evie/tool/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
-// Bootstrap 全量配置根（包含 server + data + qua + asr + enhancement + tenant_vocab + system_dict + tenant_registry + vocab_rules）。
+// Bootstrap 全量配置根（包含 server + data + qua + asr + enhancement + tenant_vocab + system_dict + tenant_registry + vocab_rules + 可选 demo credential/vocabulary）。
 message Bootstrap {
   Server server = 1;
   Data data = 2;
@@ -16,6 +16,9 @@ message Bootstrap {
   SystemDict system_dict = 7;
   TenantRegistry tenant_registry = 8;
   VocabRules vocab_rules = 9;
+  // 可选：demo / 离线模式的认证与词库配置；生产留空。
+  Credential credential = 10;
+  Vocabulary vocabulary = 11;
 }
 
 message Server {
@@ -173,4 +176,39 @@ message VocabRules {
     repeated EntityMapping entity_mappings = 2;
   }
   map<string, SourceRules> sources = 1;   // key = source name (qua / feishu / ...)
+}
+
+// Credential 可选：demo / 离线模式的 Bearer Token 认证。
+//
+// 当 Credential.provider == "static" 时，使用内置静态用户表（用于零外部依赖 demo）。
+// 生产应留空，走 data.redis TokenCache。
+message Credential {
+  string provider = 1; // "static" | "redis" | "jwt"
+  StaticCredential static = 2; // 仅当 provider == "static" 使用
+}
+
+message StaticCredential {
+  string default_tenant = 1;
+  repeated StaticUser users = 2;
+}
+
+message StaticUser {
+  string token = 1;
+  string tenant_id = 2;
+  string user_id = 3;
+  string user_name = 4;
+  int32 user_type = 5;
+}
+
+// Vocabulary 可选：demo / 离线模式的词库来源。
+//
+// 当 Vocabulary.source == "file" 时，仅从本地 JSON 文件加载（用于零外部依赖 demo）。
+message Vocabulary {
+  string source = 1; // "file" | "qua" | "http"
+  FileVocabulary file = 2; // 仅当 source == "file" 使用
+}
+
+message FileVocabulary {
+  string path = 1;
+  bool reload_on_fetch = 2;
 }

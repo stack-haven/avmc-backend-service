@@ -12,6 +12,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 
+	pkgHealth "backend-service/pkg/health"
+
 	"backend-service/app/evie/tool/internal/biz"
 	"backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/data"
@@ -34,19 +36,31 @@ func provideCanQuaFetch() func(ctx context.Context) bool {
 	}
 }
 
+// provideHealthNotifier 将 pkgHealth.Checker 适配为 biz.HealthNotifier。
+func provideHealthNotifier(checker pkgHealth.Checker) biz.HealthNotifier {
+	if checker == nil {
+		return nil
+	}
+	if n, ok := checker.(biz.HealthNotifier); ok {
+		return n
+	}
+	return nil
+}
+
 // wireApp 装配 evie/tool Kratos App + 后台 worker。
 //
 // M5/M6 依赖链：
-//   conf.SystemDict → VocabularyBuilder（加载 system.json）
-//   conf.VocabRules → Normalizer
-//   conf.Enhancement → PolicyFromConf + EnhancementPipeline（registry + observers）
-//   conf.Qua → QuaClient + QuaVocabularySource（adapter）
-//   conf.TenantRegistry → TenantRegistry
-//   TenantRegistry + QuaVocabularySource + Normalizer + VocabularyBuilder → VocabSyncer
-//   VocabularyBuilder + Pipeline + Policy → EnhancementUsecase
-//   EnhancementUsecase → EnhancementService
-//   EnhancementService → server (HTTP + gRPC)
-//   VocabSyncer → 通过 newApp 的 BeforeStart 启动后台 worker
+//
+//	conf.SystemDict → VocabularyBuilder（加载 system.json）
+//	conf.VocabRules → Normalizer
+//	conf.Enhancement → PolicyFromConf + EnhancementPipeline（registry + observers）
+//	conf.Qua → QuaClient + QuaVocabularySource（adapter）
+//	conf.TenantRegistry → TenantRegistry
+//	TenantRegistry + QuaVocabularySource + Normalizer + VocabularyBuilder → VocabSyncer
+//	VocabularyBuilder + Pipeline + Policy → EnhancementUsecase
+//	EnhancementUsecase → EnhancementService
+//	EnhancementService → server (HTTP + gRPC)
+//	VocabSyncer → 通过 newApp 的 BeforeStart 启动后台 worker
 //
 // 依赖方向严格遵 service → biz → data：
 //   - biz 定义接口（VocabularySource / AuthContext）
@@ -63,8 +77,9 @@ func wireApp(
 		biz.ProviderSet,
 		service.ProviderSet,
 		server.ProviderSet,
-		provideCanQuaFetch,           // 注入给 VocabSyncer
-		biz.NewVocabSyncerWithAuth,   // 用带 auth 检查的 syncer 构造器，内部调 AttachLazySync
+		provideCanQuaFetch,         // 注入给 VocabSyncer
+		provideHealthNotifier,      // 将 HealthChecker 适配为 biz.HealthNotifier
+		biz.NewVocabSyncerWithAuth, // 用带 auth 检查的 syncer 构造器，内部调 AttachLazySync
 		newApp,
 	))
 }

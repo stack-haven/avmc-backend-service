@@ -11,9 +11,10 @@ import (
 // ProviderSet data providers（按依赖方向注入）。
 //
 // 顺序约束（Wire 决定）：
-//   conf.Data          → RedisClient → TokenCache
-//   conf.Qua        → QuaFetcher → QuaVocabularySource
-//   conf.Asr        → ASRRegistry
+//
+//	conf.Data          → RedisClient → TokenCache
+//	conf.Qua        → QuaFetcher → QuaVocabularySource
+//	conf.Asr        → ASRRegistry
 var ProviderSet = wire.NewSet(
 	NewRedisClient,
 	NewRedisConf,
@@ -24,7 +25,7 @@ var ProviderSet = wire.NewSet(
 	NewQuaVocabularySource,
 	NewVocabularySourceRegistry,
 	NewQuaClientOptions, // 空 slice（测试 / 配置化在 M9 阶段接）
-	NewHealthChecker, // M9: 健康检查（返回接口，由 wire 推断）
+	NewHealthChecker,    // M9: 健康检查（返回接口，由 wire 推断）
 	// M4: NewSystemDictLoader
 )
 

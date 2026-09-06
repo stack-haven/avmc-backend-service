@@ -2,10 +2,10 @@
 // evie/tool 服务入口。
 //
 // 启动流程：
-//   1. 加载 config.yaml
-//   2. 构造 Kratos logger
-//   3. wireApp 装配所有组件 + 启动 VocabSyncer（BeforeStart 钩子）
-//   4. app.Run() 阻塞直到 ctx cancel 或信号
+//  1. 加载 config.yaml
+//  2. 构造 Kratos logger
+//  3. wireApp 装配所有组件 + 启动 VocabSyncer（BeforeStart 钩子）
+//  4. app.Run() 阻塞直到 ctx cancel 或信号
 package main
 
 import (
@@ -32,10 +32,10 @@ import (
 
 // 编译期 ldflags 可注入
 var (
-	Name    = "evie-tool"
-	Version = "0.1.0"
+	Name     = "evie-tool"
+	Version  = "0.1.0"
 	flagconf string
-	id, _   = os.Hostname()
+	id, _    = os.Hostname()
 )
 
 func init() {
@@ -95,6 +95,23 @@ func main() {
 
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
+		panic(err)
+	}
+	// Demo 模式：环境变量 EVIE_TOOL_DEMO=1 触发；不连 Redis/qua，仅文本增强。
+	if os.Getenv("EVIE_TOOL_DEMO") == "1" {
+		app, cleanup, err := runDemoApp(&bc, logger)
+		if err != nil {
+			panic(err)
+		}
+		defer cleanup()
+		if err := app.Run(); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	// 启动期配置校验：尽早失败，避免半配置状态运行。
+	if err := conf.Validate(&bc); err != nil {
 		panic(err)
 	}
 

@@ -8,6 +8,28 @@ config:
 		./internal/conf/conf.proto
 	@gofmt -w internal/conf/conf.pb.go
 
+.PHONY: proto
+# proto: 调用 app.mk 的 api 目标，从 backend-service/proto 重新生成 API。
+proto:
+	@cd ../../../ && $(MAKE) -s api
+
+.PHONY: wire
+# wire: 从 wire.go 重新生成 cmd/server/wire_gen.go。
+wire:
+	@cd ../../../ && $(MAKE) -s wire
+
+.PHONY: test
+# 全部单元/集成测试
+test:
+	go test ./...
+
+.PHONY: cover
+# 生成覆盖率报告（HTML）
+cover:
+	go test -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
+	@echo "coverage.html generated"
+
 .PHONY: health
 # 探测本地 evie/tool 健康状态
 health:
@@ -32,8 +54,9 @@ race:
 		./internal/service
 
 .PHONY: demo
+# 零外部依赖 demo 模式：StaticProvider + FileSource，启用 EVIE_TOOL_DEMO=1。
 demo:
-	@echo "evie/tool demo"
+	EVIE_TOOL_DEMO=1 go run ./cmd/server -conf ./configs/config.demo.yaml
 
 # === 文档目标 ===
 
@@ -43,3 +66,16 @@ doc:
 	@cd ../../../proto && \
 	buf generate --template evie/tool/v1/buf.openapi.gen.yaml 2>/dev/null || \
 	echo "OpenAPI generation skipped (run from proto/evie/tool/v1 after adding buf.gen.yaml)"
+
+# === 质量门禁 ===
+
+.PHONY: bench
+# 运行基准（所有 *_test.go 中的 Benchmark*），含内存统计。
+bench:
+	go test -bench=. -benchmem -run=^$ ./...
+
+.PHONY: lint
+# 静态检查：gofmt 检查 + go vet。
+lint:
+	@gofmt -l internal pkg cmd 2>/dev/null | (read line && echo "gofmt diff: $$line" && exit 1) || true
+	@go vet ./...

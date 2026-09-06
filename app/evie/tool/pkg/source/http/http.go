@@ -4,8 +4,9 @@
 // # Use case
 //
 // Most business systems expose some flavour of:
-//   GET {baseURL}/users   → {"code":0, "data":{"list":[...], ...}}
-//   GET {baseURL}/depts   → {"code":0, "data":[...]}
+//
+//	GET {baseURL}/users   → {"code":0, "data":{"list":[...], ...}}
+//	GET {baseURL}/depts   → {"code":0, "data":[...]}
 //
 // HTTPSource makes every part of that exchange configurable: the base
 // URL, the two endpoint paths, the entity types emitted, the JSON

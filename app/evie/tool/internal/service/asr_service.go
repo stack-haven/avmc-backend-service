@@ -57,19 +57,19 @@ func (s *ASRService) Recognize(ctx context.Context, req *v1.RecognizeRequest) (*
 	}
 
 	return &v1.RecognizeResponse{
-		RequestId:       res.RequestID,
-		SessionId:       res.SessionID,
-		RawText:         res.RawText,
-		EnhancedText:    res.EnhancedText,
-		Confidence:      float32(res.Confidence),
-		DurationMs:      res.DurationMs,
-		IsFinal:         true,
-		ProviderName:    res.ProviderName,
-		AudioPath:       res.AudioPath,
-		Changes:         changes,
-		Status:          res.EnhanceStatus,
+		RequestId:        res.RequestID,
+		SessionId:        res.SessionID,
+		RawText:          res.RawText,
+		EnhancedText:     res.EnhancedText,
+		Confidence:       float32(res.Confidence),
+		DurationMs:       res.DurationMs,
+		IsFinal:          true,
+		ProviderName:     res.ProviderName,
+		AudioPath:        res.AudioPath,
+		Changes:          changes,
+		Status:           res.EnhanceStatus,
 		ProcessingTimeMs: res.ProcessingMs,
-		ErrorMessage:    res.ErrorMessage,
+		ErrorMessage:     res.ErrorMessage,
 	}, nil
 }
 
@@ -164,13 +164,13 @@ func (s *ASRService) StreamRecognize(stream v1.ASRService_StreamRecognizeServer)
 	return nil
 }
 
-// ListRecords 分页列出记录。
+// ListRecords 分页列出本租户的记录。
 func (s *ASRService) ListRecords(ctx context.Context, req *v1.ListAsrRecordsRequest) (*v1.ListAsrRecordsResponse, error) {
-	_, ok := data.AuthInfoFromContext(ctx)
+	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "missing auth info")
 	}
-	page, total, next := s.uc.ListRecords(ctx, req.GetPageSize(), req.GetPageToken())
+	page, total, next := s.uc.ListRecords(ctx, auth.TenantID, req.GetPageSize(), req.GetPageToken())
 	out := make([]*v1.AsrRecord, 0, len(page))
 	for _, r := range page {
 		out = append(out, recordToProto(r))
@@ -182,26 +182,26 @@ func (s *ASRService) ListRecords(ctx context.Context, req *v1.ListAsrRecordsRequ
 	}, nil
 }
 
-// GetRecord 取单条记录。
+// GetRecord 取本租户的单条记录。
 func (s *ASRService) GetRecord(ctx context.Context, req *v1.GetRecordRequest) (*v1.AsrRecord, error) {
-	_, ok := data.AuthInfoFromContext(ctx)
+	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "missing auth info")
 	}
-	rec, found := s.uc.GetRecord(ctx, req.GetId())
+	rec, found := s.uc.GetRecord(ctx, auth.TenantID, req.GetId())
 	if !found {
 		return nil, status.Error(codes.NotFound, "record not found")
 	}
 	return recordToProto(rec), nil
 }
 
-// GetRecordAudio 取原始音频字节。
+// GetRecordAudio 取本租户的原始音频字节。
 func (s *ASRService) GetRecordAudio(ctx context.Context, req *v1.GetRecordAudioRequest) (*v1.GetRecordAudioResponse, error) {
-	_, ok := data.AuthInfoFromContext(ctx)
+	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.NotFound, "record not found")
+		return nil, status.Error(codes.Unauthenticated, "missing auth info")
 	}
-	audio, ct, err := s.uc.GetRecordAudio(ctx, req.GetId())
+	audio, ct, err := s.uc.GetRecordAudio(ctx, auth.TenantID, req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}

@@ -185,9 +185,9 @@ func TestRuneLen(t *testing.T) {
 	}{
 		{"", 0},
 		{"ascii", 5},
-		{"佘丽群", 3},    // 中文：3 rune
+		{"佘丽群", 3},   // 中文：3 rune
 		{"周丽群ab", 5}, // 混合：3 中文 + 2 ascii
-		{"😀😀", 2},      // emoji：2 rune（4 bytes × 2）
+		{"😀😀", 2},    // emoji：2 rune（4 bytes × 2）
 	}
 
 	for _, tt := range tests {

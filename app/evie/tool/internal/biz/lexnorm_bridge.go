@@ -40,7 +40,6 @@ func buildLexiconFromSnapshot(snap *VocabularySnapshot, systemDict *systemDictFi
 		return nil, fmt.Errorf("lexnorm_bridge: snapshot is nil")
 	}
 
-
 	entries := make([]lexicon.Entry, 0, len(snap.Entries))
 	idSet := make(map[string]bool, len(snap.Entries))
 
@@ -83,10 +82,10 @@ func buildLexiconFromSnapshot(snap *VocabularySnapshot, systemDict *systemDictFi
 					continue // unknown kind → skip
 				}
 				variants = append(variants, lexicon.Variant{
-					Text:        r.RelatedText,
-					Kind:        kind,
-					Confidence:  variantConfidenceFromKind(kind),
-					Source:      relationSource(r.RelationType),
+					Text:       r.RelatedText,
+					Kind:       kind,
+					Confidence: variantConfidenceFromKind(kind),
+					Source:     relationSource(r.RelationType),
 				})
 			}
 		}
@@ -96,10 +95,10 @@ func buildLexiconFromSnapshot(snap *VocabularySnapshot, systemDict *systemDictFi
 			for _, pr := range systemDict.PhraseRules {
 				if pr.To == e.StandardText && pr.From != "" {
 					variants = append(variants, lexicon.Variant{
-						Text:        pr.From,
-						Kind:        lexicon.VariantCorrection,
-						Confidence:  1.0,
-						Source:      "system_phrase",
+						Text:       pr.From,
+						Kind:       lexicon.VariantCorrection,
+						Confidence: 1.0,
+						Source:     "system_phrase",
 					})
 				}
 			}

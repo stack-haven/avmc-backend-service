@@ -2,10 +2,10 @@
 // EnhancementService：文本增强 transport 层。
 //
 // 责任：
-//   1. 接收 HTTP/gRPC 请求（*v1.EnhanceTextRequest）
-//   2. 从 ctx 提取 AuthInfo（tenantID）
-//   3. 调 usecase.EnhanceText(ctx, text, tenantID)
-//   4. 把 usecase 结果转 proto（*v1.EnhanceTextResponse）
+//  1. 接收 HTTP/gRPC 请求（*v1.EnhanceTextRequest）
+//  2. 从 ctx 提取 AuthInfo（tenantID）
+//  3. 调 usecase.EnhanceText(ctx, text, tenantID)
+//  4. 把 usecase 结果转 proto（*v1.EnhanceTextResponse）
 package service
 
 import (

@@ -198,6 +198,7 @@ func TestVocabSyncer_SyncTenant(t *testing.T) {
 
 // sync.Mutex 防止编译警告
 var _ sync.Mutex
+
 // TestVocabularyBuilder_MergeNoIDConflict 回归测试：merge system + tenant 时 entry ID 必须唯一
 // 否则 alias_resolution.resolveTarget 会找错 entry（M9 bug 修复）。
 func TestVocabularyBuilder_MergeNoIDConflict(t *testing.T) {
@@ -283,8 +284,8 @@ func TestVocabSyncer_SyncTenant_PartialFailure(t *testing.T) {
 
 	// mock qua source：Fetch 返回 depts + error（user 失败场景）
 	mock := &partialFailureSource{
-		err:    errors.New("users: mock 501"),
-		depts:  []biz.RawEntity{rawDept("1904", "万康盛鼎集团")},
+		err:   errors.New("users: mock 501"),
+		depts: []biz.RawEntity{rawDept("1904", "万康盛鼎集团")},
 	}
 	normalizer := biz.NewNormalizer(buildTestRules())
 	syncer := biz.NewVocabSyncer(registry, vb, normalizer, mock, &conf.TenantVocab{

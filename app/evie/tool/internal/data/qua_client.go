@@ -2,10 +2,10 @@
 // QuaFetcher：薄包装 evie/tool/pkg/source/qua.Source。
 //
 // 本文件保留：
-//   1. QuaFetcher 接口（health check + QuaVocabularySource 调用方依赖）
-//   2. QuaClientOption / WithHTTPClient / WithTimeout（保持 wire 兼容）
-//   3. NewQuaClient：根据 conf.Qua 构造 QuaFetcher，内部委托 evie/tool/pkg/source/qua
-//   4. NewQuaClientOptions：返回空的 options 列表（wire provider）
+//  1. QuaFetcher 接口（health check + QuaVocabularySource 调用方依赖）
+//  2. QuaClientOption / WithHTTPClient / WithTimeout（保持 wire 兼容）
+//  3. NewQuaClient：根据 conf.Qua 构造 QuaFetcher，内部委托 evie/tool/pkg/source/qua
+//  4. NewQuaClientOptions：返回空的 options 列表（wire provider）
 //
 // QuaFetcher 实现的 HTTP 行为（必须与旧实现一致）：
 //   - Authorization: Bearer <ctx.AuthInfo.AccessToken>
@@ -117,16 +117,16 @@ func NewQuaClient(c *conf.Qua, _ log.Logger, opts ...QuaClientOption) (QuaFetche
 	}
 
 	rawSrc, err := httpsrc.New(httpsrc.Config{
-		BaseURL:        c.GetBaseUrl(),
-		UserPath:       endpoints.GetListUsers(),
-		DeptPath:       endpoints.GetListDepts(),
-		QueryParams:    map[string]string{"selectAll": "true"},
-		TokenProvider:  quaTokenProvider{}, // from ctx
-		Headers:        headers,
-		TenantHeader:   tenantHeader,
+		BaseURL:          c.GetBaseUrl(),
+		UserPath:         endpoints.GetListUsers(),
+		DeptPath:         endpoints.GetListDepts(),
+		QueryParams:      map[string]string{"selectAll": "true"},
+		TokenProvider:    quaTokenProvider{}, // from ctx
+		Headers:          headers,
+		TenantHeader:     tenantHeader,
 		TenantIDProvider: quaTenantProvider{}, // from ctx,转 int
-		HTTPClient:     httpClient,
-		Timeout:        timeout,
+		HTTPClient:       httpClient,
+		Timeout:          timeout,
 		Envelope: httpsrc.Envelope{
 			UsersPath: "data.list",
 			DeptsPath: "data",
@@ -139,10 +139,10 @@ func NewQuaClient(c *conf.Qua, _ log.Logger, opts ...QuaClientOption) (QuaFetche
 		return nil, fmt.Errorf("qua: build source: %w", err)
 	}
 	src, err := quasrc.New(quasrc.Config{
-		BaseURL:     c.GetBaseUrl(),
-		UserPath:    endpoints.GetListUsers(),
-		DeptPath:    endpoints.GetListDepts(),
-		Headers:     headers,
+		BaseURL:      c.GetBaseUrl(),
+		UserPath:     endpoints.GetListUsers(),
+		DeptPath:     endpoints.GetListDepts(),
+		Headers:      headers,
 		TenantHeader: tenantHeader,
 	})
 	if err != nil {

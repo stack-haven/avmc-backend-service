@@ -29,6 +29,7 @@ import (
 
 	v1 "backend-service/api/evie/tool/v1"
 	"backend-service/app/evie/tool/internal/conf"
+	"backend-service/app/evie/tool/internal/metrics"
 	asrPkg "backend-service/pkg/asr"
 	asrAudio "backend-service/pkg/asr/audio"
 	pid "backend-service/pkg/utils/id"
@@ -44,7 +45,7 @@ const (
 
 // ASRRecord 识别记录（内存版，不落库）。
 type ASRRecord struct {
-	ID           string    // = session_id
+	ID           string // = session_id
 	UserID       string
 	TenantID     string
 	RawText      string
@@ -65,9 +66,11 @@ type ASRUsecase struct {
 	conf           *conf.Asr
 	log            *log.Helper
 
-	recordsMu  sync.RWMutex
-	records    []*ASRRecord
-	maxRecords int
+	recordsMu       sync.RWMutex
+	records         []*ASRRecord
+	recordsByID     map[string]*ASRRecord
+	recordsByTenant map[string][]*ASRRecord
+	maxRecords      int
 }
 
 // NewASRUsecase 构造 ASR usecase。
@@ -89,13 +92,15 @@ func NewASRUsecase(
 		panic("biz.NewASRUsecase: at least one ASR provider required")
 	}
 	return &ASRUsecase{
-		batchProvider:  batch,
-		streamProvider: stream,
-		enhancer:       enhancer,
-		conf:           c,
-		log:            log.NewHelper(log.With(logger, "module", "biz/asr")),
-		records:        make([]*ASRRecord, 0, 1024),
-		maxRecords:     1000,
+		batchProvider:   batch,
+		streamProvider:  stream,
+		enhancer:        enhancer,
+		conf:            c,
+		log:             log.NewHelper(log.With(logger, "module", "biz/asr")),
+		records:         make([]*ASRRecord, 0, 1024),
+		recordsByID:     make(map[string]*ASRRecord),
+		recordsByTenant: make(map[string][]*ASRRecord),
+		maxRecords:      1000,
 	}
 }
 
@@ -166,8 +171,18 @@ func (uc *ASRUsecase) Recognize(
 	if tenantID == "" {
 		return nil, fmt.Errorf("biz.asr: tenantID required (auth missing)")
 	}
+	if _, err := SanitizeTenantID(tenantID); err != nil {
+		return nil, err
+	}
 	if uc.batchProvider == nil {
 		return nil, fmt.Errorf("biz.asr: no batch provider configured")
+	}
+	if sessionID != "" {
+		sanitized, err := SanitizeSessionID(sessionID)
+		if err != nil {
+			return nil, err
+		}
+		sessionID = sanitized
 	}
 	if sessionID == "" {
 		sessionID = pid.NewSessionID(pid.SessionIDPrefixASR)
@@ -181,11 +196,16 @@ func (uc *ASRUsecase) Recognize(
 		SampleRate: format.SampleRate,
 		Language:   format.Language,
 	}
+	asrStart := time.Now()
 	asrResult, err := uc.batchProvider.Recognize(ctx, audioBytes, opts)
+	batchProviderName := uc.batchProvider.Name()
 	if err != nil {
+		metrics.ASRRequestsTotal.Inc(batchProviderName, "batch", "500")
 		uc.log.Warnf("recognize failed: %v", err)
 		return nil, fmt.Errorf("biz.asr: recognize failed: %w", err)
 	}
+	metrics.ASRRequestsTotal.Inc(batchProviderName, "batch", "200")
+	metrics.ASRDuration.Observe(time.Since(asrStart).Seconds(), batchProviderName, "batch")
 	if asrResult == nil {
 		return nil, fmt.Errorf("biz.asr: empty result")
 	}
@@ -275,12 +295,31 @@ func (uc *ASRUsecase) StreamRecognize(
 	if tenantID == "" {
 		return nil, fmt.Errorf("biz.asr: tenantID required (auth missing)")
 	}
+	if _, err := SanitizeTenantID(tenantID); err != nil {
+		return nil, err
+	}
 	if uc.streamProvider == nil {
 		return nil, fmt.Errorf("biz.asr: no stream provider configured")
+	}
+	if sessionID != "" {
+		sanitized, err := SanitizeSessionID(sessionID)
+		if err != nil {
+			return nil, err
+		}
+		sessionID = sanitized
 	}
 	if sessionID == "" {
 		sessionID = pid.NewSessionID(pid.SessionIDPrefixASR)
 	}
+
+	// 保证 resultCh 在所有返回路径上都被关闭，避免 service sender 永久阻塞。
+	resultChClosed := false
+	defer func() {
+		if !resultChClosed {
+			defer func() { _ = recover() }()
+			close(resultCh)
+		}
+	}()
 
 	providerIn := make(chan asrPkg.PCMChunk, streamBufferSize)
 	providerOut := make(chan asrPkg.ASRStreamResult, streamBufferSize)
@@ -331,6 +370,7 @@ func (uc *ASRUsecase) StreamRecognize(
 	case <-ctx.Done():
 	}
 	// 关闭 resultCh 告知消费方识别结束
+	resultChClosed = true
 	close(resultCh)
 
 	if provErr != nil && !errors.Is(provErr, context.Canceled) {
@@ -375,7 +415,20 @@ func (uc *ASRUsecase) runStreamProvider(
 		SampleRate: format.SampleRate,
 		Language:   format.Language,
 	}
-	done <- uc.streamProvider.StreamRecognize(ctx, in, out, opts)
+	providerName := uc.streamProvider.Name()
+	start := time.Now()
+	err := uc.streamProvider.StreamRecognize(ctx, in, out, opts)
+	status := "200"
+	if err != nil {
+		status = "500"
+		// 忽略 context.Canceled，理解为客户端断开。
+		if errors.Is(err, context.Canceled) {
+			status = "499"
+		}
+	}
+	metrics.ASRRequestsTotal.Inc(providerName, "stream", status)
+	metrics.ASRDuration.Observe(time.Since(start).Seconds(), providerName, "stream")
+	done <- err
 }
 
 // forwardStreamFrames 消费 providerOut 透传到 resultCh，同时累计 finalText / finalConfidence。
@@ -475,11 +528,20 @@ func (uc *ASRUsecase) saveAudio(tenantID, sessionID, ext string, audio []byte) (
 	if uc.conf == nil || uc.conf.Upload == nil || uc.conf.Upload.AudioDir == "" {
 		return "", fmt.Errorf("biz.asr: audio_dir not configured")
 	}
+	if _, err := SanitizeTenantID(tenantID); err != nil {
+		return "", err
+	}
+	if _, err := SanitizeSessionID(sessionID); err != nil {
+		return "", err
+	}
 	relDir := filepath.Join(uc.conf.Upload.AudioDir, tenantID)
 	if err := os.MkdirAll(relDir, 0o755); err != nil {
 		return "", fmt.Errorf("biz.asr: mkdir %s: %w", relDir, err)
 	}
 	relPath := filepath.Join(relDir, sessionID+"."+ext)
+	if !IsPathWithin(uc.conf.Upload.AudioDir, relPath) {
+		return "", fmt.Errorf("biz.asr: audio path out of base")
+	}
 	if err := os.WriteFile(relPath, audio, 0o644); err != nil {
 		return "", fmt.Errorf("biz.asr: write %s: %w", relPath, err)
 	}
@@ -487,24 +549,56 @@ func (uc *ASRUsecase) saveAudio(tenantID, sessionID, ext string, audio []byte) (
 }
 
 // appendRecord 写入 ring buffer（FIFO；超 maxRecords 淘汰最旧）。
+//
+// 同时维护 recordsByID 与 recordsByTenant 两个索引，便于按租户 O(1) 查询。
 func (uc *ASRUsecase) appendRecord(rec *ASRRecord) {
+	if rec == nil || rec.ID == "" {
+		return
+	}
 	uc.recordsMu.Lock()
 	defer uc.recordsMu.Unlock()
 	uc.records = append(uc.records, rec)
+	uc.recordsByID[rec.ID] = rec
+	uc.recordsByTenant[rec.TenantID] = append(uc.recordsByTenant[rec.TenantID], rec)
+
 	if len(uc.records) > uc.maxRecords {
 		excess := len(uc.records) - uc.maxRecords
+		for _, old := range uc.records[:excess] {
+			delete(uc.recordsByID, old.ID)
+			list := uc.recordsByTenant[old.TenantID]
+			for i, r := range list {
+				if r.ID == old.ID {
+					list = append(list[:i], list[i+1:]...)
+					break
+				}
+			}
+			if len(list) == 0 {
+				delete(uc.recordsByTenant, old.TenantID)
+			} else {
+				uc.recordsByTenant[old.TenantID] = list
+			}
+		}
 		uc.records = uc.records[excess:]
 	}
 }
 
-// ListRecords 分页列出记录（按时间倒序）。
-func (uc *ASRUsecase) ListRecords(_ context.Context, pageSize int32, pageToken string) ([]*ASRRecord, int32, string) {
+// ListRecords 按租户分页列出记录（按时间倒序）。
+//
+// tenantID 必须经过 SanitizeTenantID 校验；空租户直接返回空列表。
+func (uc *ASRUsecase) ListRecords(_ context.Context, tenantID string, pageSize int32, pageToken string) ([]*ASRRecord, int32, string) {
+	if tenantID == "" {
+		return []*ASRRecord{}, 0, ""
+	}
 	uc.recordsMu.RLock()
 	defer uc.recordsMu.RUnlock()
+	pool := uc.recordsByTenant[tenantID]
+	if len(pool) == 0 {
+		return []*ASRRecord{}, 0, ""
+	}
 
 	// 时间倒序
-	sorted := make([]*ASRRecord, len(uc.records))
-	copy(sorted, uc.records)
+	sorted := make([]*ASRRecord, len(pool))
+	copy(sorted, pool)
 	sort.Slice(sorted, func(i, j int) bool {
 		return sorted[i].CreatedAt.After(sorted[j].CreatedAt)
 	})
@@ -532,26 +626,44 @@ func (uc *ASRUsecase) ListRecords(_ context.Context, pageSize int32, pageToken s
 	return page, int32(len(sorted)), next
 }
 
-// GetRecord 按 ID 取记录。
-func (uc *ASRUsecase) GetRecord(_ context.Context, id string) (*ASRRecord, bool) {
+// GetRecord 按 ID 取记录（必须匹配 tenantID，否则视为不存在）。
+func (uc *ASRUsecase) GetRecord(_ context.Context, tenantID, id string) (*ASRRecord, bool) {
+	if tenantID == "" || id == "" {
+		return nil, false
+	}
 	uc.recordsMu.RLock()
 	defer uc.recordsMu.RUnlock()
-	for _, r := range uc.records {
-		if r.ID == id {
-			return r, true
-		}
+	rec, ok := uc.recordsByID[id]
+	if !ok || rec.TenantID != tenantID {
+		return nil, false
 	}
-	return nil, false
+	return rec, true
 }
 
-// GetRecordAudio 读原始音频 bytes + content-type。
-func (uc *ASRUsecase) GetRecordAudio(_ context.Context, id string) ([]byte, string, error) {
-	rec, ok := uc.GetRecord(context.Background(), id)
+// TenantRecordCount 返回某租户当前内存中的记录数（运维/测试用）。
+func (uc *ASRUsecase) TenantRecordCount(tenantID string) int {
+	if tenantID == "" {
+		return 0
+	}
+	uc.recordsMu.RLock()
+	defer uc.recordsMu.RUnlock()
+	return len(uc.recordsByTenant[tenantID])
+}
+
+// GetRecordAudio 读原始音频 bytes + content-type（同时校验租户与路径安全）。
+func (uc *ASRUsecase) GetRecordAudio(_ context.Context, tenantID, id string) ([]byte, string, error) {
+	rec, ok := uc.GetRecord(context.Background(), tenantID, id)
 	if !ok {
 		return nil, "", fmt.Errorf("biz.asr: record not found: %s", id)
 	}
 	if rec.AudioPath == "" {
 		return nil, "", fmt.Errorf("biz.asr: record has no audio")
+	}
+	if uc.conf == nil || uc.conf.Upload == nil || uc.conf.Upload.AudioDir == "" {
+		return nil, "", fmt.Errorf("biz.asr: audio_dir not configured")
+	}
+	if !IsPathWithin(uc.conf.Upload.AudioDir, rec.AudioPath) {
+		return nil, "", fmt.Errorf("biz.asr: audio path out of base")
 	}
 	data, err := os.ReadFile(rec.AudioPath)
 	if err != nil {
