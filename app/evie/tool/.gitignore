@@ -2,6 +2,8 @@
 # 测试 / 调试
 *.log
 *.tmp
+# CLI 二进制
+bin/
 # 生成代码（由 make config / make proto 产生）
 internal/conf/conf.pb.go
 internal/biz/upload/audio

@@ -58,6 +58,12 @@ race:
 demo:
 	EVIE_TOOL_DEMO=1 go run ./cmd/server -conf ./configs/config.demo.yaml
 
+.PHONY: cli
+# 构建 evie-toolctl 运维 CLI（cmd/evie-toolctl）。
+cli:
+	@go build -o bin/evie-toolctl ./cmd/evie-toolctl
+	@echo "bin/evie-toolctl built"
+
 # === 文档目标 ===
 
 .PHONY: doc
