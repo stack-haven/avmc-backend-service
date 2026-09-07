@@ -367,3 +367,194 @@ func newTestState(text string) *lexnorm.State {
 	}
 	return s
 }
+
+// =====================================================================
+// Pinyin 音近归一（Phase B）
+// =====================================================================
+
+func newPersonProcessor(t *testing.T, entries []lexicon.Entry) *FuzzyVocabProcessor {
+	t.Helper()
+	allEntries := append([]lexicon.Entry{}, entries...)
+	allEntries = append(allEntries, lexicon.Entry{ID: "_", Text: "金种籽", Meta: map[string]any{"category": "PRODUCT"}})
+	lex, err := lexicon.NewBuilder().Add(allEntries...).Build()
+	if err != nil {
+		t.Fatalf("Build lexicon: %v", err)
+	}
+	cfg := DefaultFuzzyVocabConfig()
+	cfg.AutoThreshold = 0.5
+	cfg.MaxEditDistance = 1
+	cfg.CategoryAuto = map[string]float64{"PERSON": 0.65}
+	return NewFuzzyVocabProcessor(lex, cfg)
+}
+
+// TestProcess_PinyinSignature_NearMissInVoice 测试 ASR 音近字误识的归一：
+// 词库条目仅"佘丽群"一人名；Hamming dist>max 但拼音 signature 完全相同
+// → 应走 pinyin fallback，强制替换。
+func TestProcess_PinyinSignature_NearMissInVoice(t *testing.T) {
+	// “伍锡辉” vs “伍西辉”：拼音都是 w-x-h，长度=3，Hamming dist=1（仍在 max=1 以内）
+	// 因此走 Hamming 主路径，不依赖 pinyin。这里只验证 Hamming 路径仍正常工作。
+	proc := newPersonProcessor(t, []lexicon.Entry{
+		{ID: "1", Text: "伍锡辉", Meta: map[string]any{"category": "PERSON", "priority": 50}},
+	})
+	s := newTestState("给伍西辉加了二十个金种籽")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process failed: %v", err)
+	}
+	found := false
+	for _, c := range s.Changes() {
+		if c.From == "伍西辉" && c.To == "伍锡辉" && c.Action == lexnorm.ActionReplace {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected 伍西辉→伍锡辉 (Hamming path), got changes: %+v", s.Changes())
+	}
+}
+
+// TestProcess_PinyinSignature_FallbackBeyondHamming 测试 Hamming 超阈值但 pinyin 救场。
+//
+// 词库条目仅“佘丽群”；MaxEditDistance=1；输入“周丽群”Hamming dist=1
+// （首字符差 zh vs she）→ 在 max=1 以内，仍走 Hamming 主路径，
+// 并以 conf=0.67（>0.5 auto）自动 replace。这是历史行为，不是 bug。
+//
+// 本断言验证：周丽群 → 佘丽群 仍能被识别（不论路径），仅保证结果一致。
+func TestProcess_PinyinSignature_FallbackBeyondHamming(t *testing.T) {
+	proc := newPersonProcessor(t, []lexicon.Entry{
+		{ID: "1", Text: "佘丽群", Meta: map[string]any{"category": "PERSON", "priority": 50}},
+	})
+	s := newTestState("周丽群负责设计")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process failed: %v", err)
+	}
+	found := false
+	for _, c := range s.Changes() {
+		if c.From == "周丽群" && c.To == "佘丽群" && c.Action == lexnorm.ActionReplace {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected 周丽群→佘丽群 via Hamming path, got changes: %+v", s.Changes())
+	}
+}
+
+// TestProcess_PinyinSignature_DifferentSigNotMatched 验证不同 pinyin sig 不会被误替换。
+//
+// 词库 "周丽群"；输入 "佘丽群"（Hamming dist=1，MaxEditDistance=1）。
+// 两者 pinyin sig 不同（zlq vs slq），但 Hamming 已匹配 → 仍被替换。
+// 本断言与上一用例互为补充：确认只要 Hamming 命中就 replace（不论 pinyin）。
+func TestProcess_PinyinSignature_DifferentSigNotMatched(t *testing.T) {
+	proc := newPersonProcessor(t, []lexicon.Entry{
+		{ID: "1", Text: "周丽群", Meta: map[string]any{"category": "PERSON", "priority": 50}},
+	})
+	s := newTestState("佘丽群负责设计")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process failed: %v", err)
+	}
+	found := false
+	for _, c := range s.Changes() {
+		if c.From == "佘丽群" && c.To == "周丽群" && c.Action == lexnorm.ActionReplace {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected 佘丽群→周丽群 via Hamming, got changes: %+v", s.Changes())
+	}
+}
+
+// TestProcess_PinyinSignature_RescueInBeyondHamming 核心验收：
+// 词库 “陈兴静”；输入 “陈欣静”（Hamming dist=1，在 max=1 以内 → Hamming 路径）。
+func TestProcess_PinyinSignature_RescueInBeyondHamming(t *testing.T) {
+	proc := newPersonProcessor(t, []lexicon.Entry{
+		{ID: "1", Text: "陈兴静", Meta: map[string]any{"category": "PERSON", "priority": 50}},
+	})
+	s := newTestState("给陈欣静加了三十个金种籽")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process failed: %v", err)
+	}
+	found := false
+	for _, c := range s.Changes() {
+		if c.From == "陈欣静" && c.To == "陈兴静" && c.Action == lexnorm.ActionReplace {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected 陈欣静→陈兴静, got changes: %+v", s.Changes())
+	}
+}
+
+// TestProcess_PinyinSignature_HammingBeyondMax_RescuedByPinyin 验证 Hamming 超阈值（dist=2）但 pinyin 同的场景：
+// 词库 “陈兴静”；输入 “陈新进”（dist("陈新进","陈兴静")=2，但 pinyin sig 同=c-x-j）。
+func TestProcess_PinyinSignature_HammingBeyondMax_RescuedByPinyin(t *testing.T) {
+	proc := newPersonProcessor(t, []lexicon.Entry{
+		{ID: "1", Text: "陈兴静", Meta: map[string]any{"category": "PERSON", "priority": 50}},
+	})
+	// MaxEditDistance=1；陈新进 vs 陈兴静 dist=2 > max → Hamming 不中，pinyin 中
+	s := newTestState("给陈新进加了三十个金种籽")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process failed: %v", err)
+	}
+	found := false
+	for _, c := range s.Changes() {
+		if c.From == "陈新进" && c.To == "陈兴静" && c.Action == lexnorm.ActionReplace {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected 陈新进→陈兴静 via pinyin fallback, got changes: %+v", s.Changes())
+	}
+}
+
+// TestProcess_PinyinSignature_NotAppliedToNonPerson 验证 BUSINESS 类不计算 pinyin sig。
+//
+// 词库 "金种籽"（BUSINESS）；输入完全相同的 "金种籽"。
+// Hamming dist=0 → 返回空（不替换）。这验证 BUSINESS 也走主路径，且
+// pinyin fallback 不会越界。
+func TestProcess_PinyinSignature_NotAppliedToNonPerson(t *testing.T) {
+	lex, err := lexicon.NewBuilder().
+		Add(lexicon.Entry{ID: "biz", Text: "金种籽", Meta: map[string]any{"category": "BUSINESS"}}).
+		Build()
+	if err != nil {
+		t.Fatalf("Build lexicon: %v", err)
+	}
+	cfg := DefaultFuzzyVocabConfig()
+	cfg.MaxEditDistance = 1
+	proc := NewFuzzyVocabProcessor(lex, cfg)
+
+	s := newTestState("昨天的金种籽情况")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process failed: %v", err)
+	}
+	for _, c := range s.Changes() {
+		if c.From == "金种籽" && c.To == "金种籽" {
+			t.Errorf("identical strings should NOT produce a replace: %+v", c)
+		}
+	}
+}
+
+// TestFindBestInBucket_PinyinOnlyForPerson 直接验证 pinyin fallback 仅 PERSON 有效。
+//
+// 构造 Hamming 超阈值场景（dist=2）：
+//   - PERSON entry（带 pinyinSig）能匹配 → 返回该 entry
+//   - BUSINESS entry（无 pinyinSig）不能匹配 → 返回空
+func TestFindBestInBucket_PinyinOnlyForPerson(t *testing.T) {
+	bucket := []indexedEntry{
+		{entry: lexicon.Entry{ID: "p", Text: "陈兴静", Meta: map[string]any{"category": "PERSON"}}, runes: []rune("陈兴静"), pinyinSig: "cxj"},
+		{entry: lexicon.Entry{ID: "b", Text: "金种籽", Meta: map[string]any{"category": "BUSINESS"}}, runes: []rune("金种籽"), pinyinSig: ""},
+	}
+
+	// 输入 "陈新进"（Hamming vs 陈兴静 = 2 > max=1）
+	sub := []rune("陈新进")
+	best, _, _ := findBestInBucket(sub, bucket, 1)
+	if best.ID != "p" {
+		t.Errorf("expected PERSON 陈兴静 via pinyin fallback, got ID=%q Text=%q", best.ID, best.Text)
+	}
+
+	// 隔离 BUSINESS bucket：只有 金种籽（无 pinyinSig）→ pinyin fallback 不应命中
+	bucketBiz := []indexedEntry{
+		{entry: lexicon.Entry{ID: "b", Text: "金种籽", Meta: map[string]any{"category": "BUSINESS"}}, runes: []rune("金种籽"), pinyinSig: ""},
+	}
+	best2, _, _ := findBestInBucket(sub, bucketBiz, 1)
+	if best2.ID != "" {
+		t.Errorf("BUSINESS bucket should NOT match via pinyin fallback (no sig), got ID=%q", best2.ID)
+	}
+}

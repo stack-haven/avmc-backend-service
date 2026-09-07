@@ -72,7 +72,11 @@ func main() {
 	if err == redis.Nil {
 		fmt.Printf("✗ key NOT found: %s\n", key)
 		// 列同前缀 key 供排查
-		keys, _ := rc.Keys(ctx, *keyPrefix+"*").Result()
+		keys, err := rc.Keys(ctx, *keyPrefix+"*").Result()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  redis KEYS failed: %v\n", err)
+			os.Exit(1)
+		}
 		fmt.Printf("  total %s* keys = %d\n", *keyPrefix, len(keys))
 		for i, k := range keys {
 			if i >= 5 {

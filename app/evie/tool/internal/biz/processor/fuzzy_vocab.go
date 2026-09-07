@@ -39,6 +39,8 @@ import (
 
 	"github.com/stack-haven/lexnorm"
 	"github.com/stack-haven/lexnorm/lexicon"
+
+	"backend-service/pkg/pinyin"
 )
 
 // FuzzyVocabConfig 业务可配置的 fuzzy 阈值。
@@ -72,8 +74,9 @@ func DefaultFuzzyVocabConfig() FuzzyVocabConfig {
 // indexedEntry 在 buildIndex 阶段预计算 entry.Text 的 rune 切片，
 // 避免 Process 阶段重复 utf8 解码与 []rune 分配。
 type indexedEntry struct {
-	entry lexicon.Entry
-	runes []rune
+	entry     lexicon.Entry
+	runes     []rune
+	pinyinSig string // 仅 PERSON 类别计算；空 sig 表示未启用 pinyin 归一
 }
 
 // FuzzyVocabProcessor 实现 lexnorm.Processor：基于词库的编辑距离模糊匹配。
@@ -124,7 +127,12 @@ func (p *FuzzyVocabProcessor) buildIndex() {
 		if n < p.config.MinEntryLen || n > p.config.MaxEntryLen {
 			return true
 		}
-		p.byLen[n] = append(p.byLen[n], indexedEntry{entry: e, runes: r})
+		ie := indexedEntry{entry: e, runes: r}
+		// PERSON 类别预计算 pinyin signature（音近归一用）
+		if categoryOf(e) == "PERSON" {
+			ie.pinyinSig = pinyin.Signature(e.Text)
+		}
+		p.byLen[n] = append(p.byLen[n], ie)
 		return true
 	})
 	// 每个桶内按 entry.Text 排序（确定性遍历 / 最佳匹配选择稳定）
@@ -212,7 +220,11 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 
 // findBestInBucket 在候选桶中找编辑距离最小的 entry（等长 Hamming 优化路径）。
 //
-// 返回：entry / confidence (=1 - dist/n) / dist
+// 匹配策略（顺序）：
+//  1. boundedHamming ≤ maxDist：常规编辑距离匹配
+//  2. （仅 PERSON）pinyin signature 全等：音近归一（覆盖 ASR 前后鼻音、in/ing 等）
+//
+// 返回：entry / confidence (=1 - dist/n 或 pinyin 固定 0.7) / dist
 //
 // 若 sub 与某 entry 完全相等，返回 (Entry{}, 0, 0) 表示"无替换"。
 func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexicon.Entry, float64, int) {
@@ -231,11 +243,52 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 			best = ie.entry
 		}
 	}
-	if bestDist > maxDist || best.ID == "" {
+	if bestDist > maxDist {
+		// Hamming 超阈值，尝试 pinyin 音近归一（仅 PERSON bucket 中有 sig 的 entry 参与）
+		if pinyinBest, ok := findBestByPinyinSig(subRunes, bucket); ok {
+			return pinyinBest, pinyinFallbackConfidence(len(subRunes)), bestDist
+		}
+		return lexicon.Entry{}, 0, bestDist
+	}
+	if best.ID == "" {
 		return lexicon.Entry{}, 0, bestDist
 	}
 	conf := 1.0 - float64(bestDist)/float64(len(subRunes))
 	return best, conf, bestDist
+}
+
+// findBestByPinyinSig 在 Hamming 超阈值后，按拼音 signature 二次匹配。
+//
+// 仅对有 pinyinSig 的 entry 参与匹配（PERSON 类别）。
+//
+// 返回 (entry, true) 当且仅当 subSig 与某 entry 的 sig FuzzyEqual。
+func findBestByPinyinSig(subRunes []rune, bucket []indexedEntry) (lexicon.Entry, bool) {
+	subSig := pinyin.Signature(string(subRunes))
+	if subSig == "" {
+		return lexicon.Entry{}, false
+	}
+	// 优先选 signature 完全相同的第一个（确定性：bucket 已按 Text 排序）
+	for _, ie := range bucket {
+		if ie.pinyinSig == "" {
+			continue
+		}
+		if pinyin.FuzzyEqual(subSig, ie.pinyinSig) {
+			return ie.entry, true
+		}
+	}
+	return lexicon.Entry{}, false
+}
+
+// pinyinFallbackConfidence pinyin 音近归一的固定置信度。
+//
+// 选择 0.7 的理由：高于 PERSON AutoThreshold=0.65（自动 replace），
+// 低于 Hamming dist=1 conf=0.67（避免覆盖已有更精确匹配）。
+func pinyinFallbackConfidence(n int) float64 {
+	if n <= 0 {
+		return 0.7
+	}
+	_ = n // 后续可按长度动态调整
+	return 0.7
 }
 
 // boundedHamming 计算等长 rune 切片的 Hamming 距离，超过 max 时早退。
