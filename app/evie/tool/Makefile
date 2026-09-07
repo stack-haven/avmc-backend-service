@@ -1,34 +1,18 @@
 include ../../../app.mk
 
 
+# 本 Makefile 只声明 evie/tool 特有的 target。
+# 通用 target（wire / test / cover / lint / api / build ...）由 app.mk 提供。
+# 例外：`run` 在本地覆盖 app.mk —— app.mk 的 run 用 `-conf ./configs` 目录，
+# 会导致 Kratos 把 configs/tenants.example.json 加载为 config source 而 panic。
+# 本地 run 默认 demo 模式（零外部依赖），可通过 CONF= 覆盖。
+
 .PHONY: config
 # 生成 evie/tool 的 conf.pb.go（基于 internal/conf/conf.proto）
 config:
 	@protoc -I . --go_out=. --go_opt=paths=source_relative \
 		./internal/conf/conf.proto
 	@gofmt -w internal/conf/conf.pb.go
-
-.PHONY: proto
-# proto: 调用 app.mk 的 api 目标，从 backend-service/proto 重新生成 API。
-proto:
-	@cd ../../../ && $(MAKE) -s api
-
-.PHONY: wire
-# wire: 从 wire.go 重新生成 cmd/server/wire_gen.go。
-wire:
-	@cd ../../../ && $(MAKE) -s wire
-
-.PHONY: test
-# 全部单元/集成测试
-test:
-	go test ./...
-
-.PHONY: cover
-# 生成覆盖率报告（HTML）
-cover:
-	go test -coverprofile=coverage.out ./...
-	@go tool cover -html=coverage.out -o coverage.html
-	@echo "coverage.html generated"
 
 .PHONY: health
 # 探测本地 evie/tool 健康状态
@@ -65,11 +49,13 @@ cli:
 	@echo "bin/evie-toolctl built"
 
 .PHONY: run
-# 覆盖 app.mk 的 run：传入具体配置文件而不是目录（避免 Kratos 加载 example/tenant 文件）。
-# 默认 demo 模式（零外部依赖）；可通过 CONF= 覆盖：
-#   make run                       # demo 模式
+# 覆盖 app.mk 的 run（bug 修复）：传入具体配置文件而非目录，
+# 避免 Kratos 加载 configs/tenants.example.json（JSON 数组无法 merge 到 Bootstrap map）。
+#
+# 用法：
+#   make run                       # demo 模式（零外部依赖）
 #   make run CONF=./configs/config.yaml  # 生产配置（需 redis/qua）
-#   make run CONF=./configs/config.demo.yaml  # 同 demo 但不启用 EVIE_TOOL_DEMO
+#   make run CONF=./configs/config.demo.yaml  # demo 配置但不走 EVIE_TOOL_DEMO 分支
 run:
 	@if [ "$(CONF)" = "" ]; then \
 		echo "▶ demo 模式（EVIE_TOOL_DEMO=1，零外部依赖）"; \
@@ -79,8 +65,6 @@ run:
 		go run ./cmd/server -conf $(CONF); \
 	fi
 
-# === 文档目标 ===
-
 .PHONY: doc
 # 生成 OpenAPI v3 文档（Kratos assets embed）
 doc:
@@ -88,15 +72,8 @@ doc:
 	buf generate --template evie/tool/v1/buf.openapi.gen.yaml 2>/dev/null || \
 	echo "OpenAPI generation skipped (run from proto/evie/tool/v1 after adding buf.gen.yaml)"
 
-# === 质量门禁 ===
-
 .PHONY: bench
 # 运行基准（所有 *_test.go 中的 Benchmark*），含内存统计。
+# 注：app.mk 未提供 bench，本地保留。
 bench:
 	go test -bench=. -benchmem -run=^$ ./...
-
-.PHONY: lint
-# 静态检查：gofmt 检查 + go vet。
-lint:
-	@gofmt -l internal pkg cmd 2>/dev/null | (read line && echo "gofmt diff: $$line" && exit 1) || true
-	@go vet ./...
