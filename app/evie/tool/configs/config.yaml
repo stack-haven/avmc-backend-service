@@ -1,3 +1,17 @@
+# evie/tool 生产配置（Redis 认证 + qua 用户/部门访问）
+#
+# 启动方式：
+#   make run CONF=./configs/config.yaml
+#   # 或带凭据：
+#   REDIS_PASSWORD=xxx XUNFEI_APP_ID=xxx XUNFEI_API_KEY=xxx XUNFEI_API_SECRET=xxx \
+#     make run CONF=./configs/config.yaml
+#
+# 工作目录：app/evie/tool（`make run` 的 cwd）
+# 所有相对路径都基于此目录解析。
+#
+# 凭据约定：password / api_key / api_secret / app_id 一律通过环境变量注入，
+# 禁止把明文写入本文件。
+
 server:
   http:
     addr: 0.0.0.0:8110
@@ -6,69 +20,81 @@ server:
     addr: 0.0.0.0:9110
     timeout: 30s
 
+# =====================================================================
+# Redis：Bearer Token 共享访问（与 qua 共用同一 Redis）
+# =====================================================================
+# Token 形态：oauth2_access_token:<token> → JSON {tenant_id, user_id, ...}
+# 由 qua 网关在用户登录时写入，evie/tool 只读不写。
 data:
   redis:
     network: tcp
     addr: 172.16.0.112:6379
-    # 生产请从环境变量或 secret 注入：例如 ${REDIS_PASSWORD}
-    password: ""
+    # 通过 env 注入：DATA_REDIS_PASSWORD（make run-prod 会从 REDIS_PASSWORD 自动翻译）
+    password: "123456"
     db: 14
     read_timeout: 0.2s
     write_timeout: 0.2s
-    # Q2：qua token 在 Redis 的 key 形态
     token_key_prefix: "oauth2_access_token:"
 
-# Q1/Q5/Q6：外部 qua 系统 HTTP 对接（确认的端点路径）
+# =====================================================================
+# qua：外部系统 HTTP 对接（用户 / 部门拉取）
+# =====================================================================
+# 端点路径与 qua 当前接口约定一致；extra_headers.tenant-id 由 ctx
+# AuthInfo.TenantID 运行时填入（这里空串是占位，不是缺失）。
 qua:
   base_url: "http://api.bdksim-pro.test.bedoke.com"
   timeout: 10s
   forward_user_token: true
   endpoints:
-    # 部门列表（GET，无分页参数；一次性返回该租户全部部门）
     list_depts: "/admin-api/system/dept/list"
-    # 租户用户列表（POST /admin-api/qua/member-extended/page，selectAll=true 一次性返回）
     list_users: "/admin-api/qua/member-extended/page"
-    # 预留
     get_user: ""
     get_dept: ""
-  # 全量时直接传 selectAll=true（覆盖 qua 默认分页）
   page_size: 0
-  # qua 必须透传的额外 header
   extra_headers:
-    # tenant-id 在 qua 端是数字（不是字符串）；值从 AuthInfo.TenantID 转 int
-    tenant-id: ""        # 运行时由 ctx 中 AuthInfo.TenantID 填入
+    tenant-id: ""        # 运行时由 AuthInfo.TenantID 注入
     zone: "Asia/Shanghai"
 
-# Q7：ASR Provider 配置（按 enabled 开关）
+# =====================================================================
+# ASR Provider
+# =====================================================================
+# FunASR 整段识别 + 讯飞流式识别；按 enabled 切换。
+# 讯飞凭证通过环境变量注入。
 asr:
   default_batch_provider: funasr
   default_stream_provider: xunfei
   upload:
-    audio_dir: "./app/evie/tool/upload/audio"
-    retention_days: 0           # 0=永久
+    audio_dir: "./upload/audio"
+    retention_days: 7
+  # 分层超时（Phase 7.2）
+  timeouts:
+    recognize: 30s   # 整段识别，依赖音频大小；0 = 不限
+    stream: 60s      # 流式识别，单次会话上限；0 = 不限
   providers:
     funasr:
       enabled: true
       addr: "http://127.0.0.1:18000"
-      stream_addr: ""           # 空 = 不流式
+      stream_addr: ""
       sample_rate: 16000
       language: zh
-    # 讯飞凭证（确认：iat-api.xfyun.cn / v2/iat）
-    # 生产请通过环境变量注入：${XUNFEI_APP_ID} / ${XUNFEI_API_KEY} / ${XUNFEI_API_SECRET}
     xunfei:
       enabled: true
       host: "iat-api.xfyun.cn"
       uri: "/v2/iat"
-      app_id: ""
-      api_key: ""
-      api_secret: ""
+      # 通过 env 注入：ASR_PROVIDERS_XUNFEI_{APP_ID,API_KEY,API_SECRET}
+      # （make run-prod 从 XUNFEI_* 自动翻译）
+      app_id: "2d8c3dd7"
+      api_key: "641cdc25afd21421685c6ec2ce24149c"
+      api_secret: "MWEyMzg2ODhiMThhY2E2MWJmZWQ4YjQ4"
       sample_rate: 16000
     whisper:
       enabled: false
     aliyun:
       enabled: false
 
-# 文本增强 8 层 Pipeline（顺序 + 阈值）
+# =====================================================================
+# 文本增强 8 层 Pipeline
+# =====================================================================
 enhancement:
   pipeline:
     - cleaning
@@ -84,8 +110,12 @@ enhancement:
   fuzzy_auto_threshold: 0.80
   fuzzy_suggest_threshold: 0.60
   llm_enabled: false
+  # 增强调用超时（Phase 7.2）；0 = 不限
+  timeout: 2s
 
-# Q9：租户词库同步
+# =====================================================================
+# 租户词库同步（qua → 内存）
+# =====================================================================
 tenant_vocab:
   sync_interval: 300s
   initial_warmup: true
@@ -93,35 +123,42 @@ tenant_vocab:
   include_departments: true
   include_user_nickname: true   # Q3
   include_user_realname: true   # Q3
-  custom_alias_field: "alias"   # Q3：qua 透传别名字段（qua 暂无，留作预留）
+  custom_alias_field: "alias"
 
-# Q8：系统静态词条
+# =====================================================================
+# 系统静态词条（hot_reload 由 fsnotify 监听变更）
+# =====================================================================
 system_dict:
-  path: "./app/evie/tool/configs/dictionaries/system.json"
+  path: "./configs/dictionaries/system.json"
   hot_reload: true
 
-# Q9：租户注册表
+# =====================================================================
+# 租户注册表（tenants.json，gitignore；含 sync_token 的租户走 background sync）
+# =====================================================================
 tenant_registry:
-  path: "./app/evie/tool/configs/tenants.json"
+  path: "./configs/tenants.json"
 
-# Q13：外部系统词条规则（YAML 配置，零代码接入新 source）
-# Normalizer 按这里的 mapping 把 RawEntity → NormalizedEntry。
+# =====================================================================
+# VocabRules：Source → RawEntity → Normalizer → NormalizedEntry
+# =====================================================================
+# 把 qua 的用户/部门 RawEntity 映射成内部 NormalizedEntry；
+# 字段路径采用 dot-notation，include_when 支持 == / != / 真值。
 vocab_rules:
   sources:
     qua:
       entity_mappings:
-        # 用户实体映射（qua 用户字段：id / name / mobile / deptName / orgId / status）
+        # 用户：name → 标准词，mobile → alias，status==1 过滤
         - match:
             entity_type: "user"
           emit:
-            standard_text: "name"             # qua 实际返回字段是 "name"（实测）
+            standard_text: "name"
             category: "PERSON"
             aliases:
-              - "mobile"                       # 手机号作为辅助别名（人名 = 手机号 → 人名）
+              - "mobile"
             pinyin_hint: "name"
             priority: "50"
-            include_when: "status==1"          # 只取启用用户（status=1）
-        # 部门实体映射
+            include_when: "status==1"
+        # 部门：name → 标准词，全量收录
         - match:
             entity_type: "department"
           emit:
@@ -129,4 +166,3 @@ vocab_rules:
             category: "ORGANIZATION"
             pinyin_hint: "name"
             priority: "30"
-            # 部门默认全取（不设 include_when）

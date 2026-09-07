@@ -25,13 +25,14 @@ import (
 
 // HealthChecker 聚合多个 dependency 检查。
 type HealthChecker struct {
-	rdb       *redis.Client
-	qua       *quaFetcher
-	asrReg    *asrPkg.ProviderRegistry
-	mu        sync.RWMutex
-	lastSync  time.Time
-	lastError string
-	syncMode  string
+	rdb           *redis.Client
+	qua           *quaFetcher
+	asrReg        *asrPkg.ProviderRegistry
+	tokenReporter TokenExpiryReporter
+	mu            sync.RWMutex
+	lastSync      time.Time
+	lastError     string
+	syncMode      string
 }
 
 // 编译期断言 HealthChecker 实现 pkgHealth.Checker。
@@ -68,6 +69,22 @@ func (c *HealthChecker) SetSyncMode(mode string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.syncMode = mode
+}
+
+// TokenExpiryReporter 可选注入：由 biz 提供租户 token 过期状态。
+//
+// biz.TenantRegistry 本身已实现此接口；不设置则 health 输出中不包含
+// expiring_tenants / expired_tenants / expired_token_tenants 字段。
+type TokenExpiryReporter interface {
+	ExpiringTenants(threshold time.Duration) []string
+	ExpiredTenants() []string
+}
+
+// SetTokenReporter 注入 token 过期报告器。
+func (c *HealthChecker) SetTokenReporter(r TokenExpiryReporter) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.tokenReporter = r
 }
 
 // Ready 检查所有依赖（带 2s 总超时）。
@@ -114,7 +131,8 @@ func (c *HealthChecker) Ready(ctx context.Context) error {
 // Details 返回诊断数据（用于 ready 详情输出）。
 func (c *HealthChecker) Details(_ context.Context) map[string]any {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
+	reporter := c.tokenReporter
+	c.mu.RUnlock()
 
 	details := map[string]any{
 		"redis":           c.rdb != nil,
@@ -130,6 +148,15 @@ func (c *HealthChecker) Details(_ context.Context) map[string]any {
 	}
 	if c.lastError != "" {
 		details["vocab_last_error"] = c.lastError
+	}
+	if reporter != nil {
+		// 过期 token 状态（供运维监控）
+		if exp := reporter.ExpiringTenants(time.Hour); len(exp) > 0 {
+			details["expiring_tenants"] = exp
+		}
+		if expired := reporter.ExpiredTenants(); len(expired) > 0 {
+			details["expired_tenants"] = expired
+		}
 	}
 	return details
 }

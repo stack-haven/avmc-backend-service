@@ -65,6 +65,34 @@ run:
 		go run ./cmd/server -conf $(CONF); \
 	fi
 
+.PHONY: run-prod
+# 生产模式启动：连真实 Redis + qua + ASR。
+# 凭据来源（优先级高 → 低）：
+#   1. shell 环境中已 export 的同名变量
+#   2. ./.env.local（gitignored；make 自动 source）
+# 必须提供（启动时校验，缺失则退出）：
+#   REDIS_PASSWORD, XUNFEI_APP_ID, XUNFEI_API_KEY, XUNFEI_API_SECRET
+#
+# 凭据传递机制：main.go 启动后通过 os.Getenv 直接覆盖 conf 字段。
+# 不用 Kratos env source（它的 key 不做路径映射，对嵌套 proto 无效）。
+run-prod:
+	@if [ -f .env.local ]; then \
+		echo "▶ 加载 .env.local"; \
+		set -a; . ./.env.local; set +a; \
+	fi; \
+	missing=""; \
+	[ -z "$$REDIS_PASSWORD" ]    && missing="$$missing REDIS_PASSWORD"; \
+	[ -z "$$XUNFEI_APP_ID" ]     && missing="$$missing XUNFEI_APP_ID"; \
+	[ -z "$$XUNFEI_API_KEY" ]    && missing="$$missing XUNFEI_API_KEY"; \
+	[ -z "$$XUNFEI_API_SECRET" ] && missing="$$missing XUNFEI_API_SECRET"; \
+	if [ -n "$$missing" ]; then \
+		echo "✗ 缺少必需 env:$$missing"; \
+		echo "  请通过 shell export 或写入 ./.env.local（gitignored）"; \
+		exit 1; \
+	fi; \
+	echo "▶ 生产模式启动（连真实 Redis + qua + ASR）"; \
+	exec go run ./cmd/server -conf ./configs/config.yaml
+
 .PHONY: doc
 # 生成 OpenAPI v3 文档（Kratos assets embed）
 doc:

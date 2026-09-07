@@ -55,6 +55,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	if err != nil {
 		return nil, nil, err
 	}
+	// lazy sync 回调：Build() miss 时触发后台同步（保障 per-tenant 词库首次请求热加载）
+	// 注意：此处 vocabSyncer 尚未构造，所以采用后置赋值（下面创建后补）
 	engine, err := biz.NewLexnormEngine(enhancement, vocabularyBuilder, logger)
 	if err != nil {
 		return nil, nil, err
@@ -78,10 +80,16 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	httpServer := server.NewHTTPServer(confServer, tokenCache, enhancementService, asrService, checker, logger)
 	healthNotifier := provideHealthNotifier(checker)
 	bizTenantRegistry := biz.NewTenantRegistry(tenantRegistry)
+	// 把 TenantRegistry 注入 HealthChecker 以便 /health/ready 暴露 token 过期状态
+	if hc, ok := checker.(*data.HealthChecker); ok {
+		hc.SetTokenReporter(bizTenantRegistry)
+	}
 	normalizer := biz.NewNormalizerFromConf(vocabRules, logger)
 	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
 	v2 := provideCanQuaFetch()
 	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, tenantVocab, logger, v2, healthNotifier)
+	// 把 syncer 的 EnsureTenant 注入 builder 的 lazy-sync 回调（错位构造后的反向注入）
+	vocabularyBuilder.WithLazySyncOnMiss(vocabSyncer.EnsureTenant)
 	app := newApp(logger, grpcServer, httpServer, vocabSyncer)
 	return app, func() {
 	}, nil

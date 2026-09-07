@@ -83,15 +83,25 @@ func extractBearerToken(ctx context.Context) (string, error) {
 
 // AuthInfoFromContext 从 ctx 取回 AuthInfo（业务代码首选）。
 //
-// 实现细节：通过 biz.AuthFrom 拿 ctx 值，再断言为 *AuthInfo。
-// 保留此 API 是为了 service 层调用方不需重构。
+// 实现细节：通过 biz.AuthFrom 拿 ctx 值，优先断言为 *AuthInfo（兼容旧代码）；
+// 如果不是 *AuthInfo 但实现了 biz.AuthContext 接口，则从接口取 AccessToken + TenantID
+// 包装为 AuthInfo 返回（支持后台 sync_token 注入路径）。
 func AuthInfoFromContext(ctx context.Context) (*AuthInfo, bool) {
 	v, ok := biz.AuthFrom(ctx)
 	if !ok {
 		return nil, false
 	}
-	info, ok := v.(*AuthInfo)
-	return info, ok
+	if info, ok := v.(*AuthInfo); ok {
+		return info, true
+	}
+	// 后台 sync_token 路径：biz.AuthContext 接口实现（如 *biz.syncAuth）
+	if auth, ok := v.(biz.AuthContext); ok {
+		return &AuthInfo{
+			AccessToken: auth.GetAccessToken(),
+			TenantID:    auth.GetTenantID(),
+		}, true
+	}
+	return nil, false
 }
 
 // WithAuthInfo 把 AuthInfo 注入 ctx（供测试 / service 层复用）。

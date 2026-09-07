@@ -2,6 +2,9 @@
 # 测试 / 调试
 *.log
 *.tmp
+# 本地凭据（被 make run-prod 自动 source）
+.env.local
+.env
 # CLI 二进制
 bin/
 # 生成代码（由 make config / make proto 产生）

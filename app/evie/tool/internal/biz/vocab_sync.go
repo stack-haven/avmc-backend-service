@@ -32,31 +32,43 @@ import (
 // JSON 格式（`tenant_registry.path` 指向的文件）：
 //
 //	[
-//	  {"id": "158", "sync_token": "..."},   // 可选，配置后台同步使用的 Bearer
-//	  {"id": "159"}
+//	  {"id": "158", "sync_token": "..."},                           // 可选，配置后台同步使用的 Bearer
+//	  {"id": "1889501240003497986",
+//	   "sync_token": "eyJ...",                                       // qua service token
+//	   "sync_token_expires_at": "2026-12-31T23:59:59+08:00",        // RFC3339；可选，缺省 = 不过期
+//	   "last_refresh_at": "2026-09-07T10:00:00+08:00"}              // 自动写入；运行时可读
 //	]
 //
 // 行为：
-//   - 启动时加载文件，填入 tenants + syncTokens。
+//   - 启动时加载文件，填入 tenants + syncTokens + expires。
 //   - 缺失字段时仅记录 ID；sync_token 为空表示该租户仅在请求路径按需同步。
 //   - qua 同步时如发现新租户也会调用 Ensure 注册。
+//   - sync_token 过期 / 即将过期由 TokenRefresher 负责（见 token_refresher.go）。
 type TenantRegistry struct {
 	mu         sync.RWMutex
 	tenants    map[string]bool
 	syncTokens map[string]string
+	// expiresAt[tenantID] = zero 表示不过期（缺省行为，兼容旧配置）
+	expiresAt map[string]time.Time
+	// lastRefreshAt[tenantID] 由 TokenRefresher 自动写入
+	lastRefreshAt map[string]time.Time
 }
 
 // tenantRegistryEntry tenant_registry.json 中的单条记录。
 type tenantRegistryEntry struct {
-	ID        string `json:"id"`
-	SyncToken string `json:"sync_token,omitempty"`
+	ID                string    `json:"id"`
+	SyncToken         string    `json:"sync_token,omitempty"`
+	SyncTokenExpires  string    `json:"sync_token_expires_at,omitempty"` // RFC3339
+	LastRefreshAt     string    `json:"last_refresh_at,omitempty"`        // RFC3339（只读，refresher 写入）
 }
 
 // NewTenantRegistry 从 conf 构造（启动时读 tenant_registry.path 文件）。
 func NewTenantRegistry(c *conf.TenantRegistry) *TenantRegistry {
 	r := &TenantRegistry{
-		tenants:    make(map[string]bool),
-		syncTokens: make(map[string]string),
+		tenants:       make(map[string]bool),
+		syncTokens:    make(map[string]string),
+		expiresAt:     make(map[string]time.Time),
+		lastRefreshAt: make(map[string]time.Time),
 	}
 	if c == nil || c.Path == "" {
 		return r
@@ -94,6 +106,19 @@ func (r *TenantRegistry) loadFromFile(path string) error {
 		if e.SyncToken != "" {
 			r.syncTokens[e.ID] = e.SyncToken
 		}
+		if e.SyncTokenExpires != "" {
+			if t, err := time.Parse(time.RFC3339, e.SyncTokenExpires); err == nil {
+				r.expiresAt[e.ID] = t
+			} else {
+				fmt.Fprintf(os.Stderr, "[tenant_registry] %s: invalid expires_at %q: %v\n",
+					e.ID, e.SyncTokenExpires, err)
+			}
+		}
+		if e.LastRefreshAt != "" {
+			if t, err := time.Parse(time.RFC3339, e.LastRefreshAt); err == nil {
+				r.lastRefreshAt[e.ID] = t
+			}
+		}
 	}
 	return nil
 }
@@ -123,7 +148,7 @@ func (r *TenantRegistry) List() []string {
 	return out
 }
 
-// GetSyncToken 返回指定租户的后台同步 Bearer。
+// GetSyncToken 返回指定租户的后台同步 Bearer（过期仍返回，由调用方决定）。
 func (r *TenantRegistry) GetSyncToken(tenantID string) string {
 	if tenantID == "" {
 		return ""
@@ -131,6 +156,13 @@ func (r *TenantRegistry) GetSyncToken(tenantID string) string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.syncTokens[tenantID]
+}
+
+// SyncTokenExpiresAt 返回过期时间；zero 表示未配置 / 不过期。
+func (r *TenantRegistry) SyncTokenExpiresAt(tenantID string) time.Time {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.expiresAt[tenantID]
 }
 
 // HasSyncTokens 是否存在至少一个配置了 sync_token 的租户。
@@ -150,9 +182,98 @@ func (r *TenantRegistry) SetSyncToken(tenantID, token string) {
 	r.tenants[tenantID] = true
 	if token == "" {
 		delete(r.syncTokens, tenantID)
+		delete(r.expiresAt, tenantID)
+		delete(r.lastRefreshAt, tenantID)
 		return
 	}
 	r.syncTokens[tenantID] = token
+}
+
+// SetSyncTokenWithExpiry 设置 token + 过期时间（refresher 调用）。
+func (r *TenantRegistry) SetSyncTokenWithExpiry(tenantID, token string, expiresAt time.Time) {
+	if tenantID == "" {
+		return
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.tenants[tenantID] = true
+	r.syncTokens[tenantID] = token
+	r.expiresAt[tenantID] = expiresAt
+	r.lastRefreshAt[tenantID] = time.Now()
+}
+
+// LastRefreshAt 返回该租户最近一次 refresh 时间（zero = 从未刷新）。
+func (r *TenantRegistry) LastRefreshAt(tenantID string) time.Time {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.lastRefreshAt[tenantID]
+}
+
+// ExpiringTenants 返回 expiresAt - now < threshold 的 tenantID 列表（即将过期）。
+func (r *TenantRegistry) ExpiringTenants(threshold time.Duration) []string {
+	now := time.Now()
+	var out []string
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for tid, exp := range r.expiresAt {
+		if exp.IsZero() {
+			continue // 未配置过期 = 不过期
+		}
+		if exp.Sub(now) < threshold {
+			out = append(out, tid)
+		}
+	}
+	return out
+}
+
+// ExpiredTenants 返回已过期（exp < now）的 tenantID 列表。
+func (r *TenantRegistry) ExpiredTenants() []string {
+	now := time.Now()
+	var out []string
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for tid, exp := range r.expiresAt {
+		if exp.IsZero() {
+			continue
+		}
+		if exp.Before(now) {
+			out = append(out, tid)
+		}
+	}
+	return out
+}
+
+// Snapshot 返回不可变快照（供健康检查 / refresher 读）。
+type TenantSnapshot struct {
+	ID                string
+	HasToken          bool
+	ExpiresAt         time.Time
+	LastRefreshAt     time.Time
+	IsExpired         bool
+	IsExpiringSoon    bool // 1h 内
+}
+
+// SnapshotAll 返回所有租户状态快照。
+func (r *TenantRegistry) SnapshotAll() []TenantSnapshot {
+	now := time.Now()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	out := make([]TenantSnapshot, 0, len(r.tenants))
+	for tid := range r.tenants {
+		exp, hasExp := r.expiresAt[tid]
+		snap := TenantSnapshot{
+			ID:            tid,
+			HasToken:      r.syncTokens[tid] != "",
+			ExpiresAt:     exp,
+			LastRefreshAt: r.lastRefreshAt[tid],
+		}
+		if hasExp && !exp.IsZero() {
+			snap.IsExpired = exp.Before(now)
+			snap.IsExpiringSoon = !snap.IsExpired && exp.Sub(now) < time.Hour
+		}
+		out = append(out, snap)
+	}
+	return out
 }
 
 // VocabSyncer 后台同步 worker。
@@ -364,9 +485,21 @@ func (s *VocabSyncer) SyncMode() string {
 //
 // 设计说明（M5 → M9 修正）：quaSource 拉到的所有 RawEntity 都属于同一租户（qua 端
 // 按 tenant-id 头隔离数据），所以无需再过滤；所有 raws 直接进入 Normalizer。
+//
+// Token 来源（优先级）：
+//   1. ctx.AuthContext.AccessToken（请求路径，前端调用方 token）
+//   2. registry.GetSyncToken(tenantID)（后台路径，配置在 tenants.json 的 service token）
+//   3. 都没有 → 跳过后台同步（仅依赖 lazy 请求路径）
 func (s *VocabSyncer) SyncTenant(ctx context.Context, tenantID string) error {
 	if tenantID == "" {
 		return nil
+	}
+
+	// 若 ctx 没有 auth，注入 tenants.json 里的 sync_token（后台同步路径）
+	if _, hasAuth := AuthFrom(ctx); !hasAuth {
+		if token := s.registry.GetSyncToken(tenantID); token != "" {
+			ctx = s.syncCtxFor(ctx, tenantID, token)
+		}
 	}
 
 	// 拉 raw（partial-failure 容忍：user/dept 任一失败仍用已拿到的数据）
