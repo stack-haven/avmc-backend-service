@@ -64,6 +64,21 @@ cli:
 	@go build -o bin/evie-toolctl ./cmd/evie-toolctl
 	@echo "bin/evie-toolctl built"
 
+.PHONY: run
+# 覆盖 app.mk 的 run：传入具体配置文件而不是目录（避免 Kratos 加载 example/tenant 文件）。
+# 默认 demo 模式（零外部依赖）；可通过 CONF= 覆盖：
+#   make run                       # demo 模式
+#   make run CONF=./configs/config.yaml  # 生产配置（需 redis/qua）
+#   make run CONF=./configs/config.demo.yaml  # 同 demo 但不启用 EVIE_TOOL_DEMO
+run:
+	@if [ "$(CONF)" = "" ]; then \
+		echo "▶ demo 模式（EVIE_TOOL_DEMO=1，零外部依赖）"; \
+		EVIE_TOOL_DEMO=1 go run ./cmd/server -conf ./configs/config.demo.yaml; \
+	else \
+		echo "▶ 使用配置: $(CONF)"; \
+		go run ./cmd/server -conf $(CONF); \
+	fi
+
 # === 文档目标 ===
 
 .PHONY: doc
