@@ -379,117 +379,161 @@ function renderResult(data, kind) {
   $('resultCard').classList.remove('hidden');
   $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // 状态 pill
-  const statusMap = { 1: 'success', 2: 'degraded' };
-  const statusTextMap = { 1: 'SUCCESS', 2: 'DEGRADED' };
+  // 状态 pill（响应里 status: 0=SUCCESS/UNKNOWN 都视为成功；1=DEGRADED 等）
+  const statusMap = { 0: 'success', 1: 'success', 2: 'degraded', 3: 'error' };
+  const statusTextMap = { 0: 'SUCCESS', 1: 'SUCCESS', 2: 'DEGRADED', 3: 'ERROR' };
   const status = statusMap[data.status] || 'unknown';
   $('resultStatus').className = `status-pill ${status}`;
   $('resultStatus').textContent = statusTextMap[data.status] || 'UNKNOWN';
 
-  // 元数据
-  $('resultProvider').textContent = `provider: ${data.provider_name || '—'}`;
-  $('resultConfidence').textContent = `conf: ${data.confidence != null ? data.confidence.toFixed(2) : '—'}`;
-  $('resultDuration').textContent = `dur: ${data.duration_ms ? (data.duration_ms / 1000).toFixed(1) + 's' : '—'}`;
+  // 元数据：兼容驼峰（ASR）和下划线（enhancement）两种命名
+  const provider = data.providerName || data.provider_name || '—';
+  const conf = data.confidence;
+  const durMs = data.durationMs ?? data.duration_ms;
+  $('resultProvider').textContent = `provider: ${provider}`;
+  $('resultConfidence').textContent = conf != null
+    ? `conf: ${(+conf).toFixed(2)}`
+    : 'conf: —';
+  $('resultDuration').textContent = durMs
+    ? `dur: ${(+durMs / 1000).toFixed(1)}s`
+    : 'dur: —';
 
-  const rawText = data.raw_text || data.original_text || '';
-  const enhancedText = data.enhanced_text || '';
+  // 文本：ASR 用 rawText，enhancement 用 originalText
+  const rawText = data.rawText || data.raw_text
+               || data.originalText || data.original_text || '';
+  const enhancedText = data.enhancedText || data.enhanced_text || '';
 
-  // 文本渲染
   $('rawText').textContent = rawText || '—';
   $('enhancedText').innerHTML = renderDiff(rawText, enhancedText, data.changes || []);
 
-  // 改动详情
   const changes = data.changes || [];
   $('changeCount').textContent = changes.length;
   renderChanges(changes);
 
-  // 耗时
-  renderTimings(data, kind);
-
-  // 原始 JSON
+  renderTimings(data);
   $('rawJson').textContent = JSON.stringify(data, null, 2);
 }
 
-// ===== Diff 渲染（高亮 from → to）=====
+// ===== Diff 渲染（高亮 to 在 enhanced 文本中）=====
 function renderDiff(raw, enhanced, changes) {
   if (!enhanced) return '—';
   if (!changes || changes.length === 0) return escapeHtml(enhanced);
 
-  // 在 enhanced 文本里高亮 replacements
+  // 只高亮 from != to 的真实内容替换（跳过空白归一这类无意义改动）
+  const real = changes
+    .map(c => ({
+      from: c.from ?? c.original ?? '',
+      to:   c.to   ?? c.replacement ?? '',
+    }))
+    .filter(c => c.from !== c.to && c.to);
+  if (real.length === 0) return escapeHtml(enhanced);
+
   let html = escapeHtml(enhanced);
-  // 按 replacement 长度倒序排，避免短串先替换影响长串
-  const sorted = [...changes].sort((a, b) =>
-    (b.replacement || '').length - (a.replacement || '').length
-  );
-  for (const ch of sorted) {
-    const from = ch.original || '';
-    const to = ch.replacement || '';
-    if (!to) continue;
-    // 转义后做替换
-    const fromEsc = escapeHtml(from);
-    const toEsc = escapeHtml(to);
-    // 替换最后一次出现（避免误伤）
+  // 按 to 长度倒序排，避免短串先替换影响长串
+  const sorted = [...real].sort((a, b) => b.to.length - a.to.length);
+  for (const c of sorted) {
+    const toEsc = escapeHtml(c.to);
     const idx = html.lastIndexOf(toEsc);
     if (idx >= 0) {
-      html = html.slice(0, idx) +
-        `<mark class="to">${toEsc}</mark>` +
-        html.slice(idx + toEsc.length);
-    }
-    // 高亮原始文本中的 from（如果有）
-    if (from && from !== to) {
-      const fromIdx = html.indexOf(`<mark class="to">${toEsc}</mark>`);
-      if (fromIdx === -1) {
-        const rawIdx = html.indexOf(fromEsc);
-        if (rawIdx >= 0) {
-          html = html.slice(0, rawIdx) +
-            `<mark class="from">${fromEsc}</mark>` +
-            html.slice(rawIdx + fromEsc.length);
-        }
-      }
+      html = html.slice(0, idx)
+        + `<mark class="to">${toEsc}</mark>`
+        + html.slice(idx + toEsc.length);
     }
   }
   return html;
 }
 
+// labelMap 基于 evie/tool processor 真实 source 名（response.changes[*].source）
+const SOURCE_LABEL_MAP = {
+  normalize: '① 清洗（全/半角、空白、标点）',
+  disfluency: '② 填充词删除（啊/呃/那个）',
+  alias: '③ 别名（产品功能名 / 业务术语）',
+  deterministic: '④ 确定性（量词 / 专用词）',
+  fuzzy_vocab: '⑤ 模糊匹配（Hamming / Pinyin / lock_alias）',
+  pinyin: '拼音归一（兜底）',
+  ctxproc: '上下文处理',
+  cleaning: '文本清洗',
+};
+
 function renderChanges(changes) {
   const container = $('changesList');
   container.innerHTML = '';
-  if (changes.length === 0) {
+  if (!changes || changes.length === 0) {
     container.innerHTML = '<div class="no-changes">✨ 无改动</div>';
     return;
   }
+
+  // 按 source 分组
+  const groups = new Map();
   for (const ch of changes) {
-    const item = document.createElement('div');
-    item.className = 'change-item';
-    item.innerHTML = `
-      <span class="change-kind">${escapeHtml(ch.kind || '—')}</span>
-      <span class="change-from">${escapeHtml(ch.original || '')}</span>
-      <span class="change-to">${escapeHtml(ch.replacement || '')}</span>
-      <span class="change-confidence">${ch.confidence != null ? ch.confidence.toFixed(2) : '—'}</span>
-    `;
-    container.appendChild(item);
+    const from = ch.from ?? ch.original ?? '';
+    const to   = ch.to   ?? ch.replacement ?? '';
+    if (from === to && !to) continue;  // 跳过空改动
+    const key = ch.source || ch.type || ch.kind || 'other';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({
+      from, to,
+      type: ch.type ?? ch.kind ?? '—',
+      conf: ch.confidence,
+    });
+  }
+
+  if (groups.size === 0) {
+    container.innerHTML = '<div class="no-changes">✨ 无实质改动</div>';
+    return;
+  }
+
+  for (const [key, items] of groups) {
+    const label = SOURCE_LABEL_MAP[key] || key;
+    const groupEl = document.createElement('div');
+    groupEl.className = 'change-group';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'change-group-title';
+    titleEl.innerHTML = `${escapeHtml(label)} <span class="badge">${items.length}</span>`;
+    groupEl.appendChild(titleEl);
+
+    const listEl = document.createElement('div');
+    listEl.className = 'changes-list';
+    for (const r of items) {
+      const item = document.createElement('div');
+      item.className = 'change-item';
+      item.innerHTML = `
+        <span class="change-kind">${escapeHtml(r.type)}</span>
+        <span class="change-from">${escapeHtml(r.from)}</span>
+        <span class="change-to">${escapeHtml(r.to)}</span>
+        <span class="change-confidence">${r.conf != null ? (+r.conf).toFixed(2) : '—'}</span>
+      `;
+      listEl.appendChild(item);
+    }
+    groupEl.appendChild(listEl);
+    container.appendChild(groupEl);
   }
 }
 
-function renderTimings(data, kind) {
+function renderTimings(data) {
+  // 字段驼峰（ASR / enhancement 都是 TimeMs 后缀）
   const fields = [
-    { key: 'cleaning_time_ms', label: 'cleaning' },
-    { key: 'filler_time_ms', label: 'filler' },
-    { key: 'vocab_match_time_ms', label: 'vocab match' },
-    { key: 'alias_time_ms', label: 'alias' },
-    { key: 'deterministic_time_ms', label: 'deterministic' },
-    { key: 'pinyin_time_ms', label: 'pinyin' },
-    { key: 'fuzzy_time_ms', label: 'fuzzy' },
-    { key: 'context_time_ms', label: 'context' },
+    { key: 'cleaningTimeMs', label: 'cleaning' },
+    { key: 'fillerTimeMs', label: 'filler' },
+    { key: 'vocabMatchTimeMs', label: 'vocab match' },
+    { key: 'aliasTimeMs', label: 'alias' },
+    { key: 'deterministicTimeMs', label: 'deterministic' },
+    { key: 'pinyinTimeMs', label: 'pinyin' },
+    { key: 'fuzzyTimeMs', label: 'fuzzy' },
+    { key: 'contextTimeMs', label: 'context' },
   ];
 
-  const values = fields.map(f => ({ ...f, value: data[f.key] || 0 }));
+  // 响应里 *TimeMs 是字符串数字，需要 parseInt
+  const values = fields.map(f => {
+    const v = data[f.key];
+    return { ...f, value: parseInt(v, 10) || 0 };
+  });
   const max = Math.max(...values.map(v => v.value), 1);
 
   const container = $('timingBars');
   container.innerHTML = '';
   for (const v of values) {
-    const pct = Math.max(2, (v.value / max) * 100); // 最小 2% 避免 0 不可见
+    const pct = Math.max(2, (v.value / max) * 100);
     const row = document.createElement('div');
     row.className = 'timing-bar';
     row.innerHTML = `
@@ -500,43 +544,13 @@ function renderTimings(data, kind) {
     container.appendChild(row);
   }
 
-  // processingTimeMs 在响应里是字符串数字（"8"），要 parseInt
+  // 总耗时
   const totalRaw = data.processingTimeMs ?? data.processing_time_ms;
   let total = parseInt(totalRaw, 10) || 0;
   if (!total) total = values.reduce((sum, v) => sum + v.value, 0);
   $('totalTime').textContent = total + 'ms';
 }
 
-// ===== Health Details =====
-async function getVocabStatus() {
-  await adminRequest('GET', '/health/ready');
-}
-
-async function adminRequest(method, path, body) {
-  const baseUrl = $('baseUrl').value.replace(/\/$/, '');
-  const token = $('token').value.trim();
-  const out = $('adminOutput');
-
-  out.textContent = `${method} ${path}\n请求中...`;
-  try {
-    const r = await fetch(`${baseUrl}${path}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    const text = await r.text();
-    let pretty = text;
-    try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch {}
-    out.textContent = `HTTP ${r.status} ${r.statusText}\n\n${pretty}`;
-  } catch (err) {
-    out.textContent = `请求失败: ${err.message}`;
-  }
-}
-
-// ===== Error =====
 function showError(httpCode, data) {
   $('resultCard').classList.remove('hidden');
   $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });

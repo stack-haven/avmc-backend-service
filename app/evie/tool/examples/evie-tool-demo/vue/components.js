@@ -346,11 +346,12 @@ const ResultViewer = {
   props: ['result', 'kind'],
   computed: {
     statusClass() {
-      const map = { 1: 'success', 2: 'degraded' };
+      // 响应里 status: 0=SUCCESS / 1=SUCCESS（不同业务码）/ 2=DEGRADED / 3+=ERROR
+      const map = { 0: 'success', 1: 'success', 2: 'degraded', 3: 'error' };
       return map[this.result.status] || 'unknown';
     },
     statusText() {
-      const map = { 1: 'SUCCESS', 2: 'DEGRADED' };
+      const map = { 0: 'SUCCESS', 1: 'SUCCESS', 2: 'DEGRADED', 3: 'ERROR' };
       return map[this.result.status] || 'UNKNOWN';
     },
     rawText() {
