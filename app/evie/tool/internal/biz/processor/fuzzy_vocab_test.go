@@ -705,3 +705,62 @@ func TestProcess_LockAlias_PrefixProtection(t *testing.T) {
 		}
 	}
 }
+
+
+// TestProcess_LockAlias_NotInBucket 验证 lock_alias=true entry 不进 fuzzy 候选桶，
+// 避免 ASR 错字（如"菌种子"）被误纠为业务专名（如"金种籽"）。
+//
+// 修复前："菌种子" Hamming("金种籽")=2 conf=0.33 仍被自动替换（bug）
+// 修复后："金种籽" lock_alias=true 不进 bucket，"菌种子" 不参与 fuzzy 替换
+func TestProcess_LockAlias_NotInBucket(t *testing.T) {
+	lex, _ := lexicon.NewBuilder().
+		Add(lexicon.Entry{ID: "1", Text: "金种籽", Meta: map[string]any{"category": "PRODUCT", "lock_alias": true}}).
+		Add(lexicon.Entry{ID: "2", Text: "田清", Meta: map[string]any{"category": "PERSON"}}).
+		Build()
+	cfg := DefaultFuzzyVocabConfig()
+	cfg.MaxEditDistance = 2
+	proc := NewFuzzyVocabProcessor(lex, cfg)
+
+	t.Logf("protectedPrefixes: %v (length %d)", proc.protectedPrefixes, len(proc.protectedPrefixes))
+	// protectedPrefixes 应包含 "金", "金种", "金种籽" 的非空前缀
+	for _, expected := range []string{"金", "金种"} {
+		if !proc.protectedPrefixes[expected] {
+			t.Errorf("protectedPrefixes 缺少 %q", expected)
+		}
+	}
+
+	// 验证 "金种籽" 不在 byLen bucket (3 字)
+	if _, ok := proc.byLen[3]; ok {
+		for _, ie := range proc.byLen[3] {
+			if ie.entry.Text == "金种籽" {
+				t.Errorf("'金种籽' lock_alias=true 不应进 byLen[3] bucket")
+			}
+		}
+	}
+
+	// ASR 原文 "加五个菌种子" 不应被 fuzzy 改成 "金种籽"
+	s := newTestState("加五个菌种子")
+	if err := proc.Process(context.Background(), s); err != nil {
+		t.Fatalf("Process: %v", err)
+	}
+	for _, c := range s.Changes() {
+		if c.From == "菌种子" && c.To == "金种籽" {
+			t.Errorf(`"菌种子" 不应被 fuzzy 改成 "金种籽"（lock_alias entry 不进 bucket）`)
+		}
+	}
+
+	// 对照：普通 PERSON entry 仍进 bucket，正常纠错
+	s2 := newTestState("找填清确认")
+	if err := proc.Process(context.Background(), s2); err != nil {
+		t.Fatalf("Process: %v", err)
+	}
+	found := false
+	for _, c := range s2.Changes() {
+		if c.From == "填清" && c.To == "田清" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf(`"填清" 应被 fuzzy 改成 "田清"（普通 PERSON entry 仍进 bucket）`)
+	}
+}

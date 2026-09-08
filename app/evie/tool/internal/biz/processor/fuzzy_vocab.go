@@ -140,11 +140,14 @@ func (p *FuzzyVocabProcessor) buildIndex() {
 		// lock_alias=true：跳过该 entry（保护产品功能名 / 专有名词不被误改）
 		if lockAliasOf(e) {
 			ie.lockAlias = true
-			// 同时收集所有非空前缀（≥2 字），子串命中时整个 span 跳过替换
+			// P-FIX v2：lock_alias entry 只贡献 protectedPrefixes（子串保护），
+			// 不进 byLen bucket，避免 ASR 错字匹配业务专名导致误纠
+			// 例：金种籽(lock_alias) 不参与 fuzzy 替换 → '菌种子' → '金种籽' 不再发生
 			r := []rune(e.Text)
 			for plen := 1; plen < len(r); plen++ {
 				p.protectedPrefixes[string(r[:plen])] = true
 			}
+			return true  // 不进 bucket
 		}
 		p.byLen[n] = append(p.byLen[n], ie)
 		return true

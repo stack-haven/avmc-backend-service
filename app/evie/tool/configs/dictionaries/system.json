@@ -14,7 +14,8 @@
         "金中子",
         "金种种",
         "斤种子"
-      ]
+      ],
+      "lock_alias": true
     },
     {
       "standard_text": "黑种籽",
@@ -28,7 +29,8 @@
       "homophones": [
         "黑中子",
         "黑种种"
-      ]
+      ],
+      "lock_alias": true
     },
     {
       "standard_text": "指令官",
@@ -41,7 +43,8 @@
       "homophones": [
         "纸灵官",
         "指令关"
-      ]
+      ],
+      "lock_alias": true
     },
     {
       "standard_text": "技术研发部",
@@ -120,6 +123,326 @@
       "corrections": [],
       "homophones": [],
       "lock_alias": true
+    },
+    {
+      "standard_text": "龚千友",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "冯春晓",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "龚建军",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "何焓",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "阳巡宇",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "邓梓",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "朱凤",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "夏其军",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "高萍",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "卢川",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "杨城冰月",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "六的起飞",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "小屁娃些",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "新人哒哒",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "新人",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "张力",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "小子",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "嘻嘻嘻",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "贺卡计划",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "可靠",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "小河",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "阿松大",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "杜岩",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "可可",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "叶海嫣",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "袁孟莲",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "王婷",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "冯渡",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "向中华",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "向鑫",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "喵喵",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "李云龙",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "孙策",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "郭源潮",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "肖可可",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "华子哥",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "熊龙军",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "小乖乖",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "田华",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
+    },
+    {
+      "standard_text": "于云海",
+      "category": "PERSON",
+      "priority": 50,
+      "aliases": [],
+      "corrections": [],
+      "homophones": []
     }
   ],
   "phrase_rules": [
