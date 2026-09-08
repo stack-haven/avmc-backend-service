@@ -23,23 +23,35 @@
     </header>
 
     <section class="config-card">
-      <h2>配置</h2>
-      <div class="form-grid">
-        <label>
-          <span>Base URL</span>
+      <h2>连接配置</h2>
+      <div class="form-row">
+        <label class="form-item">
+          <span class="form-label">Base URL</span>
           <input type="text" id="baseUrl" value="http://localhost:8110" placeholder="http://localhost:8110">
         </label>
-        <label>
-          <span>Bearer Token <small style="color:#9ca3af">(OAuth access_token，存于 Redis db=14 <code>oauth2_access_token:*</code>)</small></span>
-          <input type="text" id="token" placeholder="不是 qua sync_token；用户登录后的 access_token">
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="enableEnhance" checked>
-          <span>启用文本增强（推荐）</span>
+        <label class="form-item form-item-grow">
+          <span class="form-label">
+            Bearer Token
+            <span class="form-hint" id="tokenHint">
+              <span class="hint-icon">ⓘ</span>
+              <span class="hint-text">存于 Redis db=14 <code>oauth2_access_token:*</code>；不是 qua sync_token</span>
+            </span>
+          </span>
+          <div class="input-with-action">
+            <input type="password" id="token" placeholder="粘贴 OAuth access_token" autocomplete="off">
+            <button class="btn-icon" id="toggleTokenVis" title="显示/隐藏 Token">👁</button>
+          </div>
         </label>
       </div>
-      <div class="config-actions">
-        <button class="btn btn-secondary" id="checkHealth">检查健康</button>
+      <div class="form-row form-row-options">
+        <label class="checkbox-label">
+          <input type="checkbox" id="enableEnhance" checked>
+          <span>启用文本增强（8 层 processor，推荐）</span>
+        </label>
+        <div class="preset-actions">
+          <button class="btn-link" id="loadPresetBtn" title="填入 Redis db=14 演示 token">⚡ 加载演示凭据</button>
+          <button class="btn btn-secondary" id="checkHealth">检查健康</button>
+        </div>
       </div>
     </section>
 

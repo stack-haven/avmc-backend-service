@@ -500,9 +500,11 @@ function renderTimings(data, kind) {
     container.appendChild(row);
   }
 
-  const total = data.processing_time_ms
-    || values.reduce((sum, v) => sum + v.value, 0);
-  $('totalTime').textContent = total;
+  // processingTimeMs 在响应里是字符串数字（"8"），要 parseInt
+  const totalRaw = data.processingTimeMs ?? data.processing_time_ms;
+  let total = parseInt(totalRaw, 10) || 0;
+  if (!total) total = values.reduce((sum, v) => sum + v.value, 0);
+  $('totalTime').textContent = total + 'ms';
 }
 
 // ===== Health Details =====

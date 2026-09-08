@@ -30,32 +30,61 @@ const AppHeader = {
 // ===== ConfigPanel =====
 const ConfigPanel = {
   props: ['baseUrl', 'token', 'enableEnhance'],
-  emits: ['update:baseUrl', 'update:token', 'update:enableEnhance', 'check-health'],
+  emits: ['update:baseUrl', 'update:token', 'update:enableEnhance', 'check-health', 'load-preset'],
+  data() {
+    return { tokenVisible: false };
+  },
+  methods: {
+    toggleTokenVis() {
+      this.tokenVisible = !this.tokenVisible;
+    },
+    loadPreset() {
+      this.$emit('update:token', '182ed78960304d90a5e286b08a57145d');
+      this.tokenVisible = false;
+      this.$nextTick(() => this.$refs.tokenInput?.focus());
+    },
+  },
   template: `
     <section class="config-card">
-      <h2>配置</h2>
-      <div class="form-grid">
-        <label>
-          <span>Base URL</span>
+      <h2>连接配置</h2>
+      <div class="form-row">
+        <label class="form-item">
+          <span class="form-label">Base URL</span>
           <input type="text" :value="baseUrl"
             @input="$emit('update:baseUrl', $event.target.value)"
             placeholder="http://localhost:8110">
         </label>
-        <label>
-          <span>Bearer Token <small style="color:#9ca3af">(OAuth access_token，存于 Redis db=14 <code>oauth2_access_token:*</code>)</small></span>
-          <input type="text" :value="token"
-            @input="$emit('update:token', $event.target.value)"
-            placeholder="不是 qua sync_token；用户登录后的 access_token">
+        <label class="form-item form-item-grow">
+          <span class="form-label">
+            Bearer Token
+            <span class="form-hint">
+              <span class="hint-icon">ⓘ</span>
+              <span class="hint-text">存于 Redis db=14 <code>oauth2_access_token:*</code>；不是 qua sync_token</span>
+            </span>
+          </span>
+          <div class="input-with-action">
+            <input ref="tokenInput" :type="tokenVisible ? 'text' : 'password'"
+              :value="token"
+              @input="$emit('update:token', $event.target.value)"
+              placeholder="粘贴 OAuth access_token"
+              autocomplete="off">
+            <button class="btn-icon" @click="toggleTokenVis" :title="tokenVisible ? '隐藏' : '显示'">
+              {{ tokenVisible ? '🙈' : '👁' }}
+            </button>
+          </div>
         </label>
+      </div>
+      <div class="form-row form-row-options">
         <label class="checkbox-label">
           <input type="checkbox"
             :checked="enableEnhance"
             @change="$emit('update:enableEnhance', $event.target.checked)">
-          <span>启用文本增强</span>
+          <span>启用文本增强（8 层 processor，推荐）</span>
         </label>
-      </div>
-      <div class="config-actions">
-        <button class="btn btn-secondary" @click="$emit('check-health')">检查健康</button>
+        <div class="preset-actions">
+          <button class="btn-link" @click="loadPreset">⚡ 加载演示凭据</button>
+          <button class="btn btn-secondary" @click="$emit('check-health')">检查健康</button>
+        </div>
       </div>
     </section>
   `,
@@ -325,45 +354,85 @@ const ResultViewer = {
       return map[this.result.status] || 'UNKNOWN';
     },
     rawText() {
-      return this.result.raw_text || this.result.original_text || '—';
+      return this.result.rawText || this.result.raw_text
+          || this.result.originalText || this.result.original_text || '—';
     },
     enhancedText() {
-      return this.result.enhanced_text || '—';
+      return this.result.enhancedText || this.result.enhanced_text || '—';
     },
     changes() {
       return this.result.changes || [];
     },
+    groupedChanges() {
+      // 按 source 分组（fuzzy / alias / deterministic / clean 等）
+      const groups = new Map();
+      // labelMap 基于 evie/tool processor 真实 source 名
+      const labelMap = {
+        normalize: '① 清洗（全/半角、空白、标点）',
+        disfluency: '② 填充词删除（啊/呃/那个）',
+        alias: '③ 别名（产品功能名 / 业务术语）',
+        deterministic: '④ 确定性（量词 / 专用词）',
+        fuzzy_vocab: '⑤ 模糊匹配（Hamming / Pinyin / lock_alias）',
+        pinyin: '拼音归一（兜底）',
+        ctxproc: '上下文处理',
+        cleaning: '文本清洗',
+      };
+      for (const ch of this.changes) {
+        const from = ch.from ?? ch.original ?? '';
+        const to = ch.to ?? ch.replacement ?? '';
+        if (from === to && !to) continue;
+        const key = ch.source || ch.type || ch.kind || 'other';
+        if (!groups.has(key)) groups.set(key, { key, label: labelMap[key] || key, items: [] });
+        groups.get(key).items.push({
+          from, to,
+          type: ch.type ?? ch.kind ?? '—',
+          conf: ch.confidence,
+        });
+      }
+      return Array.from(groups.values());
+    },
     timingFields() {
       return [
-        { key: 'cleaning_time_ms', label: 'cleaning' },
-        { key: 'filler_time_ms', label: 'filler' },
-        { key: 'vocab_match_time_ms', label: 'vocab match' },
-        { key: 'alias_time_ms', label: 'alias' },
-        { key: 'deterministic_time_ms', label: 'deterministic' },
-        { key: 'pinyin_time_ms', label: 'pinyin' },
-        { key: 'fuzzy_time_ms', label: 'fuzzy' },
-        { key: 'context_time_ms', label: 'context' },
+        { key: 'cleaningTimeMs', label: 'cleaning' },
+        { key: 'fillerTimeMs', label: 'filler' },
+        { key: 'vocabMatchTimeMs', label: 'vocab match' },
+        { key: 'aliasTimeMs', label: 'alias' },
+        { key: 'deterministicTimeMs', label: 'deterministic' },
+        { key: 'pinyinTimeMs', label: 'pinyin' },
+        { key: 'fuzzyTimeMs', label: 'fuzzy' },
+        { key: 'contextTimeMs', label: 'context' },
       ];
     },
     timingValues() {
-      const values = this.timingFields.map(f => ({ ...f, value: this.result[f.key] || 0 }));
+      const values = this.timingFields.map(f => {
+        // 响应里 *TimeMs 是字符串数字
+        const v = this.result[f.key];
+        return { ...f, value: parseInt(v, 10) || 0 };
+      });
       const max = Math.max(...values.map(v => v.value), 1);
       return values.map(v => ({ ...v, pct: Math.max(2, (v.value / max) * 100) }));
     },
     totalTime() {
-      return this.result.processing_time_ms
-        || this.timingValues.reduce((s, v) => s + v.value, 0);
+      const raw = this.result.processingTimeMs ?? this.result.processing_time_ms;
+      let total = parseInt(raw, 10) || 0;
+      if (!total) total = this.timingValues.reduce((s, v) => s + v.value, 0);
+      return total + 'ms';
     },
     enhancedHtml() {
-      if (!this.result.enhanced_text) return '—';
-      if (this.changes.length === 0) return this.escapeHtml(this.result.enhanced_text);
-      let html = this.escapeHtml(this.result.enhanced_text);
-      const sorted = [...this.changes].sort((a, b) =>
-        (b.replacement || '').length - (a.replacement || '').length
-      );
-      for (const ch of sorted) {
-        const to = this.escapeHtml(ch.replacement || '');
-        if (!to) continue;
+      if (!this.enhancedText || this.enhancedText === '—') return '—';
+      if (!this.changes || this.changes.length === 0) return this.escapeHtml(this.enhancedText);
+      // 只高亮 from != to 的真实改动
+      const real = this.changes
+        .map(ch => ({
+          from: ch.from ?? ch.original ?? '',
+          to: ch.to ?? ch.replacement ?? '',
+        }))
+        .filter(c => c.from !== c.to && c.to);
+      if (real.length === 0) return this.escapeHtml(this.enhancedText);
+      let html = this.escapeHtml(this.enhancedText);
+      const sorted = [...real].sort((a, b) => b.to.length - a.to.length);
+      for (const c of sorted) {
+        const to = this.escapeHtml(c.to);
         const idx = html.lastIndexOf(to);
         if (idx >= 0) {
           html = html.slice(0, idx) +
@@ -391,9 +460,9 @@ const ResultViewer = {
         <h3>③ 识别 / 增强结果</h3>
         <div class="result-meta">
           <span class="status-pill" :class="statusClass">{{ statusText }}</span>
-          <span class="meta-item" v-if="result.provider_name">provider: {{ result.provider_name }}</span>
-          <span class="meta-item" v-if="result.confidence != null">conf: {{ result.confidence.toFixed(2) }}</span>
-          <span class="meta-item" v-if="result.duration_ms">dur: {{ (result.duration_ms / 1000).toFixed(1) }}s</span>
+          <span class="meta-item" v-if="result.providerName || result.provider_name">provider: {{ result.providerName || result.provider_name }}</span>
+          <span class="meta-item" v-if="result.confidence != null">conf: {{ (+result.confidence).toFixed(2) }}</span>
+          <span class="meta-item" v-if="result.durationMs || result.duration_ms">dur: {{ ((result.durationMs || result.duration_ms) / 1000).toFixed(1) }}s</span>
         </div>
       </header>
       <div class="card-body">
@@ -410,13 +479,18 @@ const ResultViewer = {
 
         <div class="changes-section">
           <h4>改动详情 <span class="badge">{{ changes.length }}</span></h4>
-          <div v-if="changes.length === 0" class="no-changes">✨ 无改动</div>
-          <div v-else class="changes-list">
-            <div v-for="(ch, i) in changes" :key="i" class="change-item">
-              <span class="change-kind">{{ ch.kind || '—' }}</span>
-              <span class="change-from">{{ ch.original || '' }}</span>
-              <span class="change-to">{{ ch.replacement || '' }}</span>
-              <span class="change-confidence">{{ ch.confidence != null ? ch.confidence.toFixed(2) : '—' }}</span>
+          <div v-if="groupedChanges.length === 0" class="no-changes">✨ 无改动</div>
+          <div v-else class="changes-groups">
+            <div v-for="g in groupedChanges" :key="g.key" class="change-group">
+              <div class="change-group-title">{{ g.label }} <span class="badge">{{ g.items.length }}</span></div>
+              <div class="changes-list">
+                <div v-for="(ch, i) in g.items" :key="i" class="change-item">
+                  <span class="change-kind">{{ ch.type }}</span>
+                  <span class="change-from">{{ ch.from }}</span>
+                  <span class="change-to">{{ ch.to }}</span>
+                  <span class="change-confidence">{{ ch.conf != null ? (+ch.conf).toFixed(2) : '—' }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
