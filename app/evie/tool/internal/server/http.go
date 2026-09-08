@@ -18,6 +18,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport"
 	kratoshttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/gorilla/handlers"
 
 	v1 "backend-service/api/evie/tool/v1"
 	"backend-service/app/evie/tool/internal/conf"
@@ -52,7 +53,33 @@ func NewHTTPServer(
 	}
 	_ = logger
 
-	opts := []kratoshttp.ServerOption{kratoshttp.Middleware(mws...)}
+	// CORS 中间件。
+	//
+	// 为什么用 kratoshttp.Filter 而不是 kratoshttp.Middleware：
+	//   浏览器对跨域非简单请求（如 application/json POST）会先发 OPTIONS 预检请求。
+	//   如果 CORS 在 Middleware 链里，OPTIONS 请求会先被 TokenAuth 看到
+	//   （无 Authorization 头）→ 返回 401 → 浏览器拒绝跨域响应。
+	//   作为 Filter 时，CORS 在所有 Middleware / handler 之前执行，
+	//   且 gorilla/handlers.CORS 自动识别 OPTIONS + Origin 头，
+	//   直接返回 204 + CORS 响应头，不进入业务链。
+	//
+	// 生产环境应把 AllowedOrigins 从 ["*"] 收敛为允许的前端域名白名单；
+	// demo 阶段用 * 方便 file:// / http-server 调试。
+	opts := []kratoshttp.ServerOption{
+		kratoshttp.Filter(handlers.CORS(
+			handlers.AllowedHeaders([]string{
+				"Content-Type",
+				"Authorization",
+				"X-Request-Id", // 链路追踪 ID，方便前端日志关联
+			}),
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+			handlers.AllowedOrigins([]string{"*"}),
+			handlers.ExposedHeaders([]string{
+				"X-Request-Id",
+			}),
+		)),
+		kratoshttp.Middleware(mws...),
+	}
 	if c != nil && c.Http != nil {
 		if c.Http.Network != "" {
 			opts = append(opts, kratoshttp.Network(c.Http.Network))
