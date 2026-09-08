@@ -221,36 +221,40 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 // findBestInBucket 在候选桶中找编辑距离最小的 entry（等长 Hamming 优化路径）。
 //
 // 匹配策略（顺序）：
-//  1. boundedHamming ≤ maxDist：常规编辑距离匹配
+//  1. 精确等值（d==0）：跳过，不替换
 //  2. （仅 PERSON）pinyin signature 全等：音近归一（覆盖 ASR 前后鼻音、in/ing 等）
+//  3. boundedHamming ≤ maxDist：常规编辑距离匹配
+//
+// 顺序理由：pinyin 优先 Hamming，避免 "天华" vs "田花"（Hamming=2 conf=0）压制
+// "天华" vs "田花"（pinyin 命中 conf=0.7）的场景。
 //
 // 返回：entry / confidence (=1 - dist/n 或 pinyin 固定 0.7) / dist
 //
 // 若 sub 与某 entry 完全相等，返回 (Entry{}, 0, 0) 表示"无替换"。
 func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexicon.Entry, float64, int) {
+	// 1. 精确等值 → 不替换
+	for _, ie := range bucket {
+		if boundedHamming(subRunes, ie.runes, 0) == 0 {
+			return lexicon.Entry{}, 0, 0
+		}
+	}
+
+	// 2. pinyin 优先（PERSON bucket 才有效）
+	if pinyinBest, ok := findBestByPinyinSig(subRunes, bucket); ok {
+		return pinyinBest, pinyinFallbackConfidence(len(subRunes)), 0
+	}
+
+	// 3. boundedHamming
 	var best lexicon.Entry
 	bestDist := maxDist + 1
 	for _, ie := range bucket {
-		// boundedHamming 在 max=bestDist-1 时：返回 ≤ bestDist-1 的真实距离，
-		// 或返回 > bestDist-1 的已超过值（早退后实际差异数）。
 		d := boundedHamming(subRunes, ie.runes, bestDist-1)
-		if d == 0 {
-			// 完全相同：不替换
-			return lexicon.Entry{}, 0, 0
-		}
 		if d < bestDist {
 			bestDist = d
 			best = ie.entry
 		}
 	}
-	if bestDist > maxDist {
-		// Hamming 超阈值，尝试 pinyin 音近归一（仅 PERSON bucket 中有 sig 的 entry 参与）
-		if pinyinBest, ok := findBestByPinyinSig(subRunes, bucket); ok {
-			return pinyinBest, pinyinFallbackConfidence(len(subRunes)), bestDist
-		}
-		return lexicon.Entry{}, 0, bestDist
-	}
-	if best.ID == "" {
+	if bestDist > maxDist || best.ID == "" {
 		return lexicon.Entry{}, 0, bestDist
 	}
 	conf := 1.0 - float64(bestDist)/float64(len(subRunes))
