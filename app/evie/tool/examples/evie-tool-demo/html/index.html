@@ -30,8 +30,8 @@
           <input type="text" id="baseUrl" value="http://localhost:8110" placeholder="http://localhost:8110">
         </label>
         <label>
-          <span>Bearer Token</span>
-          <input type="text" id="token" placeholder="从 Redis 共享 auth 获取的 token">
+          <span>Bearer Token <small style="color:#9ca3af">(OAuth access_token，存于 Redis db=14 <code>oauth2_access_token:*</code>)</small></span>
+          <input type="text" id="token" placeholder="不是 qua sync_token；用户登录后的 access_token">
         </label>
         <label class="checkbox-label">
           <input type="checkbox" id="enableEnhance" checked>

@@ -144,12 +144,24 @@ Content-Type: application/json
 进入 demo 页面后，顶部有 **配置区**：
 
 - **Base URL**：默认 `http://localhost:8110`（evie/tool 默认端口）
-- **Token**：Bearer Token，从 Redis 共享 auth 获取
-  ```bash
-  # 启动后通过 redis_check 工具验证 token
-  go run ./cmd/redis_check <token>
-  ```
+- **Token**：Bearer Token 必须是 **OAuth access_token**（存在 Redis db=14，key 前缀 `oauth2_access_token:`），**不是 qua 平台 sync_token**。混淆这两者会得到 `401 TOKEN_INVALID`。
 - **音频格式**：mp3 / wav / pcm
+
+### 401 TOKEN_INVALID 排查
+
+```bash
+# 1) 确认 token 存在于 Redis（设 REDIS_PASSWORD 来自 .env.local）
+REDIS_PASSWORD=xxx go run ./cmd/redis_check <token>
+# → ✓ FOUND key=oauth2_access_token:<token>  表示是 access_token，可用作 Bearer
+# → ✗ key NOT found                                  表示 token 不在 Redis
+```
+
+**常见混淆**：
+| Token 类型 | 来源 | 是否可作 Bearer |
+|---|---|---|
+| OAuth access_token | Redis `oauth2_access_token:*`，用户登录后下发 | ✅ 可作 Bearer |
+| qua sync_token | qua 平台内部用，存于 `configs/tenants.json` 的 `sync_token` 字段 | ❌ 仅服务内部使用 |
+| qua client credentials | qua 服务自己的 client id/secret | ❌ 不用于本服务 |
 
 ---
 

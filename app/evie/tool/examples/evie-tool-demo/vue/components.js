@@ -42,10 +42,10 @@ const ConfigPanel = {
             placeholder="http://localhost:8110">
         </label>
         <label>
-          <span>Bearer Token</span>
+          <span>Bearer Token <small style="color:#9ca3af">(OAuth access_token，存于 Redis db=14 <code>oauth2_access_token:*</code>)</small></span>
           <input type="text" :value="token"
             @input="$emit('update:token', $event.target.value)"
-            placeholder="从 Redis 共享 auth 获取的 token">
+            placeholder="不是 qua sync_token；用户登录后的 access_token">
         </label>
         <label class="checkbox-label">
           <input type="checkbox"
