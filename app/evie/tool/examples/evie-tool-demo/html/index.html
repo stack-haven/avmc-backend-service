@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>evie/tool · HTTP Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">🎙️</span>
+        <div>
+          <h1>evie/tool</h1>
+          <p class="subtitle">ASR + Text Enhancement HTTP Demo</p>
+        </div>
+      </div>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">未连接</span>
+      </div>
+    </header>
+
+    <section class="config-card">
+      <h2>配置</h2>
+      <div class="form-grid">
+        <label>
+          <span>Base URL</span>
+          <input type="text" id="baseUrl" value="http://localhost:8110" placeholder="http://localhost:8110">
+        </label>
+        <label>
+          <span>Bearer Token</span>
+          <input type="text" id="token" placeholder="从 Redis 共享 auth 获取的 token">
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="enableEnhance" checked>
+          <span>启用文本增强（推荐）</span>
+        </label>
+      </div>
+      <div class="config-actions">
+        <button class="btn btn-secondary" id="checkHealth">检查健康</button>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <!-- 左：ASR 卡片 -->
+      <div class="card">
+        <header class="card-header">
+          <h3>① ASR 识别 + 增强</h3>
+          <span class="hint">POST /evie/tool/v1/asr:recognize</span>
+        </header>
+        <div class="card-body">
+          <div class="audio-source">
+            <label class="source-tab active" data-tab="file">📁 文件</label>
+            <label class="source-tab" data-tab="url">🔗 URL</label>
+            <label class="source-tab" data-tab="record">🎤 录制</label>
+          </div>
+
+          <div class="source-panel active" id="panel-file">
+            <div class="drop-zone" id="dropZone">
+              <p class="drop-zone-icon">⬇</p>
+              <p>拖拽音频文件到此处</p>
+              <p class="hint">或</p>
+              <button class="btn btn-secondary" id="selectFileBtn">选择文件</button>
+              <input type="file" id="fileInput" accept="audio/*" hidden>
+            </div>
+            <div class="file-info hidden" id="fileInfo">
+              <span class="file-name" id="fileName"></span>
+              <span class="file-meta" id="fileMeta"></span>
+            </div>
+          </div>
+
+          <div class="source-panel" id="panel-url">
+            <input type="text" id="audioUrl" placeholder="https://example.com/audio.mp3">
+            <button class="btn btn-secondary" id="loadUrlBtn">加载</button>
+          </div>
+
+          <div class="source-panel" id="panel-record">
+            <div class="record-controls">
+              <button class="btn btn-record" id="recordBtn">
+                <span class="rec-dot" id="recDot"></span>
+                <span id="recLabel">开始录制</span>
+              </button>
+              <span id="recordTime" class="record-time">00:00</span>
+            </div>
+            <audio id="recordPreview" controls hidden></audio>
+          </div>
+
+          <button class="btn btn-primary btn-block" id="recognizeBtn" disabled>▶ 识别并增强</button>
+        </div>
+      </div>
+
+      <!-- 右：纯文本增强卡片 -->
+      <div class="card">
+        <header class="card-header">
+          <h3>② 纯文本增强</h3>
+          <span class="hint">POST /evie/tool/v1/enhance</span>
+        </header>
+        <div class="card-body">
+          <label class="textarea-label">
+            <span>输入文本</span>
+            <textarea id="textInput" rows="6" placeholder="例如：金种子 是 我们的 主要 产品 之一。测试播种未来功能。">金种子 是 我们的 主要 产品 之一。</textarea>
+          </label>
+          <button class="btn btn-primary btn-block" id="enhanceBtn">▶ 增强</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 响应结果区 -->
+    <section class="result-card hidden" id="resultCard">
+      <header class="card-header">
+        <h3>③ 识别 / 增强结果</h3>
+        <div class="result-meta">
+          <span class="status-pill" id="resultStatus">—</span>
+          <span class="meta-item" id="resultProvider">provider: —</span>
+          <span class="meta-item" id="resultConfidence">conf: —</span>
+          <span class="meta-item" id="resultDuration">dur: —</span>
+        </div>
+      </header>
+      <div class="card-body">
+        <div class="diff-section">
+          <div class="diff-row">
+            <span class="diff-label">原始</span>
+            <div class="diff-text" id="rawText">—</div>
+          </div>
+          <div class="diff-row">
+            <span class="diff-label">增强</span>
+            <div class="diff-text enhanced" id="enhancedText">—</div>
+          </div>
+        </div>
+
+        <div class="changes-section">
+          <h4>改动详情 <span class="badge" id="changeCount">0</span></h4>
+          <div class="changes-list" id="changesList"></div>
+        </div>
+
+        <div class="timing-section">
+          <h4>各阶段耗时（ms）</h4>
+          <div class="timing-bars" id="timingBars"></div>
+          <div class="timing-total">
+            总耗时: <strong id="totalTime">—</strong> ms
+          </div>
+        </div>
+
+        <details class="raw-response">
+          <summary>查看完整响应 JSON</summary>
+          <pre id="rawJson"></pre>
+        </details>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <header class="card-header">
+        <h3>④ 服务健康详情</h3>
+        <span class="hint">GET /health/ready</span>
+      </header>
+      <div class="card-body">
+        <div class="admin-actions">
+          <button class="btn btn-secondary" id="syncStatusBtn">查看 /health/ready 详情</button>
+        </div>
+        <pre class="admin-output" id="adminOutput">（点击上方按钮查询 /health/ready）</pre>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>evie/tool · Go 1.25 · Kratos v2 · Vue-style pure HTML demo</p>
+      <p>接口规范详见 <code>README.md</code></p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

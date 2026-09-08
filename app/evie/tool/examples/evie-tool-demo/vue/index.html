@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>evie/tool · Vue 3 Demo</title>
+
+  <!-- Vue 3 CDN（无需 npm install） -->
+  <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 头部 -->
+    <app-header
+      :status="status"
+      @check-health="pingHealth"
+    ></app-header>
+
+    <!-- 配置区 -->
+    <config-panel
+      v-model:base-url="baseUrl"
+      v-model:token="token"
+      v-model:enable-enhance="enableEnhance"
+      @check-health="pingHealth"
+    ></config-panel>
+
+    <!-- 双列工作区 -->
+    <div class="workspace">
+      <asr-panel
+        :audio-base64="audioBase64"
+        :audio-encoding="audioEncoding"
+        :audio-meta="audioMeta"
+        :enable-enhance="enableEnhance"
+        :base-url="baseUrl"
+        :token="token"
+        @recognize="onRecognize"
+        @reset="resetAudio"
+      ></asr-panel>
+
+      <text-enhance-panel
+        :base-url="baseUrl"
+        :token="token"
+        @enhance="onEnhance"
+      ></text-enhance-panel>
+    </div>
+
+    <!-- 结果展示 -->
+    <result-viewer
+      v-if="result"
+      :result="result"
+      :kind="resultKind"
+    ></result-viewer>
+
+    <!-- 服务健康详情 -->
+    <admin-panel
+      :base-url="baseUrl"
+      :token="token"
+    ></admin-panel>
+
+    <app-footer></app-footer>
+  </div>
+
+  <script src="components.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
