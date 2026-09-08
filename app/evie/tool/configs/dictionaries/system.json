@@ -58,7 +58,9 @@
       "standard_text": "佘丽群",
       "category": "PERSON",
       "priority": 100,
-      "aliases": [],
+      "aliases": [
+        "周丽群"
+      ],
       "corrections": [],
       "homophones": []
     },
@@ -109,6 +111,15 @@
       "aliases": [],
       "corrections": [],
       "homophones": []
+    },
+    {
+      "standard_text": "播种未来",
+      "category": "PRODUCT",
+      "priority": 100,
+      "aliases": [],
+      "corrections": [],
+      "homophones": [],
+      "lock_alias": true
     }
   ],
   "phrase_rules": [

@@ -63,6 +63,9 @@ type systemEntry struct {
 	Aliases      []string `json:"aliases"`
 	Corrections  []string `json:"corrections"`
 	Homophones   []string `json:"homophones"`
+	// LockAlias=true 时，fuzzy/deterministic processor 不会把这个 entry 的 standard_text 替换掉
+	//（即业务产品功能名 / 已知专有名词保护）。
+	LockAlias    bool     `json:"lock_alias,omitempty"`
 }
 
 type systemPhraseRule struct {
@@ -376,6 +379,7 @@ func (b *VocabularyBuilder) buildSystemSnapshot() *VocabularySnapshot {
 			Category:     e.Category,
 			EntryType:    "WORD",
 			Priority:     e.Priority,
+			LockAlias:    e.LockAlias,
 		}
 		entries = append(entries, ent)
 		nextID++

@@ -17,6 +17,9 @@ type VocabularyEntry struct {
 	Priority      int
 	Pinyin        string
 	PinyinInitial string
+	// LockAlias=true 时，fuzzy/deterministic processor 不替换此 entry 的 standard_text
+	//（业务产品功能名 / 已知专有名词保护，避免被相似词误改）。
+	LockAlias     bool
 }
 
 // VocabularyRelation 词汇关系（别名/纠错/同音等）。

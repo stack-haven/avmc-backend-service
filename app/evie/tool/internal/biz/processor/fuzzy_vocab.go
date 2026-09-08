@@ -77,6 +77,7 @@ type indexedEntry struct {
 	entry     lexicon.Entry
 	runes     []rune
 	pinyinSig string // 仅 PERSON 类别计算；空 sig 表示未启用 pinyin 归一
+	lockAlias bool   // true 时跳过（业务产品功能名 / 已知专有名词保护）
 }
 
 // FuzzyVocabProcessor 实现 lexnorm.Processor：基于词库的编辑距离模糊匹配。
@@ -88,6 +89,9 @@ type FuzzyVocabProcessor struct {
 	byLen map[int][]indexedEntry
 	// 非空长度桶的 n 值（排序），用于 Process 外层循环跳过空桶与 map lookup
 	nonEmptyLens []int
+	// protectedPrefixes 由 lockAlias=true 的 entry 生成的所有非空前缀集合。
+	// sub 命中其中任一前缀 → 整个 span 跳过 fuzzy 替换（保护产品功能名 / 专有名词子串）。
+	protectedPrefixes map[string]bool
 }
 
 // NewFuzzyVocabProcessor 构造 processor。
@@ -118,6 +122,7 @@ func (p *FuzzyVocabProcessor) Descriptor() lexnorm.Descriptor {
 
 func (p *FuzzyVocabProcessor) buildIndex() {
 	p.byLen = make(map[int][]indexedEntry)
+	p.protectedPrefixes = make(map[string]bool)
 	if p.lex == nil {
 		return
 	}
@@ -131,6 +136,15 @@ func (p *FuzzyVocabProcessor) buildIndex() {
 		// PERSON 类别预计算 pinyin signature（音近归一用）
 		if categoryOf(e) == "PERSON" {
 			ie.pinyinSig = pinyin.Signature(e.Text)
+		}
+		// lock_alias=true：跳过该 entry（保护产品功能名 / 专有名词不被误改）
+		if lockAliasOf(e) {
+			ie.lockAlias = true
+			// 同时收集所有非空前缀（≥2 字），子串命中时整个 span 跳过替换
+			r := []rune(e.Text)
+			for plen := 1; plen < len(r); plen++ {
+				p.protectedPrefixes[string(r[:plen])] = true
+			}
 		}
 		p.byLen[n] = append(p.byLen[n], ie)
 		return true
@@ -188,6 +202,21 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 			if hasChangeAtSpan(changes, span) {
 				continue
 			}
+			// lockAlias 子串保护：sub 包含 lockAlias entry 的非空前缀（≥1 字）→ 整个 span 跳过
+			// 例：protectedPrefixes={"播","播种","播种未"}，sub="测试播种" 含 "播种" → 跳过
+			if len(p.protectedPrefixes) > 0 {
+				subStr := string(subRunes)
+				skip := false
+				for prefix := range p.protectedPrefixes {
+					if len(prefix) <= len(subStr) && containsString(subStr, prefix) {
+						skip = true
+						break
+					}
+				}
+				if skip {
+					continue
+				}
+			}
 
 			bestEntry, bestConf, bestDist := findBestInBucket(subRunes, bucket, maxEdit)
 			if bestEntry.ID == "" {
@@ -244,10 +273,13 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 		return pinyinBest, pinyinFallbackConfidence(len(subRunes)), 0
 	}
 
-	// 3. boundedHamming
+	// 3. boundedHamming（跳过 lockAlias 的 entry）
 	var best lexicon.Entry
 	bestDist := maxDist + 1
 	for _, ie := range bucket {
+		if ie.lockAlias {
+			continue
+		}
 		d := boundedHamming(subRunes, ie.runes, bestDist-1)
 		if d < bestDist {
 			bestDist = d
@@ -273,6 +305,9 @@ func findBestByPinyinSig(subRunes []rune, bucket []indexedEntry) (lexicon.Entry,
 	}
 	// 优先选 signature 完全相同的第一个（确定性：bucket 已按 Text 排序）
 	for _, ie := range bucket {
+		if ie.lockAlias {
+			continue
+		}
 		if ie.pinyinSig == "" {
 			continue
 		}
@@ -358,6 +393,33 @@ func thresholdFor(catMap map[string]float64, fallback float64, category string) 
 		return v
 	}
 	return fallback
+}
+
+// containsString 检查 haystack 是否包含 needle（精确子串，非 fuzzy）。
+func containsString(haystack, needle string) bool {
+	if len(needle) == 0 {
+		return true
+	}
+	if len(needle) > len(haystack) {
+		return false
+	}
+	for i := 0; i+len(needle) <= len(haystack); i++ {
+		if haystack[i:i+len(needle)] == needle {
+			return true
+		}
+	}
+	return false
+}
+
+// lockAliasOf 从 Entry.Meta 拿 lock_alias bool（保护产品功能名/专有名词）。
+func lockAliasOf(e lexicon.Entry) bool {
+	if e.Meta == nil {
+		return false
+	}
+	if v, ok := e.Meta["lock_alias"].(bool); ok {
+		return v
+	}
+	return false
 }
 
 // categoryOf 从 Entry.Meta 拿 category 字符串。
