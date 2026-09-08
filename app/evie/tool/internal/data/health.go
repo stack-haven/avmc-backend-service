@@ -41,7 +41,7 @@ var _ pkgHealth.Checker = (*HealthChecker)(nil)
 // NewHealthChecker 创建 evie/tool 健康检查器。
 //
 // 返回 pkgHealth.Checker 接口以简化 Wire 装配（避免 wire.Bind）
-func NewHealthChecker(rdb *redis.Client, qua QuaFetcher, reg *asrPkg.ProviderRegistry) pkgHealth.Checker {
+func NewHealthChecker(rdb *redis.Client, qua QuaFetcher, reg *asrPkg.ProviderRegistry) *HealthChecker {
 	var q *quaFetcher
 	if qua != nil {
 		if qc, ok := qua.(*quaFetcher); ok {

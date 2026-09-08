@@ -47,6 +47,27 @@ func provideHealthNotifier(checker pkgHealth.Checker) biz.HealthNotifier {
 	return nil
 }
 
+// provideHealthCheckerWithTokenReporter 把 *biz.TenantRegistry 注入 HealthChecker。
+//
+// 设计：HealthChecker 的 Details() 需要暴露 token 过期状态（expiring_tenants /
+// expired_tenants），但 TenantRegistry 由 biz 包构造，wire 注入在 HealthChecker
+// 之后。这个 provider 把"反向注入"声明为依赖关系，wire 会自动按依赖顺序调用：
+//  1. NewHealthChecker 构造 HealthChecker
+//  2. NewTenantRegistry 构造 TenantRegistry
+//  3. 本 provider 触发 SetTokenReporter（如果 checker 是 *data.HealthChecker）
+//  4. server.NewHTTPServer 接收的 checker 已被注入 reporter
+//
+// 反向注入是 wire 友好的写法：避免手动修改 wire_gen.go。
+func provideHealthCheckerWithTokenReporter(
+	checker *data.HealthChecker,
+	registry *biz.TenantRegistry,
+) pkgHealth.Checker {
+	if checker != nil && registry != nil {
+		checker.SetTokenReporter(registry)
+	}
+	return checker
+}
+
 // wireApp 装配 evie/tool Kratos App + 后台 worker。
 //
 // M5/M6 依赖链：
@@ -77,9 +98,10 @@ func wireApp(
 		biz.ProviderSet,
 		service.ProviderSet,
 		server.ProviderSet,
-		provideCanQuaFetch,         // 注入给 VocabSyncer
-		provideHealthNotifier,      // 将 HealthChecker 适配为 biz.HealthNotifier
-		biz.NewVocabSyncerWithAuth, // 用带 auth 检查的 syncer 构造器，内部调 AttachLazySync
+		provideCanQuaFetch,                       // 注入给 VocabSyncer
+		provideHealthNotifier,                    // 将 HealthChecker 适配为 biz.HealthNotifier
+		provideHealthCheckerWithTokenReporter,    // 反向注入 TenantRegistry → HealthChecker
+		biz.NewVocabSyncerWithAuth,               // 内部已调 AttachLazySync(builder)
 		newApp,
 	))
 }

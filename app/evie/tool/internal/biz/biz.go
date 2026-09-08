@@ -29,7 +29,7 @@ var ProviderSet = wire.NewSet(
 	NewVocabularyBuilder,
 	NewTenantProfileResolver,
 	NewLexnormEngine,
-	NewEnhancementUsecase,
+	NewEnhancementUsecaseWithConf,
 	// M5
 	NewTenantRegistry,
 	// M7

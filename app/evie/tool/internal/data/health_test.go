@@ -53,7 +53,7 @@ func TestHealthChecker_Ready_AllOK(t *testing.T) {
 	qua, _ := NewQuaClient(&v1conf.Qua{BaseUrl: ts.URL}, log.DefaultLogger)
 	reg := newTestRegistry()
 
-	c := NewHealthChecker(rdb, qua, reg).(*HealthChecker)
+	c := NewHealthChecker(rdb, qua, reg)
 	if err := c.Ready(context.Background()); err != nil {
 		t.Errorf("Ready: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestHealthChecker_Ready_RedisDown(t *testing.T) {
 	mr.Close()
 	rdb := redis.NewClient(&redis.Options{Addr: addr})
 
-	c := NewHealthChecker(rdb, nil, nil).(*HealthChecker)
+	c := NewHealthChecker(rdb, nil, nil)
 	err := c.Ready(context.Background())
 	if err == nil {
 		t.Error("expected redis error")
@@ -81,7 +81,7 @@ func TestHealthChecker_Ready_NilComponents(t *testing.T) {
 		t.Errorf("nil checker should error, got %v", err)
 	}
 
-	c = NewHealthChecker(nil, nil, nil).(*HealthChecker)
+	c = NewHealthChecker(nil, nil, nil)
 	if err := c.Ready(context.Background()); err == nil {
 		t.Error("nil rdb should error")
 	}
@@ -94,7 +94,7 @@ func TestHealthChecker_Details(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	reg := newTestRegistry()
 
-	c := NewHealthChecker(rdb, nil, reg).(*HealthChecker)
+	c := NewHealthChecker(rdb, nil, reg)
 	c.SetSyncState(time.Now(), "")
 	details := c.Details(context.Background())
 	if details["redis"] != true {
@@ -116,7 +116,7 @@ func TestHealthChecker_Ready_ASRMissing(t *testing.T) {
 
 	// ASR reg 有有效 provider + nil reg 的混合场景——构造一个空 reg
 	reg := asrPkg.NewProviderRegistry()
-	c := NewHealthChecker(rdb, nil, reg).(*HealthChecker)
+	c := NewHealthChecker(rdb, nil, reg)
 	err := c.Ready(context.Background())
 	// redis OK + qua nil + asr 空 → 应通过
 	if err != nil {

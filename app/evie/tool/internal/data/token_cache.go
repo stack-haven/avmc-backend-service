@@ -67,7 +67,7 @@ type TokenCache struct {
 //
 //	rdb:    已连接 Redis（与 qua 共享 db）
 //	prefix: Redis key 前缀，从 conf.Data.Redis.TokenKeyPrefix 注入
-func NewTokenCache(rdb *redis.Client, redisConf *conf.Data_Redis) *TokenCache {
+func NewTokenCache(rdb *redis.Client, redisConf *conf.Data_Redis) TokenLookup {
 	prefix := redisConf.GetTokenKeyPrefix()
 	if prefix == "" {
 		prefix = "oauth2_access_token:"

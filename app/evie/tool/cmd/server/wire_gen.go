@@ -12,11 +12,10 @@ import (
 	"backend-service/app/evie/tool/internal/data"
 	"backend-service/app/evie/tool/internal/server"
 	"backend-service/app/evie/tool/internal/service"
+	"backend-service/pkg/health"
 	"context"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-
-	pkgHealth "backend-service/pkg/health"
 )
 
 import (
@@ -50,13 +49,11 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 		return nil, nil, err
 	}
 	data_Redis := data.NewRedisConf(confData)
-	tokenCache := data.NewTokenCache(client, data_Redis)
+	tokenLookup := data.NewTokenCache(client, data_Redis)
 	vocabularyBuilder, err := biz.NewVocabularyBuilder(systemDict)
 	if err != nil {
 		return nil, nil, err
 	}
-	// lazy sync 回调：Build() miss 时触发后台同步（保障 per-tenant 词库首次请求热加载）
-	// 注意：此处 vocabSyncer 尚未构造，所以采用后置赋值（下面创建后补）
 	engine, err := biz.NewLexnormEngine(enhancement, vocabularyBuilder, logger)
 	if err != nil {
 		return nil, nil, err
@@ -70,26 +67,21 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	asrProviders := data.NewASRProviders(providerRegistry, asr)
 	asrUsecase := biz.NewASRUsecase(asrProviders, enhancementUsecase, asr, logger)
 	asrService := service.NewASRService(asrUsecase)
-	grpcServer := server.NewGRPCServer(confServer, tokenCache, enhancementService, asrService, logger)
+	grpcServer := server.NewGRPCServer(confServer, tokenLookup, enhancementService, asrService, logger)
 	v := data.NewQuaClientOptions()
 	quaFetcher, err := data.NewQuaClient(qua, logger, v...)
 	if err != nil {
 		return nil, nil, err
 	}
-	checker := data.NewHealthChecker(client, quaFetcher, providerRegistry)
-	httpServer := server.NewHTTPServer(confServer, tokenCache, enhancementService, asrService, checker, logger)
-	healthNotifier := provideHealthNotifier(checker)
+	healthChecker := data.NewHealthChecker(client, quaFetcher, providerRegistry)
 	bizTenantRegistry := biz.NewTenantRegistry(tenantRegistry)
-	// 把 TenantRegistry 注入 HealthChecker 以便 /health/ready 暴露 token 过期状态
-	if hc, ok := checker.(*data.HealthChecker); ok {
-		hc.SetTokenReporter(bizTenantRegistry)
-	}
+	checker := provideHealthCheckerWithTokenReporter(healthChecker, bizTenantRegistry)
+	httpServer := server.NewHTTPServer(confServer, tokenLookup, enhancementService, asrService, checker, logger)
 	normalizer := biz.NewNormalizerFromConf(vocabRules, logger)
 	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
 	v2 := provideCanQuaFetch()
+	healthNotifier := provideHealthNotifier(checker)
 	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, tenantVocab, logger, v2, healthNotifier)
-	// 把 syncer 的 EnsureTenant 注入 builder 的 lazy-sync 回调（错位构造后的反向注入）
-	vocabularyBuilder.WithLazySyncOnMiss(vocabSyncer.EnsureTenant)
 	app := newApp(logger, grpcServer, httpServer, vocabSyncer)
 	return app, func() {
 	}, nil
@@ -113,7 +105,7 @@ func provideCanQuaFetch() func(ctx context.Context) bool {
 }
 
 // provideHealthNotifier 将 pkgHealth.Checker 适配为 biz.HealthNotifier。
-func provideHealthNotifier(checker pkgHealth.Checker) biz.HealthNotifier {
+func provideHealthNotifier(checker health.Checker) biz.HealthNotifier {
 	if checker == nil {
 		return nil
 	}
@@ -121,4 +113,25 @@ func provideHealthNotifier(checker pkgHealth.Checker) biz.HealthNotifier {
 		return n
 	}
 	return nil
+}
+
+// provideHealthCheckerWithTokenReporter 把 *biz.TenantRegistry 注入 HealthChecker。
+//
+// 设计：HealthChecker 的 Details() 需要暴露 token 过期状态（expiring_tenants /
+// expired_tenants），但 TenantRegistry 由 biz 包构造，wire 注入在 HealthChecker
+// 之后。这个 provider 把"反向注入"声明为依赖关系，wire 会自动按依赖顺序调用：
+//  1. NewHealthChecker 构造 HealthChecker
+//  2. NewTenantRegistry 构造 TenantRegistry
+//  3. 本 provider 触发 SetTokenReporter（如果 checker 是 *data.HealthChecker）
+//  4. server.NewHTTPServer 接收的 checker 已被注入 reporter
+//
+// 反向注入是 wire 友好的写法：避免手动修改 wire_gen.go。
+func provideHealthCheckerWithTokenReporter(
+	checker *data.HealthChecker,
+	registry *biz.TenantRegistry,
+) health.Checker {
+	if checker != nil && registry != nil {
+		checker.SetTokenReporter(registry)
+	}
+	return checker
 }

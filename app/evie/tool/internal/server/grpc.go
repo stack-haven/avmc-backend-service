@@ -18,7 +18,7 @@ import (
 // NewGRPCServer 创建 gRPC server。
 func NewGRPCServer(
 	c *conf.Server,
-	cache *data.TokenCache,
+	cache data.TokenLookup,
 	enhService *service.EnhancementService,
 	asrService *service.ASRService,
 	logger log.Logger,

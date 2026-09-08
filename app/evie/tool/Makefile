@@ -3,9 +3,18 @@ include ../../../app.mk
 
 # 本 Makefile 只声明 evie/tool 特有的 target。
 # 通用 target（wire / test / cover / lint / api / build ...）由 app.mk 提供。
-# 例外：`run` 在本地覆盖 app.mk —— app.mk 的 run 用 `-conf ./configs` 目录，
-# 会导致 Kratos 把 configs/tenants.example.json 加载为 config source 而 panic。
-# 本地 run 默认 demo 模式（零外部依赖），可通过 CONF= 覆盖。
+# 例外：
+#  1. `run` 在本地覆盖 app.mk —— app.mk 的 run 用 `-conf ./configs` 目录，
+#     会导致 Kratos 把 configs/tenants.example.json 加载为 config source 而 panic。
+#     本地 run 默认 demo 模式（零外部依赖），可通过 CONF= 覆盖。
+#  2. `wire` 在本地覆盖 app.mk —— app.mk 用 `-mod=mod` 触发 workspace 冲突。
+#     本地用 GOWORK=off 绕开；wire 工具仅用于本服务，无需传播到其它服务。
+
+.PHONY: wire
+# 重新生成 cmd/server/wire_gen.go。
+# GOWORK=off 绕开 backend-service 的 go workspace（避免 `-mod=mod` 冲突）。
+wire:
+	@GOWORK=off go run github.com/google/wire/cmd/wire ./cmd/server
 
 .PHONY: config
 # 生成 evie/tool 的 conf.pb.go（基于 internal/conf/conf.proto）
