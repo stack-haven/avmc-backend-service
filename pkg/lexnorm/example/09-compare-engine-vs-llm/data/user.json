@@ -1,0 +1,983 @@
+{
+  "version": "user-2025-09-08",
+  "source": "admin-api/qua/member-extended/page",
+  "entries": [
+    {
+      "id": "user-1921841946499616769-10086_",
+      "text": "10086+",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921841946499616769",
+        "dept_name": "王德发集团",
+        "is_dirty": true,
+        "kind": "digit-or-sym"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-1871676400",
+      "text": "1871676400",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": true,
+        "kind": "digit-or-sym"
+      }
+    },
+    {
+      "id": "user-1968591251740585985-rebbitmq",
+      "text": "rebbitmq",
+      "variants": null,
+      "meta": {
+        "dept_id": "1968591251740585985",
+        "dept_name": "大部门",
+        "is_dirty": true,
+        "kind": "english"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-于云海",
+      "text": "于云海",
+      "pinyin": "yu yun hai",
+      "variants": [
+        {
+          "text": "于工",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        },
+        {
+          "text": "于总",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-于云海2号",
+      "text": "于云海2号",
+      "pinyin": "yu yun hai hao",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": true,
+        "kind": "mixed"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-伍锡辉",
+      "text": "伍锡辉",
+      "pinyin": "wu xi hui",
+      "variants": [
+        {
+          "text": "伍西辉",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        },
+        {
+          "text": "五西辉",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        },
+        {
+          "text": "伍工",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        },
+        {
+          "text": "伍总",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-会发光的话发给",
+      "text": "会发光的话发给",
+      "pinyin": "hui fa guang de hua fa gei",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": true,
+        "kind": "long-zh"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-何焓",
+      "text": "何焓",
+      "pinyin": "he han",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450957703344130-佘丽群",
+      "text": "佘丽群",
+      "pinyin": "she li qun",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450957703344130",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-入职",
+      "text": "入职",
+      "pinyin": "ru zhi",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-入职咯",
+      "text": "入职咯",
+      "pinyin": "ru zhi ge",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-六的起飞",
+      "text": "六的起飞",
+      "pinyin": "liu de qi fei",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-冯春晓",
+      "text": "冯春晓",
+      "pinyin": "feng chun xiao",
+      "variants": [
+        {
+          "text": "冯工",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        },
+        {
+          "text": "冯总",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450901239623681-冯渡",
+      "text": "冯渡",
+      "pinyin": "feng du",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450901239623681",
+        "dept_name": "真语者",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1968590324224856066-力说肯定是_劳动隔开",
+      "text": "力说肯定是·劳动隔开",
+      "pinyin": "li shuo ken ding shi lao dong ge kai",
+      "variants": null,
+      "meta": {
+        "dept_id": "1968590324224856066",
+        "dept_name": "",
+        "is_dirty": true,
+        "kind": "sep-zh"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-动态测试01",
+      "text": "动态测试01",
+      "pinyin": "dong tai ce shi",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1921847694147420162-华子哥",
+      "text": "华子哥",
+      "pinyin": "hua zi ge",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921847694147420162",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450957703344130-卢川",
+      "text": "卢川",
+      "pinyin": "lu chuan",
+      "variants": [
+        {
+          "text": "芦川",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450957703344130",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-可可",
+      "text": "可可",
+      "pinyin": "ke ke",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-可靠",
+      "text": "可靠",
+      "pinyin": "ke kao",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450901239623681-叶海嫣",
+      "text": "叶海嫣",
+      "pinyin": "ye hai yan",
+      "variants": [
+        {
+          "text": "叶海燕",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450901239623681",
+        "dept_name": "真语者",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-向中华",
+      "text": "向中华",
+      "pinyin": "xiang zhong hua",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-向鑫",
+      "text": "向鑫",
+      "pinyin": "xiang xin",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1921847694147420162-喵喵",
+      "text": "喵喵",
+      "pinyin": "miao miao",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921847694147420162",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-嘻嘻嘻",
+      "text": "嘻嘻嘻",
+      "pinyin": "xi xi xi",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450957703344130-夏其军",
+      "text": "夏其军",
+      "pinyin": "xia qi jun",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450957703344130",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450957703344130-孙策",
+      "text": "孙策",
+      "pinyin": "sun ce",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450957703344130",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450901239623681-小乖乖",
+      "text": "小乖乖",
+      "pinyin": "xiao guai guai",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450901239623681",
+        "dept_name": "真语者",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-小子",
+      "text": "小子",
+      "pinyin": "xiao zi",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-小屁娃些",
+      "text": "小屁娃些",
+      "pinyin": "xiao pi wa xie",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-小河",
+      "text": "小河",
+      "pinyin": "xiao he",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-张三",
+      "text": "张三",
+      "pinyin": "zhang san",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1921841946499616769-张三01",
+      "text": "张三01",
+      "pinyin": "zhang san",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921841946499616769",
+        "dept_name": "王德发集团",
+        "is_dirty": true,
+        "kind": "mixed"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-张力",
+      "text": "张力",
+      "pinyin": "zhang li",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-新人",
+      "text": "新人",
+      "pinyin": "xin ren",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-新人哒哒",
+      "text": "新人哒哒",
+      "pinyin": "xin ren da da",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-朱凤",
+      "text": "朱凤",
+      "pinyin": "zhu feng",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1921847694147420162-李云龙",
+      "text": "李云龙",
+      "pinyin": "li yun long",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921847694147420162",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-李四",
+      "text": "李四",
+      "pinyin": "li si",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-杜岩",
+      "text": "杜岩",
+      "pinyin": "du yan",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-杜岩测试成员",
+      "text": "杜岩测试成员",
+      "pinyin": "du yan ce shi cheng yuan",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1904450957703344130-杨城冰月",
+      "text": "杨城冰月",
+      "pinyin": "yang cheng bing yue",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450957703344130",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-林宇豪",
+      "text": "林宇豪",
+      "pinyin": "lin yu hao",
+      "variants": [
+        {
+          "text": "林工",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        },
+        {
+          "text": "林总",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-江温桑你1",
+      "text": "江温桑你1",
+      "pinyin": "jiang wen sang ni",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "mixed"
+      }
+    },
+    {
+      "id": "user-1921841946499616769-没有权限的成员",
+      "text": "没有权限的成员",
+      "pinyin": "mei you quan xian de cheng yuan",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921841946499616769",
+        "dept_name": "王德发集团",
+        "is_dirty": true,
+        "kind": "long-zh"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-测试1管理账号",
+      "text": "测试1管理账号",
+      "pinyin": "ce shi guan li zhang hao",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-测试3",
+      "text": "测试3",
+      "pinyin": "ce shi",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1968590324224856066-测试员工",
+      "text": "测试员工",
+      "pinyin": "ce shi yuan gong",
+      "variants": null,
+      "meta": {
+        "dept_id": "1968590324224856066",
+        "dept_name": "",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-熊龙军",
+      "text": "熊龙军",
+      "pinyin": "xiong long jun",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450901239623681-王婷",
+      "text": "王婷",
+      "pinyin": "wang ting",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450901239623681",
+        "dept_name": "真语者",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-田华",
+      "text": "田华",
+      "pinyin": "tian hua",
+      "variants": [
+        {
+          "text": "田花",
+          "kind": "approximate",
+          "confidence": 0.7,
+          "source": "manual-homophone"
+        },
+        {
+          "text": "田工",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        },
+        {
+          "text": "田总",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-田清",
+      "text": "田清",
+      "pinyin": "tian qing",
+      "variants": [
+        {
+          "text": "田青",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-田花",
+      "text": "田花",
+      "pinyin": "tian hua",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1921841946499616769-肖可可",
+      "text": "肖可可",
+      "pinyin": "xiao ke ke",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921841946499616769",
+        "dept_name": "王德发集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450901239623681-袁孟莲",
+      "text": "袁孟莲",
+      "pinyin": "yuan meng lian",
+      "variants": [
+        {
+          "text": "袁梦莲",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450901239623681",
+        "dept_name": "真语者",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1921847694147420162-贺卡计划",
+      "text": "贺卡计划",
+      "pinyin": "he qia ji hua",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921847694147420162",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1921847694147420162-转正1",
+      "text": "转正1",
+      "pinyin": "zhuan zheng",
+      "variants": null,
+      "meta": {
+        "dept_id": "1921847694147420162",
+        "dept_name": "万康广告",
+        "is_dirty": true,
+        "kind": "mixed"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-邓梓",
+      "text": "邓梓",
+      "pinyin": "deng zi",
+      "variants": [
+        {
+          "text": "邓子",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450303484194818-郭源潮",
+      "text": "郭源潮",
+      "pinyin": "guo yuan chao",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450303484194818",
+        "dept_name": "倍多客科技",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-野原新之助",
+      "text": "野原新之助",
+      "pinyin": "ye yuan xin zhi zhu",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "test-account"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-阳巡宇",
+      "text": "阳巡宇",
+      "pinyin": "yang xun yu",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-阿布杜瓦哈甫_阿卜来",
+      "text": "阿布杜瓦哈甫·阿卜来",
+      "pinyin": "a bu du wa ha fu a bu lai",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "sep-zh"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-阿松大",
+      "text": "阿松大",
+      "pinyin": "a song da",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-陈兴静",
+      "text": "陈兴静",
+      "pinyin": "chen xing jing",
+      "variants": [
+        {
+          "text": "陈新静",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-陈科沆",
+      "text": "陈科沆",
+      "pinyin": "chen ke huang",
+      "variants": [
+        {
+          "text": "陈科航",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-homophone"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1914516834397196289-风萧萧青丝寥寥",
+      "text": "风萧萧青丝寥寥",
+      "pinyin": "feng xiao xiao qing si liao liao",
+      "variants": null,
+      "meta": {
+        "dept_id": "1914516834397196289",
+        "dept_name": "倍多客测试组",
+        "is_dirty": true,
+        "kind": "long-zh"
+      }
+    },
+    {
+      "id": "user-1904450957703344130-高萍",
+      "text": "高萍",
+      "pinyin": "gao ping",
+      "variants": null,
+      "meta": {
+        "dept_id": "1904450957703344130",
+        "dept_name": "万康广告",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-龚千友",
+      "text": "龚千友",
+      "pinyin": "gong qian you",
+      "variants": [
+        {
+          "text": "龚老板",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        },
+        {
+          "text": "龚总",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    },
+    {
+      "id": "user-1904450235179954177-龚建军",
+      "text": "龚建军",
+      "pinyin": "gong jian jun",
+      "variants": [
+        {
+          "text": "建军工",
+          "kind": "alias",
+          "confidence": 0.85,
+          "source": "manual-title"
+        }
+      ],
+      "meta": {
+        "dept_id": "1904450235179954177",
+        "dept_name": "万康盛鼎集团",
+        "is_dirty": false,
+        "kind": "real-name"
+      }
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "version": "dept-2025-09-08",
+  "source": "admin-api/system/dept/list",
+  "entries": [
+    {
+      "id": "dept-1904450235179954177",
+      "text": "万康盛鼎集团",
+      "pinyin": "wan kang sheng ding ji tuan",
+      "variants": [
+        {
+          "text": "万康盛鼎",
+          "kind": "alias",
+          "confidence": 0.9,
+          "source": "auto-abbrev"
+        }
+      ],
+      "meta": {
+        "parent_id": "0",
+        "path": "万康盛鼎集团",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-1904450303484194818",
+      "text": "倍多客科技",
+      "pinyin": "bei duo ke ke ji",
+      "variants": [
+        {
+          "text": "倍多客",
+          "kind": "alias",
+          "confidence": 0.9,
+          "source": "auto-abbrev"
+        }
+      ],
+      "meta": {
+        "parent_id": "1904450235179954177",
+        "path": "万康盛鼎集团/倍多客科技",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-1904450901239623681",
+      "text": "真语者",
+      "pinyin": "zhen yu zhe",
+      "variants": [],
+      "meta": {
+        "parent_id": "1904450235179954177",
+        "path": "万康盛鼎集团/真语者",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-1904450957703344130",
+      "text": "万康广告",
+      "pinyin": "wan kang guang gao",
+      "variants": [
+        {
+          "text": "万康盛鼎集团·倍多客科技·万康广告",
+          "kind": "alias",
+          "confidence": 0.95,
+          "source": "auto-path-disambig"
+        }
+      ],
+      "meta": {
+        "parent_id": "1904450235179954177",
+        "path": "万康盛鼎集团/万康广告",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-1914516834397196289",
+      "text": "倍多客测试组",
+      "pinyin": "bei duo ke ce shi zu",
+      "variants": [
+        {
+          "text": "倍多客测试",
+          "kind": "alias",
+          "confidence": 0.9,
+          "source": "auto-abbrev"
+        }
+      ],
+      "meta": {
+        "parent_id": "1904450303484194818",
+        "path": "万康盛鼎集团/倍多客科技/倍多客测试组",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-1921841946499616769",
+      "text": "王德发集团",
+      "pinyin": "wang de fa ji tuan",
+      "variants": [
+        {
+          "text": "王德发",
+          "kind": "alias",
+          "confidence": 0.9,
+          "source": "auto-abbrev"
+        }
+      ],
+      "meta": {
+        "parent_id": "0",
+        "path": "王德发集团",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-1968591251740585985",
+      "text": "大部门",
+      "pinyin": "da bu men",
+      "variants": [],
+      "meta": {
+        "parent_id": "1904450235179954177",
+        "path": "万康盛鼎集团/大部门",
+        "sort": 0
+      }
+    },
+    {
+      "id": "dept-2096145101939658754",
+      "text": "综合部",
+      "pinyin": "zong he bu",
+      "variants": [],
+      "meta": {
+        "parent_id": "1904450235179954177",
+        "path": "万康盛鼎集团/综合部",
+        "sort": 0
+      }
+    }
+  ]
+}

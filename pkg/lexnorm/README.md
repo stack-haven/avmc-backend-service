@@ -75,6 +75,26 @@ Normalize → Disfluency → Alias → Deterministic → Pinyin → Fuzzy → Co
 
 ---
 
+## Scenario Combinations (Reference)
+
+The engine provides ready-made presets in `processor/presets`. Use the following combinations as a starting point; processors are executed from left to right.
+
+| Scenario | Recommended pipeline | Notes |
+|---|---|---|
+| General / Standard | `Normalize → Disfluency → Alias → Deterministic → Pinyin → Fuzzy → Context` | `presets.Standard(lex, conv)`; all-purpose starting point |
+| High accuracy | Same as Standard | `presets.HighAccuracy(lex, conv)`; more conservative thresholds, produces more Suggestions |
+| Low latency / Fast | `Normalize → Alias` | `presets.Fast(lex)`; minimal pipeline |
+| ASR / speech transcript | `Normalize → Disfluency → Alias → Pinyin` | `presets.ASR(lex, conv)`; removes filler words and fixes homophones |
+| OCR | `Normalize → Alias → Deterministic` | `presets.OCR(lex)`; handles exact typos and shape-like errors |
+| Search query | `Normalize → Alias → Deterministic → Pinyin → Fuzzy` | conservative Apply, more Suggestions |
+| Document audit / review | Full pipeline | enable all processors, use Suggest-only mode |
+| Customer service ticket | `Normalize → Alias → Deterministic` | Apply + Suggest |
+| Log normalization | `Normalize → Alias → Deterministic` | Apply mainly |
+
+> This is only a reference. Applications may extend a built-in preset with custom Processors (for example, domain-specific Context or OCR shape Processors) or adjust thresholds via `Config`.
+
+---
+
 ## Installation
 
 ```bash

@@ -77,6 +77,26 @@ Normalize → Disfluency → Alias → Deterministic → Pinyin → Fuzzy → Co
 
 ---
 
+## 场景组合参考
+
+`processor/presets` 提供了一些内置 Preset。下面按常见场景给出 Processor 组合，左到右为执行顺序，可作为参考。
+
+| 场景 | 推荐 Pipeline | 说明 |
+|---|---|---|
+| 通用 / Standard | `Normalize → Disfluency → Alias → Deterministic → Pinyin → Fuzzy → Context` | `presets.Standard(lex, conv)`；通用全量起点 |
+| 高精度 / HighAccuracy | 同 Standard | `presets.HighAccuracy(lex, conv)`；阈值更保守，产出更多 Suggest |
+| 低延迟 / Fast | `Normalize → Alias` | `presets.Fast(lex)`；最小 Pipeline |
+| ASR / 语音转写 | `Normalize → Disfluency → Alias → Pinyin` | `presets.ASR(lex, conv)`；去口语填充词、处理同音词 |
+| OCR | `Normalize → Alias → Deterministic` | `presets.OCR(lex)`；处理明确错字/形近错字 |
+| 搜索查询 | `Normalize → Alias → Deterministic → Pinyin → Fuzzy` | 保守 Apply，多 Suggest |
+| 文档审计/人工审核 | 全量 Processor | 启用全部 Processor，建议仅 Suggest |
+| 客服工单 | `Normalize → Alias → Deterministic` | Apply + Suggest |
+| 日志规范化 | `Normalize → Alias → Deterministic` | 以 Apply 为主 |
+
+> 以上仅为参考。业务方可以在内置 Preset 基础上追加自定义 Processor（例如领域 Context、OCR 形近字等），或通过 `Config` 调整阈值。
+
+---
+
 ## 安装
 
 ```bash

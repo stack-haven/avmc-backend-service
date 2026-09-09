@@ -1,0 +1,602 @@
+{
+  "version": "system-2025-09-08",
+  "source": "manual-curated-asr-typos",
+  "entries": [
+    {
+      "id": "term-pptmoban",
+      "text": "PPT模板",
+      "pinyin": "mo ban",
+      "variants": [
+        {
+          "text": "PPT模版",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "tool",
+        "freq": 0,
+        "variant_count": 1
+      }
+    },
+    {
+      "id": "term-zhongbiao",
+      "text": "中标",
+      "pinyin": "zhong biao",
+      "variants": [
+        {
+          "text": "重标",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "终标",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "中镖",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "中表",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "project",
+        "freq": 4,
+        "variant_count": 4
+      }
+    },
+    {
+      "id": "term-gongyingshang",
+      "text": "供应商",
+      "pinyin": "gong ying shang",
+      "variants": [
+        {
+          "text": "共应商",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "供应伤",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "供应上",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "project",
+        "freq": 1,
+        "variant_count": 3
+      }
+    },
+    {
+      "id": "term-shijianka",
+      "text": "实践卡",
+      "pinyin": "shi jian qia",
+      "variants": [
+        {
+          "text": "时间卡",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "实践咖",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "十件卡",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "course",
+        "freq": 1,
+        "variant_count": 3
+      }
+    },
+    {
+      "id": "term-bangzhu",
+      "text": "帮助",
+      "pinyin": "bang zhu",
+      "variants": [
+        {
+          "text": "邦助",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "棒助",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "action",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-zhixing",
+      "text": "执行",
+      "pinyin": "zhi xing",
+      "variants": [
+        {
+          "text": "指行",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "至行",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "知行",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "phase",
+        "freq": 2,
+        "variant_count": 3
+      }
+    },
+    {
+      "id": "term-zhuizong",
+      "text": "抓取",
+      "pinyin": "zhua qu",
+      "variants": [
+        {
+          "text": "抓曲",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "抓趣",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "phase",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-zhaobiaotoubiao",
+      "text": "招投标",
+      "pinyin": "zhao tou biao",
+      "variants": [
+        {
+          "text": "投招标",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "召标投",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "招表投",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "project",
+        "freq": 1,
+        "variant_count": 3
+      }
+    },
+    {
+      "id": "term-bozhong",
+      "text": "播种",
+      "pinyin": "bo zhong",
+      "variants": [
+        {
+          "text": "拨种",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "博种",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "搏种",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "播种类",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "course",
+        "freq": 3,
+        "variant_count": 4
+      }
+    },
+    {
+      "id": "term-mingxi",
+      "text": "明细",
+      "pinyin": "ming xi",
+      "variants": [
+        {
+          "text": "名细",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "命细",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "data",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-biaoshu",
+      "text": "标书",
+      "pinyin": "biao shu",
+      "variants": [
+        {
+          "text": "表书",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "镖书",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "tool",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-wuliao",
+      "text": "物料",
+      "pinyin": "wu liang",
+      "variants": [
+        {
+          "text": "无料",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "悟料",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "data",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-kehuduanshangxufei",
+      "text": "续费",
+      "pinyin": "xu fei",
+      "variants": [
+        {
+          "text": "需费",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "叙费",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "tool",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-zhongliuyuanyi",
+      "text": "肿瘤医院",
+      "pinyin": "zhong liu yi yuan",
+      "variants": [
+        {
+          "text": "中流医院",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "org",
+        "freq": 4,
+        "variant_count": 1
+      }
+    },
+    {
+      "id": "term-shipinzhanghao",
+      "text": "视频账号",
+      "pinyin": "shi pin zhang hao",
+      "variants": [
+        {
+          "text": "视屏账号",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "视频帐号",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "tool",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-ruanjian",
+      "text": "软件",
+      "pinyin": "ruan jian",
+      "variants": [
+        {
+          "text": "软见",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "软减",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "软健",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "tool",
+        "freq": 2,
+        "variant_count": 3
+      }
+    },
+    {
+      "id": "term-peihe",
+      "text": "配合",
+      "pinyin": "pei he",
+      "variants": [
+        {
+          "text": "配和",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "佩合",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "action",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-jinzhongzi",
+      "text": "金种籽",
+      "pinyin": "jin zhong zi",
+      "variants": [
+        {
+          "text": "金种仔",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "金种子",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "金钟子",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "金种资",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "紧种子",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "reward",
+        "freq": 0,
+        "variant_count": 5
+      }
+    },
+    {
+      "id": "term-kejinzhongzi",
+      "text": "颗金种籽",
+      "pinyin": "ke jin zhong zi",
+      "variants": [
+        {
+          "text": "克金种子",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "reward",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-jieduan",
+      "text": "阶段",
+      "pinyin": "jie duan",
+      "variants": [
+        {
+          "text": "截断",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        },
+        {
+          "text": "节段",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "phase",
+        "freq": 1,
+        "variant_count": 2
+      }
+    },
+    {
+      "id": "term-heizhongzi",
+      "text": "黑种籽",
+      "pinyin": "hei zhong zi",
+      "variants": [
+        {
+          "text": "黑种仔",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "黑种子",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "黑钟子",
+          "kind": "approximate",
+          "confidence": 0.95,
+          "source": "manual-asr"
+        },
+        {
+          "text": "菌种子",
+          "kind": "approximate",
+          "confidence": 0.7,
+          "source": "manual-asr"
+        },
+        {
+          "text": "嘿种子",
+          "kind": "approximate",
+          "confidence": 0.85,
+          "source": "manual-asr"
+        }
+      ],
+      "meta": {
+        "category": "reward",
+        "freq": 0,
+        "variant_count": 5
+      }
+    }
+  ],
+  "meta": {
+    "mined_from": [
+      "text1",
+      "text2"
+    ],
+    "pipeline": {
+      "max_changes": 50,
+      "processors": [
+        "normalize",
+        "disfluency",
+        "alias",
+        "fuzzy"
+      ],
+      "thresholds": {
+        "alias_auto": 0.95,
+        "fuzzy_auto": 0.85,
+        "fuzzy_suggest": 0.7
+      }
+    }
+  }
+}
