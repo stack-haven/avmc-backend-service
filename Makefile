@@ -101,6 +101,17 @@ check: fmt-check lint
 http-convention-check:
 	@./scripts/check-http-path-convention.sh
 
+.PHONY: coverage
+# generate a coverage report and compare with the gates in docs/architecture/4-5 §二
+# does NOT block PRs by default; integration into CI quality gate is decided per release
+coverage:
+	@./scripts/check-coverage.sh
+
+.PHONY: import-boundary-check
+# verify the service → biz → data dependency direction (see .agents/RULES.md §依赖方向硬规则)
+import-boundary-check:
+	@./scripts/check-import-boundaries.sh
+
 .PHONY: race
 # run race detection for global backend packages
 race:

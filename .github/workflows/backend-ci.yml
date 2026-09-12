@@ -38,6 +38,12 @@ jobs:
       - name: Verify generated files
         run: make generate-check
 
+      - name: Verify import boundaries (service → biz → data)
+        run: make import-boundary-check
+
+      - name: Verify HTTP path convention (AIP-136)
+        run: make http-convention-check
+
       - name: Run focused race detection
         run: make race
 
@@ -48,8 +54,9 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - ./app/platform/admin/cmd/server
-          - ./app/platform/ai/cmd/server
+          - ./app/platform/service/cmd/server
+          - ./app/ai/service/cmd/server
+          - ./app/evie/service/cmd/server
           - ./app/version/service/cmd/server
 
     steps:
