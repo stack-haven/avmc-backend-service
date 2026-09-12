@@ -135,6 +135,6 @@ go test -tags=integration ./internal/data/ -run TestEntPrivacy
 ## 更多参考
 
 - 架构全景：[`docs/architecture/0-0-架构总览-架构总览.md`](../../../docs/architecture/0-0-架构总览-架构总览.md)
-- 开发规范：[`docs/vibe-coding/backend/README.md`](../../../docs/vibe-coding/backend/README.md)
+- 开发规范：[`.agents/RULES.md` §项目特有约定（后端）](../../../.agents/RULES.md) + [`.agents/skills/avmc-contract-first-backend`](../../../.agents/skills/avmc-contract-first-backend/SKILL.md)
 - Kratos 分层：[`docs/architecture/0-2-架构总览-技术栈与工程基线.md`](../../../docs/architecture/0-2-架构总览-技术栈与工程基线.md)
 - 测试策略：[`docs/architecture/4-5-治理-测试策略.md`](../../../docs/architecture/4-5-治理-测试策略.md)
