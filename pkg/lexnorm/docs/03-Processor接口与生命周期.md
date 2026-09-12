@@ -180,16 +180,16 @@ pipeline := lexnorm.NewPipeline(
 | 要求 | 说明 |
 |---|---|
 | 子包提供 `New(...)` 构造函数 | 不依赖 Engine / Pipeline / Registry |
-| 子包可单独 import | `import "github.com/stack-haven/lexnorm/processor/clean"` 即可使用 |
+| 子包可单独 import | `import "github.com/stack-haven/lexnorm/processor/alias"` 即可使用 |
 | 子包自带测试 | 不强制启动完整 Engine |
 
 ### 推荐子包结构
 
 ```text
-processor/clean/
-├── clean.go         # Processor 实现 + New()
-├── clean_test.go    # 单 Processor 测试
-└── doc.go           # 包级文档
+processor/alias/
+├── alias.go         # Processor 实现 + New() + Descriptor
+├── alias_test.go    # 单 Processor 测试（独立于 Engine）
+└── fuzz 覆盖        # FuzzAlias 等可选
 ```
 
 ---
@@ -291,3 +291,39 @@ return &lexnorm.ProcessorError{
 - 错误：[10-配置校验与错误体系](10-配置校验与错误体系.md)
 - 测试：[15-测试策略与质量工程](15-测试策略与质量工程.md) §2
 - Processor Version 1.1 新增 / 1.2 采纳，详见 `01-架构总览与包结构.md`
+
+
+---
+
+## 12. v1.1 变更同步（2026-09，Processor 体系规范化）
+
+> 本节同步代码现状；上文保留为 1.2 基线描述。
+
+### 12.1 新增可选接口（接口仍然极简，两方法冻结不变）
+
+```go
+// 高级 Processor 可自愿实现，向 Registry/审计/文档声明能力元数据。
+type DescribedProcessor interface {
+    Processor
+    Descriptor() Descriptor
+}
+```
+
+`Descriptor` 在 v1.1 追加了可选能力字段：`Version / Category / MutatesText /
+SupportsSuggest / SupportsProtected / Deterministic / Determinism /
+DefaultOrder / Description`（零值 = 未声明；既有带键字面量构造完全兼容）。
+
+### 12.2 元数据读取带回退
+
+```go
+d, fullyDeclared := lexnorm.DescriptorOf(proc)
+```
+
+解析顺序：`DescribedProcessor` → 从 `Versioner` / `CertaintyReporter` 合成部分
+元数据（fullyDeclared=false）→ 兜底空值。第三方旧 Processor 不实现任何新接口也
+不会报错。
+
+### 12.3 内置处理器均已声明完整 Descriptor
+
+八个内置处理器的 Category 归属与默认次序见 `docs/processor.md` §3，
+由 `classification_test.go` 持续断言。

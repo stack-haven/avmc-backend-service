@@ -63,8 +63,11 @@ package ctxproc
 import (
 	"context"
 	"encoding/json"
+	"sort"
+	"strings"
 
 	"github.com/stack-haven/lexnorm"
+	"github.com/stack-haven/lexnorm/lexicon"
 )
 
 const (
@@ -75,16 +78,110 @@ const (
 	Version = "v1"
 )
 
-// Processor is the default (no-op) Context Processor.
-//
-// The default implementation performs no text modifications. Replace
-// this Processor with a custom one (or wrap it via Middleware / Hook)
-// to add real context-aware logic.
-type Processor struct{}
+// Candidate is one contextual resolution candidate: a surface form
+// (Variant{Contextual}.Text) that may resolve to a canonical entry.
+type Candidate struct {
+	// EntryID of the canonical form.
+	EntryID lexicon.EntryID
 
-// New returns a new Context Processor.
-func New() *Processor {
-	return &Processor{}
+	// Canonical text this candidate would replace the surface form with.
+	Canonical string
+
+	// Confidence declared on the Variant{Contextual}.
+	Confidence float64
+}
+
+// Scorer re-ranks contextual candidates for one surface occurrence.
+//
+// Application code implements scoring using surrounding context (the
+// full original text and the match position). Returning an empty slice
+// or fewer candidates than received prunes the list. A nil Scorer
+// keeps declaration order (lexicon ID order).
+type Scorer func(ctx context.Context, original string, start, end int, cands []Candidate) []Candidate
+
+// Processor is the Contextual Correction Processor.
+//
+// It scans the text for Variant{Contextual} forms. These are surface
+// forms whose canonical target depends on context (e.g., the same
+// nickname mapped to different people). Resolution policy:
+//
+//   - exactly one candidate → Suggest (never applied in v1)
+//   - multiple candidates   → run the Scorer; if a unique best remains
+//     → Suggest; otherwise → Skip
+//
+// v1 deliberately never calls State.Replace: contextual resolution is
+// heuristic, and the spec requires uncertainty to degrade to Suggest
+// or Skip.
+type Processor struct {
+	lex      lexicon.Lexicon
+	matcher  *lexicon.Matcher
+	candsFor map[string][]Candidate // surface form → candidates
+	scorer   Scorer
+}
+
+// New returns a no-op Context Processor (kept for backward
+// compatibility). Use NewWithLexicon for the functional implementation.
+func New() *Processor { return &Processor{} }
+
+// NewWithLexicon constructs a functional Contextual Processor from the
+// given Lexicon. If lex is nil, the Processor is a no-op.
+func NewWithLexicon(lex lexicon.Lexicon) *Processor {
+	p := &Processor{lex: lex}
+	if lex == nil {
+		return p
+	}
+	candsFor := make(map[string][]Candidate)
+	var patterns []string
+	seen := make(map[string]bool)
+
+	lex.All(func(e lexicon.Entry) bool {
+		for _, v := range e.Variants {
+			if v.Kind != lexicon.VariantContextual {
+				continue
+			}
+			if !v.IsValid() || v.Text == e.Text {
+				continue
+			}
+			if strings.Contains(e.Text, v.Text) {
+				continue // would corrupt; also rejected by Builder.Validate
+			}
+			if !seen[v.Text] {
+				seen[v.Text] = true
+				patterns = append(patterns, v.Text)
+			}
+			conf := v.Confidence
+			if conf == 0 {
+				conf = 0.7 // default: above Suggest, below AutoApply
+			}
+			candsFor[v.Text] = append(candsFor[v.Text], Candidate{
+				EntryID:    e.ID,
+				Canonical:  e.Text,
+				Confidence: conf,
+			})
+		}
+		return true
+	})
+
+	if len(patterns) == 0 {
+		return p
+	}
+	// Deterministic candidate order (lexicon iteration is already
+	// ID-sorted; keep it explicit for stability under scorer pruning).
+	for k := range candsFor {
+		c := candsFor[k]
+		sort.Slice(c, func(i, j int) bool { return c[i].EntryID < c[j].EntryID })
+		candsFor[k] = c
+	}
+	p.matcher = lexicon.NewMatcher(patterns)
+	p.candsFor = candsFor
+	return p
+}
+
+// WithScorer attaches a custom candidate scorer. Returns the Processor
+// for chaining.
+func (p *Processor) WithScorer(sc Scorer) *Processor {
+	p.scorer = sc
+	return p
 }
 
 // Name implements lexnorm.Processor.
@@ -95,22 +192,53 @@ func (p *Processor) Version() string { return Version }
 
 // Certainty implements lexnorm.CertaintyReporter.
 //
-// Context is low-certainty by design: it operates on Suggestions
-// from upstream Processors and may further reduce confidence.
+// Context is low-certainty by design: it operates on context-dependent
+// candidates.
 func (p *Processor) Certainty() lexnorm.Certainty { return lexnorm.CertaintyLow }
 
-// Process is a no-op in the default implementation.
+// Process implements lexnorm.Processor.
 //
-// It does not modify the State; the State passes through unchanged.
-// Application code should provide a custom implementation for real
-// context-aware disambiguation.
-func (p *Processor) Process(_ context.Context, _ *lexnorm.State) error {
+// Scans Original for Variant{Contextual} forms and records Suggestions
+// for uniquely resolvable ones. Never applies changes in v1.
+func (p *Processor) Process(ctx context.Context, s *lexnorm.State) error {
+	if p.matcher == nil {
+		return nil
+	}
+	for _, m := range p.matcher.Match(s.Original()) {
+		cands, ok := p.candsFor[m.Pattern]
+		if !ok || len(cands) == 0 {
+			continue
+		}
+		if len(cands) > 1 && p.scorer != nil {
+			cands = p.scorer(ctx, s.Original(), m.Start, m.End, cands)
+		}
+		if len(cands) != 1 {
+			// Ambiguous even after scoring → Skip (spec: 无法确定时
+			// Suggest 或 Skip; multi-candidate ambiguity is Skip).
+			continue
+		}
+		best := cands[0]
+		_ = s.Suggest(
+			lexnorm.Span{Start: m.Start, End: m.End},
+			best.Canonical,
+			lexnorm.ChangeMeta{
+				Source:     Name,
+				Confidence: best.Confidence,
+				RuleID:     "contextual",
+				EntryID:    string(best.EntryID),
+				Reason:     "contextual resolution: " + m.Pattern + " → " + best.Canonical,
+			},
+		)
+	}
 	return nil
 }
 
-// Descriptor is the Registry Descriptor for the default no-op Context
-// Processor. Application code should provide a custom Descriptor
-// pointing to a real LLM / ML / rule-based Processor.
+// Descriptor is the Registry Descriptor for this Processor.
+//
+// NewWithLexicon is not reachable via the Registry's config-based New
+// (the Lexicon is injected by the Engine, not by JSON config); the
+// Descriptor therefore constructs the no-op variant, mirroring the
+// other Lexicon-bound processors.
 var Descriptor = lexnorm.Descriptor{
 	Name:      Name,
 	Certainty: lexnorm.CertaintyLow,
@@ -118,4 +246,19 @@ var Descriptor = lexnorm.Descriptor{
 		return New(), nil
 	},
 	Default: func() any { return nil },
+
+	Version:           Version,
+	Category:          lexnorm.CategoryContextual,
+	MutatesText:       false,
+	SupportsSuggest:   true,
+	SupportsProtected: false,
+	Deterministic:     true,
+	Determinism:       lexnorm.DeterministicTrue,
+	DefaultOrder:      7,
+	Description:       "Contextual disambiguation over Variant{Contextual} forms; v1 suggests, never applies.",
 }
+
+// Descriptor implements lexnorm.DescribedProcessor: it exposes the
+// capability metadata of this Processor (category, mutation mode,
+// determinism) for Registry queries, audit tooling, and docs.
+func (p *Processor) Descriptor() lexnorm.Descriptor { return Descriptor }

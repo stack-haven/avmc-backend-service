@@ -11,6 +11,39 @@
 
 ### Status
 
+- 🚀 **Processor 体系规范化 v1.1** — Complete (2026-09)
+
+#### Added
+
+- **Processor 正式分类**：`Category` + 八大分类常量（normalization/noise/canonicalization/deterministic/phonetic/approximate/contextual/semantic），`Category.DefaultOrder()` 对应默认管线次序。
+- **能力元数据层**：`Descriptor` 追加可选字段（Version/Category/MutatesText/SupportsSuggest/SupportsProtected/Deterministic/Determinism/DefaultOrder/Description）；新增 `DescribedProcessor` 可选接口与 `DescriptorOf()` 回退读取；`Descriptor.Mutation()` 维度视图。全部带键字面量构造兼容。
+- **可观测性**：`StepTiming` 增加 `Category` / `Deterministic`；`RuntimeInfo` 增加 `ProcessorCategories`。
+- **Phonetic 整词路径**（修复缺陷清单 D-2）：`processor/pinyin` 消费 `Variant{Homophone}.Text`（整词 Aho-Corasick）；逐字路径仅索引单字 entry，杜绝"1 字 span 换整词"的文本损坏。
+- **词库卫生校验**：`lexicon.Builder.Validate()` 拒绝①空 canonical、②variant 为 canonical 子串（D-1）、③variant 撞其他条目 canonical、④跨条目重复 variant；`Build()` 保持宽容（兼容优先）。
+- **Contextual v1**：`processor/ctxproc.NewWithLexicon` 消费 `Variant{Contextual}`（新增 `lexicon.VariantContextual`），支持注入 `Scorer` 候选排序；v1 只 Suggest 不 Apply。
+- **Pipeline 组合助手**：`AppendProcessor` / `ReplaceProcessor` / `RemoveProcessor`（返回新 Pipeline，不可变语义不变）。
+- **测试**：分类/Descriptor/Pipeline/独立运行/Protected Span/Failure（panic）/Determinism 专项用例；golden 行为基线（`testdata/golden/`，27 件）。
+
+#### Changed（行为变更，均有逃生门或基线评审）
+
+- **Noise 安全策略**（spec 明文反例）：默认填充词表拆两级——单字叹词（呃/嗯/啊/哦/诶）无条件删除；多字歧义词（那个/这个/然后/就是说/其实/反正/你知道）仅在独立出现（两侧为边界）时删除。旧行为可用 `disfluency.WithAggressiveFillers()` 完整恢复。
+- **重复词/短语检测**：连续重复字符/短语折叠以 **Suggest** 呈现（默认不改文本，规避"哈哈哈哈"类误折叠）。
+- **填充词删除吸附一个相邻空格**：消除双空格输出（normalize 先行时）。
+- **alias 置信度真实化**：Change 记录 variant 声明的置信度（未设置视为 1.0）；Apply 行为不变。
+- **重复 variant 文本在匹配器构建时去重**：赢家为 ID 序第一条（文档化）；消除同 span 双重审计记录。
+- **normalize 防损坏**：检测到 State 已被前序处理器修改时改走 `Rewrite()` 整段回写（修复乱序管线下的 UTF-8 截断损坏）；跳过 identity 替换（不再产生 `" "→" "` 幽灵审计记录）。
+- **Processor panic 默认降级**：Engine 内建 recover → `StatusFailed` + error（`Result.Original` 恒保留）；`Recover()` Middleware 保留供自定义日志。
+- **`State.Replace` 拒绝"包含已替换区间"的新替换**（同 span 幂等覆盖仍允许），防止幻影审计。
+- **presets**：`ASR()`/`OCR()` 标记 Deprecated（保留原名与新行为一致）；新增中性命名 `Transcripts()` / `ScannedText()`。Standard/HighAccuracy 预设的 Context 处理器启用 `ctxproc.NewWithLexicon`。
+- example/09 数据卫生修复（dept.json 子串 variant ×4、user.json 田花歧义 alias）；stress test 管线补入 pinyin processor；**pass rate 84.3% → 94.1%（48 PASS / 0 FAIL / 3 KNOWN_DEFECT）**。
+
+#### Deprecated
+
+- `presets.ASR()` → 使用 `presets.Transcripts()`（预设名仍为 "asr"，兼容）。
+- `presets.OCR()` → 使用 `presets.ScannedText()`（预设名仍为 "ocr"，兼容）。
+
+### Status (v1.1 之前的历史)
+
 - 📚 **Documentation Phase** — Complete
 - ✅ **M1 (Project Skeleton)** — Complete (2024-09-04)
 - ✅ **M2 (Value Objects)** — Complete (2024-09-04)

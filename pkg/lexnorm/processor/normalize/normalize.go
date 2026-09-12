@@ -88,6 +88,17 @@ func (p *Processor) Certainty() lexnorm.Certainty { return lexnorm.CertaintyHigh
 // Performs per-position replacements (whitespace collapse, control
 // char removal, fullwidth → halfwidth) so that Original byte offsets
 // of meaningful content remain stable for downstream Processors.
+//
+// # Position Requirement
+//
+// Per-position edits are emitted in Original byte coordinates. This is
+// only valid while Original and current Text still align. If earlier
+// Processors already mutated the State (MutationCount() > 0), the
+// Processor falls back to a whole-text Rewrite — the State API designed
+// for pre-processing steps — so that downstream Processors keep valid
+// Original-relative Spans. Normalizing first in the Pipeline therefore
+// remains strongly recommended: it yields the finest-grained Change
+// audit.
 func (p *Processor) Process(_ context.Context, s *lexnorm.State) error {
 	if s.Text() == "" {
 		return nil
@@ -97,6 +108,18 @@ func (p *Processor) Process(_ context.Context, s *lexnorm.State) error {
 		Source:     Name,
 		Confidence: 1.0,
 		Reason:     "whitespace and full-width normalization",
+	}
+
+	// Fallback path: the State was already mutated by an earlier
+	// Processor, so current-Text byte offsets no longer correspond to
+	// Original coordinates. Rewriting wholesale keeps the output
+	// correct without corrupting downstream span accounting.
+	if s.MutationCount() > 0 {
+		normalized := normalizeText(s.Text(), p.fullWidthToHalf)
+		if normalized == s.Text() {
+			return nil
+		}
+		return s.Rewrite(normalized, meta)
 	}
 
 	type edit struct {
@@ -163,6 +186,13 @@ func (p *Processor) Process(_ context.Context, s *lexnorm.State) error {
 		e := edits[j]
 		if e.to == "" && e.start == e.end {
 			continue // no-op
+		}
+		// Skip identity edits (e.g., a single space rewritten to a
+		// single space): recording them would pollute the audit trail
+		// with "no-change" Changes and create replacement records that
+		// block downstream processors from editing across those spans.
+		if e.end-e.start == len(e.to) && text[e.start:e.end] == e.to {
+			continue
 		}
 		if err := s.Replace(lexnorm.Span{Start: e.start, End: e.end}, e.to, meta); err != nil {
 			return err
@@ -241,4 +271,19 @@ var Descriptor = lexnorm.Descriptor{
 		return New(), nil
 	},
 	Default: func() any { return nil },
+
+	Version:           Version,
+	Category:          lexnorm.CategoryNormalization,
+	MutatesText:       true,
+	SupportsSuggest:   false,
+	SupportsProtected: true,
+	Deterministic:     true,
+	Determinism:       lexnorm.DeterministicTrue,
+	DefaultOrder:      1,
+	Description:       "Unify base text representation: whitespace, control characters, fullwidth/halfwidth.",
 }
+
+// Descriptor implements lexnorm.DescribedProcessor: it exposes the
+// capability metadata of this Processor (category, mutation mode,
+// determinism) for Registry queries, audit tooling, and docs.
+func (p *Processor) Descriptor() lexnorm.Descriptor { return Descriptor }

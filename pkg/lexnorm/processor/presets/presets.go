@@ -73,7 +73,7 @@ func Standard(lex lexicon.Lexicon, conv lexicon.PinyinConverter) *lexnorm.Preset
 		deterministic.New(lex),
 		pinyin.New(lex, conv),
 		fuzzy.New(lex),
-		ctxproc.New(),
+		ctxproc.NewWithLexicon(lex),
 	)
 	return lexnorm.NewPreset(
 		"standard",
@@ -131,27 +131,57 @@ func Fast(lex lexicon.Lexicon) *lexnorm.Preset {
 	)
 }
 
-// ASR returns a Pipeline tuned for ASR transcript correction.
+// Transcripts returns a Pipeline tuned for speech-transcript
+// correction.
 //
 // Pipeline:
 //
 //	Normalize → Disfluency → Alias → Pinyin
 //
 // Emphasizes disfluency removal (filler words) and homophone matching,
-// which are the dominant error classes for ASR output.
+// which are the dominant error classes for speech transcripts.
+func Transcripts(lex lexicon.Lexicon, conv lexicon.PinyinConverter) *lexnorm.Preset {
+	return newTranscriptsPreset(lex, conv, "transcripts",
+		"Pipeline tuned for speech transcripts (Disfluency + Pinyin emphasis)")
+}
+
+// ASR returns a Pipeline tuned for ASR transcript correction.
+//
+// Pipeline:
+//
+//	Normalize → Disfluency → Alias → Pinyin
+//
+// Deprecated: ASR is a business-specific term; the core API must stay
+// business-neutral. Use Transcripts instead (same pipeline shape; the
+// preset name remains "asr" for compatibility). ASR will be removed in
+// a future major version.
 func ASR(lex lexicon.Lexicon, conv lexicon.PinyinConverter) *lexnorm.Preset {
+	return newTranscriptsPreset(lex, conv, "asr",
+		"Pipeline tuned for ASR transcripts (Disfluency + Pinyin emphasis)")
+}
+
+func newTranscriptsPreset(lex lexicon.Lexicon, conv lexicon.PinyinConverter, name, desc string) *lexnorm.Preset {
 	p := lexnorm.NewPipeline(
 		normalize.New(),
 		disfluency.New(),
 		alias.New(lex),
 		pinyin.New(lex, conv),
 	)
-	return lexnorm.NewPreset(
-		"asr",
-		"Pipeline tuned for ASR transcripts (Disfluency + Pinyin emphasis)",
-		p,
-		lexnorm.DefaultConfig(),
-	)
+	return lexnorm.NewPreset(name, desc, p, lexnorm.DefaultConfig())
+}
+
+// ScannedText returns a Pipeline tuned for scanned-document text
+// correction.
+//
+// Pipeline:
+//
+//	Normalize → Alias → Deterministic
+//
+// Emphasizes alias / deterministic correction (typos introduced by
+// document scanning), without phonetic or approximate matching.
+func ScannedText(lex lexicon.Lexicon) *lexnorm.Preset {
+	return newScannedTextPreset(lex, "scanned-text",
+		"Pipeline tuned for scanned text (Alias + Deterministic emphasis)")
 }
 
 // OCR returns a Pipeline tuned for OCR text correction.
@@ -160,18 +190,20 @@ func ASR(lex lexicon.Lexicon, conv lexicon.PinyinConverter) *lexnorm.Preset {
 //
 //	Normalize → Alias → Deterministic
 //
-// Emphasizes alias / deterministic correction (typos introduced by
-// OCR), without pinyin or fuzzy (which assume ASR-like patterns).
+// Deprecated: OCR is a business-specific term; the core API must stay
+// business-neutral. Use ScannedText instead (same pipeline shape; the
+// preset name remains "ocr" for compatibility). OCR will be removed in
+// a future major version.
 func OCR(lex lexicon.Lexicon) *lexnorm.Preset {
+	return newScannedTextPreset(lex, "ocr",
+		"Pipeline tuned for OCR text (Alias + Deterministic emphasis)")
+}
+
+func newScannedTextPreset(lex lexicon.Lexicon, name, desc string) *lexnorm.Preset {
 	p := lexnorm.NewPipeline(
 		normalize.New(),
 		alias.New(lex),
 		deterministic.New(lex),
 	)
-	return lexnorm.NewPreset(
-		"ocr",
-		"Pipeline tuned for OCR text (Alias + Deterministic emphasis)",
-		p,
-		lexnorm.DefaultConfig(),
-	)
+	return lexnorm.NewPreset(name, desc, p, lexnorm.DefaultConfig())
 }

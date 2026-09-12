@@ -1,0 +1,6 @@
+text: "田华和周丽群都来了,金种籽也在"
+status: success
+change: "，"->"," span=27:30 src=normalize conf=1.00 applied=true
+change: "田工"->"田华" span=0:6 src=alias conf=0.90 applied=true
+change: "金种仔"->"金种籽" span=30:39 src=deterministic conf=1.00 applied=true
+change: "周莉群"->"周丽群" span=9:18 src=fuzzy conf=0.95 applied=true

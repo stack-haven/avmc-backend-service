@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stack-haven/lexnorm"
+	"github.com/stack-haven/lexnorm/lexicon"
 	"github.com/stack-haven/lexnorm/processor/ctxproc"
 )
 
@@ -188,4 +189,111 @@ func newStateB(b *testing.B, text string) *lexnorm.State {
 		b.Fatalf("NewState: %v", err)
 	}
 	return s
+}
+
+// --- Contextual v1 (NewWithLexicon / WithScorer / Suggest-only) ---
+
+func TestContextual_UniqueCandidate_SuggestsNeverApplies(t *testing.T) {
+	lex := mustLexicon(t, []lexicon.Entry{{
+		ID: "e-gong", Text: "龚建军",
+		Variants: []lexicon.Variant{{Text: "建军工", Kind: lexicon.VariantContextual, Confidence: 0.8}},
+	}})
+	p := ctxproc.NewWithLexicon(lex)
+	st, err := lexnorm.NewState(context.Background(), "让建军工来评审", lex, lexnorm.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Process(context.Background(), st); err != nil {
+		t.Fatal(err)
+	}
+	if st.Text() != "让建军工来评审" {
+		t.Fatalf("contextual v1 must never apply: %q", st.Text())
+	}
+	sugg := st.Changes()
+	if len(sugg) != 1 || sugg[0].To != "龚建军" || sugg[0].Applied {
+		t.Fatalf("suggestions = %+v", sugg)
+	}
+}
+
+func TestContextual_AmbiguousSkipsAndScorerResolves(t *testing.T) {
+	entries := []lexicon.Entry{
+		{ID: "e1", Text: "龚千友",
+			Variants: []lexicon.Variant{{Text: "龚工", Kind: lexicon.VariantContextual, Confidence: 0.8}}},
+		{ID: "e2", Text: "龚建军",
+			Variants: []lexicon.Variant{{Text: "龚工", Kind: lexicon.VariantContextual, Confidence: 0.8}}},
+	}
+	lex := mustLexicon(t, entries)
+
+	// Ambiguous without a scorer → Skip.
+	p := ctxproc.NewWithLexicon(lex)
+	st, _ := lexnorm.NewState(context.Background(), "龚工来了", lex, lexnorm.DefaultConfig())
+	if err := p.Process(context.Background(), st); err != nil {
+		t.Fatal(err)
+	}
+	if len(st.Changes()) != 0 {
+		t.Fatalf("ambiguous must skip, changes = %+v", st.Changes())
+	}
+
+	// Scorer prunes to one → Suggest.
+	p2 := ctxproc.NewWithLexicon(lex).WithScorer(func(_ context.Context, _ string, _, _ int, cands []ctxproc.Candidate) []ctxproc.Candidate {
+		out := cands[:0]
+		for _, c := range cands {
+			if c.EntryID == "e2" {
+				out = append(out, c)
+			}
+		}
+		return out
+	})
+	st2, _ := lexnorm.NewState(context.Background(), "龚工来了", lex, lexnorm.DefaultConfig())
+	if err := p2.Process(context.Background(), st2); err != nil {
+		t.Fatal(err)
+	}
+	if len(st2.Changes()) != 1 || st2.Changes()[0].To != "龚建军" {
+		t.Fatalf("scorer suggestions = %+v", st2.Changes())
+	}
+}
+
+func TestContextual_SubstringVariantSkipped(t *testing.T) {
+	lex := mustLexicon(t, []lexicon.Entry{{
+		ID: "e1", Text: "万康盛鼎集团",
+		Variants: []lexicon.Variant{{Text: "万康盛鼎", Kind: lexicon.VariantContextual, Confidence: 0.9}},
+	}})
+	p := ctxproc.NewWithLexicon(lex)
+	st, _ := lexnorm.NewState(context.Background(), "万康盛鼎集团开会", lex, lexnorm.DefaultConfig())
+	if err := p.Process(context.Background(), st); err != nil {
+		t.Fatal(err)
+	}
+	if len(st.Changes()) != 0 {
+		t.Fatalf("substring variant must be skipped, changes = %+v", st.Changes())
+	}
+}
+
+func TestContextual_NilLexiconNoOp(t *testing.T) {
+	p := ctxproc.NewWithLexicon(nil)
+	st, _ := lexnorm.NewState(context.Background(), "任意文本", nil, lexnorm.DefaultConfig())
+	if err := p.Process(context.Background(), st); err != nil {
+		t.Fatal(err)
+	}
+	if len(st.Changes()) != 0 {
+		t.Fatal("nil lexicon must be a no-op")
+	}
+}
+
+func TestContextual_DescriptorMetadata(t *testing.T) {
+	d := ctxproc.New().Descriptor()
+	if d.Category != lexnorm.CategoryContextual || d.MutatesText {
+		t.Fatalf("descriptor = %+v", d)
+	}
+	if d.DefaultOrder != 7 || d.Determinism != lexnorm.DeterministicTrue {
+		t.Fatalf("descriptor = %+v", d)
+	}
+}
+
+func mustLexicon(t *testing.T, entries []lexicon.Entry) lexicon.Lexicon {
+	t.Helper()
+	lex, err := lexicon.NewBuilder().Add(entries...).Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return lex
 }

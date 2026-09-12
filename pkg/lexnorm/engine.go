@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"time"
 
 	"github.com/stack-haven/lexnorm/lexicon"
@@ -193,8 +194,12 @@ func (e *Engine) Normalize(ctx context.Context, text string, opts ...CallOption)
 	}
 	handler := chainMiddleware(inner, e.middleware...)
 
-	// 6. Execute.
-	procErr := handler(ctx, state)
+	// 6. Execute. A Processor panic is converted into an error so the
+	// caller gets a Result with the original text preserved (spec:
+	// Processor failure must not lose the input; degrade, not crash).
+	// The Recover() Middleware remains available for applications that
+	// want custom panic logging / metrics.
+	procErr, panicked := e.executeWithRecovery(handler, state)
 
 	// 7. Build Result.
 	result := e.buildResult(state, rt, procErr, startTime)
@@ -209,7 +214,14 @@ func (e *Engine) Normalize(ctx context.Context, text string, opts ...CallOption)
 		Duration: result.Duration,
 	})
 
-	// 9. Return.
+	// 9. Return. A recovered panic aborts the whole pipeline (unknown
+	// completion state), so it is surfaced as StatusFailed with the
+	// error returned — unlike per-Processor errors, which degrade to
+	// StatusPartial.
+	if panicked {
+		result.Status = StatusFailed
+		return result, procErr
+	}
 	if procErr != nil && result.Status == StatusFailed {
 		return result, procErr
 	}
@@ -308,6 +320,20 @@ func (e *Engine) resolveRuntime(ctx context.Context, cc callConfig) (*Runtime, e
 	return nil, fmt.Errorf("Engine has no profiles configured: %w", ErrRuntime)
 }
 
+// executeWithRecovery runs the middleware-wrapped Pipeline, converting
+// a Processor or Middleware panic into an error (wrapping ErrRuntime)
+// so Normalize returns a Result with Original preserved instead of
+// crashing the process.
+func (e *Engine) executeWithRecovery(handler Handler, s *State) (err error, panicked bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("lexnorm: panic recovered: %v\n%s: %w", r, debug.Stack(), ErrRuntime)
+			panicked = true
+		}
+	}()
+	return handler(s.Context(), s), false
+}
+
 // runProcessors executes each Processor in the Pipeline, collecting
 // per-step timings and errors.
 //
@@ -382,6 +408,10 @@ func (e *Engine) runProcessors(ctx context.Context, s *State, rt *Runtime) error
 		}
 		if v, ok := proc.(Versioner); ok {
 			timing.ProcessorVersion = v.Version()
+		}
+		if d, ok := DescriptorOf(proc); ok {
+			timing.Category = d.Category
+			timing.Deterministic = d.Deterministic
 		}
 		if err != nil {
 			timing.Error = err

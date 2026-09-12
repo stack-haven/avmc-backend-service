@@ -20,6 +20,12 @@
 
 ---
 
+## 导航层文档（v1.1 新增）
+
+- [architecture.md](architecture.md) — 架构总览与逐主题索引
+- [processor.md](processor.md) — Processor 体系正式规范（八大分类 / Descriptor / 组合规则）
+- [examples.md](examples.md) — 示例索引与关键片段
+
 ## 文档索引
 
 ### 规范文档（**权威 + 历史归档**）

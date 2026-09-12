@@ -17,6 +17,7 @@ package lexnorm
 import (
 	"context"
 	"errors"
+	"fmt"
 )
 
 // Pipeline composes Processors into an ordered execution chain.
@@ -129,6 +130,68 @@ func (p *pipeline) Processors() []Processor {
 	out := make([]Processor, len(p.processors))
 	copy(out, p.processors)
 	return out
+}
+
+// AppendProcessor returns a new Pipeline with proc appended after all
+// existing Processors. The receiver Pipeline is unmodified.
+func AppendProcessor(p Pipeline, proc Processor) Pipeline {
+	if p == nil {
+		return NewPipeline(proc)
+	}
+	return NewPipeline(append(p.Processors(), proc)...)
+}
+
+// ReplaceProcessor returns a new Pipeline in which the first Processor
+// whose Name() equals name is replaced by proc; all other Processors
+// keep their positions. The receiver Pipeline is unmodified.
+//
+// Returns an error wrapping ErrInvalidConfig when no Processor with
+// that name exists.
+func ReplaceProcessor(p Pipeline, name string, proc Processor) (Pipeline, error) {
+	if p == nil {
+		return nil, fmt.Errorf("nil pipeline: %w", ErrInvalidConfig)
+	}
+	old := p.Processors()
+	idx := -1
+	for i, existing := range old {
+		if existing.Name() == name {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return nil, fmt.Errorf("processor %q not in pipeline: %w", name, ErrInvalidConfig)
+	}
+	next := make([]Processor, len(old))
+	copy(next, old)
+	next[idx] = proc
+	return NewPipeline(next...), nil
+}
+
+// RemoveProcessor returns a new Pipeline without the first Processor
+// whose Name() equals name. The receiver Pipeline is unmodified.
+//
+// Returns an error wrapping ErrInvalidConfig when no Processor with
+// that name exists.
+func RemoveProcessor(p Pipeline, name string) (Pipeline, error) {
+	if p == nil {
+		return nil, fmt.Errorf("nil pipeline: %w", ErrInvalidConfig)
+	}
+	old := p.Processors()
+	idx := -1
+	for i, existing := range old {
+		if existing.Name() == name {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return nil, fmt.Errorf("processor %q not in pipeline: %w", name, ErrInvalidConfig)
+	}
+	next := make([]Processor, 0, len(old)-1)
+	next = append(next, old[:idx]...)
+	next = append(next, old[idx+1:]...)
+	return NewPipeline(next...), nil
 }
 
 // Version returns "" for the default Pipeline.

@@ -115,6 +115,59 @@ type CertaintyReporter interface {
 	Certainty() Certainty
 }
 
+// DescribedProcessor is an optional interface for Processors that carry
+// a full capability Descriptor (category, mutation, determinism, ...).
+//
+// DescribedProcessor is OPTIONAL. Ordinary Processors only need to
+// satisfy Processor; advanced Processors may additionally implement
+// DescribedProcessor to expose their capability metadata to Registry
+// queries, audit tooling, and documentation generation.
+//
+// # Compatibility
+//
+// The core Processor interface stays minimal (frozen v1.0). Capability
+// metadata is opt-in precisely so that third-party Processors are never
+// forced to implement extra methods. Use DescriptorOf to read metadata
+// with graceful fallback for plain Processors.
+type DescribedProcessor interface {
+	Processor
+
+	// Descriptor returns the Processor's capability metadata. The
+	// returned value should be a pure function of the Processor's
+	// static configuration (determinism invariant I9).
+	Descriptor() Descriptor
+}
+
+// DescriptorOf returns the capability Descriptor for a Processor.
+//
+// Resolution order:
+//
+//  1. If p implements DescribedProcessor, its Descriptor() is returned
+//     with ok=true (fully declared).
+//  2. Otherwise a partial Descriptor is synthesized from the optional
+//     Versioner / CertaintyReporter interfaces, with ok=false (declared:
+//     only what could be inferred).
+//
+// DescriptorOf never returns an error and never panics; it works for
+// any Processor, including third-party ones that predate the
+// capability metadata.
+func DescriptorOf(p Processor) (Descriptor, bool) {
+	if p == nil {
+		return Descriptor{}, false
+	}
+	if dp, ok := p.(DescribedProcessor); ok {
+		return dp.Descriptor(), true
+	}
+	d := Descriptor{Name: p.Name()}
+	if v, ok := p.(Versioner); ok {
+		d.Version = v.Version()
+	}
+	if c, ok := p.(CertaintyReporter); ok {
+		d.Certainty = c.Certainty()
+	}
+	return d, false
+}
+
 // ProcessorError wraps an error with the producing Processor's identity.
 //
 // ProcessorError is the standard error type returned by Processors when

@@ -12,9 +12,11 @@
 
 ## 当前阶段
 
-**文档阶段已完成，代码实施待启动。** 当前 M：M1（项目骨架）。
+**Processor 体系 v1.1 已落地**：八大分类（Category）+ 能力 Descriptor +
+DescribedProcessor + Contextual v1 + Builder.Validate + Noise 安全策略。
+规范入口：`docs/processor.md`；架构导航：`docs/architecture.md`；示例：`docs/examples.md`。
 
-详见 `docs/17-开发实施路线.md` §6。
+里程碑历史详见 `docs/17-开发实施路线.md` §6。
 
 ## 4 个核心决策（**D1-D4**，必记）
 

@@ -89,6 +89,7 @@ func New(lex lexicon.Lexicon) *Processor {
 	canonicalFor := make(map[string]string)
 	entryFor := make(map[string]lexicon.EntryID)
 	confidenceFor := make(map[string]float64)
+	seen := make(map[string]bool) // dedupe identical variant texts across entries
 
 	lex.All(func(e lexicon.Entry) bool {
 		for _, v := range e.Variants {
@@ -101,6 +102,14 @@ func New(lex lexicon.Lexicon) *Processor {
 			if v.Text == e.Text {
 				continue
 			}
+			// Dedupe: same variant text on multiple entries resolves
+			// deterministically to the FIRST entry in ID order; duplicate
+			// patterns would double-record identical Changes in the
+			// audit trail.
+			if seen[v.Text] {
+				continue
+			}
+			seen[v.Text] = true
 			patterns = append(patterns, v.Text)
 			canonicalFor[v.Text] = e.Text
 			entryFor[v.Text] = e.ID
@@ -176,4 +185,19 @@ var Descriptor = lexnorm.Descriptor{
 		return New(nil), nil
 	},
 	Default: func() any { return nil },
+
+	Version:           Version,
+	Category:          lexnorm.CategoryDeterministic,
+	MutatesText:       true,
+	SupportsSuggest:   false,
+	SupportsProtected: true,
+	Deterministic:     true,
+	Determinism:       lexnorm.DeterministicTrue,
+	DefaultOrder:      4,
+	Description:       "Correct explicit, stable error mappings sourced from lexicon entries.",
 }
+
+// Descriptor implements lexnorm.DescribedProcessor: it exposes the
+// capability metadata of this Processor (category, mutation mode,
+// determinism) for Registry queries, audit tooling, and docs.
+func (p *Processor) Descriptor() lexnorm.Descriptor { return Descriptor }

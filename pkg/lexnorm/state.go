@@ -54,6 +54,11 @@ type State struct {
 	// Original positions to current Text positions.
 	replacements []replacement
 
+	// rewrites counts Rewrite calls. Rewrite replaces the whole Text but
+	// does not add a replacement record; downstream Processors use
+	// MutationCount() to detect that Original offsets have shifted.
+	rewrites int
+
 	locked  *interval.Set
 	changes []Change
 	steps   []StepTiming // populated by Engine during runProcessors
@@ -132,6 +137,19 @@ func (s *State) Changes() []Change {
 	out := make([]Change, len(s.changes))
 	copy(out, s.changes)
 	return out
+}
+
+// MutationCount returns how many times the State's text has been
+// structurally modified: every Replace contributes one (including
+// same-span overrides) and every Rewrite contributes one.
+//
+// Processors that scan the current Text and emit Spans in current-text
+// coordinates (rather than matching against Original) MUST treat a
+// non-zero MutationCount as "Original byte offsets have shifted" and
+// use Rewrite instead of Replace. The built-in Normalize Processor
+// follows this rule.
+func (s *State) MutationCount() int {
+	return len(s.replacements) + s.rewrites
 }
 
 // Steps returns the per-Processor step timings populated by the Engine.
@@ -224,6 +242,26 @@ func (s *State) Replace(span Span, to string, meta ChangeMeta) error {
 		)
 	}
 
+	// Reject spans that strictly CONTAIN a previously replaced region.
+	// Such a replace would silently clobber the earlier change's effect
+	// while leaving its Change record applied (phantom audit entry).
+	// Replacing the exact same span remains allowed (documented
+	// idempotency: the second call overrides the first).
+	for _, r := range s.replacements {
+		if r.origStart >= span.End {
+			break // sorted by origStart: no further overlap possible
+		}
+		if r.origEnd > span.Start { // r overlaps [span.Start, span.End)
+			sameSpan := r.origStart == span.Start && r.origEnd == span.End
+			if !sameSpan {
+				return fmt.Errorf(
+					"span %v contains previously replaced region [%d,%d): %w",
+					span, r.origStart, r.origEnd, ErrConflict,
+				)
+			}
+		}
+	}
+
 	// Splice Text: text[:textStart] + to + text[textEnd:]
 	newText := make([]byte, 0, len(s.text)-(textEnd-textStart)+len(to))
 	newText = append(newText, s.text[:textStart]...)
@@ -293,6 +331,7 @@ func (s *State) Rewrite(text string, meta ChangeMeta) error {
 		return err
 	}
 	s.text = []byte(text)
+	s.rewrites++
 	s.changes = append(s.changes, Change{
 		Span:             Span{Start: 0, End: len(s.original)},
 		From:             string(s.original),

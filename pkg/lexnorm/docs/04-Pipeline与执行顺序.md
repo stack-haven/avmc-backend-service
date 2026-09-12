@@ -408,3 +408,30 @@ Pipeline 测试必须验证：
 - Match 冲突完整规则：[11-确定性与匹配冲突消解](11-确定性与匹配冲突消解.md)
 - 场景模板：[13-应用场景与Pipeline模板](13-应用场景与Pipeline模板.md)
 - 错误体系：[10-配置校验与错误体系](10-配置校验与错误体系.md)
+
+
+---
+
+## v1.1 变更同步（2026-09）
+
+### 组合助手（不可变语义：均返回新 Pipeline，原对象不变）
+
+```go
+p2, err := lexnorm.ReplaceProcessor(pipeline, "alias", aliasV2) // 按名替换，保持位置
+p3, err := lexnorm.RemoveProcessor(pipeline, "fuzzy")          // 按名删除
+p4 := lexnorm.AppendProcessor(pipeline, myProc)                // 尾部追加
+```
+
+未找到同名处理器时返回包 `ErrInvalidConfig` 的错误。
+
+### 顺序优先级链（正式化）
+
+```text
+显式用户 Pipeline Order > Preset Order > DefaultOrder > Certainty
+```
+
+- 用户显式指定后**不自动重排**、不因 Certainty/Category 改序、不隐藏插入（实现与
+  测试均保证，见 `pipeline_test.go`）。
+- `DefaultOrder` 来自 `Category.DefaultOrder()`（八大分类 1~8）与处理器
+  `Descriptor.DefaultOrder`，仅用于默认装配与文档展示。
+- 内置 Standard Preset 的实际次序 = 八大分类 1~7（Semantic 按 D1 排除）。

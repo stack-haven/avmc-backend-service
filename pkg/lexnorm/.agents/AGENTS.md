@@ -97,13 +97,13 @@ github.com/stack-haven/lexnorm               # 当前独立开源仓库
 
 ## 4. 当前开发状态
 
-### 4.1 文档阶段（**当前**）
+### 4.1 Processor 体系 v1.1（**当前**，2026-09）
 
-- ✅ 1.2 权威规范已发布（48 节）
-- ✅ 18 份拆解文档已刷新
-- ✅ 决策日志 D1-D7 已收口
-- ✅ Agent 规则体系建立（本文件）
-- ⏳ **代码实施 M1~M12 待启动**
+- ✅ 八大 Category + 能力 Descriptor + DescribedProcessor 落地（`docs/processor.md`）
+- ✅ Contextual v1 / Builder.Validate / Noise 安全策略 / panic 降级
+- ✅ golden 行为基线（`testdata/golden/`）
+- ✅ stress test 94.1%（缺陷清单 D-1/D-2 关闭，见 `docs/19-工具包缺陷清单.md`）
+- 📜 历史状态：文档阶段与 M1~M12 里程碑均已完成
 
 ### 4.2 里程碑概览
 

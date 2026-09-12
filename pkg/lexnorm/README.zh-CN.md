@@ -28,6 +28,7 @@
 
 ## 核心特性
 
+- ✅ **正式分类** — 八大能力 `Category` + 可选能力 `Descriptor` 元数据
 - ✅ **可组合** — 每个 `Processor` 都是独立单元，可单独使用
 - ✅ **确定性** — 相同输入 + 相同快照始终产生相同输出
 - ✅ **并发安全** — 多个 goroutine 可共享同一 `Engine` 实例
@@ -166,6 +167,13 @@ func main() {
 ```
 
 ---
+
+## Processor 分类
+
+内置处理器正式划分为八大分类：`normalization` / `noise` / `canonicalization` /
+`deterministic` / `phonetic` / `approximate` / `contextual` / `semantic`，
+通过可选接口 `DescribedProcessor` 声明能力元数据，并体现在 `Result.Steps` 与
+`RuntimeInfo` 中。详见 [docs/processor.md](docs/processor.md)。
 
 ## 文档
 

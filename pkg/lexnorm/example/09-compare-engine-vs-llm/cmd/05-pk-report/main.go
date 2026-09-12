@@ -2,8 +2,9 @@
 //
 // 输入：logs/01-engine.log + logs/02-llm.log
 // 输出：
-//   logs/03-pk.md    — PK 矩阵（每条 from 的处理对比）
-//   logs/04-optimize.md — 对 ark-lexnorm 工具包的优化建议
+//
+//	logs/03-pk.md    — PK 矩阵（每条 from 的处理对比）
+//	logs/04-optimize.md — 对 ark-lexnorm 工具包的优化建议
 //
 // 运行：go run ./cmd/05-pk-report
 package main
@@ -38,11 +39,11 @@ type llmChange struct {
 }
 
 type textPK struct {
-	TextID      string
+	TextID        string
 	EngineChanges []engineChange
-	LLMChanges   []llmChange
-	EngineNorm   string
-	LLMNorm      string
+	LLMChanges    []llmChange
+	EngineNorm    string
+	LLMNorm       string
 }
 
 type changeBucket struct {

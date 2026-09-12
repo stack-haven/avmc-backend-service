@@ -1,5 +1,9 @@
 # 12 · 内置 Processor 规范
 
+> **v1.1 行为同步（2026-09）**：本文各 Processor 小节的行为描述以「v1.1」标注
+> 为准，与代码当前实现一致；未标注处为 1.2 基线描述。分类归属（Category）与
+> 能力元数据见 `docs/processor.md`。
+
 > 源节：§34 LLM · §35 内置 Processor · §36~§42 各 Processor 详情
 > 适用阶段：Phase 5
 > 受众：核心开发者 + 学习者（用 ark-lexnorm 解决业务问题的人）
@@ -10,14 +14,16 @@
 
 | # | Processor | 包路径 | 确定性 |
 |:--:|---|---|:--:|
-| 1 | Normalize | `processor/clean` | Deterministic |
-| 2 | Disfluency | `processor/disfluency` | Deterministic |
-| 3 | Alias | `processor/alias` | Deterministic |
-| 4 | Deterministic | `processor/deterministic` | Deterministic |
-| 5 | Pinyin | `processor/pinyin` | High |
-| 6 | Fuzzy | `processor/fuzzy` | Medium |
-| 7 | Context | `processor/context` | Medium |
-| 8 | LLM | `processor/llm` | Unknown（可选） |
+| # | 处理器 | 包路径 | Category | Certainty | DefaultOrder |
+|:--:|---|---|---|---|:--:|
+| 1 | Normalize | `processor/normalize` | `normalization` | high | 1 |
+| 2 | Disfluency | `processor/disfluency` | `noise` | high | 2 |
+| 3 | Alias | `processor/alias` | `canonicalization` | high | 3 |
+| 4 | Deterministic | `processor/deterministic` | `deterministic` | high | 4 |
+| 5 | Pinyin | `processor/pinyin` | `phonetic` | medium | 5 |
+| 6 | Fuzzy | `processor/fuzzy` | `approximate` | medium | 6 |
+| 7 | Context | `processor/ctxproc` | `contextual` | low | 7 |
+| 8 | LLM | `processor/llm` | `semantic` | low | 8（可选） |
 
 > LLM 作为扩展能力，**不在 Standard Preset 内**。
 
@@ -71,22 +77,38 @@ processors:
 
 负责处理不流畅文本成分。
 
-### 典型词
+### 典型词（v1.1 两级词表）
 
 ```text
-呃
-额
-嗯
-啊
-那个
-然后
+无条件删除（无歧义单字叹词）：
+呃 嗯 啊 哦 诶
+
+边界守卫删除（多字歧义词：仅在两侧均为边界——标点/空白/首尾——时删除）：
+那个 这个 然后 就是说 其实 反正 你知道
 ```
+
+> **规范依据**：§37 / 规范化指令 §2 Noise——「那个文件给我」中的"那个"
+> 不得被无条件删除（它是指示词，直接修饰名词）。该反例已进入回归测试。
+>
+> **逃生门**：`WithAggressiveFillers()` 一键恢复旧行为（全词表无条件删除）；
+> `WithTokens(...)` 显式覆盖词表（调用方自担语义责任）。
 
 ### 关键约束
 
 > 规则**必须可配置**。
 >
-> **不得把具体业务规则硬编码为核心知识。**
+> **不得把具体业务规则硬编码为核心知识**；**不得把所有口语词默认删除**。
+
+### 重复词 / 重复短语（v1.1 新增）
+
+- 连续重复字符（≥3 个相同字）与连续重复短语（2~4 字短语重复 ≥3 次）
+  **只产生 Suggest**（折叠建议，默认不改文本）——规避「哈哈哈哈」类合法
+  重复被误折叠；`WithRepeatedWordFolding(n)` / `WithRepeatedPhraseFolding(len, n)`
+  可调参或关闭。
+
+### 删除与空格
+
+删除填充词时吸附**一个相邻空格**进入删除 span，避免输出双空格。
 
 ### 配置示例
 
@@ -94,7 +116,7 @@ processors:
 processors:
   - name: disfluency
     config:
-      tokens: ["呃", "额", "嗯", "啊", "那个", "然后"]
+      tokens: ["呃", "额", "嗯", "啊"]   # 显式覆盖 = 无条件删除（历史契约）
       action: remove   # remove / suggest
 ```
 
@@ -222,6 +244,18 @@ processors:
       pinyin_dict_ref: "default"
 ```
 
+
+### v1.1 行为同步（Phonetic 整词路径，D-2 修复）
+
+- **整词路径（新增）**：构建期把所有 `Variant{Homophone}.Text` 加入 Aho-Corasick
+  模式集（跳过 variant 为 canonical 子串的登记与跨条目重复），整词命中后按
+  置信度阈值 Apply / Suggest / Skip。`Variant{Homophone}.Text` 由此正式被消费
+  （缺陷清单 D-2 关闭）。
+- **逐字路径收紧**：仅索引**单字 canonical entry**。多字 entry 不可能通过单字
+  span 命中——杜绝"1 字 span 换整词"的文本损坏（曾实测复现三重复制）。
+- **分类与算法解耦**：Category 为 `phonetic`；拼音算法经由 `PinyinConverter`
+  插件注入，中文拼音只是一种实现。分类名/处理器名均不绑定中文。
+
 ---
 
 ## 7. Fuzzy Processor（§41）
@@ -278,7 +312,18 @@ processors:
 
 ## 8. Context Processor（§42）
 
-**包路径**：`processor/context`
+**包路径**：`processor/ctxproc`（v1.1 实现落地，不再是纯占位）
+
+### v1.1 行为同步
+
+- 消费 `Variant{Contextual}`（v1.1 新增 kind，值追加兼容）：整词 AC 扫描；
+- 候选唯一 → **Suggest**；多候选 → 注入 `Scorer` 重排序，唯一最优 → Suggest，
+  仍歧义 → Skip；
+- **v1 只 Suggest，永不 Apply**（上下文消歧属启发式，按规范"无法确定时
+  Suggest 或 Skip"降级）；
+- 无 `Scorer` 且多候选时保持词库 ID 序的确定性。
+- `ctxproc.New()` 保留为 no-op（向后兼容）；功能性构造为
+  `ctxproc.NewWithLexicon(lex)`，Standard/HighAccuracy 预设已启用。
 
 ### 职责
 

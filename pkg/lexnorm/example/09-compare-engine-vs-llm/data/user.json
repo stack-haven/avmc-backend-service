@@ -683,12 +683,6 @@
       "pinyin": "tian hua",
       "variants": [
         {
-          "text": "田花",
-          "kind": "approximate",
-          "confidence": 0.7,
-          "source": "manual-homophone"
-        },
-        {
           "text": "田工",
           "kind": "alias",
           "confidence": 0.85,
@@ -758,8 +752,8 @@
       "variants": [
         {
           "text": "袁梦莲",
-          "kind": "approximate",
-          "confidence": 0.95,
+          "kind": "homophone",
+          "confidence": 0.9,
           "source": "manual-homophone"
         }
       ],

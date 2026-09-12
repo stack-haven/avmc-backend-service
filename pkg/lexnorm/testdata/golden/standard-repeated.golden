@@ -1,0 +1,6 @@
+text: "这个测试"
+status: success
+change: "啊"->"" span=9:12 src=disfluency conf=1.00 applied=true
+change: "啊"->"" span=6:9 src=disfluency conf=1.00 applied=true
+change: "啊"->"" span=3:6 src=disfluency conf=1.00 applied=true
+change: "啊"->"" span=0:3 src=disfluency conf=1.00 applied=true

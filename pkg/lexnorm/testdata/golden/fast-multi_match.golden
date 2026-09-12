@@ -1,0 +1,4 @@
+text: "田华和周莉群都来了,金种仔也在"
+status: success
+change: "，"->"," span=27:30 src=normalize conf=1.00 applied=true
+change: "田工"->"田华" span=0:6 src=alias conf=0.90 applied=true

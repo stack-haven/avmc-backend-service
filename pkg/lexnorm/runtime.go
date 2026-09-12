@@ -66,6 +66,12 @@ type Runtime struct {
 	// ProcessorVersions maps Processor.Name() to Version() for all
 	// Processors that implement the optional Versioner interface.
 	ProcessorVersions map[string]string
+
+	// ProcessorCategories maps Processor.Name() to its declared
+	// Category (string form of Category). Processors that do not
+	// declare a category (no DescribedProcessor) are omitted. Nil when
+	// no Processor declares one.
+	ProcessorCategories map[string]string
 }
 
 // NewRuntime constructs a Runtime from a ProfileID and ProfileBundle.
@@ -120,6 +126,18 @@ func newRuntimeFromBundle(id ProfileID, b ProfileBundle) *Runtime {
 				rt.ProcessorVersions[p.Name()] = v.Version()
 			}
 		}
+		// Capability metadata: category per Processor (declared via
+		// DescribedProcessor). Processors without a declared category
+		// are omitted.
+		cats := make(map[string]string, len(processors))
+		for _, p := range processors {
+			if d, ok := DescriptorOf(p); ok && d.Category != "" {
+				cats[p.Name()] = string(d.Category)
+			}
+		}
+		if len(cats) > 0 {
+			rt.ProcessorCategories = cats
+		}
 	}
 	return rt
 }
@@ -130,12 +148,24 @@ func (r *Runtime) info() RuntimeInfo {
 		return RuntimeInfo{}
 	}
 	return RuntimeInfo{
-		ProfileID:         r.Profile.ID,
-		ProfileVersion:    r.ProfileVersion,
-		LexiconVersion:    r.LexiconVersion,
-		PipelineVersion:   r.PipelineVersion,
-		ProcessorVersions: copyProcessorVersions(r.ProcessorVersions),
+		ProfileID:           r.Profile.ID,
+		ProfileVersion:      r.ProfileVersion,
+		LexiconVersion:      r.LexiconVersion,
+		PipelineVersion:     r.PipelineVersion,
+		ProcessorVersions:   copyProcessorVersions(r.ProcessorVersions),
+		ProcessorCategories: copyProcessorCategories(r.ProcessorCategories),
 	}
+}
+
+func copyProcessorCategories(src map[string]string) map[string]string {
+	if src == nil {
+		return nil
+	}
+	out := make(map[string]string, len(src))
+	for k, v := range src {
+		out[k] = v
+	}
+	return out
 }
 
 func copyProcessorVersions(src map[string]string) map[string]string {
@@ -188,6 +218,11 @@ type RuntimeInfo struct {
 	// Processors that implement the optional Versioner interface.
 	// Processors without Versioner are omitted.
 	ProcessorVersions map[string]string
+
+	// ProcessorCategories maps Processor.Name() to its declared Category
+	// (string form). Processors that do not declare a category are
+	// omitted; nil when none declare one.
+	ProcessorCategories map[string]string
 }
 
 // IsZero reports whether ri is the zero value (no runtime info).
@@ -196,7 +231,8 @@ func (ri RuntimeInfo) IsZero() bool {
 		ri.ProfileVersion == "" &&
 		ri.LexiconVersion == "" &&
 		ri.PipelineVersion == "" &&
-		len(ri.ProcessorVersions) == 0
+		len(ri.ProcessorVersions) == 0 &&
+		len(ri.ProcessorCategories) == 0
 }
 
 // ProcessorVersion returns the version of the named Processor, or "" if

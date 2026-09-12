@@ -472,3 +472,31 @@ Runtime {
 - 性能：[14-性能设计与算法优化](14-性能设计与算法优化.md)
 - 高可用整体：[§34](07-Engine与Profile.md) / 1.2 规范 §34
 - 测试：[15-测试策略与质量工程](15-测试策略与质量工程.md)
+
+
+---
+
+## v1.1 变更同步（2026-09）
+
+### Builder.Validate()（词库卫生校验）
+
+`Build()` 保持既有宽容语义（兼容优先）；需要数据质量保障的调用方在 Build 前
+显式调用：
+
+```go
+b := lexicon.NewBuilder().Add(entries...)
+if err := b.Validate(); err != nil { ... } // 错误均包 lexicon.ErrConflict
+lex, err := b.Build()
+```
+
+拒绝四类登记（源自 stress test 实证的数据损坏模式）：
+
+1. entry 缺 canonical Text（空 text）；
+2. variant **等于或为自身 canonical 的子串**（会把 canonical 命中处改写并
+   重复剩余部分，如「万康盛鼎」⊂「万康盛鼎集团」→「万康盛鼎集团集团」）；
+3. variant 撞**其他 entry 的 canonical**（会把他人正名改写，如 李四光）；
+4. 同一 variant 文本跨 entry 重复（消解结果任意且静默）。
+
+处理器层同步防御：alias/fuzzy/deterministic 对重复 variant 文本在构建匹配器时
+去重（赢家 = ID 序第一条，已文档化）；pinyin/context 跳过"variant 为 canonical
+子串"的登记。

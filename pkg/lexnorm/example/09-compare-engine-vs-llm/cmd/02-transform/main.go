@@ -1,9 +1,9 @@
 // Command transform 把原始 curl 响应转换为 ark-lexnorm 可消费的词库 JSON。
 //
 // 步骤：
-//   1. 读 data/dept.raw.json    → 字段裁剪、拼音生成 → data/dept.json
-//   2. 读 data/member.raw.json  → 启发式过滤（保留真实人名 + ~20% 边界脏数据）→ data/user.json
-//   3. 从测试文本中挖掘业务术语（硬编码清单 + 频率统计）→ data/system.json
+//  1. 读 data/dept.raw.json    → 字段裁剪、拼音生成 → data/dept.json
+//  2. 读 data/member.raw.json  → 启发式过滤（保留真实人名 + ~20% 边界脏数据）→ data/user.json
+//  3. 从测试文本中挖掘业务术语（硬编码清单 + 频率统计）→ data/system.json
 //
 // 设计目标：
 //   - 不写入敏感字段（手机号、头像、userId、createTime、email）
@@ -39,17 +39,17 @@ type VariantJSON struct {
 }
 
 type EntryJSON struct {
-	ID       string        `json:"id"`
-	Text     string        `json:"text"`
-	Pinyin   string        `json:"pinyin,omitempty"`
-	Variants []VariantJSON `json:"variants"`
+	ID       string         `json:"id"`
+	Text     string         `json:"text"`
+	Pinyin   string         `json:"pinyin,omitempty"`
+	Variants []VariantJSON  `json:"variants"`
 	Meta     map[string]any `json:"meta,omitempty"`
 }
 
 type LexiconJSON struct {
-	Version string      `json:"version"`
-	Source  string      `json:"source"`
-	Entries []EntryJSON `json:"entries"`
+	Version string         `json:"version"`
+	Source  string         `json:"source"`
+	Entries []EntryJSON    `json:"entries"`
 	Meta    map[string]any `json:"meta,omitempty"`
 }
 
@@ -58,11 +58,11 @@ type LexiconJSON struct {
 // ----------------------------------------------------------------------------
 
 type deptRaw struct {
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
+	ID       string          `json:"id"`
+	Name     string          `json:"name"`
 	ParentID json.RawMessage `json:"parentId"` // 可能是 string 或 number
-	Sort     int     `json:"sort"`
-	Status   int     `json:"status"`
+	Sort     int             `json:"sort"`
+	Status   int             `json:"status"`
 }
 
 type memberRaw struct {
@@ -79,25 +79,25 @@ type memberRaw struct {
 // ----------------------------------------------------------------------------
 
 var (
-	reDigitOrSym  = regexp.MustCompile(`^[\d+]+$`)
-	reEnglish     = regexp.MustCompile(`^[A-Za-z]+$`)
-	reMixed       = regexp.MustCompile(`[A-Za-z]`)
-	reHasTestKw   = regexp.MustCompile(`(测试|入职|员工|管理|账号|哒哒|动态|野原)`)
-	reHasSep      = regexp.MustCompile(`[·.・]`)
-	reIsAllHan    = regexp.MustCompile(`^[\x{4e00}-\x{9fff}]+$`)
+	reDigitOrSym = regexp.MustCompile(`^[\d+]+$`)
+	reEnglish    = regexp.MustCompile(`^[A-Za-z]+$`)
+	reMixed      = regexp.MustCompile(`[A-Za-z]`)
+	reHasTestKw  = regexp.MustCompile(`(测试|入职|员工|管理|账号|哒哒|动态|野原)`)
+	reHasSep     = regexp.MustCompile(`[·.・]`)
+	reIsAllHan   = regexp.MustCompile(`^[\x{4e00}-\x{9fff}]+$`)
 )
 
 // nameKind 分类
 type nameKind int
 
 const (
-	kindRealName   nameKind = iota // 真实中文人名（2~4 字）
-	kindLongZh                     // 长中文（非人名短语）
-	kindSepZh                      // 含分隔符
-	kindEnglish                    // 纯英文
-	kindDigitOrSym                 // 纯数字/符号
-	kindMixed                      // 中英混合
-	kindTestAccount                // 测试/入职账号
+	kindRealName    nameKind = iota // 真实中文人名（2~4 字）
+	kindLongZh                      // 长中文（非人名短语）
+	kindSepZh                       // 含分隔符
+	kindEnglish                     // 纯英文
+	kindDigitOrSym                  // 纯数字/符号
+	kindMixed                       // 中英混合
+	kindTestAccount                 // 测试/入职账号
 )
 
 func classify(name string) nameKind {
@@ -247,9 +247,9 @@ func pickAbbrev(name string) string {
 func transformMember(raw []memberRaw, version string) []EntryJSON {
 	// 第一轮：分类
 	type classified struct {
-		raw    memberRaw
-		kind   nameKind
-		keep   bool
+		raw  memberRaw
+		kind nameKind
+		keep bool
 	}
 
 	classifieds := make([]classified, 0, len(raw))
@@ -334,10 +334,10 @@ func explicitHomophones(canonical string) []VariantJSON {
 		"陈兴静": {{"陈新静", 0.95}},
 		"陈科沆": {{"陈科航", 0.95}},
 		"伍锡辉": {{"伍西辉", 0.95}, {"五西辉", 0.95}}, // P0-3: 补 “五西辉”（五↔伍同音近似）
-		"卢川":   {{"芦川", 0.95}},
-		"邓梓":   {{"邓子", 0.95}},
-		"田清":   {{"田青", 0.95}},
-		"田华":   {{"田花", 0.70}}, // 边界 Suggest（仅提示不替换）
+		"卢川":  {{"芦川", 0.95}},
+		"邓梓":  {{"邓子", 0.95}},
+		"田清":  {{"田青", 0.95}},
+		"田华":  {{"田花", 0.70}}, // 边界 Suggest（仅提示不替换）
 		// 故意不登记：
 		//   - 夏奇君 ↔ 夏其军：不同人，LLM 应保留
 		//   - 杨行宇 → ?：无明显对应，LLM 应判为不确定
@@ -477,7 +477,7 @@ type businessTerm struct {
 var businessTerms = []businessTerm{
 	// 奖励体系
 	{
-		"term-jinzhongzi", "金种籽", "reward",  // ⚠️ 项目偏好：canonical = 金种籽
+		"term-jinzhongzi", "金种籽", "reward", // ⚠️ 项目偏好：canonical = 金种籽
 		[]VariantJSON{
 			{Text: "金种仔", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"}, // 子↔仔
 			{Text: "金种子", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"}, // 旧写法作为 variant（项目偏好保留）
@@ -487,7 +487,7 @@ var businessTerms = []businessTerm{
 		},
 	},
 	{
-		"term-heizhongzi", "黑种籽", "reward",  // ⚠️ 项目偏好：canonical = 黑种籽
+		"term-heizhongzi", "黑种籽", "reward", // ⚠️ 项目偏好：canonical = 黑种籽
 		[]VariantJSON{
 			{Text: "黑种仔", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"},
 			{Text: "黑种子", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"}, // 旧写法作为 variant
@@ -500,9 +500,9 @@ var businessTerms = []businessTerm{
 	{
 		"term-bozhong", "播种", "course",
 		[]VariantJSON{
-			{Text: "拨种", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"}, // 拨↔播
-			{Text: "博种", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"}, // 博↔播
-			{Text: "搏种", Kind: "approximate", Confidence: 0.85, Source: "manual-asr"}, // 搏↔播
+			{Text: "拨种", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"},  // 拨↔播
+			{Text: "博种", Kind: "approximate", Confidence: 0.95, Source: "manual-asr"},  // 博↔播
+			{Text: "搏种", Kind: "approximate", Confidence: 0.85, Source: "manual-asr"},  // 搏↔播
 			{Text: "播种类", Kind: "approximate", Confidence: 0.85, Source: "manual-asr"}, // 多字
 		},
 	},

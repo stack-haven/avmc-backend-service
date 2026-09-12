@@ -2,8 +2,9 @@
 // 把 prompt、响应、解析结果落到 logs/02-llm.log（JSON Lines）。
 //
 // Prompt 设计（system + user 两段）：
-//   system: 你是文本规范化助手，下面是允许替换的词库（JSON），规则...
-//   user:   请规范化下面这段文本，并按 JSON schema 输出
+//
+//	system: 你是文本规范化助手，下面是允许替换的词库（JSON），规则...
+//	user:   请规范化下面这段文本，并按 JSON schema 输出
 //
 // 运行：go run ./cmd/04-llm-test
 //
@@ -44,7 +45,7 @@ type llmChange struct {
 }
 
 type llmOutput struct {
-	Normalized string     `json:"normalized"`
+	Normalized string      `json:"normalized"`
 	Changes    []llmChange `json:"changes"`
 }
 
@@ -124,13 +125,13 @@ func runOne(ctx context.Context, client *llmclient.Client, systemPrompt, textID,
 
 	// 写 prompt log
 	if err := logJSON.Encode(map[string]any{
-		"type":         "prompt",
-		"text_id":      textID,
-		"system":       systemPrompt,
-		"user":         userMsg,
-		"model":        req.Model,
-		"temperature":  req.Temperature,
-		"max_tokens":   req.MaxTokens,
+		"type":        "prompt",
+		"text_id":     textID,
+		"system":      systemPrompt,
+		"user":        userMsg,
+		"model":       req.Model,
+		"temperature": req.Temperature,
+		"max_tokens":  req.MaxTokens,
 	}); err != nil {
 		log.Printf("encode prompt: %v", err)
 	}
@@ -142,9 +143,9 @@ func runOne(ctx context.Context, client *llmclient.Client, systemPrompt, textID,
 	if err != nil {
 		fmt.Printf(" ERROR: %v\n", err)
 		_ = logJSON.Encode(map[string]any{
-			"type":  "error",
+			"type":    "error",
 			"text_id": textID,
-			"error": err.Error(),
+			"error":   err.Error(),
 		})
 		return
 	}
@@ -152,11 +153,11 @@ func runOne(ctx context.Context, client *llmclient.Client, systemPrompt, textID,
 
 	// 写 raw response
 	_ = logJSON.Encode(map[string]any{
-		"type":     "raw_response",
-		"text_id":  textID,
+		"type":       "raw_response",
+		"text_id":    textID,
 		"latency_ms": latency.Milliseconds(),
-		"usage":    resp.Usage,
-		"content":  content2,
+		"usage":      resp.Usage,
+		"content":    content2,
 	})
 
 	// 解析 JSON（先尝试直接解析，失败则尝试从 markdown code block 抽取）
@@ -174,10 +175,10 @@ func runOne(ctx context.Context, client *llmclient.Client, systemPrompt, textID,
 	}
 	if stripped != content2 {
 		_ = logJSON.Encode(map[string]any{
-			"type":      "parsed",
-			"text_id":   textID,
-			"data":      out,
-			"note":      "stripped markdown fence",
+			"type":    "parsed",
+			"text_id": textID,
+			"data":    out,
+			"note":    "stripped markdown fence",
 		})
 	} else {
 		_ = logJSON.Encode(map[string]any{
@@ -208,9 +209,9 @@ func buildSystemPrompt(userLex, deptLex, sysLex *lexjson.LexiconJSON) string {
 
 	// 为节省 token，只列每个 entry 的 text 和 freq（不输出 id/meta/variants 详情）
 	type simpleEntry struct {
-		Text  string `json:"text"`
-		Kind  string `json:"kind,omitempty"`  // "person" | "dept" | "term"
-		Tags  []string `json:"tags,omitempty"`
+		Text string   `json:"text"`
+		Kind string   `json:"kind,omitempty"` // "person" | "dept" | "term"
+		Tags []string `json:"tags,omitempty"`
 	}
 	simple := make([]simpleEntry, 0, len(all))
 	for _, e := range all {

@@ -358,3 +358,34 @@ State 丢弃
 - 不可变结果：[02 §18](02-核心领域模型.md#18-结果不可变原则)
 - 性能：[14-性能设计与算法优化](14-性能设计与算法优化.md) §5
 - 错误：[10-配置校验与错误体系](10-配置校验与错误体系.md) §1
+
+
+---
+
+## v1.1 变更同步（2026-09）
+
+### Replace 新增「包含区间」防御
+
+`Replace` 在以下情形返回 `ErrConflict`（错误均包 `lexnorm.ErrConflict`）：
+
+- span 与 Locked 区间重叠（既有）；
+- span（部分或全部）落在已替换区间**内部**（既有）；
+- **新增**：span **严格包含**某个已替换区间。此类替换会覆盖先前修改的效果却
+  在审计中留下"已应用"的幻影 Change，现被拒绝。**同 span 的再次 Replace 仍允许**
+  （文档化的幂等覆盖语义不变）。
+
+### MutationCount()
+
+```go
+func (s *State) MutationCount() int // Replace 次数 + Rewrite 次数
+```
+
+供处理器判断 Original 坐标是否已失效。**内置 normalize 依赖它**：
+`MutationCount() > 0` 时改走 `Rewrite()` 整段回写（Rewrite 是为前置处理设计的
+API，不占用 Original 偏移），避免"扫当前 Text、按 Original 坐标写回"造成的
+多字节截断损坏。normalize 同时跳过 identity 替换（如"空格→空格"），
+不再产生无效果审计记录。
+
+### 噪声处理器与相邻空格
+
+disfluency 删除填充词时会吸附一个相邻空格进入删除 span，避免输出双空格。

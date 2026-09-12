@@ -71,6 +71,7 @@
 | 1.0 | 初版 | 历史归档 | 81 节 / 2865 行；建立 Processor / Pipeline / Engine / State / Lexicon 基础模型与 8 步默认流程 |
 | 1.1 | 修订版 | 历史归档 | 63 节 / 3062 行；新增 Runtime Snapshot、ProfileResolver、LexiconSource/Compose、HA 体系、20 条执行规则、16 里程碑 |
 | **1.2** | **合并权威** | **正式工作基线** | **本文件**：`1.1` 主体 + `1.0` 缺失章节（Match 冲突规则）+ 3 项冲突解决 |
+| **1.2.1** | 2026-09 | **v1.1 实施落定** | Processor 体系规范化实施（见下方「1.2.1 v1.1 实施记录」，变更清单以 `CHANGELOG.md [Unreleased]` 为准） |
 
 ### 1.2 决策记录（与 1.1 的差异）
 
@@ -88,6 +89,32 @@
 | D5 | §22 **Match 冲突规则** | 1.0 §63 |
 | D6 | §23 **Match 冲突示例** | 1.0 §63 + 1.1 扩展 |
 | D7 | §24 **Result 全字段合并** | 1.0 §28 + 1.1 §24 字段合集 |
+
+### 1.2.1 v1.1 实施记录（2026-09，Processor 体系规范化）
+
+> 本节是实施层记录；详细行为变更以仓库 `CHANGELOG.md [Unreleased]` 为权威。
+> 规范入口文档：`docs/processor.md`（正式分类/Descriptor/组合规则）。
+
+**新增（纯增量）**：
+
+- 八大正式分类 `Category`（normalization / noise / canonicalization / deterministic / phonetic / approximate / contextual / semantic），`Category.DefaultOrder()` 即 §7 默认次序。
+- 能力元数据：`Descriptor` 追加可选字段（Version/Category/MutatesText/SupportsSuggest/SupportsProtected/Deterministic/Determinism/DefaultOrder/Description）；可选接口 `DescribedProcessor`；`DescriptorOf()` 回退读取。核心 `Processor` 接口保持两方法冻结不变。
+- 行为维度类型：`MutationMode`、`Determinism`；`Certainty` 依「优先复用」原则沿用 uint8（String() 输出 high/medium/low）。
+- 可观测性：`StepTiming.Category/Deterministic`、`RuntimeInfo.ProcessorCategories`。
+- Pipeline 组合助手：`AppendProcessor` / `ReplaceProcessor` / `RemoveProcessor`（不可变，返回新对象）。
+- `lexicon.VariantContextual`（kind 追加，值兼容）与 Contextual v1（`ctxproc.NewWithLexicon` + 可注入 `Scorer`；v1 只 Suggest）。
+- `lexicon.Builder.Validate()`：拒绝空 canonical、variant 为 canonical 子串、variant 撞他人 canonical、跨条目重复 variant（`Build()` 保持宽容，严格校验显式 opt-in）。
+
+**行为变更（各带逃生门或基线评审，详见 CHANGELOG）**：
+
+- Noise 两级词表：单字叹词无条件删除；多字歧义词（那个/这个/…）仅独立出现时删除（`WithAggressiveFillers()` 恢复旧行为）；重复词/短语折叠默认只 Suggest。
+- Phonetic（原 Pinyin）：新增 homophone 整词匹配路径（D-2 修复）；逐字路径只索引单字 entry（杜绝单字 span 换整词的文本损坏）。
+- State：拒绝「包含已替换区间」的 Replace（同 span 幂等覆盖保留）；新增 `MutationCount()`；normalize 在 State 已被修改时回退 `Rewrite()`，并跳过 identity 替换。
+- Processor panic 默认 recover → `StatusFailed` + error，原文恒保留。
+- 重复 variant 文本在匹配器构建时去重，赢家为 ID 序第一条（文档化）。
+- `presets.ASR()/OCR()` 标 Deprecated（预设名保留），新增 `Transcripts()/ScannedText()`。
+
+**冲突规则落地补充（对应 §22/D4）**：Longest-first 语义在处理器实现层以「leftmost-first + 同 span 覆盖 + 包含区间拒绝 + 模式去重」组合保证；词库层由 `Builder.Validate()` 前置消除歧义登记。
 
 ---
 

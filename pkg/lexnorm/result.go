@@ -171,6 +171,16 @@ type StepTiming struct {
 	// Processor name; use errors.As(err, &lexnorm.ProcessorError{}) to
 	// extract it.
 	Error error
+
+	// Category is the Processor's declared capability Category
+	// (CategoryNormalization, ...). Empty for Processors that do not
+	// implement DescribedProcessor.
+	Category Category
+
+	// Deterministic mirrors the Processor's declared determinism
+	// (Descriptor.Deterministic). False for Processors that do not
+	// declare it.
+	Deterministic bool
 }
 
 // IsZero reports whether st is the zero value.
@@ -179,7 +189,9 @@ func (st StepTiming) IsZero() bool {
 		st.ProcessorVersion == "" &&
 		st.ChangeCount == 0 &&
 		st.Duration == 0 &&
-		st.Error == nil
+		st.Error == nil &&
+		st.Category == "" &&
+		!st.Deterministic
 }
 
 // HasError reports whether this step produced an error.

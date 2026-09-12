@@ -65,6 +65,12 @@ const (
 	// VariantApproximate indicates a fuzzy match (edit distance, n-gram
 	// overlap, etc.).
 	VariantApproximate
+
+	// VariantContextual indicates a form that requires context to
+	// resolve: the same surface text may map to different canonicals
+	// depending on surroundings, relations, or discourse. Processors in
+	// the Contextual category consume these variants.
+	VariantContextual
 )
 
 // String returns a stable lowercase identifier for the VariantKind.
@@ -78,6 +84,8 @@ func (k VariantKind) String() string {
 		return "homophone"
 	case VariantApproximate:
 		return "approximate"
+	case VariantContextual:
+		return "contextual"
 	}
 	return "unknown"
 }

@@ -24,6 +24,22 @@ import (
 // veryEnhancer 是一个示例 Processor：把"非常"替换为"特别"。
 type veryEnhancer struct{}
 
+// Descriptor 实现 lexnorm.DescribedProcessor（可选）：向 Registry、
+// 审计工具与文档声明本 Processor 的能力元数据。
+func (veryEnhancer) Descriptor() lexnorm.Descriptor {
+	return lexnorm.Descriptor{
+		Name:              "very-enhancer",
+		Category:          lexnorm.CategoryCanonical,
+		Certainty:         lexnorm.CertaintyHigh,
+		MutatesText:       true,
+		SupportsSuggest:   true,
+		SupportsProtected: true,
+		Deterministic:     true,
+		Determinism:       lexnorm.DeterministicTrue,
+		Description:       "Demo: rewrite intensifier word 非常 to 特别.",
+	}
+}
+
 // Name 实现 lexnorm.Processor。
 func (veryEnhancer) Name() string { return "very-enhancer" }
 

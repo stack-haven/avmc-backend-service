@@ -85,4 +85,77 @@ type Descriptor struct {
 	// config is provided. May return nil if the Processor has no
 	// configurable options.
 	Default func() any
+
+	// --- Capability metadata (optional; zero value = undeclared) ---
+	//
+	// The fields below describe WHAT a Processor does, not how to
+	// construct it. They are consumed by Registry queries, audit
+	// tooling, documentation generation, and default-Pipeline
+	// assembly. They never override user-declared Pipeline order and
+	// never gate runtime behavior.
+
+	// Version is the semantic version of the Processor implementation.
+	// Declaring it here is equivalent to implementing Versioner;
+	// processors should keep the two in sync (Versioner wins when both
+	// are present and differ, since the interface is authoritative).
+	Version string
+
+	// Category is the formal capability classification (Category*
+	// constants). Zero value "" means undeclared.
+	Category Category
+
+	// MutatesText reports whether the Processor may modify State.Text.
+	MutatesText bool
+
+	// SupportsSuggest reports whether the Processor can produce
+	// Suggestions (State.Suggest).
+	SupportsSuggest bool
+
+	// SupportsProtected reports whether the Processor's modifications
+	// honor Protected Spans (State.Lock) — i.e., its Replace calls go
+	// through State and are rejected on locked regions.
+	SupportsProtected bool
+
+	// Deterministic declares same-input/same-snapshot determinism.
+	// For finer classification (probabilistic / generative), see
+	// Determinism.
+	Deterministic bool
+
+	// Determinism is the finer determinism class (DeterministicTrue /
+	// DeterministicProbabilistic / DeterministicGenerative). When set,
+	// it refines the Deterministic bool.
+	Determinism Determinism
+
+	// DefaultOrder is the suggested position in the DEFAULT Pipeline
+	// (1-based; 0 = undeclared). It is used for default Pipeline
+	// construction and documentation display only. It MUST NOT be used
+	// to reorder a user-declared Pipeline.
+	DefaultOrder int
+
+	// Description is a short human-readable summary for docs and
+	// tooling. Optional.
+	Description string
+}
+
+// Mutation returns the MutationMode implied by the declared capability
+// flags:
+//
+//	MutatesText && SupportsSuggest → MutationMixed
+//	MutatesText                    → MutationApply
+//	SupportsSuggest                → MutationSuggest
+//	otherwise                      → MutationNone
+//
+// This is a convenience view over the flags; the flags remain the
+// source of truth.
+func (d Descriptor) Mutation() MutationMode {
+	switch {
+	case d.MutatesText && d.SupportsSuggest:
+		return MutationMixed
+	case d.MutatesText:
+		return MutationApply
+	case d.SupportsSuggest:
+		return MutationSuggest
+	default:
+		return MutationNone
+	}
 }

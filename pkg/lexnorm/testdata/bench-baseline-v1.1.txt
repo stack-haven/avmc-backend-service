@@ -1,0 +1,7 @@
+BenchmarkAlias-16    	  856730	      1188 ns/op	    1200 B/op	      16 allocs/op
+BenchmarkContext-16    	 3698664	       324.1 ns/op	     274 B/op	       3 allocs/op
+BenchmarkDeterministic-16    	 1024887	      1180 ns/op	    1224 B/op	      16 allocs/op
+BenchmarkDisfluency-16    	  282110	      3718 ns/op	    1390 B/op	      40 allocs/op
+BenchmarkFuzzy-16    	  479925	      2396 ns/op	    2069 B/op	      26 allocs/op
+BenchmarkNormalize-16    	  374436	      2931 ns/op	    4174 B/op	      36 allocs/op
+BenchmarkPinyin-16    	  512388	      2241 ns/op	    2896 B/op	      30 allocs/op

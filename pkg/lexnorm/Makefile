@@ -18,10 +18,18 @@
 #   make ci           full CI pipeline (check + deps)
 
 GO          ?= go
-GOFMT       ?= gofmt
+# Resolve gofmt from the toolchain's GOROOT so `make fmt` works even when
+# GOROOT/bin is not on PATH (previously a missing gofmt silently passed).
+GOROOT      := $(shell $(GO) env GOROOT)
+GOFMT       ?= $(GOROOT)/bin/gofmt
 PKG         ?= ./...
 COVER_FILE  ?= cover.out
 TIMEOUT     ?= 60s
+
+# backend-service/go.work references a missing module (app/tmp/ocr) and
+# currently breaks every go command under this tree. Force the workspace
+# off for all targets below; REMOVE this line once go.work is repaired.
+export GOWORK := off
 
 .PHONY: help
 help: ## Show this help message.
@@ -72,7 +80,7 @@ vet: ## go vet (REQUIRED per RULES.md §6.1)
 
 .PHONY: fmt
 fmt: ## gofmt -l (no output = OK)
-	@out=$$($(GO)FMT -l .); \
+	@out=$$($(GOFMT) -l .); \
 	if [ -n "$$out" ]; then \
 		echo "Files need formatting:"; \
 		echo "$$out"; \
@@ -83,7 +91,7 @@ fmt: ## gofmt -l (no output = OK)
 
 .PHONY: fmt-fix
 fmt-fix: ## gofmt -w (auto-fix formatting)
-	$(GO)FMT -w .
+	$(GOFMT) -w .
 
 # ---- Dependency check ----
 

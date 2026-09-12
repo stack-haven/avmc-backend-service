@@ -14,6 +14,12 @@
 
 package lexicon
 
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
+
 // Builder constructs a Lexicon from a set of Entries and Relations.
 //
 // # Construction Lifecycle
@@ -109,6 +115,86 @@ func (b *Builder) Build() (Lexicon, error) {
 	}
 	return buildMemLexicon(b.cfg)
 }
+
+// Validate checks the accumulated Entries against the lexicon hygiene
+// rules WITHOUT building. Build() stays intentionally lenient (backward
+// compatibility); callers that want data-quality enforcement invoke
+// Validate before Build and fail fast on the returned error.
+//
+// Validate rejects:
+//
+//  1. Entry without canonical Text (empty Text).
+//  2. Variant that equals or is a substring of its own canonical Text —
+//     matching it would rewrite the canonical into itself with the
+//     remainder duplicated (observed corruption: "万康盛鼎" →
+//     "万康盛鼎集团" produced "万康盛鼎集团集团").
+//  3. Variant text that equals ANOTHER entry's canonical Text — alias
+//     matching would destroy that canonical name wherever it occurs.
+//  4. The same variant text declared on multiple entries — resolution
+//     would be arbitrary (first-by-ID wins) and silently ambiguous.
+//
+// These checks can be run both on Builder input and on already-decoded
+// entry sets (see example 09 for a stress-test integration).
+func (b *Builder) Validate() error {
+	if b == nil {
+		return errNilBuilder
+	}
+
+	canonicals := make(map[string]EntryID, len(b.cfg.entries))
+	for _, e := range b.cfg.entries {
+		if !e.IsValid() {
+			return &errInvalidEntry{e: e}
+		}
+		if e.Text == "" {
+			return fmt.Errorf("lexicon: entry %q has empty canonical text: %w", e.ID, ErrConflict)
+		}
+		canonicals[e.Text] = e.ID
+	}
+
+	type variantOrigin struct {
+		text    string
+		entryID EntryID
+	}
+	seenVariants := make(map[string]EntryID)
+
+	for _, e := range b.cfg.entries {
+		for _, v := range e.Variants {
+			if !v.IsValid() {
+				continue // empty variants are dropped at Build; not an error
+			}
+			// Rule 2: variant equals or is inside its own canonical.
+			if v.Text == e.Text {
+				return fmt.Errorf(
+					"lexicon: entry %q: variant %q equals its canonical text: %w",
+					e.ID, v.Text, ErrConflict)
+			}
+			if strings.Contains(e.Text, v.Text) {
+				return fmt.Errorf(
+					"lexicon: entry %q: variant %q is a substring of canonical %q: %w",
+					e.ID, v.Text, e.Text, ErrConflict)
+			}
+			// Rule 3: variant collides with another entry's canonical.
+			if owner, ok := canonicals[v.Text]; ok && e.ID != owner {
+				return fmt.Errorf(
+					"lexicon: entry %q: variant %q collides with canonical text of entry %q: %w",
+					e.ID, v.Text, string(owner), ErrConflict)
+			}
+			// Rule 4: duplicate variant across entries.
+			if prev, ok := seenVariants[v.Text]; ok && prev != e.ID {
+				return fmt.Errorf(
+					"lexicon: variant %q declared on both entry %q and entry %q: %w",
+					v.Text, string(prev), e.ID, ErrConflict)
+			}
+			seenVariants[v.Text] = e.ID
+		}
+	}
+	return nil
+}
+
+// ErrConflict is the sentinel wrapped (via fmt.Errorf %w) by every
+// validation failure reported by Builder.Validate and Build. Use
+// errors.Is to detect it.
+var ErrConflict = errors.New("lexicon: conflict")
 
 // errNilBuilder is returned when Build is called on a nil Builder.
 var errNilBuilder = &errBuilderNil{}

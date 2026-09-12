@@ -27,6 +27,7 @@ The engine is intentionally **domain-neutral**: it does not assume ASR, HR, CRM,
 ## Features
 
 - ✅ **Composable** — every `Processor` is a small unit that can be used independently
+- ✅ **Formally classified** — eight capability `Category`s with opt-in capability `Descriptor` metadata
 - ✅ **Deterministic** — same input + same snapshot always produces the same output
 - ✅ **Concurrent-safe** — multiple goroutines can share an `Engine` instance
 - ✅ **Hot-reloadable Lexicon** — atomic snapshot swap with last-known-good fallback
@@ -164,6 +165,14 @@ func main() {
 ```
 
 ---
+
+## Processor Classification
+
+Built-in processors are formally classified into eight categories —
+`normalization`, `noise`, `canonicalization`, `deterministic`, `phonetic`,
+`approximate`, `contextual`, `semantic` — declared via an optional
+`DescribedProcessor` interface and surfaced in `Result.Steps` /
+`RuntimeInfo`. See [docs/processor.md](docs/processor.md).
 
 ## Documentation
 

@@ -30,20 +30,21 @@ import (
 	"github.com/stack-haven/lexnorm/processor/alias"
 	"github.com/stack-haven/lexnorm/processor/fuzzy"
 	"github.com/stack-haven/lexnorm/processor/normalize"
+	"github.com/stack-haven/lexnorm/processor/pinyin"
 )
 
 // testCase 是单个测试用例。
 type testCase struct {
-	ID          string            // T01/T02/...
-	Category    string            // 同音异字 / 边界 / 错误恢复 / ...
-	Description string            // 测试目的描述
-	Text        string            // 输入文本
-	Expected    []expectedChange  // 期望的修改（空表示无期望）
+	ID          string           // T01/T02/...
+	Category    string           // 同音异字 / 边界 / 错误恢复 / ...
+	Description string           // 测试目的描述
+	Text        string           // 输入文本
+	Expected    []expectedChange // 期望的修改（空表示无期望）
 }
 
 type expectedChange struct {
-	From  string  // 期望的 from
-	To    string  // 期望的 to
+	From    string  // 期望的 from
+	To      string  // 期望的 to
 	MinConf float64 // 最低 conf（0 表示不要求）
 }
 
@@ -54,7 +55,7 @@ type expectedChange struct {
 var allTests = []testCase{
 	// ===== T01: 同音异字（已支持，应 PASS）=====
 	{
-		ID: "T01", Category: "同音异字", Description: "袁梦莲→袁孟莲（Variant{Homophone} 走 approximate 变通）",
+		ID: "T01", Category: "同音异字", Description: "袁梦莲→袁孟莲（Variant{Homophone} 原生消费）",
 		Text:     "袁梦莲提交了报告",
 		Expected: []expectedChange{{From: "袁梦莲", To: "袁孟莲", MinConf: 0.5}},
 	},
@@ -83,13 +84,13 @@ var allTests = []testCase{
 		Expected: []expectedChange{{From: "菌种子", To: "黑种籽", MinConf: 0.5}},
 	},
 
-	// ===== T04: 工具包缺陷：homophone kind 无人消费 =====
-	// 直接登记 kind=homophone 的变体（按规范应该是 homophone processor 消费）
-	// 期望：engine 不改（暴露工具包缺陷）
+	// ===== T04: homophone variant 整词消费（D-2 已修复）=====
+	// pinyin processor 现已消费 Variant{Homophone}.Text（整词 AC 匹配），
+	// conf 0.9 低于 AutoApplyThreshold → 以 Suggest 呈现。
 	{
-		ID: "T04", Category: "工具包缺陷", Description: "Variant{Homophone} 无人消费（应被 homophone processor 处理，但工具包无此 processor）",
-		Text:     "请夏奇君参加播种",
-		Expected: []expectedChange{}, // 期望不改（但实际是引擎缺陷）
+		ID: "T04", Category: "同音异字", Description: "Variant{Homophone} 整词消费（D-2 已修复：pinyin homophone 路径）",
+		Text:     "袁梦莲提交了报告",
+		Expected: []expectedChange{{From: "袁梦莲", To: "袁孟莲", MinConf: 0.5}},
 	},
 
 	// ===== T05: 单字级 pinyin processor（不应替换整词）=====
@@ -174,7 +175,7 @@ var allTests = []testCase{
 	// ===== T11.2: 1000+ 字 =====
 	{
 		ID: "T11.2", Category: "压力", Description: "1000+ 字长文本，引擎应不崩溃",
-		Text: strings.Repeat("田华与袁孟莲、伍锡辉、林宇豪等同事一起工作。", 50),
+		Text:     strings.Repeat("田华与袁孟莲、伍锡辉、林宇豪等同事一起工作。", 50),
 		Expected: []expectedChange{}, // 所有人名都是 canonical，不应改
 	},
 
@@ -247,7 +248,7 @@ var allTests = []testCase{
 	// ===== T20: 重复人名 =====
 	{
 		ID: "T20", Category: "重复", Description: "同一人名出现多次（应全部命中）",
-		Text:     "袁梦莲提交了。袁梦莲审核了。袁梦莲完成了。",
+		Text: "袁梦莲提交了。袁梦莲审核了。袁梦莲完成了。",
 		Expected: []expectedChange{
 			{From: "袁梦莲", To: "袁孟莲", MinConf: 0.5},
 			{From: "袁梦莲", To: "袁孟莲", MinConf: 0.5},
@@ -272,7 +273,7 @@ var allTests = []testCase{
 	// ===== T23: 同一个 entry 多个 alias variant =====
 	{
 		ID: "T23", Category: "alias 多变体", Description: "田华 的田工/田总同时命中",
-		Text:     "田工和田总都说：找田华确认",
+		Text: "田工和田总都说：找田华确认",
 		Expected: []expectedChange{
 			{From: "田工", To: "田华", MinConf: 0.5},
 			{From: "田总", To: "田华", MinConf: 0.5},
@@ -350,7 +351,7 @@ var allTests = []testCase{
 	// ===== T31: 多名同句 =====
 	{
 		ID: "T31", Category: "多 target", Description: "同句多个不同人名同音替换",
-		Text:     "袁梦莲找陈新静、叶海燕一起",
+		Text: "袁梦莲找陈新静、叶海燕一起",
 		Expected: []expectedChange{
 			{From: "袁梦莲", To: "袁孟莲", MinConf: 0.5},
 			{From: "陈新静", To: "陈兴静", MinConf: 0.5},
@@ -358,12 +359,14 @@ var allTests = []testCase{
 		},
 	},
 
-	// ===== T32: 变体是另一个 entry 的 canonical =====
-	// 严格来说不应这么登记，但能发现冲突
+	// ===== T32: 变体是另一个 entry 的 canonical（卫生策略收口）=====
+	// 田花 是独立 canonical 条目；把 田花 登记为 田华 的变体会把正名
+	// 改写为他人（数据损坏）。卫生策略：canonical 优先，歧义 alias
+	// 删除（Builder.Validate 现在会拒绝此类登记）。期望：不改。
 	{
-		ID: "T32", Category: "冲突", Description: "跨词典源冲突：user '田花' vs system 没有；仅 user '田花' 被识别",
+		ID: "T32", Category: "冲突", Description: "跨词典源冲突已按卫生策略解决：田花 保留自身 canonical",
 		Text:     "田花参加了",
-		Expected: []expectedChange{{From: "田花", To: "田华", MinConf: 0.5}}, // 田花 → 田华 (user 中的 homophone)
+		Expected: []expectedChange{},
 	},
 
 	// ===== T33: 姓+称谓的同姓歧义 =====
@@ -398,7 +401,7 @@ var allTests = []testCase{
 	// ===== T37: 全是变体 (无 canonical) =====
 	{
 		ID: "T37", Category: "变体", Description: "一段只含变体的文本",
-		Text:     "叶海燕、陈新静、陈科航、伍西辉、芦川、袁梦莲一起开会",
+		Text: "叶海燕、陈新静、陈科航、伍西辉、芦川、袁梦莲一起开会",
 		Expected: []expectedChange{
 			{From: "叶海燕", To: "叶海嫣", MinConf: 0.5},
 			{From: "陈新静", To: "陈兴静", MinConf: 0.5},
@@ -412,7 +415,7 @@ var allTests = []testCase{
 	// ===== T38: 变体 + canonical 混合 =====
 	{
 		ID: "T38", Category: "变体", Description: "变体和 canonical 混在",
-		Text:     "袁梦莲、袁孟莲、叶海燕、叶海嫣同时出现",
+		Text: "袁梦莲、袁孟莲、叶海燕、叶海嫣同时出现",
 		Expected: []expectedChange{
 			{From: "袁梦莲", To: "袁孟莲", MinConf: 0.5},
 			{From: "叶海燕", To: "叶海嫣", MinConf: 0.5},
@@ -430,7 +433,7 @@ var allTests = []testCase{
 	// 这个是极端情况：万康盛鼎和万康 (后者不是变体，只是文本中的子串)
 	{
 		ID: "T40", Category: "工具包缺陷-D1", Description: "变体可能被文本中其他变体的子串误命中",
-		Text:     "万康开会",  // '万康' 是 '万康盛鼎集团' 的子串但不是变体
+		Text:     "万康开会",             // '万康' 是 '万康盛鼎集团' 的子串但不是变体
 		Expected: []expectedChange{}, // 期望不改
 	},
 }
@@ -474,7 +477,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pipeline := lexnorm.NewPipeline(normalize.New(), alias.New(built), fuzzy.New(built))
+	// Pinyin processor included since v1.1: consumes Variant{Homophone}
+	// whole-word matches (D-2 fix) and per-character single-char fixes.
+	pipeline := lexnorm.NewPipeline(normalize.New(), alias.New(built),
+		pinyin.New(built, pinyinlite.Converter{}), fuzzy.New(built))
 
 	engine, err := lexnorm.New(
 		lexnorm.WithLexicon(built),
@@ -606,16 +612,16 @@ func runAllTests(ctx context.Context, engine *lexnorm.Engine, logJSON *json.Enco
 		fmt.Printf("%s (latency=%dms)\n", marker, r.LatencyMS)
 
 		_ = logJSON.Encode(map[string]any{
-			"type":     "stress_result",
-			"id":       tc.ID,
-			"category": tc.Category,
-			"status":   r.Status,
+			"type":       "stress_result",
+			"id":         tc.ID,
+			"category":   tc.Category,
+			"status":     r.Status,
 			"latency_ms": r.LatencyMS,
-			"text":     tc.Text,
-			"actual":   r.Actual,
-			"expected": r.Expected,
-			"error":    r.ErrorMsg,
-			"notes":    r.Notes,
+			"text":       tc.Text,
+			"actual":     r.Actual,
+			"expected":   r.Expected,
+			"error":      r.ErrorMsg,
+			"notes":      r.Notes,
 		})
 	}
 	return results

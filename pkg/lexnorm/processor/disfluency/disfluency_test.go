@@ -83,12 +83,17 @@ func TestProcessor_WithTokens(t *testing.T) {
 // ----------------------------------------------------------------------------
 
 func TestDisfluency_RemoveSingleToken(t *testing.T) {
+	// Default policy: unambiguous particles removed unconditionally;
+	// ambiguous multi-char fillers (然后/那个/这个) removed only when
+	// standalone (see TestDisfluency_AmbiguousGuard).
 	tests := []struct{ in, want string }{
 		{"呃你好", "你好"},
 		{"嗯，你好", "，你好"},
 		{"你好，呃", "你好，"},
-		{"然后我们去吃饭", "我们去吃饭"},
-		{"那个这个然后", ""},
+		// 然后 is attached to 我们 (meaning-bearing) → kept by default.
+		{"然后我们去吃饭", "然后我们去吃饭"},
+		// 那个/这个/然后 each attached to a word or to each other → kept.
+		{"那个这个然后", "那个这个然后"},
 	}
 	for _, tc := range tests {
 		s := newState(t, tc.in)
@@ -102,19 +107,39 @@ func TestDisfluency_RemoveSingleToken(t *testing.T) {
 	}
 }
 
+func TestDisfluency_AggressiveLegacy(t *testing.T) {
+	// WithAggressiveFillers restores the legacy unconditional removal.
+	tests := []struct{ in, want string }{
+		{"然后我们去吃饭", "我们去吃饭"},
+		{"那个这个然后", ""},
+	}
+	for _, tc := range tests {
+		s := newState(t, tc.in)
+		p := disfluency.New().WithAggressiveFillers()
+		if err := p.Process(context.Background(), s); err != nil {
+			t.Fatal(err)
+		}
+		if got := s.Text(); got != tc.want {
+			t.Errorf("aggressive(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
 func TestDisfluency_MultipleOccurrences(t *testing.T) {
-	// "呃那个，然后呃" → 4 fillers (呃×2 + 那个 + 然后) + 1 punctuation (，).
-	// Disfluency removes only the filler words, leaving the punctuation.
+	// "呃那个，然后呃": 呃×2 removed unconditionally; 那个 is followed
+	// by ，and preceded by 呃→，boundaries... 那个 preceded by 呃 (word
+	// rune) → guarded; 然后 followed by 呃 → guarded. Result keeps the
+	// ambiguous fillers and removes the particles.
 	s := newState(t, "呃那个，然后呃")
 	p := disfluency.New()
 	if err := p.Process(context.Background(), s); err != nil {
 		t.Fatal(err)
 	}
-	if got := s.Text(); got != "，" {
-		t.Errorf("Text = %q, want %q", got, "，")
+	if got := s.Text(); got != "那个，然后" {
+		t.Errorf("Text = %q, want %q", got, "那个，然后")
 	}
-	if got := len(s.Changes()); got != 4 {
-		t.Errorf("len(Changes) = %d, want 4 (呃×2 + 那个 + 然后)", got)
+	if got := len(s.Changes()); got != 2 {
+		t.Errorf("len(Changes) = %d, want 2 (呃×2)", got)
 	}
 }
 
@@ -170,13 +195,14 @@ func TestDisfluency_IndependentOfEngine(t *testing.T) {
 func TestDisfluency_Deterministic(t *testing.T) {
 	p := disfluency.New()
 	for i := 0; i < 5; i++ {
+		// 呃×2 removed unconditionally; 那个/然后 guarded (attached to
+		// word runes); comma preserved.
 		s := newState(t, "呃那个，然后我们呃去吃饭")
 		if err := p.Process(context.Background(), s); err != nil {
 			t.Fatal(err)
 		}
-		// Comma is preserved (Disfluency only removes filler words).
-		if got := s.Text(); got != "，我们去吃饭" {
-			t.Errorf("run %d: Text = %q, want %q", i, got, "，我们去吃饭")
+		if got := s.Text(); got != "那个，然后我们去吃饭" {
+			t.Errorf("run %d: Text = %q, want %q", i, got, "那个，然后我们去吃饭")
 		}
 	}
 }

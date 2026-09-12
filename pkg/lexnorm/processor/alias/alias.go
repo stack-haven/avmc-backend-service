@@ -57,10 +57,11 @@ const (
 
 // Processor replaces alias variants with their canonical forms.
 type Processor struct {
-	lex          lexicon.Lexicon
-	matcher      *lexicon.Matcher
-	canonicalFor map[string]string          // variant text → canonical text
-	entryFor     map[string]lexicon.EntryID // variant text → Entry ID (audit)
+	lex           lexicon.Lexicon
+	matcher       *lexicon.Matcher
+	canonicalFor  map[string]string          // variant text → canonical text
+	entryFor      map[string]lexicon.EntryID // variant text → Entry ID (audit)
+	confidenceFor map[string]float64         // variant text → recorded confidence
 }
 
 // New constructs an Alias Processor from the given Lexicon.
@@ -75,6 +76,8 @@ func New(lex lexicon.Lexicon) *Processor {
 	var patterns []string
 	canonicalFor := make(map[string]string)
 	entryFor := make(map[string]lexicon.EntryID)
+	confidenceFor := make(map[string]float64)
+	seen := make(map[string]bool) // dedupe identical variant texts across entries
 
 	lex.All(func(e lexicon.Entry) bool {
 		for _, v := range e.Variants {
@@ -88,9 +91,25 @@ func New(lex lexicon.Lexicon) *Processor {
 			if v.Text == e.Text {
 				continue
 			}
+			// Dedupe: the same variant text registered on multiple
+			// entries resolves deterministically to the FIRST entry in
+			// ID order; emitting the pattern twice would double-record
+			// the same Change in the audit trail.
+			if seen[v.Text] {
+				continue
+			}
+			seen[v.Text] = true
 			patterns = append(patterns, v.Text)
 			canonicalFor[v.Text] = e.Text
 			entryFor[v.Text] = e.ID
+			// Unset confidence (0.0) means "explicitly high" for alias:
+			// alias matches are unambiguous synonyms. Declared values
+			// are recorded on the Change for audit.
+			if v.Confidence > 0 {
+				confidenceFor[v.Text] = v.Confidence
+			} else {
+				confidenceFor[v.Text] = 1.0
+			}
 		}
 		return true
 	})
@@ -102,6 +121,7 @@ func New(lex lexicon.Lexicon) *Processor {
 	p.matcher = lexicon.NewMatcher(patterns)
 	p.canonicalFor = canonicalFor
 	p.entryFor = entryFor
+	p.confidenceFor = confidenceFor
 	return p
 }
 
@@ -136,7 +156,7 @@ func (p *Processor) Process(_ context.Context, s *lexnorm.State) error {
 			canonical,
 			lexnorm.ChangeMeta{
 				Source:     Name,
-				Confidence: 1.0,
+				Confidence: p.confidenceFor[m.Pattern],
 				RuleID:     "alias",
 				EntryID:    string(p.entryFor[m.Pattern]),
 				Reason:     "alias → canonical: " + m.Pattern + " → " + canonical,
@@ -165,4 +185,19 @@ var Descriptor = lexnorm.Descriptor{
 		return New(nil), nil
 	},
 	Default: func() any { return nil },
+
+	Version:           Version,
+	Category:          lexnorm.CategoryCanonical,
+	MutatesText:       true,
+	SupportsSuggest:   false,
+	SupportsProtected: true,
+	Deterministic:     true,
+	Determinism:       lexnorm.DeterministicTrue,
+	DefaultOrder:      3,
+	Description:       "Unify aliases, abbreviations, nicknames, and forms of address onto canonical forms.",
 }
+
+// Descriptor implements lexnorm.DescribedProcessor: it exposes the
+// capability metadata of this Processor (category, mutation mode,
+// determinism) for Registry queries, audit tooling, and docs.
+func (p *Processor) Descriptor() lexnorm.Descriptor { return Descriptor }

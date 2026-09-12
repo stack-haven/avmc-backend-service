@@ -5,9 +5,10 @@
 //   - admin-api/qua/member-extended/page?selectAll   → data/member.raw.json
 //
 // 配置：
-//   env API_BASE    默认 http://api.bdksim-pro.test.bedoke.com
-//   env API_TOKEN   默认 <hardcoded test token>
-//   env TENANT_ID   默认 1889501240003497986
+//
+//	env API_BASE    默认 http://api.bdksim-pro.test.bedoke.com
+//	env API_TOKEN   默认 <hardcoded test token>
+//	env TENANT_ID   默认 1889501240003497986
 //
 // 运行：go run ./cmd/01-fetch
 package main
