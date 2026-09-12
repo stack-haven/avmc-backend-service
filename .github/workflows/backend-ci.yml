@@ -5,7 +5,19 @@ on:
     branches:
       - main
       - master
+      - ark-tech
   pull_request:
+    branches:
+      - main
+      - master
+      - ark-tech
+  workflow_dispatch:
+    inputs:
+      strict_coverage:
+        description: "Run coverage with FAIL_ON_GAP=1 (CI gate mode)"
+        required: false
+        default: "false"
+        type: boolean
 
 permissions:
   contents: read
@@ -27,7 +39,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: true
+        cache: true
 
       - name: Download dependencies
         run: go mod download
@@ -46,6 +58,40 @@ jobs:
 
       - name: Run focused race detection
         run: make race
+
+  coverage:
+    # 覆盖率报告：默认仅上传 report（不阻断）；workflow_dispatch 可手动开启严格模式
+    # 严格模式触发条件：workflow_dispatch.strict_coverage == 'true'
+    name: Coverage report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+        cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run coverage
+        env:
+          # CI 默认报告模式；workflow_dispatch 触发且开启 strict 才 FAIL_ON_GAP=1
+          FAIL_ON_GAP: ${{ github.event.inputs.strict_coverage == 'true' && '1' || '0' }}
+        run: ./scripts/check-coverage.sh
+
+      - name: Upload coverage summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: backend-service/bin/coverage/coverage-summary.txt
+          if-no-files-found: warn
 
   container:
     runs-on: ubuntu-latest
