@@ -4,21 +4,24 @@
 // 「词法规范文件 (lexical_spec)」。
 //
 // 输入：
-//   -system ./configs/dictionaries/system.json   （系统静态词条）
-//   -qua    /tmp/qua_snapshot.json              （qua mock 接口快照，可选）
-//   -resp   /tmp/real_best.json                  （evie-tool 真实响应）
-//   -audio  ./testdata/晨会录音.mp3              （真实音频路径）
-//   -out    ./testdata/lexspec/                  （输出目录）
+//
+//	-system ./configs/dictionaries/system.json   （系统静态词条）
+//	-qua    /tmp/qua_snapshot.json              （qua mock 接口快照，可选）
+//	-resp   /tmp/real_best.json                  （evie-tool 真实响应）
+//	-audio  ./testdata/晨会录音.mp3              （真实音频路径）
+//	-out    ./testdata/lexspec/                  （输出目录）
 //
 // 输出：
-//   lexical_spec.json   结构化规范（CI 可校验）
-//   lexical_spec.md     人类可读 review 报告
+//
+//	lexical_spec.json   结构化规范（CI 可校验）
+//	lexical_spec.md     人类可读 review 报告
 //
 // 用法（已生成的 /tmp/real_best.json）：
-//   go run ./testdata/lexspec/generate.go \
-//     -resp /tmp/real_best.json \
-//     -audio ./testdata/晨会录音.mp3 \
-//     -out ./testdata/lexspec
+//
+//	go run ./testdata/lexspec/generate.go \
+//	  -resp /tmp/real_best.json \
+//	  -audio ./testdata/晨会录音.mp3 \
+//	  -out ./testdata/lexspec
 package main
 
 import (
@@ -69,11 +72,11 @@ type ToolMeta struct {
 }
 
 type AudioMeta struct {
-	Path        string `json:"path"`
-	SizeBytes   int    `json:"size_bytes"`
-	Format      string `json:"format"`
-	Provider    string `json:"provider"`
-	Stream      bool   `json:"stream"`
+	Path      string `json:"path"`
+	SizeBytes int    `json:"size_bytes"`
+	Format    string `json:"format"`
+	Provider  string `json:"provider"`
+	Stream    bool   `json:"stream"`
 }
 
 type TenantMeta struct {
@@ -84,9 +87,9 @@ type TenantMeta struct {
 }
 
 type DictionaryMeta struct {
-	System SystemDictMeta  `json:"system"`
-	Qua    QuaDictMeta     `json:"qua"`
-	Totals map[string]int  `json:"totals"`
+	System SystemDictMeta `json:"system"`
+	Qua    QuaDictMeta    `json:"qua"`
+	Totals map[string]int `json:"totals"`
 }
 
 type SystemDictMeta struct {
@@ -116,11 +119,11 @@ type PhraseRuleMeta struct {
 type QuaDictMeta struct {
 	EndpointUsers string          `json:"endpoint_users"`
 	EndpointDepts string          `json:"endpoint_depts"`
-	UsersActive   int             `json:"users_active_total"`  // 期望激活
-	UsersFiltered int             `json:"users_filtered"`      // status=0 应过滤
+	UsersActive   int             `json:"users_active_total"` // 期望激活
+	UsersFiltered int             `json:"users_filtered"`     // status=0 应过滤
 	DeptsActive   int             `json:"depts_active_total"`
 	SyncMessage   string          `json:"sync_log_message"` // "synced tenant ...: 73 entries, 65 relations"
-	Snapshot      []DictEntryMeta `json:"snapshot"`          // 同步到的真实数据
+	Snapshot      []DictEntryMeta `json:"snapshot"`         // 同步到的真实数据
 }
 
 type PipelineMeta struct {
@@ -130,13 +133,13 @@ type PipelineMeta struct {
 }
 
 type ResultMeta struct {
-	RawText         string         `json:"raw_text"`
-	EnhancedText    string         `json:"enhanced_text"`
-	RawLen          int            `json:"raw_len"`
-	EnhancedLen     int            `json:"enhanced_len"`
-	Provider        string         `json:"provider"`
-	Changes         []ChangeMeta   `json:"changes"`
-	Skipped         []string       `json:"skipped,omitempty"`
+	RawText      string       `json:"raw_text"`
+	EnhancedText string       `json:"enhanced_text"`
+	RawLen       int          `json:"raw_len"`
+	EnhancedLen  int          `json:"enhanced_len"`
+	Provider     string       `json:"provider"`
+	Changes      []ChangeMeta `json:"changes"`
+	Skipped      []string     `json:"skipped,omitempty"`
 }
 
 type ChangeMeta struct {
@@ -160,14 +163,14 @@ type RulesMeta struct {
 }
 
 type StatsMeta struct {
-	TotalChanges    int            `json:"total_changes"`
-	ByAction        map[string]int `json:"by_action"`
-	ByType          map[string]int `json:"by_type"`
-	BySource        map[string]int `json:"by_source"`
-	HighConfHits    []HighConfHit  `json:"high_confidence_hits"` // conf >= 0.8 且 action != suggest
-	AliasHits       []AliasHit     `json:"alias_hits"`
-	FuzzyReplaceHits []FuzzyHit    `json:"fuzzy_replace_hits"`
-	FuzzySuggestHits []FuzzyHit    `json:"fuzzy_suggest_hits"`
+	TotalChanges     int            `json:"total_changes"`
+	ByAction         map[string]int `json:"by_action"`
+	ByType           map[string]int `json:"by_type"`
+	BySource         map[string]int `json:"by_source"`
+	HighConfHits     []HighConfHit  `json:"high_confidence_hits"` // conf >= 0.8 且 action != suggest
+	AliasHits        []AliasHit     `json:"alias_hits"`
+	FuzzyReplaceHits []FuzzyHit     `json:"fuzzy_replace_hits"`
+	FuzzySuggestHits []FuzzyHit     `json:"fuzzy_suggest_hits"`
 }
 
 type HighConfHit struct {
@@ -180,14 +183,14 @@ type HighConfHit struct {
 }
 
 type AliasHit struct {
-	From   string `json:"from"`
-	To     string `json:"to"`
-	Count  int    `json:"count_in_session"`
+	From  string `json:"from"`
+	To    string `json:"to"`
+	Count int    `json:"count_in_session"`
 }
 
 type FuzzyHit struct {
-	From   string  `json:"from"`
-	To     string  `json:"to"`
+	From       string  `json:"from"`
+	To         string  `json:"to"`
 	Confidence float32 `json:"confidence"`
 }
 
@@ -274,11 +277,11 @@ func main() {
 }
 
 type ASRResponse struct {
-	RawText         string       `json:"rawText"`
-	EnhancedText    string       `json:"enhancedText"`
-	Provider        string       `json:"provider"`
-	SessionID       string       `json:"sessionId"`
-	Changes         []RawChange  `json:"changes"`
+	RawText      string      `json:"rawText"`
+	EnhancedText string      `json:"enhancedText"`
+	Provider     string      `json:"provider"`
+	SessionID    string      `json:"sessionId"`
+	Changes      []RawChange `json:"changes"`
 }
 
 type RawChange struct {
@@ -459,7 +462,7 @@ func buildLexSpec(audioPath string, audioBytes []byte, sysDict SystemDictJSON, q
 		},
 		Tenant: TenantMeta{
 			ID:     testTenant,
-			Token:  "bearer:" + testToken[:8] + "...",  // 脱敏
+			Token:  "bearer:" + testToken[:8] + "...", // 脱敏
 			UserID: testUserID,
 			DeptID: testDeptID,
 		},

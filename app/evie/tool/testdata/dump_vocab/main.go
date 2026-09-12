@@ -4,7 +4,8 @@
 // 把每个节点的产物 dump 出来，让人能查证"qua users / depts 是否真进了词库"。
 //
 // 用法：
-//   go run ./testdata/dump_vocab/
+//
+//	go run ./testdata/dump_vocab/
 package main
 
 import (

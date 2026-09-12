@@ -31,9 +31,9 @@ type Client interface {
 
 // UserInfo carries the current request's user identity.
 type UserInfo struct {
-	TenantID   uint32
-	UserID     uint32
-	UserName   string
+	TenantID uint32
+	UserID   uint32
+	UserName string
 }
 
 // ContextExtractor extracts UserInfo from a context. Callers inject

@@ -13,9 +13,9 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryconflict"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
+	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
-	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
 	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
 	"backend-service/app/evie/service/internal/runtimeconfig"
 
@@ -257,6 +257,7 @@ func seedConflicts(ctx context.Context, client *gen.Client) error {
 // 2026-08-27 重构为 A/B 场景双策略，供前端对比增强差异。
 //   - 场景 A: 客服对话场景 → 客服对话策略 (text_cleaning + alias_resolution)
 //   - 场景 B: 专业访谈场景 → 专业访谈策略 (pinyin_correction + context_correction)
+//
 // 幂等：按 (tenant_id, name) 查存在则跳过；旧 random profile/policy 保留。
 func seedPoliciesAndProfiles(ctx context.Context, client *gen.Client) error {
 	scenarioA := []struct {
@@ -353,6 +354,7 @@ func seedPoliciesAndProfiles(ctx context.Context, client *gen.Client) error {
 	}
 	return nil
 }
+
 // seedLogs 生成增强日志（历史记录）。
 func seedLogs(ctx context.Context, client *gen.Client) error {
 	cnt, err := client.EnhancementLog.Query().
@@ -376,15 +378,15 @@ func seedLogs(ctx context.Context, client *gen.Client) error {
 			SetTenantID(1).
 			SetRequestID(fmt.Sprintf("req-%d", i)).
 			SetSessionID(fmt.Sprintf("session-%d", i)).
-			SetPolicyID(uint32(1 + i%3)).  // 轮询分配到 1/2/3 号策略 (mock seed 已创建 3 条)
+			SetPolicyID(uint32(1 + i%3)). // 轮询分配到 1/2/3 号策略 (mock seed 已创建 3 条)
 			SetPolicyMode([]string{"HIGH_PERFORMANCE", "STANDARD", "HIGH_ACCURACY"}[i%3]).
 			SetContextVersion(fmt.Sprintf("v%d", 1+(i/30))).
 			SetRawText(raw).
 			SetEnhancedText(enhanced).
 			SetStatus(status).
-			SetProcessingTimeMs(int64(i%50)).
-			SetCleaningTimeMs(int64(i%5)).
-			SetAliasTimeMs(int64(i%3)).
+			SetProcessingTimeMs(int64(i % 50)).
+			SetCleaningTimeMs(int64(i % 5)).
+			SetAliasTimeMs(int64(i % 3)).
 			Save(ctx); err != nil {
 			return fmt.Errorf("create log: %w", err)
 		}

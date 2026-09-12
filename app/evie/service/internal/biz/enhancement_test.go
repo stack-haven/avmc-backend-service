@@ -8,9 +8,9 @@ import (
 func buildTestVocab() *VocabularyContext {
 	return &VocabularyContext{
 		entries: map[string]*VocabularyEntry{
-			"田华":   {ID: 1, StandardText: "田华", Category: "PERSON"},
-			"金种籽":  {ID: 2, StandardText: "金种籽", Category: "PRODUCT"},
-			"技术部":  {ID: 3, StandardText: "技术部", Category: "ORGANIZATION"},
+			"田华":  {ID: 1, StandardText: "田华", Category: "PERSON"},
+			"金种籽": {ID: 2, StandardText: "金种籽", Category: "PRODUCT"},
+			"技术部": {ID: 3, StandardText: "技术部", Category: "ORGANIZATION"},
 		},
 		relations: map[string][]*VocabularyRelation{
 			"小田":  {{EntryID: 1, RelationType: "ALIAS", RelatedText: "小田", TargetEntryID: 1}},

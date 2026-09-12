@@ -157,7 +157,6 @@ func (*client) UploadPart(context.Context, string, string, string, int32, io.Rea
 	return "", objectstorage.ErrUnsupportedProvider
 }
 
-
 func (*client) ListMultipartParts(context.Context, string, string, string) ([]objectstorage.MultipartPart, error) {
 	return nil, objectstorage.ErrUnsupportedProvider
 }
@@ -169,4 +168,3 @@ func (*client) CompleteMultipartUpload(context.Context, string, string, string, 
 func (*client) AbortMultipartUpload(context.Context, string, string, string) error {
 	return objectstorage.ErrUnsupportedProvider
 }
-

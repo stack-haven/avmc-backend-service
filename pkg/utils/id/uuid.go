@@ -4,7 +4,7 @@ import "github.com/google/uuid"
 
 // SessionID 业务前缀（区分不同业务来源）。
 const (
-	SessionIDPrefixASR            = "asr-"
+	SessionIDPrefixASR             = "asr-"
 	SessionIDPrefixReRecognize     = "re-"
 	SessionIDPrefixEnhanceText     = "ext-"
 	SessionIDPrefixEnhancePipeline = "pipe-"

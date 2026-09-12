@@ -10,9 +10,9 @@ import (
 // ───────────────────────────── Shared Errors ─────────────────────────────
 
 var (
-	ErrInvalidConfig       = fmt.Errorf("notifier: invalid config")
-	ErrUnsupportedChannel  = fmt.Errorf("notifier: unsupported channel")
-	ErrRecipientRequired   = fmt.Errorf("notifier: recipient required")
+	ErrInvalidConfig      = fmt.Errorf("notifier: invalid config")
+	ErrUnsupportedChannel = fmt.Errorf("notifier: unsupported channel")
+	ErrRecipientRequired  = fmt.Errorf("notifier: recipient required")
 )
 
 // ───────────────────────────── Shared Types ─────────────────────────────

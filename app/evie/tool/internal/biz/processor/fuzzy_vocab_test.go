@@ -686,7 +686,7 @@ func TestProcess_LockAlias_PrefixProtection(t *testing.T) {
 	cfg.MaxEditDistance = 2
 	proc := NewFuzzyVocabProcessor(lex, cfg)
 
-		t.Logf("protectedPrefixes: %v (length %d)", proc.protectedPrefixes, len(proc.protectedPrefixes))
+	t.Logf("protectedPrefixes: %v (length %d)", proc.protectedPrefixes, len(proc.protectedPrefixes))
 	// 应包含 播、播种、播种未（"播种未来" 的所有 prefix，plen 2 到 3）
 	for _, expected := range []string{"播", "播种", "播种未"} {
 		if !proc.protectedPrefixes[expected] {
@@ -705,7 +705,6 @@ func TestProcess_LockAlias_PrefixProtection(t *testing.T) {
 		}
 	}
 }
-
 
 // TestProcess_LockAlias_NotInBucket 验证 lock_alias=true entry 不进 fuzzy 候选桶，
 // 避免 ASR 错字（如"菌种子"）被误纠为业务专名（如"金种籽"）。

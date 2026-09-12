@@ -190,4 +190,5 @@ func (s *RedisStorage) BatchDelete(ctx context.Context, keys []string) error {
 func (s *RedisStorage) Close() error {
 	return s.client.Close()
 }
+
 // ───────────────────────────── 以下为 Redis 操作实现 ─────────────────────────────

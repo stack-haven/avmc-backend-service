@@ -10,7 +10,7 @@ func TestPercentEncode(t *testing.T) {
 		"a b":     "a%20b",
 		"a*b":     "a%2Ab",
 		"a~b":     "a~b",
-		"中文":     "%E4%B8%AD%E6%96%87",
+		"中文":      "%E4%B8%AD%E6%96%87",
 		"a+b":     "a%2Bb",
 		"a/b?c=d": "a%2Fb%3Fc%3Dd",
 	}
@@ -23,11 +23,11 @@ func TestPercentEncode(t *testing.T) {
 
 func TestSignDeterministicAndNonEmpty(t *testing.T) {
 	params := map[string]string{
-		"Action":      "SendSms",
-		"Version":     "2017-05-25",
+		"Action":       "SendSms",
+		"Version":      "2017-05-25",
 		"PhoneNumbers": "13800138000",
-		"SignName":    "测试",
-		"AccessKeyId": "ak",
+		"SignName":     "测试",
+		"AccessKeyId":  "ak",
 	}
 	secret := "secret"
 	sig1 := sign(secret, params)

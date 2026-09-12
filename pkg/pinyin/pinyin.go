@@ -123,6 +123,7 @@ func normalize(text string) string {
 //   - ASCII 标点（0x21-0x2F、0x3A-0x40、0x5B-0x60、0x7B-0x7E）
 //   - CJK 标点（U+3000-U+303F）
 //   - 全角 ASCII 标点（U+FF01-U+FF0E、U+FF1A-U+FF20、U+FF3B-U+FF40、U+FF5B-U+FF5E）
+//
 // 保留：中文字符（CJK 统一表意文字 U+4E00-U+9FFF）、英文字母、数字。
 func isPunctuationOrSpace(r rune) bool {
 	if r < 0x21 || r == 0x7F {

@@ -56,7 +56,7 @@ func TestTenantRegistry_ExpiringAndExpired(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "tenants.json")
 	now := time.Now()
-	soon := now.Add(30 * time.Minute).Format(time.RFC3339)   // 30 分钟后过期
+	soon := now.Add(30 * time.Minute).Format(time.RFC3339)  // 30 分钟后过期
 	expired := now.Add(-1 * time.Hour).Format(time.RFC3339) // 1 小时前过期
 	farFuture := now.Add(24 * time.Hour).Format(time.RFC3339)
 	content := `[

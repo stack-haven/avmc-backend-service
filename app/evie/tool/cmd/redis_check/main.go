@@ -2,13 +2,15 @@
 //
 // 诊断工具：检查 Bearer Token 是否在 Redis（qua 共享缓存）中存在。
 // 用法：
-//   go run ./cmd/redis_check <token>
-//   REDIS_ADDR=host:6379 REDIS_PASSWORD=xxx go run ./cmd/redis_check <token>
+//
+//	go run ./cmd/redis_check <token>
+//	REDIS_ADDR=host:6379 REDIS_PASSWORD=xxx go run ./cmd/redis_check <token>
 //
 // 退出码：
-//   0  token 存在
-//   1  token 不存在 / 连接失败
-//   2  参数错误
+//
+//	0  token 存在
+//	1  token 不存在 / 连接失败
+//	2  参数错误
 //
 // 这是人肉排查 401 TOKEN_INVALID 的第一把钥匙。
 package main

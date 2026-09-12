@@ -98,10 +98,10 @@ func wireApp(
 		biz.ProviderSet,
 		service.ProviderSet,
 		server.ProviderSet,
-		provideCanQuaFetch,                       // 注入给 VocabSyncer
-		provideHealthNotifier,                    // 将 HealthChecker 适配为 biz.HealthNotifier
-		provideHealthCheckerWithTokenReporter,    // 反向注入 TenantRegistry → HealthChecker
-		biz.NewVocabSyncerWithAuth,               // 内部已调 AttachLazySync(builder)
+		provideCanQuaFetch,                    // 注入给 VocabSyncer
+		provideHealthNotifier,                 // 将 HealthChecker 适配为 biz.HealthNotifier
+		provideHealthCheckerWithTokenReporter, // 反向注入 TenantRegistry → HealthChecker
+		biz.NewVocabSyncerWithAuth,            // 内部已调 AttachLazySync(builder)
 		newApp,
 	))
 }

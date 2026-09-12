@@ -56,10 +56,10 @@ type TenantRegistry struct {
 
 // tenantRegistryEntry tenant_registry.json 中的单条记录。
 type tenantRegistryEntry struct {
-	ID                string    `json:"id"`
-	SyncToken         string    `json:"sync_token,omitempty"`
-	SyncTokenExpires  string    `json:"sync_token_expires_at,omitempty"` // RFC3339
-	LastRefreshAt     string    `json:"last_refresh_at,omitempty"`        // RFC3339（只读，refresher 写入）
+	ID               string `json:"id"`
+	SyncToken        string `json:"sync_token,omitempty"`
+	SyncTokenExpires string `json:"sync_token_expires_at,omitempty"` // RFC3339
+	LastRefreshAt    string `json:"last_refresh_at,omitempty"`       // RFC3339（只读，refresher 写入）
 }
 
 // NewTenantRegistry 从 conf 构造（启动时读 tenant_registry.path 文件）。
@@ -245,12 +245,12 @@ func (r *TenantRegistry) ExpiredTenants() []string {
 
 // Snapshot 返回不可变快照（供健康检查 / refresher 读）。
 type TenantSnapshot struct {
-	ID                string
-	HasToken          bool
-	ExpiresAt         time.Time
-	LastRefreshAt     time.Time
-	IsExpired         bool
-	IsExpiringSoon    bool // 1h 内
+	ID             string
+	HasToken       bool
+	ExpiresAt      time.Time
+	LastRefreshAt  time.Time
+	IsExpired      bool
+	IsExpiringSoon bool // 1h 内
 }
 
 // SnapshotAll 返回所有租户状态快照。
@@ -487,9 +487,9 @@ func (s *VocabSyncer) SyncMode() string {
 // 按 tenant-id 头隔离数据），所以无需再过滤；所有 raws 直接进入 Normalizer。
 //
 // Token 来源（优先级）：
-//   1. ctx.AuthContext.AccessToken（请求路径，前端调用方 token）
-//   2. registry.GetSyncToken(tenantID)（后台路径，配置在 tenants.json 的 service token）
-//   3. 都没有 → 跳过后台同步（仅依赖 lazy 请求路径）
+//  1. ctx.AuthContext.AccessToken（请求路径，前端调用方 token）
+//  2. registry.GetSyncToken(tenantID)（后台路径，配置在 tenants.json 的 service token）
+//  3. 都没有 → 跳过后台同步（仅依赖 lazy 请求路径）
 func (s *VocabSyncer) SyncTenant(ctx context.Context, tenantID string) error {
 	if tenantID == "" {
 		return nil

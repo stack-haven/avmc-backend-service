@@ -51,9 +51,9 @@ type DictionaryRepo interface {
 
 // DictionaryUsecase 词库中心业务逻辑（词库 + 词条）。
 type DictionaryUsecase struct {
-	repo     DictionaryRepo
-	confRec  DictionaryConflictRecorder
-	log      *log.Helper
+	repo    DictionaryRepo
+	confRec DictionaryConflictRecorder
+	log     *log.Helper
 }
 
 // NewDictionaryUsecase 创建词库中心 usecase。

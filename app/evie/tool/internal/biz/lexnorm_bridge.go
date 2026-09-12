@@ -58,9 +58,9 @@ func buildLexiconFromSnapshot(snap *VocabularySnapshot, systemDict *systemDictFi
 			ID:   lexicon.EntryID(idStr),
 			Text: e.StandardText,
 			Meta: map[string]any{
-				"category":  e.Category,
-				"priority":  e.Priority,
-				"pinyin":    e.Pinyin,
+				"category":   e.Category,
+				"priority":   e.Priority,
+				"pinyin":     e.Pinyin,
 				"lock_alias": e.LockAlias,
 			},
 		}

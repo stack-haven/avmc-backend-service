@@ -19,6 +19,7 @@ import (
 
 	"backend-service/pkg/objectstorage"
 )
+
 func init() {
 	objectstorage.Register("local", func(raw json.RawMessage) (objectstorage.Client, error) {
 		var jc jsonConfig

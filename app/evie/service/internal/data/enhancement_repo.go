@@ -12,8 +12,8 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
-	pinyinpkg "backend-service/pkg/pinyin"
 	"backend-service/pkg/aip/listing"
+	pinyinpkg "backend-service/pkg/pinyin"
 )
 
 type enhancementPolicyRepo struct{ BaseRepo }
@@ -30,19 +30,19 @@ func enhancementPolicyProto(row *gen.EnhancementPolicy) *pb.EnhancementPolicy {
 	}
 	_ = status
 	return &pb.EnhancementPolicy{
-		Id:                     row.ID,
-		Name:                   row.Name,
-		Mode:                   row.Mode,
-		TextCleaning:           row.TextCleaning,
-		FillerRemoval:          row.FillerRemoval,
-		AliasResolution:        row.AliasResolution,
+		Id:                       row.ID,
+		Name:                     row.Name,
+		Mode:                     row.Mode,
+		TextCleaning:             row.TextCleaning,
+		FillerRemoval:            row.FillerRemoval,
+		AliasResolution:          row.AliasResolution,
 		DeterministicReplacement: row.DeterministicReplacement,
-		PinyinCorrection:       row.PinyinCorrection,
-		FuzzyMatching:          row.FuzzyMatching,
-		ContextCorrection:      row.ContextCorrection,
-		Description:            row.Description,
-		CreatedAt:              row.CreatedAt.Format(time.DateTime),
-		UpdatedAt:              row.UpdatedAt.Format(time.DateTime),
+		PinyinCorrection:         row.PinyinCorrection,
+		FuzzyMatching:            row.FuzzyMatching,
+		ContextCorrection:        row.ContextCorrection,
+		Description:              row.Description,
+		CreatedAt:                row.CreatedAt.Format(time.DateTime),
+		UpdatedAt:                row.UpdatedAt.Format(time.DateTime),
 	}
 }
 

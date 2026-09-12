@@ -18,8 +18,8 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
 	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
-	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/auth/authn"
 )
 
 type dictionaryRepo struct{ BaseRepo }
@@ -54,21 +54,21 @@ func dictionaryEntryProto(row *gen.DictionaryEntry) *pb.DictionaryEntry {
 		status = *row.Status
 	}
 	return &pb.DictionaryEntry{
-		Id:            row.ID,
-		DictionaryId:  row.DictionaryID,
-		StandardText:  row.StandardText,
-		EntryType:     row.EntryType,
-		Category:      row.Category,
-		Description:   row.Description,
-		Source:        row.Source,
-		SourceId:      row.SourceID,
-		Priority:      row.Priority,
-		Pinyin:        row.Pinyin,
-		PinyinInitial: row.PinyinInitial,
+		Id:             row.ID,
+		DictionaryId:   row.DictionaryID,
+		StandardText:   row.StandardText,
+		EntryType:      row.EntryType,
+		Category:       row.Category,
+		Description:    row.Description,
+		Source:         row.Source,
+		SourceId:       row.SourceID,
+		Priority:       row.Priority,
+		Pinyin:         row.Pinyin,
+		PinyinInitial:  row.PinyinInitial,
 		NormalizedText: row.NormalizedText,
-		Status:        status,
-		CreatedAt:     row.CreatedAt.Format(time.DateTime),
-		UpdatedAt:     row.UpdatedAt.Format(time.DateTime),
+		Status:         status,
+		CreatedAt:      row.CreatedAt.Format(time.DateTime),
+		UpdatedAt:      row.UpdatedAt.Format(time.DateTime),
 	}
 }
 
@@ -511,7 +511,9 @@ func (r *dictionaryRepo) ListRelations(ctx context.Context, req *pb.ListRelation
 
 // ListRelationsByDictionary 词库级别关系列表（跨 entryId，一次性返回词库下所有词条的关系）。
 // SQL 等价：SELECT r.* FROM dictionary_relations r
-//   INNER JOIN dictionary_entries e ON r.entry_id = e.id WHERE e.dictionary_id = ?
+//
+//	INNER JOIN dictionary_entries e ON r.entry_id = e.id WHERE e.dictionary_id = ?
+//
 // 响应含 JOIN 后的 entry_standard_text / dictionary_name 等字段，与 ListRelations 保持一致。
 func (r *dictionaryRepo) ListRelationsByDictionary(ctx context.Context, req *pb.ListRelationsByDictionaryRequest) ([]*pb.DictionaryRelation, int32, error) {
 	// 1. 校验词库存在 + scope 可见性（复用 GetDictionary，错误码 DICTIONARY_NOT_FOUND）
@@ -1004,15 +1006,15 @@ func (r *dictionaryRepo) GetStats(ctx context.Context, id uint32) (*pb.Dictionar
 	}
 
 	stats := &pb.DictionaryStats{
-		EntryCount:                 int32(entryTotal),
-		EnabledEntryCount:          int32(enabledEntry),
-		RelationCount:              int32(relationTotal),
-		VersionCount:               int32(versionTotal),
-		UnresolvedConflictCount:    0, // 1.0 占位：返回 0，前端展示「数据收集中」
-		HitRate:                    0, // 1.0 占位
-		AvgRecognitionConfidence:   0, // 1.0 占位
-		LastModifiedAt:             lastModifiedAt,
-		DictionaryId:               id,
+		EntryCount:               int32(entryTotal),
+		EnabledEntryCount:        int32(enabledEntry),
+		RelationCount:            int32(relationTotal),
+		VersionCount:             int32(versionTotal),
+		UnresolvedConflictCount:  0, // 1.0 占位：返回 0，前端展示「数据收集中」
+		HitRate:                  0, // 1.0 占位
+		AvgRecognitionConfidence: 0, // 1.0 占位
+		LastModifiedAt:           lastModifiedAt,
+		DictionaryId:             id,
 	}
 	return stats, nil
 }
@@ -1070,13 +1072,13 @@ func dashboardMyDictCard(d *gen.Dictionary, entryCount int32, relationCount int3
 		lastModified = d.UpdatedAt.Format(time.DateTime)
 	}
 	return &pb.DashboardMyDictionary{
-		Id:                     d.ID,
-		Name:                   d.Name,
-		Scope:                  d.Scope,
-		EntryCount:             entryCount,
-		RelationCount:          relationCount,
+		Id:                      d.ID,
+		Name:                    d.Name,
+		Scope:                   d.Scope,
+		EntryCount:              entryCount,
+		RelationCount:           relationCount,
 		UnresolvedConflictCount: conflictCount,
-		LastModifiedAt:         lastModified,
+		LastModifiedAt:          lastModified,
 	}
 }
 
@@ -1172,15 +1174,15 @@ func (r *dictionaryRepo) GetDashboardOverview(ctx context.Context, activitiesLim
 	totalRelations := totalMyRelations
 	totalDicts := int32(len(myDicts) + len(sysDicts))
 	health := &pb.DashboardHealthSummary{
-		TotalDictionaries:       totalDicts,
-		TotalEntries:            totalEntries,
-		EnabledEntries:          enabledEntries,
-		TotalRelations:          totalRelations,
-		UnresolvedConflicts:     totalMyConflicts,
-		HitRate:                 0, // 1.0 占位（需 JOIN EnhancementLog，2.0 补 schema）
+		TotalDictionaries:        totalDicts,
+		TotalEntries:             totalEntries,
+		EnabledEntries:           enabledEntries,
+		TotalRelations:           totalRelations,
+		UnresolvedConflicts:      totalMyConflicts,
+		HitRate:                  0, // 1.0 占位（需 JOIN EnhancementLog，2.0 补 schema）
 		AvgRecognitionConfidence: 0,
-		CoverageDictionaryCount: int32(len(myDicts)),
-		TotalDictionaryCount:    totalDicts,
+		CoverageDictionaryCount:  int32(len(myDicts)),
+		TotalDictionaryCount:     totalDicts,
 	}
 
 	// 4. 最近活动（从 DictionaryChangeLog 拉取前 N 条，限制为 ctx 租户 + PLATFORM 可见）
@@ -1306,6 +1308,7 @@ func extractActivitySummary(snapshot string) string {
 // 后续 2.0 需要：
 //   - EnhancementLog 增加 dictionary_id 外键（当前只有 session_id）
 //   - 通过 ASRRecord → session_id 间接 JOIN 词库
+//
 // 多租户隐私：ctx 租户的 scope=TENANT + PLATFORM/SYSTEM 词库。
 func (r *dictionaryRepo) GetVocabularyHealth(ctx context.Context, scope string, recentDays int32) ([]*pb.VocabularyHealthDetail, error) {
 	if recentDays <= 0 {

@@ -65,7 +65,7 @@ type systemEntry struct {
 	Homophones   []string `json:"homophones"`
 	// LockAlias=true 时，fuzzy/deterministic processor 不会把这个 entry 的 standard_text 替换掉
 	//（即业务产品功能名 / 已知专有名词保护）。
-	LockAlias    bool     `json:"lock_alias,omitempty"`
+	LockAlias bool `json:"lock_alias,omitempty"`
 }
 
 type systemPhraseRule struct {

@@ -81,19 +81,19 @@ func (c *client) Send(ctx context.Context, msg notifier.Message) (notifier.Resul
 
 func (c *client) sendOne(ctx context.Context, phone string, msg notifier.Message) error {
 	params := map[string]string{
-		"Action":         "SendSms",
-		"Version":        "2017-05-25",
-		"Format":         "JSON",
-		"RegionId":       "cn-hangzhou",
-		"PhoneNumbers":   phone,
-		"SignName":       c.cfg.SignName,
-		"TemplateCode":   c.cfg.TemplateCode,
-		"TemplateParam":  templateParam(msg.Variables),
-		"AccessKeyId":    c.cfg.AccessKeyID,
-		"SignatureMethod": "HMAC-SHA1",
+		"Action":           "SendSms",
+		"Version":          "2017-05-25",
+		"Format":           "JSON",
+		"RegionId":         "cn-hangzhou",
+		"PhoneNumbers":     phone,
+		"SignName":         c.cfg.SignName,
+		"TemplateCode":     c.cfg.TemplateCode,
+		"TemplateParam":    templateParam(msg.Variables),
+		"AccessKeyId":      c.cfg.AccessKeyID,
+		"SignatureMethod":  "HMAC-SHA1",
 		"SignatureVersion": "1.0",
-		"SignatureNonce":  nonce(),
-		"Timestamp":       time.Now().UTC().Format("2006-01-02T15:04:05Z"),
+		"SignatureNonce":   nonce(),
+		"Timestamp":        time.Now().UTC().Format("2006-01-02T15:04:05Z"),
 	}
 	params["Signature"] = sign(c.cfg.AccessKeySecret, params)
 

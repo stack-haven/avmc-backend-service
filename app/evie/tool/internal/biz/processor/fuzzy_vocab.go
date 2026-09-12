@@ -147,7 +147,7 @@ func (p *FuzzyVocabProcessor) buildIndex() {
 			for plen := 1; plen < len(r); plen++ {
 				p.protectedPrefixes[string(r[:plen])] = true
 			}
-			return true  // 不进 bucket
+			return true // 不进 bucket
 		}
 		p.byLen[n] = append(p.byLen[n], ie)
 		return true

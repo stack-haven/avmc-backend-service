@@ -41,10 +41,11 @@ func conv() Converter {
 // Signature 返回 text 的"首字母 signature"。
 //
 // 例：
-//   Signature("陈欣静")   = "cxj"
-//   Signature("佘丽群")   = "slq"
-//   Signature("Hello")    = "hello"   // ASCII 字符原样保留并小写
-//   Signature("")         = ""
+//
+//	Signature("陈欣静")   = "cxj"
+//	Signature("佘丽群")   = "slq"
+//	Signature("Hello")    = "hello"   // ASCII 字符原样保留并小写
+//	Signature("")         = ""
 //
 // 设计选择：
 //   - 空字符串 / 纯标点 → ""
