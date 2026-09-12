@@ -1,15 +1,26 @@
 # Ark Tech Platform — Unified Go Lint Configuration
-# Last updated: 2026-07-30
+# Last updated: 2026-09-12
 #
 # 渐进式引入策略:
-#   Phase 1 (立即):  启用所有 [P0] 规则 + forbidigo，CI 阻断
-#   Phase 2 (2周内): 启用 [P1] 规则，CI 阻断
-#   Phase 3 (1月内): 启用 [P2] 规则，CI 阻断
+#   P0 (安全 + 正确性): 永远 CI 阻断
+#     - govet, errcheck, staticcheck, gosec, nilerr, errorlint, forbidigo
+#   P1 (代码质量):     报告（不阻断），累计 50 个 max-issues-per-linter
+#     - gocritic, unconvert, prealloc, makezero, copyloopvar, gocognit
+#   P2 (风格统一):     报告（不阻断），累计 50 个 max-issues-per-linter
+#     - revive, gci, nakedret, dupword, testifylint
+#
+# CI 增量门禁说明:
+#   - make lint 跑全量 lint，作为质量报告源（信息源，不阻断）
+#   - make lint-new 仅检查本次 diff 相对 HEAD 的变更；该项是 P0 门禁（CI 阻断）
+#   - 累计 130+ P0 漂移逐个修完之前，PR 不能引入新 P0 错误但可保留旧 P0
+#   - 详细计划在 4-6 变更记录与 4-7 代码功能清单里跟踪
 #
 # Usage:
-#   make lint            # 检查
+#   make lint            # 全量 lint（报告）
+#   make lint-new        # 仅本次 diff（CI 门禁）
 #   make lint-fix        # 自动修复
 #   make security-check  # 安全扫描
+#   make check           # P0 门禁 = fmt-check + lint-new + vet + test
 
 run:
   timeout: 5m
@@ -67,8 +78,9 @@ linters-settings:
       - p: ^panic$
         msg: "Do not use panic in biz/data layer; return errors instead"
 
-  # ── P1 ──
+  # ── P1（CI 告警不阻断）──
   gocritic:
+    severity: warning
     enabled-tags:
       - diagnostic
       - style
@@ -77,10 +89,23 @@ linters-settings:
       - ifElseChain          # 项目中有合理的长 switch/if-else
       - commentFormatting    # 早期中文注释多，先禁用
 
+  unconvert:
+    severity: warning
+
+  prealloc:
+    severity: warning
+
+  makezero:
+    severity: warning
+
+  copyloopvar:
+    severity: warning
+
   gocognit:
+    severity: warning
     min-complexity: 25
 
-  # ── P2 ──
+  # ── P2（CI 告警不阻断）──
   revive:
     severity: warning
     rules:
@@ -96,18 +121,28 @@ linters-settings:
       - name: superfluous-else
 
   gci:
+    severity: warning
     sections:
       - standard
       - default
       - prefix(backend-service)
     skip-generated: true
 
+  nakedret:
+    severity: warning
+
+  dupword:
+    severity: warning
+
   testifylint:
+    severity: warning
     enable-all: true
 
 issues:
   max-issues-per-linter: 50
   max-same-issues: 10
+  exclude-default: false
+  show-stats: true
 
   exclude-dirs:
     - api

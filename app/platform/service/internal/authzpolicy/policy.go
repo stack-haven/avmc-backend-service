@@ -209,9 +209,6 @@ func IsAuthenticatedSelfServiceOperation(object authz.Object, action authz.Actio
 		return action == "POST" || action == authz.Action(lastSegment(string(object)))
 	case authz.Object(v1.OperationSessionServiceListMySessions):
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
-		return action == "GET" || action == authz.Action(lastSegment(string(object)))
-		return action == "GET" || action == authz.Action(lastSegment(string(object)))
-		return action == "POST" || action == authz.Action(lastSegment(string(object)))
 	case authz.Object(v1.OperationNotificationServiceListMyNotifications),
 		authz.Object(v1.OperationNotificationServiceCountMyUnreadNotifications):
 		return action == "GET" || action == authz.Action(lastSegment(string(object)))
