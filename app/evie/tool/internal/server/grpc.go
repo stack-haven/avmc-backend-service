@@ -23,10 +23,13 @@ func NewGRPCServer(
 	asrService *service.ASRService,
 	logger log.Logger,
 ) *grpc.Server {
-	mws := []middleware.Middleware{recovery.Recovery(), kvalidate.ProtoValidate()}
+	// v1.3 中间件顺序（与 HTTP 一致）：recovery → auth → validate
+	// 关键：auth 在 validate 之前，避免未鉴权请求探测验证规则。
+	mws := []middleware.Middleware{recovery.Recovery()}
 	if cache != nil {
 		mws = append(mws, NewTokenAuthMiddleware(cache, nil))
 	}
+	mws = append(mws, kvalidate.ProtoValidate())
 	_ = logger
 	opts := []grpc.ServerOption{grpc.Middleware(mws...)}
 	if c != nil && c.Grpc != nil {

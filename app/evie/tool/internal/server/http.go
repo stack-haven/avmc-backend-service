@@ -48,10 +48,16 @@ func NewHTTPServer(
 	checker pkgHealth.Checker,
 	logger log.Logger,
 ) *kratoshttp.Server {
-	mws := []middleware.Middleware{recovery.Recovery(), kvalidate.ProtoValidate(), metricsMiddleware()}
+	// v1.3 中间件顺序（外层 → 内层）：
+	//   recovery → metrics → auth → validate
+	//
+	// 关键：auth 在 validate 之前，避免未鉴权请求探测验证规则
+	// （无 token + 无效 body 应返 401 而非 400）。
+	mws := []middleware.Middleware{recovery.Recovery(), metricsMiddleware()}
 	if cache != nil {
 		mws = append(mws, NewTokenAuthMiddleware(cache, skipPaths))
 	}
+	mws = append(mws, kvalidate.ProtoValidate())
 	_ = logger
 
 	// CORS 中间件（配置驱动，v1.3）。
