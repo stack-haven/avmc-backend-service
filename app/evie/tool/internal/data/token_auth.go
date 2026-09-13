@@ -18,6 +18,7 @@ import (
 	v1 "backend-service/api/evie/tool/v1"
 
 	"backend-service/app/evie/tool/internal/biz"
+	"backend-service/app/evie/tool/pkg/credential"
 	"backend-service/pkg/auth/authn"
 
 	"github.com/go-kratos/kratos/v2/middleware"
@@ -56,11 +57,16 @@ func TokenAuthMiddleware(cache TokenLookup, skipPath []string) middleware.Middle
 			if err != nil {
 				switch {
 				case errors.Is(err, ErrTokenNotFound):
-					return nil, v1.ErrorTokenInvalid("token not found in redis")
+					// v1.3 修复：不暴露后端实现细节（不写死 "redis"）
+					return nil, v1.ErrorTokenInvalid("token not found or expired")
 				case errors.Is(err, ErrTokenInvalid):
-					return nil, v1.ErrorTokenInvalid("token value invalid json")
+					return nil, v1.ErrorTokenInvalid("token payload invalid")
+				case errors.Is(err, credential.ErrProviderUnavailable):
+					// v1.3 修复：后端存储不可达 → HTTP 503（而非 500）
+					return nil, v1.ErrorAuthServiceUnavailable("auth backend temporarily unavailable")
 				default:
-					return nil, v1.ErrorTokenLookupFailed("token lookup: %v", err)
+					// v1.3 修复：不暴露内部错误（redis 地址 / 连接错误等）
+					return nil, v1.ErrorAuthServiceUnavailable("auth backend temporarily unavailable")
 				}
 			}
 			if info.TenantID == "" || info.UserID == "" {

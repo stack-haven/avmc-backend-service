@@ -106,7 +106,7 @@ func setupASR_E2E(t *testing.T) *asrE2EEnv {
 		&v1conf.Asr{Upload: &v1conf.Asr_Upload{AudioDir: env.audioDir}},
 		log.DefaultLogger,
 	)
-	asrSvc := service.NewASRService(asrUC)
+	asrSvc := service.NewASRService(asrUC, nil)
 
 	// 6. Kratos HTTP server
 	mws := []middleware.Middleware{NewTokenAuthMiddleware(tc, nil)}

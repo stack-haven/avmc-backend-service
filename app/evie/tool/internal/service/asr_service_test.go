@@ -79,7 +79,7 @@ func makeService(t *testing.T) *service.ASRService {
 	uc := biz.NewASRUsecase(providers, nil, &v1conf.Asr{
 		Upload: &v1conf.Asr_Upload{AudioDir: dir + "/audio"},
 	}, log.DefaultLogger)
-	return service.NewASRService(uc)
+	return service.NewASRService(uc, nil)
 }
 
 func makeCtxWithAuth(userID, tenantID string) context.Context {

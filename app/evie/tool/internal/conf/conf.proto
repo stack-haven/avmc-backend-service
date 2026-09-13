@@ -26,6 +26,11 @@ message Server {
     string network = 1;
     string addr = 2;
     google.protobuf.Duration timeout = 3;
+    // v1.3 CORS 允许的来源列表（生产必填）。
+    // 	- 多个源用逗号分隔，如 "https://app.example.com,https://admin.example.com"
+    //  - 空 = 不启用 CORS（仅同源调用）
+    //  - "*" = 允许任意来源（仅 dev/test 使用；生产禁止）
+    string cors_allowed_origins = 4;
   }
   message GRPC {
     string network = 1;

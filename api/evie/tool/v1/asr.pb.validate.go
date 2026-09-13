@@ -199,6 +199,8 @@ func (m *RecognizeRequest) validate(all bool) error {
 
 	// no validation rules for EnableEnhancement
 
+	// no validation rules for ProviderName
+
 	if len(errors) > 0 {
 		return RecognizeRequestMultiError(errors)
 	}

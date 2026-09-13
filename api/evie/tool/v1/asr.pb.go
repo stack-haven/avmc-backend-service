@@ -103,8 +103,11 @@ type RecognizeRequest struct {
 	SessionId string `protobuf:"bytes,3,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	// 是否在识别后执行 8 层文本增强；默认 true。
 	EnableEnhancement bool `protobuf:"varint,4,opt,name=enable_enhancement,json=enableEnhancement,proto3" json:"enable_enhancement,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// v1.3 可选客户端指定 ASR provider（如 "funasr" / "xunfei"）；空 = 用服务端默认。
+	// 不存在的 provider_name 会返回 INVALID_ARGUMENT（400）。
+	ProviderName  string `protobuf:"bytes,5,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RecognizeRequest) Reset() {
@@ -163,6 +166,13 @@ func (x *RecognizeRequest) GetEnableEnhancement() bool {
 		return x.EnableEnhancement
 	}
 	return false
+}
+
+func (x *RecognizeRequest) GetProviderName() string {
+	if x != nil {
+		return x.ProviderName
+	}
+	return ""
 }
 
 // RecognizeResponse 同步识别响应。
@@ -994,7 +1004,7 @@ const file_evie_tool_v1_asr_proto_rawDesc = "" +
 	"\vsample_rate\x18\x02 \x01(\x05R\n" +
 	"sampleRate\x12\x1b\n" +
 	"\tbit_depth\x18\x03 \x01(\x05R\bbitDepth\x12\x1a\n" +
-	"\bchannels\x18\x04 \x01(\x05R\bchannels\"\xbe\x01\n" +
+	"\bchannels\x18\x04 \x01(\x05R\bchannels\"\xe3\x01\n" +
 	"\x10RecognizeRequest\x121\n" +
 	"\x06format\x18\x01 \x01(\v2\x19.evie.tool.v1.AudioFormatR\x06format\x12)\n" +
 	"\n" +
@@ -1002,7 +1012,8 @@ const file_evie_tool_v1_asr_proto_rawDesc = "" +
 	"\xbaH\az\x05\x18\x80\x80\x80\x05R\taudioData\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x03 \x01(\tR\tsessionId\x12-\n" +
-	"\x12enable_enhancement\x18\x04 \x01(\bR\x11enableEnhancement\"\x9c\x06\n" +
+	"\x12enable_enhancement\x18\x04 \x01(\bR\x11enableEnhancement\x12#\n" +
+	"\rprovider_name\x18\x05 \x01(\tR\fproviderName\"\x9c\x06\n" +
 	"\x11RecognizeResponse\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x1d\n" +

@@ -30,10 +30,11 @@ enum ErrorReason {
   SERVICE_UNAVAILABLE = 6  [(errors.code) = 503];
 
   // ===== Token / 认证 =====
-  TOKEN_MISSING         = 100 [(errors.code) = 401];
-  TOKEN_INVALID         = 101 [(errors.code) = 401]; // Redis 不存在 / JSON 非法
-  TOKEN_LOOKUP_FAILED   = 102 [(errors.code) = 500]; // Redis 故障
-  TOKEN_PAYLOAD_INVALID = 103 [(errors.code) = 401]; // 缺少 tenantId/userId
+  TOKEN_MISSING               = 100 [(errors.code) = 401];
+  TOKEN_INVALID               = 101 [(errors.code) = 401]; // Redis 不存在 / JSON 非法
+  TOKEN_LOOKUP_FAILED         = 102 [(errors.code) = 500]; // Redis 故障
+  TOKEN_PAYLOAD_INVALID       = 103 [(errors.code) = 401]; // 缺少 tenantId/userId
+  AUTH_SERVICE_UNAVAILABLE     = 104 [(errors.code) = 503]; // 后端认证存储不可达（Redis down 等）
 
   // ===== Qua 上游错误 =====
   QUA_UNREACHABLE         = 200 [(errors.code) = 502];
@@ -50,6 +51,7 @@ enum ErrorReason {
   ASR_PROVIDER_INVALID_AUDIO   = 302 [(errors.code) = 400];
   ASR_AUDIO_TOO_LARGE          = 303 [(errors.code) = 413];
   ASR_STREAM_BROKEN            = 304 [(errors.code) = 500];
+  ASR_PROVIDER_NOT_FOUND       = 305 [(errors.code) = 400]; // v1.3 不存在的 provider_name
 
   // ===== 文本增强 / 词库 =====
   ENHANCEMENT_VOCAB_NOT_READY  = 400 [(errors.code) = 503];

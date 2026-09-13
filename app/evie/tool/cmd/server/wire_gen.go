@@ -66,7 +66,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	}
 	asrProviders := data.NewASRProviders(providerRegistry, asr)
 	asrUsecase := biz.NewASRUsecase(asrProviders, enhancementUsecase, asr, logger)
-	asrService := service.NewASRService(asrUsecase)
+	asrService := service.NewASRService(asrUsecase, providerRegistry)
 	grpcServer := server.NewGRPCServer(confServer, tokenLookup, enhancementService, asrService, logger)
 	v := data.NewQuaClientOptions()
 	quaFetcher, err := data.NewQuaClient(qua, logger, v...)

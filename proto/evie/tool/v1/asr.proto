@@ -68,6 +68,9 @@ message RecognizeRequest {
   string session_id = 3;
   // 是否在识别后执行 8 层文本增强；默认 true。
   bool enable_enhancement = 4;
+  // v1.3 可选客户端指定 ASR provider（如 "funasr" / "xunfei"）；空 = 用服务端默认。
+  // 不存在的 provider_name 会返回 INVALID_ARGUMENT（400）。
+  string provider_name = 5;
 }
 
 // RecognizeResponse 同步识别响应。

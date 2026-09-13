@@ -17,17 +17,23 @@ import (
 	v1 "backend-service/api/evie/tool/v1"
 	"backend-service/app/evie/tool/internal/biz"
 	"backend-service/app/evie/tool/internal/data"
+	"backend-service/pkg/asr"
 )
 
 // ASRService 同步 + 流式识别。
 type ASRService struct {
 	v1.UnimplementedASRServiceServer
-	uc *biz.ASRUsecase
+	uc       *biz.ASRUsecase
+	registry *asr.ProviderRegistry // 用于 providerName 存在性校验（防止任意名称）
 }
 
 // NewASRService 构造。
-func NewASRService(uc *biz.ASRUsecase) *ASRService {
-	return &ASRService{uc: uc}
+//
+// registry 用于校验请求中的 providerName 是否在已注册列表中（防止任意名称传入）。
+// 不在 ASRUsecase 主路径中使用（usecase 依然用已固定的 batch/stream provider），
+// 仅用于 service 层的输入校验。
+func NewASRService(uc *biz.ASRUsecase, registry *asr.ProviderRegistry) *ASRService {
+	return &ASRService{uc: uc, registry: registry}
 }
 
 // Recognize 同步识别。
@@ -35,6 +41,17 @@ func (s *ASRService) Recognize(ctx context.Context, req *v1.RecognizeRequest) (*
 	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok || auth == nil {
 		return nil, status.Error(codes.Unauthenticated, "missing auth info")
+	}
+
+	// v1.3 修复：providerName 在 service 层校验（不存在 → HTTP 400，避免
+	// 服务静默忽略 unknown provider 后调用默认 provider 返 500）。
+	if s.registry != nil {
+		if name := req.GetProviderName(); name != "" {
+			if _, err := s.registry.Get(name); err != nil {
+				// 不在已注册列表 → 400 ASR_PROVIDER_NOT_FOUND
+				return nil, v1.ErrorAsrProviderNotFound("unknown ASR provider: %s", name)
+			}
+		}
 	}
 
 	format := protoAudioToBiz(req.GetFormat())

@@ -8,6 +8,7 @@ package server
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	pkgHealth "backend-service/pkg/health"
@@ -53,7 +54,7 @@ func NewHTTPServer(
 	}
 	_ = logger
 
-	// CORS 中间件。
+	// CORS 中间件（配置驱动，v1.3）。
 	//
 	// 为什么用 kratoshttp.Filter 而不是 kratoshttp.Middleware：
 	//   浏览器对跨域非简单请求（如 application/json POST）会先发 OPTIONS 预检请求。
@@ -63,23 +64,45 @@ func NewHTTPServer(
 	//   且 gorilla/handlers.CORS 自动识别 OPTIONS + Origin 头，
 	//   直接返回 204 + CORS 响应头，不进入业务链。
 	//
-	// 生产环境应把 AllowedOrigins 从 ["*"] 收敛为允许的前端域名白名单；
-	// demo 阶段用 * 方便 file:// / http-server 调试。
-	opts := []kratoshttp.ServerOption{
-		kratoshttp.Filter(handlers.CORS(
-			handlers.AllowedHeaders([]string{
-				"Content-Type",
-				"Authorization",
-				"X-Request-Id", // 链路追踪 ID，方便前端日志关联
-			}),
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-			handlers.AllowedOrigins([]string{"*"}),
-			handlers.ExposedHeaders([]string{
-				"X-Request-Id",
-			}),
-		)),
-		kratoshttp.Middleware(mws...),
+	// 配置（conf.Server.HTTP.cors_allowed_origins）：
+	//   - 空（默认）：不启用 CORS（仅同源调用）
+	//   - "*"：允许任意来源（仅 dev/test；生产禁止）
+	//   - "https://app.example.com,https://admin.example.com"：白名单
+	opts := []kratoshttp.ServerOption{}
+
+	// 仅当配置了 cors_allowed_origins 才添加 CORS filter（默认不启用）
+	if c != nil && c.Http != nil && c.Http.GetCorsAllowedOrigins() != "" {
+		originsRaw := c.Http.GetCorsAllowedOrigins()
+		var allowedOrigins []string
+		if originsRaw == "*" {
+			// dev/test: 允许任意来源；生产禁止
+			allowedOrigins = []string{"*"}
+		} else {
+			// 逗号分隔的白名单
+			for _, o := range strings.Split(originsRaw, ",") {
+				o = strings.TrimSpace(o)
+				if o != "" {
+					allowedOrigins = append(allowedOrigins, o)
+				}
+			}
+		}
+		if len(allowedOrigins) > 0 {
+			opts = append(opts, kratoshttp.Filter(handlers.CORS(
+				handlers.AllowedHeaders([]string{
+					"Content-Type",
+					"Authorization",
+					"X-Request-Id",
+				}),
+				handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+				handlers.AllowedOrigins(allowedOrigins),
+				handlers.ExposedHeaders([]string{
+					"X-Request-Id",
+				}),
+			)))
+		}
 	}
+
+	opts = append(opts, kratoshttp.Middleware(mws...))
 	if c != nil && c.Http != nil {
 		if c.Http.Network != "" {
 			opts = append(opts, kratoshttp.Network(c.Http.Network))

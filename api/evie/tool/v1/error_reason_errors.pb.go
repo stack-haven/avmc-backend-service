@@ -153,6 +153,20 @@ func ErrorTokenPayloadInvalid(format string, args ...interface{}) *errors.Error 
 	return errors.New(401, ErrorReason_TOKEN_PAYLOAD_INVALID.String(), fmt.Sprintf(format, args...))
 }
 
+// 后端认证存储不可达（Redis down 等）
+func IsAuthServiceUnavailable(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AUTH_SERVICE_UNAVAILABLE.String() && e.Code == 503
+}
+
+// 后端认证存储不可达（Redis down 等）
+func ErrorAuthServiceUnavailable(format string, args ...interface{}) *errors.Error {
+	return errors.New(503, ErrorReason_AUTH_SERVICE_UNAVAILABLE.String(), fmt.Sprintf(format, args...))
+}
+
 // ===== Qua 上游错误 =====
 func IsQuaUnreachable(err error) bool {
 	if err == nil {
@@ -301,6 +315,20 @@ func IsAsrStreamBroken(err error) bool {
 
 func ErrorAsrStreamBroken(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, ErrorReason_ASR_STREAM_BROKEN.String(), fmt.Sprintf(format, args...))
+}
+
+// v1.3 不存在的 provider_name
+func IsAsrProviderNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ASR_PROVIDER_NOT_FOUND.String() && e.Code == 400
+}
+
+// v1.3 不存在的 provider_name
+func ErrorAsrProviderNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ASR_PROVIDER_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // ===== 文本增强 / 词库 =====

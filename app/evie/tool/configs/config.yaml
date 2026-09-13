@@ -1,177 +1,109 @@
-# evie/tool 生产配置（Redis 认证 + qua 用户/部门访问）
-#
-# 启动方式：
-#   make run CONF=./configs/config.yaml
-#   # 或带凭据：
-#   REDIS_PASSWORD=xxx XUNFEI_APP_ID=xxx XUNFEI_API_KEY=xxx XUNFEI_API_SECRET=xxx \
-#     make run CONF=./configs/config.yaml
-#
-# 工作目录：app/evie/tool（`make run` 的 cwd）
-# 所有相对路径都基于此目录解析。
-#
-# 凭据约定：password / api_key / api_secret / app_id 一律通过环境变量注入，
-# 禁止把明文写入本文件。
-
 server:
   http:
     addr: 0.0.0.0:8110
     timeout: 30s
+    cors_allowed_origins: '*'
   grpc:
     addr: 0.0.0.0:9110
     timeout: 30s
-
-# =====================================================================
-# Redis：Bearer Token 共享访问（与 qua 共用同一 Redis）
-# =====================================================================
-# Token 形态：oauth2_access_token:<token> → JSON {tenant_id, user_id, ...}
-# 由 qua 网关在用户登录时写入，evie/tool 只读不写。
 data:
   redis:
     network: tcp
     addr: 127.0.0.1:6379
-    # 通过 env 注入：DATA_REDIS_PASSWORD（make run-prod 会从 REDIS_PASSWORD 自动翻译）
-    password: ""
+    password: ''
     db: 14
     read_timeout: 0.2s
     write_timeout: 0.2s
-    token_key_prefix: "oauth2_access_token:"
-
-# =====================================================================
-# qua：外部系统 HTTP 对接（用户 / 部门拉取）
-# =====================================================================
-# 端点路径与 qua 当前接口约定一致；extra_headers.tenant-id 由 ctx
-# AuthInfo.TenantID 运行时填入（这里空串是占位，不是缺失）。
-#
-# v1.2 admin_token（可选）：
-#   - 空（默认）：纯 lazy sync。请求路径上 cache miss 或 TTL 过期时用请求 token 拉。
-#                不启动后台 goroutine，无需 service-account token。
-#   - 有值：后台 warmup（启动期拉一次）+ ticker 周期同步。
-#           用 service-account token，可拉任意租户的数据（需 admin 权限）。
-# 推荐：开发/测试场景用 lazy_only；生产场景且 qua 提供 admin token 时启用后台 sync。
+    token_key_prefix: 'oauth2_access_token:'
 qua:
-  base_url: "http://api.bdksim-pro.test.bedoke.com"
+  base_url: http://api.bdksim-pro.test.bedoke.com
   timeout: 10s
   forward_user_token: true
-  # admin_token: "eyJ..."        # 推荐通过环境变量 QUa_ADMIN_TOKEN 注入
   endpoints:
-    list_depts: "/admin-api/system/dept/list"
-    list_users: "/admin-api/qua/member-extended/page"
-    get_user: ""
-    get_dept: ""
+    list_depts: /admin-api/system/dept/list
+    list_users: /admin-api/qua/member-extended/page
+    get_user: ''
+    get_dept: ''
   page_size: 0
   extra_headers:
-    tenant-id: ""        # 运行时由 AuthInfo.TenantID 注入
-    zone: "Asia/Shanghai"
-
-# =====================================================================
-# ASR Provider
-# =====================================================================
-# FunASR 整段识别 + 讯飞流式识别；按 enabled 切换。
-# 讯飞凭证通过环境变量注入。
+    tenant-id: ''
+    zone: Asia/Shanghai
 asr:
   default_batch_provider: funasr
   default_stream_provider: xunfei
   upload:
-    audio_dir: "./upload/audio"
+    audio_dir: ./upload/audio
     retention_days: 7
-  # 分层超时（Phase 7.2）
   timeouts:
-    recognize: 30s   # 整段识别，依赖音频大小；0 = 不限
-    stream: 60s      # 流式识别，单次会话上限；0 = 不限
+    recognize: 30s
+    stream: 60s
   providers:
     funasr:
       enabled: true
-      addr: "http://127.0.0.1:18000"
-      stream_addr: ""
+      addr: http://127.0.0.1:18000
+      stream_addr: ''
       sample_rate: 16000
       language: zh
     xunfei:
       enabled: true
-      host: "iat-api.xfyun.cn"
-      uri: "/v2/iat"
-      # 通过 env 注入：ASR_PROVIDERS_XUNFEI_{APP_ID,API_KEY,API_SECRET}
-      # （make run-prod 从 XUNFEI_* 自动翻译）
-      app_id: "2d8c3dd7"
-      api_key: "641cdc25afd21421685c6ec2ce24149c"
-      api_secret: "MWEyMzg2ODhiMThhY2E2MWJmZWQ4YjQ4"
+      host: iat-api.xfyun.cn
+      uri: /v2/iat
+      app_id: 2d8c3dd7
+      api_key: 641cdc25afd21421685c6ec2ce24149c
+      api_secret: MWEyMzg2ODhiMThhY2E2MWJmZWQ4YjQ4
       sample_rate: 16000
     whisper:
       enabled: false
     aliyun:
       enabled: false
-
-# =====================================================================
-# 文本增强 8 层 Pipeline
-# =====================================================================
 enhancement:
   pipeline:
-    - cleaning
-    - filler
-    - vocab_matching
-    - alias_resolution
-    - deterministic_replacement
-    - pinyin_correction
-    - fuzzy_matching
-    - context_correction
-    # - llm_reserved  # 保留位，未启用
+  - cleaning
+  - filler
+  - vocab_matching
+  - alias_resolution
+  - deterministic_replacement
+  - pinyin_correction
+  - fuzzy_matching
+  - context_correction
   pinyin_threshold: 0.85
-  fuzzy_auto_threshold: 0.80
-  fuzzy_suggest_threshold: 0.60
+  fuzzy_auto_threshold: 0.8
+  fuzzy_suggest_threshold: 0.6
   llm_enabled: false
-  # 增强调用超时（Phase 7.2）；0 = 不限
   timeout: 2s
-
-# =====================================================================
-# 租户词库同步（qua → 内存）
-# =====================================================================
 tenant_vocab:
   sync_interval: 300s
   initial_warmup: true
   concurrency: 4
   include_departments: true
-  include_user_nickname: true   # Q3
-  include_user_realname: true   # Q3
-  custom_alias_field: "alias"
-
-# =====================================================================
-# 系统静态词条（hot_reload 由 fsnotify 监听变更）
-# =====================================================================
+  include_user_nickname: true
+  include_user_realname: true
+  custom_alias_field: alias
 system_dict:
-  path: "./configs/dictionaries/system.json"
+  path: ./configs/dictionaries/system.json
   hot_reload: true
-
-# =====================================================================
-# 租户注册表（tenants.json，gitignore；含 sync_token 的租户走 background sync）
-# =====================================================================
 tenant_registry:
-  path: "./configs/tenants.json"
-
-# =====================================================================
-# VocabRules：Source → RawEntity → Normalizer → NormalizedEntry
-# =====================================================================
-# 把 qua 的用户/部门 RawEntity 映射成内部 NormalizedEntry；
-# 字段路径采用 dot-notation，include_when 支持 == / != / 真值。
+  path: ./configs/tenants.json
 vocab_rules:
   sources:
     qua:
       entity_mappings:
-        # 用户：name → 标准词，mobile → alias，status==1 过滤
-        # v1.2: 加通用词黑名单（exclude 测试/入职/账号 等系统账号）
-        - match:
-            entity_type: "user"
-          emit:
-            standard_text: "name"
-            category: "PERSON"
-            aliases:
-              - "mobile"
-            pinyin_hint: "name"
-            priority: "50"
-            include_when: "status==1 AND name!~测试 AND name!~入职 AND name!~账号 AND name!~权限 AND name!~成员 AND name!~动态 AND name!~员工 AND name!~管理 AND name!~张三 AND name!~小子 AND name!~可可 AND name!~新人 AND name!~花花"
-        # 部门：name → 标准词，全量收录
-        - match:
-            entity_type: "department"
-          emit:
-            standard_text: "name"
-            category: "ORGANIZATION"
-            pinyin_hint: "name"
-            priority: "30"
+      - match:
+          entity_type: user
+        emit:
+          standard_text: name
+          category: PERSON
+          aliases:
+          - mobile
+          pinyin_hint: name
+          priority: '50'
+          include_when: status==1 AND name!~测试 AND name!~入职 AND name!~账号 AND name!~权限
+            AND name!~成员 AND name!~动态 AND name!~员工 AND name!~管理 AND name!~张三 AND name!~小子
+            AND name!~可可 AND name!~新人 AND name!~花花
+      - match:
+          entity_type: department
+        emit:
+          standard_text: name
+          category: ORGANIZATION
+          pinyin_hint: name
+          priority: '30'

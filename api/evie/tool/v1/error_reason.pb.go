@@ -44,10 +44,11 @@ const (
 	ErrorReason_INTERNAL_ERROR      ErrorReason = 5
 	ErrorReason_SERVICE_UNAVAILABLE ErrorReason = 6
 	// ===== Token / 认证 =====
-	ErrorReason_TOKEN_MISSING         ErrorReason = 100
-	ErrorReason_TOKEN_INVALID         ErrorReason = 101 // Redis 不存在 / JSON 非法
-	ErrorReason_TOKEN_LOOKUP_FAILED   ErrorReason = 102 // Redis 故障
-	ErrorReason_TOKEN_PAYLOAD_INVALID ErrorReason = 103 // 缺少 tenantId/userId
+	ErrorReason_TOKEN_MISSING            ErrorReason = 100
+	ErrorReason_TOKEN_INVALID            ErrorReason = 101 // Redis 不存在 / JSON 非法
+	ErrorReason_TOKEN_LOOKUP_FAILED      ErrorReason = 102 // Redis 故障
+	ErrorReason_TOKEN_PAYLOAD_INVALID    ErrorReason = 103 // 缺少 tenantId/userId
+	ErrorReason_AUTH_SERVICE_UNAVAILABLE ErrorReason = 104 // 后端认证存储不可达（Redis down 等）
 	// ===== Qua 上游错误 =====
 	ErrorReason_QUA_UNREACHABLE      ErrorReason = 200
 	ErrorReason_QUA_BAD_REQUEST      ErrorReason = 201
@@ -62,6 +63,7 @@ const (
 	ErrorReason_ASR_PROVIDER_INVALID_AUDIO  ErrorReason = 302
 	ErrorReason_ASR_AUDIO_TOO_LARGE         ErrorReason = 303
 	ErrorReason_ASR_STREAM_BROKEN           ErrorReason = 304
+	ErrorReason_ASR_PROVIDER_NOT_FOUND      ErrorReason = 305 // v1.3 不存在的 provider_name
 	// ===== 文本增强 / 词库 =====
 	ErrorReason_ENHANCEMENT_VOCAB_NOT_READY ErrorReason = 400
 	ErrorReason_ENHANCEMENT_TEXT_INVALID    ErrorReason = 401
@@ -82,6 +84,7 @@ var (
 		101: "TOKEN_INVALID",
 		102: "TOKEN_LOOKUP_FAILED",
 		103: "TOKEN_PAYLOAD_INVALID",
+		104: "AUTH_SERVICE_UNAVAILABLE",
 		200: "QUA_UNREACHABLE",
 		201: "QUA_BAD_REQUEST",
 		202: "QUA_UNAUTHORIZED",
@@ -94,6 +97,7 @@ var (
 		302: "ASR_PROVIDER_INVALID_AUDIO",
 		303: "ASR_AUDIO_TOO_LARGE",
 		304: "ASR_STREAM_BROKEN",
+		305: "ASR_PROVIDER_NOT_FOUND",
 		400: "ENHANCEMENT_VOCAB_NOT_READY",
 		401: "ENHANCEMENT_TEXT_INVALID",
 		402: "ENHANCEMENT_STEP_FAILED",
@@ -110,6 +114,7 @@ var (
 		"TOKEN_INVALID":               101,
 		"TOKEN_LOOKUP_FAILED":         102,
 		"TOKEN_PAYLOAD_INVALID":       103,
+		"AUTH_SERVICE_UNAVAILABLE":    104,
 		"QUA_UNREACHABLE":             200,
 		"QUA_BAD_REQUEST":             201,
 		"QUA_UNAUTHORIZED":            202,
@@ -122,6 +127,7 @@ var (
 		"ASR_PROVIDER_INVALID_AUDIO":  302,
 		"ASR_AUDIO_TOO_LARGE":         303,
 		"ASR_STREAM_BROKEN":           304,
+		"ASR_PROVIDER_NOT_FOUND":      305,
 		"ENHANCEMENT_VOCAB_NOT_READY": 400,
 		"ENHANCEMENT_TEXT_INVALID":    401,
 		"ENHANCEMENT_STEP_FAILED":     402,
@@ -159,7 +165,7 @@ var File_evie_tool_v1_error_reason_proto protoreflect.FileDescriptor
 
 const file_evie_tool_v1_error_reason_proto_rawDesc = "" +
 	"\n" +
-	"\x1fevie/tool/v1/error_reason.proto\x12\fevie.tool.v1\x1a\x13errors/errors.proto*\xaf\x06\n" +
+	"\x1fevie/tool/v1/error_reason.proto\x12\fevie.tool.v1\x1a\x13errors/errors.proto*\xf6\x06\n" +
 	"\vErrorReason\x12\x1a\n" +
 	"\x10RESERVED_DEFAULT\x10\x00\x1a\x04\xa8E\xf4\x03\x12\x15\n" +
 	"\vBAD_REQUEST\x10\x01\x1a\x04\xa8E\x90\x03\x12\x16\n" +
@@ -171,7 +177,8 @@ const file_evie_tool_v1_error_reason_proto_rawDesc = "" +
 	"\rTOKEN_MISSING\x10d\x1a\x04\xa8E\x91\x03\x12\x17\n" +
 	"\rTOKEN_INVALID\x10e\x1a\x04\xa8E\x91\x03\x12\x1d\n" +
 	"\x13TOKEN_LOOKUP_FAILED\x10f\x1a\x04\xa8E\xf4\x03\x12\x1f\n" +
-	"\x15TOKEN_PAYLOAD_INVALID\x10g\x1a\x04\xa8E\x91\x03\x12\x1a\n" +
+	"\x15TOKEN_PAYLOAD_INVALID\x10g\x1a\x04\xa8E\x91\x03\x12\"\n" +
+	"\x18AUTH_SERVICE_UNAVAILABLE\x10h\x1a\x04\xa8E\xf7\x03\x12\x1a\n" +
 	"\x0fQUA_UNREACHABLE\x10\xc8\x01\x1a\x04\xa8E\xf6\x03\x12\x1a\n" +
 	"\x0fQUA_BAD_REQUEST\x10\xc9\x01\x1a\x04\xa8E\xf6\x03\x12\x1b\n" +
 	"\x10QUA_UNAUTHORIZED\x10\xca\x01\x1a\x04\xa8E\xf6\x03\x12\x18\n" +
@@ -183,7 +190,8 @@ const file_evie_tool_v1_error_reason_proto_rawDesc = "" +
 	"\x1bASR_PROVIDER_RECOGNIZE_FAIL\x10\xad\x02\x1a\x04\xa8E\xf4\x03\x12%\n" +
 	"\x1aASR_PROVIDER_INVALID_AUDIO\x10\xae\x02\x1a\x04\xa8E\x90\x03\x12\x1e\n" +
 	"\x13ASR_AUDIO_TOO_LARGE\x10\xaf\x02\x1a\x04\xa8E\x9d\x03\x12\x1c\n" +
-	"\x11ASR_STREAM_BROKEN\x10\xb0\x02\x1a\x04\xa8E\xf4\x03\x12&\n" +
+	"\x11ASR_STREAM_BROKEN\x10\xb0\x02\x1a\x04\xa8E\xf4\x03\x12!\n" +
+	"\x16ASR_PROVIDER_NOT_FOUND\x10\xb1\x02\x1a\x04\xa8E\x90\x03\x12&\n" +
 	"\x1bENHANCEMENT_VOCAB_NOT_READY\x10\x90\x03\x1a\x04\xa8E\xf7\x03\x12#\n" +
 	"\x18ENHANCEMENT_TEXT_INVALID\x10\x91\x03\x1a\x04\xa8E\x90\x03\x12\"\n" +
 	"\x17ENHANCEMENT_STEP_FAILED\x10\x92\x03\x1a\x04\xa8E\xf4\x03\x1a\x04\xa0E\xf4\x03B\x9b\x01\n" +
