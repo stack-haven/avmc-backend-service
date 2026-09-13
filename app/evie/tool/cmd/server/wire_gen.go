@@ -81,7 +81,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
 	v2 := provideCanQuaFetch()
 	healthNotifier := provideHealthNotifier(checker)
-	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, tenantVocab, logger, v2, healthNotifier)
+	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, qua, tenantVocab, logger, v2, healthNotifier)
 	app := newApp(logger, grpcServer, httpServer, vocabSyncer)
 	return app, func() {
 	}, nil

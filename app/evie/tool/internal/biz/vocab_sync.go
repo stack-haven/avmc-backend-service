@@ -286,11 +286,15 @@ type VocabSyncer struct {
 	concurrency int
 	log         *log.Helper
 
+	// v1.2 全局 service-account token（来自 conf.Qua.AdminToken）。
+	// 空 = 不启动后台 sync，仅请求路径 lazy sync。
+	adminToken string
+
 	// canQuaFetch 判断 ctx 是否可调 qua（避免启动期无 token 报 401）。
 	// 由 wire 注入，默认返回 true。
 	canQuaFetch func(ctx context.Context) bool
 
-	// healthChecker 可选：用于上报同步模式（lazy_only / background）。
+	// healthChecker 可选：用于上报同步模式（lazy_only / admin）。
 	healthChecker HealthNotifier
 }
 
@@ -317,6 +321,16 @@ func WithHealthNotifier(n HealthNotifier) SyncerOption {
 		if n != nil {
 			s.healthChecker = n
 		}
+	}
+}
+
+// WithAdminToken v1.2 注入全局 service-account token。
+//
+// 有 admin_token → 后台 sync goroutine 启动周期拉取。
+// 无 admin_token → 纯 lazy sync（请求路径 cache miss 才拉）。
+func WithAdminToken(token string) SyncerOption {
+	return func(s *VocabSyncer) {
+		s.adminToken = token
 	}
 }
 
@@ -356,23 +370,32 @@ func NewVocabSyncer(
 	return s
 }
 
-// NewVocabSyncerWithAuth 是 wire 专用的注入器：在 NewVocabSyncer 上
-// 额外注入 ctx AuthInfo 检测（避免启动期 warmup 调 qua 时报 401）。
+// NewVocabSyncerWithAuth v1.2 wire 专用注入器：
+//   - 从 qua.AdminToken 读 admin_token（可选；空 = 纯 lazy sync）
+//   - 同时装上 lazy sync 回调（请求路径 cache miss 时按需同步）
 //
-// 同时装上 lazy sync 回调（cache miss 时按需同步）。
+// sync 模式（根据 admin_token 决定）：
+//   - admin_token 有 → 后台 warmup + ticker 周期同步（main.go 决定是否启动 Run）
+//   - admin_token 无 → 纯 lazy sync（请求路径 cache miss 或 TTL 过期才拉）
 func NewVocabSyncerWithAuth(
 	registry *TenantRegistry,
 	vocab *VocabularyBuilder,
 	normalizer *Normalizer,
 	quaSource VocabularySource,
-	c *conf.TenantVocab,
+	quaConf *conf.Qua, // v1.2 新增：读 admin_token
+	tenantConf *conf.TenantVocab,
 	logger log.Logger,
 	canQuaFetch func(ctx context.Context) bool,
 	health HealthNotifier,
 ) *VocabSyncer {
-	s := NewVocabSyncer(registry, vocab, normalizer, quaSource, c, logger,
+	var adminToken string
+	if quaConf != nil {
+		adminToken = quaConf.GetAdminToken()
+	}
+	s := NewVocabSyncer(registry, vocab, normalizer, quaSource, tenantConf, logger,
 		WithCanQuaFetch(canQuaFetch),
 		WithHealthNotifier(health),
+		WithAdminToken(adminToken),
 	)
 	// 装上 cache miss 回调（不阻塞当前请求，goroutine 异步同步）。
 	s.AttachLazySync(vocab)
@@ -383,21 +406,31 @@ func NewVocabSyncerWithAuth(
 	return s
 }
 
-// Warmup 启动期全量预热（拉一次 qua + 对已注册 tenant 同步）。
+// Warmup v1.2 启动期预热：仅在有 admin_token 时拉一次全量 sync。
 //
-// 不阻塞主流程太久：设 30s timeout。
+// 设计变化：
+//   - v1.1：依赖 tenants.json 里的 sync_token（user access_token），
+//     需手动维护且需 admin 权限。
+//   - v1.2：使用全局 conf.Qua.AdminToken（service-account），无则跳过。
 //
-// 注意：qua 调用需要 ctx 里携带 AuthInfo（用户 token），启动期如果没有
-// 共享 service account，会跳过全量预热、改为请求级按需同步。
-// Warmup 启动期预热：
-//
-//  1. 优先从 tenant_registry 读取预配置租户（含可选 sync_token）；
-//  2. 对有 sync_token 的租户立即同步一次（用其 token 作为认证上下文）。
-//  3. 未配置 sync_token 的租户只能靠请求路径 lazy 同步，warmup 不会拉。
+// 三档模式：
+//   - admin_token 有 + 有租户 → 启动期全量预热 + 后台 ticker 周期同步
+//   - admin_token 无 → 纯 lazy sync（请求路径 cache miss/TTL 过期才拉）
 func (s *VocabSyncer) Warmup(ctx context.Context) {
+	if s.adminToken == "" {
+		s.log.Info("vocab warmup skipped: no admin_token (lazy only mode, will sync per-request)")
+		if s.healthChecker != nil {
+			s.healthChecker.SetSyncMode("lazy_only")
+		}
+		return
+	}
+
 	tenants := s.registry.List()
 	if len(tenants) == 0 {
-		s.log.Info("vocab warmup skipped: empty tenant registry (will sync per-request)")
+		s.log.Info("vocab warmup: admin_token configured but empty tenant registry; skip")
+		if s.healthChecker != nil {
+			s.healthChecker.SetSyncMode("admin")
+		}
 		return
 	}
 
@@ -406,29 +439,36 @@ func (s *VocabSyncer) Warmup(ctx context.Context) {
 
 	synced := 0
 	for _, t := range tenants {
-		token := s.registry.GetSyncToken(t)
-		if token == "" {
-			s.log.Debugf("warmup skip tenant %s: no sync_token (lazy only)", t)
-			continue
-		}
-		syncCtx := s.syncCtxFor(warmupCtx, t, token)
+		syncCtx := s.adminCtxFor(warmupCtx, t, s.adminToken)
 		if err := s.SyncTenant(syncCtx, t); err != nil {
 			s.log.Warnf("warmup tenant %s: %v", t, err)
 			continue
 		}
 		synced++
 	}
-	s.log.Infof("vocab warmup: %d/%d tenants synced (with sync_token)", synced, len(tenants))
+	s.log.Infof("vocab warmup: %d/%d tenants synced (admin_token mode)", synced, len(tenants))
+	if s.healthChecker != nil {
+		s.healthChecker.SetSyncMode("admin")
+	}
 }
 
-// Run 后台 ticker 循环；ctx 取消时退出。
+// Run v1.2 后台 ticker（仅 admin_token 模式启动 goroutine）。
+//
+// 无 admin_token 时不调用本函数；main.go 根据配置决定是否启动。
+//
+// 周期拉取全量数据，防止一次性拉取后长期缓存导致数据过期。
 func (s *VocabSyncer) Run(ctx context.Context) {
-	s.log.Infof("vocab sync started, interval=%v", s.interval)
+	if s.adminToken == "" {
+		// 防御性：main.go 应不会调用，但为了安全不启动 ticker。
+		s.log.Info("vocab sync disabled (no admin_token)")
+		return
+	}
+	s.log.Infof("vocab sync started, interval=%v (admin_token mode)", s.interval)
 	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()
 
 	// 立即跑一次（不等第一个 tick）
-	s.runOnce(ctx)
+	s.runOnceAdmin(ctx)
 
 	for {
 		select {
@@ -436,30 +476,25 @@ func (s *VocabSyncer) Run(ctx context.Context) {
 			s.log.Info("vocab sync stopped")
 			return
 		case <-ticker.C:
-			s.runOnce(ctx)
+			s.runOnceAdmin(ctx)
 		}
 	}
 }
 
-// runOnce 单次后台同步：遍历 registry，仅同步配置了 sync_token 的租户。
+// runOnceAdmin v1.2 单次后台同步：遍历 registry，用 admin_token 拉每个租户。
 //
 // 语义说明：
-//   - 每个租户独立构造带有其 token 的 ctx，避免 token 透传错误；
+//   - 每个租户独立构造 ctx（admin_token + 各自 tenantID），避免 token 串扰；
 //   - 同步失败仅记 warn，不中断其他租户；
 //   - 每次同步向 metrics.VocabSyncTotal 上报 mode + status。
-func (s *VocabSyncer) runOnce(ctx context.Context) {
+func (s *VocabSyncer) runOnceAdmin(ctx context.Context) {
 	tenants := s.registry.List()
 	if len(tenants) == 0 {
 		return
 	}
-	mode := s.SyncMode()
+	mode := "admin"
 	for _, t := range tenants {
-		token := s.registry.GetSyncToken(t)
-		if token == "" {
-			// 无后台 token：仅靠请求路径同步。
-			continue
-		}
-		syncCtx := s.syncCtxFor(ctx, t, token)
+		syncCtx := s.adminCtxFor(ctx, t, s.adminToken)
 		if err := s.SyncTenant(syncCtx, t); err != nil {
 			metrics.VocabSyncTotal.Inc(mode, "error")
 			s.log.Warnf("sync tenant %s: %v", t, err)
@@ -469,12 +504,12 @@ func (s *VocabSyncer) runOnce(ctx context.Context) {
 	}
 }
 
-// SyncMode 返回当前同步模式：
-//   - "background"：存在至少一个 sync_token，后台周期同步生效；
-//   - "lazy_only"：未配置 sync_token，仅在请求路径同步。
+// SyncMode v1.2 返回当前同步模式：
+//   - "admin"：配置了 admin_token，后台周期同步生效；
+//   - "lazy_only"：未配置 admin_token，仅在请求路径 cache miss/TTL 过期时同步。
 func (s *VocabSyncer) SyncMode() string {
-	if s.registry.HasSyncTokens() {
-		return "background"
+	if s.adminToken != "" {
+		return "admin"
 	}
 	return "lazy_only"
 }
@@ -523,20 +558,30 @@ func (s *VocabSyncer) SyncTenant(ctx context.Context, tenantID string) error {
 	return nil
 }
 
-// EnsureTenant 保证某 tenant 的 vocab snapshot 已存在。如果 tenant 未注册过，
-// 主动调 qua 同步一次；同步失败不阻塞调用方（返回 error 仅用于日志）。
+// EnsureTenant v1.2 保证某 tenant 的 vocab snapshot 是新鲜的。
 //
-// 设计意图：请求路径上首次访问某 tenant 时调用，避免 5min ticker 期间的真空期。
-// 单 tenant 内部串行（避免重复同步同 tenant）。
+// 触发条件：
+//   1. cache miss（该 tenant 从未同步过）→ 同步
+//   2. cache stale（snapshot.ExpiresAt 过）→ 同步
+//   3. 已有且未过期 → 跳过
+//
+// 调用 ctx 用于调 qua，需包含 AuthInfo（request token）或 adminToken（后台预热场景）。
+// 同步在调用 goroutine 中执行（与请求同步），保证下次访问是新鲜数据。
 func (s *VocabSyncer) EnsureTenant(ctx context.Context, tenantID string) error {
 	if tenantID == "" {
 		return nil
 	}
-	if _, ok := s.vocab.HasTenant(tenantID); ok {
-		return nil // 已有 snapshot，跳过
+	// 检查 freshness（v1.2：有 ExpiresAt 才需重新同步）
+	if s.vocab.HasFreshTenant(tenantID) {
+		return nil // 未过期，跳过
 	}
 	s.registry.Ensure(tenantID)
-	return s.SyncTenant(ctx, tenantID)
+	if err := s.SyncTenant(ctx, tenantID); err != nil {
+		s.log.Warnf("lazy sync tenant %s: %v (continue serving stale snapshot)", tenantID, err)
+		return err
+	}
+	s.log.Infof("lazy synced tenant %s", tenantID)
+	return nil
 }
 
 // syncAuth 为后台同步提供 per-tenant 认证上下文。
@@ -554,10 +599,18 @@ func (a *syncAuth) GetAccessToken() string { return a.token }
 // GetTenantID 实现 biz.AuthContext。
 func (a *syncAuth) GetTenantID() string { return a.tenantID }
 
-// syncCtxFor 为指定租户构造带有 sync token 的 ctx。
+// syncCtxFor v1.1 遗留方法（保持兼容）。v1.2 后台 sync 用 adminCtxFor。
+func (s *VocabSyncer) syncCtxFor(parent context.Context, tenantID, token string) context.Context {
+	if token == "" {
+		return parent
+	}
+	return WithAuth(parent, &syncAuth{token: token, tenantID: tenantID})
+}
+
+// adminCtxFor v1.2 为指定租户构造带有 admin_token 的 ctx（后台 sync 用）。
 //
 // 避免多个 goroutine 共享同一 ctx，每个租户独立 clone。
-func (s *VocabSyncer) syncCtxFor(parent context.Context, tenantID, token string) context.Context {
+func (s *VocabSyncer) adminCtxFor(parent context.Context, tenantID, token string) context.Context {
 	if token == "" {
 		return parent
 	}

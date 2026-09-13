@@ -6,7 +6,12 @@
 //   - 词库快照是 evie/tool 业务数据模型（per-tenant），不是通用文本增强概念
 //   - 把它放在 biz 包，与 lexnorm 解耦（lexnorm 用自己的 Lexicon 类型）
 //   - lexnorm_bridge.go 在 biz 内部把 snapshot → lexnorm.Lexicon
+//
+// v1.2 新增 TTL：快照带 ExpiresAt，VocabularyBuilder.HasFreshTenant 用 TTL 决定是否重拉。
+// 设计理由：防止长期缓存导致数据陈旧；同时避免实时拉取（性能）。
 package biz
+
+import "time"
 
 // VocabularyEntry 词汇条目。
 type VocabularyEntry struct {
@@ -31,15 +36,27 @@ type VocabularyRelation struct {
 }
 
 // VocabularySnapshot 不可变快照（per-request）。
+//
+// v1.2 新增 TTL：ExpiresAt 为零表示永不过期（如静态 source）。
 type VocabularySnapshot struct {
 	Version     string
 	Entries     map[string]*VocabularyEntry      // standard_text → entry
 	Relations   map[string][]*VocabularyRelation // related_text → relations
 	lookupEntry map[string]*VocabularyEntry      // alias for O(1) query
+	// ExpiresAt v1.2 快照过期时间；zero = 永不过期
+	ExpiresAt time.Time
 }
 
-// NewVocabularySnapshot 构造快照。
+// NewVocabularySnapshot 构造永不过期的快照（兼容 v1.1 调用方）。
 func NewVocabularySnapshot(entries []*VocabularyEntry, relations []*VocabularyRelation) *VocabularySnapshot {
+	return NewVocabularySnapshotWithTTL(entries, relations, 0)
+}
+
+// NewVocabularySnapshotWithTTL v1.2 构造带 TTL 的快照。
+//
+// ttl <= 0 表示永不过期（适用静态 source / 单元测试）。
+// ttl > 0 时 ExpiresAt = now + ttl。
+func NewVocabularySnapshotWithTTL(entries []*VocabularyEntry, relations []*VocabularyRelation, ttl time.Duration) *VocabularySnapshot {
 	es := make(map[string]*VocabularyEntry, len(entries))
 	for _, e := range entries {
 		if e == nil || e.StandardText == "" {
@@ -54,11 +71,16 @@ func NewVocabularySnapshot(entries []*VocabularyEntry, relations []*VocabularyRe
 		}
 		rs[r.RelatedText] = append(rs[r.RelatedText], r)
 	}
+	var expiresAt time.Time
+	if ttl > 0 {
+		expiresAt = time.Now().Add(ttl)
+	}
 	return &VocabularySnapshot{
 		Version:     "v1",
 		Entries:     es,
 		Relations:   rs,
 		lookupEntry: es,
+		ExpiresAt:   expiresAt,
 	}
 }
 
@@ -70,6 +92,19 @@ func EmptyVocabularySnapshot() *VocabularySnapshot {
 		Relations:   map[string][]*VocabularyRelation{},
 		lookupEntry: map[string]*VocabularyEntry{},
 	}
+}
+
+// IsExpired v1.2 判断快照是否过期（ExpiresAt 已设且 < now）。
+//
+// 零值 ExpiresAt 永不过期（适用静态 snapshot）。
+func (s *VocabularySnapshot) IsExpired(now time.Time) bool {
+	if s == nil {
+		return true
+	}
+	if s.ExpiresAt.IsZero() {
+		return false
+	}
+	return now.After(s.ExpiresAt)
 }
 
 // LookupEntry 精确匹配标准词。

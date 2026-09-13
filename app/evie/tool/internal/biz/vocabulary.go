@@ -27,6 +27,18 @@ import (
 // 不走 conf：Build 是热路径，字段硬编码即可。
 const lazySyncWaitTimeout = 5 * time.Second
 
+// vocabSnapshotTTL v1.2 词库快照默认过期时间。
+//
+// 设为 5 分钟：
+//   - 避免长时间缓存导致数据陈旧（qua 系统数据变更后 5min 内体现）
+//   - 平衡性能与实时性（同一租户 5min 内复用缓存，不重复拉 qua）
+//
+// 修改方式：
+//   - 设为 0 = 永不过期（仅 unit test / 静态 source 使用）
+//   - 调高 = 减少 qua 调用频率（适合不常变更的环境）
+//   - 调低 = 更快体现变更（适合频繁变更的租户）
+const vocabSnapshotTTL = 5 * time.Minute
+
 // VocabularyBuilder 词库快照构建器。
 type VocabularyBuilder struct {
 	conf       *conf.SystemDict
@@ -246,17 +258,39 @@ func (b *VocabularyBuilder) HasTenant(tenantID string) (*VocabularySnapshot, boo
 	return snap, ok
 }
 
+// HasFreshTenant v1.2 判断 tenant 快照是否存在且未过期。
+//
+// TTL 机制：快照默认 5min 过期，避免长时间缓存导致数据陈旧。
+// 过期后 lazy sync 会重新拉一遍。
+func (b *VocabularyBuilder) HasFreshTenant(tenantID string) bool {
+	if tenantID == "" {
+		return false
+	}
+	b.tenantMu.RLock()
+	snap, ok := b.tenantSnaps[tenantID]
+	b.tenantMu.RUnlock()
+	if !ok {
+		return false
+	}
+	if snap.IsExpired(time.Now()) {
+		return false
+	}
+	return true
+}
+
 // UpdateTenant 刷新某 tenant 的快照（vocab_sync 调用）。
 //
 // entries / relations 来自 qua API → Normalizer 转换后的通用词条。
 // HA 行为：写入失败不抛；原快照保留。
+//
+// v1.2 新增 TTL：写入时设 expiresAt = now + TTL；下次 sync 会根据 freshness 决定。
 func (b *VocabularyBuilder) UpdateTenant(tenantID string, entries []*VocabularyEntry, relations []*VocabularyRelation) {
 	if tenantID == "" {
 		return
 	}
 	// 合并：system entries + tenant entries（tenant 优先）
 	mergedEntries, mergedRelations := b.mergeWithSystem(entries, relations)
-	snap := NewVocabularySnapshot(mergedEntries, mergedRelations)
+	snap := NewVocabularySnapshotWithTTL(mergedEntries, mergedRelations, vocabSnapshotTTL)
 
 	b.tenantMu.Lock()
 	b.tenantSnaps[tenantID] = snap

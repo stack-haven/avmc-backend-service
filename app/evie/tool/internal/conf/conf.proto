@@ -74,6 +74,9 @@ message Qua {
   string tenant_header = 6;
   // 额外静态 header（如 zone: Asia/Shanghai）；运行时不携带运行时参数。
   map<string, string> extra_headers = 7;
+  // v1.2 后台同步用的 service-account token（可选；空 = 不启动后台 sync，仅请求路径 lazy sync）。
+  // 推荐通过环境变量 QUa_ADMIN_TOKEN 注入。
+  string admin_token = 8;
 }
 
 // Asr ASR 配置（Q7）。

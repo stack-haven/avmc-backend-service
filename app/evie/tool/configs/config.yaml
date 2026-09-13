@@ -41,10 +41,18 @@ data:
 # =====================================================================
 # 端点路径与 qua 当前接口约定一致；extra_headers.tenant-id 由 ctx
 # AuthInfo.TenantID 运行时填入（这里空串是占位，不是缺失）。
+#
+# v1.2 admin_token（可选）：
+#   - 空（默认）：纯 lazy sync。请求路径上 cache miss 或 TTL 过期时用请求 token 拉。
+#                不启动后台 goroutine，无需 service-account token。
+#   - 有值：后台 warmup（启动期拉一次）+ ticker 周期同步。
+#           用 service-account token，可拉任意租户的数据（需 admin 权限）。
+# 推荐：开发/测试场景用 lazy_only；生产场景且 qua 提供 admin token 时启用后台 sync。
 qua:
   base_url: "http://api.bdksim-pro.test.bedoke.com"
   timeout: 10s
   forward_user_token: true
+  # admin_token: "eyJ..."        # 推荐通过环境变量 QUa_ADMIN_TOKEN 注入
   endpoints:
     list_depts: "/admin-api/system/dept/list"
     list_users: "/admin-api/qua/member-extended/page"
