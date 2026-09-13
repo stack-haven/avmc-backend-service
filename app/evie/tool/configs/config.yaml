@@ -28,9 +28,9 @@ server:
 data:
   redis:
     network: tcp
-    addr: 172.16.0.112:6379
+    addr: 127.0.0.1:6379
     # 通过 env 注入：DATA_REDIS_PASSWORD（make run-prod 会从 REDIS_PASSWORD 自动翻译）
-    password: "123456"
+    password: ""
     db: 14
     read_timeout: 0.2s
     write_timeout: 0.2s
@@ -148,6 +148,7 @@ vocab_rules:
     qua:
       entity_mappings:
         # 用户：name → 标准词，mobile → alias，status==1 过滤
+        # v1.2: 加通用词黑名单（exclude 测试/入职/账号 等系统账号）
         - match:
             entity_type: "user"
           emit:
@@ -157,7 +158,7 @@ vocab_rules:
               - "mobile"
             pinyin_hint: "name"
             priority: "50"
-            include_when: "status==1"
+            include_when: "status==1 AND name!~测试 AND name!~入职 AND name!~账号 AND name!~权限 AND name!~成员 AND name!~动态 AND name!~员工 AND name!~管理 AND name!~张三 AND name!~小子 AND name!~可可 AND name!~新人 AND name!~花花"
         # 部门：name → 标准词，全量收录
         - match:
             entity_type: "department"

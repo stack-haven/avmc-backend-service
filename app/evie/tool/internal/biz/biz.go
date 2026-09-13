@@ -50,16 +50,21 @@ func NewNormalizerFromConf(rules *v1conf.VocabRules, logger log.Logger) *Normali
 //
 // 阈值设计（修复 P2）：lexnorm.Config 默认 AutoApplyThreshold=0.95 太严，
 // 会拦截 biz 层 fuzzy_vocab 已经按 Category 判定好的 0.65 替换。
-// 这里把全局阈值调到 0.5，让最终决策权交给 processor 自身
-// （fuzzy_vocab.CategoryAuto["PERSON"]=0.65）。
+// v1.2 (P7/P8 修复后): 全局阈值与 fuzzy_vocab.CategoryAuto[PERSON]=0.85 对齐。
+//
+// 设计：
+//   - AutoApplyThreshold=0.85：只接受字面 Hamming dist=1 (conf=0.95) 自动 Apply
+//   - SuggestThreshold=0.50：pinyin 命中 (conf=0.55) 走 Suggest，不 Apply
+//   - 默认 lexnorm.DefaultConfig()=0.95/0.65 太严，会导致 fuzzy_vocab
+//     完全不 Apply；0.5/0.0 又太松，会导致 pinyin 命中破坏正常词。
 func NewLexnormEngine(
 	c *v1conf.Enhancement,
 	builder *VocabularyBuilder,
 	logger log.Logger,
 ) (*lexnorm.Engine, error) {
 	cfg := lexnorm.DefaultConfig()
-	cfg.AutoApplyThreshold = 0.5 // 修复 P2：让 processor 决定最终 apply
-	cfg.SuggestThreshold = 0.0   // 0 = 只要 processor Suggest 都接受
+	cfg.AutoApplyThreshold = 0.85 // v1.2: 与 fuzzy_vocab.CategoryAuto[PERSON] 对齐
+	cfg.SuggestThreshold = 0.50   // v1.2: pinyin conf=0.55 走 Suggest
 
 	// 构造 per-tenant ProfileResolver
 	resolver := NewTenantProfileResolver(builder, cfg, logger)

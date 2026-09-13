@@ -270,13 +270,18 @@ func lookupPath(data map[string]any, path string) (string, bool) {
 
 // evalCondition 评估简单条件表达式。
 //
-// 支持的语法（v1，不支持完整 CEL）：
+// 支持的语法（v1.2 扩展）：
 //
 //	"field.path==1"          数字相等（值已被 lookupPath 转 string）
 //	"field.path=='literal'" 字符串相等（自动去 ' / " 包裹）
 //	"field.path==true"       布尔相等（lookupPath 转为 "true" / "false"）
 //	"field.path!=value"      不等
+//	"field.path!~substring"  不包含子串（v1.2 新增；用于过滤"通用词"如"测试"/"入职"）
 //	"field.path"             真值（非空 / 非 0 / 非 false）
+//
+// 多条件用 " AND " 连接（v1.2 新增），例：
+//
+//	"status==1 AND name!~测试 AND name!~入职"
 //
 // 设计取舍：保留简单语义，避免引入 CEL 库；M9 阶段评估是否升级。
 func evalCondition(expr string, data map[string]any) (bool, error) {
@@ -285,9 +290,29 @@ func evalCondition(expr string, data map[string]any) (bool, error) {
 		return true, nil
 	}
 
-	// 解析操作符
+	// v1.2: 支持 AND 连接多条件（从左到右短路求值）
+	for _, sub := range strings.Split(expr, " AND ") {
+		pass, err := evalSingleCondition(strings.TrimSpace(sub), data)
+		if err != nil {
+			return false, err
+		}
+		if !pass {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+// evalSingleCondition 评估单个条件子表达式。
+func evalSingleCondition(expr string, data map[string]any) (bool, error) {
+	expr = strings.TrimSpace(expr)
+	if expr == "" {
+		return true, nil
+	}
+
+	// 解析操作符（v1.2: 加上 !~ 不包含）
 	var op, left, right string
-	for _, cand := range []string{"==", "!="} {
+	for _, cand := range []string{"==", "!=", "!~"} {
 		if idx := strings.Index(expr, cand); idx >= 0 {
 			op = cand
 			left = strings.TrimSpace(expr[:idx])
@@ -316,6 +341,8 @@ func evalCondition(expr string, data map[string]any) (bool, error) {
 		return lv == right, nil
 	case "!=":
 		return lv != right, nil
+	case "!~":
+		return !strings.Contains(lv, right), nil
 	}
 	return false, fmt.Errorf("unsupported operator %q in %q", op, expr)
 }

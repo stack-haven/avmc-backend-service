@@ -54,16 +54,24 @@ type FuzzyVocabConfig struct {
 	MaxEditDistance  int // 最大编辑距离（默认 2）
 }
 
-// DefaultFuzzyVocabConfig 默认阈值（与原 fuzzy_matching 一致）。
+// DefaultFuzzyVocabConfig 默认阈值（v1.2 — P7/P8 修复后）。
+//
+// 设计变化：
+//   - PERSON AutoThreshold 从 0.65 → 0.85：收紧后 pinyin signature 命中
+//     （conf=0.7）只走 Suggest，避免把"问题→王婷""协助→小子"这类
+//     常用词误改。
+//   - PERSON SuggestThreshold 从 0.55 → 0.50：保留低置信度兜底。
+//   - PERSON 字面 Hamming dist=1 → conf=0.85（与 AutoThreshold 对齐自动 Apply）。
+//   - PERSON pinyin signature 一致 → conf=0.55（只 Suggest，不 Apply）。
 func DefaultFuzzyVocabConfig() FuzzyVocabConfig {
 	return FuzzyVocabConfig{
-		AutoThreshold:    0.80,
-		SuggestThreshold: 0.60,
+		AutoThreshold:    0.85,
+		SuggestThreshold: 0.50,
 		CategoryAuto: map[string]float64{
-			"PERSON": 0.65, // 人名 ASR 错字率高
+			"PERSON": 0.85, // v1.2: 收紧，仅高置信字面匹配自动 Apply
 		},
 		CategorySuggest: map[string]float64{
-			"PERSON": 0.55,
+			"PERSON": 0.50, // v1.2: pinyin 命中（conf=0.55）仍能 Suggest
 		},
 		MinEntryLen:     2,
 		MaxEntryLen:     8,
@@ -252,15 +260,25 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 
 // findBestInBucket 在候选桶中找编辑距离最小的 entry（等长 Hamming 优化路径）。
 //
-// 匹配策略（顺序）：
+// 匹配策略（顺序，v1.2 — P8 修复）：
 //  1. 精确等值（d==0）：跳过，不替换
-//  2. （仅 PERSON）pinyin signature 全等：音近归一（覆盖 ASR 前后鼻音、in/ing 等）
+//  2. （仅 PERSON）pinyin signature 全等：音近归一（conf=pinyinFallback=0.55）
+//     → 仅 Suggest（不 Replace）— 防止常用词被误改成无关人名
 //  3. boundedHamming ≤ maxDist：常规编辑距离匹配
+//     → conf = 1 - dist/n，dist=1/n=3 → conf=0.67，dist=1/n=2 → conf=0.50
 //
-// 顺序理由：pinyin 优先 Hamming，避免 "天华" vs "田花"（Hamming=2 conf=0）压制
-// "天华" vs "田花"（pinyin 命中 conf=0.7）的场景。
+// v1.2 (P9 修复): 查找顺序改为"字面 Hamming 优先于 pinyin"。
 //
-// 返回：entry / confidence (=1 - dist/n 或 pinyin 固定 0.7) / dist
+// 原顺序（pinyin 优先）在 v1.2 暴露问题：字面 dist=1 的高置信 ASR 错字
+// （如"田青→田清"，pinyin sig tq = tq）会被 pinyin 路径吃掉，
+// conf=0.55 走 Suggest 而不是字面 dist=1 的 conf=0.95 走 Replace。
+//
+// 新顺序：
+//   1. 精确等值 → 不替换
+//   2. boundedHamming（dist≤maxDist）：阶梯式 conf，dist=1 → 0.95（高置信 Apply）
+//   3. pinyin signature：兜底，仅 dist>maxDist 时使用（conf=0.55 → Suggest）
+//
+// 返回：entry / confidence (=阶梯式 或 pinyinFallback=0.55) / dist
 //
 // 若 sub 与某 entry 完全相等，返回 (Entry{}, 0, 0) 表示"无替换"。
 func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexicon.Entry, float64, int) {
@@ -271,12 +289,7 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 		}
 	}
 
-	// 2. pinyin 优先（PERSON bucket 才有效）
-	if pinyinBest, ok := findBestByPinyinSig(subRunes, bucket); ok {
-		return pinyinBest, pinyinFallbackConfidence(len(subRunes)), 0
-	}
-
-	// 3. boundedHamming（跳过 lockAlias 的 entry）
+	// 2. boundedHamming（跳过 lockAlias 的 entry）— v1.2 (P9) 改为优先
 	var best lexicon.Entry
 	bestDist := maxDist + 1
 	for _, ie := range bucket {
@@ -290,9 +303,31 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 		}
 	}
 	if bestDist > maxDist || best.ID == "" {
+		// v1.2 (P9): 字面 Hamming 没命中，pinyin 兜底
+		// 仅在字面 dist > maxDist 时回退到 pinyin（conf=0.55 仅 Suggest）
+		if pinyinBest, ok := findBestByPinyinSig(subRunes, bucket); ok {
+			return pinyinBest, pinyinFallbackConfidence(), 0
+		}
 		return lexicon.Entry{}, 0, bestDist
 	}
-	conf := 1.0 - float64(bestDist)/float64(len(subRunes))
+	// v1.2 (P8 修复): 字面 Hamming 命中使用阶梯式置信度。
+	//
+	// 设计：
+	//   - dist=1 → conf=0.95（高置信：典型 ASR 错字如"田青→田清""佘莉群→佘丽群"）
+	//   - dist=2 → conf=0.55（中置信：人工 review 决定）
+	//   - dist>2 → conf=0.30（仅兜底）— 实际上已被 maxDist 截断，不会到这里
+	//
+	// 原计算 (1 - dist/n) 总是偏低，例如 n=3, dist=1 → conf=0.67，
+	// 达不到 PERSON AutoThreshold=0.85 → 全部走 Suggest，失去修正意义。
+	var conf float64
+	switch bestDist {
+	case 1:
+		conf = 0.95
+	case 2:
+		conf = 0.55
+	default:
+		conf = 1.0 - float64(bestDist)/float64(len(subRunes))
+	}
 	return best, conf, bestDist
 }
 
@@ -323,14 +358,14 @@ func findBestByPinyinSig(subRunes []rune, bucket []indexedEntry) (lexicon.Entry,
 
 // pinyinFallbackConfidence pinyin 音近归一的固定置信度。
 //
-// 选择 0.7 的理由：高于 PERSON AutoThreshold=0.65（自动 replace），
-// 低于 Hamming dist=1 conf=0.67（避免覆盖已有更精确匹配）。
-func pinyinFallbackConfidence(n int) float64 {
-	if n <= 0 {
-		return 0.7
-	}
-	_ = n // 后续可按长度动态调整
-	return 0.7
+// v1.2: conf 从 0.7 → 0.55（仅 Suggest 不 Replace）。
+//
+// 设计理由：
+//   - pinyin signature 只取首字母，召回高但精度低（"问题"wt == "王婷"wt）
+//   - 0.55 处于 PERSON SuggestThreshold=0.50 与 AutoThreshold=0.85 之间
+//   - 让运营看到 Suggest 列表，但不会自动破坏正常词
+func pinyinFallbackConfidence() float64 {
+	return 0.55
 }
 
 // boundedHamming 计算等长 rune 切片的 Hamming 距离，超过 max 时早退。

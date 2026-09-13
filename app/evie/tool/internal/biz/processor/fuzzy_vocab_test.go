@@ -400,6 +400,9 @@ func TestProcess_PinyinSignature_NearMissInVoice(t *testing.T) {
 	if err := proc.Process(context.Background(), s); err != nil {
 		t.Fatalf("Process failed: %v", err)
 	}
+	// v1.2 (P9 修复后): 顺序改为"字面 Hamming 优先于 pinyin"。
+	// "伍西辉" vs "伍锡辉" Hamming dist=1（“西”↔“锡”）。
+	// 阶梯式 conf：dist=1 → conf=0.95 ≥ AutoThreshold=0.85 → Replace。
 	found := false
 	for _, c := range s.Changes() {
 		if c.From == "伍西辉" && c.To == "伍锡辉" && c.Action == lexnorm.ActionReplace {
@@ -407,7 +410,7 @@ func TestProcess_PinyinSignature_NearMissInVoice(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("expected 伍西辉→伍锡辉 (Hamming path), got changes: %+v", s.Changes())
+		t.Errorf("expected 伍西辉→伍锡辉 Replace, got changes: %+v", s.Changes())
 	}
 }
 
@@ -471,6 +474,8 @@ func TestProcess_PinyinSignature_RescueInBeyondHamming(t *testing.T) {
 	if err := proc.Process(context.Background(), s); err != nil {
 		t.Fatalf("Process failed: %v", err)
 	}
+	// v1.2 (P9 修复后): "陈欣静" vs "陈兴静" Hamming dist=1（首字符差）。
+	// 阶梯式 conf：dist=1 → conf=0.95 → Replace。
 	found := false
 	for _, c := range s.Changes() {
 		if c.From == "陈欣静" && c.To == "陈兴静" && c.Action == lexnorm.ActionReplace {
@@ -478,7 +483,7 @@ func TestProcess_PinyinSignature_RescueInBeyondHamming(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Errorf("expected 陈欣静→陈兴静, got changes: %+v", s.Changes())
+		t.Errorf("expected 陈欣静→陈兴静 Replace, got changes: %+v", s.Changes())
 	}
 }
 
@@ -493,14 +498,15 @@ func TestProcess_PinyinSignature_HammingBeyondMax_RescuedByPinyin(t *testing.T) 
 	if err := proc.Process(context.Background(), s); err != nil {
 		t.Fatalf("Process failed: %v", err)
 	}
+	// v1.2 (P7 修复后): pinyin 命中只 Suggest 不 Replace（conf=0.55）
 	found := false
 	for _, c := range s.Changes() {
-		if c.From == "陈新进" && c.To == "陈兴静" && c.Action == lexnorm.ActionReplace {
+		if c.From == "陈新进" && c.To == "陈兴静" && c.Action == lexnorm.ActionSuggest {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("expected 陈新进→陈兴静 via pinyin fallback, got changes: %+v", s.Changes())
+		t.Errorf("expected 陈新进→陈兴静 Suggest via pinyin fallback, got changes: %+v", s.Changes())
 	}
 }
 
