@@ -31,6 +31,14 @@ message Server {
     //  - 空 = 不启用 CORS（仅同源调用）
     //  - "*" = 允许任意来源（仅 dev/test 使用；生产禁止）
     string cors_allowed_origins = 4;
+    // v1.3 /metrics 端点的 IP 白名单（生产必填）。
+    //  - 多个 IP 用逗号分隔，如 "127.0.0.1,10.0.0.0/8"
+    //  - 空 = 任意来源可访问（仅 dev/test；生产禁止）
+    string metrics_allowed_ips = 5;
+    // v1.3 IP-based rate limit（每分钟最大请求数）。
+    //  - 0（默认）：关闭 rate limit
+    //  - >0：每 IP 每分钟最多 N 个请求（推荐 60-300）
+    int32 rate_limit_per_minute = 6;
   }
   message GRPC {
     string network = 1;

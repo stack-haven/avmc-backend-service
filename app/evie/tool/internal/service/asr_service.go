@@ -9,10 +9,10 @@ package service
 import (
 	"context"
 	"strconv"
+	"strings"
 
-	"google.golang.org/grpc/codes"
+	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 
 	v1 "backend-service/api/evie/tool/v1"
 	"backend-service/app/evie/tool/internal/biz"
@@ -25,6 +25,7 @@ type ASRService struct {
 	v1.UnimplementedASRServiceServer
 	uc       *biz.ASRUsecase
 	registry *asr.ProviderRegistry // 用于 providerName 存在性校验（防止任意名称）
+	log      *log.Helper
 }
 
 // NewASRService 构造。
@@ -32,15 +33,15 @@ type ASRService struct {
 // registry 用于校验请求中的 providerName 是否在已注册列表中（防止任意名称传入）。
 // 不在 ASRUsecase 主路径中使用（usecase 依然用已固定的 batch/stream provider），
 // 仅用于 service 层的输入校验。
-func NewASRService(uc *biz.ASRUsecase, registry *asr.ProviderRegistry) *ASRService {
-	return &ASRService{uc: uc, registry: registry}
+func NewASRService(uc *biz.ASRUsecase, registry *asr.ProviderRegistry, logger log.Logger) *ASRService {
+	return &ASRService{uc: uc, registry: registry, log: log.NewHelper(log.With(logger, "module", "service/asr"))}
 }
 
 // Recognize 同步识别。
 func (s *ASRService) Recognize(ctx context.Context, req *v1.RecognizeRequest) (*v1.RecognizeResponse, error) {
 	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok || auth == nil {
-		return nil, status.Error(codes.Unauthenticated, "missing auth info")
+		return nil, v1.ErrorTokenMissing("missing auth context")
 	}
 
 	// v1.3 修复：providerName 在 service 层校验（不存在 → HTTP 400，避免
@@ -65,7 +66,16 @@ func (s *ASRService) Recognize(ctx context.Context, req *v1.RecognizeRequest) (*
 		req.GetEnableEnhancement(),
 	)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		// v1.3 错误分类（友好提示）：
+		//   - 音频格式问题 → ASR_PROVIDER_INVALID_AUDIO（400）
+		//   - 其他 → ASR_PROVIDER_RECOGNIZE_FAIL（500）
+		// 不暴露内部错误给客户端，仅记日志。
+		s.log.Errorf("recognize failed: %v", err)
+		errMsg := err.Error()
+		if isAudioFormatError(errMsg) {
+			return nil, v1.ErrorAsrProviderInvalidAudio("invalid or unsupported audio format")
+		}
+		return nil, v1.ErrorAsrProviderRecognizeFail("recognize failed")
 	}
 
 	changes := res.EnhanceChanges
@@ -102,7 +112,7 @@ func (s *ASRService) StreamRecognize(stream v1.ASRService_StreamRecognizeServer)
 
 	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok || auth == nil {
-		return status.Error(codes.Unauthenticated, "missing auth info")
+		return v1.ErrorTokenMissing("missing auth context")
 	}
 
 	// 从 metadata 取 session_id / format
@@ -173,10 +183,10 @@ func (s *ASRService) StreamRecognize(stream v1.ASRService_StreamRecognizeServer)
 
 	sErr := <-sendDone
 	if recErr != nil && sErr == nil {
-		return status.Error(codes.Internal, recErr.Error())
+		return v1.ErrorAsrStreamBroken("recognize failed")
 	}
 	if sErr != nil {
-		return status.Error(codes.Internal, sErr.Error())
+		return v1.ErrorAsrStreamBroken("send failed")
 	}
 	return nil
 }
@@ -185,7 +195,7 @@ func (s *ASRService) StreamRecognize(stream v1.ASRService_StreamRecognizeServer)
 func (s *ASRService) ListRecords(ctx context.Context, req *v1.ListAsrRecordsRequest) (*v1.ListAsrRecordsResponse, error) {
 	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "missing auth info")
+		return nil, v1.ErrorTokenMissing("missing auth context")
 	}
 	page, total, next := s.uc.ListRecords(ctx, auth.TenantID, req.GetPageSize(), req.GetPageToken())
 	out := make([]*v1.AsrRecord, 0, len(page))
@@ -203,11 +213,11 @@ func (s *ASRService) ListRecords(ctx context.Context, req *v1.ListAsrRecordsRequ
 func (s *ASRService) GetRecord(ctx context.Context, req *v1.GetRecordRequest) (*v1.AsrRecord, error) {
 	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "missing auth info")
+		return nil, v1.ErrorTokenMissing("missing auth context")
 	}
 	rec, found := s.uc.GetRecord(ctx, auth.TenantID, req.GetId())
 	if !found {
-		return nil, status.Error(codes.NotFound, "record not found")
+		return nil, v1.ErrorResourceNotFound("record not found: %s", req.GetId())
 	}
 	return recordToProto(rec), nil
 }
@@ -216,11 +226,11 @@ func (s *ASRService) GetRecord(ctx context.Context, req *v1.GetRecordRequest) (*
 func (s *ASRService) GetRecordAudio(ctx context.Context, req *v1.GetRecordAudioRequest) (*v1.GetRecordAudioResponse, error) {
 	auth, ok := data.AuthInfoFromContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "missing auth info")
+		return nil, v1.ErrorTokenMissing("missing auth context")
 	}
 	audio, ct, err := s.uc.GetRecordAudio(ctx, auth.TenantID, req.GetId())
 	if err != nil {
-		return nil, status.Error(codes.NotFound, err.Error())
+		return nil, v1.ErrorResourceNotFound("audio not found: %s", req.GetId())
 	}
 	return &v1.GetRecordAudioResponse{
 		AudioData:   audio,
@@ -273,4 +283,28 @@ func intMeta(md metadata.MD, key string, def int) int {
 		}
 	}
 	return def
+}
+
+// isAudioFormatError 判断错误是否由音频格式问题引起。
+//
+// v1.3 友好提示：音频格式错误返回 INVALID_AUDIO (400) 而不是 RECOGNIZE_FAIL (500)，
+// 客户端可以提示用户检查音频文件。
+func isAudioFormatError(errMsg string) bool {
+	audioKeywords := []string{
+		"empty audio",
+		"mp3 transcode",
+		"unsupported encoding",
+		"unsupported format",
+		"invalid audio",
+		"decode",
+		"a 0-d tensor",      // funasr 在音频为空时返回
+		"non-empty TensorList", // funasr 另一种空音频错误
+		"tensor",
+	}
+	for _, kw := range audioKeywords {
+		if strings.Contains(errMsg, kw) {
+			return true
+		}
+	}
+	return false
 }

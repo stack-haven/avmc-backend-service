@@ -9,6 +9,12 @@ server:
   http:
     addr: 0.0.0.0:8110
     timeout: 30s
+    # v1.3 CORS 允许来源（逗号分隔；空 = 不启用；'*' 仅 dev/test）
+    corsAllowedOrigins: "https://app.example.com"
+    # v1.3 /metrics IP 白名单（逗号分隔；空 = 不限；生产推荐内网段）
+    metricsAllowedIps: "127.0.0.1,10.0.0.0/8"
+    # v1.3 per-IP 限流（每分钟请求数；0 = 关闭）
+    rateLimitPerMinute: 120
   grpc:
     addr: 0.0.0.0:9110
     timeout: 30s

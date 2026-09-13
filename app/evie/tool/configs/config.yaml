@@ -2,7 +2,8 @@ server:
   http:
     addr: 0.0.0.0:8110
     timeout: 30s
-    cors_allowed_origins: '*'
+    corsAllowedOrigins: '*'
+    rateLimitPerMinute: 0
   grpc:
     addr: 0.0.0.0:9110
     timeout: 30s

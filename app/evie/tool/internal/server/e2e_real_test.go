@@ -83,7 +83,7 @@ func TestE2E_RealRecording(t *testing.T) {
 		&v1conf.Asr{Upload: &v1conf.Asr_Upload{AudioDir: t.TempDir() + "/audio"}},
 		log.DefaultLogger,
 	)
-	asrSvc := service.NewASRService(asrUC, nil)
+	asrSvc := service.NewASRService(asrUC, nil, log.DefaultLogger)
 
 	// 4. 静态 token 缓存（demo 模式）
 	tokenCache, err := data.NewStaticTokenCache(&v1conf.StaticCredential{

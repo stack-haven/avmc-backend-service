@@ -102,6 +102,13 @@ func NewHTTPServer(
 		}
 	}
 
+	// v1.3 Rate Limiter（per-IP，默认关闭）。
+	// 注：rate limit 作为 Filter 而非 Middleware，确保 OPTIONS 请求也限流（防 CORS preflight 绕过）。
+	if c != nil && c.Http != nil && c.Http.GetRateLimitPerMinute() > 0 {
+		limiter := newRateLimiter(int(c.Http.GetRateLimitPerMinute()), time.Minute, logger)
+		opts = append(opts, kratoshttp.Filter(limiter.middleware))
+	}
+
 	opts = append(opts, kratoshttp.Middleware(mws...))
 	if c != nil && c.Http != nil {
 		if c.Http.Network != "" {
@@ -128,8 +135,12 @@ func NewHTTPServer(
 	if checker != nil {
 		pkgHealth.RegisterHTTP(srv, checker, 2*time.Second)
 	}
-	// Metrics 文本导出（Prometheus 兼容）
-	srv.Handle("/metrics", metrics.Default.Handler())
+	// Metrics 文本导出（Prometheus 兼容，v1.3 加 IP 白名单）
+	metricsHandler := metrics.Default.Handler()
+	if c != nil && c.Http != nil && c.Http.GetMetricsAllowedIps() != "" {
+		metricsHandler = newMetricsIPFilter(c.Http.GetMetricsAllowedIps()).middleware(metricsHandler)
+	}
+	srv.Handle("/metrics", metricsHandler)
 	// pprof 调试端点（仅 EVIE_TOOL_PPROF=1）
 	MountPProf(srv)
 	return srv

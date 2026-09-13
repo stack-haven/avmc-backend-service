@@ -155,6 +155,57 @@ curl -s -X POST http://127.0.0.1:8110/evie/tool/v1/enhance \
 
 > 所有业务端点都要求 `Authorization: Bearer <token>`；token 过期会被拒绝。
 
+### 4.1 records 分页 API
+
+**请求**：
+
+```
+GET /evie/tool/v1/asr/records?page_size=20&page_token=<token>
+```
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `page_size` | int | ❌ | 默认 20；最大 100 |
+| `page_token` | string | ❌ | 上一页响应的 `next_page_token`；首页留空 |
+
+**响应**（v1.ListAsrRecordsResponse）：
+
+```json
+{
+  "records": [
+    {
+      "id": "session-001",
+      "userId": "1909508813653905410",
+      "tenantId": "1889501240003497986",
+      "rawText": "...",
+      "enhancedText": "...",
+      "audioPath": "upload/audio/1889501240003497986/session-001.mp3",
+      "providerName": "funasr",
+      "createdAt": "2026-09-13T22:45:31Z"
+    }
+  ],
+  "total": 42,
+  "nextPageToken": "eyJ..."
+}
+```
+
+| 字段 | 说明 |
+|---|---|
+| `records` | 当前页的识别记录（按 `created_at` 倒序） |
+| `total` | 总记录数（注意：受 ring buffer 上限 1000 限制） |
+| `nextPageToken` | 下一页 token；空字符串表示已是最后一页 |
+
+**租户隔离**：
+- records 按 `tenantId` 过滤（取自 ctx 的 AuthInfo.TenantID）
+- 跨租户访问返回 404 RESOURCE_NOT_FOUND
+
+**单条记录 / 音频下载**：
+
+```
+GET /evie/tool/v1/asr/records/{id}        # 返回 AsrRecord JSON
+GET /evie/tool/v1/asr/records/{id}/audio  # 返回原始音频字节（Content-Type: audio/mpeg 或 audio/wav）
+```
+
 ---
 
 ## 5. 配置参考
@@ -164,7 +215,11 @@ curl -s -X POST http://127.0.0.1:8110/evie/tool/v1/enhance \
 | 字段 | 含义 | 默认 |
 |---|---|---|
 | `server.http.addr` | HTTP 监听地址 | `0.0.0.0:8110` |
+| `server.http.corsAllowedOrigins` | CORS 允许来源（逗号分隔；空=不启用；`*` 仅 dev） | 空 |
+| `server.http.metricsAllowedIps` | `/metrics` IP 白名单（逗号分隔，支持 CIDR；空=不限） | 空 |
+| `server.http.rateLimitPerMinute` | per-IP 限流（每分钟请求数；0=关闭） | 0 |
 | `server.grpc.addr` | gRPC 监听地址 | `0.0.0.0:9110` |
+| `qua.adminToken` | 后台同步 service-account token（空 = 纯 lazy sync） | 空 |
 | `data.redis.addr` | qua 共享 Redis | `127.0.0.1:6379` |
 | `data.redis.token_key_prefix` | Token key 前缀 | `oauth2_access_token:` |
 | `qua.base_url` | qua HTTP 服务 | — |
