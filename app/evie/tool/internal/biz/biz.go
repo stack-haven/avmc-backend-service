@@ -34,6 +34,7 @@ var ProviderSet = wire.NewSet(
 	NewTenantRegistry,
 	// M7
 	NewASRUsecase,
+	NewVocabSyncerWithAuth,
 )
 
 // NewNormalizerFromConf 从 conf.VocabRules 构造 Normalizer（带 warn logger）。
