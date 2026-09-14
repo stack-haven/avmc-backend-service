@@ -12,7 +12,6 @@ import (
 	"backend-service/app/evie/tool/internal/data"
 	"backend-service/app/evie/tool/internal/server"
 	"backend-service/app/evie/tool/internal/service"
-	"backend-service/pkg/health"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -24,11 +23,6 @@ import (
 // Injectors from wire.go:
 
 // wireApp 装配 evie/tool Kratos App + 后台 worker。
-//
-// 依赖方向严格遵 service → biz → data：
-//   - biz 定义接口（VocabularySource / AuthContext / HealthNotifier）
-//   - data 实现接口（NewQuaVocabularySource / *AuthInfo implements AuthContext / *HealthChecker implements HealthNotifier）
-//   - wire 把各层 ProviderSet 绑在一起，interface binding 在本文件显式声明
 func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *conf.Qua, enhancement *conf.Enhancement, tenantVocab *conf.TenantVocab, systemDict *conf.SystemDict, tenantRegistry *conf.TenantRegistry, vocabRules *conf.VocabRules, logger log.Logger) (*kratos.App, func(), error) {
 	client, err := data.NewRedisClient(confData)
 	if err != nil {
@@ -61,7 +55,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	}
 	healthChecker := data.NewHealthChecker(client, quaFetcher, providerRegistry)
 	bizTenantRegistry := biz.NewTenantRegistry(tenantRegistry)
-	checker := initHealthChecker(healthChecker, bizTenantRegistry)
+	checker := data.NewHealthCheckerWithReporter(healthChecker, bizTenantRegistry)
 	httpServer := server.NewHTTPServer(confServer, tokenLookup, enhancementService, asrService, checker, logger)
 	normalizer := biz.NewNormalizerFromConf(vocabRules, logger)
 	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
@@ -69,21 +63,4 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	app := newApp(logger, grpcServer, httpServer, vocabSyncer)
 	return app, func() {
 	}, nil
-}
-
-// wire.go:
-
-// initHealthChecker 把 TenantRegistry 注入 HealthChecker（反向注入）。
-//
-// 为什么需要 wire.Bind(new(biz.HealthNotifier), new(*HealthChecker))：
-// *HealthChecker 同时实现 pkgHealth.Checker 和 biz.HealthNotifier，wire
-// 默认不知道这层 interface 关系，需要显式声明。
-func initHealthChecker(
-	checker *data.HealthChecker,
-	registry *biz.TenantRegistry,
-) health.Checker {
-	if checker != nil && registry != nil {
-		checker.SetTokenReporter(registry)
-	}
-	return checker
 }
