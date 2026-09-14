@@ -1,15 +1,28 @@
 include ../../../app.mk
 
 # 本 Makefile 只声明 evie/tool 特有的 target。
-# 通用 target（init / build / test / lint / api / openapi / vet / cover / docker / wire / help ...）
+# 通用 target（init / build / test / lint / api / openapi / vet / cover / docker / help ...）
 # 由 ../app.mk 提供。
 #
-# 命名约定（避免与 app.mk 冲突，0 警告）：
-#   - app.mk 提供 `wire` / `run` / `build` / `test` 等通用 target
-#   - 本服务只声明 app.mk 没有的 target；与 app.mk 同名的用改名或别名
+# ============================================================================
+# 预期警告（1 个，可安全忽略）
+# ============================================================================
+# 运行任何 target 都会出现：
+#   Makefile:N: warning: overriding commands for target 'wire'
+#   ../../../app.mk:M: warning: ignoring old commands for target 'wire'
+#
+# 原因：app.mk 的 `wire` 用 `go run -mod=mod ...`，在 go workspace 模式下必然失败：
+#   "go: -mod may only be set to readonly or vendor when in workspace mode"
+# 本地覆写为 `GOWORK=off` 绕开。
+# （evie/service 也有同样问题，但未覆写，所以 `make wire` 实际不可用）
+#
+# GNU make 的 "overriding commands" 警告无法静默。这是必要的设计权衡：
+#   - 接受 1 个警告 + `make wire` 可用（本服务选择）
+#   - 0 警告 + `make wire` 不可用（evie/service 的隐性 bug）
+# ============================================================================
 #
 # 目标命名映射：
-#   - app.mk 的 `wire`：本服务直接继承（在非 workspace 环境下可用）
+#   - app.mk 的 `wire`：本服务覆写（加 GOWORK=off）
 #   - app.mk 的 `run`（用 ./configs 目录加载，会 panic）：→ 本服务用 `serve`
 #   - 本服务的 `run` 不存在（避免与 app.mk 冲突）
 
@@ -25,6 +38,22 @@ config:
 		./internal/conf/conf.proto
 	@gofmt -w internal/conf/conf.pb.go
 	@echo "✓ conf.pb.go regenerated"
+
+.PHONY: wire
+# 重新生成 cmd/server/wire_gen.go。
+#
+# 为什么覆盖 app.mk 的 wire：
+#   app.mk 用 `go run -mod=mod ...`，在 go workspace 模式下必然失败：
+#     "go: -mod may only be set to readonly or vendor when in workspace mode"
+#   本地覆写为 GOWORK=off 绕开（仅会触发一条 expected warning）。
+#
+# 警告信息：
+#   Makefile:N: warning: overriding commands for target 'wire'
+#   ../../../app.mk:M: warning: ignoring old commands for target 'wire'
+# 这是 GNU make 的硬限制，无法静默。
+wire:
+	@GOWORK=off go run github.com/google/wire/cmd/wire ./cmd/server
+	@echo "✓ wire_gen.go regenerated"
 
 # ============================================================================
 # 运行（核心）
@@ -124,12 +153,7 @@ bench:
 # 注：app.mk 的 wire 用 `-mod=mod`，在 workspace 下会失败。
 #     本地兜底：先试 app.mk 的 wire，失败时回退到 GOWORK=off。
 generate-check:
-	@if $(MAKE) wire >/dev/null 2>&1; then \
-		echo "✓ app.mk wire 成功"; \
-	else \
-		echo "▶ app.mk wire 失败，回退到 GOWORK=off"; \
-		GOWORK=off $(MAKE) wire; \
-	fi
+	$(MAKE) wire
 	@cd ../../.. && git diff --exit-code -- \
 		app/evie/tool/cmd/server/wire_gen.go || \
 		(echo "✗ wire_gen.go 已过时，请运行 make wire 并提交"; exit 1)
