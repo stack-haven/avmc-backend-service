@@ -22,8 +22,10 @@ import (
 
 // Injectors from wire.go:
 
-// wireApp 装配 evie/tool Kratos App + 后台 worker。
-func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *conf.Qua, enhancement *conf.Enhancement, tenantVocab *conf.TenantVocab, systemDict *conf.SystemDict, tenantRegistry *conf.TenantRegistry, vocabRules *conf.VocabRules, logger log.Logger) (*kratos.App, func(), error) {
+// wireApp 装配 evie/tool Kratos App。
+//
+// v1.6 减法：删除 *conf.TenantRegistry 参数（不再加载 tenants.json）。
+func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *conf.Qua, enhancement *conf.Enhancement, tenantVocab *conf.TenantVocab, systemDict *conf.SystemDict, vocabRules *conf.VocabRules, logger log.Logger) (*kratos.App, func(), error) {
 	client, err := data.NewRedisClient(confData)
 	if err != nil {
 		return nil, nil, err
@@ -54,13 +56,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 		return nil, nil, err
 	}
 	healthChecker := data.NewHealthChecker(client, quaFetcher, providerRegistry)
-	bizTenantRegistry := biz.NewTenantRegistry(tenantRegistry)
-	checker := data.NewHealthCheckerWithReporter(healthChecker, bizTenantRegistry)
-	httpServer := server.NewHTTPServer(confServer, tokenLookup, enhancementService, asrService, checker, logger)
-	normalizer := biz.NewNormalizerFromConf(vocabRules, logger)
-	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
-	vocabSyncer := biz.NewVocabSyncerWithAuth(bizTenantRegistry, vocabularyBuilder, normalizer, vocabularySource, qua, tenantVocab, logger, healthChecker)
-	app := newApp(logger, grpcServer, httpServer, vocabSyncer)
+	httpServer := server.NewHTTPServer(confServer, tokenLookup, enhancementService, asrService, healthChecker, logger)
+	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 	}, nil
 }

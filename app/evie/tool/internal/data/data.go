@@ -5,8 +5,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 
-	"backend-service/app/evie/tool/internal/biz"
 	"backend-service/app/evie/tool/internal/conf"
+	pkgHealth "backend-service/pkg/health"
 )
 
 // ProviderSet data providers（按依赖方向注入）。
@@ -27,13 +27,10 @@ var ProviderSet = wire.NewSet(
 	NewVocabularySourceRegistry,
 	NewQuaClientOptions, // 空 slice（测试 / 配置化在 M9 阶段接）
 	NewHealthChecker,    // M9: 健康检查（返回 *HealthChecker）
-	// wire.Bind 声明 *HealthChecker 满足 biz.HealthNotifier 接口
-	// （biz.NewVocabSyncerWithAuth 的 health 参数依赖此绑定）
-	wire.Bind(new(biz.HealthNotifier), new(*HealthChecker)),
-	// NewHealthCheckerWithReporter 反向注入 TokenReporter 并返回 pkgHealth.Checker 接口
-	// （server.NewHTTPServer 需要的正是 pkgHealth.Checker 接口）。
-	// 注：pkgHealth.Checker 不需要 wire.Bind，因为它就是 NewHealthCheckerWithReporter 的返回类型。
-	NewHealthCheckerWithReporter,
+	// wire.Bind 声明 *HealthChecker 满足 pkgHealth.Checker 接口
+	// （server.NewHTTPServer 需要此接口）。
+	// v1.6 减法：删除 wire.Bind(new(biz.HealthNotifier), new(*HealthChecker))。
+	wire.Bind(new(pkgHealth.Checker), new(*HealthChecker)),
 	// M4: NewSystemDictLoader
 )
 

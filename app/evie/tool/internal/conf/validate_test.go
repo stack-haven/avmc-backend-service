@@ -35,7 +35,6 @@ func newValid() *Bootstrap {
 			Pipeline: []string{"cleaning", "filler"},
 		},
 		SystemDict:     &SystemDict{Path: "./system.json"},
-		TenantRegistry: &TenantRegistry{Path: "./tenants.json"},
 	}
 }
 

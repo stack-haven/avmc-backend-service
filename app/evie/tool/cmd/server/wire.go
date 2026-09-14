@@ -26,10 +26,12 @@ import (
 	"backend-service/app/evie/tool/internal/service"
 )
 
-// wireApp 装配 evie/tool Kratos App + 后台 worker。
+// wireApp 装配 evie/tool Kratos App。
+//
+// v1.6 减法：删除 *conf.TenantRegistry 参数（不再加载 tenants.json）。
 func wireApp(
 	*conf.Server, *conf.Data, *conf.Asr, *conf.Qua,
-	*conf.Enhancement, *conf.TenantVocab, *conf.SystemDict, *conf.TenantRegistry,
+	*conf.Enhancement, *conf.TenantVocab, *conf.SystemDict,
 	*conf.VocabRules,
 	log.Logger,
 ) (*kratos.App, func(), error) {

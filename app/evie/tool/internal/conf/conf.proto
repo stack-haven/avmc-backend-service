@@ -5,7 +5,10 @@ option go_package = "backend-service/app/evie/tool/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
-// Bootstrap 全量配置根（包含 server + data + qua + asr + enhancement + tenant_vocab + system_dict + tenant_registry + vocab_rules + 可选 demo credential/vocabulary）。
+// Bootstrap 全量配置根。
+//
+// v1.6 减法：删除 TenantRegistry message（不再支持 tenants.json）。
+// 所有租户数据通过请求 ctx.AuthContext 动态获取，依赖 lazy sync + TTL 缓存。
 message Bootstrap {
   Server server = 1;
   Data data = 2;
@@ -14,11 +17,10 @@ message Bootstrap {
   Enhancement enhancement = 5;
   TenantVocab tenant_vocab = 6;
   SystemDict system_dict = 7;
-  TenantRegistry tenant_registry = 8;
-  VocabRules vocab_rules = 9;
+  VocabRules vocab_rules = 8;
   // 可选：demo / 离线模式的认证与词库配置；生产留空。
-  Credential credential = 10;
-  Vocabulary vocabulary = 11;
+  Credential credential = 9;
+  Vocabulary vocabulary = 10;
 }
 
 message Server {
@@ -69,6 +71,8 @@ message Data {
 }
 
 // Qua 外部系统对接配置（Q1/Q5/Q6）。
+//
+// v1.6 减法：删除 admin_token 字段（不再支持后台 sync，凭请求 token 即可）。
 message Qua {
   string base_url = 1;
   google.protobuf.Duration timeout = 2;
@@ -87,9 +91,6 @@ message Qua {
   string tenant_header = 6;
   // 额外静态 header（如 zone: Asia/Shanghai）；运行时不携带运行时参数。
   map<string, string> extra_headers = 7;
-  // v1.2 后台同步用的 service-account token（可选；空 = 不启动后台 sync，仅请求路径 lazy sync）。
-  // 推荐通过环境变量 QUa_ADMIN_TOKEN 注入。
-  string admin_token = 8;
 }
 
 // Asr ASR 配置（Q7）。
@@ -156,27 +157,22 @@ message Enhancement {
   google.protobuf.Duration timeout = 6;
 }
 
-// TenantVocab 租户词库同步配置（Q9）。
+// TenantVocab 词库 Normalizer 规则配置（v1.6 减法：删除 sync_interval / initial_warmup / concurrency）。
+//
+// 词库加载策略：lazy + TTL（vocabSnapshotTTL，5min）。
+// 不再有后台 sync / 启动预热 / ticker；首次带 token 请求时同步加载。
 message TenantVocab {
-  google.protobuf.Duration sync_interval = 1; // 默认 5m
-  bool initial_warmup = 2;                   // 启动时立即全量预热
-  int32 concurrency = 3;                     // 同步并发 worker 数
-  bool include_departments = 4;              // 是否把部门名作为标准词
-  bool include_user_nickname = 5;            // 是否收 qua userInfo.nickname（Q3）
-  bool include_user_realname = 6;            // 是否收 qua realname（Q3）
+  bool include_departments = 1;              // 是否把部门名作为标准词
+  bool include_user_nickname = 2;            // 是否收 qua userInfo.nickname（Q3）
+  bool include_user_realname = 3;            // 是否收 qua realname（Q3）
   // qua 透传时的自定义别名字段（Q3：qua 不提供 alias 时留空）。
-  string custom_alias_field = 7;
+  string custom_alias_field = 4;
 }
 
 // SystemDict 系统静态词条（Q8）。
 message SystemDict {
   string path = 1;       // 相对工作目录
   bool hot_reload = 2;   // fsnotify 监听变更
-}
-
-// TenantRegistry 租户注册表（Q9：tenants.json）。
-message TenantRegistry {
-  string path = 1; // 相对工作目录
 }
 
 // VocabRules 外部系统词条规则（Q13：解耦外部数据）。

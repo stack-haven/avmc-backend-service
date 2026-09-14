@@ -1,20 +1,27 @@
 // Package main · main.go
-// evie/tool 服务入口。
+// evie/tool 服务入口（v1.6 减法后）。
 //
 // 启动流程：
 //  1. 加载 config.yaml
 //  2. 构造 Kratos logger
-//  3. wireApp 装配所有组件 + 启动 VocabSyncer（BeforeStart 钩子）
+//  3. wireApp 装配所有组件
 //  4. app.Run() 阻塞直到 ctx cancel 或信号
+//
+// v1.6 减法：
+//   - 删除 BeforeStart 中的 Warmup/Run 钩子（无后台 sync）
+//   - 删除 TenantRegistry conf 引用
+//   - 删除 wireApp 的 tenantRegistry 参数
+//
+// sync 策略（纯 lazy + TTL）：
+//   - 首次带 token 请求 → VocabSyncer.EnsureTenant 同步拉 qua
+//   - TTL 默认 5min（vocabSnapshotTTL）→ 过期后下次请求重新拉
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -24,7 +31,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
-	"backend-service/app/evie/tool/internal/biz"
 	"backend-service/app/evie/tool/internal/conf"
 	"backend-service/app/evie/tool/internal/logging"
 
@@ -43,12 +49,10 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-// newApp 装配 Kratos App；通过 BeforeStart 根据 syncer.SyncMode() 决定启动行为。
+// newApp 装配 Kratos App。
 //
-// v1.2 sync 模式：
-//   - "admin"（qua.admin_token 有）：启动 goroutine 调 Warmup + Run（后台周期拉）
-//   - "lazy_only"（qua.admin_token 无）：不启动后台 goroutine，靠请求路径 cache miss/TTL 过期触发 sync
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, syncer *biz.VocabSyncer) *kratos.App {
+// 无后台 sync 钩子：所有 vocab 同步都在请求路径（EnsureTenant）按需触发。
+func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -56,26 +60,6 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, syncer *biz.Voc
 		kratos.Metadata(map[string]string{"service.group": "evie"}),
 		kratos.Logger(logger),
 		kratos.Server(gs, hs),
-		kratos.BeforeStart(func(ctx context.Context) error {
-			// v1.2: 只在 admin_token 模式下启动后台 goroutine
-			if syncer.SyncMode() != "admin" {
-				logger.Log(log.LevelInfo, "msg", "vocab sync: lazy_only mode (no admin_token), skip background sync")
-				return nil
-			}
-			// admin_token 模式：Warmup（10s）+ 后台 ticker
-			go func() {
-				warmupCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-				syncer.Warmup(warmupCtx)
-				cancel()
-				// ticker 循环（内部监听 ctx.Done）
-				syncer.Run(ctx)
-			}()
-			return nil
-		}),
-		kratos.AfterStop(func(_ context.Context) error {
-			// syncer.Run 内部监听 ctx.Done；Kratos 关闭 ctx 时会优雅退出
-			return nil
-		}),
 	)
 }
 
@@ -127,8 +111,8 @@ func main() {
 		panic(err)
 	}
 
-	// 装配所有组件（含 VocabSyncer）；通过 BeforeStart 钩子启动
-	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Asr, bc.Qua, bc.Enhancement, bc.TenantVocab, bc.SystemDict, bc.TenantRegistry, bc.VocabRules, logger)
+	// 装配所有组件（无 BeforeStart 钩子 — 所有同步走请求路径）
+	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Asr, bc.Qua, bc.Enhancement, bc.TenantVocab, bc.SystemDict, bc.VocabRules, logger)
 	if err != nil {
 		panic(err)
 	}

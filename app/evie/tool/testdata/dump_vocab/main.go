@@ -65,7 +65,6 @@ func main() {
 	if err != nil {
 		die("NewVocabularyBuilder: %v", err)
 	}
-	registry := biz.NewTenantRegistry(bc.TenantRegistry)
 	syncer := biz.NewVocabSyncer(registry, builder, normalizer, quaSource, bc.TenantVocab, log.DefaultLogger)
 	if err := syncer.SyncTenant(context.Background(), testTenant); err != nil {
 		die("sync: %v", err)
@@ -222,7 +221,6 @@ func mkBootstrap() *conf.Bootstrap {
 		SystemDict: &conf.SystemDict{
 			Path: "/Users/jayden/Development/Code/Object/stack-haven/avmc/backend-service/app/evie/tool/configs/dictionaries/system.json", HotReload: false,
 		},
-		TenantRegistry: &conf.TenantRegistry{Path: "/Users/jayden/Development/Code/Object/stack-haven/avmc/backend-service/app/evie/tool/configs/tenants.json"},
 		VocabRules: &conf.VocabRules{
 			Sources: map[string]*conf.VocabRules_SourceRules{
 				"qua": {

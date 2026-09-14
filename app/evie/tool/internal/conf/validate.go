@@ -72,12 +72,9 @@ func Validate(b *Bootstrap) error {
 		}
 	}
 
-	// System dict / tenant registry
+	// System dict only（v1.6：删除 tenant_registry 校验）
 	if b.SystemDict == nil || b.SystemDict.Path == "" {
 		errs = append(errs, "system_dict.path is required")
-	}
-	if b.TenantRegistry == nil || b.TenantRegistry.Path == "" {
-		errs = append(errs, "tenant_registry.path is required")
 	}
 
 	if len(errs) > 0 {

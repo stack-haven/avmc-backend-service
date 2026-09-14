@@ -1,12 +1,7 @@
 // Package biz 聚合 evie/tool 的所有业务用例 Provider。
 //
-// M9.6 重构：从 pkg/textenhance 迁移到 pkg/lexnorm。
-//
-// ProviderSet 变更：
-//   - 删除：NewPolicyFromConf / NewEnhancementPipeline
-//   - 新增：NewLexnormEngine / NewTenantProfileResolver
-//   - 保留：NewNormalizerFromConf / NewVocabularyBuilder / NewEnhancementUsecase /
-//     NewTenantRegistry / NewASRUsecase / NewVocabSyncerWithAuth
+// v1.6 减法：删除 NewTenantRegistry（tenants.json / TenantRegistry 完全剔除）。
+// 所有租户数据通过请求 ctx.AuthContext 动态获取，依赖 lazy sync + TTL。
 package biz
 
 import (
@@ -30,8 +25,6 @@ var ProviderSet = wire.NewSet(
 	NewTenantProfileResolver,
 	NewLexnormEngine,
 	NewEnhancementUsecaseWithConf,
-	// M5
-	NewTenantRegistry,
 	// M7
 	NewASRUsecase,
 	NewVocabSyncerWithAuth,
