@@ -1,14 +1,17 @@
 include ../../../app.mk
 
 # 本 Makefile 只声明 evie/tool 特有的 target。
-# 通用 target（init / build / test / lint / api / openapi / vet / cover / docker ...）
+# 通用 target（init / build / test / lint / api / openapi / vet / cover / docker / wire / help ...）
 # 由 ../app.mk 提供。
 #
-# 必须覆盖的 app.mk target：
-#  1. `run` — app.mk 用 `-conf ./configs` 目录加载所有 .yaml/.json，会触发 panic
-#     （configs/tenants.json 是 JSON 数组，无法 merge 到 Bootstrap map）。
-#     本服务的 run 默认用 ./configs/config.yaml。
-#  2. `wire` — app.mk 用 `-mod=mod` 触发 workspace 冲突；本地用 GOWORK=off 绕开。
+# 命名约定（避免与 app.mk 冲突，0 警告）：
+#   - app.mk 提供 `wire` / `run` / `build` / `test` 等通用 target
+#   - 本服务只声明 app.mk 没有的 target；与 app.mk 同名的用改名或别名
+#
+# 目标命名映射：
+#   - app.mk 的 `wire`：本服务直接继承（在非 workspace 环境下可用）
+#   - app.mk 的 `run`（用 ./configs 目录加载，会 panic）：→ 本服务用 `serve`
+#   - 本服务的 `run` 不存在（避免与 app.mk 冲突）
 
 # ============================================================================
 # 代码生成（服务特有）
@@ -23,26 +26,24 @@ config:
 	@gofmt -w internal/conf/conf.pb.go
 	@echo "✓ conf.pb.go regenerated"
 
-.PHONY: wire
-# 重新生成 cmd/server/wire_gen.go（已入库，CI 必须保证与 wire 输出一致）
-# GOWORK=off 绕开 backend-service 的 go workspace（避免 `-mod=mod` 冲突）
-wire:
-	@GOWORK=off go run github.com/google/wire/cmd/wire ./cmd/server
-	@echo "✓ wire_gen.go regenerated"
-
 # ============================================================================
 # 运行（核心）
 # ============================================================================
 
-.PHONY: run
+.PHONY: serve
 # 直接运行服务（生产配置 ./configs/config.yaml）。
 # 自动 source .env.local（gitignored；放凭据用）。
 #
 # 用法：
-#   make run                                  # 默认 config.yaml
-#   make run CONF=./configs/config.demo.yaml # 自定义配置
-#   make run CONF=./configs/config.yaml      # 显式指定生产配置
-run:
+#   make serve                                  # 默认 config.yaml
+#   make serve CONF=./configs/config.demo.yaml # 自定义配置
+#   make serve CONF=./configs/config.yaml      # 显式指定生产配置
+#
+# 为什么叫 `serve` 而不是 `run`：
+#   app.mk 的 `run` 用 `-conf ./configs` 目录加载，会把 configs/tenants.json
+#   当配置加载触发 panic（JSON 数组无法 merge 到 Bootstrap map）。
+#   改名 `serve` 规避冲突，并提供更明确的语义（运行一个服务）。
+serve:
 	@if [ -f .env.local ]; then \
 		echo "▶ 已 source .env.local"; \
 		set -a; . ./.env.local; set +a; \
@@ -57,9 +58,9 @@ run:
 demo:
 	EVIE_TOOL_DEMO=1 go run ./cmd/server -conf ./configs/config.demo.yaml
 
-.PHONY: build-run
-# 编译后运行（生产配置）— 比 make run 快（避免每次 go run 都重编译）。
-build-run:
+.PHONY: build-serve
+# 编译后运行（生产配置）— 比 make serve 快（避免每次 go run 都重编译）。
+build-serve:
 	@mkdir -p bin
 	@go build -o bin/evie-tool ./cmd/server
 	@echo "▶ 运行 bin/evie-tool"
@@ -77,8 +78,9 @@ health:
 
 .PHONY: kill
 # 杀掉运行中的 evie/tool 进程并释放端口
+# pkill 匹配 `evie/tool`（路径），go run 后子进程路径不变
 kill:
-	@pkill -f "evie/tool/cmd/server" || true
+	@pkill -f "evie/tool" || true
 	@for port in 8110 9110; do \
 		lsof -ti :$$port 2>/dev/null | xargs -r kill -9 2>/dev/null || true; \
 	done
@@ -118,10 +120,16 @@ bench:
 	go test -bench=. -benchmem -run=^$ ./...
 
 .PHONY: generate-check
-# CI 检查：generated code 与最新 wire/config 输出是否一致
-# 注：wire 需要 GOWORK=off（避免 workspace 冲突），子 make 不会继承环境变量，显式传递
+# CI 检查：wire_gen.go 与最新 wire 输出一致
+# 注：app.mk 的 wire 用 `-mod=mod`，在 workspace 下会失败。
+#     本地兜底：先试 app.mk 的 wire，失败时回退到 GOWORK=off。
 generate-check:
-	GOWORK=off $(MAKE) wire
+	@if $(MAKE) wire >/dev/null 2>&1; then \
+		echo "✓ app.mk wire 成功"; \
+	else \
+		echo "▶ app.mk wire 失败，回退到 GOWORK=off"; \
+		GOWORK=off $(MAKE) wire; \
+	fi
 	@cd ../../.. && git diff --exit-code -- \
 		app/evie/tool/cmd/server/wire_gen.go || \
 		(echo "✗ wire_gen.go 已过时，请运行 make wire 并提交"; exit 1)
