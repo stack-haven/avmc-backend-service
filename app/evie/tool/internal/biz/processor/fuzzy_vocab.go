@@ -195,7 +195,6 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 
 	autoApply := s.Config().AutoApplyThreshold
 	suggest := s.Config().SuggestThreshold
-	maxEdit := p.config.MaxEditDistance
 
 	changes := s.Changes() // 取一次快照，后续增量追加不重复扫描整段
 
@@ -229,7 +228,7 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 				}
 			}
 
-			bestEntry, bestConf, bestDist := findBestInBucket(subRunes, bucket, maxEdit)
+			bestEntry, bestConf, bestDist := findBestInBucket(subRunes, bucket, effectiveMaxDist(n, p.config.MaxEditDistance))
 			if bestEntry.ID == "" {
 				continue
 			}
@@ -303,6 +302,10 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 		}
 	}
 	if bestDist > maxDist || best.ID == "" {
+		// v1.3 (P10): n<=2 关闭 pinyin 兜底（pinyin sig 太短，重叠率太高，噪音大）。
+		if len(subRunes) <= 2 {
+			return lexicon.Entry{}, 0, bestDist
+		}
 		// v1.2 (P9): 字面 Hamming 没命中，pinyin 兜底
 		// 仅在字面 dist > maxDist 时回退到 pinyin（conf=0.55 仅 Suggest）
 		if pinyinBest, ok := findBestByPinyinSig(subRunes, bucket); ok {
@@ -319,16 +322,52 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 	//
 	// 原计算 (1 - dist/n) 总是偏低，例如 n=3, dist=1 → conf=0.67，
 	// 达不到 PERSON AutoThreshold=0.85 → 全部走 Suggest，失去修正意义。
+	//
+	// v1.3 (P10): n-aware 阶梯式 conf（n 越小，conf 越保守）。
+	//   - n=2, dist=1 → conf=0.70（仅 Suggest：2 字短文本容易巧合）
+	//   - n>=3, dist=1 → conf=0.95（Apply）
+	//   - n>=4, dist=2 → conf=0.55（Suggest）
+	//   - n<=3, dist=2 → conf=0.30（拒绝：n=3 容不下 2 字不同）
 	var conf float64
+	n := len(subRunes)
 	switch bestDist {
 	case 1:
-		conf = 0.95
+		if n <= 2 {
+			conf = 0.70
+		} else {
+			conf = 0.95
+		}
 	case 2:
-		conf = 0.55
+		if n <= 3 {
+			conf = 0.30
+		} else {
+			conf = 0.55
+		}
 	default:
-		conf = 1.0 - float64(bestDist)/float64(len(subRunes))
+		conf = 1.0 - float64(bestDist)/float64(n)
 	}
 	return best, conf, bestDist
+}
+
+// effectiveMaxDist 按 n 自适应缩放 maxDist（v1.3 — P10 修复）。
+//
+// 背景问题：默认 maxDist=2 对 2/3 字输入过宽。
+//   - n=2 时，任意 2 字 vs 任意 2 字 Hamming 距离 ≤ 2，必然命中
+//   - 桶按 Text 排序，多解时取第一个，suggest 列表被同一高频 PERSON 覆盖
+//
+// 规则：
+//   - n<=2: maxDist=1（接受 1 字不同的 ASR 错字）
+//   - n<=3: maxDist=1（"周丽群→佘丽群"）
+//   - n>=4: 保持 config.MaxEditDistance（默认 2）
+func effectiveMaxDist(n, configMax int) int {
+	switch {
+	case n <= 2:
+		return 1
+	case n <= 3:
+		return 1
+	default:
+		return configMax
+	}
 }
 
 // findBestByPinyinSig 在 Hamming 超阈值后，按拼音 signature 二次匹配。
