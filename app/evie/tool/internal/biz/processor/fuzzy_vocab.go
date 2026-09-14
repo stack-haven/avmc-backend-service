@@ -289,8 +289,16 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 	}
 
 	// 2. boundedHamming（跳过 lockAlias 的 entry）— v1.2 (P9) 改为优先
+	//
+	// v1.4 (P-FIX v3): 增加 pinyin sig tie-breaker。
+	//   问题：桶按 Text 排序，多解时 first-encountered wins 稳定性差。
+	//   例：'田青' 桶里同时有 '田华' (sig=th) 和 '田清' (sig=tq)，两个 dist=1，
+	//       旧逻辑选 '田华'（Text 排序在前），用户预期 '田清'。
+	//   修复：dist 相同时，优先选 subSig == entry.pinyinSig（拼音完全一致更可信）。
 	var best lexicon.Entry
 	bestDist := maxDist + 1
+	bestPinyinSig := ""
+	subSig := pinyin.Signature(string(subRunes)) // 仅算一次（热路径）
 	for _, ie := range bucket {
 		if ie.lockAlias {
 			continue
@@ -299,6 +307,16 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 		if d < bestDist {
 			bestDist = d
 			best = ie.entry
+			bestPinyinSig = ie.pinyinSig
+			continue
+		}
+		// tie-breaker: dist 相同时，优先选 subSig == entry.pinyinSig
+		// 仅在 subSig 非空时启用（避免空 sig 误匹配）
+		if d == bestDist && d > 0 && subSig != "" && ie.pinyinSig != "" {
+			if ie.pinyinSig == subSig && bestPinyinSig != subSig {
+				best = ie.entry
+				bestPinyinSig = ie.pinyinSig
+			}
 		}
 	}
 	if bestDist > maxDist || best.ID == "" {
@@ -328,12 +346,23 @@ func findBestInBucket(subRunes []rune, bucket []indexedEntry, maxDist int) (lexi
 	//   - n>=3, dist=1 → conf=0.95（Apply）
 	//   - n>=4, dist=2 → conf=0.55（Suggest）
 	//   - n<=3, dist=2 → conf=0.30（拒绝：n=3 容不下 2 字不同）
+	//
+	// v1.4 (P-FIX v4): tie-breaker 后 n=2 conf 提升。
+	//   修复后：dist 相同时优先选 pinyin sig 完全相等的 entry，
+	//   拼音完全相等的高置信 ASR 错字应允许自动 replace。
+	//   - n=2, dist=1, sig 完全相等 → conf=0.85（Apply）
+	//   - n=2, dist=1, sig 不等   → conf=0.55（保守 Suggest）
 	var conf float64
 	n := len(subRunes)
+	sigMatch := subSig != "" && bestPinyinSig == subSig
 	switch bestDist {
 	case 1:
 		if n <= 2 {
-			conf = 0.70
+			if sigMatch {
+				conf = 0.85 // v1.4 P-FIX v4: 拼音一致 → 高置信
+			} else {
+				conf = 0.55 // sig 不一致 → 保守 Suggest（避免误改）
+			}
 		} else {
 			conf = 0.95
 		}
