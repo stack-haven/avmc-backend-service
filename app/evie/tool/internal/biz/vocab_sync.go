@@ -290,10 +290,6 @@ type VocabSyncer struct {
 	// 空 = 不启动后台 sync，仅请求路径 lazy sync。
 	adminToken string
 
-	// canQuaFetch 判断 ctx 是否可调 qua（避免启动期无 token 报 401）。
-	// 由 wire 注入，默认返回 true。
-	canQuaFetch func(ctx context.Context) bool
-
 	// healthChecker 可选：用于上报同步模式（lazy_only / admin）。
 	healthChecker HealthNotifier
 }
@@ -305,15 +301,6 @@ type HealthNotifier interface {
 
 // SyncerOption 配置函数（Functional Options 模式）。
 type SyncerOption func(*VocabSyncer)
-
-// WithCanQuaFetch 注入 ctx AuthInfo 检测函数。
-func WithCanQuaFetch(fn func(ctx context.Context) bool) SyncerOption {
-	return func(s *VocabSyncer) {
-		if fn != nil {
-			s.canQuaFetch = fn
-		}
-	}
-}
 
 // WithHealthNotifier 注入 health checker 用于报告 sync 模式。
 func WithHealthNotifier(n HealthNotifier) SyncerOption {
@@ -362,7 +349,6 @@ func NewVocabSyncer(
 		interval:    interval,
 		concurrency: concurrency,
 		log:         log.NewHelper(log.With(logger, "module", "biz/vocab_sync")),
-		canQuaFetch: func(ctx context.Context) bool { return true }, // 默认不限制
 	}
 	for _, opt := range opts {
 		opt(s)
@@ -385,7 +371,6 @@ func NewVocabSyncerWithAuth(
 	quaConf *conf.Qua, // v1.2 新增：读 admin_token
 	tenantConf *conf.TenantVocab,
 	logger log.Logger,
-	canQuaFetch func(ctx context.Context) bool,
 	health HealthNotifier,
 ) *VocabSyncer {
 	var adminToken string
@@ -393,7 +378,6 @@ func NewVocabSyncerWithAuth(
 		adminToken = quaConf.GetAdminToken()
 	}
 	s := NewVocabSyncer(registry, vocab, normalizer, quaSource, tenantConf, logger,
-		WithCanQuaFetch(canQuaFetch),
 		WithHealthNotifier(health),
 		WithAdminToken(adminToken),
 	)
