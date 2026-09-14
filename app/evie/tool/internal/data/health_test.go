@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-kratos/kratos/v2/log"
@@ -95,16 +94,12 @@ func TestHealthChecker_Details(t *testing.T) {
 	reg := newTestRegistry()
 
 	c := NewHealthChecker(rdb, nil, reg)
-	c.SetSyncState(time.Now(), "")
 	details := c.Details(context.Background())
 	if details["redis"] != true {
 		t.Errorf("details[redis] = %v", details["redis"])
 	}
 	if _, ok := details["asr_providers"]; !ok {
 		t.Error("details[asr_providers] missing")
-	}
-	if _, ok := details["vocab_last_sync"]; !ok {
-		t.Error("details[vocab_last_sync] missing")
 	}
 }
 

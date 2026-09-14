@@ -1,20 +1,22 @@
 // Package data · health.go
-// evie/tool 健康检查器（M9 收口）。
+// evie/tool 健康检查器（v1.7 减法后）。
 //
-// 检查范围：
+// 检查范围（Ready）：
 //   - Redis：Ping
 //   - Qua HTTP：HEAD baseURL
 //   - ASR providers：遍历 enabled providers
 //
-// 不做：磁盘 / GPU / LLM provider（evie/tool 不依赖）。
-// VocabSyncer 失败不阻断 ready（warn 级别）。
+// 检查范围（Details）：
+//   - 上述依赖是否配置 + asr_providers 列表
+//
+// v1.7 减法：删除与后台 sync 相关的方法/字段（SetSyncState / SetSyncMode /
+// lastSync / lastError / syncMode / mu），全部由 pkg/health 自动探测 DetailsProvider。
 package data
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -23,23 +25,23 @@ import (
 	pkgHealth "backend-service/pkg/health"
 )
 
-// HealthChecker 聚合多个 dependency 检查。
+// HealthChecker 聚合多个 dependency 检查（Ready + Details）。
 type HealthChecker struct {
-	rdb      *redis.Client
-	qua      *quaFetcher
-	asrReg   *asrPkg.ProviderRegistry
-	mu       sync.RWMutex
-	lastSync time.Time
-	lastError string
-	syncMode string
+	rdb    *redis.Client
+	qua    *quaFetcher
+	asrReg *asrPkg.ProviderRegistry
 }
 
-// 编译期断言 HealthChecker 实现 pkgHealth.Checker。
-var _ pkgHealth.Checker = (*HealthChecker)(nil)
+// 编译期断言 HealthChecker 实现 pkgHealth.Checker 和 DetailsProvider。
+var (
+	_ pkgHealth.Checker        = (*HealthChecker)(nil)
+	_ pkgHealth.DetailsProvider = (*HealthChecker)(nil)
+)
 
 // NewHealthChecker 创建 evie/tool 健康检查器。
 //
-// 返回 pkgHealth.Checker 接口以简化 Wire 装配（避免 wire.Bind）
+// 返回 concrete *HealthChecker，由 data.ProviderSet 的 wire.Bind 让其同时满足
+// pkgHealth.Checker（server.NewHTTPServer 需要）。
 func NewHealthChecker(rdb *redis.Client, qua QuaFetcher, reg *asrPkg.ProviderRegistry) *HealthChecker {
 	var q *quaFetcher
 	if qua != nil {
@@ -48,26 +50,6 @@ func NewHealthChecker(rdb *redis.Client, qua QuaFetcher, reg *asrPkg.ProviderReg
 		}
 	}
 	return &HealthChecker{rdb: rdb, qua: q, asrReg: reg}
-}
-
-// SetSyncState 由 VocabSyncer 在每次同步完成时回调，更新内部状态。
-func (c *HealthChecker) SetSyncState(last time.Time, errMsg string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.lastSync = last
-	c.lastError = errMsg
-}
-
-// SetSyncMode 上报后台词库同步模式（lazy_only / background）。
-//
-// 编译期保证：*HealthChecker 满足 biz.HealthNotifier。
-func (c *HealthChecker) SetSyncMode(mode string) {
-	if c == nil {
-		return
-	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.syncMode = mode
 }
 
 // Ready 检查所有依赖（带 2s 总超时）。
@@ -111,11 +93,8 @@ func (c *HealthChecker) Ready(ctx context.Context) error {
 	return nil
 }
 
-// Details 返回诊断数据（用于 ready 详情输出）。
+// Details 返回诊断数据（pkg/health 自动探测 DetailsProvider 并输出）。
 func (c *HealthChecker) Details(_ context.Context) map[string]any {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	details := map[string]any{
 		"redis": c.rdb != nil,
 		"qua":   c.qua != nil && c.qua.BaseURL() != "",
@@ -123,12 +102,6 @@ func (c *HealthChecker) Details(_ context.Context) map[string]any {
 	}
 	if c.asrReg != nil {
 		details["asr_providers"] = c.asrReg.Names()
-	}
-	if !c.lastSync.IsZero() {
-		details["vocab_last_sync"] = c.lastSync.Format(time.RFC3339)
-	}
-	if c.lastError != "" {
-		details["vocab_last_error"] = c.lastError
 	}
 	return details
 }

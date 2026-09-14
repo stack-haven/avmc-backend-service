@@ -24,12 +24,11 @@ var ProviderSet = wire.NewSet(
 	NewASRProviders,
 	NewQuaClient,
 	NewQuaVocabularySource,
-	NewVocabularySourceRegistry,
 	NewQuaClientOptions, // 空 slice（测试 / 配置化在 M9 阶段接）
 	NewHealthChecker,    // M9: 健康检查（返回 *HealthChecker）
 	// wire.Bind 声明 *HealthChecker 满足 pkgHealth.Checker 接口
 	// （server.NewHTTPServer 需要此接口）。
-	// v1.6 减法：删除 wire.Bind(new(biz.HealthNotifier), new(*HealthChecker))。
+	// v1.7 减法：删除 NewVocabularySourceRegistry（0 引用）+ biz.HealthNotifier 绑定。
 	wire.Bind(new(pkgHealth.Checker), new(*HealthChecker)),
 	// M4: NewSystemDictLoader
 )

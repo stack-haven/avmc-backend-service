@@ -9,8 +9,9 @@
 // 暴露：
 //   - Default：进程级默认注册表；
 //   - HTTPRequestsTotal / RequestDuration：HTTP 请求计数与延迟；
-//   - ASRRequestsTotal / ASRDuration：ASR provider 调用计数与延迟；
-//   - VocabSyncTotal：词库同步调用计数。
+//   - ASRRequestsTotal / ASRDuration：ASR provider 调用计数与延迟。
+//
+// v1.7 减法：删除 VocabSyncTotal（后台 sync 完全剔除后无调用方）。
 package metrics
 
 import (
@@ -263,17 +264,11 @@ var ASRDuration = NewHistogramVec(
 	"provider", "kind",
 )
 
-// VocabSyncTotal 词库同步调用计数。
-var VocabSyncTotal = NewCounterVec(
-	"evie_vocab_sync_total",
-	"Total vocab sync attempts.",
-	"mode", "status",
-)
+// VocabSyncTotal 词库同步调用计数（v1.7 删除：后台 sync 完全剔除后不再使用）。
 
 func init() {
 	Default.RegisterCounter(HTTPRequestsTotal)
 	Default.RegisterCounter(ASRRequestsTotal)
-	Default.RegisterCounter(VocabSyncTotal)
 	Default.RegisterHistogram(RequestDuration)
 	Default.RegisterHistogram(ASRDuration)
 }
