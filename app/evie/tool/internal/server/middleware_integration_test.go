@@ -137,7 +137,7 @@ func setupEndToEnd(t *testing.T) *endToEndEnv {
 	quaClient, _ := data.NewQuaClient(conf.Qua, log.DefaultLogger)
 	_ = quaClient // M5 阶段会使用；这里仅验证 config + wire
 	vocabBuilder, _ := biz.NewVocabularyBuilder(conf.SystemDict)
-	engine, _ := biz.NewLexnormEngine(conf.Enhancement, vocabBuilder, log.DefaultLogger)
+	engine, _ := biz.NewLexnormEngine(conf.Enhancement, vocabBuilder, nil, log.DefaultLogger)
 	usecase := biz.NewEnhancementUsecase(engine)
 	enhService := service.NewEnhancementService(usecase, log.DefaultLogger)
 

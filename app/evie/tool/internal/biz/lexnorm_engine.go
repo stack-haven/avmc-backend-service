@@ -40,18 +40,43 @@ import (
 //  4. 构造 Pipeline（每个 tenant 独立 Pipeline 实例，因为 Lexicon 不同）
 //  5. 返回 lexnorm.Runtime
 type TenantProfileResolver struct {
-	builder *VocabularyBuilder
-	cfg     lexnorm.Config
-	logger  *log.Helper
+	builder  *VocabularyBuilder
+	lazySync func(ctx context.Context, tenantID string) error
+	cfg      lexnorm.Config
+	logger   *log.Helper
 }
 
 // NewTenantProfileResolver 构造 resolver。
-func NewTenantProfileResolver(builder *VocabularyBuilder, cfg lexnorm.Config, logger log.Logger) *TenantProfileResolver {
-	return &TenantProfileResolver{
-		builder: builder,
-		cfg:     cfg,
-		logger:  log.NewHelper(log.With(logger, "module", "lexnorm/resolver")),
+//
+// lazySync 非 nil 时，会被绑定到 builder 的 cache miss 回调，
+// 确保首次带 token 请求某 tenant 时能 lazy 拉 qua。
+func NewTenantProfileResolver(
+	builder *VocabularyBuilder,
+	lazySync func(ctx context.Context, tenantID string) error,
+	cfg lexnorm.Config,
+	logger log.Logger,
+) *TenantProfileResolver {
+	if lazySync != nil {
+		builder.WithLazySyncOnMiss(lazySync)
 	}
+	return &TenantProfileResolver{
+		builder:  builder,
+		lazySync: lazySync,
+		cfg:      cfg,
+		logger:   log.NewHelper(log.With(logger, "module", "lexnorm/resolver")),
+	}
+}
+
+// NewLazySyncFunc 把 VocabSyncer 的 lazySync 方法暴露成独立函数，
+// 供 NewLexnormEngine 注入到 ProfileResolver。
+//
+// 为什么需要：wire 看到 NewLexnormEngine 需要 lazySync 函数，会自动构造 VocabSyncer。
+// v1.6 减法删了 main.go 的 syncer 引用后，必须靠 wire 依赖链才能保活。
+func NewLazySyncFunc(syncer *VocabSyncer) func(ctx context.Context, tenantID string) error {
+	if syncer == nil {
+		return nil
+	}
+	return syncer.lazySync
 }
 
 // Resolve 实现 lexnorm.ProfileResolver。

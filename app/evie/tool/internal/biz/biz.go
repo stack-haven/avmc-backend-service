@@ -5,6 +5,8 @@
 package biz
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/stack-haven/lexnorm"
@@ -28,6 +30,9 @@ var ProviderSet = wire.NewSet(
 	// M7
 	NewASRUsecase,
 	NewVocabSyncerWithAuth,
+	// v1.7 减法后的保活：把 VocabSyncer.lazySync 暴露为函数，
+	// 供 NewLexnormEngine 注入；wire 自动连接 syncer 依赖链。
+	NewLazySyncFunc,
 )
 
 // NewNormalizerFromConf 从 conf.VocabRules 构造 Normalizer（带 warn logger）。
@@ -54,14 +59,15 @@ func NewNormalizerFromConf(rules *v1conf.VocabRules, logger log.Logger) *Normali
 func NewLexnormEngine(
 	c *v1conf.Enhancement,
 	builder *VocabularyBuilder,
+	lazySync func(context.Context, string) error,
 	logger log.Logger,
 ) (*lexnorm.Engine, error) {
 	cfg := lexnorm.DefaultConfig()
 	cfg.AutoApplyThreshold = 0.85 // v1.2: 与 fuzzy_vocab.CategoryAuto[PERSON] 对齐
 	cfg.SuggestThreshold = 0.50   // v1.2: pinyin conf=0.55 走 Suggest
 
-	// 构造 per-tenant ProfileResolver
-	resolver := NewTenantProfileResolver(builder, cfg, logger)
+	// 构造 per-tenant ProfileResolver（注入 lazySync 以注册 cache miss 回调）
+	resolver := NewTenantProfileResolver(builder, lazySync, cfg, logger)
 
 	engine, err := lexnorm.New(
 		lexnorm.WithProfileResolver(resolver),

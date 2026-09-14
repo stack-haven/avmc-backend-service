@@ -36,7 +36,16 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	if err != nil {
 		return nil, nil, err
 	}
-	engine, err := biz.NewLexnormEngine(enhancement, vocabularyBuilder, logger)
+	normalizer := biz.NewNormalizerFromConf(vocabRules, logger)
+	v := data.NewQuaClientOptions()
+	quaFetcher, err := data.NewQuaClient(qua, logger, v...)
+	if err != nil {
+		return nil, nil, err
+	}
+	vocabularySource := data.NewQuaVocabularySource(quaFetcher)
+	vocabSyncer := biz.NewVocabSyncerWithAuth(vocabularyBuilder, normalizer, vocabularySource, logger)
+	v2 := biz.NewLazySyncFunc(vocabSyncer)
+	engine, err := biz.NewLexnormEngine(enhancement, vocabularyBuilder, v2, logger)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -50,11 +59,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, asr *conf.Asr, qua *c
 	asrUsecase := biz.NewASRUsecase(asrProviders, enhancementUsecase, asr, logger)
 	asrService := service.NewASRService(asrUsecase, providerRegistry, logger)
 	grpcServer := server.NewGRPCServer(confServer, tokenLookup, enhancementService, asrService, logger)
-	v := data.NewQuaClientOptions()
-	quaFetcher, err := data.NewQuaClient(qua, logger, v...)
-	if err != nil {
-		return nil, nil, err
-	}
 	healthChecker := data.NewHealthChecker(client, quaFetcher, providerRegistry)
 	httpServer := server.NewHTTPServer(confServer, tokenLookup, enhancementService, asrService, healthChecker, logger)
 	app := newApp(logger, grpcServer, httpServer)

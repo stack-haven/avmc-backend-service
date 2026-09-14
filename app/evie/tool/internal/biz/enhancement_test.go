@@ -54,7 +54,7 @@ func newEngine(t *testing.T, dictPath string) *lexnorm.Engine {
 	if err != nil {
 		t.Fatalf("NewVocabularyBuilder: %v", err)
 	}
-	engine, err := biz.NewLexnormEngine(&conf.Enhancement{}, vb, log.DefaultLogger)
+	engine, err := biz.NewLexnormEngine(&conf.Enhancement{}, vb, nil, log.DefaultLogger)
 	if err != nil {
 		t.Fatalf("NewLexnormEngine: %v", err)
 	}

@@ -113,7 +113,7 @@ func makeEnhancer(t testing.TB, dir string) *biz.EnhancementUsecase {
 	if err != nil {
 		t.Fatalf("vocab builder: %v", err)
 	}
-	engine, err := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	engine, err := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, nil, log.DefaultLogger)
 	if err != nil {
 		t.Fatalf("NewLexnormEngine: %v", err)
 	}

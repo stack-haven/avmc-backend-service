@@ -46,7 +46,7 @@ func runDemoApp(bc *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), err
 	if err != nil {
 		return nil, nil, err
 	}
-	engine, err := biz.NewLexnormEngine(bc.Enhancement, vb, logger)
+	engine, err := biz.NewLexnormEngine(bc.Enhancement, vb, nil, logger)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -46,7 +46,7 @@ func newTestService(t *testing.T) *service.EnhancementService {
 	dictPath := writeServiceTestDict(t)
 
 	vb, _ := biz.NewVocabularyBuilder(&v1conf.SystemDict{Path: dictPath})
-	engine, err := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	engine, err := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, nil, log.DefaultLogger)
 	if err != nil {
 		t.Fatalf("NewLexnormEngine: %v", err)
 	}

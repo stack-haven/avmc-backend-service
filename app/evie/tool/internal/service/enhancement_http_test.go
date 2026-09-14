@@ -36,7 +36,7 @@ func TestEnhancementService_HTTPRouteRegistered(t *testing.T) {
 	dictPath := writeSystemDict(t)
 	_ = &v1conf.Enhancement{}
 	vb, _ := biz.NewVocabularyBuilder(&v1conf.SystemDict{Path: dictPath})
-	engine, _ := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	engine, _ := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, nil, log.DefaultLogger)
 	uc := biz.NewEnhancementUsecase(engine)
 	svc := service.NewEnhancementService(uc, log.DefaultLogger)
 
@@ -66,7 +66,7 @@ func TestEnhancementService_GRPCServiceDirect(t *testing.T) {
 	dictPath := writeSystemDict(t)
 	_ = &v1conf.Enhancement{}
 	vb, _ := biz.NewVocabularyBuilder(&v1conf.SystemDict{Path: dictPath})
-	engine, _ := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, log.DefaultLogger)
+	engine, _ := biz.NewLexnormEngine(&v1conf.Enhancement{}, vb, nil, log.DefaultLogger)
 	uc := biz.NewEnhancementUsecase(engine)
 	svc := service.NewEnhancementService(uc, log.DefaultLogger)
 
