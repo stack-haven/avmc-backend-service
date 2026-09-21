@@ -1,0 +1,82 @@
+# Dockerfile.evie-tool
+# evie/tool v1.7.0 容器镜像构建
+#
+# 构建：docker build -f Dockerfile.evie-tool -t stack-haven/evie-tool:v1.7.0 .
+# 运行：docker run -d --name evie-tool -p 8110:8110 -p 9110:9110 \
+#         -v $(pwd)/configs:/data/conf:ro \
+#         -e EVIE_TOOL_REDIS_ADDR=... -e EVIE_TOOL_REDIS_PASSWORD=... \
+#         stack-haven/evie-tool:v1.7.0
+#
+# 镜像特点：
+#   - 多阶段构建（builder + distroless runtime）
+#   - distroless 非 root 用户运行
+#   - 系统词典 baked into 镜像（/app/configs/dictionaries/）
+#   - 业务配置通过 -v /data/conf 挂载
+
+# ============ Stage 1: Builder ============
+FROM golang:1.25-bookworm AS builder
+
+WORKDIR /src
+
+# 先复制依赖文件（利用 Docker 层缓存）
+COPY go.mod go.sum ./
+COPY pkg/lexnorm/ ./pkg/lexnorm/
+RUN go mod download
+
+# 再复制全部源码
+COPY . .
+
+# 构建参数（CI/CD 注入）
+ARG VERSION=dev
+ARG SERVICE_PACKAGE=./app/evie/tool/cmd/server
+
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -trimpath \
+    -ldflags="-s -w -X main.Version=${VERSION}" \
+    -o /out/evie-tool \
+    "${SERVICE_PACKAGE}"
+
+# ============ Stage 2: Runtime ============
+# ASR 需要 ffmpeg 转码 MP3 → PCM，所以 runtime 用 debian-slim（非 distroless）
+ARG VERSION=dev
+FROM debian:bookworm-slim AS runtime
+
+# 安装 ffmpeg + ca-certificates（qua HTTPS 调用需要）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+
+WORKDIR /app
+
+# 复制编译产物
+COPY --from=builder --chown=nonroot:nonroot /out/evie-tool /app/evie-tool
+
+# 复制系统词典（运行时只读）
+COPY --from=builder --chown=nonroot:nonroot \
+    /src/app/evie/tool/configs/dictionaries/system.json \
+    /app/configs/dictionaries/system.json
+
+# 创建配置挂载点
+VOLUME ["/data/conf"]
+
+# 端口
+EXPOSE 8110 9110
+
+# 切到非 root 用户（debian-slim 自带 nobody 用户，但可能没权限）
+USER nobody
+
+# 默认配置路径（通过 volume 挂载覆盖）
+WORKDIR /data/conf
+
+ENTRYPOINT ["/app/evie-tool"]
+CMD ["-conf", "/data/conf/config.yaml"]
+
+# 元数据
+LABEL org.opencontainers.image.title="evie-tool" \
+      org.opencontainers.image.description="独立轻量 ASR + 文本规范化服务" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.source="https://github.com/stack-haven/avmc-backend-service"

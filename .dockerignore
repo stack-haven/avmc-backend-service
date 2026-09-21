@@ -1,10 +1,39 @@
+# 项目级 .dockerignore（所有服务构建通用）
+
+# Git / IDE
 .git
 .github
 .idea
 .DS_Store
-bin
-coverage
+
+# 构建产物
+bin/
+coverage/
 *.log
 *.out
 *.test
-app/platform/ai/server
+
+# 文档与示例（不需要进镜像）
+docs/
+README.md
+*.md
+
+# 测试数据（避免 COPY 进镜像浪费空间）
+app/**/testdata/
+**/testdata/
+**/*_test.go
+**/e2e_*
+
+# 临时代码（避免 e2e_production 符号链接污染）
+e2e_production
+e2e_lexnorm_*
+
+# 上传目录（运行时挂载，不进镜像）
+app/**/upload/
+
+# 开发工具
+.playwright-cli/
+.vscode/
+
+# 平台 admin 服务（evie-tool 不需要）
+app/platform/ai/server/

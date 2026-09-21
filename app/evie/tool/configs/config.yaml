@@ -10,9 +10,9 @@ server:
 data:
   redis:
     network: tcp
-    addr: 127.0.0.1:6379
+    addr: 172.16.0.125:6379
     password: ''
-    db: 14
+    db: 9
     read_timeout: 0.2s
     write_timeout: 0.2s
     token_key_prefix: 'oauth2_access_token:'
@@ -41,7 +41,7 @@ asr:
   providers:
     funasr:
       enabled: true
-      addr: http://127.0.0.1:18000
+      addr: http://172.16.0.125:18000
       stream_addr: ''
       sample_rate: 16000
       language: zh
