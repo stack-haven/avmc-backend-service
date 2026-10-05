@@ -1,13 +1,13 @@
 version: '3'
 services:
   zookeeper:
-    image: docker.io/bitnami/zookeeper:latest
+    image: docker.io/soldevelo/zookeeper:latest
     ports:
       - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
   kafka:
-    image: docker.io/bitnami/kafka:latest
+    image: docker.io/soldevelo/kafka:latest
     ports:
       - "9092:9092"
     environment:
@@ -23,7 +23,7 @@ services:
     links:
       - zookeeper
   postgres:
-    image: docker.io/bitnami/postgresql:latest
+    image: docker.io/soldevelo/postgresql:latest
     ports:
       - "5432:5432"
     environment:
@@ -31,7 +31,7 @@ services:
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=accesscontroldb
   minio:
-    image: docker.io/bitnami/minio:latest
+    image: docker.io/soldevelo/minio:latest
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -70,7 +70,7 @@ services:
       - COLLECTOR_ZIPKIN_HOST_PORT=:9411
       - COLLECTOR_OTLP_ENABLED=true
   redis:
-    image: docker.io/bitnami/redis:latest
+    image: docker.io/soldevelo/redis:latest
     ports:
       - "6379:6379"
   user-service:
