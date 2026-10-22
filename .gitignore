@@ -49,3 +49,6 @@ deploy/sql/*.sql.gz
 ./server
 pkg/lexnorm/.agents/DESIGN.md
 e2e_production
+
+# gen_clients.sh (mobile-desktop-service) 的 buf 临时配置残留
+proto/.buf-gen-tmp-*.yaml
