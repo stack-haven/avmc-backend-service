@@ -273,9 +273,9 @@ func (p *FuzzyVocabProcessor) Process(_ context.Context, s *lexnorm.State) error
 // conf=0.55 走 Suggest 而不是字面 dist=1 的 conf=0.95 走 Replace。
 //
 // 新顺序：
-//   1. 精确等值 → 不替换
-//   2. boundedHamming（dist≤maxDist）：阶梯式 conf，dist=1 → 0.95（高置信 Apply）
-//   3. pinyin signature：兜底，仅 dist>maxDist 时使用（conf=0.55 → Suggest）
+//  1. 精确等值 → 不替换
+//  2. boundedHamming（dist≤maxDist）：阶梯式 conf，dist=1 → 0.95（高置信 Apply）
+//  3. pinyin signature：兜底，仅 dist>maxDist 时使用（conf=0.55 → Suggest）
 //
 // 返回：entry / confidence (=阶梯式 或 pinyinFallback=0.55) / dist
 //

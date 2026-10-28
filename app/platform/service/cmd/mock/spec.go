@@ -8,6 +8,7 @@ type mockMenuSpec struct {
 	Name, Title, Path, Component, Icon string
 	Type, Sort                         int32
 	AuthCode                           string
+	IframeSrc                          string // Component=IFrameView 时的内嵌地址
 }
 
 // menuSeed 定义菜单目录/页面的 seed 规格（平铺 + Parent 引用）。
@@ -17,10 +18,11 @@ type menuSeed struct {
 	Name      string // 菜单 name（唯一键）
 	Title     string // 菜单中文标题
 	Path      string // 前端路由路径
-	Component string // 前端组件
+	Component string // 前端组件（IFrameView 表示内嵌页）
 	Icon      string // 图标
 	Type      int32  // 1=目录 2=页面
 	Sort      int32
+	IframeSrc string // Component=IFrameView 时的内嵌地址
 }
 
 // buttonSpec 定义权限按钮（菜单 type=3）的 seed 规格。

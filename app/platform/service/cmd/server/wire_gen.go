@@ -13,7 +13,6 @@ import (
 	"backend-service/app/platform/service/internal/server"
 	"backend-service/app/platform/service/internal/service"
 	"backend-service/pkg/auth/authn"
-	"backend-service/pkg/auth/session"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -49,7 +48,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 		cleanup()
 		return nil, nil, err
 	}
-	manager := session.NewManager(redisClient, logger, authenticator)
+	manager := data.ProvideSessionManager(redisClient, logger, authenticator)
 	guard, err := data.NewLoginAttemptGuard(redisClient)
 	if err != nil {
 		cleanup()
@@ -102,10 +101,6 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	storageProviderRepo := data.NewStorageProviderRepo(dataData, oss, logger)
 	storageProviderUsecase := biz.NewStorageProviderUsecase(storageProviderRepo, logger)
 	storageProviderServiceService := service.NewStorageProviderServiceService(storageProviderUsecase)
-	storageCrypto := data.NewStorageCrypto()
-	storageConfigRepo := data.NewStorageConfigRepo(dataData, storageCrypto, logger)
-	storageConfigUsecase := biz.NewStorageConfigUsecase(storageConfigRepo, logger)
-	storageConfigService := service.NewStorageConfigService(storageConfigUsecase)
 	fileRepo := data.NewFileRepo(dataData, logger)
 	fileAccessLogRepo := data.NewFileAccessLogRepo(dataData, logger)
 	storageProviderResolver := biz.NewStorageProviderResolver(storageProviderRepo)
@@ -128,13 +123,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, oss *conf.OSS, logger
 	v := biz.NewAsyncTaskHandlers(asyncTaskRepo, permissionCacheInvalidator, asyncTaskHandler, webhookRepo, logger)
 	asyncTaskUsecase := biz.NewAsyncTaskUsecase(asyncTaskRepo, v, logger)
 	asyncTaskServiceService := service.NewAsyncTaskServiceService(asyncTaskUsecase, logger)
-	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, manager, authorizer, operationLogUsecase, logger)
+	webhookUsecase := biz.NewWebhookUsecase(webhookRepo, asyncTaskRepo, logger)
+	webhookServiceService := service.NewWebhookService(webhookUsecase, logger)
+	grpcServer, err := server.NewGRPCServer(confServer, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, webhookServiceService, manager, authorizer, operationLogUsecase, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	checker := data.NewHealthChecker(dataData)
-	httpServer, err := server.NewHTTPServer(confServer, logger, manager, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, storageConfigService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService)
+	httpServer, err := server.NewHTTPServer(confServer, logger, manager, authorizer, checker, operationLogUsecase, authServiceService, tenantServiceService, userServiceService, deptServiceService, menuServiceService, tenantMenuPermissionGroupServiceService, roleServiceService, postServiceService, projectServiceService, dictionaryServiceService, operationLogServiceService, loginLogServiceService, sessionServiceService, parameterServiceService, storageProviderServiceService, fileCenterServiceService, notificationServiceService, notificationProviderServiceService, deviceServiceService, asyncTaskServiceService, webhookServiceService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

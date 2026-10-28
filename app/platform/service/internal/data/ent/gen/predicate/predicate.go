@@ -57,9 +57,6 @@ type Project func(*sql.Selector)
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
 
-// StorageConfig is the predicate function for storageconfig builders.
-type StorageConfig func(*sql.Selector)
-
 // StorageProvider is the predicate function for storageprovider builders.
 type StorageProvider func(*sql.Selector)
 

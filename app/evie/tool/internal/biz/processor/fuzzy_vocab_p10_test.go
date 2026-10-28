@@ -40,10 +40,10 @@ func TestP10_TwoCharNoiseIsolation(t *testing.T) {
 	tests := []struct {
 		input string
 	}{
-		{"周丽群汇报"},      // 4 字含 3 字目标
-		{"腾讯"},            // 2 字普通词（不应被 suggest）
+		{"周丽群汇报"},        // 4 字含 3 字目标
+		{"腾讯"},           // 2 字普通词（不应被 suggest）
 		{"袁梦莲和羊城冰月一起开会"}, // 多个 3/4 字目标
-		{"问题"},            // 2 字普通词（不应被 suggest）
+		{"问题"},           // 2 字普通词（不应被 suggest）
 	}
 
 	for _, tt := range tests {

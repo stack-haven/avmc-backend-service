@@ -20,6 +20,11 @@ func TestActionsForAuthCodeStatusUpdate(t *testing.T) {
 			want: []authz.Action{"POST"},
 		},
 		{
+			name: "set-default AIP-136 自定义动词返回 POST",
+			code: "/platform.service.v1.StorageProviderService/SetDefaultStorageProvider",
+			want: []authz.Action{"POST"},
+		},
+		{
 			name: "普通 update 返回 PUT",
 			code: "/platform.admin.v1.UserService/UpdateUser",
 			want: []authz.Action{"PUT"},

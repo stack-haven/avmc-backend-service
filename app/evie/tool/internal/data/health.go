@@ -34,7 +34,7 @@ type HealthChecker struct {
 
 // 编译期断言 HealthChecker 实现 pkgHealth.Checker 和 DetailsProvider。
 var (
-	_ pkgHealth.Checker        = (*HealthChecker)(nil)
+	_ pkgHealth.Checker         = (*HealthChecker)(nil)
 	_ pkgHealth.DetailsProvider = (*HealthChecker)(nil)
 )
 

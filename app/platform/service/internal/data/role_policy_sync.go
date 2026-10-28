@@ -153,6 +153,10 @@ func actionsForAuthCode(code string) []authz.Action {
 		if strings.HasSuffix(lower, "status") {
 			return []authz.Action{"POST"}
 		}
+		// SetDefaultXxx 是 AIP-136 自定义动词（POST /xxx/{id}:set-default），非标准更新。
+		if strings.HasPrefix(lower, "setdefault") {
+			return []authz.Action{"POST"}
+		}
 		return []authz.Action{"PUT"}
 	case strings.HasPrefix(lower, "delete"), strings.HasPrefix(lower, "remove"):
 		return []authz.Action{"DELETE"}

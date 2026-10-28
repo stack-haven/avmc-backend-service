@@ -34,7 +34,7 @@ func newValid() *Bootstrap {
 		Enhancement: &Enhancement{
 			Pipeline: []string{"cleaning", "filler"},
 		},
-		SystemDict:     &SystemDict{Path: "./system.json"},
+		SystemDict: &SystemDict{Path: "./system.json"},
 	}
 }
 

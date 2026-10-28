@@ -33,10 +33,12 @@ func menuX(ctx context.Context, c *gen.Client, s mockMenuSpec, pid uint32, typ i
 	if err != nil {
 		return c.Menu.Create().SetName(s.Name).SetTitle(s.Title).SetPath(s.Path).
 			SetComponent(s.Component).SetIcon(s.Icon).SetType(typ).SetSort(s.Sort).
+			SetIframeSrc(s.IframeSrc).
 			SetNillableAuthCode(&s.AuthCode).SetNillableParentID(&pid).SaveX(ctx)
 	}
 	c.Menu.UpdateOneID(ex.ID).SetTitle(s.Title).SetPath(s.Path).
 		SetComponent(s.Component).SetIcon(s.Icon).SetType(typ).SetSort(s.Sort).
+		SetIframeSrc(s.IframeSrc).
 		SetNillableAuthCode(&s.AuthCode).SetNillableParentID(&pid).Exec(ctx)
 	return ex
 }
@@ -171,7 +173,7 @@ func seedMenuTree(ctx context.Context, c *gen.Client, seeds []menuSeed) (map[str
 		if s.Parent != "" {
 			parentID = menuMap[s.Parent]
 		}
-		spec := mockMenuSpec{Name: s.Name, Title: s.Title, Path: s.Path, Component: s.Component, Icon: s.Icon, Type: s.Type, Sort: s.Sort}
+		spec := mockMenuSpec{Name: s.Name, Title: s.Title, Path: s.Path, Component: s.Component, Icon: s.Icon, Type: s.Type, Sort: s.Sort, IframeSrc: s.IframeSrc}
 		var m *gen.Menu
 		if s.Type == 1 {
 			m = menuDir(ctx, c, spec, parentID)

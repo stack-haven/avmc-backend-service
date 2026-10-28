@@ -28,13 +28,16 @@ var ProviderSet = wire.NewSet(NewHTTPServer, NewGRPCServer, NewAsyncTaskWorker)
 // anthnWhiteListOperations 认证白名单：跳过 JWT 认证的接口。
 // 仅含登录前接口（无 token）；跨服务委托接口（IsAuthorized 等）现已携带原始 JWT，
 // 不再跳过认证（保留在鉴权白名单中，见 anthzWhiteListOperations）。
+//
+// 注意：Logout 不在此白名单——登出必须带有效 access token 才能定位并撤销会话；
+// 若跳过认证，上下文无 claims，登出会退化为 no-op，导致旧 token 在过期前始终有效。
+// Logout 仍在鉴权白名单（无需 Casbin），前端对登出失败已容错（catch 后本地清理）。
 var anthnWhiteListOperations = map[string]bool{
 	v1.OperationAuthServiceLoginByPhoneCode:    true,
 	v1.OperationAuthServiceLoginPassword:       true,
 	v1.OperationAuthServiceLoginByEmail:        true,
 	v1.OperationAuthServiceLoginByUsername:     true,
 	v1.OperationAuthServiceRefreshToken:        true,
-	v1.OperationAuthServiceLogout:              true,
 	v1.OperationTenantServiceListTenantSimples: true,
 }
 

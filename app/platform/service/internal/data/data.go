@@ -43,7 +43,7 @@ var ProviderSet = wire.NewSet(
 	NewHealthChecker,
 	NewLoginAttemptGuard,
 	NewAuthenticator, NewAuthorizer, authn.NewSecurity,
-	session.NewManager,
+	ProvideSessionManager,
 	NewTenantRepo,
 	NewAuthRepo,
 	NewUserRepo,
@@ -69,8 +69,6 @@ var ProviderSet = wire.NewSet(
 	NewWebhookRepo,
 	NewResourceQuotaRepo,
 	NewPermissionCacheInvalidator,
-	NewStorageConfigRepo,
-	NewStorageCrypto,
 )
 
 // Data .
@@ -279,6 +277,14 @@ func NewLoginAttemptGuard(rdb *redis.Client) (loginattempt.Guard, error) {
 		return nil, err
 	}
 	return loginattempt.NewRedisGuard(rdb, opts), nil
+}
+
+// ProvideSessionManager 包装 session.NewManager。
+// session.NewManager 的 variadic Option 参数无法被 wire 推导（no provider
+// found for []session.Option），此包装保持与旧 wire_gen 产物完全一致的
+// 无 Option 调用行为；需要 Option 时在此处显式追加（如 session.WithFailOpen）。
+func ProvideSessionManager(rdb *redis.Client, logger log.Logger, authenticator authnEngine.Authenticator) *session.Manager {
+	return session.NewManager(rdb, logger, authenticator)
 }
 
 // NewRedisClient 创建Redis客户端

@@ -297,7 +297,7 @@ func isAudioFormatError(errMsg string) bool {
 		"unsupported format",
 		"invalid audio",
 		"decode",
-		"a 0-d tensor",      // funasr 在音频为空时返回
+		"a 0-d tensor",         // funasr 在音频为空时返回
 		"non-empty TensorList", // funasr 另一种空音频错误
 		"tensor",
 	}

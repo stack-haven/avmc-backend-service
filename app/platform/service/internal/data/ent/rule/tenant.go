@@ -96,8 +96,6 @@ func filterTenantQuery(q ent.Query, tenantID uint32) error {
 		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	case *gen.FileAccessLogQuery:
 		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
-	case *gen.StorageConfigQuery:
-		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	case *gen.NotificationMessageQuery:
 		q.Filter().WhereTenantID(entql.Uint32EQ(tenantID))
 	case *gen.NotificationTemplateQuery:
@@ -139,8 +137,6 @@ func filterTenantMutation(m ent.Mutation, tenantID uint32) error {
 	case *gen.FileObjectMutation:
 		m.WhereP(tenantFieldEQ(tenantID))
 	case *gen.FileAccessLogMutation:
-		m.WhereP(tenantFieldEQ(tenantID))
-	case *gen.StorageConfigMutation:
 		m.WhereP(tenantFieldEQ(tenantID))
 	case *gen.NotificationMessageMutation:
 		m.WhereP(tenantFieldEQ(tenantID))

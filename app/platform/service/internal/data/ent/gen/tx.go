@@ -48,8 +48,6 @@ type Tx struct {
 	Project *ProjectClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
-	// StorageConfig is the client for interacting with the StorageConfig builders.
-	StorageConfig *StorageConfigClient
 	// StorageProvider is the client for interacting with the StorageProvider builders.
 	StorageProvider *StorageProviderClient
 	// Tenant is the client for interacting with the Tenant builders.
@@ -214,7 +212,6 @@ func (tx *Tx) init() {
 	tx.Post = NewPostClient(tx.config)
 	tx.Project = NewProjectClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
-	tx.StorageConfig = NewStorageConfigClient(tx.config)
 	tx.StorageProvider = NewStorageProviderClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)
 	tx.TenantMenuPermissionGroup = NewTenantMenuPermissionGroupClient(tx.config)

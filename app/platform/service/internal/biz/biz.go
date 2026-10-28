@@ -34,8 +34,6 @@ var ProviderSet = wire.NewSet(
 	NewAsyncTaskHandlers,
 	NewAsyncTaskUsecase,
 	NewWebhookUsecase,
-	NewStorageConfigUsecase,
-	NewStorageResolver,
 )
 
 type Transaction interface {

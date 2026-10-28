@@ -48,12 +48,12 @@ func NewGRPCServer(c *conf.Server,
 	session *service.SessionServiceService,
 	parameter *service.ParameterServiceService,
 	storageProvider *service.StorageProviderServiceService,
-	storageConfig *service.StorageConfigService,
 	fileCenter *service.FileCenterServiceService,
 	notification *service.NotificationServiceService,
 	notificationProvider *service.NotificationProviderServiceService,
 	device *service.DeviceServiceService,
 	asyncTask *service.AsyncTaskServiceService,
+	webhook *service.WebhookServiceService,
 	authenticator *session.Manager,
 	authorizer authzEngine.Authorizer,
 	operationAudit *biz.OperationLogUsecase,
@@ -98,11 +98,11 @@ func NewGRPCServer(c *conf.Server,
 	v1.RegisterSessionServiceServer(srv, session)
 	v1.RegisterParameterServiceServer(srv, parameter)
 	v1.RegisterStorageProviderServiceServer(srv, storageProvider)
-	v1.RegisterStorageConfigServiceServer(srv, storageConfig)
 	v1.RegisterFileCenterServiceServer(srv, fileCenter)
 	v1.RegisterNotificationServiceServer(srv, notification)
 	v1.RegisterNotificationProviderServiceServer(srv, notificationProvider)
 	v1.RegisterDeviceServiceServer(srv, device)
 	v1.RegisterAsyncTaskServiceServer(srv, asyncTask)
+	v1.RegisterWebhookServiceServer(srv, webhook)
 	return srv, nil
 }

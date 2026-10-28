@@ -97,12 +97,19 @@ security-check:
 check: fmt-check lint-new
 	go vet ./...
 	go test -timeout 90s ./...
+	$(MAKE) operation-coverage-check
 	git diff --check
 
 .PHONY: http-convention-check
 # verify HTTP paths follow AIP-136 (custom methods use ':', not '/')
 http-convention-check:
 	@./scripts/check-http-path-convention.sh
+
+.PHONY: operation-coverage-check
+# verify every Casbin-protected operation is reachable (has a menu button or is whitelisted)
+# 防止「有路由但无按钮 -> 恒 403」缺陷复发，见 scripts/check-operation-coverage.sh
+operation-coverage-check:
+	@./scripts/check-operation-coverage.sh
 
 .PHONY: coverage
 # generate a coverage report and compare with the gates in docs/architecture/4-5 §二

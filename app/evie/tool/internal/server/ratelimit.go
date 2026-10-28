@@ -41,12 +41,12 @@ type rateLimitEntry struct {
 
 // rateLimiter IP 频率限制器（fixed-window）。
 type rateLimiter struct {
-	mu       sync.Mutex
-	entries  map[string]*rateLimitEntry
-	maxPer   int           // 每窗口最大请求数
-	window   time.Duration // 窗口大小
-	lastGC   int64         // 上次 GC 时间
-	log      *log.Helper
+	mu      sync.Mutex
+	entries map[string]*rateLimitEntry
+	maxPer  int           // 每窗口最大请求数
+	window  time.Duration // 窗口大小
+	lastGC  int64         // 上次 GC 时间
+	log     *log.Helper
 }
 
 // newRateLimiter 构造 limiter（maxPer=0 表示禁用）。

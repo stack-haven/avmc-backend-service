@@ -39,12 +39,12 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	session *service.SessionServiceService,
 	parameter *service.ParameterServiceService,
 	storageProvider *service.StorageProviderServiceService,
-	storageConfig *service.StorageConfigService,
 	fileCenter *service.FileCenterServiceService,
 	notification *service.NotificationServiceService,
 	notificationProvider *service.NotificationProviderServiceService,
 	device *service.DeviceServiceService,
 	asyncTask *service.AsyncTaskServiceService,
+	webhook *service.WebhookServiceService,
 ) (*http.Server, error) {
 	if c == nil || c.Http == nil {
 		return nil, fmt.Errorf("http server config is required")
@@ -91,12 +91,12 @@ func NewHTTPServer(c *conf.Server, logger log.Logger,
 	v1.RegisterSessionServiceHTTPServer(srv, session)
 	v1.RegisterParameterServiceHTTPServer(srv, parameter)
 	v1.RegisterStorageProviderServiceHTTPServer(srv, storageProvider)
-	v1.RegisterStorageConfigServiceHTTPServer(srv, storageConfig)
 	v1.RegisterFileCenterServiceHTTPServer(srv, fileCenter)
 	v1.RegisterNotificationServiceHTTPServer(srv, notification)
 	v1.RegisterNotificationProviderServiceHTTPServer(srv, notificationProvider)
 	v1.RegisterDeviceServiceHTTPServer(srv, device)
 	v1.RegisterAsyncTaskServiceHTTPServer(srv, asyncTask)
+	v1.RegisterWebhookServiceHTTPServer(srv, webhook)
 	if c.GetHttp().GetEnableSwagger() {
 		allFS := nethttp.FS(assets.OpenAPIData)
 		// swagger-ui: http://127.0.0.1:8000/docs/swagger-ui
