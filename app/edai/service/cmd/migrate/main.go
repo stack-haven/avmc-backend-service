@@ -1,0 +1,36 @@
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"os"
+
+	"backend-service/app/edai/service/internal/data"
+	"backend-service/app/edai/service/internal/runtimeconfig"
+
+	"github.com/go-kratos/kratos/v2/log"
+)
+
+var flagconf string
+
+func init() {
+	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf ./configs")
+}
+
+func main() {
+	flag.Parse()
+	logger := log.NewStdLogger(os.Stdout)
+	if err := run(context.Background(), logger); err != nil {
+		fmt.Fprintf(os.Stderr, "edai migration failed: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(ctx context.Context, logger log.Logger) error {
+	bc, err := runtimeconfig.Load(flagconf)
+	if err != nil {
+		return err
+	}
+	return data.RunSchemaMigration(ctx, bc.Data, logger)
+}

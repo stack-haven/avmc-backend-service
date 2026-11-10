@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package edai.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/edai/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.edai.service.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// EDAI 文件记录服务。
+//
+// 契约边界（系统设计基线 §5.2）：
+//   - FileRecord 表示**物理文件**，不是业务资产（DigitalAsset 是后续层）；
+//   - 路径不是文件身份：content_hash 用于去重与完整性，业务身份留给资产层；
+//   - 原始路径、目录名、文件系统时间必须原样保留，不被推断结果覆盖；
+//   - 文件不存在/不可访问必须显式标记，不能静默丢弃。
+service FileService {
+  // 查询文件记录列表（Metadata Search 的 V1.0 范围）
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {
+    option (google.api.http) = {get: "/edai/v1/files"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询文件记录列表"
+      tags: ["文件记录"]
+    };
+  }
+
+  // 查询单个文件记录
+  rpc GetFile(GetFileRequest) returns (GetFileResponse) {
+    option (google.api.http) = {get: "/edai/v1/files/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询文件记录"
+      tags: ["文件记录"]
+    };
+  }
+
+  // 文件记录统计（按状态/扩展名聚合），用于数据质量指标
+  rpc GetFileStats(GetFileStatsRequest) returns (GetFileStatsResponse) {
+    option (google.api.http) = {get: "/edai/v1/files:stats"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "文件记录统计"
+      tags: ["文件记录"]
+    };
+  }
+}
+
+// 文件记录
+message FileRecord {
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "文件记录ID"}];
+  // 所属数据源
+  uint32 source_id = 2 [(gnostic.openapi.v3.property) = {description: "数据源ID"}];
+  // 原始完整路径（原样记录，永不改写）
+  string raw_path = 3 [(gnostic.openapi.v3.property) = {description: "原始完整路径"}];
+  // 原始父目录
+  string raw_parent_path = 4 [(gnostic.openapi.v3.property) = {description: "原始父目录"}];
+  // 文件名
+  string file_name = 5 [(gnostic.openapi.v3.property) = {description: "文件名"}];
+  // 扩展名（保留原始大小写；可为空）
+  optional string extension = 6 [(gnostic.openapi.v3.property) = {description: "扩展名"}];
+  // 文件大小（字节）；采集失败时为 0 且 file_status 标记异常
+  int64 file_size = 7 [(gnostic.openapi.v3.property) = {description: "文件大小（字节）"}];
+  // 文件系统创建时间（原始语义，不得当作设计时间）
+  optional string fs_created_at = 8 [(gnostic.openapi.v3.property) = {description: "文件系统创建时间"}];
+  // 文件系统修改时间（原始语义，不得当作项目完成时间）
+  optional string fs_modified_at = 9 [(gnostic.openapi.v3.property) = {description: "文件系统修改时间"}];
+  // 内容哈希（SHA256）；大文件可能未计算，为空表示未计算
+  optional string content_hash = 10 [(gnostic.openapi.v3.property) = {description: "内容哈希 SHA256"}];
+  // 快速指纹（size + mtime 组合），用于增量扫描判断是否变化
+  string quick_fingerprint = 11 [(gnostic.openapi.v3.property) = {description: "快速指纹"}];
+  // 首次发现时间
+  string first_seen_at = 12 [(gnostic.openapi.v3.property) = {description: "首次发现时间"}];
+  // 最近一次扫描看到它的时间
+  string last_scanned_at = 13 [(gnostic.openapi.v3.property) = {description: "最近扫描时间"}];
+  // 文件状态：present / missing / unreachable
+  string file_status = 14 [(gnostic.openapi.v3.property) = {description: "文件状态 present/missing/unreachable"}];
+  // 状态说明（不可访问原因等）
+  optional string status_message = 15 [(gnostic.openapi.v3.property) = {description: "状态说明"}];
+  // 是否与其它记录内容重复（同 content_hash）
+  bool is_duplicate = 16 [(gnostic.openapi.v3.property) = {description: "是否重复"}];
+  string created_at = 17 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+  string updated_at = 18 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+}
+
+message ListFilesRequest {
+  optional string filter = 1 [(gnostic.openapi.v3.property) = {description: "过滤条件"}];
+  optional string order_by = 2 [(gnostic.openapi.v3.property) = {description: "排序字段"}];
+  int32 page_size = 3 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 200
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "每页条数"
+      default: {number: 20}
+    }
+  ];
+  string page_token = 4 [(gnostic.openapi.v3.property) = {description: "分页令牌"}];
+  // 限定数据源（0 表示不限）
+  optional uint32 source_id = 5 [(gnostic.openapi.v3.property) = {description: "数据源ID"}];
+}
+
+message ListFilesResponse {
+  repeated FileRecord items = 1 [(gnostic.openapi.v3.property) = {description: "文件记录列表"}];
+  int32 total = 2 [(gnostic.openapi.v3.property) = {description: "总数"}];
+  string next_page_token = 3 [(gnostic.openapi.v3.property) = {description: "下一页令牌"}];
+}
+
+message GetFileRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "文件记录ID"}
+  ];
+}
+
+message GetFileResponse {
+  FileRecord file = 1 [(gnostic.openapi.v3.property) = {description: "文件记录"}];
+}
+
+message GetFileStatsRequest {
+  optional uint32 source_id = 1 [(gnostic.openapi.v3.property) = {description: "数据源ID"}];
+}
+
+// 扩展名计数
+message ExtensionCount {
+  string extension = 1 [(gnostic.openapi.v3.property) = {description: "扩展名"}];
+  int32 count = 2 [(gnostic.openapi.v3.property) = {description: "数量"}];
+}
+
+message GetFileStatsResponse {
+  // 总记录数
+  int32 total = 1 [(gnostic.openapi.v3.property) = {description: "总记录数"}];
+  // 正常存在的文件数
+  int32 present_count = 2 [(gnostic.openapi.v3.property) = {description: "存在文件数"}];
+  // 已消失的文件数
+  int32 missing_count = 3 [(gnostic.openapi.v3.property) = {description: "已消失文件数"}];
+  // 不可访问的文件数
+  int32 unreachable_count = 4 [(gnostic.openapi.v3.property) = {description: "不可访问文件数"}];
+  // 内容重复的文件数
+  int32 duplicate_count = 5 [(gnostic.openapi.v3.property) = {description: "重复文件数"}];
+  // 扩展名分布（按数量倒序，最多 20 项）
+  repeated ExtensionCount top_extensions = 6 [(gnostic.openapi.v3.property) = {description: "扩展名分布"}];
+  // 总字节数
+  int64 total_size = 7 [(gnostic.openapi.v3.property) = {description: "总字节数"}];
+}

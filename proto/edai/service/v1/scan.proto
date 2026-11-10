@@ -1,0 +1,155 @@
+syntax = "proto3";
+
+package edai.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/edai/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.edai.service.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// EDAI 扫描任务服务。
+//
+// 任务引擎自建（4-2 ADR-013 决策 5）：不扩展 platform 的任务中心。
+// 状态机与系统设计基线 §14 对齐，非法迁移由 biz 层拒绝。
+service ScanService {
+  // 发起一次扫描（异步执行，立即返回任务）
+  rpc StartScan(StartScanRequest) returns (StartScanResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/sources/{source_id}:scan"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "发起扫描"
+      tags: ["扫描任务"]
+    };
+  }
+
+  // 查询任务列表
+  rpc ListScanTasks(ListScanTasksRequest) returns (ListScanTasksResponse) {
+    option (google.api.http) = {get: "/edai/v1/scan-tasks"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询扫描任务列表"
+      tags: ["扫描任务"]
+    };
+  }
+
+  // 查询任务详情
+  rpc GetScanTask(GetScanTaskRequest) returns (GetScanTaskResponse) {
+    option (google.api.http) = {get: "/edai/v1/scan-tasks/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询扫描任务"
+      tags: ["扫描任务"]
+    };
+  }
+
+  // 取消任务（置为 cancel_requested，由 worker 在安全点停止）
+  rpc CancelScanTask(CancelScanTaskRequest) returns (CancelScanTaskResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/scan-tasks/{id}:cancel"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "取消扫描任务"
+      tags: ["扫描任务"]
+    };
+  }
+}
+
+// 扫描任务
+message ScanTask {
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "任务ID"}];
+  uint32 source_id = 2 [(gnostic.openapi.v3.property) = {description: "数据源ID"}];
+  // 状态：pending / running / succeeded / failed / cancelled / cancel_requested
+  string status = 3 [(gnostic.openapi.v3.property) = {description: "任务状态"}];
+  // 扫描根路径快照（发起时的数据源根路径）
+  string root_path = 4 [(gnostic.openapi.v3.property) = {description: "扫描根路径"}];
+  // 已发现文件数
+  int32 discovered = 5 [(gnostic.openapi.v3.property) = {description: "已发现文件数"}];
+  // 新登记数
+  int32 created = 6 [(gnostic.openapi.v3.property) = {description: "新登记数"}];
+  // 更新数（路径相同但指纹变化）
+  int32 updated = 7 [(gnostic.openapi.v3.property) = {description: "更新数"}];
+  // 标记消失数
+  int32 marked_missing = 8 [(gnostic.openapi.v3.property) = {description: "标记消失数"}];
+  // 跳过数（排除规则命中）
+  int32 skipped = 9 [(gnostic.openapi.v3.property) = {description: "跳过数"}];
+  // 失败数（权限/IO 错误）
+  int32 failed = 10 [(gnostic.openapi.v3.property) = {description: "失败数"}];
+  // 是否全量扫描（false 表示增量）
+  bool full_scan = 11 [(gnostic.openapi.v3.property) = {description: "是否全量"}];
+  optional string error_message = 12 [(gnostic.openapi.v3.property) = {description: "错误信息"}];
+  string started_at = 13 [(gnostic.openapi.v3.property) = {description: "开始时间"}];
+  optional string finished_at = 14 [(gnostic.openapi.v3.property) = {description: "结束时间"}];
+  string created_at = 15 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+  // 发起的子路径（相对根路径）；空表示整棵树
+  optional string sub_path = 16 [(gnostic.openapi.v3.property) = {description: "发起的子路径"}];
+  // 是否计算内容哈希
+  bool compute_hash = 17 [(gnostic.openapi.v3.property) = {description: "是否计算内容哈希"}];
+}
+
+message StartScanRequest {
+  uint32 source_id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "数据源ID"}
+  ];
+  // 可选：限定子路径（相对于数据源根路径）。
+  // 试点规范 §8.1 要求「不要求先扫描整个服务器」，因此支持先扫单客户目录。
+  optional string sub_path = 2 [(gnostic.openapi.v3.property) = {description: "子路径（相对根路径）"}];
+  // 是否全量重扫（默认增量）
+  bool full_scan = 3 [(gnostic.openapi.v3.property) = {description: "是否全量扫描"}];
+  // 是否计算内容哈希（默认不计算：大文件成本高，按策略决定时机）
+  bool compute_hash = 4 [(gnostic.openapi.v3.property) = {description: "是否计算内容哈希"}];
+}
+
+message StartScanResponse {
+  ScanTask task = 1 [(gnostic.openapi.v3.property) = {description: "扫描任务"}];
+}
+
+message ListScanTasksRequest {
+  optional string filter = 1 [(gnostic.openapi.v3.property) = {description: "过滤条件"}];
+  optional string order_by = 2 [(gnostic.openapi.v3.property) = {description: "排序字段"}];
+  int32 page_size = 3 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 200
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "每页条数"
+      default: {number: 20}
+    }
+  ];
+  string page_token = 4 [(gnostic.openapi.v3.property) = {description: "分页令牌"}];
+  optional uint32 source_id = 5 [(gnostic.openapi.v3.property) = {description: "数据源ID"}];
+}
+
+message ListScanTasksResponse {
+  repeated ScanTask items = 1 [(gnostic.openapi.v3.property) = {description: "任务列表"}];
+  int32 total = 2 [(gnostic.openapi.v3.property) = {description: "总数"}];
+  string next_page_token = 3 [(gnostic.openapi.v3.property) = {description: "下一页令牌"}];
+}
+
+message GetScanTaskRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "任务ID"}
+  ];
+}
+
+message GetScanTaskResponse {
+  ScanTask task = 1 [(gnostic.openapi.v3.property) = {description: "扫描任务"}];
+}
+
+message CancelScanTaskRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "任务ID"}
+  ];
+}
+
+message CancelScanTaskResponse {
+  ScanTask task = 1 [(gnostic.openapi.v3.property) = {description: "扫描任务"}];
+}

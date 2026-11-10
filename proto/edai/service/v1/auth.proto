@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package edai.service.v1;
+
+import "buf/validate/validate.proto";
+import "common/enum/enum.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/edai/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.edai.service.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// EDAI 本地账号认证服务。
+//
+// 定位（4-2 ADR-013）：EDAI 是相对独立产品，不依赖 platform/service 运行时。
+// 账号、密码、JWT 签发全部由本服务自持，仅复用 backend-service/pkg/auth 的 JWT 实现。
+// V1.0 仅本机访问（loopback），不做多租户登录。
+service AuthService {
+  // 账号密码登录
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/auth/login"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "账号密码登录"
+      tags: ["认证"]
+    };
+  }
+
+  // 刷新访问令牌
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/auth/refresh"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "刷新访问令牌"
+      tags: ["认证"]
+    };
+  }
+
+  // 退出登录
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/auth/logout"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "退出登录"
+      tags: ["认证"]
+    };
+  }
+
+  // 获取当前用户的权限码（前端 v-access 指令使用）
+  //
+  // EDAI 不做平台菜单权限组：权限码按角色静态派生，仅用于隐藏入口，
+  // 真正的权限校验在后端每个写接口上执行。
+  rpc GetAccessCodes(GetAccessCodesRequest) returns (GetAccessCodesResponse) {
+    option (google.api.http) = {get: "/edai/v1/auth/codes"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取当前用户权限码"
+      tags: ["认证"]
+    };
+  }
+
+  // 获取当前登录用户
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
+    option (google.api.http) = {get: "/edai/v1/auth/me"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取当前登录用户"
+      tags: ["认证"]
+    };
+  }
+}
+
+// 令牌载荷，登录与刷新共用
+message TokenPayload {
+  string access_token = 1 [(gnostic.openapi.v3.property) = {description: "访问令牌"}];
+  string refresh_token = 2 [(gnostic.openapi.v3.property) = {description: "刷新令牌"}];
+  // 固定 Bearer
+  string token_type = 3 [(gnostic.openapi.v3.property) = {description: "令牌类型"}];
+  // 访问令牌有效期（秒）
+  int64 expires_in = 4 [(gnostic.openapi.v3.property) = {description: "有效期（秒）"}];
+}
+
+message LoginRequest {
+  string username = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+    },
+    (gnostic.openapi.v3.property) = {description: "登录账号"}
+  ];
+  // 明文密码；V1.0 仅 loopback 传输，P6 补 Origin/Host 校验
+  string password = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 128
+    },
+    (gnostic.openapi.v3.property) = {description: "登录密码"}
+  ];
+}
+
+message LoginResponse {
+  TokenPayload token = 1 [(gnostic.openapi.v3.property) = {description: "令牌"}];
+  User user = 2 [(gnostic.openapi.v3.property) = {description: "当前用户"}];
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 2048
+    },
+    (gnostic.openapi.v3.property) = {description: "刷新令牌"}
+  ];
+}
+
+message RefreshTokenResponse {
+  TokenPayload token = 1 [(gnostic.openapi.v3.property) = {description: "令牌"}];
+}
+
+message LogoutRequest {
+  // 可选：显式指定要撤销的刷新令牌
+  optional string refresh_token = 1 [(gnostic.openapi.v3.property) = {description: "刷新令牌"}];
+}
+
+message LogoutResponse {}
+
+message GetAccessCodesRequest {}
+
+message GetAccessCodesResponse {
+  repeated string codes = 1 [(gnostic.openapi.v3.property) = {description: "权限码"}];
+}
+
+message GetCurrentUserRequest {}
+
+message GetCurrentUserResponse {
+  User user = 1 [(gnostic.openapi.v3.property) = {description: "当前用户"}];
+}
+
+// EDAI 本地用户
+message User {
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "用户ID"}];
+  string username = 2 [(gnostic.openapi.v3.property) = {description: "登录账号"}];
+  optional string display_name = 3 [(gnostic.openapi.v3.property) = {description: "显示名称"}];
+  optional string email = 4 [(gnostic.openapi.v3.property) = {description: "邮箱"}];
+  // 角色：admin / operator / viewer
+  string role = 5 [(gnostic.openapi.v3.property) = {description: "角色"}];
+  optional enum.Status status = 6 [(gnostic.openapi.v3.property) = {description: "状态"}];
+  optional string last_login_at = 7 [(gnostic.openapi.v3.property) = {description: "最近登录时间"}];
+  string created_at = 8 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+}

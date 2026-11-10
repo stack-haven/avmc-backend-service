@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package edai.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/edai/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.edai.service.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// EDAI 系统信息服务。
+//
+// 只暴露本机运行状态的只读信息：版本、运行模式、数据目录、库类型。
+// 健康检查走 pkg/health 的 /health/live 与 /health/ready，不在此重复。
+service SystemService {
+  // 获取系统信息
+  rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {
+    option (google.api.http) = {get: "/edai/v1/system/info"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "获取系统信息"
+      tags: ["系统"]
+    };
+  }
+}
+
+message GetSystemInfoRequest {}
+
+// 系统信息
+message SystemInfo {
+  // 版本号
+  string version = 1 [(gnostic.openapi.v3.property) = {description: "版本号"}];
+  // 运行模式：local_dashboard / backend_service
+  string run_mode = 2 [(gnostic.openapi.v3.property) = {description: "运行模式"}];
+  // 数据库驱动：sqlite / mysql
+  string database_driver = 3 [(gnostic.openapi.v3.property) = {description: "数据库驱动"}];
+  // 数据目录（预览、派生文件、临时文件）
+  string data_dir = 4 [(gnostic.openapi.v3.property) = {description: "数据目录"}];
+  // 监听地址
+  string http_addr = 5 [(gnostic.openapi.v3.property) = {description: "HTTP 监听地址"}];
+  // 启动时间
+  string started_at = 6 [(gnostic.openapi.v3.property) = {description: "启动时间"}];
+}
+
+message GetSystemInfoResponse {
+  SystemInfo info = 1 [(gnostic.openapi.v3.property) = {description: "系统信息"}];
+}

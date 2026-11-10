@@ -1,0 +1,199 @@
+syntax = "proto3";
+
+package edai.service.v1;
+
+import "buf/validate/validate.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "backend-service/api/edai/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.edai.service.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// EDAI 数据源管理服务。
+//
+// V1.0 支持本地目录与 SMB 共享路径；扫描默认只读，不移动、不修改原始文件
+// （系统设计基线 §1.3 原则 2）。
+service SourceService {
+  // 查询数据源列表
+  rpc ListSources(ListSourcesRequest) returns (ListSourcesResponse) {
+    option (google.api.http) = {get: "/edai/v1/sources"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询数据源列表"
+      tags: ["数据源"]
+    };
+  }
+
+  // 查询单个数据源
+  rpc GetSource(GetSourceRequest) returns (GetSourceResponse) {
+    option (google.api.http) = {get: "/edai/v1/sources/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "查询数据源"
+      tags: ["数据源"]
+    };
+  }
+
+  // 创建数据源
+  rpc CreateSource(CreateSourceRequest) returns (CreateSourceResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/sources"
+      body: "source"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "创建数据源"
+      tags: ["数据源"]
+    };
+  }
+
+  // 更新数据源
+  rpc UpdateSource(UpdateSourceRequest) returns (UpdateSourceResponse) {
+    option (google.api.http) = {
+      put: "/edai/v1/sources/{id}"
+      body: "source"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "更新数据源"
+      tags: ["数据源"]
+    };
+  }
+
+  // 删除数据源（仅移除配置，不触碰原始文件）
+  rpc DeleteSource(DeleteSourceRequest) returns (DeleteSourceResponse) {
+    option (google.api.http) = {delete: "/edai/v1/sources/{id}"};
+    option (gnostic.openapi.v3.operation) = {
+      summary: "删除数据源"
+      tags: ["数据源"]
+    };
+  }
+
+  // 连接测试：校验路径可达与读取权限，不写入任何登记数据
+  rpc TestSourceConnection(TestSourceConnectionRequest) returns (TestSourceConnectionResponse) {
+    option (google.api.http) = {
+      post: "/edai/v1/sources/{id}:test-connection"
+      body: "*"
+    };
+    option (gnostic.openapi.v3.operation) = {
+      summary: "数据源连接测试"
+      tags: ["数据源"]
+    };
+  }
+}
+
+// 数据源
+message DataSource {
+  uint32 id = 1 [(gnostic.openapi.v3.property) = {description: "数据源ID"}];
+  // 数据源名称（展示用）
+  string name = 2 [(gnostic.openapi.v3.property) = {description: "数据源名称"}];
+  // 类型：local / smb
+  string type = 3 [(gnostic.openapi.v3.property) = {description: "类型 local/smb"}];
+  // 根路径（本地绝对路径或 SMB UNC 路径）
+  string root_path = 4 [(gnostic.openapi.v3.property) = {description: "根路径"}];
+  // 包含规则（glob），空表示全部包含
+  repeated string include_patterns = 5 [(gnostic.openapi.v3.property) = {description: "包含规则"}];
+  // 排除规则（glob），如临时目录、缓存、备份
+  repeated string exclude_patterns = 6 [(gnostic.openapi.v3.property) = {description: "排除规则"}];
+  // 连接状态：unknown / reachable / unreachable
+  string connection_status = 7 [(gnostic.openapi.v3.property) = {description: "连接状态"}];
+  // 最近一次连接测试的说明（错误原因）
+  optional string connection_message = 8 [(gnostic.openapi.v3.property) = {description: "连接测试说明"}];
+  // 最近一次连接测试时间
+  optional string last_checked_at = 9 [(gnostic.openapi.v3.property) = {description: "最近检测时间"}];
+  // 最近一次扫描时间
+  optional string last_scanned_at = 10 [(gnostic.openapi.v3.property) = {description: "最近扫描时间"}];
+  // 备注
+  optional string remark = 11 [(gnostic.openapi.v3.property) = {description: "备注"}];
+  string created_at = 12 [(gnostic.openapi.v3.property) = {description: "创建时间"}];
+  string updated_at = 13 [(gnostic.openapi.v3.property) = {description: "更新时间"}];
+}
+
+// 查询列表请求（AIP 标准：page_size / page_token / filter / order_by）
+message ListSourcesRequest {
+  // AIP-160 过滤表达式
+  optional string filter = 1 [(gnostic.openapi.v3.property) = {description: "过滤条件"}];
+  // 排序字段，如 created_at desc
+  optional string order_by = 2 [(gnostic.openapi.v3.property) = {description: "排序字段"}];
+  // 每页条数
+  int32 page_size = 3 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 200
+    },
+    (gnostic.openapi.v3.property) = {
+      description: "每页条数"
+      default: {number: 20}
+    }
+  ];
+  // 分页令牌（EDAI 前端使用数字 offset）
+  string page_token = 4 [(gnostic.openapi.v3.property) = {description: "分页令牌"}];
+}
+
+message ListSourcesResponse {
+  repeated DataSource items = 1 [(gnostic.openapi.v3.property) = {description: "数据源列表"}];
+  int32 total = 2 [(gnostic.openapi.v3.property) = {description: "总数"}];
+  string next_page_token = 3 [(gnostic.openapi.v3.property) = {description: "下一页令牌"}];
+}
+
+message GetSourceRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "数据源ID"}
+  ];
+}
+
+message CreateSourceRequest {
+  DataSource source = 1 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "数据源"}
+  ];
+}
+
+message UpdateSourceRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "数据源ID"}
+  ];
+  DataSource source = 2 [
+    (buf.validate.field).required = true,
+    (gnostic.openapi.v3.property) = {description: "数据源"}
+  ];
+}
+
+message DeleteSourceRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "数据源ID"}
+  ];
+}
+
+message DeleteSourceResponse {}
+
+message TestSourceConnectionRequest {
+  uint32 id = 1 [
+    (buf.validate.field).uint32.gt = 0,
+    (gnostic.openapi.v3.property) = {description: "数据源ID"}
+  ];
+}
+
+message TestSourceConnectionResponse {
+  // 是否可达
+  bool reachable = 1 [(gnostic.openapi.v3.property) = {description: "是否可达"}];
+  // 说明（失败原因或统计信息）
+  string message = 2 [(gnostic.openapi.v3.property) = {description: "说明"}];
+  // 顶层目录数量（可达时返回）
+  int32 directory_count = 3 [(gnostic.openapi.v3.property) = {description: "顶层目录数"}];
+  // 顶层文件数量（可达时返回）
+  int32 file_count = 4 [(gnostic.openapi.v3.property) = {description: "顶层文件数"}];
+}
+
+message GetSourceResponse {
+  DataSource source = 1 [(gnostic.openapi.v3.property) = {description: "数据源"}];
+}
+
+message CreateSourceResponse {
+  DataSource source = 1 [(gnostic.openapi.v3.property) = {description: "数据源"}];
+}
+
+message UpdateSourceResponse {
+  DataSource source = 1 [(gnostic.openapi.v3.property) = {description: "数据源"}];
+}

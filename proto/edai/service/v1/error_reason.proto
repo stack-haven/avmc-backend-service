@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package edai.service.v1;
+
+import "errors/errors.proto";
+
+option go_package = "backend-service/api/edai/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.edai.service.v1";
+option objc_class_prefix = "RESOURCEapiV1";
+
+// 错误原因枚举。
+// 注意：EDAI 是相对独立产品（4-2 ADR-013），错误码仅本服务使用，不复用平台错误语义。
+enum ErrorReason {
+  // 设置缺省错误码为 500
+  option (errors.default_code) = 500;
+
+  // =======================================
+  // HTTP 标准错误 (0-99)
+  // =======================================
+  RESERVED_DEFAULT = 0 [(errors.code) = 500];
+  BAD_REQUEST = 1 [(errors.code) = 400];
+  NOT_LOGGED_IN = 2 [(errors.code) = 401];
+  ACCESS_FORBIDDEN = 3 [(errors.code) = 403];
+  RESOURCE_NOT_FOUND = 4 [(errors.code) = 404];
+  METHOD_NOT_ALLOWED = 5 [(errors.code) = 405];
+  REQUEST_TIMEOUT = 6 [(errors.code) = 408];
+  INTERNAL_SERVER_ERROR = 7 [(errors.code) = 500];
+  NOT_IMPLEMENTED = 8 [(errors.code) = 501];
+  SERVICE_UNAVAILABLE = 10 [(errors.code) = 503];
+
+  // =======================================
+  // 认证 (100-199)
+  // =======================================
+  // 用户名或密码错误
+  INVALID_CREDENTIALS = 100 [(errors.code) = 401];
+  // 账号已被禁用
+  ACCOUNT_DISABLED = 101 [(errors.code) = 403];
+  // 登录失败次数过多，暂时锁定
+  ACCOUNT_LOCKED = 102 [(errors.code) = 429];
+
+  // =======================================
+  // 数据源 (200-299)
+  // =======================================
+  // 数据源路径不存在或不可访问
+  SOURCE_PATH_UNREACHABLE = 200 [(errors.code) = 400];
+  // 数据源正在扫描中
+  SOURCE_SCAN_IN_PROGRESS = 201 [(errors.code) = 409];
+
+  // =======================================
+  // 资产 (300-399)
+  // =======================================
+  // 资产不存在
+  ASSET_NOT_FOUND = 300 [(errors.code) = 404];
+  // 文件不可访问（权限/断连/已删除）
+  FILE_UNREACHABLE = 301 [(errors.code) = 409];
+
+  // =======================================
+  // 任务 (400-499)
+  // =======================================
+  // 任务不存在
+  TASK_NOT_FOUND = 400 [(errors.code) = 404];
+  // 任务状态不允许该操作（如已完成的取消）
+  TASK_INVALID_STATE = 401 [(errors.code) = 409];
+
+  // =======================================
+  // 处理与预览 (500-599)
+  // =======================================
+  // 当前格式不支持预览（不是失败）
+  PREVIEW_UNSUPPORTED = 500 [(errors.code) = 422];
+  // 处理失败
+  PROCESSING_FAILED = 501 [(errors.code) = 500];
+  // 处理策略禁止该操作（如禁止外发云模型）
+  POLICY_BLOCKED = 502 [(errors.code) = 403];
+}
