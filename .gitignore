@@ -52,3 +52,6 @@ e2e_production
 
 # gen_clients.sh (mobile-desktop-service) 的 buf 临时配置残留
 proto/.buf-gen-tmp-*.yaml
+
+# EDAI 本地 SQLite 库与运行时数据（不入库）
+app/edai/service/data/

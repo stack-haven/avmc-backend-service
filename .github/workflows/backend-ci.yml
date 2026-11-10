@@ -103,6 +103,7 @@ jobs:
           - ./app/platform/service/cmd/server
           - ./app/ai/service/cmd/server
           - ./app/evie/service/cmd/server
+          - ./app/edai/service/cmd/server
           - ./app/version/service/cmd/server
 
     steps:
