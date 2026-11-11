@@ -17,7 +17,6 @@ require (
 	github.com/google/gnostic v0.7.1
 	github.com/google/wire v0.7.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/qiniu/go-sdk/v7 v7.21.1
