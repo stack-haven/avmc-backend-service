@@ -91,6 +91,12 @@ jobs:
       - name: Verify HTTP path convention (AIP-136)
         run: make http-convention-check
 
+      - name: Verify proto backwards compatibility (buf breaking)
+        env:
+          # PR → 目标分支；push → 上一个提交（新分支为全零，脚本会跳过）
+          BUF_BREAKING_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: make breaking
+
       - name: Run focused race detection
         run: make race
 

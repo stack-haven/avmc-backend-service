@@ -35,8 +35,19 @@ echo "    目录: $PROTO_DIR"
 check_paths() {
   local paths
   # 提取所有 google.api.http 注解中的路径（get:/post:/put:/delete:/patch: 后面的引号内容）
-  paths=$(grep -rhoE '"(/admin/v1|/evie/v1|/ai/v1|/version/v1)[^"]*"' "$PROTO_DIR" \
+  # 抽取所有 "…/v1/…" 形式的路径注解。
+  # 旧实现把前缀写死成 /admin|/evie|/ai|/version，导致 /platform/v1 的 168 条路径
+  #（全平台最大的服务）从未被检查 —— 与 import 边界、覆盖率同类的"静默通过"缺陷。
+  paths=$(grep -rhoE '"/[a-z][a-z0-9-]*/v1[^"]*"' "$PROTO_DIR" \
     --include='*.proto' 2>/dev/null | tr -d '"' | sort -u || true)
+
+  local path_count
+  path_count=$(printf '%s\n' "$paths" | grep -c . || true)
+  echo "    抽取到路径 ${path_count} 条"
+  if [ "$path_count" -eq 0 ]; then
+    echo "  ❌ 未抽取到任何 HTTP 路径 —— 正则或目录失效，检查不可信"
+    exit 1
+  fi
 
   # 规则 1: 动作前置反模式 /{resource}/{verb}/{id}
   # 例: /users/status-update/{id} → 应为 /users/{id}:status-update
@@ -66,10 +77,17 @@ check_paths() {
 
   # 规则 3: 服务名重复 /{service}/v1/{service}/
   # 例: /ai/v1/ai/chats → 应为 /ai/v1/chats
-  local dup
-  dup=$(echo "$paths" | grep -oE '/(admin|evie|ai|version)/v1/\1/' || true)
+  local dup=""
+  for svc in $(echo "$paths" | sed -E 's|^/([a-z0-9-]+)/v1.*|\1|' | sort -u); do
+    local hit
+    hit=$(echo "$paths" | grep -E "^/${svc}/v1/${svc}/" || true)
+    if [ -n "$hit" ]; then
+      dup="$dup$hit"$'\n'
+    fi
+  done
   if [ -n "$dup" ]; then
-    echo "  ❌ 服务名重复: $dup （应去掉重复段）"
+    echo "  ❌ 服务名重复:"
+    echo "$dup" | sed '/^$/d' | sed 's/^/     /'
     FAILED=1
   fi
 }

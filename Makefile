@@ -89,9 +89,33 @@ generate-check:
 	go mod tidy
 	$(MAKE) diff-check
 
+# buf breaking 的基线 ref。CI 中由 workflow 注入：
+#   PR   → origin/<base_ref>
+#   push → github.event.before（上一个提交）
+# 本地默认 origin/coding/ai。注意：本地 origin 落后时会产生"已接受的历史删除"误报。
+BUF_BREAKING_BASE ?= origin/coding/ai
+
+.PHONY: breaking
+# 校验 proto 是否存在破坏性变更（buf breaking，类别 FILE）
+breaking:
+	@base="$(BUF_BREAKING_BASE)"; \
+	if [ -z "$$base" ] || [ "$$base" = "0000000000000000000000000000000000000000" ]; then \
+		echo "ℹ️  新分支无基线提交，跳过 buf breaking"; \
+		exit 0; \
+	fi; \
+	if ! git rev-parse --verify --quiet "$$base" >/dev/null; then \
+		echo "❌ 基线 ref '$$base' 不存在；请设置 BUF_BREAKING_BASE=<ref>"; \
+		exit 1; \
+	fi; \
+	tmp="$$(mktemp -d)"; \
+	trap 'rm -rf "$$tmp"' EXIT; \
+	git archive "$$base" proto | tar -x -C "$$tmp"; \
+	echo "==> buf breaking against $$base"; \
+	cd proto && buf breaking --against "$$tmp/proto"
+
 .PHONY: contract-check
 # run strict protobuf and generated-code contract checks
-contract-check: proto-lint generate-check
+contract-check: proto-lint breaking generate-check
 
 .PHONY: build
 # build
