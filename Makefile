@@ -182,6 +182,7 @@ check: fmt-check lint-new
 	go test -timeout 90s ./...
 	$(MAKE) operation-coverage-check
 	$(MAKE) verify-servicetargets
+	$(MAKE) data-tx-check
 	git diff --check
 
 .PHONY: http-convention-check
@@ -194,6 +195,12 @@ http-convention-check:
 # 防止「有路由但无按钮 -> 恒 403」缺陷复发，见 scripts/check-operation-coverage.sh
 operation-coverage-check:
 	@./scripts/check-operation-coverage.sh
+
+.PHONY: data-tx-check
+# verify repositories never bypass DB(ctx) (transaction-aware client)
+# 见 scripts/check-data-tx-discipline.sh 与 2026-11-12 P0-4a
+data-tx-check:
+	@./scripts/check-data-tx-discipline.sh
 
 .PHONY: coverage
 # generate a coverage report and compare with the gates in docs/architecture/4-5 §二
