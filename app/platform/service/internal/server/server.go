@@ -70,7 +70,9 @@ var anthzWhiteListOperations = map[string]bool{
 	// 跨服务鉴权委托：产品服务（evie 等）调用平台 IsAuthorized，
 	// 该内部 RPC 不携带原始 JWT，需跳过本服务的认证/鉴权中间件。
 	v1.AuthService_IsAuthorized_FullMethodName: true,
-	// 跨服务审计委托：产品服务写入操作审计，同样不携带原始 JWT。
+	// 跨服务审计委托：产品服务写入操作审计。该 RPC 免 Casbin 鉴权，但**仍然认证**，
+	// 且客户端会原样转发调用方的 Authorization（见 client/audit.go 的 ForwardAuthToken）。
+	// 因此仓储层必须以认证身份的租户为准，不得用请求体 tenant_id 覆盖（见 P0-3）。
 	v1.OperationLogService_CreateOperationLog_FullMethodName: true,
 	// 跨服务文件中心：产品服务转发 JWT，走 crossServiceMatcher 仅认证（免鉴权）。
 	v1.FileCenterService_CreateFileUploadSession_FullMethodName: true,
