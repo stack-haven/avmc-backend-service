@@ -82,6 +82,18 @@ type Manager struct {
 // Option 会话管理器配置选项。
 type Option func(*Manager)
 
+// DefaultOptions 返回空的 Option 列表（不启用任何可选策略）。
+//
+// 存在理由：NewManager 的 variadic `opts ...Option` 无法被 wire 自动推导，
+// 依赖注入图会报 `no provider found for []session.Option`。
+// 本函数提供一个图内的 []Option 生产者，让各服务直接引用
+// `session.NewManager` + `session.DefaultOptions`，不必各自复制一个同义的
+// 本地包装（platform/evie 此前分别写了 ProvideSessionManager / NewSessionOptions）。
+//
+// 需要启用具体策略（如 WithFailOpen）时，应在服务侧提供返回该切片的 provider，
+// 而不是修改本函数的默认语义。
+func DefaultOptions() []Option { return nil }
+
 // WithFailOpen 设置 Redis 故障时的降级策略：
 // true = 降级为仅 JWT 验签（可用性优先）；false = 拒绝认证（安全优先，默认）。
 func WithFailOpen(failOpen bool) Option {
