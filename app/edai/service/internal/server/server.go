@@ -5,10 +5,10 @@ import (
 	"time"
 
 	v1 "backend-service/api/edai/service/v1"
-	"backend-service/app/edai/service/internal/conf"
 	"backend-service/app/edai/service/internal/service"
 	"backend-service/pkg/auth/authn"
 	authMiddleware "backend-service/pkg/auth/middleware"
+	"backend-service/pkg/conf"
 	pkgHealth "backend-service/pkg/health"
 
 	"github.com/go-kratos/kratos/v2/log"

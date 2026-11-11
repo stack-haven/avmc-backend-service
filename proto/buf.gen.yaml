@@ -18,6 +18,10 @@ inputs:
       - ./evie/service/v1
       - ./evie/tool/v1
       - ./edai/service/v1
+    # conf 不属于对外 API 契约：它是服务端共享配置类型，
+    # 生成目标为 pkg/conf（见 pkg/conf/buf.gen.yaml），不再进入 api/。
+    exclude_paths:
+      - ./common/conf
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.11
     out: ../api

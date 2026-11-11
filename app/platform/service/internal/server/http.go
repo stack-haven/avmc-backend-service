@@ -12,10 +12,10 @@ import (
 	v1 "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/cmd/server/assets"
 	"backend-service/app/platform/service/internal/biz"
-	"backend-service/app/platform/service/internal/conf"
 	"backend-service/app/platform/service/internal/service"
 	authzEngine "backend-service/pkg/auth/authz"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 	pkgHealth "backend-service/pkg/health"
 )
 

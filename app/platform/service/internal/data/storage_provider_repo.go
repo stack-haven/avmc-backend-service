@@ -9,12 +9,12 @@ import (
 
 	pb "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/internal/biz"
-	"backend-service/app/platform/service/internal/conf"
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	"backend-service/app/platform/service/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/service/internal/data/ent/gen/storageprovider"
 	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/conf"
 	"backend-service/pkg/objectstorage"
 
 	// 触发供应商注册

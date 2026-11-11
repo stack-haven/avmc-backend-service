@@ -1,7 +1,7 @@
 package data
 
 import (
-	"backend-service/app/platform/service/internal/conf"
+	"backend-service/pkg/conf"
 	"context"
 	"fmt"
 	"time"

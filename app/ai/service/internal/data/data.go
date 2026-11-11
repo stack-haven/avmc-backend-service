@@ -2,9 +2,9 @@ package data
 
 import (
 	"backend-service/app/ai/service/internal/biz"
-	"backend-service/app/ai/service/internal/conf"
 	"backend-service/app/ai/service/internal/data/ent/gen"
 	_ "backend-service/app/ai/service/internal/data/ent/gen/runtime"
+	"backend-service/pkg/conf"
 	"context"
 	"errors"
 	"fmt"
@@ -39,7 +39,9 @@ var ProviderSet = wire.NewSet(
 	NewEntClient, NewRedisClient,
 	NewHealthChecker,
 	NewAuthenticator, NewAuthorizer, authn.NewSecurity,
-	session.NewManager,
+	// session.DefaultOptions 提供 []session.Option，满足 NewManager 的 variadic 参数；
+	// 缺少它时 wire 报 `no provider found for []session.Option`（此前 ai 的 wire 图即因此不可再生成）。
+	session.NewManager, session.DefaultOptions,
 	NewChatRepo,
 )
 

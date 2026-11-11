@@ -5,11 +5,11 @@ import (
 	"time"
 
 	v1 "backend-service/api/evie/service/v1"
-	"backend-service/app/evie/service/internal/conf"
 	"backend-service/app/evie/service/internal/service"
 	"backend-service/pkg/audit"
 	authzEngine "backend-service/pkg/auth/authz"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 
 	pkgHealth "backend-service/pkg/health"
 

@@ -9,12 +9,12 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/google/wire"
 
-	"backend-service/app/evie/service/internal/conf"
 	"backend-service/pkg/audit"
 	auditMiddleware "backend-service/pkg/audit/middleware"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 	"backend-service/pkg/middleware/safelogging"
 )
 

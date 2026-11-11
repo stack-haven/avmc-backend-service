@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"backend-service/app/platform/service/internal/conf"
+	"backend-service/pkg/conf"
 	"backend-service/pkg/objectstorage"
 
 	// 触发 S3 供应商注册

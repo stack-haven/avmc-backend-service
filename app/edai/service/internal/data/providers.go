@@ -2,7 +2,7 @@ package data
 
 import (
 	"backend-service/app/edai/service/internal/biz"
-	"backend-service/app/edai/service/internal/conf"
+	"backend-service/pkg/conf"
 
 	"github.com/google/wire"
 )

@@ -2,11 +2,11 @@ package server
 
 import (
 	v1 "backend-service/api/ai/service/v1"
-	"backend-service/app/ai/service/internal/conf"
 	"backend-service/app/ai/service/internal/service"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 	"context"
 
 	"backend-service/pkg/middleware/safelogging"

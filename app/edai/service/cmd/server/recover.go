@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"backend-service/app/edai/service/internal/conf"
 	"backend-service/app/edai/service/internal/data"
 	"backend-service/app/edai/service/internal/data/ent/viewer"
+	"backend-service/pkg/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

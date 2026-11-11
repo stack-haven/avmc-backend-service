@@ -8,12 +8,12 @@ package main
 
 import (
 	"backend-service/app/evie/service/internal/biz"
-	"backend-service/app/evie/service/internal/conf"
 	"backend-service/app/evie/service/internal/data"
 	"backend-service/app/evie/service/internal/server"
 	"backend-service/app/evie/service/internal/service"
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -55,8 +55,8 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 	enhancementPolicyUsecase := biz.NewEnhancementPolicyUsecase(enhancementPolicyRepo, logger)
 	enhancementLogRepo := data.NewEnhancementLogRepo(dataData, logger)
 	enhancementLogUsecase := biz.NewEnhancementLogUsecase(enhancementLogRepo, logger)
-	enhancemenUsecase := biz.NewEnhancementUsecase(enhancementEngine, enhancementPolicyUsecase, enhancementLogUsecase, logger)
-	asrUsecase := biz.NewASRUsecase(providerRepo, asrRecordRepo, fileCenterClient, enhancemenUsecase, logger)
+	enhancementUsecase := biz.NewEnhancementUsecase(enhancementEngine, enhancementPolicyUsecase, enhancementLogUsecase, logger)
+	asrUsecase := biz.NewASRUsecase(providerRepo, asrRecordRepo, fileCenterClient, enhancementUsecase, logger)
 	security := authn.NewSecurity(logger)
 	authenticator, err := data.NewAuthenticator(confServer, logger, security)
 	if err != nil {
@@ -65,10 +65,10 @@ func wireApp(confServer *conf.Server, client *conf.Client, confData *conf.Data, 
 	}
 	v := data.NewSessionOptions()
 	manager := session.NewManager(redisClient, logger, authenticator, v...)
-	asrServiceService := service.NewASRServiceService(asrUsecase, enhancemenUsecase, manager, logger)
+	asrServiceService := service.NewASRServiceService(asrUsecase, enhancementUsecase, manager, logger)
 	providerUsecase := biz.NewProviderUsecase(providerRepo, logger)
 	providerServiceService := service.NewProviderServiceService(providerUsecase, logger)
-	enhancementServiceService := service.NewEnhancementServiceService(enhancemenUsecase, enhancementPolicyUsecase, enhancementLogUsecase, logger)
+	enhancementServiceService := service.NewEnhancementServiceService(enhancementUsecase, enhancementPolicyUsecase, enhancementLogUsecase, logger)
 	enforcer, err := data.NewAuthorizer(client, logger)
 	if err != nil {
 		cleanup()

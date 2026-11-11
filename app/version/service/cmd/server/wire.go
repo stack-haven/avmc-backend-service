@@ -7,10 +7,10 @@ package main
 
 import (
 	"backend-service/app/version/service/internal/biz"
-	"backend-service/app/version/service/internal/conf"
 	"backend-service/app/version/service/internal/data"
 	"backend-service/app/version/service/internal/server"
 	"backend-service/app/version/service/internal/service"
+	"backend-service/pkg/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"

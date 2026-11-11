@@ -1,7 +1,7 @@
 package data
 
 import (
-	"backend-service/app/evie/service/internal/conf"
+	"backend-service/pkg/conf"
 	"context"
 	"fmt"
 	"time"

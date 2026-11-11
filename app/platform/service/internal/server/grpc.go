@@ -10,11 +10,11 @@ import (
 
 	v1 "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/internal/biz"
-	"backend-service/app/platform/service/internal/conf"
 	"backend-service/app/platform/service/internal/service"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 )
 
 // crossServiceMatcher 匹配转发 JWT 的跨服务 RPC，仅做认证（不做 Casbin 鉴权）。

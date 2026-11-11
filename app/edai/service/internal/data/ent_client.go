@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"backend-service/app/edai/service/internal/conf"
 	"backend-service/app/edai/service/internal/data/ent/gen"
+	"backend-service/pkg/conf"
 
 	// ent 运行期/隐私/钩子支持
 	_ "backend-service/app/edai/service/internal/data/ent/gen/runtime"

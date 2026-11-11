@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"backend-service/app/platform/service/internal/conf"
+	"backend-service/pkg/conf"
 
 	"google.golang.org/protobuf/types/known/durationpb"
 )

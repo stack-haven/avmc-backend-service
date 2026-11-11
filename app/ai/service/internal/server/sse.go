@@ -1,8 +1,8 @@
 package server
 
 import (
-	"backend-service/app/ai/service/internal/conf"
 	"backend-service/app/ai/service/internal/service"
+	"backend-service/pkg/conf"
 	"backend-service/pkg/kratos/transport/sse"
 
 	"github.com/go-kratos/kratos/v2/log"

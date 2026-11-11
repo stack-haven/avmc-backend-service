@@ -16,9 +16,9 @@
 #   - 删除 `kill` 覆写：改用 app.mk 的 kill + PORTS/KILL_PATTERN
 #   - `race` 从覆写 target 改为声明 RACE_PKGS 变量
 
-# 本服务自带 config（protoc 直出）与 generate-check（只校验 wire），
-# 在 include 前声明跳过 app.mk 的同名定义，避免 make overriding 警告。
-SKIP_APP_MK_CONFIG := 1
+# 本服务自带 config（protoc 直出）与 generate-check（只校验 wire）。
+# 注意：app.mk 自 2026-11-11 起已不再定义 `config` 目标（conf 上收到 pkg/conf
+# 唯一出口），因此无需再声明 SKIP_APP_MK_CONFIG；仅 generate-check 仍需跳过。
 SKIP_APP_MK_GENERATE_CHECK := 1
 
 include ../../../app.mk

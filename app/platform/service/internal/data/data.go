@@ -2,10 +2,10 @@ package data
 
 import (
 	"backend-service/app/platform/service/internal/biz"
-	"backend-service/app/platform/service/internal/conf"
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	_ "backend-service/app/platform/service/internal/data/ent/gen/runtime"
 	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
+	"backend-service/pkg/conf"
 	"context"
 	"errors"
 	"fmt"

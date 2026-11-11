@@ -85,12 +85,11 @@ jobs:
       - name: Verify generated files
         run: make generate-check
 
-      - name: Verify conf single source (owner + drift)
-        # 两级保证，缺一不可：
-        #   generate-check（上一步）→ api/common/conf 与 proto/common/conf 同步
-        #   conf-check（本步）      → 各服务 internal/conf 与 api/common/conf 逐字节相等
-        # 历史缺口：服务级 internal/conf 只被「服务级」make generate-check 覆盖，
-        # 而 CI 从不按服务调用 → 改 conf proto 后 4 个服务的副本会静默陈旧。
+      - name: Verify conf single registration point
+        # conf 只有一个生成出口（make conf → pkg/conf），由一个 Go 包注册。
+        # 本步骤阻断「又有人复制一份 conf.proto / buf.gen.yaml」导致的注册表冲突回退：
+        # 同一份 common/conf proto 被两个 Go 包注册，任何同时链接两边的二进制都会
+        # 在 init 阶段 panic。生成物漂移已由上方 generate-check 覆盖（含 pkg/conf）。
         run: make conf-check
 
       - name: Verify import boundaries (service → biz → data)

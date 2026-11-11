@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"backend-service/app/edai/service/internal/biz"
-	"backend-service/app/edai/service/internal/conf"
 	"backend-service/app/edai/service/internal/runtimeconfig"
 	"backend-service/pkg/auth"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"

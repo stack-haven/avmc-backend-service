@@ -15,10 +15,10 @@ import (
 
 	v1 "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/internal/biz"
-	"backend-service/app/platform/service/internal/conf"
 	authzEngine "backend-service/pkg/auth/authz"
 	authMiddleware "backend-service/pkg/auth/middleware"
 	"backend-service/pkg/auth/session"
+	"backend-service/pkg/conf"
 	"backend-service/pkg/middleware/safelogging"
 )
 

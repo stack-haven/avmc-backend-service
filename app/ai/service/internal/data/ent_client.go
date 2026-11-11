@@ -1,7 +1,7 @@
 package data
 
 import (
-	"backend-service/app/ai/service/internal/conf"
+	"backend-service/pkg/conf"
 	"context"
 	"time"
 

@@ -2,10 +2,10 @@ package data
 
 import (
 	"backend-service/app/evie/service/internal/biz"
-	"backend-service/app/evie/service/internal/conf"
 	"backend-service/app/evie/service/internal/data/ent/gen"
 	_ "backend-service/app/evie/service/internal/data/ent/gen/runtime"
 	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
+	"backend-service/pkg/conf"
 	"context"
 	"errors"
 	"fmt"

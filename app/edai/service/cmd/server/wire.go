@@ -7,10 +7,10 @@ package main
 
 import (
 	"backend-service/app/edai/service/internal/biz"
-	"backend-service/app/edai/service/internal/conf"
 	"backend-service/app/edai/service/internal/data"
 	"backend-service/app/edai/service/internal/server"
 	"backend-service/app/edai/service/internal/service"
+	"backend-service/pkg/conf"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
@@ -20,7 +20,7 @@ import (
 // wireApp init kratos application.
 func wireApp(*conf.Bootstrap, log.Logger) (*kratos.App, func(), error) {
 	panic(wire.Build(
-		conf.ProviderSet,
+		confProviderSet,
 		server.ProviderSet,
 		data.ProviderSet,
 		data.AuthProviderSet,

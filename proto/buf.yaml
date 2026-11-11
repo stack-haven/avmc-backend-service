@@ -16,6 +16,15 @@ modules:
       except:
         - EXTENSION_NO_DELETE
         - FIELD_SAME_DEFAULT
+      # 精确豁免，不削弱对外契约的门禁：
+      #   common/conf/*.proto 是服务端共享配置类型，不是对外 wire 契约，
+      #   其唯一消费者是本仓库生成的 Go 代码（pkg/conf），随同一次提交更新。
+      #   2026-11-12 把生成目标从 api/common/conf 迁到 pkg/conf，
+      #   因此 go_package 必然改变；只对这一个目录、这一条规则放行。
+      #   其它 proto（platform/evie/ai/version/edai/*）仍然受 FILE_SAME_GO_PACKAGE 约束。
+      ignore_only:
+        FILE_SAME_GO_PACKAGE:
+          - common/conf
 deps:
   - buf.build/googleapis/googleapis:83c0f6c19b2f4ea0b0fd84a80e753659
   - buf.build/gnostic/gnostic:087bc8072ce44e339f213209e4d57bf0

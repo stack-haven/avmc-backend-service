@@ -10,8 +10,8 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 
 	v1 "backend-service/api/platform/service/v1"
-	"backend-service/app/platform/service/internal/conf"
 	"backend-service/pkg/auth/authn"
+	"backend-service/pkg/conf"
 )
 
 func TestNewServerMiddlewareRejectsUnsupportedLimiter(t *testing.T) {

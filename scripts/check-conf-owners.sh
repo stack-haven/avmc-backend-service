@@ -9,16 +9,17 @@
 #
 #   panic: proto: file "common/conf/base.proto" is already registered
 #
-# 本仓库当前有 5 个 Go 包注册同一批 conf proto（实测 md5 全等）：
-#   api/common/conf                                       ← 根 buf.gen.yaml 出口
-#   app/{ai,evie,platform,version}/service/internal/conf   ← 服务级出口（make config + mv）
+# 2026-11-11 之前本仓库有 5 个 Go 包注册同一批 conf proto（api/common/conf 加
+# 4 个服务的 internal/conf 副本，实测 md5 全等）。现已收敛为唯一出口：
 #
-# 目前没有二进制同时链接两边，所以是**潜伏**地雷而非现网故障。
-# 但触发条件很现实：任何 pkg/ 包只要引用 api/common/conf，再被那 4 个服务之一引用，
-# 该服务启动即 panic。这正是 pkg/objectstorage 改用 `json.RawMessage` 的根本原因。
+#   proto/common/conf/*.proto  --(make conf)-->  pkg/conf/*.pb.go
 #
-# 本门禁不改存量（存量进 baseline 棘轮，与 check-import-boundaries.sh 同机制），
-# 只阻断**新增**注册点，防止地雷扩散。
+# 收敛后风险从「潜伏」变为「结构性不可能」，但它随时可能被重新引入 ——
+# 最典型的路径是「某个服务为了自定义配置，又加了一份 conf.proto 副本」。
+# 本门禁的作用就是让这种回退立即变红。
+#
+# baseline 保留棘轮机制：若确有新的注册点需要临时接受，必须显式登记
+# 并写明原因与去向（与 check-import-boundaries.sh 同机制）。
 #
 # 兼容性：刻意不使用 bash 4 才有的 mapfile / declare -A
 #   —— 本仓库开发者本机是 macOS 自带 bash 3.2，用了会在本地直接报错，
@@ -30,8 +31,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 BASELINE_FILE="scripts/conf-owner-baseline.txt"
-# 唯一允许的注册点。若未来把 conf 生成目标迁到 pkg/conf，只需改这一行。
-CANONICAL_OWNER="api/common/conf"
+# 唯一允许的注册点（唯一生成出口，见 pkg/conf/buf.gen.yaml）。
+CANONICAL_OWNER="pkg/conf"
 # 判定依据：生成物头部 `// source: <proto 路径>` 以此前缀开头即算 conf 注册点
 CONF_SOURCE_PREFIX="common/conf/"
 
@@ -74,7 +75,9 @@ fi
 # baseline：只对比目录列，`#` 注释与空行忽略
 BASELINE_DIRS=""
 if [ -f "$BASELINE_FILE" ]; then
-    BASELINE_DIRS="$(grep -vE '^[[:space:]]*(#|$)' "$BASELINE_FILE" | awk '{print $1}')"
+    # `|| true` 必需：基线为空时 grep 退出码为 1，在 set -euo pipefail 下
+    # 会让整个脚本静默退出（基线清零后立即踩到过这个坑）。
+    BASELINE_DIRS="$(grep -vE '^[[:space:]]*(#|$)' "$BASELINE_FILE" | awk '{print $1}' || true)"
 fi
 
 echo "   发现 ${OWNER_TOTAL} 个注册点，扫描 ${PB_TOTAL} 个 pb.go"
@@ -111,8 +114,8 @@ if [ "${NEW_COUNT}" -gt 0 ]; then
     echo
     echo "   同一份 conf proto 被多个 Go 包注册会导致 protobuf 全局注册表冲突，"
     echo "   任一同时链接两边的二进制都会在 init 阶段 panic。"
-    echo "   正确做法：删除该服务的 buf.gen.yaml，改为引用 ${CANONICAL_OWNER}（类型别名层），"
-    echo "   参照 app/edai/service/internal/conf/doc.go。"
+    echo "   正确做法：删除该目录下的 conf.proto / buf.gen.yaml，直接 import ${CANONICAL_OWNER}。"
+    echo "   若确需服务专属配置字段，应扩展 proto/common/conf 而不是复制一份。"
     exit 1
 fi
 

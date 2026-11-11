@@ -1,8 +1,8 @@
 package server
 
 import (
-	"backend-service/app/version/service/internal/conf"
 	"backend-service/app/version/service/internal/service"
+	"backend-service/pkg/conf"
 	pkgHealth "backend-service/pkg/health"
 	"time"
 

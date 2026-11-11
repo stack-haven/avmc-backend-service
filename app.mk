@@ -62,7 +62,6 @@ OPENAPI_TEMPLATE  ?= $(APP_RELATIVE_PATH)/v1/buf.openapi.gen.yaml
 HAS_CMD_MIGRATE := $(wildcard ./cmd/migrate)
 HAS_CMD_MOCK    := $(wildcard ./cmd/mock)
 HAS_CMD_POLICY  := $(wildcard ./cmd/policy)
-HAS_CONF_TMPL   := $(wildcard $(BACKEND_ROOT)/app/$(APP_RELATIVE_PATH)/buf.gen.yaml)
 HAS_TS_TMPL     := $(wildcard $(BACKEND_ROOT)/app/$(APP_RELATIVE_PATH)/buf.typescript.gen.yaml)
 HAS_OPENAPI     := $(wildcard $(PROTO_DIR)/$(OPENAPI_TEMPLATE))
 
@@ -127,27 +126,16 @@ wire:
 	fi
 	@echo "✅ wire generated"
 
-# 若服务自带 config 实现（如 evie/tool 用 protoc 直出），可在 include 前设置
-# SKIP_APP_MK_CONFIG := 1 来跳过本定义，避免 make 的 overriding 警告。
-ifndef SKIP_APP_MK_CONFIG
-.PHONY: config
-# 生成 internal/conf/*.pb.go（模板由 <service>/buf.gen.yaml 提供）
-#
-# 2026-11-11 加固（Stage 0-b）：安装步骤由裸 `rm -rf internal/conf && mv` 改为
-# `scripts/install-conf.sh` —— 只删除 *.pb.go，保留目录内的手写文件。
-# 旧行为会静默删掉 edai 的 conf/doc.go、conf/provider.go（类型别名层 + wire ProviderSet），
-# 且因 mv 成功仍打印 ✅。
-config:
-	@if [ ! -d "$(BACKEND_ROOT)/app/$(APP_RELATIVE_PATH)" ] || [ -z "$(HAS_CONF_TMPL)" ]; then \
-		echo "ℹ️  本服务未提供 buf.gen.yaml，跳过 config"; \
-	else \
-		cd $(PROTO_DIR) && \
-		buf generate --template ../app/$(APP_RELATIVE_PATH)/buf.gen.yaml && \
-		cd - >/dev/null && \
-		$(BACKEND_ROOT)/scripts/install-conf.sh && \
-		echo "✅ config generated"; \
-	fi
-endif
+# 注：历史上这里有一个 `config` 目标，用服务级 buf.gen.yaml 把
+# proto/common/conf 生成到 <svc>/internal/conf（生成后 mv 抹掉目录层级）。
+# 该机制已于 2026-11-11 移除：同一批 conf proto 被 5 个 Go 包注册进
+# protobuf 全局注册表，任何同时链接两边的二进制都会在 init 阶段 panic。
+# 现在 conf 只有单一生成出口（`make conf` → pkg/conf），服务直接 import pkg/conf。
+# 相关门禁见 scripts/check-conf-owners.sh 与 docs/architecture/4-9 遗留 #11。
+.PHONY: conf
+# 生成共享配置类型到 pkg/conf。生成逻辑归属 L0（仓库级唯一出口），L1 只做委托。
+conf:
+	@$(MAKE) -C $(BACKEND_ROOT) conf
 
 .PHONY: ts
 # 生成 TypeScript 客户端（模板由 <service>/buf.typescript.gen.yaml 提供）
@@ -291,32 +279,32 @@ race:
 
 .PHONY: diff-check
 # 校验生成物无漂移（服务级）
+# 注：不再包含 internal/conf —— conf 生成物已上收到唯一出口 pkg/conf，
+#     由根仓库的 `make generate-check`（proto + conf）统一校验。
 diff-check:
 	@cd $(BACKEND_ROOT) && git diff --check
 	@cd $(BACKEND_ROOT) && git diff --exit-code -- \
-		go.mod go.sum api \
+		go.mod go.sum api pkg/conf \
 		$(SERVICE_PATH)/cmd/server/assets/openapi.yaml \
-		$(SERVICE_PATH)/internal/conf \
 		$(SERVICE_PATH)/internal/data/ent/gen
 	@cd $(BACKEND_ROOT) && git diff --cached --exit-code -- \
-		go.mod go.sum api \
+		go.mod go.sum api pkg/conf \
 		$(SERVICE_PATH)/cmd/server/assets/openapi.yaml \
-		$(SERVICE_PATH)/internal/conf \
 		$(SERVICE_PATH)/internal/data/ent/gen
 	@test -z "$$(cd $(BACKEND_ROOT) && git ls-files --others --exclude-standard -- \
-		api $(SERVICE_PATH)/cmd/server/assets/openapi.yaml \
-		$(SERVICE_PATH)/internal/conf $(SERVICE_PATH)/internal/data/ent/gen)" || \
+		api pkg/conf $(SERVICE_PATH)/cmd/server/assets/openapi.yaml \
+		$(SERVICE_PATH)/internal/data/ent/gen)" || \
 		(echo "❌ 存在未跟踪的生成物："; \
 		 cd $(BACKEND_ROOT) && git ls-files --others --exclude-standard -- \
-			api $(SERVICE_PATH)/cmd/server/assets/openapi.yaml \
-			$(SERVICE_PATH)/internal/conf $(SERVICE_PATH)/internal/data/ent/gen; \
+			api pkg/conf $(SERVICE_PATH)/cmd/server/assets/openapi.yaml \
+			$(SERVICE_PATH)/internal/data/ent/gen; \
 		 exit 1)
 	@echo "✅ diff-check passed"
 
 ifndef SKIP_APP_MK_GENERATE_CHECK
 .PHONY: generate-check
 # 重新生成并校验生成物已提交
-generate-check: api ent config wire openapi
+generate-check: api conf ent wire openapi
 	@cd $(BACKEND_ROOT) && go mod tidy
 	@$(MAKE) diff-check
 endif

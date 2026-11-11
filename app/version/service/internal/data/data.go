@@ -2,7 +2,7 @@ package data
 
 import (
 	"backend-service/app/version/service/internal/biz"
-	"backend-service/app/version/service/internal/conf"
+	"backend-service/pkg/conf"
 	"context"
 	"errors"
 	"fmt"

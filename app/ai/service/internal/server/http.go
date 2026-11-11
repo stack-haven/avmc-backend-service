@@ -3,8 +3,8 @@ package server
 import (
 	v1 "backend-service/api/ai/service/v1"
 	"backend-service/app/ai/service/cmd/server/assets"
-	"backend-service/app/ai/service/internal/conf"
 	"backend-service/app/ai/service/internal/service"
+	"backend-service/pkg/conf"
 	"context"
 
 	nethttp "net/http"

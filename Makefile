@@ -58,6 +58,17 @@ proto:
 	@cd proto && \
 	buf generate --template buf.gen.yaml
 
+.PHONY: conf
+# generate the shared config types (proto/common/conf → pkg/conf)
+#
+# 为什么单独一个目标而不并入 `make proto`：
+#   api/ 是对外 API 契约（受 buf breaking 保护），pkg/conf 是服务端内部共享类型，
+#   两者的生成根目录、插件集与漂移校验口径都不同。混在一起会让「契约变更」与
+#   「配置类型变更」互相顶撞。conf 已在 proto/buf.gen.yaml 的 exclude_paths 排除。
+conf:
+	@cd proto && \
+	buf generate --template ../pkg/conf/buf.gen.yaml
+
 .PHONY: proto-lint
 # lint protobuf contracts
 proto-lint:
@@ -70,22 +81,25 @@ diff-check:
 	@git diff --exit-code -- \
 		go.mod \
 		go.sum \
-		api
+		api \
+		pkg/conf
 	@git diff --cached --exit-code -- \
 		go.mod \
 		go.sum \
-		api
+		api \
+		pkg/conf
 	@test -z "$$(git ls-files --others --exclude-standard -- \
-		api)" || \
+		api pkg/conf)" || \
 		(echo "Untracked generated files found:"; \
 		 git ls-files --others --exclude-standard -- \
-			api; \
+			api pkg/conf; \
 		 exit 1)
 
 .PHONY: generate-check
 # regenerate global protobuf API code and verify generated outputs are committed
 generate-check:
 	$(MAKE) proto
+	$(MAKE) conf
 	go mod tidy
 	$(MAKE) diff-check
 
@@ -194,19 +208,14 @@ import-boundary-check:
 
 .PHONY: conf-owner-check
 # verify proto/common/conf/* is registered by exactly ONE Go package (protobuf 全局注册表唯一性)
-# 存量注册点进 scripts/conf-owner-baseline.txt 棘轮，只阻断新增；见 docs/architecture/4-9 §六
+# 唯一允许的注册点是 pkg/conf，基线为空 → 任何新增注册点立即变红
+# 见 docs/architecture/4-9 遗留 #11
 conf-owner-check:
 	@./scripts/check-conf-owners.sh
 
-.PHONY: conf-drift-check
-# verify each service's internal/conf/*.pb.go stays byte-identical to api/common/conf/*.pb.go
-# 传递保证：api 与 proto 的同步由 `make generate-check` 负责，本目标只需证明两边相等
-conf-drift-check:
-	@./scripts/check-conf-drift.sh
-
 .PHONY: conf-check
-# conf 单一事实源门禁聚合（CI 唯一入口）
-conf-check: conf-owner-check conf-drift-check
+# conf 单一事实源门禁（CI 唯一入口）
+conf-check: conf-owner-check
 
 .PHONY: race
 # run race detection for global backend packages

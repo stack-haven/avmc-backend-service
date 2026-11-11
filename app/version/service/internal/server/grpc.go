@@ -2,8 +2,8 @@ package server
 
 import (
 	v1 "backend-service/api/version/service/v1"
-	"backend-service/app/version/service/internal/conf"
 	"backend-service/app/version/service/internal/service"
+	"backend-service/pkg/conf"
 
 	"backend-service/pkg/middleware/safelogging"
 	"github.com/go-kratos/kratos/v2/log"

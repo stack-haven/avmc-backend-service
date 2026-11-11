@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"backend-service/app/platform/service/internal/conf"
+	"backend-service/pkg/conf"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"

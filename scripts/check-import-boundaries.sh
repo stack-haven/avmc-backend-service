@@ -41,7 +41,11 @@ NEW_VIOLATIONS=()
 #   - 信息性统计：import internal/conf（若要升级为硬规则，须先改 RULES.md，
 #     属 requires-confirmation 变更，不在 A 案范围内擅自扩大门禁）
 REVERSE_DEPS='app/[a-z0-9_-]+/(service|tool)/internal/data|/ent(/gen)?["/]'
-CONF_IMPORT='app/[a-z0-9_-]+/(service|tool)/internal/conf'
+# conf 依赖同时覆盖两种形态：
+#   pkg/conf                                   — 2026-11-12 起的唯一共享配置出口
+#   app/<svc>/(service|tool)/internal/conf      — 历史副本；evie/tool 仍保留自有的
+#                                                 internal/conf（package kratos.api）
+CONF_IMPORT='pkg/conf|app/[a-z0-9_-]+/(service|tool)/internal/conf'
 
 # 统一 grep 选项：只读 Go 源码，跳过运行期大目录。
 # 不排除时 platform/service（377MB，其中 bin/ 218MB、upload/ 110MB）
@@ -97,9 +101,13 @@ scan_layer() {
   hits=$(grep -rEn "$REVERSE_DEPS" "${GREP_OPTS[@]}" --exclude='*_test.go' "${dirs[@]}" 2>/dev/null || true)
 
   # 信息性：conf 依赖（非硬规则，仅统计）
+  #
+  # `|| true` 必需：conf 依赖清零后 `grep` 因无匹配返回 1，在 `set -euo pipefail`
+  # 下整个脚本会**静默退出**（只打印到一半、无任何错误说明，CI 上表现为裸 Error 1）。
+  # 这是 2026-11-12 把 conf 收敛到 pkg/conf 后暴露出来的既有缺陷。
   local conf_count
-  conf_count=$(grep -rEl "$CONF_IMPORT" "${GREP_OPTS[@]}" --exclude='*_test.go' "${dirs[@]}" 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$conf_count" -gt 0 ]; then
+  conf_count=$(grep -rEl "$CONF_IMPORT" "${GREP_OPTS[@]}" --exclude='*_test.go' "${dirs[@]}" 2>/dev/null | wc -l | tr -d ' ' || true)
+  if [ "${conf_count:-0}" -gt 0 ]; then
     echo "   ℹ️  conf 依赖 ${conf_count} 个文件（信息性，非硬规则）"
   fi
 

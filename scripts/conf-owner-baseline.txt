@@ -1,8 +1,8 @@
 # Conf 生成物注册点基线（棘轮机制）
 #
 # 用途：`scripts/check-conf-owners.sh` 对**新增**的 conf 注册点判定失败，
-#       对下列存量注册点只记录、不阻断。机制与
-#       `scripts/import-boundary-baseline.txt` / `proto/buf-lint-baseline.txt` 一致。
+#       对本文件登记的存量注册点只记录、不阻断。
+#       机制与 `scripts/import-boundary-baseline.txt` / `proto/buf-lint-baseline.txt` 一致。
 #
 # 规则（每条必须写清原因与去向，禁止无理由堆积）：
 #   <相对 backend-service 的目录>    # 原因 / 去向
@@ -10,13 +10,16 @@
 # 背景（详见 scripts/check-conf-owners.sh 头部）：
 #   同一份 proto/common/conf/*.proto 被 N 个 Go 包各自 init 注册时，
 #   protobuf 全局注册表按文件路径判重 → 任一同时链接两边的二进制在 init 阶段 panic。
-#   规范注册点只有 api/common/conf 一个；下列 4 个目录是历史上的服务级副本。
 #
-# 收敛去向：Stage 1（A 案后续）把这 4 个 internal/conf 改为 api/common/conf 的
-#   类型别名层（照 app/edai/service/internal/conf/doc.go 的既有做法），
-#   届时删除本文件中的 4 行。edai 已是别名层，故不在本基线内。
-
-app/ai/service/internal/conf        # 服务级 buf.gen.yaml 生成后 mv；去向：Stage 1 改别名层
-app/evie/service/internal/conf      # 服务级 buf.gen.yaml 生成后 mv；去向：Stage 1 改别名层
-app/platform/service/internal/conf  # 服务级 buf.gen.yaml 生成后 mv；去向：Stage 1 改别名层
-app/version/service/internal/conf   # 服务级 buf.gen.yaml 生成后 mv；去向：Stage 1 改别名层
+# 当前状态：**基线为空（0 条）**。
+#   2026-11-12 完成收敛：删除了 4 个服务的 internal/conf 副本与 api/common/conf，
+#   conf 现在只有唯一生成出口 pkg/conf（`make conf`）。
+#   因此任何新增的注册点都立即变红 —— 这是期望行为，不是误报。
+#
+# 收敛路径（供追溯）：Stage 1 服务副本 → 类型别名层；Stage 2 别名层 → 直接 import pkg/conf。
+# 最终实现直接采用「服务 import pkg/conf、不保留别名层」，理由：
+#   conf 包有 60 个导出类型，手写别名层等于一份需要人工同步的清单（正是要消除的病灶）。
+#
+# 下一步收敛目标：app/evie/tool/internal/conf（package kratos.api，独立 schema，
+# 含 Qua/Asr/Enhancement/Vocab 等工具专属配置）。它注册的是 internal/conf/conf.proto，
+# 路径不同、不与 common/conf 冲突，故不在本基线内，也不阻塞本次收敛。

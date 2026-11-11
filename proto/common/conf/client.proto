@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package conf;
 
-option go_package = "backend-service/api/common/conf;conf";
+option go_package = "backend-service/pkg/conf;conf";
 
 import "google/protobuf/duration.proto";
 import "common/conf/middleware.proto";

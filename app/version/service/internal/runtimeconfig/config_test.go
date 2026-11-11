@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"backend-service/app/version/service/internal/conf"
+	"backend-service/pkg/conf"
 )
 
 func TestValidateProductionRejectsDevelopmentDatabaseCredentials(t *testing.T) {

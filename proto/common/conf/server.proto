@@ -5,7 +5,7 @@ package conf;
 import "common/conf/middleware.proto";
 import "google/protobuf/duration.proto";
 
-option go_package = "backend-service/api/common/conf;conf";
+option go_package = "backend-service/pkg/conf;conf";
 
 // 服务器
 message Server {

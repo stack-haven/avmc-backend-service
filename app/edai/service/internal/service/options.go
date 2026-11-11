@@ -1,7 +1,7 @@
 package service
 
 import (
-	"backend-service/app/edai/service/internal/conf"
+	"backend-service/pkg/conf"
 )
 
 // NewSystemOptions 从配置构造系统信息参数。

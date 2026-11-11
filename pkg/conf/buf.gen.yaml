@@ -1,0 +1,40 @@
+version: v2
+# ─────────────────────────────────────────────────────────────────────────────
+# pkg/conf —— 共享配置类型的唯一生成出口
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 为什么模板放在 pkg/conf 而不是服务目录：
+#   proto/common/conf 描述的是**服务端共享配置 schema**，不是对外 API 契约。
+#   它此前被导出到 api/common/conf，并被 4 个服务各自复制一份到 internal/conf，
+#   导致同一批 proto 被 5 个 Go 包注册进 protobuf 全局注册表 —— 同时链入即 panic：
+#     proto: file "common/conf/base.proto" is already registered
+#   现在收敛为单一份生成物 + 单一注册点，门禁见 scripts/check-conf-owners.sh。
+#
+# 为什么用默认的 paths=import（而不是 paths=source_relative）：
+#   protoc-gen-go 在 paths=import 下按 go_package 的 import path 拼输出路径，
+#   于是 `backend-service/pkg/conf` 会落到 <out>/backend-service/pkg/conf/*.pb.go。
+#   out 取 `../..`（即 Go 模块根 backend-service 的父目录）正好让结果落在
+#   backend-service/pkg/conf/ 下 —— 无需再像旧机制那样生成后 mv 抹掉目录层级。
+#   注意：out 相对于执行目录 backend-service/proto。
+#
+# 只挂 protoc-gen-go 一个插件：
+#   common/conf 的 12 个 proto 没有任何 buf.validate 规则，此前 api 出口额外生成的
+#   12 个 .pb.validate.go 共 9,013 行全是空壳 stub（33 个 no-op 函数/文件）。
+#   若将来给 conf 加校验规则，再在本模板追加 validate 插件。
+#
+# 插件版本：与 backend-service/Makefile 的 PROTOC_GEN_GO_VERSION 保持一致。
+
+managed:
+  enabled: true
+  disable:
+    - file_option: go_package_prefix
+      module: buf.build/bufbuild/protovalidate
+
+inputs:
+  - directory: .
+    paths:
+      - ./common/conf
+
+plugins:
+  - remote: buf.build/protocolbuffers/go:v1.36.11
+    out: ../..

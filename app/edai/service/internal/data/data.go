@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"backend-service/app/edai/service/internal/conf"
 	"backend-service/app/edai/service/internal/data/ent/gen"
 	entviewer "backend-service/app/edai/service/internal/data/ent/viewer"
+	"backend-service/pkg/conf"
 	"backend-service/pkg/entgo/mixin"
 	pkgHealth "backend-service/pkg/health"
 

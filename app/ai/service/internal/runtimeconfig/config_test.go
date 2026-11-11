@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"backend-service/app/ai/service/internal/conf"
+	"backend-service/pkg/conf"
 )
 
 func TestValidateRejectsUnsafeProductionDefaults(t *testing.T) {
