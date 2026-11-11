@@ -132,6 +132,11 @@ wire:
 ifndef SKIP_APP_MK_CONFIG
 .PHONY: config
 # 生成 internal/conf/*.pb.go（模板由 <service>/buf.gen.yaml 提供）
+#
+# 2026-11-11 加固（Stage 0-b）：安装步骤由裸 `rm -rf internal/conf && mv` 改为
+# `scripts/install-conf.sh` —— 只删除 *.pb.go，保留目录内的手写文件。
+# 旧行为会静默删掉 edai 的 conf/doc.go、conf/provider.go（类型别名层 + wire ProviderSet），
+# 且因 mv 成功仍打印 ✅。
 config:
 	@if [ ! -d "$(BACKEND_ROOT)/app/$(APP_RELATIVE_PATH)" ] || [ -z "$(HAS_CONF_TMPL)" ]; then \
 		echo "ℹ️  本服务未提供 buf.gen.yaml，跳过 config"; \
@@ -139,9 +144,7 @@ config:
 		cd $(PROTO_DIR) && \
 		buf generate --template ../app/$(APP_RELATIVE_PATH)/buf.gen.yaml && \
 		cd - >/dev/null && \
-		rm -rf internal/conf && \
-		mv proto/common/conf internal && \
-		rm -rf proto && \
+		$(BACKEND_ROOT)/scripts/install-conf.sh && \
 		echo "✅ config generated"; \
 	fi
 endif

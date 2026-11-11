@@ -192,6 +192,22 @@ coverage:
 import-boundary-check:
 	@./scripts/check-import-boundaries.sh
 
+.PHONY: conf-owner-check
+# verify proto/common/conf/* is registered by exactly ONE Go package (protobuf 全局注册表唯一性)
+# 存量注册点进 scripts/conf-owner-baseline.txt 棘轮，只阻断新增；见 docs/architecture/4-9 §六
+conf-owner-check:
+	@./scripts/check-conf-owners.sh
+
+.PHONY: conf-drift-check
+# verify each service's internal/conf/*.pb.go stays byte-identical to api/common/conf/*.pb.go
+# 传递保证：api 与 proto 的同步由 `make generate-check` 负责，本目标只需证明两边相等
+conf-drift-check:
+	@./scripts/check-conf-drift.sh
+
+.PHONY: conf-check
+# conf 单一事实源门禁聚合（CI 唯一入口）
+conf-check: conf-owner-check conf-drift-check
+
 .PHONY: race
 # run race detection for global backend packages
 race:
