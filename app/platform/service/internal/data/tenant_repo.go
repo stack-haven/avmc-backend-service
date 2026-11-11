@@ -258,9 +258,17 @@ func (r *tenantRepo) Provision(ctx context.Context, input *biz.TenantProvisionin
 	if err != nil {
 		return nil, err
 	}
-	// Sync Casbin policies for the admin role and user
-	SyncRolePolicies(ctx, r.Data.DB(ctx), r.Data.authorizer, tenantRow.ID, adminRole.ID)
-	SyncUserRoles(ctx, r.Data.DB(ctx), r.Data.authorizer, tenantRow.ID, adminUser.ID, []uint32{adminRole.ID})
+	// Sync Casbin policies for the admin role and user.
+	// 必须使用 systemCtx：SyncRolePolicies 会查询目标租户的角色，而 Role 受租户隐私
+	// 规则约束。用请求 ctx 时平台操作员（无租户）会被 Deny、"带租户"操作员会把新租户
+	// 角色过滤成 NotFound，两种情况都会静默跳过同步，导致新租户管理员零权限。
+	// 保持 best-effort 语义（事务已提交，不能因授权同步失败回滚），但错误必须可见。
+	if err := SyncRolePolicies(systemCtx, r.Data.DB(systemCtx), r.Data.authorizer, tenantRow.ID, adminRole.ID); err != nil {
+		r.Log.Errorf("provision tenant %d: sync admin role %d policies: %v", tenantRow.ID, adminRole.ID, err)
+	}
+	if err := SyncUserRoles(systemCtx, r.Data.DB(systemCtx), r.Data.authorizer, tenantRow.ID, adminUser.ID, []uint32{adminRole.ID}); err != nil {
+		r.Log.Errorf("provision tenant %d: sync admin user %d roles: %v", tenantRow.ID, adminUser.ID, err)
+	}
 	return &biz.TenantProvisioningResult{
 		Tenant: created, AdminUserID: adminUser.ID, AdminRoleID: adminRole.ID, RootDeptID: rootDept.ID,
 	}, nil
