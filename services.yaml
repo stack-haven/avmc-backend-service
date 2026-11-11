@@ -10,8 +10,11 @@
 # 修改后必须执行：
 #   make gen-servicetargets      # 重新生成 mk/services.mk
 #   make verify-servicetargets   # CI 校验生成物无漂移
+#   make gen-servicemap          # 重新生成 docs/architecture/0-0 活跃服务图
+#   make verify-servicemap       # CI 校验架构总览图无漂移
 #
 # 字段：
+#   desc    一句话定位（渲染进架构总览服务图）
 #   path    相对 backend-service 的服务目录
 #   http / grpc / sse   监听端口（sse 仅 ai 使用）
 #   db      数据库类型与库名（mysql 或 sqlite）
@@ -21,6 +24,7 @@
 # =============================================================================
 
 platform:
+  desc: 平台基础能力（租户/认证/权限/审计/任务/文件/通知/参数）
   path: app/platform/service
   http: 8000
   grpc: 9000
@@ -30,6 +34,7 @@ platform:
   status: active
 
 ai:
+  desc: AI/Chat 通用能力
   path: app/ai/service
   http: 8001
   grpc: 9001
@@ -40,6 +45,7 @@ ai:
   status: active
 
 evie:
+  desc: Evie ASR —— 语音识别 + 词库 + 文本增强
   path: app/evie/service
   http: 8100
   grpc: 9100
@@ -49,6 +55,7 @@ evie:
   status: active
 
 edai:
+  desc: 企业数字资产 —— 扫描登记 / 检索 / 去重 / 任务引擎
   path: app/edai/service
   http: 8200
   grpc: 9200
@@ -64,6 +71,7 @@ edai:
 #    `platform_version` 不一致。本服务的 DB 名当前不参与任何生成命令，
 #    故不影响门禁；解冻时须同步修正 config.yaml。
 version:
+  desc: 历史雏形（已冻结）
   path: app/version/service
   http: 8300
   grpc: 9300
@@ -75,6 +83,7 @@ version:
 # evie/tool 是独立轻量二进制，不提供 gRPC 之外的平台能力，
 # 其 Makefile 有大量自有命令（serve/demo/cli/docker-*），故只暴露 serve。
 evie-tool:
+  desc: Evie 工具服务（词库/演示/CLI 等自有命令）
   path: app/evie/tool
   run_target: serve      # 本服务的配置加载方式特殊，用自有 serve 而非 app.mk 的 run
   http: 8110
