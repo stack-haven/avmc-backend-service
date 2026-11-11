@@ -10,6 +10,7 @@ import (
 	"backend-service/app/platform/service/internal/data/ent/gen/tenant"
 	"backend-service/app/platform/service/internal/data/ent/gen/tenantmenupermissiongroup"
 	"backend-service/app/platform/service/internal/data/ent/gen/tenantmenupermissiongroupversion"
+	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/utils/convert"
 	"context"
@@ -716,17 +717,28 @@ func (r *tenantMenuPermissionGroupRepo) GetTenantEffectiveMenuIDs(ctx context.Co
 // cascadeTenantRoleMenus trims role menus for all tenants bound to a package
 // after the package's menu set changes (publish/rollback). Out-of-scope menus
 // are removed and Casbin policies re-synced.
+//
+// 该函数天然跨租户：它要遍历所有绑定本套餐的租户并改写其角色。因此必须显式切换
+// 到 system 上下文——否则 Role 的租户隐私规则会把范围收窄到操作者租户（平台操作员
+// 无租户时直接 Deny），级联被静默跳过，租户角色保留已裁剪的菜单（越权），而发布
+// 接口仍返回成功。
 func (r *tenantMenuPermissionGroupRepo) cascadeTenantRoleMenus(ctx context.Context, groupID uint32) {
+	ctx = entviewer.NewSystemContext(ctx)
 	// Find all tenants bound to this package
 	tenants, err := r.Data.DB(ctx).Tenant.Query().
 		Where(tenant.HasGroupsWith(tenantmenupermissiongroup.IDEQ(groupID))).
 		All(ctx)
 	if err != nil {
+		r.Log.Errorf("cascade package %d: query bound tenants: %v", groupID, err)
 		return
 	}
 	for _, t := range tenants {
 		effective, err := r.GetTenantEffectiveMenuIDs(ctx, t.ID)
-		if err != nil || len(effective) == 0 {
+		if err != nil {
+			r.Log.Errorf("cascade package %d tenant %d: effective menus: %v", groupID, t.ID, err)
+			continue
+		}
+		if len(effective) == 0 {
 			continue
 		}
 		effectiveSet := make(map[uint32]bool, len(effective))
@@ -738,6 +750,7 @@ func (r *tenantMenuPermissionGroupRepo) cascadeTenantRoleMenus(ctx context.Conte
 			WithMenus(func(q *gen.MenuQuery) { q.Select(menu.FieldID) }).
 			All(ctx)
 		if err != nil {
+			r.Log.Errorf("cascade package %d tenant %d: query roles: %v", groupID, t.ID, err)
 			continue
 		}
 		for _, rl := range roles {
@@ -751,9 +764,14 @@ func (r *tenantMenuPermissionGroupRepo) cascadeTenantRoleMenus(ctx context.Conte
 				}
 			}
 			if changed {
-				_, _ = r.Data.DB(ctx).Role.UpdateOneID(rl.ID).
-					ClearMenus().AddMenuIDs(newMenus...).Save(ctx)
-				SyncRolePolicies(ctx, r.Data.DB(ctx), r.Data.authorizer, t.ID, rl.ID)
+				if _, err := r.Data.DB(ctx).Role.UpdateOneID(rl.ID).
+					ClearMenus().AddMenuIDs(newMenus...).Save(ctx); err != nil {
+					r.Log.Errorf("cascade package %d tenant %d role %d: trim menus: %v", groupID, t.ID, rl.ID, err)
+					continue
+				}
+				if err := SyncRolePolicies(ctx, r.Data.DB(ctx), r.Data.authorizer, t.ID, rl.ID); err != nil {
+					r.Log.Errorf("cascade package %d tenant %d role %d: sync policies: %v", groupID, t.ID, rl.ID, err)
+				}
 			}
 		}
 	}
