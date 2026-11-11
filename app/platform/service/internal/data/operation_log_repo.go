@@ -13,6 +13,7 @@ import (
 	"backend-service/app/platform/service/internal/data/ent/gen/operationlog"
 	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
+	"backend-service/pkg/auth/authn"
 )
 
 type operationLogRepo struct{ BaseRepo }
@@ -25,8 +26,17 @@ func operationLogProto(row *gen.OperationLog) *pb.OperationLog {
 	return &pb.OperationLog{Id: uint64(row.ID), TenantId: row.TenantID, OperatorId: row.OperatorID, OperatorName: &row.OperatorName, Module: row.Module, Action: row.Action, ResourceType: &row.ResourceType, ResourceId: &row.ResourceID, Operation: &row.Operation, Method: &row.Method, Path: &row.Path, RequestSummary: &row.RequestSummary, BeforeData: &row.BeforeData, AfterData: &row.AfterData, Ip: &row.IP, UserAgent: &row.UserAgent, TraceId: &row.TraceID, Success: row.Success, DurationMs: &row.DurationMs, ErrorMessage: &row.ErrorMessage, CreatedAt: &created}
 }
 func (r *operationLogRepo) Append(ctx context.Context, value *pb.OperationLog) error {
-	// 跨服务审计委托（evie 等）不携带 JWT 上下文，租户从 entry 提取并注入 Ent viewer。
-	if value.GetTenantId() > 0 {
+	// 跨服务审计委托会原样转发调用方的 Authorization（见 platform/client/audit.go），
+	// 因此「认证身份」才是权威租户来源：请求体里的 tenant_id 不得覆盖它，否则任意
+	// 已登录用户都能往其他租户写入审计并伪造操作人。
+	// 仅当调用方没有租户身份（平台侧委托）时，才允许用请求体的 tenant_id 显式切换
+	// Ent viewer，以保证隐私规则能落到目标租户。
+	claimTenant := authn.GetAuthUserTenantID(ctx)
+	if claimTenant > 0 {
+		if tenantID := value.GetTenantId(); tenantID > 0 && tenantID != claimTenant {
+			return pb.ErrorPermissionDenied("审计写入租户与认证身份不一致")
+		}
+	} else if value.GetTenantId() > 0 {
 		ctx = entviewer.NewTenantContext(ctx, value.GetTenantId())
 	}
 	_, err := r.Data.DB(ctx).OperationLog.Create().SetNillableOperatorID(value.OperatorId).SetOperatorName(value.GetOperatorName()).SetModule(value.GetModule()).SetAction(value.GetAction()).SetResourceType(value.GetResourceType()).SetResourceID(value.GetResourceId()).SetOperation(value.GetOperation()).SetMethod(value.GetMethod()).SetPath(value.GetPath()).SetRequestSummary(value.GetRequestSummary()).SetBeforeData(value.GetBeforeData()).SetAfterData(value.GetAfterData()).SetIP(value.GetIp()).SetUserAgent(value.GetUserAgent()).SetTraceID(value.GetTraceId()).SetSuccess(value.GetSuccess()).SetDurationMs(value.GetDurationMs()).SetErrorMessage(value.GetErrorMessage()).Save(ctx)
