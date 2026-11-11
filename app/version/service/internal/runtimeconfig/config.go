@@ -1,76 +1,48 @@
 package runtimeconfig
 
 import (
-	"os"
-	"strconv"
 	"strings"
 
 	"backend-service/pkg/conf"
-
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
+	"backend-service/pkg/runtimeconfig"
 )
 
+// profile version 服务的环境变量约定。
+//
+// version 服务已冻结，只覆盖最少的运行时字段（监听地址 + 数据源），
+// 不读取 Swagger / CORS / JWT 相关变量，因此 Load 中不调用
+// runtimeconfig.ApplyServerEnvOverrides。这是刻意的：不要因为"顺便统一"
+// 而让一个冻结服务开始响应它从未读取过的环境变量。
+var profile = runtimeconfig.Profile{
+	EnvPrefix:      "platform_VERSION",
+	ProductionEnvs: []string{"platform_VERSION_ENV", "DEPLOY_ENV", "APP_ENV"},
+}
+
+// ConfigError 表示配置缺失或不合法（实现见 pkg/runtimeconfig）。
+type ConfigError = runtimeconfig.ConfigError
+
+// Load 读取配置文件、应用环境变量覆盖并校验。
 func Load(path string) (*conf.Bootstrap, error) {
-	c := config.New(config.WithSource(file.NewSource(path)))
-	defer c.Close()
-
-	if err := c.Load(); err != nil {
+	bc, err := runtimeconfig.Load(path)
+	if err != nil {
 		return nil, err
 	}
-	var bc conf.Bootstrap
-	if err := c.Scan(&bc); err != nil {
+	ApplyEnvOverrides(bc)
+	if err := Validate(bc); err != nil {
 		return nil, err
 	}
-	ApplyEnvOverrides(&bc)
-	if err := Validate(&bc); err != nil {
-		return nil, err
-	}
-	return &bc, nil
+	return bc, nil
 }
 
+// ApplyEnvOverrides 应用环境变量覆盖（仅监听地址与数据源）。
 func ApplyEnvOverrides(bc *conf.Bootstrap) {
-	if bc == nil {
-		return
-	}
-	if bc.Server != nil {
-		if bc.Server.Http != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_VERSION_HTTP_ADDR")); v != "" {
-				bc.Server.Http.Addr = v
-			}
-		}
-		if bc.Server.Grpc != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_VERSION_GRPC_ADDR")); v != "" {
-				bc.Server.Grpc.Addr = v
-			}
-		}
-	}
-	if bc.Data != nil {
-		if bc.Data.Database != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_VERSION_DB_DRIVER")); v != "" {
-				bc.Data.Database.Driver = v
-			}
-			if v := strings.TrimSpace(os.Getenv("platform_VERSION_DB_SOURCE")); v != "" {
-				bc.Data.Database.Source = v
-			}
-			if v, ok := envBool("platform_VERSION_DB_DEBUG"); ok {
-				bc.Data.Database.Debug = v
-			}
-			if v, ok := envBool("platform_VERSION_DB_MIGRATE"); ok {
-				bc.Data.Database.Migrate = v
-			}
-		}
-		if bc.Data.Redis != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_VERSION_REDIS_ADDR")); v != "" {
-				bc.Data.Redis.Addr = v
-			}
-			if v, ok := os.LookupEnv("platform_VERSION_REDIS_PASSWORD"); ok {
-				bc.Data.Redis.Password = v
-			}
-		}
-	}
+	runtimeconfig.ApplyEnvOverrides(bc, profile)
 }
 
+// IsProduction 判断当前是否生产环境。
+func IsProduction() bool { return runtimeconfig.IsProduction(profile) }
+
+// Validate version 服务的配置校验策略：只保证能启动，不做中间件加固校验。
 func Validate(bc *conf.Bootstrap) error {
 	if bc == nil {
 		return ConfigError("bootstrap config is required")
@@ -117,37 +89,14 @@ func Validate(bc *conf.Bootstrap) error {
 	return nil
 }
 
+// unsafeProductionDatabaseSource 是 version 服务特有的判定：
+// 它把 "replace-me" 视为占位符，而 pkg/runtimeconfig 的通用实现只认 "replace-with"。
+//
+// 这里刻意保留本地实现以保持既有行为不变（version 已冻结）。
+// 两种占位符写法本应统一，但那是行为收紧，需要单独确认后再改。
 func unsafeProductionDatabaseSource(source string) bool {
 	source = strings.ToLower(strings.TrimSpace(source))
 	return strings.HasPrefix(source, "root:") ||
 		strings.HasPrefix(source, "root@") ||
 		strings.Contains(source, "replace-me")
-}
-
-func IsProduction() bool {
-	for _, key := range []string{"platform_VERSION_ENV", "DEPLOY_ENV", "APP_ENV"} {
-		switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
-		case "prod", "production":
-			return true
-		}
-	}
-	return false
-}
-
-func envBool(key string) (bool, bool) {
-	raw, ok := os.LookupEnv(key)
-	if !ok {
-		return false, false
-	}
-	v, err := strconv.ParseBool(strings.TrimSpace(raw))
-	if err != nil {
-		return false, false
-	}
-	return v, true
-}
-
-type ConfigError string
-
-func (e ConfigError) Error() string {
-	return string(e)
 }

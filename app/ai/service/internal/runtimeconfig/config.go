@@ -1,51 +1,56 @@
 package runtimeconfig
 
 import (
-	"os"
-	"strconv"
 	"strings"
 
 	"backend-service/pkg/conf"
-
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
+	"backend-service/pkg/runtimeconfig"
 )
 
+// profile AI 服务的环境变量约定。
+//
+// 注意两点与平台不同，且都是既有部署约定，不做统一：
+//   - 前缀是 platform_AI（不是 platform_ADMIN）；
+//   - JWT 密钥走独立的 platform_AI_JWT_KEY，而不是 ARK_JWT_KEY。
+//
+// ProductionEnvs 同时保留 platform_AI_ENV 与 platform_ADMIN_ENV：
+// 历史上 AI 服务曾被当作平台的一部分部署，两种开关都可能存在。
+var profile = runtimeconfig.Profile{
+	EnvPrefix:      "platform_AI",
+	JWTKeyEnv:      "platform_AI_JWT_KEY",
+	ProductionEnvs: []string{"platform_AI_ENV", "platform_ADMIN_ENV", "DEPLOY_ENV", "APP_ENV"},
+}
+
+// ConfigError 表示配置缺失或不合法（实现见 pkg/runtimeconfig）。
+type ConfigError = runtimeconfig.ConfigError
+
+// Load 读取配置文件、应用环境变量覆盖并校验。
 func Load(path string) (*conf.Bootstrap, error) {
-	c := config.New(
-		config.WithSource(
-			file.NewSource(path),
-		),
-	)
-	defer c.Close()
-
-	if err := c.Load(); err != nil {
+	bc, err := runtimeconfig.Load(path)
+	if err != nil {
 		return nil, err
 	}
-
-	var bc conf.Bootstrap
-	if err := c.Scan(&bc); err != nil {
+	ApplyEnvOverrides(bc)
+	if err := Validate(bc); err != nil {
 		return nil, err
 	}
-	ApplyEnvOverrides(&bc)
-	if err := Validate(&bc); err != nil {
-		return nil, err
-	}
-	return &bc, nil
+	return bc, nil
 }
 
+// ApplyEnvOverrides 应用环境变量覆盖：监听地址/数据源 + 中间件 + SSE。
 func ApplyEnvOverrides(bc *conf.Bootstrap) {
-	if bc == nil {
-		return
-	}
-	if bc.Server != nil {
-		applyServerEnv(bc.Server)
-	}
-	if bc.Data != nil {
-		applyDataEnv(bc.Data)
-	}
+	runtimeconfig.ApplyEnvOverrides(bc, profile)
+	runtimeconfig.ApplyServerEnvOverrides(bc, profile)
+	runtimeconfig.ApplySSEEnvOverrides(bc, profile)
 }
 
+// IsProduction 判断当前是否生产环境。
+func IsProduction() bool { return runtimeconfig.IsProduction(profile) }
+
+// Validate AI 服务的配置校验策略。
+//
+// 与平台的区别：额外要求 SSE 配置；不强制 HTTP 中间件的 recovery/validate 开关，
+// 也不校验超时与限流器（AI 服务的 HTTP 面较薄，这些约束由平台网关承担）。
 func Validate(bc *conf.Bootstrap) error {
 	if bc == nil {
 		return ConfigError("bootstrap config is required")
@@ -109,7 +114,7 @@ func Validate(bc *conf.Bootstrap) error {
 		if len(key) < 32 || strings.Contains(strings.ToLower(key), "replace-with") {
 			return ConfigError("platform_AI_JWT_KEY must be at least 32 bytes and must not be a placeholder in production")
 		}
-		if unsafeProductionDatabaseSource(bc.Data.Database.Source) {
+		if runtimeconfig.UnsafeProductionDatabaseSource(bc.Data.Database.Source) {
 			return ConfigError("platform_AI_DB_SOURCE must not use root credentials or placeholders in production")
 		}
 		if strings.TrimSpace(bc.Data.Redis.Password) == "" || strings.Contains(strings.ToLower(bc.Data.Redis.Password), "replace-with") {
@@ -134,110 +139,4 @@ func Validate(bc *conf.Bootstrap) error {
 		}
 	}
 	return nil
-}
-
-func unsafeProductionDatabaseSource(source string) bool {
-	source = strings.ToLower(strings.TrimSpace(source))
-	return strings.HasPrefix(source, "root:") ||
-		strings.HasPrefix(source, "root@") ||
-		strings.Contains(source, "replace-with")
-}
-
-func IsProduction() bool {
-	for _, key := range []string{"platform_AI_ENV", "platform_ADMIN_ENV", "DEPLOY_ENV", "APP_ENV"} {
-		switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
-		case "prod", "production":
-			return true
-		}
-	}
-	return false
-}
-
-func applyServerEnv(server *conf.Server) {
-	if server.Sse != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_AI_SSE_ADDR")); v != "" {
-			server.Sse.Addr = v
-		}
-		if v := strings.TrimSpace(os.Getenv("platform_AI_SSE_PATH")); v != "" {
-			server.Sse.Path = v
-		}
-	}
-	if server.Http != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_AI_HTTP_ADDR")); v != "" {
-			server.Http.Addr = v
-		}
-		if v, ok := envBool("platform_AI_ENABLE_SWAGGER"); ok {
-			server.Http.EnableSwagger = v
-		}
-		if v := splitCSV(os.Getenv("platform_AI_CORS_ORIGINS")); len(v) > 0 {
-			if server.Http.Cors == nil {
-				server.Http.Cors = &conf.Server_HTTP_CORS{}
-			}
-			server.Http.Cors.Origins = v
-		}
-		if server.Http.Middleware != nil && server.Http.Middleware.Auth != nil {
-			if v := strings.TrimSpace(os.Getenv("platform_AI_JWT_KEY")); v != "" {
-				server.Http.Middleware.Auth.Key = v
-			}
-		}
-	}
-	if server.Grpc != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_AI_GRPC_ADDR")); v != "" {
-			server.Grpc.Addr = v
-		}
-	}
-}
-
-func applyDataEnv(data *conf.Data) {
-	if data.Database != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_AI_DB_DRIVER")); v != "" {
-			data.Database.Driver = v
-		}
-		if v := strings.TrimSpace(os.Getenv("platform_AI_DB_SOURCE")); v != "" {
-			data.Database.Source = v
-		}
-		if v, ok := envBool("platform_AI_DB_MIGRATE"); ok {
-			data.Database.Migrate = v
-		}
-		if v, ok := envBool("platform_AI_DB_DEBUG"); ok {
-			data.Database.Debug = v
-		}
-	}
-	if data.Redis != nil {
-		if v := strings.TrimSpace(os.Getenv("platform_AI_REDIS_ADDR")); v != "" {
-			data.Redis.Addr = v
-		}
-		if v, ok := os.LookupEnv("platform_AI_REDIS_PASSWORD"); ok {
-			data.Redis.Password = v
-		}
-	}
-}
-
-func splitCSV(raw string) []string {
-	parts := strings.Split(raw, ",")
-	values := make([]string, 0, len(parts))
-	for _, part := range parts {
-		if v := strings.TrimSpace(part); v != "" {
-			values = append(values, v)
-		}
-	}
-	return values
-}
-
-func envBool(key string) (bool, bool) {
-	raw, ok := os.LookupEnv(key)
-	if !ok {
-		return false, false
-	}
-	v, err := strconv.ParseBool(strings.TrimSpace(raw))
-	if err != nil {
-		return false, false
-	}
-	return v, true
-}
-
-type ConfigError string
-
-func (e ConfigError) Error() string {
-	return string(e)
 }
