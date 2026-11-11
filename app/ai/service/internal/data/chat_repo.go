@@ -222,7 +222,7 @@ func (r *chatRepo) CountChats(ctx context.Context, opts ...biz.ListOption) (int3
 		opt(&o)
 	}
 	r.log.Infof("查询对话数量")
-	count, err := r.data.db.Chat.Query().
+	count, err := r.data.DB(ctx).Chat.Query().
 		Select(chat.FieldID).
 		Where(ents.ApplyFilter(o.Filter)).
 		Count(ctx)
@@ -242,7 +242,7 @@ func (r *chatRepo) ListChats(ctx context.Context, opts ...biz.ListOption) ([]*pb
 		opt(&o)
 	}
 	r.log.Infof("查询对话列表，limit=%d offset=%d", o.Limit, o.Offset)
-	pos, err := r.data.db.Chat.Query().
+	pos, err := r.data.DB(ctx).Chat.Query().
 		Select(
 			chat.FieldID,
 			chat.FieldName,
