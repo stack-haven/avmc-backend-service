@@ -74,8 +74,12 @@ jobs:
 
       - name: Run quality gate
         env:
-          # lint-new 的增量基准：PR 用目标分支，push 用 origin/coding/ai
-          LINT_BASE: origin/${{ github.base_ref || 'coding/ai' }}
+          # lint-new 的增量基准：
+          #   PR   → 目标分支（origin/<base_ref>）
+          #   push → 上一个提交（github.event.before）
+          # 为什么 push 不用 origin/<当前分支>：CI 就在该分支上，origin == HEAD，
+          # diff 为空 → lint-new 退化成零检查。
+          LINT_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
         run: make check
 
       - name: Verify generated files
@@ -112,9 +116,10 @@ jobs:
 
       - name: Run coverage
         env:
-          # CI 默认报告模式；workflow_dispatch 触发且开启 strict 才 FAIL_ON_GAP=1
+          # 基线棘轮 + 测量失败 fail-closed 始终生效；
+          # 绝对阈值仅在 workflow_dispatch 开启 strict 时阻断。
           FAIL_ON_GAP: ${{ github.event.inputs.strict_coverage == 'true' && '1' || '0' }}
-        run: ./scripts/check-coverage.sh
+        run: make coverage
 
       - name: Upload coverage summary
         if: always()

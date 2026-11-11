@@ -1,0 +1,14 @@
+# 覆盖率基线（棘轮）：只允许上升，下降超过容差即失败
+# 生成：./scripts/check-coverage.sh --init-baseline
+# 生成代码（ent/gen、api、*.pb.go）不计入分母
+# 更新时间：2026-11-11
+app/platform/service/internal/biz 34.5
+app/platform/service/internal/data 22.2
+app/platform/service/internal/service 9.7
+app/ai/service/internal/biz 0.0
+app/ai/service/internal/data 3.7
+app/evie/service/internal/biz 33.6
+app/evie/service/internal/data 0.0
+pkg/auth 31.1
+pkg/aip/listing 67.2
+pkg/health 88.2

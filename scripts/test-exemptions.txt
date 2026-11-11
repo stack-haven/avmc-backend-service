@@ -1,0 +1,15 @@
+# 单元测试豁免清单（A 案 Phase 5 · 棘轮机制）
+#
+# 用途：`scripts/gen-capability-matrix.py` 读取本文件。被豁免的能力域在矩阵中
+#       标记为「已豁免」而非裸缺口，避免长期红灯导致的告警疲劳。
+#
+# 规则（每条必须写清原因与补测条件，禁止无理由堆积）：
+#   <capability>    <原因>；补测条件：<什么情况下必须补上>
+#
+# 棘轮约束：一旦某能力域补了测试，其豁免条目必须删除，否则 capgen-check 会失败
+#（防止豁免变成永久借口）。
+#
+# 当前能力域清单见 docs/architecture/1-9-技术中台-能力全景.md。
+
+device    # 后端 4 RPC 已实现但无前端入口、无消费方（operation-coverage 亦已 IGNORE）；补测条件：新增「设备管理」页或任一产品开始消费 DeviceService
+webhook   # 8 RPC 已有前端页面与 mock 数据，但缺少针对性单测；补测条件：Webhook 投递重试逻辑被任一产品依赖前
