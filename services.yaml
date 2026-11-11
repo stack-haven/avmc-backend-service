@@ -1,0 +1,85 @@
+# =============================================================================
+# 后端服务清单（L0 根 Makefile 的服务元数据源）
+# =============================================================================
+#
+# 用途：
+#   1. 生成 mk/services.mk —— 根目录的 serve-<svc> / migrate-<svc> / gen-<svc> 等
+#      委托命令（薄壳，实际执行 $(MAKE) -C <path> <target>，不复制实现）
+#   2. 作为端口分配的唯一事实源，避免服务间端口冲突
+#
+# 修改后必须执行：
+#   make gen-servicetargets      # 重新生成 mk/services.mk
+#   make verify-servicetargets   # CI 校验生成物无漂移
+#
+# 字段：
+#   path    相对 backend-service 的服务目录
+#   http / grpc / sse   监听端口（sse 仅 ai 使用）
+#   db      数据库类型与库名（mysql 或 sqlite）
+#   redis   是否依赖 Redis
+#   cmds    该服务提供的独立命令行入口（cmd/<name>）
+#   status  active / frozen / planning
+# =============================================================================
+
+platform:
+  path: app/platform/service
+  http: 8000
+  grpc: 9000
+  db: { driver: mysql, name: platform_system }
+  redis: true
+  cmds: [migrate, mock, policy]
+  status: active
+
+ai:
+  path: app/ai/service
+  http: 8001
+  grpc: 9001
+  sse: 7001
+  db: { driver: mysql, name: platform_ai }
+  redis: true
+  cmds: [migrate]
+  status: active
+
+evie:
+  path: app/evie/service
+  http: 8100
+  grpc: 9100
+  db: { driver: mysql, name: platform_evie }
+  redis: true
+  cmds: [migrate, mock, policy]
+  status: active
+
+edai:
+  path: app/edai/service
+  http: 8200
+  grpc: 9200
+  db: { driver: sqlite }
+  redis: false
+  cmds: [migrate]
+  status: active
+
+# 历史版本服务：🔴 冻结。端口从 8000/9000 改为 8300/9300，
+# 消除与 platform 的冲突（2026-11-11 已确认）。
+#
+# ⚠️ 已知偏差：config.yaml 里的库名仍是 `test`（历史遗留），与下方声明的
+#    `platform_version` 不一致。本服务的 DB 名当前不参与任何生成命令，
+#    故不影响门禁；解冻时须同步修正 config.yaml。
+version:
+  path: app/version/service
+  http: 8300
+  grpc: 9300
+  db: { driver: mysql, name: platform_version }
+  redis: true
+  cmds: []
+  status: frozen
+
+# evie/tool 是独立轻量二进制，不提供 gRPC 之外的平台能力，
+# 其 Makefile 有大量自有命令（serve/demo/cli/docker-*），故只暴露 serve。
+evie-tool:
+  path: app/evie/tool
+  run_target: serve      # 本服务的配置加载方式特殊，用自有 serve 而非 app.mk 的 run
+  http: 8110
+  grpc: 9110
+  db: { driver: none }
+  redis: true
+  cmds: []
+  status: active

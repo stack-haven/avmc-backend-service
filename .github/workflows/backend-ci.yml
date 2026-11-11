@@ -2,12 +2,16 @@ name: Backend CI
 
 on:
   push:
+    # coding/ai 是 origin/HEAD 默认分支。此前只监听 main/master/ark-tech，
+    # 导致默认分支上的 154 个提交从未被执行过任何 CI（见 docs/platform/README.md）。
     branches:
+      - coding/ai
       - main
       - master
       - ark-tech
   pull_request:
     branches:
+      - coding/ai
       - main
       - master
       - ark-tech
@@ -26,6 +30,11 @@ concurrency:
   group: backend-ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # 与 backend-service/Makefile 的 *_VERSION 保持一致
+  BUF_VERSION: "1.64.0"
+  GOLANGCI_LINT_VERSION: "v1.64.8"
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -34,17 +43,39 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          # lint-new 需要基准分支，浅克隆拿不到 origin/coding/ai
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-        cache: true
+          cache: true
 
       - name: Download dependencies
         run: go mod download
 
+      - name: Install buf
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          version: ${{ env.BUF_VERSION }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          # 由 make check 统一调用，这里只负责安装
+          install-only: true
+
+      - name: Install pinned codegen toolchain
+        run: make setup-tools
+
       - name: Run quality gate
+        env:
+          # lint-new 的增量基准：PR 用目标分支，push 用 origin/coding/ai
+          LINT_BASE: origin/${{ github.base_ref || 'coding/ai' }}
         run: make check
 
       - name: Verify generated files

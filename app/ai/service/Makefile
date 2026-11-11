@@ -1,39 +1,10 @@
+# app/ai/service —— L2（仅声明 AI 服务特有配置）
+#
+# 通用命令由 L1 `backend-service/app.mk` 提供。
+# 本次改动顺带修复：原 `doc` 指向不存在的 `platform/ai/v1/buf.openapi.gen.yaml`，
+# 现由 app.mk 的 `openapi` 按 `ai/service/v1/buf.openapi.gen.yaml` 生成。
+
 include ../../../app.mk
 
-# generate OpenAPI v3 doc
-.PHONY: doc
-doc:
-	@cd ../../../proto && \
-	buf generate --template platform/ai/v1/buf.openapi.gen.yaml
-
-# generate config
-.PHONY: config
-config:
-	@cd ../../../proto && \
-	buf generate --template ../app/ai/service/buf.gen.yaml
-	rm -rf internal/conf && \
-	mv proto/common/conf internal && \
-	rm -rf proto
-
-# generate protobuf ts code
-.PHONY: ts
-ts:
-	@cd ../../../proto && \
-	buf generate --template ../app/ai/service/buf.typescript.gen.yaml
-
-.PHONY: migrate
-migrate:
-	@go run ./cmd/migrate -conf ./configs
-
-.PHONY: demo
-demo:
-	@echo "demo"
-
-.PHONY: newent
-newent:
-	@cd internal/data && \
-	echo "new ent" && \
-	echo "please input ent name:" && \
-	read name; \
-	printf "ent name: %s\n" "$$name" && \
-	go run -mod=mod entgo.io/ent/cmd/ent new "$$name"
+# kill 需要释放的端口（ai: HTTP 7001 / 内部 8001 / gRPC 9001）
+PORTS := 7001 8001 9001

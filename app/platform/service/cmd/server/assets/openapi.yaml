@@ -3,10 +3,10 @@
 
 openapi: 3.0.3
 info:
-    title: platform Admin Auth API
-    description: platform 后台管理脚手架系统-认证服务
+    title: Platform Admin Auth API
+    description: Platform 后台管理脚手架系统-认证服务
     contact:
-        name: platform Admin架构
+        name: Platform Admin架构
         url: https://github.com/grpc-ecosystem/grpc-gateway
         email: 737043980@qq.com
     license:
@@ -17,7 +17,7 @@ servers:
     - url: https://api.example.com/v1
       description: Production server
 paths:
-    /admin/v1/async-tasks:
+    /platform/v1/async-tasks:
         get:
             tags:
                 - AsyncTaskService
@@ -64,7 +64,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListAsyncTasksResponse'
-    /admin/v1/async-tasks/{id}:
+    /platform/v1/async-tasks/{id}:
         get:
             tags:
                 - AsyncTaskService
@@ -83,7 +83,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GetAsyncTaskResponse'
-    /admin/v1/async-tasks/{id}:cancel:
+    /platform/v1/async-tasks/{id}:cancel:
         post:
             tags:
                 - AsyncTaskService
@@ -108,7 +108,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CancelAsyncTaskResponse'
-    /admin/v1/async-tasks/{id}:retry:
+    /platform/v1/async-tasks/{id}:retry:
         post:
             tags:
                 - AsyncTaskService
@@ -133,7 +133,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/RetryAsyncTaskResponse'
-    /admin/v1/async-tasks:stats:
+    /platform/v1/async-tasks:stats:
         get:
             tags:
                 - AsyncTaskService
@@ -155,7 +155,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GetAsyncTaskStatsResponse'
-    /admin/v1/auth/codes:
+    /platform/v1/auth/codes:
         get:
             tags:
                 - AuthService
@@ -172,7 +172,7 @@ paths:
                                 $ref: '#/components/schemas/CodesResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/auth/login/email:
+    /platform/v1/auth/login-email:
         post:
             tags:
                 - AuthService
@@ -193,7 +193,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LoginResponse'
-    /admin/v1/auth/login/password:
+    /platform/v1/auth/login-password:
         post:
             tags:
                 - AuthService
@@ -214,7 +214,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LoginResponse'
-    /admin/v1/auth/login/phoneCode:
+    /platform/v1/auth/login-phoneCode:
         post:
             tags:
                 - AuthService
@@ -235,7 +235,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LoginResponse'
-    /admin/v1/auth/login/username:
+    /platform/v1/auth/login-username:
         post:
             tags:
                 - AuthService
@@ -256,7 +256,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LoginResponse'
-    /admin/v1/auth/logout:
+    /platform/v1/auth/logout:
         post:
             tags:
                 - AuthService
@@ -279,7 +279,7 @@ paths:
                                 $ref: '#/components/schemas/LogoutResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/auth/menus:
+    /platform/v1/auth/menus:
         get:
             tags:
                 - AuthService
@@ -296,7 +296,7 @@ paths:
                                 $ref: '#/components/schemas/MenusResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/auth/profile:
+    /platform/v1/auth/profile:
         get:
             tags:
                 - AuthService
@@ -313,7 +313,7 @@ paths:
                                 $ref: '#/components/schemas/ProfileResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/auth/refresh-token:
+    /platform/v1/auth/refresh-token:
         post:
             tags:
                 - AuthService
@@ -336,7 +336,28 @@ paths:
                                 $ref: '#/components/schemas/RefreshTokenResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/auth/vben/profile:
+    /platform/v1/auth/register:password:
+        post:
+            tags:
+                - AuthService
+                - 认证服务
+            summary: 用户密码注册
+            description: 通过用户名和密码注册认证服务
+            operationId: AuthService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RegisterResponse'
+    /platform/v1/auth/vben-profile:
         get:
             tags:
                 - AuthService
@@ -353,149 +374,7 @@ paths:
                                 $ref: '#/components/schemas/VbenProfileResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/current-tenant/capabilities:
-        get:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 获取当前登录租户运行时能力配置
-            description: 聚合当前租户绑定套餐及版本中的接口能力、功能开关和资源额度
-            operationId: TenantPermissionService_GetCurrentTenantCapabilities
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetCurrentTenantCapabilitiesResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/current-tenant/effective-menus:
-        get:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 获取当前登录租户最终有效菜单树
-            description: 获取当前登录租户最终有效菜单树
-            operationId: TenantPermissionService_GetCurrentTenantEffectiveMenus
-            parameters:
-                - name: parentId
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetTenantEffectiveMenusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/current-tenant/resource-quotas:
-        get:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 查询当前租户资源额度
-            description: 返回当前租户套餐额度定义和已使用量
-            operationId: TenantPermissionService_ListCurrentTenantResourceQuotas
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListCurrentTenantResourceQuotasResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/current-tenant/resource-quotas/{resourceKey}:check:
-        get:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 检查当前租户资源额度
-            description: 检查本次资源占用是否会超过当前租户套餐额度
-            operationId: TenantPermissionService_CheckCurrentTenantResourceQuota
-            parameters:
-                - name: resourceKey
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: amount
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/CheckCurrentTenantResourceQuotaResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/current-tenant/resource-quotas/{resourceKey}:consume:
-        post:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 占用当前租户资源额度
-            description: 原子检查并占用当前租户资源额度，超额时拒绝
-            operationId: TenantPermissionService_ConsumeCurrentTenantResourceQuota
-            parameters:
-                - name: resourceKey
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ConsumeCurrentTenantResourceQuotaRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ConsumeCurrentTenantResourceQuotaResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/current-tenant/resource-quotas/{resourceKey}:release:
-        post:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 释放当前租户资源额度
-            description: 释放当前租户已占用资源额度，释放后使用量不会小于0
-            operationId: TenantPermissionService_ReleaseCurrentTenantResourceQuota
-            parameters:
-                - name: resourceKey
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/ReleaseCurrentTenantResourceQuotaRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ReleaseCurrentTenantResourceQuotaResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/depts:
+    /platform/v1/depts:
         get:
             tags:
                 - DeptService
@@ -612,35 +491,7 @@ paths:
                                 $ref: '#/components/schemas/CreateDeptResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/depts/status-update/{id}:
-        put:
-            tags:
-                - DeptService
-                - 部门管理服务
-            summary: 更新部门状态
-            description: 更新部门状态
-            operationId: DeptService_UpdateDeptByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json: {}
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateDeptByStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/depts/tree:
+    /platform/v1/depts/list-tree:
         get:
             tags:
                 - DeptService
@@ -663,31 +514,7 @@ paths:
                                 $ref: '#/components/schemas/ListDeptsTreeResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/depts/tree/{parentId}:
-        get:
-            tags:
-                - DeptService
-                - 部门管理服务
-            summary: 获取部门树
-            description: 获取部门树
-            operationId: DeptService_ListDeptsTree
-            parameters:
-                - name: parentId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListDeptsTreeResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/depts/{id}:
+    /platform/v1/depts/{id}:
         get:
             tags:
                 - DeptService
@@ -779,7 +606,105 @@ paths:
                                 $ref: '#/components/schemas/DeleteDeptResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/dictionaries:
+    /platform/v1/depts/{id}:delete-impact:
+        get:
+            tags:
+                - DeptService
+            description: 获取删除部门前的影响范围
+            operationId: DeptService_GetDeptDeleteImpact
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetDeptDeleteImpactResponse'
+    /platform/v1/depts/{id}:status-update:
+        post:
+            tags:
+                - DeptService
+                - 部门管理服务
+            summary: 更新部门状态
+            description: 更新部门状态
+            operationId: DeptService_UpdateDeptByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateDeptByStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/depts/{id}:transfer-and-delete:
+        post:
+            tags:
+                - DeptService
+            description: 转移部门人员并删除部门
+            operationId: DeptService_TransferAndDeleteDept
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TransferAndDeleteDeptRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TransferAndDeleteDeptResponse'
+    /platform/v1/depts/{parentId}:list-tree:
+        get:
+            tags:
+                - DeptService
+                - 部门管理服务
+            summary: 获取部门树
+            description: 获取部门树
+            operationId: DeptService_ListDeptsTree
+            parameters:
+                - name: parentId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListDeptsTreeResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/dictionaries:
         get:
             tags:
                 - DictionaryService
@@ -835,7 +760,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/DictionaryType'
-    /admin/v1/dictionaries/{id}:
+    /platform/v1/dictionaries/{id}:
         get:
             tags:
                 - DictionaryService
@@ -893,7 +818,7 @@ paths:
                 "200":
                     description: OK
                     content: {}
-    /admin/v1/dictionary-items:
+    /platform/v1/dictionary-items:
         get:
             tags:
                 - DictionaryService
@@ -937,7 +862,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/DictionaryItem'
-    /admin/v1/dictionary-items/{id}:
+    /platform/v1/dictionary-items/{id}:
         put:
             tags:
                 - DictionaryService
@@ -977,7 +902,7 @@ paths:
                 "200":
                     description: OK
                     content: {}
-    /admin/v1/files:
+    /platform/v1/files:
         get:
             tags:
                 - FileCenterService
@@ -1033,7 +958,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListFileObjectsResponse'
-    /admin/v1/files/upload-sessions:
+    /platform/v1/files/upload-sessions:
         post:
             tags:
                 - FileCenterService
@@ -1051,7 +976,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CreateFileUploadSessionResponse'
-    /admin/v1/files/{fileId}/access-logs:
+    /platform/v1/files/{fileId}/access-logs:
         get:
             tags:
                 - FileCenterService
@@ -1104,7 +1029,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListFileAccessLogsResponse'
-    /admin/v1/files/{id}:
+    /platform/v1/files/{id}:
         get:
             tags:
                 - FileCenterService
@@ -1123,6 +1048,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/FileObject'
+        put:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_UpdateFileObject
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateFileObjectRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateFileObjectResponse'
         delete:
             tags:
                 - FileCenterService
@@ -1145,7 +1094,100 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/DeleteFileObjectResponse'
-    /admin/v1/files/{id}:confirm:
+    /platform/v1/files/{id}/parts:
+        get:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_ListFileParts
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListFilePartsResponse'
+        put:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_UploadFilePart
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UploadFilePartRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UploadFilePartResponse'
+    /platform/v1/files/{id}:abort:
+        post:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_AbortFileUpload
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AbortFileUploadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AbortFileUploadResponse'
+    /platform/v1/files/{id}:complete:
+        post:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_CompleteFileUpload
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CompleteFileUploadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CompleteFileUploadResponse'
+    /platform/v1/files/{id}:confirm:
         post:
             tags:
                 - FileCenterService
@@ -1170,7 +1212,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ConfirmFileUploadResponse'
-    /admin/v1/files/{id}:content:
+    /platform/v1/files/{id}:content:
         post:
             tags:
                 - FileCenterService
@@ -1195,7 +1237,26 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/UploadFileContentResponse'
-    /admin/v1/files/{id}:download-url:
+    /platform/v1/files/{id}:download:
+        get:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_DownloadFileContent
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DownloadFileContentResponse'
+    /platform/v1/files/{id}:download-url:
         get:
             tags:
                 - FileCenterService
@@ -1219,7 +1280,32 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/PresignFileDownloadResponse'
-    /admin/v1/login-logs:
+    /platform/v1/files/{id}:replace:
+        post:
+            tags:
+                - FileCenterService
+            operationId: FileCenterService_ReplaceFileContent
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ReplaceFileContentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ReplaceFileContentResponse'
+    /platform/v1/login-logs:
         get:
             tags:
                 - LoginLogService
@@ -1262,7 +1348,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListLoginLogsResponse'
-    /admin/v1/login-logs/{id}:
+    /platform/v1/login-logs/{id}:
         get:
             tags:
                 - LoginLogService
@@ -1280,281 +1366,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/LoginLog'
-    /admin/v1/menu-permission-groups:
-        get:
-            tags:
-                - MenuPermissionGroupService
-                - 菜单权限组服务
-            summary: 获取菜单权限组列表
-            description: 获取菜单权限组列表
-            operationId: MenuPermissionGroupService_ListMenuPermissionGroups
-            parameters:
-                - name: pageToken
-                  in: query
-                  schema:
-                    type: string
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: nopaging
-                  in: query
-                  schema:
-                    type: boolean
-                - name: name
-                  in: query
-                  schema:
-                    type: string
-                - name: code
-                  in: query
-                  schema:
-                    type: string
-                - name: status
-                  in: query
-                  schema:
-                    enum:
-                        - STATUS_UNSPECIFIED
-                        - STATUS_ENABLED
-                        - STATUS_DISABLED
-                    type: string
-                    format: enum
-                - name: filter
-                  in: query
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  schema:
-                    type: string
-                - name: skip
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListMenuPermissionGroupsResponse'
-            security:
-                - BearerAuth: []
-        post:
-            tags:
-                - MenuPermissionGroupService
-                - 菜单权限组服务
-            summary: 创建菜单权限组
-            description: 创建菜单权限组
-            operationId: MenuPermissionGroupService_CreateMenuPermissionGroup
-            parameters:
-                - name: operatorId
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/MenuPermissionGroup'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/CreateMenuPermissionGroupResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menu-permission-groups/status-update/{id}:
-        put:
-            tags:
-                - MenuPermissionGroupService
-                - 菜单权限组服务
-            summary: 更新菜单权限组状态
-            description: 更新菜单权限组状态
-            operationId: MenuPermissionGroupService_UpdateMenuPermissionGroupStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateMenuPermissionGroupStatusRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateMenuPermissionGroupStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menu-permission-groups/{groupId}/versions:
-        get:
-            tags:
-                - MenuPermissionGroupService
-            operationId: MenuPermissionGroupService_ListMenuPermissionGroupVersions
-            parameters:
-                - name: groupId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListMenuPermissionGroupVersionsResponse'
-    /admin/v1/menu-permission-groups/{groupId}/versions:publish:
-        post:
-            tags:
-                - MenuPermissionGroupService
-            operationId: MenuPermissionGroupService_PublishMenuPermissionGroupVersion
-            parameters:
-                - name: groupId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/PublishMenuPermissionGroupVersionRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/PublishMenuPermissionGroupVersionResponse'
-    /admin/v1/menu-permission-groups/{groupId}/versions:rollback:
-        post:
-            tags:
-                - MenuPermissionGroupService
-            operationId: MenuPermissionGroupService_RollbackMenuPermissionGroupVersion
-            parameters:
-                - name: groupId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/RollbackMenuPermissionGroupVersionRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/RollbackMenuPermissionGroupVersionResponse'
-    /admin/v1/menu-permission-groups/{id}:
-        get:
-            tags:
-                - MenuPermissionGroupService
-                - 菜单权限组服务
-            summary: 获取菜单权限组
-            description: 获取菜单权限组
-            operationId: MenuPermissionGroupService_GetMenuPermissionGroup
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/MenuPermissionGroup'
-            security:
-                - BearerAuth: []
-        put:
-            tags:
-                - MenuPermissionGroupService
-                - 菜单权限组服务
-            summary: 更新菜单权限组
-            description: 更新菜单权限组
-            operationId: MenuPermissionGroupService_UpdateMenuPermissionGroup
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: operatorId
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/MenuPermissionGroup'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateMenuPermissionGroupResponse'
-            security:
-                - BearerAuth: []
-        delete:
-            tags:
-                - MenuPermissionGroupService
-                - 菜单权限组服务
-            summary: 删除菜单权限组
-            description: 删除菜单权限组
-            operationId: MenuPermissionGroupService_DeleteMenuPermissionGroup
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: operatorId
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/DeleteMenuPermissionGroupResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menus:
+    /platform/v1/menus:
         get:
             tags:
                 - MenuService
@@ -1666,7 +1478,7 @@ paths:
                                 $ref: '#/components/schemas/CreateMenuResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/all:
+    /platform/v1/menus/list-all:
         get:
             tags:
                 - MenuService
@@ -1683,7 +1495,30 @@ paths:
                                 $ref: '#/components/schemas/ListMenusResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/name-exists:
+    /platform/v1/menus/list-tree:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取菜单树
+            description: 获取菜单树
+            operationId: MenuService_ListMenusTree
+            parameters:
+                - name: parentId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMenusTreeResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/menus/name-exists:
         post:
             tags:
                 - MenuService
@@ -1706,35 +1541,7 @@ paths:
                                 $ref: '#/components/schemas/ExistMenuByNameResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/name-exists/{id}:
-        get:
-            tags:
-                - MenuService
-                - 菜单管理服务
-            summary: 判断菜单名是否存在
-            description: 判断菜单名是否存在
-            operationId: MenuService_ExistMenuByName
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: name
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ExistMenuByNameResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menus/path-exists:
+    /platform/v1/menus/path-exists:
         post:
             tags:
                 - MenuService
@@ -1757,110 +1564,7 @@ paths:
                                 $ref: '#/components/schemas/ExistMenuByPathResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/menus/path-exists/{id}:
-        get:
-            tags:
-                - MenuService
-                - 菜单管理服务
-            summary: 判断菜单路径是否存在
-            description: 判断菜单路径是否存在
-            operationId: MenuService_ExistMenuByPath
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: path
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ExistMenuByPathResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menus/status-update/{id}:
-        put:
-            tags:
-                - MenuService
-                - 菜单管理服务
-            summary: 更新菜单状态
-            description: 更新菜单状态
-            operationId: MenuService_UpdateMenuByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json: {}
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateMenuByStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menus/tree:
-        get:
-            tags:
-                - MenuService
-                - 菜单管理服务
-            summary: 获取菜单树
-            description: 获取菜单树
-            operationId: MenuService_ListMenusTree
-            parameters:
-                - name: parentId
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListMenusTreeResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menus/tree/{parentId}:
-        get:
-            tags:
-                - MenuService
-                - 菜单管理服务
-            summary: 获取菜单树
-            description: 获取菜单树
-            operationId: MenuService_ListMenusTree
-            parameters:
-                - name: parentId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/ListMenusTreeResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/menus/{id}:
+    /platform/v1/menus/{id}:
         get:
             tags:
                 - MenuService
@@ -1951,7 +1655,162 @@ paths:
                                 $ref: '#/components/schemas/DeleteMenuResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/my/notifications:
+    /platform/v1/menus/{id}:name-exists:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 判断菜单名是否存在
+            description: 判断菜单名是否存在
+            operationId: MenuService_ExistMenuByName
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByNameResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/menus/{id}:path-exists:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 判断菜单路径是否存在
+            description: 判断菜单路径是否存在
+            operationId: MenuService_ExistMenuByPath
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: path
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ExistMenuByPathResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/menus/{id}:status-update:
+        post:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 更新菜单状态
+            description: 更新菜单状态
+            operationId: MenuService_UpdateMenuByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateMenuByStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/menus/{parentId}:list-tree:
+        get:
+            tags:
+                - MenuService
+                - 菜单管理服务
+            summary: 获取菜单树
+            description: 获取菜单树
+            operationId: MenuService_ListMenusTree
+            parameters:
+                - name: parentId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMenusTreeResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/my/devices:
+        get:
+            tags:
+                - DeviceService
+            operationId: DeviceService_ListMyDevices
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMyDevicesResponse'
+        post:
+            tags:
+                - DeviceService
+            operationId: DeviceService_RegisterDevice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RegisterDeviceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Device'
+    /platform/v1/my/devices/{deviceToken}:
+        delete:
+            tags:
+                - DeviceService
+            operationId: DeviceService_UnregisterDevice
+            parameters:
+                - name: deviceToken
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UnregisterDeviceResponse'
+    /platform/v1/my/notifications:
         get:
             tags:
                 - NotificationService
@@ -2003,7 +1862,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListNotificationMessagesResponse'
-    /admin/v1/my/notifications/{id}:read:
+    /platform/v1/my/notifications/{id}:read:
         post:
             tags:
                 - NotificationService
@@ -2025,7 +1884,7 @@ paths:
                 "200":
                     description: OK
                     content: {}
-    /admin/v1/my/notifications:read:
+    /platform/v1/my/notifications:read:
         post:
             tags:
                 - NotificationService
@@ -2040,7 +1899,7 @@ paths:
                 "200":
                     description: OK
                     content: {}
-    /admin/v1/my/notifications:unread-count:
+    /platform/v1/my/notifications:unread-count:
         get:
             tags:
                 - NotificationService
@@ -2052,7 +1911,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CountMyUnreadNotificationsResponse'
-    /admin/v1/notification-messages:
+    /platform/v1/notification-messages:
         get:
             tags:
                 - NotificationService
@@ -2104,7 +1963,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListNotificationMessagesResponse'
-    /admin/v1/notification-messages/{id}:
+    /platform/v1/notification-messages/{id}:
         get:
             tags:
                 - NotificationService
@@ -2123,7 +1982,174 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/NotificationMessage'
-    /admin/v1/notification-templates:
+    /platform/v1/notification-providers:
+        get:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_ListNotificationProviders
+            parameters:
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: code
+                  in: query
+                  schema:
+                    type: string
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: channel
+                  in: query
+                  schema:
+                    type: string
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListNotificationProvidersResponse'
+        post:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_CreateNotificationProvider
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateNotificationProviderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateNotificationProviderResponse'
+    /platform/v1/notification-providers/{id}:
+        get:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_GetNotificationProvider
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/NotificationProvider'
+        put:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_UpdateNotificationProvider
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateNotificationProviderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateNotificationProviderResponse'
+        delete:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_DeleteNotificationProvider
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteNotificationProviderResponse'
+    /platform/v1/notification-providers/{id}:set-default:
+        post:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_SetDefaultNotificationProvider
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SetDefaultNotificationProviderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SetDefaultNotificationProviderResponse'
+    /platform/v1/notification-providers/{id}:test:
+        post:
+            tags:
+                - NotificationProviderService
+            operationId: NotificationProviderService_TestNotificationProvider
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TestNotificationProviderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TestNotificationProviderResponse'
+    /platform/v1/notification-templates:
         get:
             tags:
                 - NotificationService
@@ -2186,7 +2212,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/NotificationTemplate'
-    /admin/v1/notification-templates/{id}:
+    /platform/v1/notification-templates/{id}:
         get:
             tags:
                 - NotificationService
@@ -2244,7 +2270,25 @@ paths:
                 "200":
                     description: OK
                     content: {}
-    /admin/v1/notifications:send-in-app:
+    /platform/v1/notifications:send:
+        post:
+            tags:
+                - NotificationService
+            operationId: NotificationService_SendNotification
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SendNotificationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SendNotificationResponse'
+    /platform/v1/notifications:send-in-app:
         post:
             tags:
                 - NotificationService
@@ -2262,10 +2306,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/SendInAppNotificationResponse'
-    /admin/v1/operation-logs:
+    /platform/v1/operation-logs:
         get:
             tags:
                 - OperationLogService
+                - 操作日志服务
+            summary: 分页查询操作日志
+            description: 分页查询操作日志列表
             operationId: OperationLogService_ListOperationLogs
             parameters:
                 - name: pageToken
@@ -2313,10 +2360,37 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListOperationLogsResponse'
-    /admin/v1/operation-logs/{id}:
+            security:
+                - BearerAuth: []
+        post:
+            tags:
+                - OperationLogService
+                - 操作日志服务
+            summary: 创建操作日志
+            description: 记录一条操作日志（供内部服务调用）
+            operationId: OperationLogService_CreateOperationLog
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OperationLog'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateOperationLogResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/operation-logs/{id}:
         get:
             tags:
                 - OperationLogService
+                - 操作日志服务
+            summary: 获取操作日志详情
+            description: 获取指定操作日志的详细信息
             operationId: OperationLogService_GetOperationLog
             parameters:
                 - name: id
@@ -2331,7 +2405,9 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/OperationLog'
-    /admin/v1/parameters/current:
+            security:
+                - BearerAuth: []
+    /platform/v1/parameters/current:
         get:
             tags:
                 - ParameterService
@@ -2348,7 +2424,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListCurrentTenantParametersResponse'
-    /admin/v1/parameters/current/{key}:
+    /platform/v1/parameters/current/{key}:
         put:
             tags:
                 - ParameterService
@@ -2389,7 +2465,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ResetCurrentTenantParameterResponse'
-    /admin/v1/parameters/definitions:
+    /platform/v1/parameters/definitions:
         get:
             tags:
                 - ParameterService
@@ -2456,7 +2532,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CreateParameterDefinitionResponse'
-    /admin/v1/parameters/definitions/{id}:
+    /platform/v1/parameters/definitions/{id}:
         get:
             tags:
                 - ParameterService
@@ -2517,7 +2593,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/DeleteParameterDefinitionResponse'
-    /admin/v1/posts:
+    /platform/v1/posts:
         get:
             tags:
                 - PostService
@@ -2634,35 +2710,7 @@ paths:
                                 $ref: '#/components/schemas/CreatePostResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/posts/status-update/{id}:
-        put:
-            tags:
-                - PostService
-                - 岗位管理服务
-            summary: 更新岗位状态
-            description: 更新岗位状态
-            operationId: PostService_UpdatePostByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json: {}
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdatePostByStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/posts/{id}:
+    /platform/v1/posts/{id}:
         get:
             tags:
                 - PostService
@@ -2754,7 +2802,35 @@ paths:
                                 $ref: '#/components/schemas/DeletePostResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/projects:
+    /platform/v1/posts/{id}:status-update:
+        post:
+            tags:
+                - PostService
+                - 岗位管理服务
+            summary: 更新岗位状态
+            description: 更新岗位状态
+            operationId: PostService_UpdatePostByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdatePostByStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/projects:
         get:
             tags:
                 - ProjectService
@@ -2848,35 +2924,7 @@ paths:
                                 $ref: '#/components/schemas/CreateProjectResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/projects/status-update/{id}:
-        put:
-            tags:
-                - ProjectService
-                - 项目管理服务
-            summary: 更新项目状态
-            description: 更新项目状态
-            operationId: ProjectService_UpdateProjectByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json: {}
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateProjectByStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/projects/{id}:
+    /platform/v1/projects/{id}:
         get:
             tags:
                 - ProjectService
@@ -2968,7 +3016,35 @@ paths:
                                 $ref: '#/components/schemas/DeleteProjectResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/roles:
+    /platform/v1/projects/{id}:status-update:
+        post:
+            tags:
+                - ProjectService
+                - 项目管理服务
+            summary: 更新项目状态
+            description: 更新项目状态
+            operationId: ProjectService_UpdateProjectByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateProjectByStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/roles:
         get:
             tags:
                 - RoleService
@@ -3094,7 +3170,7 @@ paths:
                                 $ref: '#/components/schemas/CreateRoleResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/roles/name-exists:
+    /platform/v1/roles/name-exists:
         post:
             tags:
                 - RoleService
@@ -3117,7 +3193,7 @@ paths:
                                 $ref: '#/components/schemas/ExistRoleByNameResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/roles/name-exists/{id}:
+    /platform/v1/roles/name-exists/{id}:
         get:
             tags:
                 - RoleService
@@ -3145,37 +3221,24 @@ paths:
                                 $ref: '#/components/schemas/ExistRoleByNameResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/roles/status-update/{id}:
-        put:
+    /platform/v1/roles/simple:
+        get:
             tags:
                 - RoleService
                 - 角色管理服务
-            summary: 更新角色状态
-            description: 更新角色状态
-            operationId: RoleService_UpdateRoleByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateRoleByStatusRequest'
-                required: true
+            summary: 获取角色简单列表
+            description: 获取角色简单列表，用于用户角色配置、筛选项和绑定选择等轻量场景
+            operationId: RoleService_ListRoleSimple
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/UpdateRoleByStatusResponse'
+                                $ref: '#/components/schemas/ListRoleSimpleResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/roles/{id}:
+    /platform/v1/roles/{id}:
         get:
             tags:
                 - RoleService
@@ -3256,7 +3319,37 @@ paths:
                                 $ref: '#/components/schemas/DeleteRoleResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/sessions:
+    /platform/v1/roles/{id}:status-update:
+        post:
+            tags:
+                - RoleService
+                - 角色管理服务
+            summary: 更新角色状态
+            description: 更新角色状态
+            operationId: RoleService_UpdateRoleByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateRoleByStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateRoleByStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/sessions:
         get:
             tags:
                 - SessionService
@@ -3291,7 +3384,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListSessionsResponse'
-    /admin/v1/sessions/mine:
+    /platform/v1/sessions/mine:
         get:
             tags:
                 - SessionService
@@ -3303,7 +3396,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListMySessionsResponse'
-    /admin/v1/sessions/{id}:
+    /platform/v1/sessions/{id}:
         delete:
             tags:
                 - SessionService
@@ -3321,7 +3414,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/RevokeSessionResponse'
-    /admin/v1/storage-providers:
+    /platform/v1/storage-providers:
         get:
             tags:
                 - StorageProviderService
@@ -3385,7 +3478,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/CreateStorageProviderResponse'
-    /admin/v1/storage-providers/{id}:
+    /platform/v1/storage-providers/{id}:
         get:
             tags:
                 - StorageProviderService
@@ -3446,7 +3539,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/DeleteStorageProviderResponse'
-    /admin/v1/storage-providers/{id}:set-default:
+    /platform/v1/storage-providers/{id}:set-default:
         post:
             tags:
                 - StorageProviderService
@@ -3471,7 +3564,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/SetDefaultStorageProviderResponse'
-    /admin/v1/storage-providers:test:
+    /platform/v1/storage-providers:test:
         post:
             tags:
                 - StorageProviderService
@@ -3489,14 +3582,14 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/TestStorageProviderResponse'
-    /admin/v1/tenants:
+    /platform/v1/tenant-menu-permission-groups:
         get:
             tags:
-                - TenantService
-                - 租户管理服务
-            summary: 获取租户列表
-            description: 获取租户列表
-            operationId: TenantService_ListTenants
+                - TenantMenuPermissionGroupService
+                - 菜单权限组服务
+            summary: 获取菜单权限组列表
+            description: 获取菜单权限组列表
+            operationId: TenantMenuPermissionGroupService_ListTenantMenuPermissionGroups
             parameters:
                 - name: pageToken
                   in: query
@@ -3547,6 +3640,271 @@ paths:
                     content:
                         application/json:
                             schema:
+                                $ref: '#/components/schemas/ListTenantMenuPermissionGroupsResponse'
+            security:
+                - BearerAuth: []
+        post:
+            tags:
+                - TenantMenuPermissionGroupService
+                - 菜单权限组服务
+            summary: 创建菜单权限组
+            description: 创建菜单权限组
+            operationId: TenantMenuPermissionGroupService_CreateTenantMenuPermissionGroup
+            parameters:
+                - name: operatorId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TenantMenuPermissionGroup'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateTenantMenuPermissionGroupResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/tenant-menu-permission-groups/{groupId}/versions:
+        get:
+            tags:
+                - TenantMenuPermissionGroupService
+            operationId: TenantMenuPermissionGroupService_ListTenantMenuPermissionGroupVersions
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListTenantMenuPermissionGroupVersionsResponse'
+    /platform/v1/tenant-menu-permission-groups/{groupId}/versions:publish:
+        post:
+            tags:
+                - TenantMenuPermissionGroupService
+            operationId: TenantMenuPermissionGroupService_PublishTenantMenuPermissionGroupVersion
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PublishTenantMenuPermissionGroupVersionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PublishTenantMenuPermissionGroupVersionResponse'
+    /platform/v1/tenant-menu-permission-groups/{groupId}/versions:rollback:
+        post:
+            tags:
+                - TenantMenuPermissionGroupService
+            operationId: TenantMenuPermissionGroupService_RollbackTenantMenuPermissionGroupVersion
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RollbackTenantMenuPermissionGroupVersionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RollbackTenantMenuPermissionGroupVersionResponse'
+    /platform/v1/tenant-menu-permission-groups/{id}:
+        get:
+            tags:
+                - TenantMenuPermissionGroupService
+                - 菜单权限组服务
+            summary: 获取菜单权限组
+            description: 获取菜单权限组
+            operationId: TenantMenuPermissionGroupService_GetTenantMenuPermissionGroup
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TenantMenuPermissionGroup'
+            security:
+                - BearerAuth: []
+        put:
+            tags:
+                - TenantMenuPermissionGroupService
+                - 菜单权限组服务
+            summary: 更新菜单权限组
+            description: 更新菜单权限组
+            operationId: TenantMenuPermissionGroupService_UpdateTenantMenuPermissionGroup
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: operatorId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TenantMenuPermissionGroup'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateTenantMenuPermissionGroupResponse'
+            security:
+                - BearerAuth: []
+        delete:
+            tags:
+                - TenantMenuPermissionGroupService
+                - 菜单权限组服务
+            summary: 删除菜单权限组
+            description: 删除菜单权限组
+            operationId: TenantMenuPermissionGroupService_DeleteTenantMenuPermissionGroup
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: operatorId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteTenantMenuPermissionGroupResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/tenant-menu-permission-groups/{id}:status-update:
+        post:
+            tags:
+                - TenantMenuPermissionGroupService
+                - 菜单权限组服务
+            summary: 更新菜单权限组状态
+            description: 更新菜单权限组状态
+            operationId: TenantMenuPermissionGroupService_UpdateTenantMenuPermissionGroupStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateTenantMenuPermissionGroupStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateTenantMenuPermissionGroupStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/tenants:
+        get:
+            tags:
+                - TenantService
+                - 租户管理服务
+            summary: 获取租户列表
+            description: 获取租户列表
+            operationId: TenantService_ListTenants
+            parameters:
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: nopaging
+                  in: query
+                  schema:
+                    type: boolean
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: code
+                  in: query
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  schema:
+                    type: string
+                - name: orderBy
+                  in: query
+                  schema:
+                    type: string
+                - name: skip
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
                                 $ref: '#/components/schemas/ListTenantsResponse'
             security:
                 - BearerAuth: []
@@ -3555,7 +3913,7 @@ paths:
                 - TenantService
                 - 租户管理服务
             summary: 创建租户
-            description: 创建租户
+            description: 原子开通：创建租户+绑定套餐+创建根部门+创建管理员
             operationId: TenantService_CreateTenant
             requestBody:
                 content:
@@ -3572,48 +3930,42 @@ paths:
                                 $ref: '#/components/schemas/CreateTenantResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/tenants/status-update/{id}:
-        put:
+    /platform/v1/tenants/simples:
+        get:
             tags:
                 - TenantService
                 - 租户管理服务
-            summary: 更新租户状态
-            description: 更新租户状态
-            operationId: TenantService_UpdateTenantStatus
+            summary: 获取租户简易列表
+            description: 获取租户简易列表（公开接口，无需登录，用于登录页租户搜索）
+            operationId: TenantService_ListTenantSimples
             parameters:
-                - name: id
-                  in: path
-                  required: true
+                - name: name
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
                   schema:
                     type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateTenantStatusRequest'
-                required: true
+                    format: int32
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/UpdateTenantStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/tenants/{id}:
+                                $ref: '#/components/schemas/ListTenantSimplesResponse'
+    /platform/v1/tenants/{id}:
         get:
             tags:
                 - TenantService
                 - 租户管理服务
             summary: 获取租户
-            description: 获取租户
+            description: 获取租户详情
             operationId: TenantService_GetTenant
             parameters:
                 - name: id
                   in: path
-                  description: 租户ID
                   required: true
                   schema:
                     type: integer
@@ -3632,7 +3984,7 @@ paths:
                 - TenantService
                 - 租户管理服务
             summary: 更新租户
-            description: 更新租户
+            description: 更新租户基本信息
             operationId: TenantService_UpdateTenant
             parameters:
                 - name: id
@@ -3643,7 +3995,6 @@ paths:
                     format: uint32
                 - name: operatorId
                   in: query
-                  description: 操作人ID
                   schema:
                     type: integer
                     format: uint32
@@ -3672,14 +4023,12 @@ paths:
             parameters:
                 - name: id
                   in: path
-                  description: 租户ID
                   required: true
                   schema:
                     type: integer
                     format: uint32
                 - name: operatorId
                   in: query
-                  description: 操作人ID
                   schema:
                     type: integer
                     format: uint32
@@ -3692,7 +4041,7 @@ paths:
                                 $ref: '#/components/schemas/DeleteTenantResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/tenants/{id}/lifecycle:
+    /platform/v1/tenants/{id}/lifecycle:
         put:
             tags:
                 - TenantService
@@ -3722,23 +4071,18 @@ paths:
                                 $ref: '#/components/schemas/UpdateTenantLifecycleResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/tenants/{tenantId}/effective-menus:
+    /platform/v1/tenants/{tenantId}/admins:
         get:
             tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 获取租户最终有效菜单树
-            description: 获取租户最终有效菜单树
-            operationId: TenantPermissionService_GetTenantEffectiveMenus
+                - TenantService
+                - 租户管理服务
+            summary: 获取租户管理员
+            description: 获取目标租户中绑定系统租户管理员角色的账号
+            operationId: TenantService_ListTenantAdmins
             parameters:
                 - name: tenantId
                   in: path
                   required: true
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: parentId
-                  in: query
                   schema:
                     type: integer
                     format: uint32
@@ -3748,10 +4092,82 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetTenantEffectiveMenusResponse'
+                                $ref: '#/components/schemas/ListTenantAdminsResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/tenants/{tenantId}/parameters:
+    /platform/v1/tenants/{tenantId}/admins/{adminUserId}:
+        put:
+            tags:
+                - TenantService
+                - 租户管理服务
+            summary: 更新租户管理员资料
+            description: 更新目标租户管理员的姓名、邮箱和手机号
+            operationId: TenantService_UpdateTenantAdmin
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: adminUserId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateTenantAdminRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateTenantAdminResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/tenants/{tenantId}/admins/{adminUserId}:reset-password:
+        post:
+            tags:
+                - TenantService
+                - 租户管理服务
+            summary: 重置租户管理员密码
+            description: 重置目标租户管理员密码并撤销其现有会话
+            operationId: TenantService_ResetTenantAdminPassword
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: adminUserId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ResetTenantAdminPasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ResetTenantAdminPasswordResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/tenants/{tenantId}/parameters:
         get:
             tags:
                 - ParameterService
@@ -3774,7 +4190,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ListTenantParametersResponse'
-    /admin/v1/tenants/{tenantId}/parameters/{key}:
+    /platform/v1/tenants/{tenantId}/parameters/{key}:
         put:
             tags:
                 - ParameterService
@@ -3827,91 +4243,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ResetTenantParameterResponse'
-    /admin/v1/tenants/{tenantId}/permission-groups:
-        get:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 获取租户绑定的菜单权限组
-            description: 获取租户绑定的菜单权限组
-            operationId: TenantPermissionService_GetTenantPermissionGroups
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetTenantPermissionGroupsResponse'
-            security:
-                - BearerAuth: []
-        put:
-            tags:
-                - TenantPermissionService
-                - 租户权限服务
-            summary: 更新租户绑定的菜单权限组
-            description: 更新租户绑定的菜单权限组
-            operationId: TenantPermissionService_UpdateTenantPermissionGroups
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateTenantPermissionGroupsRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateTenantPermissionGroupsResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/tenants/{tenantId}/permission-groups/{groupId}/version:
-        put:
-            tags:
-                - TenantPermissionService
-            operationId: TenantPermissionService_UpdateTenantPermissionGroupVersion
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: groupId
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateTenantPermissionGroupVersionRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateTenantPermissionGroupVersionResponse'
-    /admin/v1/users:
+    /platform/v1/users:
         get:
             tags:
                 - UserService
@@ -3953,6 +4285,15 @@ paths:
                         - STATUS_DISABLED
                     type: string
                     format: enum
+                - name: deptId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: includeChildDepts
+                  in: query
+                  schema:
+                    type: boolean
                 - name: filter
                   in: query
                   description: |-
@@ -4025,7 +4366,7 @@ paths:
                                 $ref: '#/components/schemas/CreateUserResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/users/simple:
+    /platform/v1/users/simple:
         get:
             tags:
                 - UserService
@@ -4067,6 +4408,15 @@ paths:
                         - STATUS_DISABLED
                     type: string
                     format: enum
+                - name: deptId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: includeChildDepts
+                  in: query
+                  schema:
+                    type: boolean
                 - name: filter
                   in: query
                   description: |-
@@ -4111,37 +4461,7 @@ paths:
                                 $ref: '#/components/schemas/ListUsersResponse'
             security:
                 - BearerAuth: []
-    /admin/v1/users/status-update/{id}:
-        put:
-            tags:
-                - UserService
-                - 用户管理服务
-            summary: 更新用户状态
-            description: 更新用户状态
-            operationId: UserService_UpdateUserByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateUserByStatusRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateUserByStatusResponse'
-            security:
-                - BearerAuth: []
-    /admin/v1/users/{id}:
+    /platform/v1/users/{id}:
         get:
             tags:
                 - UserService
@@ -4222,8 +4542,288 @@ paths:
                                 $ref: '#/components/schemas/DeleteUserResponse'
             security:
                 - BearerAuth: []
+    /platform/v1/users/{id}:status-update:
+        post:
+            tags:
+                - UserService
+                - 用户管理服务
+            summary: 更新用户状态
+            description: 更新用户状态
+            operationId: UserService_UpdateUserByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateUserByStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateUserByStatusResponse'
+            security:
+                - BearerAuth: []
+    /platform/v1/users/{userId}/devices:
+        get:
+            tags:
+                - DeviceService
+            operationId: DeviceService_ListUserDevices
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: platform
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListUserDevicesResponse'
+    /platform/v1/webhook-delivery-logs:
+        get:
+            tags:
+                - WebhookService
+            description: Delivery log management
+            operationId: WebhookService_ListWebhookDeliveryLogs
+            parameters:
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: subscriptionId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: eventType
+                  in: query
+                  schema:
+                    enum:
+                        - WEBHOOK_EVENT_TYPE_UNSPECIFIED
+                        - WEBHOOK_EVENT_TYPE_FILE_UPLOAD_COMPLETED
+                        - WEBHOOK_EVENT_TYPE_RESOURCE_QUOTA_EXCEEDED
+                        - WEBHOOK_EVENT_TYPE_ASYNC_TASK_FAILED
+                        - WEBHOOK_EVENT_TYPE_TENANT_CREATED
+                        - WEBHOOK_EVENT_TYPE_USER_CREATED
+                    type: string
+                    format: enum
+                - name: deliveryStatus
+                  in: query
+                  schema:
+                    enum:
+                        - WEBHOOK_DELIVERY_STATUS_UNSPECIFIED
+                        - WEBHOOK_DELIVERY_STATUS_PENDING
+                        - WEBHOOK_DELIVERY_STATUS_SUCCESS
+                        - WEBHOOK_DELIVERY_STATUS_FAILED
+                    type: string
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListWebhookDeliveryLogsResponse'
+    /platform/v1/webhook-delivery-logs/{id}:
+        get:
+            tags:
+                - WebhookService
+            operationId: WebhookService_GetWebhookDeliveryLog
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WebhookDeliveryLog'
+    /platform/v1/webhook-delivery-logs/{id}:retry:
+        post:
+            tags:
+                - WebhookService
+            operationId: WebhookService_RetryWebhookDelivery
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RetryWebhookDeliveryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RetryWebhookDeliveryResponse'
+    /platform/v1/webhook-subscriptions:
+        get:
+            tags:
+                - WebhookService
+            description: Subscription management
+            operationId: WebhookService_ListWebhookSubscriptions
+            parameters:
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: eventType
+                  in: query
+                  schema:
+                    enum:
+                        - WEBHOOK_EVENT_TYPE_UNSPECIFIED
+                        - WEBHOOK_EVENT_TYPE_FILE_UPLOAD_COMPLETED
+                        - WEBHOOK_EVENT_TYPE_RESOURCE_QUOTA_EXCEEDED
+                        - WEBHOOK_EVENT_TYPE_ASYNC_TASK_FAILED
+                        - WEBHOOK_EVENT_TYPE_TENANT_CREATED
+                        - WEBHOOK_EVENT_TYPE_USER_CREATED
+                    type: string
+                    format: enum
+                - name: status
+                  in: query
+                  schema:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListWebhookSubscriptionsResponse'
+        post:
+            tags:
+                - WebhookService
+            operationId: WebhookService_CreateWebhookSubscription
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WebhookSubscription'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WebhookSubscription'
+    /platform/v1/webhook-subscriptions/{id}:
+        get:
+            tags:
+                - WebhookService
+            operationId: WebhookService_GetWebhookSubscription
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WebhookSubscription'
+        put:
+            tags:
+                - WebhookService
+            operationId: WebhookService_UpdateWebhookSubscription
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WebhookSubscription'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WebhookSubscription'
+        delete:
+            tags:
+                - WebhookService
+            operationId: WebhookService_DeleteWebhookSubscription
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
 components:
     schemas:
+        AbortFileUploadRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+            description: 取消分片上传，清理已上传的分片。
+        AbortFileUploadResponse:
+            type: object
+            properties: {}
         AsyncTask:
             type: object
             properties:
@@ -4358,14 +4958,6 @@ components:
         CancelAsyncTaskResponse:
             type: object
             properties: {}
-        CheckCurrentTenantResourceQuotaResponse:
-            type: object
-            properties:
-                allowed:
-                    type: boolean
-                    description: 是否允许占用
-                usage:
-                    $ref: '#/components/schemas/TenantResourceQuotaUsage'
         CodesResponse:
             type: object
             properties:
@@ -4375,6 +4967,22 @@ components:
                         type: string
                     description: 登录用户权限码
             description: 登录用户权限码 - 回应
+        CompleteFileUploadRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                parts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/FilePart'
+                    description: 已上传分片列表（校验完整性）
+        CompleteFileUploadResponse:
+            type: object
+            properties:
+                file:
+                    $ref: '#/components/schemas/FileObject'
         ConfirmFileUploadRequest:
             type: object
             properties:
@@ -4392,23 +5000,6 @@ components:
             properties:
                 file:
                     $ref: '#/components/schemas/FileObject'
-        ConsumeCurrentTenantResourceQuotaRequest:
-            type: object
-            properties:
-                resourceKey:
-                    type: string
-                    description: 资源额度键
-                amount:
-                    type: string
-                    description: 本次占用数量
-                idempotencyKey:
-                    type: string
-                    description: 业务幂等键，同一租户同一操作重复提交时避免重复占用
-        ConsumeCurrentTenantResourceQuotaResponse:
-            type: object
-            properties:
-                usage:
-                    $ref: '#/components/schemas/TenantResourceQuotaUsage'
         CountMyUnreadNotificationsResponse:
             type: object
             properties:
@@ -4439,6 +5030,13 @@ components:
                     type: string
                 idempotencyKey:
                     type: string
+                partSize:
+                    type: string
+                    description: 分片大小（字节），>0 表示分片上传模式
+                totalParts:
+                    type: integer
+                    description: 总分片数（分片模式必填）
+                    format: int32
         CreateFileUploadSessionResponse:
             type: object
             properties:
@@ -4450,17 +5048,23 @@ components:
                     type: string
                 expiresAt:
                     type: string
-        CreateMenuPermissionGroupResponse:
-            type: object
-            properties:
-                id:
-                    type: integer
-                    description: 权限组ID
-                    format: uint32
         CreateMenuResponse:
             type: object
             properties: {}
             description: 创建菜单响应
+        CreateNotificationProviderRequest:
+            type: object
+            properties:
+                provider:
+                    $ref: '#/components/schemas/NotificationProvider'
+        CreateNotificationProviderResponse:
+            type: object
+            properties:
+                provider:
+                    $ref: '#/components/schemas/NotificationProvider'
+        CreateOperationLogResponse:
+            type: object
+            properties: {}
         CreateParameterDefinitionResponse:
             type: object
             properties:
@@ -4488,6 +5092,13 @@ components:
             properties:
                 provider:
                     $ref: '#/components/schemas/StorageProvider'
+        CreateTenantMenuPermissionGroupResponse:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: 权限组ID
+                    format: uint32
         CreateTenantRequest:
             type: object
             properties:
@@ -4499,17 +5110,15 @@ components:
                     format: uint32
                 initialAdmin:
                     $ref: '#/components/schemas/TenantInitialAdmin'
-            description: 创建租户请求
+            description: 创建租户请求（原子开通）
         CreateTenantResponse:
             type: object
             properties:
                 id:
                     type: integer
-                    description: 租户ID
                     format: uint32
                 name:
                     type: string
-                    description: 租户名称
                 adminUserId:
                     type: integer
                     format: uint32
@@ -4519,7 +5128,6 @@ components:
                 rootDeptId:
                     type: integer
                     format: uint32
-            description: 创建租户响应
         CreateUserResponse:
             type: object
             properties: {}
@@ -4530,13 +5138,13 @@ components:
         DeleteFileObjectResponse:
             type: object
             properties: {}
-        DeleteMenuPermissionGroupResponse:
-            type: object
-            properties: {}
         DeleteMenuResponse:
             type: object
             properties: {}
             description: 删除菜单响应
+        DeleteNotificationProviderResponse:
+            type: object
+            properties: {}
         DeleteParameterDefinitionResponse:
             type: object
             properties: {}
@@ -4555,14 +5163,15 @@ components:
         DeleteStorageProviderResponse:
             type: object
             properties: {}
+        DeleteTenantMenuPermissionGroupResponse:
+            type: object
+            properties: {}
         DeleteTenantResponse:
             type: object
             properties:
                 id:
                     type: integer
-                    description: 租户ID
                     format: uint32
-            description: 删除租户响应
         DeleteUserResponse:
             type: object
             properties: {}
@@ -4618,7 +5227,51 @@ components:
                         type: integer
                         format: uint32
                     description: 祖籍
+                directUserCount:
+                    type: integer
+                    description: 直接归属用户数
+                    format: uint32
+                totalUserCount:
+                    type: integer
+                    description: 包含下级部门的用户数
+                    format: uint32
             description: 部门信息
+        Device:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                tenantId:
+                    type: integer
+                    format: uint32
+                userId:
+                    type: integer
+                    format: uint32
+                deviceToken:
+                    type: string
+                    description: 设备令牌（极光 registration id / 个推 cid）
+                platform:
+                    type: string
+                    description: 平台 android/ios
+                appKey:
+                    type: string
+                    description: 应用标识（支持多 APP）
+                deviceName:
+                    type: string
+                appVersion:
+                    type: string
+                status:
+                    type: integer
+                    description: 状态 1 启用 2 禁用
+                    format: int32
+                lastActiveAt:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 设备信息
         DictionaryItem:
             type: object
             properties:
@@ -4679,6 +5332,16 @@ components:
                 createdAt:
                     type: string
                 updatedAt:
+                    type: string
+        DownloadFileContentResponse:
+            type: object
+            properties:
+                content:
+                    type: string
+                    format: bytes
+                contentType:
+                    type: string
+                fileName:
                     type: string
         ExistMenuByNameRequest:
             type: object
@@ -4843,6 +5506,25 @@ components:
                 providerCode:
                     type: string
                     description: 存储渠道编码
+                uploadId:
+                    type: string
+                    description: 分片上传会话ID
+                partSize:
+                    type: string
+                    description: 分片大小（字节），0 表示非分片
+                totalParts:
+                    type: integer
+                    description: 总分片数
+                    format: int32
+        FilePart:
+            type: object
+            properties:
+                partNumber:
+                    type: integer
+                    format: int32
+                etag:
+                    type: string
+            description: 完成分片上传：本地渠道合并分片，对象存储渠道预留为 CompleteMultipartUpload。
         GetAsyncTaskResponse:
             type: object
             properties:
@@ -4853,71 +5535,40 @@ components:
             properties:
                 stats:
                     $ref: '#/components/schemas/AsyncTaskStats'
-        GetCurrentTenantCapabilitiesResponse:
+        GetDeptDeleteImpactResponse:
             type: object
             properties:
-                tenantId:
+                id:
                     type: integer
-                    description: 租户ID
                     format: uint32
-                apiPermissions:
-                    type: array
-                    items:
-                        type: string
-                    description: 接口能力权限码并集
-                featureFlags:
-                    type: object
-                    additionalProperties:
-                        type: boolean
-                    description: 功能开关运行时配置
-                resourceQuotas:
-                    type: object
-                    additionalProperties:
-                        type: string
-                    description: 资源额度运行时配置
-                groupIds:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-                    description: 参与聚合的套餐ID
-                bindings:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/TenantPermissionGroupBinding'
-                    description: 参与聚合的套餐版本绑定
+                name:
+                    type: string
+                directUserCount:
+                    type: integer
+                    format: uint32
+                hasChildren:
+                    type: boolean
+                isProtectedRoot:
+                    type: boolean
+                hasDataScopeRoles:
+                    type: boolean
+                canDeleteDirectly:
+                    type: boolean
+                requiresUserTransfer:
+                    type: boolean
         GetParameterDefinitionResponse:
             type: object
             properties:
                 parameter:
                     $ref: '#/components/schemas/ParameterDefinition'
-        GetTenantEffectiveMenusResponse:
+        GoogleProtobufAny:
             type: object
             properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/Menu'
-                    description: 租户最终有效菜单树
-        GetTenantPermissionGroupsResponse:
-            type: object
-            properties:
-                groups:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/MenuPermissionGroup'
-                    description: 租户绑定的权限组
-                groupIds:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-                    description: 租户绑定的权限组ID
-                bindings:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/TenantPermissionGroupBinding'
-                    description: 租户套餐版本绑定
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
         ListAsyncTasksResponse:
             type: object
             properties:
@@ -4937,13 +5588,6 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/ResolvedParameter'
-        ListCurrentTenantResourceQuotasResponse:
-            type: object
-            properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/TenantResourceQuotaUsage'
         ListDeptsResponse:
             type: object
             properties:
@@ -5011,6 +5655,18 @@ components:
                     format: int32
                 nextPageToken:
                     type: string
+        ListFilePartsResponse:
+            type: object
+            properties:
+                parts:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/FilePart'
+                totalParts:
+                    type: integer
+                    format: int32
+                partSize:
+                    type: string
         ListLoginLogsResponse:
             type: object
             properties:
@@ -5018,25 +5674,6 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/LoginLog'
-                total:
-                    type: integer
-                    format: int32
-                nextPageToken:
-                    type: string
-        ListMenuPermissionGroupVersionsResponse:
-            type: object
-            properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/MenuPermissionGroupVersion'
-        ListMenuPermissionGroupsResponse:
-            type: object
-            properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/MenuPermissionGroup'
                 total:
                     type: integer
                     format: int32
@@ -5064,6 +5701,13 @@ components:
                         $ref: '#/components/schemas/Menu'
                     description: 菜单树
             description: 获取菜单树响应
+        ListMyDevicesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Device'
         ListMySessionsResponse:
             type: object
             properties:
@@ -5078,6 +5722,18 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/NotificationMessage'
+                total:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
+        ListNotificationProvidersResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NotificationProvider'
                 total:
                     type: integer
                     format: int32
@@ -5145,6 +5801,17 @@ components:
                 nextPageToken:
                     type: string
             description: 分页查询项目响应
+        ListRoleSimpleResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Role'
+                total:
+                    type: integer
+                    format: int32
+            description: 查询角色简单列表响应
         ListRolesResponse:
             type: object
             properties:
@@ -5182,6 +5849,32 @@ components:
                     format: int32
                 nextPageToken:
                     type: string
+        ListTenantAdminsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/User'
+        ListTenantMenuPermissionGroupVersionsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TenantMenuPermissionGroupVersion'
+        ListTenantMenuPermissionGroupsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TenantMenuPermissionGroup'
+                total:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
         ListTenantParametersResponse:
             type: object
             properties:
@@ -5189,6 +5882,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/ResolvedParameter'
+        ListTenantSimplesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TenantSimple'
         ListTenantsResponse:
             type: object
             properties:
@@ -5196,14 +5896,18 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/Tenant'
-                    description: 租户列表
                 total:
                     type: integer
-                    description: 总数
                     format: int32
                 nextPageToken:
                     type: string
-            description: 分页查询租户响应
+        ListUserDevicesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Device'
         ListUsersResponse:
             type: object
             properties:
@@ -5211,6 +5915,30 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/User'
+                total:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
+        ListWebhookDeliveryLogsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/WebhookDeliveryLog'
+                total:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
+        ListWebhookSubscriptionsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/WebhookSubscription'
                 total:
                     type: integer
                     format: int32
@@ -5506,130 +6234,6 @@ components:
                     type: string
                     description: 菜单标题
             description: 菜单元数据
-        MenuPermissionGroup:
-            type: object
-            properties:
-                id:
-                    type: integer
-                    description: 权限组ID
-                    format: uint32
-                name:
-                    type: string
-                    description: 权限组名称
-                code:
-                    type: string
-                    description: 权限组编码
-                status:
-                    enum:
-                        - STATUS_UNSPECIFIED
-                        - STATUS_ENABLED
-                        - STATUS_DISABLED
-                    type: string
-                    description: 权限组状态
-                    format: enum
-                isSystem:
-                    type: boolean
-                    description: 是否系统内置
-                sort:
-                    type: integer
-                    description: 排序值
-                    format: int32
-                description:
-                    type: string
-                    description: 描述
-                remark:
-                    type: string
-                    description: 备注
-                menuIds:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-                    description: 绑定的菜单ID列表
-                tenantCount:
-                    type: integer
-                    description: 绑定租户数量
-                    format: int32
-                createdAt:
-                    type: string
-                    description: 创建时间
-                updatedAt:
-                    type: string
-                    description: 更新时间
-                currentVersionId:
-                    type: integer
-                    description: 当前发布版本ID
-                    format: uint32
-                currentVersion:
-                    type: integer
-                    description: 当前发布版本号
-                    format: int32
-                apiPermissions:
-                    type: array
-                    items:
-                        type: string
-                    description: 接口能力权限码列表
-                featureFlags:
-                    type: object
-                    additionalProperties:
-                        type: boolean
-                    description: 功能开关配置
-                resourceQuotas:
-                    type: object
-                    additionalProperties:
-                        type: string
-                    description: 资源额度配置
-            description: 菜单权限组
-        MenuPermissionGroupVersion:
-            type: object
-            properties:
-                id:
-                    type: integer
-                    format: uint32
-                groupId:
-                    type: integer
-                    format: uint32
-                version:
-                    type: integer
-                    format: int32
-                state:
-                    enum:
-                        - MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED
-                        - MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED
-                        - MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED
-                    type: string
-                    format: enum
-                menuIds:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-                changeSummary:
-                    type: string
-                createdBy:
-                    type: integer
-                    format: uint32
-                publishedBy:
-                    type: integer
-                    format: uint32
-                effectiveAt:
-                    type: string
-                publishedAt:
-                    type: string
-                createdAt:
-                    type: string
-                apiPermissions:
-                    type: array
-                    items:
-                        type: string
-                featureFlags:
-                    type: object
-                    additionalProperties:
-                        type: boolean
-                resourceQuotas:
-                    type: object
-                    additionalProperties:
-                        type: string
         MenusResponse:
             type: object
             properties:
@@ -5695,6 +6299,50 @@ components:
                     type: string
                 updatedAt:
                     type: string
+        NotificationProvider:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                code:
+                    type: string
+                    description: 渠道配置编码
+                name:
+                    type: string
+                    description: 渠道配置名称
+                channel:
+                    type: string
+                    description: 渠道类型
+                providerType:
+                    type: string
+                    description: 提供商类型
+                endpoint:
+                    type: string
+                accessKeyId:
+                    type: string
+                accessKeySecret:
+                    type: string
+                signName:
+                    type: string
+                templateCode:
+                    type: string
+                status:
+                    type: integer
+                    description: 状态 1 启用 2 禁用
+                    format: int32
+                isDefault:
+                    type: boolean
+                remark:
+                    type: string
+                secretConfigured:
+                    type: boolean
+                    description: 是否已配置密钥
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 通知渠道配置（平台级）。站内信无需外部服务商；短信需配置服务商密钥。
         NotificationTemplate:
             type: object
             properties:
@@ -5785,6 +6433,7 @@ components:
                     type: string
                 createdAt:
                     type: string
+            description: 操作日志
         ParameterDefinition:
             type: object
             properties:
@@ -5933,7 +6582,7 @@ components:
                     type: string
                     description: 更新时间
             description: 项目信息
-        PublishMenuPermissionGroupVersionRequest:
+        PublishTenantMenuPermissionGroupVersionRequest:
             type: object
             properties:
                 groupId:
@@ -5966,11 +6615,11 @@ components:
                     additionalProperties:
                         type: string
                     description: 资源额度配置
-        PublishMenuPermissionGroupVersionResponse:
+        PublishTenantMenuPermissionGroupVersionResponse:
             type: object
             properties:
                 version:
-                    $ref: '#/components/schemas/MenuPermissionGroupVersion'
+                    $ref: '#/components/schemas/TenantMenuPermissionGroupVersion'
         RefreshTokenRequest:
             type: object
             properties:
@@ -5994,24 +6643,95 @@ components:
                     type: string
                     description: 当前会话ID
             description: 回应 - 刷新令牌
-        ReleaseCurrentTenantResourceQuotaRequest:
+        RegisterDeviceRequest:
             type: object
             properties:
-                resourceKey:
+                deviceToken:
                     type: string
-                    description: 资源额度键
-                amount:
+                    description: 设备令牌
+                platform:
                     type: string
-                    description: 本次释放数量
-                idempotencyKey:
+                    description: 平台 android/ios
+                appKey:
                     type: string
-                    description: 业务幂等键，同一租户同一操作重复提交时避免重复释放
-        ReleaseCurrentTenantResourceQuotaResponse:
+                deviceName:
+                    type: string
+                appVersion:
+                    type: string
+        RegisterRequest:
             type: object
             properties:
-                usage:
-                    $ref: '#/components/schemas/TenantResourceQuotaUsage'
+                auth:
+                    allOf:
+                        - $ref: '#/components/schemas/RegisterRequest_Auth'
+                    description: 请求体
+                tenant:
+                    type: string
+            description: 注册 - 请求
+        RegisterRequest_Auth:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: 用户名
+                password:
+                    type: string
+                    description: 密码
+                phone:
+                    type: string
+                    description: 电话
+        RegisterResponse:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                result:
+                    $ref: '#/components/schemas/GoogleProtobufAny'
+                type:
+                    type: string
+            description: 注册 - 回应
+        ReplaceFileContentRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                content:
+                    type: string
+                    description: 新文件内容
+                    format: bytes
+                fileName:
+                    type: string
+                    description: 可选：同时更新显示文件名
+                contentType:
+                    type: string
+            description: 原地替换文件内容（保留文件 ID，替换二进制对象和元数据）
+        ReplaceFileContentResponse:
+            type: object
+            properties:
+                file:
+                    $ref: '#/components/schemas/FileObject'
         ResetCurrentTenantParameterResponse:
+            type: object
+            properties: {}
+        ResetTenantAdminPasswordRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: integer
+                    format: uint32
+                adminUserId:
+                    type: integer
+                    format: uint32
+                newPassword:
+                    type: string
+                operatorId:
+                    type: integer
+                    format: uint32
+        ResetTenantAdminPasswordResponse:
             type: object
             properties: {}
         ResetTenantParameterResponse:
@@ -6062,6 +6782,18 @@ components:
             properties:
                 task:
                     $ref: '#/components/schemas/AsyncTask'
+        RetryWebhookDeliveryRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+        RetryWebhookDeliveryResponse:
+            type: object
+            properties:
+                newDeliveryLogId:
+                    type: integer
+                    format: uint32
         RevokeSessionResponse:
             type: object
             properties: {}
@@ -6132,7 +6864,7 @@ components:
                         format: uint32
                     description: 自定义数据范围部门ID列表
             description: 角色信息
-        RollbackMenuPermissionGroupVersionRequest:
+        RollbackTenantMenuPermissionGroupVersionRequest:
             type: object
             properties:
                 groupId:
@@ -6146,11 +6878,11 @@ components:
                 operatorId:
                     type: integer
                     format: uint32
-        RollbackMenuPermissionGroupVersionResponse:
+        RollbackTenantMenuPermissionGroupVersionResponse:
             type: object
             properties:
                 version:
-                    $ref: '#/components/schemas/MenuPermissionGroupVersion'
+                    $ref: '#/components/schemas/TenantMenuPermissionGroupVersion'
         SendInAppNotificationRequest:
             type: object
             properties:
@@ -6177,6 +6909,51 @@ components:
                 idempotencyKey:
                     type: string
         SendInAppNotificationResponse:
+            type: object
+            properties:
+                taskId:
+                    type: integer
+                    format: uint32
+        SendNotificationRequest:
+            type: object
+            properties:
+                channel:
+                    enum:
+                        - NOTIFICATION_CHANNEL_UNSPECIFIED
+                        - NOTIFICATION_CHANNEL_IN_APP
+                        - NOTIFICATION_CHANNEL_EMAIL
+                        - NOTIFICATION_CHANNEL_SMS
+                        - NOTIFICATION_CHANNEL_WEBHOOK
+                    type: string
+                    format: enum
+                recipientUserIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                phones:
+                    type: array
+                    items:
+                        type: string
+                templateCode:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                variables:
+                    type: string
+                priority:
+                    type: integer
+                    format: int32
+                businessType:
+                    type: string
+                businessId:
+                    type: string
+                idempotencyKey:
+                    type: string
+            description: 通用通知发送（站内信 / 短信 / 邮件 / Webhook）。
+        SendNotificationResponse:
             type: object
             properties:
                 taskId:
@@ -6219,6 +6996,17 @@ components:
             properties:
                 parameter:
                     $ref: '#/components/schemas/ResolvedParameter'
+        SetDefaultNotificationProviderRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+        SetDefaultNotificationProviderResponse:
+            type: object
+            properties:
+                provider:
+                    $ref: '#/components/schemas/NotificationProvider'
         SetDefaultStorageProviderRequest:
             type: object
             properties:
@@ -6320,14 +7108,6 @@ components:
                     default: !!float 10
                     description: 排序值
                     format: int32
-                status:
-                    enum:
-                        - STATUS_UNSPECIFIED
-                        - STATUS_ENABLED
-                        - STATUS_DISABLED
-                    type: string
-                    description: 租户状态 1 激活 2 未激活 3 禁用
-                    format: enum
                 remark:
                     type: string
                     description: 备注信息
@@ -6337,17 +7117,6 @@ components:
                 updatedAt:
                     type: string
                     description: 更新时间
-                groupIds:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-                    description: 绑定的租户业务套餐ID列表
-                groups:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/MenuPermissionGroup'
-                    description: 绑定的租户业务套餐
                 lifecycleStatus:
                     enum:
                         - TENANT_LIFECYCLE_STATUS_UNSPECIFIED
@@ -6371,6 +7140,20 @@ components:
                 cancelledAt:
                     type: string
                     description: 注销时间
+                isPlatform:
+                    type: boolean
+                    description: 是否平台租户(只读)
+                groupIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 绑定的套餐ID列表
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TenantMenuPermissionGroup'
+                    description: 绑定的套餐
             description: 租户信息
         TenantInitialAdmin:
             type: object
@@ -6383,63 +7166,156 @@ components:
                     type: string
                 email:
                     type: string
-        TenantPermissionGroupBinding:
+        TenantMenuPermissionGroup:
             type: object
             properties:
-                tenantId:
-                    type: integer
-                    description: 租户ID
-                    format: uint32
-                groupId:
+                id:
                     type: integer
                     description: 权限组ID
                     format: uint32
-                enabled:
-                    type: boolean
-                    description: 是否启用
-                boundBy:
-                    type: integer
-                    description: 绑定操作人ID
-                    format: uint32
-                boundAt:
+                name:
                     type: string
-                    description: 绑定时间
-                versionId:
+                    description: 套餐名称
+                code:
+                    type: string
+                    description: 套餐编码
+                status:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    description: 权限组状态
+                    format: enum
+                isSystem:
+                    type: boolean
+                    description: 是否系统内置
+                sort:
                     type: integer
-                    description: 当前使用版本ID
-                    format: uint32
-                version:
-                    type: integer
-                    description: 当前使用版本号
+                    description: 排序值
                     format: int32
-                autoUpgrade:
-                    type: boolean
-                    description: 是否自动跟随最新版
-        TenantResourceQuotaUsage:
-            type: object
-            properties:
-                tenantId:
+                description:
+                    type: string
+                    description: 描述
+                remark:
+                    type: string
+                    description: 备注
+                menuIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 绑定的菜单ID列表
+                tenantCount:
                     type: integer
-                    description: 租户ID
-                    format: uint32
-                resourceKey:
+                    description: 绑定租户数量
+                    format: int32
+                createdAt:
                     type: string
-                    description: 资源额度键
-                used:
-                    type: string
-                    description: 已使用额度
-                limit:
-                    type: string
-                    description: 额度上限，unlimited=true时为0
-                remaining:
-                    type: string
-                    description: 剩余额度，unlimited=true时为0
-                unlimited:
-                    type: boolean
-                    description: 是否不限额
+                    description: 创建时间
                 updatedAt:
                     type: string
                     description: 更新时间
+                currentVersionId:
+                    type: integer
+                    description: 当前发布版本ID
+                    format: uint32
+                currentVersion:
+                    type: integer
+                    description: 当前发布版本号
+                    format: int32
+                apiPermissions:
+                    type: array
+                    items:
+                        type: string
+                    description: 接口能力权限码列表
+                featureFlags:
+                    type: object
+                    additionalProperties:
+                        type: boolean
+                    description: 功能开关配置
+                resourceQuotas:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: 资源额度配置
+            description: 菜单权限组
+        TenantMenuPermissionGroupVersion:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                groupId:
+                    type: integer
+                    format: uint32
+                version:
+                    type: integer
+                    format: int32
+                state:
+                    enum:
+                        - MENU_PERMISSION_GROUP_VERSION_STATE_UNSPECIFIED
+                        - MENU_PERMISSION_GROUP_VERSION_STATE_PUBLISHED
+                        - MENU_PERMISSION_GROUP_VERSION_STATE_SUPERSEDED
+                    type: string
+                    format: enum
+                menuIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                changeSummary:
+                    type: string
+                createdBy:
+                    type: integer
+                    format: uint32
+                publishedBy:
+                    type: integer
+                    format: uint32
+                effectiveAt:
+                    type: string
+                publishedAt:
+                    type: string
+                createdAt:
+                    type: string
+                apiPermissions:
+                    type: array
+                    items:
+                        type: string
+                featureFlags:
+                    type: object
+                    additionalProperties:
+                        type: boolean
+                resourceQuotas:
+                    type: object
+                    additionalProperties:
+                        type: string
+        TenantSimple:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                name:
+                    type: string
+                code:
+                    type: string
+            description: 租户简易信息（公开接口，无需登录）
+        TestNotificationProviderRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                phone:
+                    type: string
+        TestNotificationProviderResponse:
+            type: object
+            properties:
+                healthy:
+                    type: boolean
+                message:
+                    type: string
         TestStorageProviderRequest:
             type: object
             properties:
@@ -6455,6 +7331,27 @@ components:
                     type: boolean
                 message:
                     type: string
+        TransferAndDeleteDeptRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                targetDeptId:
+                    type: integer
+                    format: uint32
+                operatorId:
+                    type: integer
+                    format: uint32
+        TransferAndDeleteDeptResponse:
+            type: object
+            properties:
+                transferredUserCount:
+                    type: integer
+                    format: uint32
+        UnregisterDeviceResponse:
+            type: object
+            properties: {}
         UpdateDeptByStatusResponse:
             type: object
             properties: {}
@@ -6463,39 +7360,42 @@ components:
             type: object
             properties: {}
             description: 更新部门响应
-        UpdateMenuByStatusResponse:
-            type: object
-            properties: {}
-            description: 更新菜单状态响应
-        UpdateMenuPermissionGroupResponse:
-            type: object
-            properties: {}
-        UpdateMenuPermissionGroupStatusRequest:
+        UpdateFileObjectRequest:
             type: object
             properties:
                 id:
                     type: integer
-                    description: 权限组ID
                     format: uint32
-                status:
-                    enum:
-                        - STATUS_UNSPECIFIED
-                        - STATUS_ENABLED
-                        - STATUS_DISABLED
+                fileName:
                     type: string
-                    description: 权限组状态
-                    format: enum
-                operatorId:
-                    type: integer
-                    description: 操作人ID
-                    format: uint32
-        UpdateMenuPermissionGroupStatusResponse:
+                    description: 新的显示文件名
+            description: 更新文件元数据（目前仅支持修改显示文件名）
+        UpdateFileObjectResponse:
+            type: object
+            properties:
+                file:
+                    $ref: '#/components/schemas/FileObject'
+        UpdateMenuByStatusResponse:
             type: object
             properties: {}
+            description: 更新菜单状态响应
         UpdateMenuResponse:
             type: object
             properties: {}
             description: 更新菜单响应
+        UpdateNotificationProviderRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                provider:
+                    $ref: '#/components/schemas/NotificationProvider'
+        UpdateNotificationProviderResponse:
+            type: object
+            properties:
+                provider:
+                    $ref: '#/components/schemas/NotificationProvider'
         UpdateParameterDefinitionResponse:
             type: object
             properties:
@@ -6579,6 +7479,29 @@ components:
             properties:
                 provider:
                     $ref: '#/components/schemas/StorageProvider'
+        UpdateTenantAdminRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: integer
+                    format: uint32
+                adminUserId:
+                    type: integer
+                    format: uint32
+                realname:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                operatorId:
+                    type: integer
+                    format: uint32
+        UpdateTenantAdminResponse:
+            type: object
+            properties:
+                admin:
+                    $ref: '#/components/schemas/User'
         UpdateTenantLifecycleRequest:
             type: object
             properties:
@@ -6603,62 +7526,15 @@ components:
             properties:
                 tenant:
                     $ref: '#/components/schemas/Tenant'
-        UpdateTenantPermissionGroupVersionRequest:
-            type: object
-            properties:
-                tenantId:
-                    type: integer
-                    format: uint32
-                groupId:
-                    type: integer
-                    format: uint32
-                versionId:
-                    type: integer
-                    format: uint32
-                autoUpgrade:
-                    type: boolean
-                operatorId:
-                    type: integer
-                    format: uint32
-        UpdateTenantPermissionGroupVersionResponse:
-            type: object
-            properties:
-                binding:
-                    $ref: '#/components/schemas/TenantPermissionGroupBinding'
-        UpdateTenantPermissionGroupsRequest:
-            type: object
-            properties:
-                tenantId:
-                    type: integer
-                    description: 租户ID
-                    format: uint32
-                groupIds:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-                    description: 权限组ID列表
-                operatorId:
-                    type: integer
-                    description: 操作人ID
-                    format: uint32
-        UpdateTenantPermissionGroupsResponse:
+        UpdateTenantMenuPermissionGroupResponse:
             type: object
             properties: {}
-        UpdateTenantResponse:
+        UpdateTenantMenuPermissionGroupStatusRequest:
             type: object
             properties:
                 id:
                     type: integer
-                    description: 租户ID
-                    format: uint32
-            description: 更新租户响应
-        UpdateTenantStatusRequest:
-            type: object
-            properties:
-                id:
-                    type: integer
-                    description: 租户ID
+                    description: 权限组ID
                     format: uint32
                 status:
                     enum:
@@ -6666,15 +7542,21 @@ components:
                         - STATUS_ENABLED
                         - STATUS_DISABLED
                     type: string
-                    description: 租户状态
+                    description: 权限组状态
                     format: enum
                 operatorId:
                     type: integer
                     description: 操作人ID
                     format: uint32
-        UpdateTenantStatusResponse:
+        UpdateTenantMenuPermissionGroupStatusResponse:
             type: object
             properties: {}
+        UpdateTenantResponse:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
         UpdateUserByStatusRequest:
             type: object
             properties:
@@ -6741,6 +7623,35 @@ components:
             properties:
                 file:
                     $ref: '#/components/schemas/FileObject'
+        UploadFilePartRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                partNumber:
+                    type: integer
+                    description: 分片序号，从 1 开始
+                    format: int32
+                content:
+                    type: string
+                    description: 分片内容
+                    format: bytes
+                contentSha256:
+                    type: string
+                    description: 分片 SHA256（可选校验）
+            description: |-
+                上传单个分片（分片上传模式）。
+                 本地渠道后端代理接收分片；对象存储渠道预留为预签名分片直传。
+        UploadFilePartResponse:
+            type: object
+            properties:
+                etag:
+                    type: string
+                    description: 分片标识
+                partNumber:
+                    type: integer
+                    format: int32
         User:
             type: object
             properties:
@@ -6841,6 +7752,92 @@ components:
                         type: string
                     description: 登录用户角色列表信息
             description: 登录用户Vben简介信息 - 回应
+        WebhookDeliveryLog:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                tenantId:
+                    type: integer
+                    format: uint32
+                subscriptionId:
+                    type: integer
+                    format: uint32
+                eventId:
+                    type: string
+                eventType:
+                    enum:
+                        - WEBHOOK_EVENT_TYPE_UNSPECIFIED
+                        - WEBHOOK_EVENT_TYPE_FILE_UPLOAD_COMPLETED
+                        - WEBHOOK_EVENT_TYPE_RESOURCE_QUOTA_EXCEEDED
+                        - WEBHOOK_EVENT_TYPE_ASYNC_TASK_FAILED
+                        - WEBHOOK_EVENT_TYPE_TENANT_CREATED
+                        - WEBHOOK_EVENT_TYPE_USER_CREATED
+                    type: string
+                    format: enum
+                targetUrl:
+                    type: string
+                requestBody:
+                    type: string
+                responseCode:
+                    type: integer
+                    format: int32
+                responseBody:
+                    type: string
+                deliveryStatus:
+                    enum:
+                        - WEBHOOK_DELIVERY_STATUS_UNSPECIFIED
+                        - WEBHOOK_DELIVERY_STATUS_PENDING
+                        - WEBHOOK_DELIVERY_STATUS_SUCCESS
+                        - WEBHOOK_DELIVERY_STATUS_FAILED
+                    type: string
+                    format: enum
+                attemptNumber:
+                    type: integer
+                    format: int32
+                errorMessage:
+                    type: string
+                createdAt:
+                    type: string
+        WebhookSubscription:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                tenantId:
+                    type: integer
+                    format: uint32
+                name:
+                    type: string
+                url:
+                    type: string
+                secret:
+                    type: string
+                eventTypes:
+                    type: array
+                    items:
+                        enum:
+                            - WEBHOOK_EVENT_TYPE_UNSPECIFIED
+                            - WEBHOOK_EVENT_TYPE_FILE_UPLOAD_COMPLETED
+                            - WEBHOOK_EVENT_TYPE_RESOURCE_QUOTA_EXCEEDED
+                            - WEBHOOK_EVENT_TYPE_ASYNC_TASK_FAILED
+                            - WEBHOOK_EVENT_TYPE_TENANT_CREATED
+                            - WEBHOOK_EVENT_TYPE_USER_CREATED
+                        type: string
+                        format: enum
+                status:
+                    enum:
+                        - STATUS_UNSPECIFIED
+                        - STATUS_ENABLED
+                        - STATUS_DISABLED
+                    type: string
+                    format: enum
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
     securitySchemes:
         BearerAuth:
             type: http
@@ -6853,13 +7850,13 @@ tags:
       description: The greeting service definition.
     - name: DeptService
       description: 部门管理服务
+    - name: DeviceService
     - name: DictionaryService
     - name: FileCenterService
     - name: LoginLogService
-    - name: MenuPermissionGroupService
-      description: 菜单权限组服务
     - name: MenuService
       description: 菜单管理服务
+    - name: NotificationProviderService
     - name: NotificationService
     - name: OperationLogService
     - name: ParameterService
@@ -6871,9 +7868,10 @@ tags:
       description: 角色管理服务
     - name: SessionService
     - name: StorageProviderService
-    - name: TenantPermissionService
-      description: 租户权限服务
+    - name: TenantMenuPermissionGroupService
+      description: 菜单权限组服务
     - name: TenantService
       description: 租户管理服务
     - name: UserService
       description: 用户管理服务
+    - name: WebhookService

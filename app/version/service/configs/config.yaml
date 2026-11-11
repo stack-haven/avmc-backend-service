@@ -1,12 +1,12 @@
 server:
   http:
-    addr: 0.0.0.0:8000
+    addr: 0.0.0.0:8300
     timeout: 1s
     middleware:
       limiter:
         name: "bbr"
   grpc:
-    addr: 0.0.0.0:9000
+    addr: 0.0.0.0:9300
     timeout: 1s
     middleware:
       limiter:

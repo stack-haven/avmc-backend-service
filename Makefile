@@ -1,14 +1,49 @@
 VERSION=$(shell git describe --tags --always)
 
+# L0 服务委托命令（serve-<svc> / gen-<svc> / migrate-<svc> ...），
+# 由 services.yaml 生成，禁止手改。见 docs/architecture/4-10-治理-命令契约.md
+-include mk/services.mk
+
+# ---------------------------------------------------------------------------
+# 工具链版本锁定（禁止 @latest）
+# 与 .github/workflows/backend-ci.yml 中的 BUF_VERSION / GOLANGCI_VERSION 保持一致。
+# TODO(D6-8): 迁移到 tools/tools.go + go.mod 锁定，见 docs/architecture/4-10-治理-命令契约.md
+# ---------------------------------------------------------------------------
+KRATOS_VERSION          ?= v2.9.2
+PROTOC_GEN_GO_VERSION   ?= v1.36.11
+PROTOC_GEN_GO_GRPC_VERSION ?= v1.6.0
+AIP_VERSION             ?= v0.80.0
+WIRE_VERSION            ?= v0.7.0
+ENT_VERSION             ?= v0.14.5
+
+.PHONY: setup-tools
+# install every code generator at a pinned version (required before `make proto`)
+setup-tools:
+	@echo "==> installing pinned codegen toolchain"
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@$(PROTOC_GEN_GO_VERSION)
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@$(PROTOC_GEN_GO_GRPC_VERSION)
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@$(KRATOS_VERSION)
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@$(KRATOS_VERSION)
+	go install go.einride.tech/aip/cmd/protoc-gen-go-aip@$(AIP_VERSION)
+	go install github.com/google/wire/cmd/wire@$(WIRE_VERSION)
+	go install entgo.io/ent/cmd/ent@$(ENT_VERSION)
+	@echo "==> done. 需要单独安装（非 Go 模块）：buf / golangci-lint / gosec"
+
 .PHONY: init
-# init env
-init:
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-	go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
-	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
+# init env (kept for backwards compatibility; prefer `make setup-tools`)
+init: setup-tools
+	go install github.com/go-kratos/kratos/cmd/kratos/v2@$(KRATOS_VERSION)
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
-	go install github.com/google/wire/cmd/wire@latest
+
+.PHONY: gen-servicetargets
+# 从 services.yaml 重新生成 mk/services.mk
+gen-servicetargets:
+	@python3 scripts/gen-service-targets.py
+
+.PHONY: verify-servicetargets
+# 校验 mk/services.mk 与 services.yaml 一致（CI 门禁）
+verify-servicetargets:
+	@python3 scripts/gen-service-targets.py --check
 
 .PHONY: setup-hooks
 # point git at the versioned .githooks directory (run once after clone)
@@ -80,9 +115,19 @@ lint-fix:
 	@golangci-lint run --fix --timeout 5m ./...
 
 .PHONY: lint-new
-# lint only new changes relative to HEAD (for incremental adoption)
+# lint only issues introduced by the current diff.
+# 必须用 --new-from-rev 而不能用 --new：
+#   `--new` 只检查工作区相对 HEAD 的变更；在 CI 的干净 checkout 上 diff 为空 →
+#   等于零检查（历史缺陷，见 docs/architecture/4-6）。
+# 基准分支可用 LINT_BASE 覆盖，默认 origin/coding/ai。
+LINT_BASE ?= origin/coding/ai
 lint-new:
-	@golangci-lint run --new --timeout 5m ./...
+	@if git rev-parse --verify --quiet "$(LINT_BASE)" >/dev/null; then \
+		golangci-lint run --new-from-rev="$(LINT_BASE)" --timeout 5m ./...; \
+	else \
+		echo "⚠️  base ref '$(LINT_BASE)' 不存在，回退为全量 lint"; \
+		golangci-lint run --timeout 5m ./...; \
+	fi
 
 .PHONY: security-check
 # run dedicated security scan
@@ -98,6 +143,7 @@ check: fmt-check lint-new
 	go vet ./...
 	go test -timeout 90s ./...
 	$(MAKE) operation-coverage-check
+	$(MAKE) verify-servicetargets
 	git diff --check
 
 .PHONY: http-convention-check

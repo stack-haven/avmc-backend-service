@@ -1,0 +1,17 @@
+# Import 分层违例基线（棘轮机制）
+#
+# 用途：`scripts/check-import-boundaries.sh` 对**新增**违例判定失败，
+#       对下列存量违例只记录、不阻断。机制与 `proto/buf-lint-baseline.txt` 一致。
+#
+# 规则（每条必须写清原因与去向，禁止无理由堆积）：
+#   <相对 backend-service 的文件路径>    # 原因 / 去向（A案阶段）
+#
+# A 案（平台样板）的范围只包含 app/platform/service 与 web-antd-admin，
+# 明确不修改 evie / edai / ai / version 的业务代码（见 docs/platform/README.md §三）。
+# 因此这些存量违例只登记，待 B 案（产品接入样板）统一整改。
+#
+# 统计口径：仅统计生产代码（*_test.go 不计入，测试允许装配具体实现）。
+
+app/evie/service/internal/service/asr_service.go  # service 层 import data/ent/viewer（transport 传 system context 用）；去向：B 案改为平台 SDK 提供 system context
+app/evie/tool/internal/service/asr_service.go     # service 层 import data；去向：B 案统一为 repo 接口注入
+app/evie/tool/internal/service/enhancement_service.go  # service 层 import data；去向：B 案统一为 repo 接口注入

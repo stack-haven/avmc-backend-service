@@ -7,7 +7,7 @@ info:
     description: 对话管理服务
     version: 0.0.1
 paths:
-    /ai/v1/ai/chats:
+    /ai/v1/chats:
         get:
             tags:
                 - ChatService
@@ -113,7 +113,7 @@ paths:
                                 $ref: '#/components/schemas/CreateChatResponse'
             security:
                 - BearerAuth: []
-    /ai/v1/ai/chats/simple:
+    /ai/v1/chats/simple:
         get:
             tags:
                 - ChatService
@@ -191,37 +191,7 @@ paths:
                                 $ref: '#/components/schemas/ListChatsResponse'
             security:
                 - BearerAuth: []
-    /ai/v1/ai/chats/status-update/{id}:
-        put:
-            tags:
-                - ChatService
-                - 对话管理服务
-            summary: 更新对话状态
-            description: 更新对话状态
-            operationId: ChatService_UpdateChatByStatus
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: integer
-                    format: uint32
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateChatByStatusRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateChatByStatusResponse'
-            security:
-                - BearerAuth: []
-    /ai/v1/ai/chats/{id}:
+    /ai/v1/chats/{id}:
         get:
             tags:
                 - ChatService
@@ -313,6 +283,59 @@ paths:
                                 $ref: '#/components/schemas/DeleteChatResponse'
             security:
                 - BearerAuth: []
+    /ai/v1/chats/{id}:status-update:
+        post:
+            tags:
+                - ChatService
+                - 对话管理服务
+            summary: 更新对话状态
+            description: 更新对话状态
+            operationId: ChatService_UpdateChatByStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateChatByStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateChatByStatusResponse'
+            security:
+                - BearerAuth: []
+    /ai/v1/chats:stream:
+        post:
+            tags:
+                - ChatService
+                - 对话管理服务
+            summary: 流式对话
+            description: 流式对话
+            operationId: ChatService_StreamChat
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/StreamChatRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StreamChatResponse'
+            security:
+                - BearerAuth: []
 components:
     schemas:
         Chat:
@@ -360,6 +383,22 @@ components:
                     format: int32
                 nextPageToken:
                     type: string
+        StreamChatRequest:
+            type: object
+            properties:
+                chatId:
+                    type: integer
+                    description: 对话ID
+                    format: uint32
+                message:
+                    type: string
+                    description: 消息内容
+        StreamChatResponse:
+            type: object
+            properties:
+                streamId:
+                    type: string
+                    description: 流ID
         UpdateChatByStatusRequest:
             type: object
             properties:
