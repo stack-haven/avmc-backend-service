@@ -39,8 +39,8 @@ type ChatMutation struct {
 	updated_at           *time.Time
 	status               *int32
 	addstatus            *int32
-	domain_id            *uint32
-	adddomain_id         *int32
+	tenant_id            *uint32
+	addtenant_id         *int32
 	deleted_at           *time.Time
 	name                 *string
 	user_id              *uint32
@@ -288,60 +288,60 @@ func (m *ChatMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *ChatMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *ChatMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *ChatMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *ChatMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the Chat entity.
+// OldTenantID returns the old "tenant_id" field's value of the Chat entity.
 // If the Chat object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChatMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *ChatMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *ChatMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *ChatMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *ChatMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *ChatMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *ChatMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *ChatMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -682,8 +682,8 @@ func (m *ChatMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, chat.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, chat.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, chat.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, chat.FieldDeletedAt)
@@ -714,8 +714,8 @@ func (m *ChatMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case chat.FieldStatus:
 		return m.Status()
-	case chat.FieldDomainID:
-		return m.DomainID()
+	case chat.FieldTenantID:
+		return m.TenantID()
 	case chat.FieldDeletedAt:
 		return m.DeletedAt()
 	case chat.FieldName:
@@ -741,8 +741,8 @@ func (m *ChatMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case chat.FieldStatus:
 		return m.OldStatus(ctx)
-	case chat.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case chat.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case chat.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case chat.FieldName:
@@ -783,12 +783,12 @@ func (m *ChatMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case chat.FieldDomainID:
+	case chat.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case chat.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -836,8 +836,8 @@ func (m *ChatMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, chat.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, chat.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, chat.FieldTenantID)
 	}
 	if m.adduser_id != nil {
 		fields = append(fields, chat.FieldUserID)
@@ -852,8 +852,8 @@ func (m *ChatMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case chat.FieldStatus:
 		return m.AddedStatus()
-	case chat.FieldDomainID:
-		return m.AddedDomainID()
+	case chat.FieldTenantID:
+		return m.AddedTenantID()
 	case chat.FieldUserID:
 		return m.AddedUserID()
 	}
@@ -872,12 +872,12 @@ func (m *ChatMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case chat.FieldDomainID:
+	case chat.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case chat.FieldUserID:
 		v, ok := value.(int32)
@@ -943,8 +943,8 @@ func (m *ChatMutation) ResetField(name string) error {
 	case chat.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case chat.FieldDomainID:
-		m.ResetDomainID()
+	case chat.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case chat.FieldDeletedAt:
 		m.ResetDeletedAt()
@@ -1059,8 +1059,8 @@ type ChatMessageMutation struct {
 	updated_at      *time.Time
 	status          *int32
 	addstatus       *int32
-	domain_id       *uint32
-	adddomain_id    *int32
+	tenant_id       *uint32
+	addtenant_id    *int32
 	deleted_at      *time.Time
 	chat_id         *uint32
 	addchat_id      *int32
@@ -1310,60 +1310,60 @@ func (m *ChatMessageMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetDomainID sets the "domain_id" field.
-func (m *ChatMessageMutation) SetDomainID(u uint32) {
-	m.domain_id = &u
-	m.adddomain_id = nil
+// SetTenantID sets the "tenant_id" field.
+func (m *ChatMessageMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
 }
 
-// DomainID returns the value of the "domain_id" field in the mutation.
-func (m *ChatMessageMutation) DomainID() (r uint32, exists bool) {
-	v := m.domain_id
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *ChatMessageMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldDomainID returns the old "domain_id" field's value of the ChatMessage entity.
+// OldTenantID returns the old "tenant_id" field's value of the ChatMessage entity.
 // If the ChatMessage object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChatMessageMutation) OldDomainID(ctx context.Context) (v uint32, err error) {
+func (m *ChatMessageMutation) OldTenantID(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomainID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomainID requires an ID field in the mutation")
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomainID: %w", err)
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
 	}
-	return oldValue.DomainID, nil
+	return oldValue.TenantID, nil
 }
 
-// AddDomainID adds u to the "domain_id" field.
-func (m *ChatMessageMutation) AddDomainID(u int32) {
-	if m.adddomain_id != nil {
-		*m.adddomain_id += u
+// AddTenantID adds u to the "tenant_id" field.
+func (m *ChatMessageMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
 	} else {
-		m.adddomain_id = &u
+		m.addtenant_id = &u
 	}
 }
 
-// AddedDomainID returns the value that was added to the "domain_id" field in this mutation.
-func (m *ChatMessageMutation) AddedDomainID() (r int32, exists bool) {
-	v := m.adddomain_id
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *ChatMessageMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetDomainID resets all changes to the "domain_id" field.
-func (m *ChatMessageMutation) ResetDomainID() {
-	m.domain_id = nil
-	m.adddomain_id = nil
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *ChatMessageMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -1811,8 +1811,8 @@ func (m *ChatMessageMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, chatmessage.FieldStatus)
 	}
-	if m.domain_id != nil {
-		fields = append(fields, chatmessage.FieldDomainID)
+	if m.tenant_id != nil {
+		fields = append(fields, chatmessage.FieldTenantID)
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, chatmessage.FieldDeletedAt)
@@ -1849,8 +1849,8 @@ func (m *ChatMessageMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case chatmessage.FieldStatus:
 		return m.Status()
-	case chatmessage.FieldDomainID:
-		return m.DomainID()
+	case chatmessage.FieldTenantID:
+		return m.TenantID()
 	case chatmessage.FieldDeletedAt:
 		return m.DeletedAt()
 	case chatmessage.FieldChatID:
@@ -1880,8 +1880,8 @@ func (m *ChatMessageMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldUpdatedAt(ctx)
 	case chatmessage.FieldStatus:
 		return m.OldStatus(ctx)
-	case chatmessage.FieldDomainID:
-		return m.OldDomainID(ctx)
+	case chatmessage.FieldTenantID:
+		return m.OldTenantID(ctx)
 	case chatmessage.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
 	case chatmessage.FieldChatID:
@@ -1926,12 +1926,12 @@ func (m *ChatMessageMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case chatmessage.FieldDomainID:
+	case chatmessage.FieldTenantID:
 		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetDomainID(v)
+		m.SetTenantID(v)
 		return nil
 	case chatmessage.FieldDeletedAt:
 		v, ok := value.(time.Time)
@@ -1993,8 +1993,8 @@ func (m *ChatMessageMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, chatmessage.FieldStatus)
 	}
-	if m.adddomain_id != nil {
-		fields = append(fields, chatmessage.FieldDomainID)
+	if m.addtenant_id != nil {
+		fields = append(fields, chatmessage.FieldTenantID)
 	}
 	if m.addchat_id != nil {
 		fields = append(fields, chatmessage.FieldChatID)
@@ -2018,8 +2018,8 @@ func (m *ChatMessageMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case chatmessage.FieldStatus:
 		return m.AddedStatus()
-	case chatmessage.FieldDomainID:
-		return m.AddedDomainID()
+	case chatmessage.FieldTenantID:
+		return m.AddedTenantID()
 	case chatmessage.FieldChatID:
 		return m.AddedChatID()
 	case chatmessage.FieldUserID:
@@ -2044,12 +2044,12 @@ func (m *ChatMessageMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
-	case chatmessage.FieldDomainID:
+	case chatmessage.FieldTenantID:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddDomainID(v)
+		m.AddTenantID(v)
 		return nil
 	case chatmessage.FieldChatID:
 		v, ok := value.(int32)
@@ -2148,8 +2148,8 @@ func (m *ChatMessageMutation) ResetField(name string) error {
 	case chatmessage.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case chatmessage.FieldDomainID:
-		m.ResetDomainID()
+	case chatmessage.FieldTenantID:
+		m.ResetTenantID()
 		return nil
 	case chatmessage.FieldDeletedAt:
 		m.ResetDeletedAt()

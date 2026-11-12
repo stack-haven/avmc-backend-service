@@ -15,9 +15,9 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
-		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
-		{Name: "name", Type: field.TypeString, Unique: true, Size: 32, Comment: "用户名，唯一"},
+		{Name: "name", Type: field.TypeString, Size: 32, Comment: "用户名，唯一"},
 		{Name: "user_id", Type: field.TypeUint32, Nullable: true, Comment: "用户ID", Default: 0},
 		{Name: "last_active_time", Type: field.TypeTime, Nullable: true, Comment: "最后活跃时间"},
 		{Name: "channel", Type: field.TypeString, Size: 32, Comment: "对话渠道"},
@@ -30,9 +30,14 @@ var (
 		PrimaryKey: []*schema.Column{AiChatsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "chat_name",
+				Name:    "chat_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{AiChatsColumns[6]},
+				Columns: []*schema.Column{AiChatsColumns[4]},
+			},
+			{
+				Name:    "chat_tenant_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{AiChatsColumns[4], AiChatsColumns[6]},
 			},
 			{
 				Name:    "chat_status",
@@ -47,7 +52,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "status", Type: field.TypeInt32, Comment: "状态：0=未知 1=启用 2=禁用", Default: 1, SchemaType: map[string]string{"mysql": "tinyint(2)", "postgres": "tinyint(2)"}},
-		{Name: "domain_id", Type: field.TypeUint32, Comment: "域ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
+		{Name: "tenant_id", Type: field.TypeUint32, Comment: "租户ID", SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint"}},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "chat_id", Type: field.TypeUint32, Nullable: true, Comment: "对话ID", Default: 0},
 		{Name: "content", Type: field.TypeString, Size: 2147483647, Comment: "对话内容"},
@@ -72,6 +77,11 @@ var (
 			},
 		},
 		Indexes: []*schema.Index{
+			{
+				Name:    "chatmessage_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{AiChatMessagesColumns[4]},
+			},
 			{
 				Name:    "chatmessage_chat_id",
 				Unique:  false,

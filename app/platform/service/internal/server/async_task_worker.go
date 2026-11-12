@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"backend-service/app/platform/service/internal/biz"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
+	entviewer "backend-service/pkg/entgo/viewer"
 )
 
 type AsyncTaskWorker struct {

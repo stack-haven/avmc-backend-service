@@ -30,7 +30,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			chat.FieldCreatedAt:      {Type: field.TypeTime, Column: chat.FieldCreatedAt},
 			chat.FieldUpdatedAt:      {Type: field.TypeTime, Column: chat.FieldUpdatedAt},
 			chat.FieldStatus:         {Type: field.TypeInt32, Column: chat.FieldStatus},
-			chat.FieldDomainID:       {Type: field.TypeUint32, Column: chat.FieldDomainID},
+			chat.FieldTenantID:       {Type: field.TypeUint32, Column: chat.FieldTenantID},
 			chat.FieldDeletedAt:      {Type: field.TypeTime, Column: chat.FieldDeletedAt},
 			chat.FieldName:           {Type: field.TypeString, Column: chat.FieldName},
 			chat.FieldUserID:         {Type: field.TypeUint32, Column: chat.FieldUserID},
@@ -52,7 +52,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			chatmessage.FieldCreatedAt:   {Type: field.TypeTime, Column: chatmessage.FieldCreatedAt},
 			chatmessage.FieldUpdatedAt:   {Type: field.TypeTime, Column: chatmessage.FieldUpdatedAt},
 			chatmessage.FieldStatus:      {Type: field.TypeInt32, Column: chatmessage.FieldStatus},
-			chatmessage.FieldDomainID:    {Type: field.TypeUint32, Column: chatmessage.FieldDomainID},
+			chatmessage.FieldTenantID:    {Type: field.TypeUint32, Column: chatmessage.FieldTenantID},
 			chatmessage.FieldDeletedAt:   {Type: field.TypeTime, Column: chatmessage.FieldDeletedAt},
 			chatmessage.FieldChatID:      {Type: field.TypeUint32, Column: chatmessage.FieldChatID},
 			chatmessage.FieldContent:     {Type: field.TypeString, Column: chatmessage.FieldContent},
@@ -138,9 +138,9 @@ func (f *ChatFilter) WhereStatus(p entql.Int32P) {
 	f.Where(p.Field(chat.FieldStatus))
 }
 
-// WhereDomainID applies the entql uint32 predicate on the domain_id field.
-func (f *ChatFilter) WhereDomainID(p entql.Uint32P) {
-	f.Where(p.Field(chat.FieldDomainID))
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *ChatFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(chat.FieldTenantID))
 }
 
 // WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
@@ -237,9 +237,9 @@ func (f *ChatMessageFilter) WhereStatus(p entql.Int32P) {
 	f.Where(p.Field(chatmessage.FieldStatus))
 }
 
-// WhereDomainID applies the entql uint32 predicate on the domain_id field.
-func (f *ChatMessageFilter) WhereDomainID(p entql.Uint32P) {
-	f.Where(p.Field(chatmessage.FieldDomainID))
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *ChatMessageFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(chatmessage.FieldTenantID))
 }
 
 // WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.

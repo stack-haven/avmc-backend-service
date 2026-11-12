@@ -1,8 +1,6 @@
 package mixins
 
 import (
-	"backend-service/app/evie/service/internal/data/ent/rule"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
@@ -32,8 +30,4 @@ func (TenantID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("tenant_id"),
 	}
-}
-
-func (TenantID) Policy() ent.Policy {
-	return rule.FilterTenantRule()
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"backend-service/app/platform/service/internal/data/ent/viewer"
+	"backend-service/pkg/entgo/viewer"
 )
 
 // TestEntPrivacyTenantIsolation 验证 Ent Privacy 租户隔离规则的真实行为。

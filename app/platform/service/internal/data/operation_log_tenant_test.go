@@ -8,7 +8,7 @@ import (
 	pb "backend-service/api/platform/service/v1"
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	"backend-service/app/platform/service/internal/data/ent/gen/operationlog"
-	"backend-service/app/platform/service/internal/data/ent/viewer"
+	"backend-service/pkg/entgo/viewer"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

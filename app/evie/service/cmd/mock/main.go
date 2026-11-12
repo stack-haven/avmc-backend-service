@@ -16,8 +16,8 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementlog"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementpolicy"
 	"backend-service/app/evie/service/internal/data/ent/gen/enhancementprofile"
-	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
 	"backend-service/app/evie/service/internal/runtimeconfig"
+	entviewer "backend-service/pkg/entgo/viewer"
 
 	"github.com/go-kratos/kratos/v2/log"
 	_ "github.com/go-sql-driver/mysql"

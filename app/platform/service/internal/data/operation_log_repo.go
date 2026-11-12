@@ -11,9 +11,9 @@ import (
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	"backend-service/app/platform/service/internal/data/ent/gen/operationlog"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/auth/authn"
+	entviewer "backend-service/pkg/entgo/viewer"
 )
 
 type operationLogRepo struct{ BaseRepo }

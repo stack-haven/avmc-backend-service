@@ -21,8 +21,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldDomainID holds the string denoting the domain_id field in the database.
-	FieldDomainID = "domain_id"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
 	// FieldChatID holds the string denoting the chat_id field in the database.
@@ -47,7 +47,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldStatus,
-	FieldDomainID,
+	FieldTenantID,
 	FieldDeletedAt,
 	FieldChatID,
 	FieldContent,
@@ -84,8 +84,9 @@ func ValidColumn(column string) bool {
 //
 //	import _ "backend-service/app/ai/service/internal/data/ent/gen/runtime"
 var (
-	Hooks        [1]ent.Hook
+	Hooks        [2]ent.Hook
 	Interceptors [1]ent.Interceptor
+	Policy       ent.Policy
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -96,10 +97,8 @@ var (
 	DefaultStatus int32
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int32) error
-	// DefaultDomainID holds the default value on creation for the "domain_id" field.
-	DefaultDomainID func() uint32
-	// DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	DomainIDValidator func(uint32) error
+	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	TenantIDValidator func(uint32) error
 	// DefaultChatID holds the default value on creation for the "chat_id" field.
 	DefaultChatID uint32
 	// DefaultUserID holds the default value on creation for the "user_id" field.
@@ -161,9 +160,9 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
-// ByDomainID orders the results by the domain_id field.
-func ByDomainID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDomainID, opts...).ToFunc()
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByDeletedAt orders the results by the deleted_at field.

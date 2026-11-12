@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"backend-service/app/ai/service/internal/data/ent/mixins"
 	"regexp"
 
 	"entgo.io/ent"
@@ -10,6 +9,8 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
+	"backend-service/app/ai/service/internal/data/ent/mixins"
 )
 
 // Chat holds the schema definition for the Chat entity.
@@ -32,7 +33,7 @@ func (Chat) Annotations() []schema.Annotation {
 // Fields of the Chat.
 func (Chat) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique().MinLen(3).MaxLen(32).Match(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)).Nillable().Comment("用户名，唯一"),
+		field.String("name").MinLen(3).MaxLen(32).Match(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)).Nillable().Comment("用户名，唯一"),
 		field.Uint32("user_id").Comment("用户ID").Default(0).Optional().Nillable(),
 		field.Time("last_active_time").Optional().Nillable().Comment("最后活跃时间"),
 		field.String("channel").MinLen(3).MaxLen(32).Match(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)).Nillable().Comment("对话渠道"),
@@ -57,7 +58,8 @@ func (Chat) Mixin() []ent.Mixin {
 // Indexes of the Chat.
 func (Chat) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name"),
+		// 对话名在租户内唯一；全局唯一会让不同租户互相占用名字。
+		index.Fields("tenant_id", "name").Unique(),
 		index.Fields("status"),
 	}
 }

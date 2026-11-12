@@ -252,8 +252,8 @@ func (c *ReleaseClient) Update() *ReleaseUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ReleaseClient) UpdateOne(r *Release) *ReleaseUpdateOne {
-	mutation := newReleaseMutation(c.config, OpUpdateOne, withRelease(r))
+func (c *ReleaseClient) UpdateOne(_m *Release) *ReleaseUpdateOne {
+	mutation := newReleaseMutation(c.config, OpUpdateOne, withRelease(_m))
 	return &ReleaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -270,8 +270,8 @@ func (c *ReleaseClient) Delete() *ReleaseDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *ReleaseClient) DeleteOne(r *Release) *ReleaseDeleteOne {
-	return c.DeleteOneID(r.ID)
+func (c *ReleaseClient) DeleteOne(_m *Release) *ReleaseDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.

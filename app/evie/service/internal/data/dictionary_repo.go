@@ -17,9 +17,9 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryentry"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryrelation"
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionaryversion"
-	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/auth/authn"
+	entviewer "backend-service/pkg/entgo/viewer"
 )
 
 type dictionaryRepo struct{ BaseRepo }

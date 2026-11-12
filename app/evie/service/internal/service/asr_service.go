@@ -14,10 +14,10 @@ import (
 
 	pb "backend-service/api/evie/service/v1"
 	"backend-service/app/evie/service/internal/biz"
-	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
 	"backend-service/pkg/asr"
 	"backend-service/pkg/auth/authn"
 	"backend-service/pkg/auth/session"
+	entviewer "backend-service/pkg/entgo/viewer"
 )
 
 // ASRServiceService ASR 语音识别 transport 适配层：所有 session_id 生成 + 增强 + 落库 都在 biz usecase 完成。

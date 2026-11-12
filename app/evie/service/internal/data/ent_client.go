@@ -10,7 +10,7 @@ import (
 	"backend-service/app/evie/service/internal/data/ent/gen/dictionarycategory"
 	"backend-service/app/evie/service/internal/data/ent/gen/intercept"
 	"backend-service/app/evie/service/internal/data/ent/gen/migrate"
-	entviewer "backend-service/app/evie/service/internal/data/ent/viewer"
+	entviewer "backend-service/pkg/entgo/viewer"
 
 	_ "backend-service/app/evie/service/internal/data/ent/gen/runtime"
 

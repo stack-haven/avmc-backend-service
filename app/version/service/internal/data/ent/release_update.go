@@ -17,30 +17,29 @@ import (
 // ReleaseUpdate is the builder for updating Release entities.
 type ReleaseUpdate struct {
 	config
-	hooks     []Hook
-	mutation  *ReleaseMutation
-	modifiers []func(*sql.UpdateBuilder)
+	hooks    []Hook
+	mutation *ReleaseMutation
 }
 
 // Where appends a list predicates to the ReleaseUpdate builder.
-func (ru *ReleaseUpdate) Where(ps ...predicate.Release) *ReleaseUpdate {
-	ru.mutation.Where(ps...)
-	return ru
+func (_u *ReleaseUpdate) Where(ps ...predicate.Release) *ReleaseUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Mutation returns the ReleaseMutation object of the builder.
-func (ru *ReleaseUpdate) Mutation() *ReleaseMutation {
-	return ru.mutation
+func (_u *ReleaseUpdate) Mutation() *ReleaseMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ru *ReleaseUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
+func (_u *ReleaseUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ru *ReleaseUpdate) SaveX(ctx context.Context) int {
-	affected, err := ru.Save(ctx)
+func (_u *ReleaseUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -48,35 +47,28 @@ func (ru *ReleaseUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ru *ReleaseUpdate) Exec(ctx context.Context) error {
-	_, err := ru.Save(ctx)
+func (_u *ReleaseUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ru *ReleaseUpdate) ExecX(ctx context.Context) {
-	if err := ru.Exec(ctx); err != nil {
+func (_u *ReleaseUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (ru *ReleaseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ReleaseUpdate {
-	ru.modifiers = append(ru.modifiers, modifiers...)
-	return ru
-}
-
-func (ru *ReleaseUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *ReleaseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(release.Table, release.Columns, sqlgraph.NewFieldSpec(release.FieldID, field.TypeInt))
-	if ps := ru.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(ru.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{release.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -84,45 +76,44 @@ func (ru *ReleaseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ru.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // ReleaseUpdateOne is the builder for updating a single Release entity.
 type ReleaseUpdateOne struct {
 	config
-	fields    []string
-	hooks     []Hook
-	mutation  *ReleaseMutation
-	modifiers []func(*sql.UpdateBuilder)
+	fields   []string
+	hooks    []Hook
+	mutation *ReleaseMutation
 }
 
 // Mutation returns the ReleaseMutation object of the builder.
-func (ruo *ReleaseUpdateOne) Mutation() *ReleaseMutation {
-	return ruo.mutation
+func (_u *ReleaseUpdateOne) Mutation() *ReleaseMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the ReleaseUpdate builder.
-func (ruo *ReleaseUpdateOne) Where(ps ...predicate.Release) *ReleaseUpdateOne {
-	ruo.mutation.Where(ps...)
-	return ruo
+func (_u *ReleaseUpdateOne) Where(ps ...predicate.Release) *ReleaseUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ruo *ReleaseUpdateOne) Select(field string, fields ...string) *ReleaseUpdateOne {
-	ruo.fields = append([]string{field}, fields...)
-	return ruo
+func (_u *ReleaseUpdateOne) Select(field string, fields ...string) *ReleaseUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Release entity.
-func (ruo *ReleaseUpdateOne) Save(ctx context.Context) (*Release, error) {
-	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+func (_u *ReleaseUpdateOne) Save(ctx context.Context) (*Release, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ruo *ReleaseUpdateOne) SaveX(ctx context.Context) *Release {
-	node, err := ruo.Save(ctx)
+func (_u *ReleaseUpdateOne) SaveX(ctx context.Context) *Release {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -130,32 +121,26 @@ func (ruo *ReleaseUpdateOne) SaveX(ctx context.Context) *Release {
 }
 
 // Exec executes the query on the entity.
-func (ruo *ReleaseUpdateOne) Exec(ctx context.Context) error {
-	_, err := ruo.Save(ctx)
+func (_u *ReleaseUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ruo *ReleaseUpdateOne) ExecX(ctx context.Context) {
-	if err := ruo.Exec(ctx); err != nil {
+func (_u *ReleaseUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (ruo *ReleaseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ReleaseUpdateOne {
-	ruo.modifiers = append(ruo.modifiers, modifiers...)
-	return ruo
-}
-
-func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err error) {
+func (_u *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err error) {
 	_spec := sqlgraph.NewUpdateSpec(release.Table, release.Columns, sqlgraph.NewFieldSpec(release.FieldID, field.TypeInt))
-	id, ok := ruo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Release.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ruo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, release.FieldID)
 		for _, f := range fields {
@@ -167,18 +152,17 @@ func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err e
 			}
 		}
 	}
-	if ps := ruo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(ruo.modifiers...)
-	_node = &Release{config: ruo.config}
+	_node = &Release{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{release.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -186,6 +170,6 @@ func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err e
 		}
 		return nil, err
 	}
-	ruo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

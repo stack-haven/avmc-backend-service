@@ -1,13 +1,14 @@
 package schema
 
 import (
-	pkgMixin "backend-service/pkg/entgo/mixin"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
+	entgo "backend-service/pkg/entgo/entc"
+	pkgMixin "backend-service/pkg/entgo/mixin"
 )
 
 // AsyncTask stores durable background work claimed by one worker at a time.
@@ -18,6 +19,13 @@ func (AsyncTask) Annotations() []schema.Annotation {
 		entsql.Annotation{Charset: "utf8mb4", Collation: "utf8mb4_bin", Table: "system_async_tasks"},
 		entsql.WithComments(true),
 		schema.Comment("统一异步任务表"),
+		// 2026-11-12 决策：异步任务暂不做租户隔离。任务里含有跨租户的运维动作，
+		// 租户维度的过滤会让 worker 无法统一领取，改造成本高于收益。
+		// 现状：该表保留 tenant_id 列（记录任务归属，供查询展示），但不施加隐私策略；
+		// 访问边界由平台操作面鉴权（platformControlServer + Casbin）承担。
+		// 后续若要升级为租户隔离：删除本注解，改为嵌入 mixins.TenantID 并补齐
+		// rule 分派，同时调整 worker 的领取逻辑（用 system 上下文跨租户领取）。
+		entgo.GlobalScope{},
 	}
 }
 func (AsyncTask) Fields() []ent.Field {

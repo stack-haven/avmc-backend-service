@@ -11,8 +11,8 @@ import (
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	"backend-service/app/platform/service/internal/data/ent/gen/notificationprovider"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
+	entviewer "backend-service/pkg/entgo/viewer"
 	"backend-service/pkg/utils/convert"
 
 	// 触发通知提供商注册（按 provider_type 分发的渠道提供商）

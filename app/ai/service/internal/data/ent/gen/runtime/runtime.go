@@ -6,7 +6,11 @@ import (
 	"backend-service/app/ai/service/internal/data/ent/gen/chat"
 	"backend-service/app/ai/service/internal/data/ent/gen/chatmessage"
 	"backend-service/app/ai/service/internal/data/ent/schema"
+	"context"
 	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/privacy"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -14,8 +18,18 @@ import (
 // to their package variables.
 func init() {
 	chatMixin := schema.Chat{}.Mixin()
+	chat.Policy = privacy.NewPolicies(chatMixin[0], schema.Chat{})
+	chat.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := chat.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
 	chatMixinHooks1 := chatMixin[1].Hooks()
-	chat.Hooks[0] = chatMixinHooks1[0]
+
+	chat.Hooks[1] = chatMixinHooks1[0]
 	chatMixinInters1 := chatMixin[1].Interceptors()
 	chat.Interceptors[0] = chatMixinInters1[0]
 	chatMixinFields0 := chatMixin[0].Fields()
@@ -52,12 +66,10 @@ func init() {
 			return nil
 		}
 	}()
-	// chatDescDomainID is the schema descriptor for domain_id field.
-	chatDescDomainID := chatMixinFields0[4].Descriptor()
-	// chat.DefaultDomainID holds the default value on creation for the domain_id field.
-	chat.DefaultDomainID = chatDescDomainID.Default.(func() uint32)
-	// chat.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	chat.DomainIDValidator = chatDescDomainID.Validators[0].(func(uint32) error)
+	// chatDescTenantID is the schema descriptor for tenant_id field.
+	chatDescTenantID := chatMixinFields0[4].Descriptor()
+	// chat.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	chat.TenantIDValidator = chatDescTenantID.Validators[0].(func(uint32) error)
 	// chatDescName is the schema descriptor for name field.
 	chatDescName := chatFields[0].Descriptor()
 	// chat.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -105,8 +117,18 @@ func init() {
 	// chat.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	chat.IDValidator = chatDescID.Validators[0].(func(uint32) error)
 	chatmessageMixin := schema.ChatMessage{}.Mixin()
+	chatmessage.Policy = privacy.NewPolicies(chatmessageMixin[0], schema.ChatMessage{})
+	chatmessage.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := chatmessage.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
 	chatmessageMixinHooks1 := chatmessageMixin[1].Hooks()
-	chatmessage.Hooks[0] = chatmessageMixinHooks1[0]
+
+	chatmessage.Hooks[1] = chatmessageMixinHooks1[0]
 	chatmessageMixinInters1 := chatmessageMixin[1].Interceptors()
 	chatmessage.Interceptors[0] = chatmessageMixinInters1[0]
 	chatmessageMixinFields0 := chatmessageMixin[0].Fields()
@@ -143,12 +165,10 @@ func init() {
 			return nil
 		}
 	}()
-	// chatmessageDescDomainID is the schema descriptor for domain_id field.
-	chatmessageDescDomainID := chatmessageMixinFields0[4].Descriptor()
-	// chatmessage.DefaultDomainID holds the default value on creation for the domain_id field.
-	chatmessage.DefaultDomainID = chatmessageDescDomainID.Default.(func() uint32)
-	// chatmessage.DomainIDValidator is a validator for the "domain_id" field. It is called by the builders before save.
-	chatmessage.DomainIDValidator = chatmessageDescDomainID.Validators[0].(func(uint32) error)
+	// chatmessageDescTenantID is the schema descriptor for tenant_id field.
+	chatmessageDescTenantID := chatmessageMixinFields0[4].Descriptor()
+	// chatmessage.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	chatmessage.TenantIDValidator = chatmessageDescTenantID.Validators[0].(func(uint32) error)
 	// chatmessageDescChatID is the schema descriptor for chat_id field.
 	chatmessageDescChatID := chatmessageFields[0].Descriptor()
 	// chatmessage.DefaultChatID holds the default value on creation for the chat_id field.

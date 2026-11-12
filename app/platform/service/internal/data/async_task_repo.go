@@ -12,8 +12,8 @@ import (
 	"backend-service/app/platform/service/internal/biz"
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	"backend-service/app/platform/service/internal/data/ent/gen/asynctask"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
+	entviewer "backend-service/pkg/entgo/viewer"
 	"backend-service/pkg/utils/convert"
 
 	"github.com/go-kratos/kratos/v2/errors"

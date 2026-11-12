@@ -1,10 +1,10 @@
 package mixins
 
 import (
-	pkgMixin "backend-service/pkg/entgo/mixin"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/mixin"
+
+	pkgMixin "backend-service/pkg/entgo/mixin"
 )
 
 var _ ent.Mixin = (*BaseMixin)(nil)
@@ -23,8 +23,4 @@ func (BaseMixin) Fields() []ent.Field {
 
 func (BaseMixin) Indexes() []ent.Index {
 	return TenantID{}.Indexes()
-}
-
-func (BaseMixin) Policy() ent.Policy {
-	return TenantID{}.Policy()
 }

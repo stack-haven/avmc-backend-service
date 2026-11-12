@@ -10,7 +10,7 @@ import (
 	"backend-service/app/platform/service/internal/data/ent/gen/intercept"
 	"backend-service/app/platform/service/internal/data/ent/gen/migrate"
 	"backend-service/app/platform/service/internal/data/ent/gen/role"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
+	entviewer "backend-service/pkg/entgo/viewer"
 
 	_ "backend-service/app/platform/service/internal/data/ent/gen/runtime"
 

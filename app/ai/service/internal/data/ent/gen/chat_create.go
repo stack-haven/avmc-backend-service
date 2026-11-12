@@ -65,17 +65,9 @@ func (_c *ChatCreate) SetNillableStatus(v *int32) *ChatCreate {
 	return _c
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_c *ChatCreate) SetDomainID(v uint32) *ChatCreate {
-	_c.mutation.SetDomainID(v)
-	return _c
-}
-
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_c *ChatCreate) SetNillableDomainID(v *uint32) *ChatCreate {
-	if v != nil {
-		_c.SetDomainID(*v)
-	}
+// SetTenantID sets the "tenant_id" field.
+func (_c *ChatCreate) SetTenantID(v uint32) *ChatCreate {
+	_c.mutation.SetTenantID(v)
 	return _c
 }
 
@@ -209,13 +201,6 @@ func (_c *ChatCreate) defaults() error {
 		v := chat.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		if chat.DefaultDomainID == nil {
-			return fmt.Errorf("gen: uninitialized chat.DefaultDomainID (forgotten import gen/runtime?)")
-		}
-		v := chat.DefaultDomainID()
-		_c.mutation.SetDomainID(v)
-	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		v := chat.DefaultUserID
 		_c.mutation.SetUserID(v)
@@ -239,12 +224,12 @@ func (_c *ChatCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "Chat.status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.DomainID(); !ok {
-		return &ValidationError{Name: "domain_id", err: errors.New(`gen: missing required field "Chat.domain_id"`)}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`gen: missing required field "Chat.tenant_id"`)}
 	}
-	if v, ok := _c.mutation.DomainID(); ok {
-		if err := chat.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "Chat.domain_id": %w`, err)}
+	if v, ok := _c.mutation.TenantID(); ok {
+		if err := chat.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "Chat.tenant_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
@@ -313,9 +298,9 @@ func (_c *ChatCreate) createSpec() (*Chat, *sqlgraph.CreateSpec) {
 		_spec.SetField(chat.FieldStatus, field.TypeInt32, value)
 		_node.Status = &value
 	}
-	if value, ok := _c.mutation.DomainID(); ok {
-		_spec.SetField(chat.FieldDomainID, field.TypeUint32, value)
-		_node.DomainID = value
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(chat.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(chat.FieldDeletedAt, field.TypeTime, value)
@@ -435,21 +420,21 @@ func (u *ChatUpsert) AddStatus(v int32) *ChatUpsert {
 	return u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *ChatUpsert) SetDomainID(v uint32) *ChatUpsert {
-	u.Set(chat.FieldDomainID, v)
+// SetTenantID sets the "tenant_id" field.
+func (u *ChatUpsert) SetTenantID(v uint32) *ChatUpsert {
+	u.Set(chat.FieldTenantID, v)
 	return u
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *ChatUpsert) UpdateDomainID() *ChatUpsert {
-	u.SetExcluded(chat.FieldDomainID)
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *ChatUpsert) UpdateTenantID() *ChatUpsert {
+	u.SetExcluded(chat.FieldTenantID)
 	return u
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *ChatUpsert) AddDomainID(v uint32) *ChatUpsert {
-	u.Add(chat.FieldDomainID, v)
+// AddTenantID adds v to the "tenant_id" field.
+func (u *ChatUpsert) AddTenantID(v uint32) *ChatUpsert {
+	u.Add(chat.FieldTenantID, v)
 	return u
 }
 
@@ -623,24 +608,24 @@ func (u *ChatUpsertOne) UpdateStatus() *ChatUpsertOne {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *ChatUpsertOne) SetDomainID(v uint32) *ChatUpsertOne {
+// SetTenantID sets the "tenant_id" field.
+func (u *ChatUpsertOne) SetTenantID(v uint32) *ChatUpsertOne {
 	return u.Update(func(s *ChatUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *ChatUpsertOne) AddDomainID(v uint32) *ChatUpsertOne {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *ChatUpsertOne) AddTenantID(v uint32) *ChatUpsertOne {
 	return u.Update(func(s *ChatUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *ChatUpsertOne) UpdateDomainID() *ChatUpsertOne {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *ChatUpsertOne) UpdateTenantID() *ChatUpsertOne {
 	return u.Update(func(s *ChatUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 
@@ -994,24 +979,24 @@ func (u *ChatUpsertBulk) UpdateStatus() *ChatUpsertBulk {
 	})
 }
 
-// SetDomainID sets the "domain_id" field.
-func (u *ChatUpsertBulk) SetDomainID(v uint32) *ChatUpsertBulk {
+// SetTenantID sets the "tenant_id" field.
+func (u *ChatUpsertBulk) SetTenantID(v uint32) *ChatUpsertBulk {
 	return u.Update(func(s *ChatUpsert) {
-		s.SetDomainID(v)
+		s.SetTenantID(v)
 	})
 }
 
-// AddDomainID adds v to the "domain_id" field.
-func (u *ChatUpsertBulk) AddDomainID(v uint32) *ChatUpsertBulk {
+// AddTenantID adds v to the "tenant_id" field.
+func (u *ChatUpsertBulk) AddTenantID(v uint32) *ChatUpsertBulk {
 	return u.Update(func(s *ChatUpsert) {
-		s.AddDomainID(v)
+		s.AddTenantID(v)
 	})
 }
 
-// UpdateDomainID sets the "domain_id" field to the value that was provided on create.
-func (u *ChatUpsertBulk) UpdateDomainID() *ChatUpsertBulk {
+// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
+func (u *ChatUpsertBulk) UpdateTenantID() *ChatUpsertBulk {
 	return u.Update(func(s *ChatUpsert) {
-		s.UpdateDomainID()
+		s.UpdateTenantID()
 	})
 }
 

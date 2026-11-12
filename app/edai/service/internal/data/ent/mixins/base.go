@@ -1,10 +1,10 @@
 package mixins
 
 import (
-	pkgMixin "backend-service/pkg/entgo/mixin"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/mixin"
+
+	pkgMixin "backend-service/pkg/entgo/mixin"
 )
 
 var _ ent.Mixin = (*BaseMixin)(nil)
@@ -26,10 +26,6 @@ func (BaseMixin) Indexes() []ent.Index {
 	return TenantID{}.Indexes()
 }
 
-func (BaseMixin) Policy() ent.Policy {
-	return TenantID{}.Policy()
-}
-
 var _ ent.Mixin = (*BaseMixinNoStatus)(nil)
 
 // BaseMixinNoStatus 与 BaseMixin 相同，但**不含通用 status 字段**。
@@ -49,8 +45,4 @@ func (BaseMixinNoStatus) Fields() []ent.Field {
 
 func (BaseMixinNoStatus) Indexes() []ent.Index {
 	return TenantID{}.Indexes()
-}
-
-func (BaseMixinNoStatus) Policy() ent.Policy {
-	return TenantID{}.Policy()
 }

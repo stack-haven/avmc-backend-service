@@ -8,6 +8,7 @@ import (
 	"backend-service/app/ai/service/internal/data/ent/gen/predicate"
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"math"
 
@@ -21,13 +22,12 @@ import (
 // ChatQuery is the builder for querying Chat entities.
 type ChatQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []chat.OrderOption
-	inters                []Interceptor
-	predicates            []predicate.Chat
-	withChatMessages      *ChatMessageQuery
-	modifiers             []func(*sql.Selector)
-	withNamedChatMessages map[string]*ChatMessageQuery
+	ctx              *QueryContext
+	order            []chat.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.Chat
+	withChatMessages *ChatMessageQuery
+	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -368,6 +368,12 @@ func (_q *ChatQuery) prepareQuery(ctx context.Context) error {
 		}
 		_q.sql = prev
 	}
+	if chat.Policy == nil {
+		return errors.New("gen: uninitialized chat.Policy (forgotten import gen/runtime?)")
+	}
+	if err := chat.Policy.EvalQuery(ctx, _q); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -404,13 +410,6 @@ func (_q *ChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Chat, e
 		if err := _q.loadChatMessages(ctx, query, nodes,
 			func(n *Chat) { n.Edges.ChatMessages = []*ChatMessage{} },
 			func(n *Chat, e *ChatMessage) { n.Edges.ChatMessages = append(n.Edges.ChatMessages, e) }); err != nil {
-			return nil, err
-		}
-	}
-	for name, query := range _q.withNamedChatMessages {
-		if err := _q.loadChatMessages(ctx, query, nodes,
-			func(n *Chat) { n.appendNamedChatMessages(name) },
-			func(n *Chat, e *ChatMessage) { n.appendNamedChatMessages(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -566,20 +565,6 @@ func (_q *ChatQuery) ForShare(opts ...sql.LockOption) *ChatQuery {
 func (_q *ChatQuery) Modify(modifiers ...func(s *sql.Selector)) *ChatSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
-}
-
-// WithNamedChatMessages tells the query-builder to eager-load the nodes that are connected to the "chat_messages"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (_q *ChatQuery) WithNamedChatMessages(name string, opts ...func(*ChatMessageQuery)) *ChatQuery {
-	query := (&ChatMessageClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	if _q.withNamedChatMessages == nil {
-		_q.withNamedChatMessages = make(map[string]*ChatMessageQuery)
-	}
-	_q.withNamedChatMessages[name] = query
-	return _q
 }
 
 // ChatGroupBy is the group-by builder for Chat entities.

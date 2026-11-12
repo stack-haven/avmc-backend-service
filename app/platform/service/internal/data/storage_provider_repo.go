@@ -12,9 +12,9 @@ import (
 	"backend-service/app/platform/service/internal/data/ent/gen"
 	"backend-service/app/platform/service/internal/data/ent/gen/fileobject"
 	"backend-service/app/platform/service/internal/data/ent/gen/storageprovider"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
 	"backend-service/pkg/conf"
+	entviewer "backend-service/pkg/entgo/viewer"
 	"backend-service/pkg/objectstorage"
 
 	// 触发供应商注册

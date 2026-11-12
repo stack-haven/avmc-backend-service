@@ -5,10 +5,8 @@ package ent
 import (
 	"backend-service/app/version/service/internal/data/ent/release"
 	"context"
-	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
@@ -18,22 +16,21 @@ type ReleaseCreate struct {
 	config
 	mutation *ReleaseMutation
 	hooks    []Hook
-	conflict []sql.ConflictOption
 }
 
 // Mutation returns the ReleaseMutation object of the builder.
-func (rc *ReleaseCreate) Mutation() *ReleaseMutation {
-	return rc.mutation
+func (_c *ReleaseCreate) Mutation() *ReleaseMutation {
+	return _c.mutation
 }
 
 // Save creates the Release in the database.
-func (rc *ReleaseCreate) Save(ctx context.Context) (*Release, error) {
-	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
+func (_c *ReleaseCreate) Save(ctx context.Context) (*Release, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rc *ReleaseCreate) SaveX(ctx context.Context) *Release {
-	v, err := rc.Save(ctx)
+func (_c *ReleaseCreate) SaveX(ctx context.Context) *Release {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -41,29 +38,29 @@ func (rc *ReleaseCreate) SaveX(ctx context.Context) *Release {
 }
 
 // Exec executes the query.
-func (rc *ReleaseCreate) Exec(ctx context.Context) error {
-	_, err := rc.Save(ctx)
+func (_c *ReleaseCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rc *ReleaseCreate) ExecX(ctx context.Context) {
-	if err := rc.Exec(ctx); err != nil {
+func (_c *ReleaseCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rc *ReleaseCreate) check() error {
+func (_c *ReleaseCreate) check() error {
 	return nil
 }
 
-func (rc *ReleaseCreate) sqlSave(ctx context.Context) (*Release, error) {
-	if err := rc.check(); err != nil {
+func (_c *ReleaseCreate) sqlSave(ctx context.Context) (*Release, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -71,134 +68,17 @@ func (rc *ReleaseCreate) sqlSave(ctx context.Context) (*Release, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	rc.mutation.id = &_node.ID
-	rc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (rc *ReleaseCreate) createSpec() (*Release, *sqlgraph.CreateSpec) {
+func (_c *ReleaseCreate) createSpec() (*Release, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Release{config: rc.config}
+		_node = &Release{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(release.Table, sqlgraph.NewFieldSpec(release.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = rc.conflict
 	return _node, _spec
-}
-
-// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Release.Create().
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (rc *ReleaseCreate) OnConflict(opts ...sql.ConflictOption) *ReleaseUpsertOne {
-	rc.conflict = opts
-	return &ReleaseUpsertOne{
-		create: rc,
-	}
-}
-
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Release.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
-func (rc *ReleaseCreate) OnConflictColumns(columns ...string) *ReleaseUpsertOne {
-	rc.conflict = append(rc.conflict, sql.ConflictColumns(columns...))
-	return &ReleaseUpsertOne{
-		create: rc,
-	}
-}
-
-type (
-	// ReleaseUpsertOne is the builder for "upsert"-ing
-	//  one Release node.
-	ReleaseUpsertOne struct {
-		create *ReleaseCreate
-	}
-
-	// ReleaseUpsert is the "OnConflict" setter.
-	ReleaseUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Release.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *ReleaseUpsertOne) UpdateNewValues() *ReleaseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Release.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *ReleaseUpsertOne) Ignore() *ReleaseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *ReleaseUpsertOne) DoNothing() *ReleaseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the ReleaseCreate.OnConflict
-// documentation for more info.
-func (u *ReleaseUpsertOne) Update(set func(*ReleaseUpsert)) *ReleaseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&ReleaseUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// Exec executes the query.
-func (u *ReleaseUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for ReleaseCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *ReleaseUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ReleaseUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *ReleaseUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
 }
 
 // ReleaseCreateBulk is the builder for creating many Release entities in bulk.
@@ -206,20 +86,19 @@ type ReleaseCreateBulk struct {
 	config
 	err      error
 	builders []*ReleaseCreate
-	conflict []sql.ConflictOption
 }
 
 // Save creates the Release entities in the database.
-func (rcb *ReleaseCreateBulk) Save(ctx context.Context) ([]*Release, error) {
-	if rcb.err != nil {
-		return nil, rcb.err
+func (_c *ReleaseCreateBulk) Save(ctx context.Context) ([]*Release, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
-	nodes := make([]*Release, len(rcb.builders))
-	mutators := make([]Mutator, len(rcb.builders))
-	for i := range rcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Release, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := rcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ReleaseMutation)
 				if !ok {
@@ -232,12 +111,11 @@ func (rcb *ReleaseCreateBulk) Save(ctx context.Context) ([]*Release, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = rcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -261,7 +139,7 @@ func (rcb *ReleaseCreateBulk) Save(ctx context.Context) ([]*Release, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -269,8 +147,8 @@ func (rcb *ReleaseCreateBulk) Save(ctx context.Context) ([]*Release, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rcb *ReleaseCreateBulk) SaveX(ctx context.Context) []*Release {
-	v, err := rcb.Save(ctx)
+func (_c *ReleaseCreateBulk) SaveX(ctx context.Context) []*Release {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -278,113 +156,14 @@ func (rcb *ReleaseCreateBulk) SaveX(ctx context.Context) []*Release {
 }
 
 // Exec executes the query.
-func (rcb *ReleaseCreateBulk) Exec(ctx context.Context) error {
-	_, err := rcb.Save(ctx)
+func (_c *ReleaseCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rcb *ReleaseCreateBulk) ExecX(ctx context.Context) {
-	if err := rcb.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Release.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (rcb *ReleaseCreateBulk) OnConflict(opts ...sql.ConflictOption) *ReleaseUpsertBulk {
-	rcb.conflict = opts
-	return &ReleaseUpsertBulk{
-		create: rcb,
-	}
-}
-
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Release.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
-func (rcb *ReleaseCreateBulk) OnConflictColumns(columns ...string) *ReleaseUpsertBulk {
-	rcb.conflict = append(rcb.conflict, sql.ConflictColumns(columns...))
-	return &ReleaseUpsertBulk{
-		create: rcb,
-	}
-}
-
-// ReleaseUpsertBulk is the builder for "upsert"-ing
-// a bulk of Release nodes.
-type ReleaseUpsertBulk struct {
-	create *ReleaseCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Release.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *ReleaseUpsertBulk) UpdateNewValues() *ReleaseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Release.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *ReleaseUpsertBulk) Ignore() *ReleaseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *ReleaseUpsertBulk) DoNothing() *ReleaseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the ReleaseCreateBulk.OnConflict
-// documentation for more info.
-func (u *ReleaseUpsertBulk) Update(set func(*ReleaseUpsert)) *ReleaseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&ReleaseUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// Exec executes the query.
-func (u *ReleaseUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ReleaseCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for ReleaseCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *ReleaseUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
+func (_c *ReleaseCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

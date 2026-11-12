@@ -6,6 +6,7 @@ import (
 	"backend-service/app/ai/service/internal/data/ent/gen/chatmessage"
 	"backend-service/app/ai/service/internal/data/ent/gen/predicate"
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
@@ -330,6 +331,12 @@ func (_q *ChatMessageQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		_q.sql = prev
+	}
+	if chatmessage.Policy == nil {
+		return errors.New("gen: uninitialized chatmessage.Policy (forgotten import gen/runtime?)")
+	}
+	if err := chatmessage.Policy.EvalQuery(ctx, _q); err != nil {
+		return err
 	}
 	return nil
 }

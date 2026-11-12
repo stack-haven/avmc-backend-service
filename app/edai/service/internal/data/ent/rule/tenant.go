@@ -1,15 +1,16 @@
+//go:build !ent_bootstrap
+// +build !ent_bootstrap
+
 package rule
 
 import (
 	"context"
 
+	"entgo.io/ent"
+
 	"backend-service/app/edai/service/internal/data/ent/gen"
 	"backend-service/app/edai/service/internal/data/ent/gen/privacy"
-	"backend-service/app/edai/service/internal/data/ent/viewer"
-
-	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entql"
+	"backend-service/pkg/entgo/viewer"
 )
 
 const tenantIDField = "tenant_id"
@@ -36,7 +37,7 @@ func (tenantRule) EvalQuery(ctx context.Context, q ent.Query) error {
 	if !ok {
 		return privacy.Denyf("missing tenant context")
 	}
-	return filterTenantQuery(q, tenantID)
+	return gen.FilterTenantQuery(q, tenantID)
 }
 
 func (tenantRule) EvalMutation(ctx context.Context, m ent.Mutation) error {
@@ -64,50 +65,8 @@ func (tenantRule) EvalMutation(ctx context.Context, m ent.Mutation) error {
 		}
 		return privacy.Skip
 	}
-	return filterTenantMutation(m, tenantID)
+	return gen.FilterTenantMutation(m, tenantID)
 }
 
 // 注意：EDAI 新增实体后必须同步扩充这两个 switch，否则该实体的
 // 查询/变更会被 privacy.Denyf 拒绝（fail-closed，不会静默放行）。
-func filterTenantQuery(q ent.Query, tenantID uint32) error {
-	switch q := q.(type) {
-	case *gen.UserQuery:
-		q.Filter().WhereTenantID(tenantScope(tenantID))
-	case *gen.DataSourceQuery:
-		q.Filter().WhereTenantID(tenantScope(tenantID))
-	case *gen.FileRecordQuery:
-		q.Filter().WhereTenantID(tenantScope(tenantID))
-	case *gen.ScanTaskQuery:
-		q.Filter().WhereTenantID(tenantScope(tenantID))
-	default:
-		return privacy.Denyf("unexpected tenant query type %T", q)
-	}
-	return privacy.Skip
-}
-
-func filterTenantMutation(m ent.Mutation, tenantID uint32) error {
-	switch m := m.(type) {
-	case *gen.UserMutation:
-		m.WhereP(tenantFieldEQ(tenantID))
-	case *gen.DataSourceMutation:
-		m.WhereP(tenantFieldEQ(tenantID))
-	case *gen.FileRecordMutation:
-		m.WhereP(tenantFieldEQ(tenantID))
-	case *gen.ScanTaskMutation:
-		m.WhereP(tenantFieldEQ(tenantID))
-	default:
-		return privacy.Denyf("unexpected tenant mutation type %T", m)
-	}
-	return privacy.Skip
-}
-
-func tenantFieldEQ(tenantID uint32) func(*sql.Selector) {
-	return func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(tenantIDField), tenantID))
-	}
-}
-
-// tenantScope 返回租户可见范围：本租户数据 + 平台级全局数据（tenant_id=0）。
-func tenantScope(tenantID uint32) entql.Uint32P {
-	return entql.Uint32Or(entql.Uint32EQ(tenantID), entql.Uint32EQ(0))
-}

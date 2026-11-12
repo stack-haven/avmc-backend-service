@@ -1,11 +1,11 @@
 package schema
 
 import (
-	"backend-service/app/edai/service/internal/data/ent/mixins"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
+	"backend-service/app/edai/service/internal/data/ent/mixins"
 )
 
 // FileRecord 物理文件记录。

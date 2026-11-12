@@ -9,10 +9,10 @@ import (
 	"os"
 
 	"backend-service/app/platform/service/internal/data"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/app/platform/service/internal/runtimeconfig"
 	authzEngine "backend-service/pkg/auth/authz"
 	authzCasbin "backend-service/pkg/auth/authz/casbin"
+	entviewer "backend-service/pkg/entgo/viewer"
 
 	"github.com/go-kratos/kratos/v2/log"
 	_ "github.com/go-sql-driver/mysql"

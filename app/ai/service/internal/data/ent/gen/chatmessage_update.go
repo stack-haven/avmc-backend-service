@@ -56,24 +56,24 @@ func (_u *ChatMessageUpdate) AddStatus(v int32) *ChatMessageUpdate {
 	return _u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_u *ChatMessageUpdate) SetDomainID(v uint32) *ChatMessageUpdate {
-	_u.mutation.ResetDomainID()
-	_u.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_u *ChatMessageUpdate) SetTenantID(v uint32) *ChatMessageUpdate {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
 	return _u
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_u *ChatMessageUpdate) SetNillableDomainID(v *uint32) *ChatMessageUpdate {
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *ChatMessageUpdate) SetNillableTenantID(v *uint32) *ChatMessageUpdate {
 	if v != nil {
-		_u.SetDomainID(*v)
+		_u.SetTenantID(*v)
 	}
 	return _u
 }
 
-// AddDomainID adds value to the "domain_id" field.
-func (_u *ChatMessageUpdate) AddDomainID(v int32) *ChatMessageUpdate {
-	_u.mutation.AddDomainID(v)
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *ChatMessageUpdate) AddTenantID(v int32) *ChatMessageUpdate {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -287,9 +287,9 @@ func (_u *ChatMessageUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "ChatMessage.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.DomainID(); ok {
-		if err := chatmessage.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "ChatMessage.domain_id": %w`, err)}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := chatmessage.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "ChatMessage.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Role(); ok {
@@ -327,11 +327,11 @@ func (_u *ChatMessageUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(chatmessage.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.DomainID(); ok {
-		_spec.SetField(chatmessage.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(chatmessage.FieldTenantID, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.AddedDomainID(); ok {
-		_spec.AddField(chatmessage.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(chatmessage.FieldTenantID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(chatmessage.FieldDeletedAt, field.TypeTime, value)
@@ -430,24 +430,24 @@ func (_u *ChatMessageUpdateOne) AddStatus(v int32) *ChatMessageUpdateOne {
 	return _u
 }
 
-// SetDomainID sets the "domain_id" field.
-func (_u *ChatMessageUpdateOne) SetDomainID(v uint32) *ChatMessageUpdateOne {
-	_u.mutation.ResetDomainID()
-	_u.mutation.SetDomainID(v)
+// SetTenantID sets the "tenant_id" field.
+func (_u *ChatMessageUpdateOne) SetTenantID(v uint32) *ChatMessageUpdateOne {
+	_u.mutation.ResetTenantID()
+	_u.mutation.SetTenantID(v)
 	return _u
 }
 
-// SetNillableDomainID sets the "domain_id" field if the given value is not nil.
-func (_u *ChatMessageUpdateOne) SetNillableDomainID(v *uint32) *ChatMessageUpdateOne {
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *ChatMessageUpdateOne) SetNillableTenantID(v *uint32) *ChatMessageUpdateOne {
 	if v != nil {
-		_u.SetDomainID(*v)
+		_u.SetTenantID(*v)
 	}
 	return _u
 }
 
-// AddDomainID adds value to the "domain_id" field.
-func (_u *ChatMessageUpdateOne) AddDomainID(v int32) *ChatMessageUpdateOne {
-	_u.mutation.AddDomainID(v)
+// AddTenantID adds value to the "tenant_id" field.
+func (_u *ChatMessageUpdateOne) AddTenantID(v int32) *ChatMessageUpdateOne {
+	_u.mutation.AddTenantID(v)
 	return _u
 }
 
@@ -674,9 +674,9 @@ func (_u *ChatMessageUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`gen: validator failed for field "ChatMessage.status": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.DomainID(); ok {
-		if err := chatmessage.DomainIDValidator(v); err != nil {
-			return &ValidationError{Name: "domain_id", err: fmt.Errorf(`gen: validator failed for field "ChatMessage.domain_id": %w`, err)}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := chatmessage.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`gen: validator failed for field "ChatMessage.tenant_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Role(); ok {
@@ -731,11 +731,11 @@ func (_u *ChatMessageUpdateOne) sqlSave(ctx context.Context) (_node *ChatMessage
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(chatmessage.FieldStatus, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.DomainID(); ok {
-		_spec.SetField(chatmessage.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(chatmessage.FieldTenantID, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.AddedDomainID(); ok {
-		_spec.AddField(chatmessage.FieldDomainID, field.TypeUint32, value)
+	if value, ok := _u.mutation.AddedTenantID(); ok {
+		_spec.AddField(chatmessage.FieldTenantID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(chatmessage.FieldDeletedAt, field.TypeTime, value)

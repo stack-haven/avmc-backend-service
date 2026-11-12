@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"backend-service/app/edai/service/internal/data/ent/gen"
-	entviewer "backend-service/app/edai/service/internal/data/ent/viewer"
 	"backend-service/pkg/conf"
 	"backend-service/pkg/entgo/mixin"
+	entviewer "backend-service/pkg/entgo/viewer"
 	pkgHealth "backend-service/pkg/health"
 
 	"github.com/go-kratos/kratos/v2/log"

@@ -18,8 +18,8 @@ import (
 	"backend-service/app/platform/service/internal/data/ent/gen/parameterdefinition"
 	"backend-service/app/platform/service/internal/data/ent/gen/tenantparameteroverride"
 	"backend-service/app/platform/service/internal/data/ent/mixins"
-	entviewer "backend-service/app/platform/service/internal/data/ent/viewer"
 	"backend-service/pkg/aip/listing"
+	entviewer "backend-service/pkg/entgo/viewer"
 	"backend-service/pkg/utils/convert"
 )
 
