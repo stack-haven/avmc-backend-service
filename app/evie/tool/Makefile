@@ -16,16 +16,25 @@
 #   - 删除 `kill` 覆写：改用 app.mk 的 kill + PORTS/KILL_PATTERN
 #   - `race` 从覆写 target 改为声明 RACE_PKGS 变量
 
-# 本服务自带 config（protoc 直出）与 generate-check（只校验 wire）。
-# 注意：app.mk 自 2026-11-11 起已不再定义 `config` 目标（conf 上收到 pkg/conf
-# 唯一出口），因此无需再声明 SKIP_APP_MK_CONFIG；仅 generate-check 仍需跳过。
+# 本服务自带 config（protoc 直出 internal/conf/conf.pb.go）与 generate-check（只校验 wire）。
+#
+# `config` 只能由本文件声明，不能再指望 app.mk：
+#   共享 conf 已于 2026-11-11 收敛到唯一出口 `make conf` → pkg/conf，app.mk
+#   不再有 `config` 目标；但本服务的 internal/conf/conf.proto 是**本服务自有**
+#   配置 schema（产物 conf.pb.go 被 .gitignore 忽略，必须本地生成才能编译），
+#   因此用 LOCAL_GEN_DEPS 把它挂进 gen / app 流水线（必须在 include 之前赋值：
+#   前置列表在读取规则时即展开）。
 SKIP_APP_MK_GENERATE_CHECK := 1
+LOCAL_GEN_DEPS := config
 
 include ../../../app.mk
 
 # ── 本服务特有配置 ─────────────────────────────────────────────────────────
 PORTS        := 8110 9110
-KILL_PATTERN := evie/tool
+# 本服务有两个进程形态：`make serve` 是 go run ./cmd/server，
+# `make build-serve` 是 ./bin/evie-tool —— 两者都要能被 kill 命中。
+# 注意：app.mk 的 kill 还会按「工作目录 = 本服务目录」过滤，不会跨服务误杀。
+KILL_PATTERN := cmd/server|bin/evie-tool
 RACE_PKGS    := ./internal/biz ./internal/data ./internal/server ./internal/service ./pkg/credential ./pkg/source
 
 # ============================================================================

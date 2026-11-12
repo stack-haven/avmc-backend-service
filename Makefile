@@ -45,6 +45,20 @@ gen-servicetargets:
 verify-servicetargets:
 	@python3 scripts/gen-service-targets.py --check
 
+.PHONY: verify-make-contract
+# 校验 make 命令契约本身（CI 门禁）
+#
+# 防的是「删了目标、忘了删引用」这类**命令直接不可用**的缺陷：
+#   2026-11-13 `app.mk` 删掉 `config` 目标后，`gen`/`app` 的前置仍写着它，
+#   导致 5 个服务的 `make gen` 与根目录 `make gen-<svc>` 全部
+#   `No rule to make target 'config'`（exit 2）。
+# make 只在真正构建时报错，所以这条同步关系必须由门禁强制。
+#
+# 校验三类：前置闭包（含变量前置展开）/ $(MAKE) -C 委托一致性 / .PHONY 对称性。
+# 纯静态解析，只读、无副作用。见 scripts/check-make-contract.py 头部说明。
+verify-make-contract:
+	@python3 scripts/check-make-contract.py
+
 .PHONY: setup-hooks
 # point git at the versioned .githooks directory (run once after clone)
 setup-hooks:
@@ -182,6 +196,7 @@ check: fmt-check lint-new
 	go test -timeout 90s ./...
 	$(MAKE) operation-coverage-check
 	$(MAKE) verify-servicetargets
+	$(MAKE) verify-make-contract
 	$(MAKE) data-tx-check
 	git diff --check
 
@@ -234,17 +249,29 @@ race:
 		./pkg/middleware/safelogging/...
 
 .PHONY: generate
-# generate
+# 重新生成 Ent 代码（各服务 schema → internal/data/ent/gen）并整理依赖
+#
+# ⚠️ 不要改回 `go generate ./...`：该写法会连带执行 wire_gen.go 中 wire 自带的
+#    `go run -mod=mod github.com/google/wire/cmd/wire`，而本仓存在 go.work
+#    （workspace 模式），该模式禁止 -mod=mod，整条命令会失败。
+#    wire 生成请用各服务的 `make wire`（优先用 setup-tools 安装的二进制，见 app.mk）。
 generate:
-	go generate ./...
+	@for d in app/*/service/internal/data/ent; do \
+		echo "==> go generate ./$$d"; \
+		go generate ./$$d || exit 1; \
+	done
 	go mod tidy
 
 .PHONY: all
-# generate all
-all:
-	make proto;
+# 全量生成：proto → api、conf → pkg/conf、各服务 ent → gen
+#
+# 原实现是 `all: make proto;`（只生成 api，却叫 all，见 README「Generate all
+# files」）。改为真实的前置列表：既符合 README 语义，也让 `make -n all`
+# 能一次性曝光任一条生成链路的悬空前置。
+all: proto conf generate
 
 # show help
+.PHONY: help
 help:
 	@echo ''
 	@echo 'Usage:'
@@ -254,7 +281,7 @@ help:
 	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
 	helpMessage = match(lastLine, /^# (.*)/); \
 		if (helpMessage) { \
-			helpCommand = substr($$1, 0, index($$1, ":")); \
+			helpCommand = substr($$1, 0, index($$1, ":")-1); \
 			helpMessage = substr(lastLine, RSTART + 2, RLENGTH); \
 			printf "\033[36m%-22s\033[0m %s\n", helpCommand,helpMessage; \
 		} \

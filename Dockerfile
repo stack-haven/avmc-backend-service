@@ -5,7 +5,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-ARG SERVICE_PACKAGE=./app/platform/admin/cmd/server
+# 默认值必须指向真实存在的服务：原默认值 ./app/platform/admin/cmd/server
+# 是 platform/admin → platform/service 改名前的残留，直接 `docker build .`
+# 会在 go build 阶段报 "no Go files"。app.mk 的 `make docker` 会显式传入该参数。
+ARG SERVICE_PACKAGE=./app/platform/service/cmd/server
 ARG VERSION=dev
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -trimpath \

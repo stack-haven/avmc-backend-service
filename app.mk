@@ -34,6 +34,18 @@
 #   8. VERSION 在无 tag 仓库下为空（git describe 失败）→ 加 --always
 #   9. 上收 newent / migrate / mock / policy / kill / race / config / ts /
 #      diff-check / generate-check 等 10 个被复制多份的命令
+#
+# 2026-11-13 修复（命令契约自检 scripts/check-make-contract.sh 发现）：
+#   1. gen / app 仍以 2026-11-11 已删除的 `config` 为目标前置，导致 5 个服务的
+#      `make gen` 与根目录 `make gen-<svc>` 全部报
+#      `No rule to make target 'config'` 并以 exit 2 退出。
+#      共享 conf 的生成出口已收敛为 `conf`（→ pkg/conf），前置改回 `conf`。
+#   2. L2 若确有本服务独有的生成步骤，用 `LOCAL_GEN_DEPS` 追加
+#      （evie/tool 的 protoc 直出 `config` 属此类），禁止在 L1 硬编码服务目标。
+#   3. kill 原实现是裸 `pkill -f cmd/server`，而所有服务都用
+#      `go run ./cmd/server` 启动 —— `make stop-platform` 会连带杀掉
+#      ai/evie/edai。改为「命令行匹配 + 工作目录 = 本服务目录」双重过滤。
+#   4. `make app` 改为 `app: gen build`，避免生成步骤与 gen 各写一份而漂移。
 # =============================================================================
 
 # ── 服务身份（由 PWD 推导，禁止手工指定）────────────────────────────────────
@@ -53,10 +65,16 @@ VERSION ?= $(shell git -C $(BACKEND_ROOT) describe --tags --always 2>/dev/null |
 # 导致 `-conf ./configs    ` 这类带尾随空格的参数（历史上的隐性坑）。
 CONFIG_DIR        ?= ./configs
 PORTS             ?=
+# kill 的命令行匹配模式（pgrep -f，ERE）。**必须配合工作目录过滤**：
+# 默认值命中所有 `go run ./cmd/server`，只靠 pgrep 会跨服务误杀。
 KILL_PATTERN      ?= cmd/server
 RACE_PKGS         ?= ./internal/biz ./internal/data ./internal/server ./internal/service
 DOCKER_IMAGE      ?= ark/$(subst /,-,$(APP_RELATIVE_PATH)):$(VERSION)
 OPENAPI_TEMPLATE  ?= $(APP_RELATIVE_PATH)/v1/buf.openapi.gen.yaml
+# 本服务独有的额外生成步骤，由 L2 在 include 之前赋值（值必须是 L2 内已定义的目标）。
+# 用途：app.mk 只声明跨服务通用的生成目标，服务私有生成器由服务自己挂载。
+# 例：evie/tool 的 `config`（protoc 直出 internal/conf/conf.pb.go，产物 gitignored）。
+LOCAL_GEN_DEPS    ?=
 
 # ── 探测（决定某些命令是否可用）─────────────────────────────────────────────
 HAS_CMD_MIGRATE := $(wildcard ./cmd/migrate)
@@ -89,8 +107,13 @@ vendor:
 # =============================================================================
 
 .PHONY: gen
-# 全量生成：proto → api，ent → gen，conf，wire，openapi
-gen: api ent config wire openapi
+# 全量生成本服务产物：proto → api，ent → gen，conf，wire，openapi
+#
+# ⚠️ 前置列表中的每个目标都必须真实存在。2026-11-13 的故障就是「删了目标、
+#    忘了删前置」，让 5 个服务的 gen（以及根目录 gen-<svc>）全部 exit 2。
+#    新增/删除前置请同时更新 scripts/check-make-contract.sh 覆盖的上下文，
+#    该门禁会做前置闭包校验。
+gen: api ent conf wire openapi $(LOCAL_GEN_DEPS)
 	@echo "✅ gen done ($(APP_RELATIVE_PATH))"
 
 .PHONY: api
@@ -101,13 +124,28 @@ api:
 
 .PHONY: ent
 # 从 ent/schema 生成 ent 代码
+#
+# ⚠️ 不要改回 `if [ -d ... ]; then go generate ...; echo "✅ ..."; fi` 的写法：
+#    块内最后一条命令是 echo，go generate 失败也会被吞掉，make 仍然返回 0 并打印 ✅。
+#    2026-11-13 修复：该写法曾让 ent 生成长期静默失效（生成失败却报成功）。
+#
+# ⚠️ 也不要把「无 ent 服务」的跳过写成 `test -d ... || { echo 跳过; exit 0; }`：
+#    `exit 0` 只结束**当前 recipe 行**的 shell，make 仍会执行下一条 `go generate`，
+#    结果必然 `stat ...: directory not found` → exit 2。
+#    2026-11-13 实测：evie/tool 无 ent，
+#    `make gen` / `make ent` 长期以 Error 2 失败（正是本条被审计发现的原因）。
+#    正确做法是在**解析期**用 ifeq 决定是否有这条命令。
+#
+# 前提：`internal/data/ent/gen` 不必预先存在——pkg/entgo/entc 会自动用
+#      `-tags ent_bootstrap` 做两遍生成（见 docs/architecture/4-10 §4.1）。
+ifeq ($(wildcard ./internal/data/ent),)
 ent:
-	@if [ -d ./internal/data/ent ]; then \
-		go generate ./internal/data/ent; \
-		echo "✅ ent generated"; \
-	else \
-		echo "ℹ️  本服务无 internal/data/ent，跳过"; \
-	fi
+	@echo "ℹ️  本服务无 internal/data/ent，跳过 ent"
+else
+ent:
+	go generate ./internal/data/ent
+	@echo "✅ ent generated"
+endif
 
 .PHONY: wire
 # 重新生成 cmd/server/wire_gen.go
@@ -119,10 +157,10 @@ ent:
 #   - 用已安装的二进制不参与模块解析，两种模式都稳定
 wire:
 	@if command -v wire >/dev/null 2>&1; then \
-		wire ./cmd/server; \
+		wire ./cmd/server || exit 1; \
 	else \
 		echo "⚠️  未找到 wire 二进制，回退 go run（建议先 make setup-tools）"; \
-		GOWORK=off go run -mod=mod github.com/google/wire/cmd/wire ./cmd/server; \
+		GOWORK=off go run -mod=mod github.com/google/wire/cmd/wire ./cmd/server || exit 1; \
 	fi
 	@echo "✅ wire generated"
 
@@ -174,7 +212,7 @@ newent:
 	printf "ent name: " && \
 	read name; \
 	printf "creating ent schema: %s\n" "$$name" && \
-	go run -mod=mod entgo.io/ent/cmd/ent new "$$name"
+	go run entgo.io/ent/cmd/ent new "$$name"
 
 # =============================================================================
 # 构建 / 运行
@@ -188,8 +226,8 @@ build:
 	@echo "✅ built $(APP_RELATIVE_PATH) → ./bin/ (version=$(VERSION))"
 
 .PHONY: app
-# 全流水线：生成 + 构建
-app: api ent config wire build
+# 全流水线：生成 + 构建（生成步骤直接复用 gen，禁止再抄一份前置列表）
+app: gen build
 
 .PHONY: run
 # 启动当前服务（不自动重新生成；需要新鲜代码请先 make gen）
@@ -310,16 +348,33 @@ generate-check: api conf ent wire openapi
 endif
 
 .PHONY: kill
-# 杀掉本服务进程并释放端口（端口与进程模式由 L2 指定）
+# 杀掉**本服务**进程并释放端口（端口由 L2 的 PORTS 指定）
+#
+# ⚠️ 不能只写 `pkill -f "$(KILL_PATTERN)"`：所有服务都用
+#    `go run ./cmd/server` 启动，裸 pkill 会把全部服务的进程一起杀掉
+#    （`make stop-platform` 连带停掉 ai/evie/edai，实测命中所有 go run 父进程）。
+#    这里用「命令行匹配（pgrep -f）+ 工作目录 == 本服务目录」双重过滤，
+#    使 L1 无需知道各服务的进程名，也不会跨服务误杀。
+#
+# ⚠️ 端口释放不用 `xargs -r`：`-r` 是 GNU 扩展，BSD/macOS 的 xargs 不认它，
+#    配上 `2>/dev/null || true` 会变成"静默不释放端口"。
 kill:
-	@pkill -f "$(KILL_PATTERN)" 2>/dev/null || true; \
-	if [ -n "$(PORTS)" ]; then \
-		for port in $(PORTS); do \
-			lsof -ti :$$port 2>/dev/null | xargs -r kill -9 2>/dev/null || true; \
+	@pat='$(KILL_PATTERN)'; svc=$$(cd "$$PWD" && pwd -P); self=$$$$; \
+	for pid in $$(pgrep -f "$$pat" 2>/dev/null || true); do \
+		[ "$$pid" = "$$self" ] && continue; \
+		cwd=$$(lsof -a -p "$$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -1); \
+		[ "$$cwd" = "$$svc" ] || continue; \
+		kill -9 "$$pid" 2>/dev/null && echo "  killed pid=$$pid ('$$pat')" || true; \
+	done; \
+	for port in $(PORTS); do \
+		for pid in $$(lsof -ti :$$port 2>/dev/null || true); do \
+			kill -9 "$$pid" 2>/dev/null && echo "  released port $$port (pid=$$pid)" || true; \
 		done; \
-		echo "✅ killed '$(KILL_PATTERN)', released ports: $(PORTS)"; \
+	done; \
+	if [ -n "$(PORTS)" ]; then \
+		echo "✅ killed '$$pat' in $$svc, released ports: $(PORTS)"; \
 	else \
-		echo "✅ killed '$(KILL_PATTERN)'（未指定 PORTS）"; \
+		echo "✅ killed '$$pat' in $$svc（未指定 PORTS）"; \
 	fi
 
 .PHONY: help
